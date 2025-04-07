@@ -13,7 +13,7 @@ export function progressMessage({
   context.stdout.write(`${message}`);
   return globalThis.setInterval(() => {
     dots = (dots + 1) % 5;
-    const progressText = `${message}${".".repeat(dots)}`;
+    const progressText = `${message}${".".repeat(dots)}${" ".repeat(5 - dots)}`;
     context.stdout.write(`\r${progressText}`);
   }, interval);
 }

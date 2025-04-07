@@ -1,58 +1,95 @@
 import kyvernoTerragruntHcl from "../../templates/kube_kyverno_terragrunt.hcl" with { type: "file" };
 import kubePoliciesTerragruntHcl from "../../templates/kube_policies_terragrunt.hcl" with { type: "file" };
+import { checkStepCompletion } from "../../util/check-step-completion";
 import { ensureFileExists } from "../../util/ensure-file-exists";
-import { tfInit } from "../../util/scripts/tf-init";
-import { apply } from "../terragrunt/apply";
+import { initAndApplyModule } from "../../util/init-and-apply-module";
+import { updateConfigFile } from "../../util/update-config-file";
 import type { BaseContext } from "clipanion";
 
 export async function setupPolicyController({
   context,
+  configPath,
   verbose,
 }: {
   context: BaseContext;
+  configPath: string;
   verbose?: boolean;
 }) {
   // https://panfactum.com/docs/edge/guides/bootstrapping/policy-controller#deploy-kyverno
-  context.stdout.write("5.a. Setting up Kyverno\n");
+  let kyvernoIaCSetupComplete = false;
+  try {
+    kyvernoIaCSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "kyvernoIaCSetup",
+      stepCompleteMessage:
+        "5.a. Skipping Kyverno setup as it's already complete.\n",
+      stepNotCompleteMessage: "5.a. Setting up Kyverno\n",
+    });
+  } catch {
+    throw new Error("Failed to check if Kyverno setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_kyverno/terragrunt.hcl",
-    sourceFile: await Bun.file(kyvernoTerragruntHcl).text(),
-  });
+  if (!kyvernoIaCSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_kyverno/terragrunt.hcl",
+      sourceFile: await Bun.file(kyvernoTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_kyverno",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "Kyverno",
+      modulePath: "./kube_kyverno",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_kyverno",
-  });
+    await updateConfigFile({
+      updates: {
+        kyvernoIaCSetup: true,
+      },
+      configPath,
+      context,
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/policy-controller#deploy-panfactum-policies
-  context.stdout.write("5.b. Setting up Panfactum policies\n");
+  let panfactumPoliciesIaCSetupComplete = false;
+  try {
+    panfactumPoliciesIaCSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "panfactumPoliciesIaCSetup",
+      stepCompleteMessage:
+        "5.b. Skipping Panfactum policies setup as it's already complete.\n",
+      stepNotCompleteMessage: "5.b. Setting up Panfactum policies\n",
+    });
+  } catch {
+    throw new Error("Failed to check if Panfactum policies setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_policies/terragrunt.hcl",
-    sourceFile: await Bun.file(kubePoliciesTerragruntHcl).text(),
-  });
+  if (!panfactumPoliciesIaCSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_policies/terragrunt.hcl",
+      sourceFile: await Bun.file(kubePoliciesTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_policies",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "Panfactum Policies",
+      modulePath: "./kube_policies",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_policies",
-  });
+    await updateConfigFile({
+      updates: {
+        panfactumPoliciesIaCSetup: true,
+      },
+      configPath,
+      context,
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/policy-controller#run-network-tests
   // Not doing cilium tests at this time as there's an upstream issue with the tests. Will revisit when the issue is resolved.

@@ -13,11 +13,13 @@ export async function eksReset({
   clusterName,
   commandInvocation,
   context,
+  silent = false,
   verbose = false,
 }: {
   clusterName?: string;
   commandInvocation: boolean;
   context: BaseContext;
+  silent?: boolean;
   verbose?: boolean;
 }) {
   // ############################################################
@@ -204,9 +206,9 @@ export async function eksReset({
         addon,
         "--no-preserve",
       ]);
-      context.stderr.write(`EKS addon disabled: ${addon}\n`);
+      !silent && context.stderr.write(`EKS addon disabled: ${addon}\n`);
     } else {
-      context.stderr.write(`EKS addon not enabled: ${addon}\n`);
+      !silent && context.stderr.write(`EKS addon not enabled: ${addon}\n`);
     }
   }
   // ############################################################
@@ -268,7 +270,7 @@ export async function eksReset({
   const instanceIdsOutput = instanceIds.stdout.toString();
   const instanceIdsArray = instanceIdsOutput.split("\n");
   if (instanceIdsArray.length === 0) {
-    context.stderr.write("No nodes to terminate");
+    !silent && context.stderr.write("No nodes to terminate");
   } else {
     Bun.spawnSync([
       "aws",
@@ -281,6 +283,7 @@ export async function eksReset({
       "--instance-ids",
       instanceIdsArray.join(","),
     ]);
-    context.stderr.write(`Nodes terminated to reset node-local settings.\n`);
+    !silent &&
+      context.stderr.write(`Nodes terminated to reset node-local settings.\n`);
   }
 }

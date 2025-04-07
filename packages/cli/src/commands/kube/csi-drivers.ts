@@ -1,7 +1,6 @@
 import awsEbsCsiDriverTerragruntHcl from "../../templates/kube_aws_ebs_csi_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
-import { tfInit } from "../../util/scripts/tf-init";
-import { apply } from "../terragrunt/apply";
+import { initAndApplyModule } from "../../util/init-and-apply-module";
 import type { BaseContext } from "clipanion";
 
 export async function setupCSIDrivers({
@@ -20,15 +19,10 @@ export async function setupCSIDrivers({
     sourceFile: await Bun.file(awsEbsCsiDriverTerragruntHcl).text(),
   });
 
-  tfInit({
+  await initAndApplyModule({
     context,
+    moduleName: "AWS EBS CSI Driver",
+    modulePath: "./kube_aws_ebs_csi",
     verbose,
-    workingDirectory: "./kube_aws_ebs_csi",
-  });
-
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_aws_ebs_csi",
   });
 }

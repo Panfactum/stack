@@ -7,19 +7,21 @@ import type { BaseContext } from "clipanion";
 export function apply({
   context,
   env,
+  silent = false,
   suppressErrors = false,
   verbose = false,
   workingDirectory = ".",
 }: {
   context: BaseContext;
   env?: Record<string, string | undefined>;
+  silent?: boolean;
   suppressErrors?: boolean;
   verbose?: boolean;
   workingDirectory?: string;
 }): 0 | never {
   try {
     let tfApplyProgress: globalThis.Timer | undefined;
-    if (!verbose) {
+    if (!verbose && !silent) {
       tfApplyProgress = progressMessage({
         context,
         message: "Applying infrastructure modules",
@@ -37,8 +39,8 @@ export function apply({
     );
 
     // Clear the progress interval
-    !verbose && globalThis.clearInterval(tfApplyProgress);
-    context.stdout.write("\n");
+    !verbose && !silent && globalThis.clearInterval(tfApplyProgress);
+    !verbose && !silent && context.stdout.write("\n");
 
     // Check if the init process failed
     if (initProcess.exitCode !== 0) {
@@ -57,7 +59,7 @@ export function apply({
       throw new Error("Failed to apply infrastructure modules");
     }
 
-    !verbose &&
+    !verbose && !silent &&
       context.stdout.write(
         pc.green("Successfully applied all infrastructure modules\n")
       );

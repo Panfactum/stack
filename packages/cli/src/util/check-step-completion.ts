@@ -16,15 +16,20 @@ export async function checkStepCompletion({
   stepCompleteMessage: string;
   stepNotCompleteMessage: string;
 }): Promise<boolean> {
-    const stepComplete = await getConfigFileKey({
-        key: step,
-        configPath: configFilePath,
-        context,
-      });
+  const stepComplete = await getConfigFileKey({
+    key: step,
+    configPath: configFilePath,
+    context,
+  });
 
-  if (typeof stepComplete !== "boolean") {
+  if (
+    typeof stepComplete !== "boolean" &&
+    typeof stepComplete !== "undefined"
+  ) {
     context.stderr.write(
-      pc.red(`Step ${step} is not a boolean: ${JSON.stringify(stepComplete, null, 2)}\n`)
+      pc.red(
+        `Step ${step} is not a boolean: ${JSON.stringify(stepComplete, null, 2)}\n`
+      )
     );
     printHelpInformation(context);
     throw new Error(`Failed to check step completion.`);
@@ -36,5 +41,5 @@ export async function checkStepCompletion({
     context.stdout.write(`${stepNotCompleteMessage}\n`);
   }
 
-  return stepComplete;
+  return !!stepComplete;
 }

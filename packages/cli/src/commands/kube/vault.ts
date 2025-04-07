@@ -3,7 +3,9 @@ import pc from "picocolors";
 import { z } from "zod";
 import kubeVaultTerragruntHcl from "../../templates/kube_vault_terragrunt.hcl" with { type: "file" };
 import vaultCoreResourcesTerragruntHcl from "../../templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
+import { checkStepCompletion } from "../../util/check-step-completion";
 import { ensureFileExists } from "../../util/ensure-file-exists";
+import { initAndApplyModule } from "../../util/init-and-apply-module";
 import { progressMessage } from "../../util/progress-message";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { safeFileExists } from "../../util/safe-file-exists";
@@ -11,107 +13,154 @@ import { getRepoVariables } from "../../util/scripts/get-repo-variables";
 import { tfInit } from "../../util/scripts/tf-init";
 import { sopsEncrypt } from "../../util/sops-encrypt";
 import { startBackgroundProcess } from "../../util/start-background-process";
+import { updateConfigFile } from "../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
 export const setupVault = async ({
   context,
+  configPath,
   vaultDomain,
   verbose = false,
 }: {
   context: BaseContext;
+  configPath: string;
   vaultDomain: string;
   verbose?: boolean;
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#deploy-vault
-  context.stdout.write("7.a. Setting up Vault\n");
-
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_vault/terragrunt.hcl",
-    sourceFile: await Bun.file(kubeVaultTerragruntHcl).text(),
-  });
-
-  await replaceHclValue(
-    "./kube_vault/terragrunt.hcl",
-    "inputs.vault_domain",
-    vaultDomain
-  );
-
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_vault",
-  });
-
+  let vaultIaCSetupComplete = false;
   try {
-    apply({
+    vaultIaCSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
       context,
-      suppressErrors: true,
-      verbose,
-      workingDirectory: "./kube_vault",
+      step: "vaultIaCSetup",
+      stepCompleteMessage:
+        "7.a. Skipping Vault setup as it's already complete.\n",
+      stepNotCompleteMessage: "7.a. Setting up Vault\n",
     });
   } catch {
-    // It's okay if this fails as we must manually initialize the vault on first use
-    // We'll ignore this and do more checks below to see if the vault was instantiated successfully
+    throw new Error("Failed to check if Vault setup is complete");
   }
 
-  let vaultPodNames: string[] = [];
+  if (!vaultIaCSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_vault/terragrunt.hcl",
+      sourceFile: await Bun.file(kubeVaultTerragruntHcl).text(),
+    });
 
-  // We'll check to see if the pods are running
-  // If they are, we'll assume that the vault was instantiated successfully and we can proceed
-  let allPodsRunning = false;
-  const vaultStatusProgress = progressMessage({
-    context,
-    message: "Checking status of Vault pods",
-    interval: 10000,
-  });
-  let count = 0;
-  while (!allPodsRunning) {
-    // Wait for 10 seconds
-    await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
-    // Only wait for 5 minutes
-    if (count > 30) {
-      throw new Error("Vault pods failed to start");
+    await replaceHclValue(
+      "./kube_vault/terragrunt.hcl",
+      "inputs.vault_domain",
+      vaultDomain
+    );
+
+    try {
+      let tfInitProgress: globalThis.Timer | undefined;
+      if (!verbose) {
+        tfInitProgress = progressMessage({
+          context,
+          message: `Initializing and upgrading Vault infrastructure module`,
+        });
+      }
+
+      tfInit({
+        context,
+        silent: true,
+        verbose,
+        workingDirectory: "./kube_vault",
+      });
+
+      try {
+        apply({
+          context,
+          silent: true,
+          suppressErrors: true,
+          verbose,
+          workingDirectory: "./kube_vault",
+        });
+      } catch {
+        // It's okay if this fails as we must manually initialize the vault on first use
+        // We'll ignore this and do more checks below to see if the vault was instantiated successfully
+      }
+      !verbose && globalThis.clearInterval(tfInitProgress);
+      !verbose &&
+        context.stdout.write(
+          pc.green(
+            `\rSuccessfully initialized and applied Vault module.          \n`
+          )
+        );
+    } catch (error) {
+      writeErrorToDebugFile({
+        context,
+        error,
+      });
+      throw new Error("Failed to setup Vault");
     }
 
-    const result =
-      await $`kubectl get pods --all-namespaces -o json | jq '[.items[] | select(.metadata.name | startswith("vault")) | {name: .metadata.name, namespace: .metadata.namespace, status: .status.phase}]'`.text();
+    // We'll check to see if the pods are running
+    // If they are, we'll assume that the vault was instantiated successfully and we can proceed
+    let allPodsRunning = false;
+    let vaultPodNames: string[] = [];
+    const vaultStatusProgress = progressMessage({
+      context,
+      message: "Checking status of Vault pods",
+      interval: 10000,
+    });
+    let count = 0;
+    while (!allPodsRunning) {
+      // Wait for 10 seconds
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
+      // Only wait for 5 minutes
+      if (count > 30) {
+        throw new Error("Vault pods failed to start");
+      }
+
+      const result =
+        await $`kubectl get pods --all-namespaces -o json | jq '[.items[] | select(.metadata.name | startswith("vault")) | {name: .metadata.name, namespace: .metadata.namespace, status: .status.phase}]'`.text();
+
+      if (verbose) {
+        context.stdout.write("getInstanceId STDOUT: " + result + "\n");
+        context.stderr.write("getInstanceId STDERR: " + result + "\n");
+      }
+
+      const pods = JSON.parse(result.trim());
+      const podsSchema = z.array(
+        z.object({
+          name: z.string(),
+          namespace: z.string(),
+          status: z.string(),
+        })
+      );
+      const parsedPods = podsSchema.parse(pods);
+
+      allPodsRunning = parsedPods.every((pod) => pod.status === "Running");
+      if (allPodsRunning) {
+        vaultPodNames = parsedPods.map((pod) => pod.name);
+      }
+      count++;
+    }
+
+    globalThis.clearInterval(vaultStatusProgress);
+    context.stdout.write("\n");
 
     if (verbose) {
-      context.stdout.write("getInstanceId STDOUT: " + result + "\n");
-      context.stderr.write("getInstanceId STDERR: " + result + "\n");
+      context.stdout.write("Vault pods: " + vaultPodNames.join(", ") + "\n");
     }
 
-    const pods = JSON.parse(result.trim());
-    const podsSchema = z.array(
-      z.object({
-        name: z.string(),
-        namespace: z.string(),
-        status: z.string(),
-      })
-    );
-    const parsedPods = podsSchema.parse(pods);
-
-    allPodsRunning = parsedPods.every((pod) => pod.status === "Running");
-    if (allPodsRunning) {
-      vaultPodNames = parsedPods.map((pod) => pod.name);
-    }
-    count++;
-  }
-
-  globalThis.clearInterval(vaultStatusProgress);
-  context.stdout.write("\n");
-
-  if (verbose) {
-    context.stdout.write("Vault pods: " + vaultPodNames.join(", ") + "\n");
+    await updateConfigFile({
+      updates: {
+        vaultIaCSetup: true,
+      },
+      configPath,
+      context,
+    });
   }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#initialize-vault
-  context.stdout.write("7.b. Initializing Vault\n");
-
   const recoveryKeysSchema = z.object({
     unseal_keys_b64: z.array(z.string().base64()),
     unseal_keys_hex: z.array(z.string()),
@@ -130,11 +179,15 @@ export const setupVault = async ({
     let result = "";
     try {
       result =
-        await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json`.text();
+        await $`kubectl exec -i vault-0 --namespace=vault -- vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json`.text();
     } catch (error) {
       context.stderr.write(
         pc.red("Failed to initialize vault.\n" + JSON.stringify(error, null, 2))
       );
+      writeErrorToDebugFile({
+        context,
+        error,
+      });
     }
 
     if (verbose) {
@@ -162,7 +215,7 @@ export const setupVault = async ({
   try {
     for (const key of recoveryKeys.recovery_keys_hex) {
       const statusResult =
-        await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator unseal -format=json ${key}`.text();
+        await $`kubectl exec -i vault-0 --namespace=vault -- vault operator unseal -format=json ${key}`.text();
       const statusData = JSON.parse(statusResult.trim());
       const unsealOutputSchema = z.object({
         type: z.string(),
@@ -220,7 +273,6 @@ export const setupVault = async ({
   process.env["VAULT_TOKEN"] = recoveryKeys.root_token;
 
   await replaceHclValue("./kube_vault/terragrunt.hcl", "inputs.wait", true);
-  // Check to make sure all the vault pods are running and healthy
 
   context.stdout.write("\n7.c. 🔒 Encrypting secrets\n\n");
 
@@ -334,19 +386,12 @@ export const setupVault = async ({
     sourceFile: await Bun.file(vaultCoreResourcesTerragruntHcl).text(),
   });
 
-  tfInit({
+  await initAndApplyModule({
     context,
     env,
+    moduleName: "Vault Core Resources",
+    modulePath: "./vault_core_resources",
     verbose,
-    workingDirectory: "./vault_core_resources",
-  });
-
-  apply({
-    context,
-    suppressErrors: true,
-    verbose,
-    env,
-    workingDirectory: "./vault_core_resources",
   });
 
   // To mitigate the long-running background process dying over time, we'll kill it here

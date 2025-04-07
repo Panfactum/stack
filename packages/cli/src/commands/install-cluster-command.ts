@@ -188,14 +188,38 @@ export class InstallClusterCommand extends Command {
     }
 
     if (!vpcSetupComplete) {
-      const { vpcName, vpcDescription } = await vpcPrompts({
-        environment,
+      let name = "";
+      let description = "";
+      const nameConfig = await getConfigFileKey({
+        configPath,
+        key: "vpcName",
+        context: this.context,
       });
+      const descriptionConfig = await getConfigFileKey({
+        configPath,
+        key: "vpcDescription",
+        context: this.context,
+      });
+      if (
+        !nameConfig ||
+        !descriptionConfig ||
+        typeof nameConfig !== "string" ||
+        typeof descriptionConfig !== "string"
+      ) {
+        const { vpcName, vpcDescription } = await vpcPrompts({
+          environment,
+        });
+        name = vpcName;
+        description = vpcDescription;
+      } else {
+        name = nameConfig;
+        description = descriptionConfig;
+      }
 
       await updateConfigFile({
         updates: {
-          vpcName,
-          vpcDescription,
+          vpcName: name,
+          vpcDescription: description,
         },
         configPath,
         context: this.context,
@@ -203,9 +227,10 @@ export class InstallClusterCommand extends Command {
 
       try {
         await setupVpc({
+          configPath,
           context: this.context,
-          vpcName,
-          vpcDescription,
+          vpcName: name,
+          vpcDescription: description,
           verbose: this.verbose,
         });
       } catch (error) {
@@ -254,15 +279,37 @@ export class InstallClusterCommand extends Command {
     }
 
     if (!setupEcrPullThroughCacheComplete) {
-      const { dockerHubUsername, githubUsername } =
-        await ecrPullThroughCachePrompts({
-          context: this.context,
-        });
+      let dhUsername = "";
+      let ghUsername = "";
+      const dhUsernameConfig = await getConfigFileKey({
+        configPath,
+        key: "dockerHubUsername",
+        context: this.context,
+      });
+      const ghUsernameConfig = await getConfigFileKey({
+        configPath,
+        key: "githubUsername",
+        context: this.context,
+      });
+
+      if (
+        !dhUsernameConfig ||
+        !ghUsernameConfig ||
+        typeof dhUsernameConfig !== "string" ||
+        typeof ghUsernameConfig !== "string"
+      ) {
+        const { dockerHubUsername, githubUsername } =
+          await ecrPullThroughCachePrompts({
+            context: this.context,
+          });
+        dhUsername = dockerHubUsername;
+        ghUsername = githubUsername;
+      }
 
       await updateConfigFile({
         updates: {
-          dockerHubUsername,
-          githubUsername,
+          dockerHubUsername: dhUsername,
+          githubUsername: ghUsername,
         },
         configPath,
         context: this.context,
@@ -271,8 +318,8 @@ export class InstallClusterCommand extends Command {
       try {
         await setupEcrPullThroughCache({
           context: this.context,
-          dockerHubUsername,
-          githubUsername,
+          dockerHubUsername: dhUsername,
+          githubUsername: ghUsername,
           verbose: this.verbose,
         });
       } catch (error) {
@@ -418,6 +465,7 @@ export class InstallClusterCommand extends Command {
     if (!setupInternalClusterNetworkingComplete) {
       try {
         await setupInternalClusterNetworking({
+          configPath,
           context: this.context,
           verbose: this.verbose,
         });
@@ -468,6 +516,7 @@ export class InstallClusterCommand extends Command {
     if (!setupPolicyControllerComplete) {
       try {
         await setupPolicyController({
+          configPath,
           context: this.context,
           verbose: this.verbose,
         });
@@ -576,12 +625,24 @@ export class InstallClusterCommand extends Command {
         )
       );
 
-      const { vaultDomain } = await vaultPrompts();
+      let domain = "";
+      const vaultDomainConfig = await getConfigFileKey({
+        configPath,
+        key: "vaultDomain",
+        context: this.context,
+      });
+      if (!vaultDomainConfig || typeof vaultDomainConfig !== "string") {
+        const { vaultDomain } = await vaultPrompts();
+        domain = vaultDomain;
+      } else {
+        domain = vaultDomainConfig;
+      }
 
       try {
         await setupVault({
+          configPath,
           context: this.context,
-          vaultDomain,
+          vaultDomain: domain,
           verbose: this.verbose,
         });
       } catch (error) {
@@ -607,7 +668,7 @@ export class InstallClusterCommand extends Command {
 
       await updateConfigFile({
         updates: {
-          vaultDomain,
+          vaultDomain: domain,
           vault: true,
         },
         configPath,
@@ -622,363 +683,363 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    let setupCertManagementComplete = false;
-    try {
-      setupCertManagementComplete = await checkStepCompletion({
-        configFilePath: configPath,
-        context: this.context,
-        step: "certManagement",
-        stepCompleteMessage:
-          "8/13 Skipping certificate management setup as it's already complete.\n",
-        stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
-      });
-    } catch {
-      return 1;
-    }
+    // let setupCertManagementComplete = false;
+    // try {
+    //   setupCertManagementComplete = await checkStepCompletion({
+    //     configFilePath: configPath,
+    //     context: this.context,
+    //     step: "certManagement",
+    //     stepCompleteMessage:
+    //       "8/13 Skipping certificate management setup as it's already complete.\n",
+    //     stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
+    //   });
+    // } catch {
+    //   return 1;
+    // }
 
-    if (!setupCertManagementComplete) {
-      const { alertEmail } = await certManagerPrompts();
+    // if (!setupCertManagementComplete) {
+    //   const { alertEmail } = await certManagerPrompts();
 
-      try {
-        await setupCertManagement({
-          context: this.context,
-          alertEmail,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        writeErrorToDebugFile({
-          context: this.context,
-          error: `Error setting up the certificate management: ${JSON.stringify(error, null, 2)}`,
-        });
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        backgroundProcessIds.forEach((pid) => {
-          try {
-            process.kill(pid);
-          } catch {
-            // Do nothing as it's already dead
-          }
-        });
-        return 1;
-      }
+    //   try {
+    //     await setupCertManagement({
+    //       context: this.context,
+    //       alertEmail,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     writeErrorToDebugFile({
+    //       context: this.context,
+    //       error: `Error setting up the certificate management: ${JSON.stringify(error, null, 2)}`,
+    //     });
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     backgroundProcessIds.forEach((pid) => {
+    //       try {
+    //         process.kill(pid);
+    //       } catch {
+    //         // Do nothing as it's already dead
+    //       }
+    //     });
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          alertEmail,
-          certManagement: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       alertEmail,
+    //       certManagement: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    this.context.stdout.write(
-      generateProgressString({
-        completedSteps: 8,
-        totalSteps: 13,
-      })
-    );
+    // this.context.stdout.write(
+    //   generateProgressString({
+    //     completedSteps: 8,
+    //     totalSteps: 13,
+    //   })
+    // );
 
-    let setupServiceMeshComplete = false;
-    try {
-      setupServiceMeshComplete = await checkStepCompletion({
-        configFilePath: configPath,
-        context: this.context,
-        step: "serviceMesh",
-        stepCompleteMessage:
-          "9/13 Skipping service mesh setup as it's already complete.\n",
-        stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
-      });
-    } catch {
-      return 1;
-    }
+    // let setupServiceMeshComplete = false;
+    // try {
+    //   setupServiceMeshComplete = await checkStepCompletion({
+    //     configFilePath: configPath,
+    //     context: this.context,
+    //     step: "serviceMesh",
+    //     stepCompleteMessage:
+    //       "9/13 Skipping service mesh setup as it's already complete.\n",
+    //     stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
+    //   });
+    // } catch {
+    //   return 1;
+    // }
 
-    if (!setupServiceMeshComplete) {
-      try {
-        await setupLinkerd({
-          context: this.context,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        writeErrorToDebugFile({
-          context: this.context,
-          error: `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}`,
-        });
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        backgroundProcessIds.forEach((pid) => {
-          try {
-            process.kill(pid);
-          } catch {
-            // Do nothing as it's already dead
-          }
-        });
-        return 1;
-      }
+    // if (!setupServiceMeshComplete) {
+    //   try {
+    //     await setupLinkerd({
+    //       context: this.context,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     writeErrorToDebugFile({
+    //       context: this.context,
+    //       error: `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}`,
+    //     });
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     backgroundProcessIds.forEach((pid) => {
+    //       try {
+    //         process.kill(pid);
+    //       } catch {
+    //         // Do nothing as it's already dead
+    //       }
+    //     });
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          serviceMesh: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       serviceMesh: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    this.context.stdout.write(
-      generateProgressString({
-        completedSteps: 9,
-        totalSteps: 13,
-      })
-    );
+    // this.context.stdout.write(
+    //   generateProgressString({
+    //     completedSteps: 9,
+    //     totalSteps: 13,
+    //   })
+    // );
 
-    let setupAutoscalingComplete = false;
-    try {
-      setupAutoscalingComplete = await checkStepCompletion({
-        configFilePath: configPath,
-        context: this.context,
-        step: "autoscaling",
-        stepCompleteMessage:
-          "10/13 Skipping autoscaling setup as it's already complete.\n",
-        stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
-      });
-    } catch {
-      return 1;
-    }
+    // let setupAutoscalingComplete = false;
+    // try {
+    //   setupAutoscalingComplete = await checkStepCompletion({
+    //     configFilePath: configPath,
+    //     context: this.context,
+    //     step: "autoscaling",
+    //     stepCompleteMessage:
+    //       "10/13 Skipping autoscaling setup as it's already complete.\n",
+    //     stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
+    //   });
+    // } catch {
+    //   return 1;
+    // }
 
-    if (!setupAutoscalingComplete) {
-      try {
-        await setupAutoscaling({
-          context: this.context,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        writeErrorToDebugFile({
-          context: this.context,
-          error: `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}`,
-        });
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        backgroundProcessIds.forEach((pid) => {
-          try {
-            process.kill(pid);
-          } catch {
-            // Do nothing as it's already dead
-          }
-        });
-        return 1;
-      }
+    // if (!setupAutoscalingComplete) {
+    //   try {
+    //     await setupAutoscaling({
+    //       context: this.context,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     writeErrorToDebugFile({
+    //       context: this.context,
+    //       error: `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}`,
+    //     });
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     backgroundProcessIds.forEach((pid) => {
+    //       try {
+    //         process.kill(pid);
+    //       } catch {
+    //         // Do nothing as it's already dead
+    //       }
+    //     });
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          autoscaling: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       autoscaling: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    this.context.stdout.write(
-      generateProgressString({
-        completedSteps: 10,
-        totalSteps: 13,
-      })
-    );
+    // this.context.stdout.write(
+    //   generateProgressString({
+    //     completedSteps: 10,
+    //     totalSteps: 13,
+    //   })
+    // );
 
-    let setupInboundNetworkingComplete = false;
-    try {
-      setupInboundNetworkingComplete = await checkStepCompletion({
-        configFilePath: configPath,
-        context: this.context,
-        step: "inboundNetworking",
-        stepCompleteMessage:
-          "11/13 Skipping inbound networking setup as it's already complete.\n",
-        stepNotCompleteMessage: "11/13 Setting up inbound networking\n\n",
-      });
-    } catch {
-      return 1;
-    }
+    // let setupInboundNetworkingComplete = false;
+    // try {
+    //   setupInboundNetworkingComplete = await checkStepCompletion({
+    //     configFilePath: configPath,
+    //     context: this.context,
+    //     step: "inboundNetworking",
+    //     stepCompleteMessage:
+    //       "11/13 Skipping inbound networking setup as it's already complete.\n",
+    //     stepNotCompleteMessage: "11/13 Setting up inbound networking\n\n",
+    //   });
+    // } catch {
+    //   return 1;
+    // }
 
-    if (!setupInboundNetworkingComplete) {
-      try {
-        await setupInboundNetworking({
-          configPath,
-          context: this.context,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        writeErrorToDebugFile({
-          context: this.context,
-          error: `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}`,
-        });
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        backgroundProcessIds.forEach((pid) => {
-          try {
-            process.kill(pid);
-          } catch {
-            // Do nothing as it's already dead
-          }
-        });
-        return 1;
-      }
+    // if (!setupInboundNetworkingComplete) {
+    //   try {
+    //     await setupInboundNetworking({
+    //       configPath,
+    //       context: this.context,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     writeErrorToDebugFile({
+    //       context: this.context,
+    //       error: `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}`,
+    //     });
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     backgroundProcessIds.forEach((pid) => {
+    //       try {
+    //         process.kill(pid);
+    //       } catch {
+    //         // Do nothing as it's already dead
+    //       }
+    //     });
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          inboundNetworking: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       inboundNetworking: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    this.context.stdout.write(
-      generateProgressString({
-        completedSteps: 11,
-        totalSteps: 13,
-      })
-    );
+    // this.context.stdout.write(
+    //   generateProgressString({
+    //     completedSteps: 11,
+    //     totalSteps: 13,
+    //   })
+    // );
 
-    let setupMaintenanceControllersComplete = false;
-    try {
-      setupMaintenanceControllersComplete = await checkStepCompletion({
-        configFilePath: configPath,
-        context: this.context,
-        step: "maintenanceControllers",
-        stepCompleteMessage:
-          "12/13 Skipping maintenance controllers setup as it's already complete.\n",
-        stepNotCompleteMessage: "12/13 Setting up maintenance controllers\n\n",
-      });
-    } catch {
-      return 1;
-    }
+    // let setupMaintenanceControllersComplete = false;
+    // try {
+    //   setupMaintenanceControllersComplete = await checkStepCompletion({
+    //     configFilePath: configPath,
+    //     context: this.context,
+    //     step: "maintenanceControllers",
+    //     stepCompleteMessage:
+    //       "12/13 Skipping maintenance controllers setup as it's already complete.\n",
+    //     stepNotCompleteMessage: "12/13 Setting up maintenance controllers\n\n",
+    //   });
+    // } catch {
+    //   return 1;
+    // }
 
-    if (!setupMaintenanceControllersComplete) {
-      try {
-        await setupMaintenanceControllers({
-          context: this.context,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        writeErrorToDebugFile({
-          context: this.context,
-          error: `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}`,
-        });
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        return 1;
-      }
+    // if (!setupMaintenanceControllersComplete) {
+    //   try {
+    //     await setupMaintenanceControllers({
+    //       context: this.context,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     writeErrorToDebugFile({
+    //       context: this.context,
+    //       error: `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}`,
+    //     });
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          maintenanceControllers: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       maintenanceControllers: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    this.context.stdout.write(
-      generateProgressString({
-        completedSteps: 12,
-        totalSteps: 13,
-      })
-    );
+    // this.context.stdout.write(
+    //   generateProgressString({
+    //     completedSteps: 12,
+    //     totalSteps: 13,
+    //   })
+    // );
 
-    let setupCloudNativePGComplete = false;
-    try {
-      setupCloudNativePGComplete = await checkStepCompletion({
-        configFilePath: configPath,
-        context: this.context,
-        step: "cloudNativePG",
-        stepCompleteMessage:
-          "13/13 Skipping CloudNativePG setup as it's already complete.\n",
-        stepNotCompleteMessage: "13/13 Setting up CloudNativePG\n\n",
-      });
-    } catch {
-      return 1;
-    }
+    // let setupCloudNativePGComplete = false;
+    // try {
+    //   setupCloudNativePGComplete = await checkStepCompletion({
+    //     configFilePath: configPath,
+    //     context: this.context,
+    //     step: "cloudNativePG",
+    //     stepCompleteMessage:
+    //       "13/13 Skipping CloudNativePG setup as it's already complete.\n",
+    //     stepNotCompleteMessage: "13/13 Setting up CloudNativePG\n\n",
+    //   });
+    // } catch {
+    //   return 1;
+    // }
 
-    if (!setupCloudNativePGComplete) {
-      try {
-        await setupCloudNativePG({
-          context: this.context,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        writeErrorToDebugFile({
-          context: this.context,
-          error: `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}`,
-        });
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        return 1;
-      }
+    // if (!setupCloudNativePGComplete) {
+    //   try {
+    //     await setupCloudNativePG({
+    //       context: this.context,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     writeErrorToDebugFile({
+    //       context: this.context,
+    //       error: `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}`,
+    //     });
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          cloudNativePG: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       cloudNativePG: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    this.context.stdout.write(
-      generateProgressString({
-        completedSteps: 13,
-        totalSteps: 13,
-      })
-    );
+    // this.context.stdout.write(
+    //   generateProgressString({
+    //     completedSteps: 13,
+    //     totalSteps: 13,
+    //   })
+    // );
 
-    // Verify connection to the cluster
-    // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
-    this.context.stdout.write(
-      pc.green(
-        "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
-      ) +
-        pc.blue(
-          "Run: " +
-            pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
-            "You should receive a response similar to the following:\n\n"
-        ) +
-        "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
-        "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
-        pc.blue(
-          "The Panfactum devShell ships with a TUI called k9s.\n" +
-            "To verify what pods are running in the cluster do the following:\n" +
-            `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
-            `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
-            `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
-            `4. You should see a minimal list of pods running in the cluster\n` +
-            `5. If you don't see any pods, please reach out to us on Discord\n` +
-            `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
-        )
-    );
+    // // Verify connection to the cluster
+    // // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+    // this.context.stdout.write(
+    //   pc.green(
+    //     "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
+    //   ) +
+    //     pc.blue(
+    //       "Run: " +
+    //         pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+    //         "You should receive a response similar to the following:\n\n"
+    //     ) +
+    //     "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
+    //     "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
+    //     pc.blue(
+    //       "The Panfactum devShell ships with a TUI called k9s.\n" +
+    //         "To verify what pods are running in the cluster do the following:\n" +
+    //         `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
+    //         `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
+    //         `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
+    //         `4. You should see a minimal list of pods running in the cluster\n` +
+    //         `5. If you don't see any pods, please reach out to us on Discord\n` +
+    //         `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
+    //     )
+    // );
 
     return 0;
   }

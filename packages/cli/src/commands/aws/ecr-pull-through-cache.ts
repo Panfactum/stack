@@ -1,8 +1,7 @@
 import ecrPullThroughCacheTemplate from "../../templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
+import { initAndApplyModule } from "../../util/init-and-apply-module";
 import { replaceHclValue } from "../../util/replace-hcl-value";
-import { tfInit } from "../../util/scripts/tf-init";
-import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
 export interface EcrPullThroughCacheSetupInput {
@@ -33,17 +32,12 @@ export async function setupEcrPullThroughCache(
     input.githubUsername
   );
 
-  input.context.stdout.write("2.b. Setting up infrastructure as code\n");
+  input.context.stdout.write("2.a. Setting up infrastructure as code\n");
 
-  tfInit({
+  await initAndApplyModule({
     context: input.context,
+    moduleName: "ECR Pull Through Cache",
+    modulePath: "./aws_ecr_pull_through_cache",
     verbose: input.verbose,
-    workingDirectory: "./aws_ecr_pull_through_cache",
-  });
-
-  apply({
-    context: input.context,
-    verbose: input.verbose,
-    workingDirectory: "./aws_ecr_pull_through_cache",
   });
 }

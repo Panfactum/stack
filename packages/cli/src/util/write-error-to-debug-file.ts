@@ -18,11 +18,21 @@ export async function writeErrorToDebugFile({
 
   try {
     if (!debugFileExists) {
-      await Bun.write(debugFilePath, `${timestamp}\n${JSON.stringify(error, null, 2)}`);
+      await Bun.write(
+        debugFilePath,
+        `\n${timestamp}\n${JSON.stringify(error, null, 2)}`
+      );
     } else {
-      await appendFile(debugFilePath, `${timestamp}\n${JSON.stringify(error, null, 2)}`);
+      await appendFile(
+        debugFilePath,
+        `\n${timestamp}\n${JSON.stringify(error, null, 2)}`
+      );
     }
   } catch (error) {
-    context.stderr.write(pc.red(`Failed to write error to debug file: ${JSON.stringify(error, null, 2)}`));
+    context.stderr.write(
+      pc.red(
+        `Failed to write error to debug file: ${JSON.stringify(error, null, 2)}`
+      )
+    );
   }
 }
