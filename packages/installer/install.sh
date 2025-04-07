@@ -2,6 +2,22 @@
 
 set -e
 
+# DO NOT EDIT WITHOUT CHANGING THE CICD PIPELINE
+VERSION="main"
+
+GIT_MIN_VERSION="2.40"
+NIX_MIN_VERSION="2.23"
+DIRENV_MIN_VERSION="2.32"
+
+print_panfactum() {
+    printf "\n██████╗  █████╗ ███╗   ██╗███████╗ █████╗  ██████╗████████╗██╗   ██╗███╗   ███╗\n" >&2  
+    printf "██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔══██╗██╔════╝╚══██╔══╝██║   ██║████╗ ████║\n" >&2
+    printf "██████╔╝███████║██╔██╗ ██║█████╗  ███████║██║        ██║   ██║   ██║██╔████╔██║\n" >&2
+    printf "██╔═══╝ ██╔══██║██║╚██╗██║██╔══╝  ██╔══██║██║        ██║   ██║   ██║██║╚██╔╝██║\n" >&2
+    printf "██║     ██║  ██║██║ ╚████║██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║ ╚═╝ ██║\n" >&2
+    printf "╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝\n\n" >&2
+}
+
 # Check that the user is running on a supported platform
 check_platform() {
   case "$(uname -s)" in
@@ -9,18 +25,19 @@ check_platform() {
       # Check if running in WSL
       if grep -q Microsoft /proc/version 2>/dev/null; then
         # Check WSL version
+        # shellcheck disable=SC2143
         if grep -q "WSL2" /proc/version 2>/dev/null || [ -n "$(uname -r | grep -i "WSL2")" ]; then
-          printf "Running on WSL2. Continuing installation...\n" >&2
+          printf "Running on WSL2. Beginning installation...\n" >&2
         else
           printf "\033[31mYou appear to be running WSL version 1. Please upgrade to WSL2 to continue.\033[0m\n" >&2
           exit 1
         fi
       else
-        printf "Running on Linux. Continuing installation...\n\n" >&2
+        printf "Running on Linux. Beginning installation...\n\n" >&2
       fi
       ;;
     Darwin*)
-      printf "Running on macOS. Continuing installation...\n\n" >&2
+      printf "Running on macOS. Beginning installation...\n\n" >&2
       ;;
     *)
       printf "\033[31mUnsupported platform: %s\033[0m\n" "$(uname -s)" >&2
@@ -30,18 +47,17 @@ check_platform() {
   esac
 }
 
-# Check that the users has at least version 2.40 of git installed
+# Check that the user has minimum git version installed
 check_git_version() {
   if ! command -v git >/dev/null 2>&1; then
-    printf "\033[31mGit is not installed. Please install Git version 2.40 or higher.\033[0m\n" >&2
+    printf "\033[31mGit is not installed. Please install Git version %s or higher.\033[0m\n" "$GIT_MIN_VERSION" >&2
     exit 1
   fi
   
   git_version=$(git --version | awk '{print $NF}')
-  required_version="2.40"
   
-  if [ "$(printf '%s\n' "$required_version" "$git_version" | sort -V | head -n1)" != "$required_version" ]; then
-    printf "  \033[31mGit version %s is installed, but version %s or higher is required.\033[0m\n" "$git_version" "$required_version" >&2
+  if [ "$(printf '%s\n' "$GIT_MIN_VERSION" "$git_version" | sort -V | head -n1)" != "$GIT_MIN_VERSION" ]; then
+    printf "  \033[31mGit version %s is installed, but version %s or higher is required.\033[0m\n" "$git_version" "$GIT_MIN_VERSION" >&2
     exit 1
   fi
   
@@ -52,20 +68,19 @@ check_git_version() {
 check_nix_version() {
   if command -v nix >/dev/null 2>&1; then
     nix_version=$(nix --version | awk '{print $NF}')
-    required_version="2.23"
     
-    if [ "$(printf '%s\n' "$required_version" "$nix_version" | sort -V | head -n1)" = "$required_version" ]; then
+    if [ "$(printf '%s\n' "$NIX_MIN_VERSION" "$nix_version" | sort -V | head -n1)" = "$NIX_MIN_VERSION" ]; then
       printf "  \033[32mRequired Nix version %s is already installed.\033[0m\n" "$nix_version" >&2
       return 0
     else
-      printf "  \033[31mNix version %s is installed, but version %s or higher is required. Upgrade Nix using the package manager that you used to install it.\033[0m\n" "$nix_version" "$required_version" >&2
+      printf "  \033[31mNix version %s is installed, but version %s or higher is required. Upgrade Nix using the package manager that you used to install it.\033[0m\n" "$nix_version" "$NIX_MIN_VERSION" >&2
       exit 1
     fi
   else
     echo "Nix is not installed. Installing using the Determinate Systems installer..." >&2
   fi
   
-  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate=false --no-confirm --force
+  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.38.1 | sh -s -- install --no-confirm
 }
 
 # Check if the user has direnv installed. If not, install it via nix.
@@ -99,10 +114,9 @@ check_direnv() {
     fi
   else
     direnv_version=$(direnv version | awk '{print $NF}')
-    required_version="2.32"
     
-    if [ "$(printf '%s\n' "$required_version" "$direnv_version" | sort -V | head -n1)" != "$required_version" ]; then
-      printf "  \033[31mdirenv version %s is installed, but version %s or higher is required. Upgrade direnv using the package manager that you used to install it.\033[0m\n" "$direnv_version" "$required_version" >&2
+    if [ "$(printf '%s\n' "$DIRENV_MIN_VERSION" "$direnv_version" | sort -V | head -n1)" != "$DIRENV_MIN_VERSION" ]; then
+      printf "  \033[31mdirenv version %s is installed, but version %s or higher is required. Upgrade direnv using the package manager that you used to install it.\033[0m\n" "$direnv_version" "$DIRENV_MIN_VERSION" >&2
     else
       printf "  \033[32mRequired direnv version %s is already installed.\033[0m\n" "$direnv_version" >&2
     fi
@@ -127,27 +141,33 @@ create_flake_nix() {
   flake_path="$repo_root/flake.nix"
   
   if [ -f "$flake_path" ]; then
+
+    if grep -q 'panfactum\.url = "github:panfactum/stack' "$flake_path"; then
+      printf "  \033[32mExisting flake.nix already contains a Panfactum framework reference.\033[0m\n" >&2
+      return 0
+    fi
+
     printf "  \033[31mWarning: flake.nix already exists at %s.\033[0m\n" "$flake_path" >&2
     printf "  \033[31mThis automated installer expects to be able to create the repo's flake.nix file.\033[0m\n" >&2
     printf "  \033[31mPlease remove the flake.nix file and try again.\033[0m\n" >&2
     exit 1
   fi
   
-  cat > "$flake_path" << 'EOF'
+  cat > "$flake_path" << EOF
 {
   inputs = {
      # Utility for generating flakes that are compatible with all operating systems
     flake-utils.url = "github:numtide/flake-utils";
 
-    # Make sure this matches your version of the Panfactum Stack
-    panfactum.url = "github:panfactum/stack/edge.25-04-03";
+    # The version of the Panfactum framework to use
+    panfactum.url = "github:panfactum/stack/${VERSION}";
   };
 
   outputs = { panfactum, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem
     (system:
       {
-        devShell = panfactum.lib.${system}.mkDevShell { };
+        devShell = panfactum.lib.\${system}.mkDevShell { };
       }
     );
 }
@@ -155,9 +175,7 @@ EOF
   git add "$flake_path"
 
   set +e
-  logs=$(nix flake update --quiet 2>&1)
-  # shellcheck disable=SC2181
-  if [ $? -ne 0 ]; then
+  if ! logs=$(nix flake update --quiet 2>&1); then
     printf "  \033[31mError: Failed to update flake.nix dependencies.\033[0m\n" >&2
     printf "  \033[31mLogs: %s\033[0m\n" "$logs" >&2
     exit 1
@@ -171,18 +189,48 @@ EOF
 create_panfactum_yaml() {
   repo_root=$(get_repo_root)
 
+  # Check if panfactum.yaml already exists and contains required keys
+  panfactum_yaml_path="$repo_root/panfactum.yaml"
+  
+  if [ -f "$panfactum_yaml_path" ]; then
+    # Check if the file contains all required keys
+    has_repo_url=$(grep -q "repo_url:" "$panfactum_yaml_path" && echo "true" || echo "false")
+    has_repo_name=$(grep -q "repo_name:" "$panfactum_yaml_path" && echo "true" || echo "false")
+    has_repo_primary_branch=$(grep -q "repo_primary_branch:" "$panfactum_yaml_path" && echo "true" || echo "false")
+    
+    if [ "$has_repo_url" = "true" ] && [ "$has_repo_name" = "true" ] && [ "$has_repo_primary_branch" = "true" ]; then
+      printf "  \033[32mExisting panfactum.yaml found with required configuration.\033[0m\n" >&2
+      return 0
+    fi
+  fi
+
   # Get default values
   # Try to get values from git, but allow user to override
-  default_repo_url=$(git config --get remote.origin.url || echo "")  
-  # Ask for user input with defaults
-  if [ -n "$default_repo_url" ]; then
-    printf "  Enter repository URL [%s]: " "$default_repo_url"
-  else
-    printf "  Enter repository URL: "
+  default_repo_url=$(git config --get remote.origin.url || echo "")
+
+  # Convert SSH URL to HTTPS if needed
+  if echo "$default_repo_url" | grep -q "^git@"; then
+    # Convert git@github.com:username/repo.git to https://github.com/username/repo.git
+    default_repo_url=$(echo "$default_repo_url" | sed 's|git@\([^:]*\):\(.*\)|https://\1/\2|')
   fi
-  read -r input_repo_url
-  repo_url=${input_repo_url:-$default_repo_url}
   
+  # Ask for user input with defaults
+  while true; do
+    if [ -n "$default_repo_url" ]; then
+      printf "  Enter repository URL [%s]: " "$default_repo_url"
+    else
+      printf "  Enter repository URL: "
+    fi
+    read -r input_repo_url
+    repo_url=${input_repo_url:-$default_repo_url}
+    
+    # Validate that the URL starts with https:// and ends with .git
+    if echo "$repo_url" | grep -q "^https://" && echo "$repo_url" | grep -q "\.git$"; then
+      break
+    else
+      printf "  \033[31mRepository URL must start with \"https://\" and end with \".git\". Please try again.\033[0m\n\n" >&2
+    fi
+  done
 
   default_repo_name=$(basename -s .git "$default_repo_url" 2>/dev/null || echo "")
   if [ -n "$default_repo_name" ]; then
@@ -201,7 +249,7 @@ create_panfactum_yaml() {
   repo_primary_branch=${input_repo_primary_branch:-$default_repo_primary_branch}
   
   # Create the panfactum.yaml file
-  cat > "$repo_root/panfactum.yaml" << EOF
+  cat > "$panfactum_yaml_path" << EOF
 # These are the standard repo variables required by
 # https://panfactum.com/docs/reference/repo-variables
 
@@ -210,14 +258,29 @@ repo_name: ${repo_name}
 repo_primary_branch: ${repo_primary_branch}
 EOF
 
-  git add "$repo_root/panfactum.yaml"
+  git add "$panfactum_yaml_path"
   printf "\n  \033[32mCreated panfactum.yaml config file.\033[0m\n" >&2
 }
 
+run_pf_update() {
+  export PF_SKIP_CHECK_REPO_SETUP=1
 
-###################################3
+  set +e
+  if ! logs=$(nix develop -c pf-update 2>&1); then
+    printf "  \033[31mError: Failed to build the Panfactum DevShell.\033[0m\n" >&2
+    printf "  \033[31mLogs: %s\033[0m\n" "$logs" >&2
+    return 1
+  fi
+  set -e
+
+  printf "\n  \033[32mSuccessfully built the Panfactum DevShell.\033[0m\n" >&2
+  export PF_SKIP_CHECK_REPO_SETUP=0
+}
+
+###################################
 # Main Runner  
-###################################3
+###################################
+print_panfactum
 check_platform
 
 printf "Installing dependencies...\n\n"
@@ -227,5 +290,13 @@ check_direnv
 
 printf "\nSetting up infrastructure repository...\n\n"
 check_git_repo
-#create_flake_nix
+create_flake_nix
 create_panfactum_yaml
+
+printf "\nBuilding the Panfactum DevShell. This initial build may take up to 30 minutes to complete...\n" >&2
+run_pf_update
+
+printf "\nInstallation COMPLETE! Booting up the Panfactum DevShell...\n\n" >&2
+repo_root=$(get_repo_root)
+direnv allow "$repo_root/.envrc"
+
