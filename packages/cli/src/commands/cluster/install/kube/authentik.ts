@@ -172,7 +172,7 @@ export const setupAuthentik = async ({
       // Get the domain to use for SES
       const domain = await input({
         message: pc.magenta(
-          "Which domain do you want to use for e-mails from Authentic?"
+          "Which domain do you want to use for e-mails from Authentik?"
         ),
         validate: (input) => {
           const regex =
