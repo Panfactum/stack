@@ -34,7 +34,7 @@ import { updateConfigFile } from "../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../util/write-error-to-debug-file";
 
 export class InstallClusterCommand extends Command {
-  static override paths = [["install-cluster"]];
+  static override paths = [["cluster", "install"]];
 
   verbose = Option.Boolean("-v,--verbose", {
     description: "Enable verbose output",
@@ -44,7 +44,7 @@ export class InstallClusterCommand extends Command {
     description: "Install a Panfactum cluster",
     details:
       "This command sets up a new Panfactum cluster including collecting configuration options and setting up all standard components.",
-    examples: [["Start cluster installation", "pf install-cluster"]],
+    examples: [["Start cluster installation", "pf cluster install"]],
   });
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
