@@ -2,31 +2,28 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import pc from "picocolors";
 import { z } from "zod";
-import { getRepoVariables } from "./get-repo-variables";
-import { getTerragruntVariables } from "./get-terragrunt-variables";
 import { getInstanceId } from "./helpers/aws/get-instance-id";
 import { getSsmCommandOutput } from "./helpers/aws/get-ssm-command-output";
 import { runSsmCommand } from "./helpers/aws/run-ssm-command";
 import { scaleAsg } from "./helpers/aws/scale-asg";
 import { testVpcNetworkBlocking } from "./helpers/aws/test-vpc-network-blocking";
 import { getModuleOutputs } from "./helpers/terragrunt/get-module-outputs";
-import type { BaseContext } from "clipanion";
+import type { PanfactumContext } from "../../context";
+import { getPanfactumConfig } from "../../commands/config/get/getPanfactumConfig";
 
 export const vpcNetworkTest = async ({
   context,
   modulePath,
   verbose = false,
 }: {
-  context: BaseContext;
+  context: PanfactumContext;
   modulePath: string;
   verbose?: boolean;
 }) => {
   //####################################################################
   // Step 0: Validation
   //####################################################################
-  const repoVariables = await getRepoVariables({ context });
-
-  const awsDir = repoVariables.aws_dir;
+  const awsDir = context.repoVariables.aws_dir;
   const awsConfigFile = path.join(awsDir, "config");
 
   if (!existsSync(awsConfigFile)) {
@@ -54,7 +51,7 @@ export const vpcNetworkTest = async ({
     }),
   });
 
-  const moduleOutputs = getModuleOutputs({
+  const moduleOutputs = await getModuleOutputs({
     context,
     modulePath,
     validationSchema: moduleOuputsValidationSchema,
@@ -64,10 +61,14 @@ export const vpcNetworkTest = async ({
   //####################################################################
   // Step 2: Select AWS profile to use to run the test
   //####################################################################
-  const terragruntVariables = await getTerragruntVariables({
+  const {aws_profile} = await getPanfactumConfig({
     context,
   });
-  const awsProfile = terragruntVariables.aws_profile;
+
+  // TODO: Error message
+  if(!aws_profile){
+    throw new Error("PLACEHOLDER")
+  }
 
   //####################################################################
   // Step 3: Run the tests
@@ -98,7 +99,7 @@ export const vpcNetworkTest = async ({
       context.stdout.write(`1.b.${i + 1}.b. Scaling ASG ${asg} to 1...\n`);
       scaleAsg({
         asgName: asg,
-        awsProfile,
+        awsProfile: aws_profile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         desiredCapacity: 1,
@@ -108,7 +109,7 @@ export const vpcNetworkTest = async ({
       // Step 2: Get the instance id
       const instanceId = await getInstanceId({
         asgName: asg,
-        awsProfile,
+        awsProfile: aws_profile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         verbose,
@@ -122,7 +123,7 @@ export const vpcNetworkTest = async ({
       // Step 3: Run the network test
       const commandId = await runSsmCommand({
         instanceId,
-        awsProfile,
+        awsProfile: aws_profile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         verbose,
@@ -132,7 +133,7 @@ export const vpcNetworkTest = async ({
       const publicIp = await getSsmCommandOutput({
         commandId,
         instanceId,
-        awsProfile,
+        awsProfile: aws_profile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         verbose,
@@ -173,7 +174,7 @@ export const vpcNetworkTest = async ({
       }
       scaleAsg({
         asgName: subnet.asg,
-        awsProfile,
+        awsProfile: aws_profile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         desiredCapacity: 0,

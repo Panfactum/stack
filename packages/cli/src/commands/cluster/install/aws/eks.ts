@@ -1,22 +1,22 @@
 import path from "node:path";
 import yaml from "yaml";
 import { z } from "zod";
-import awsEksSla1Template from "../../../../templates/aws_eks_sla_1_terragrunt.hcl" with { type: "file" };
-import awsEksSla2Template from "../../../../templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
-import { initAndApplyModule } from "../../../../util/init-and-apply-module";
-import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { safeFileExists } from "../../../../util/safe-file-exists";
-import { eksReset } from "../../../../util/scripts/eks-reset";
-import { getRepoVariables } from "../../../../util/scripts/get-repo-variables";
-import { getTerragruntVariables } from "../../../../util/scripts/get-terragrunt-variables";
-import { getRoot } from "../../../../util/scripts/helpers/get-root";
-import { updateKube } from "../../../../util/scripts/update-kube";
-import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
+import awsEksSla1Template from "../../templates/aws_eks_sla_1_terragrunt.hcl" with { type: "file" };
+import awsEksSla2Template from "../../templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
+import { ensureFileExists } from "../../util/ensure-file-exists";
+import { replaceHclValue } from "../../util/replace-hcl-value";
+import { safeFileExists } from "../../util/safe-file-exists";
+import { eksReset } from "../../util/scripts/eks-reset";
+import { getRepoVariables } from "../../util/scripts/get-repo-variables";
+import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
+import { getRoot } from "../../util/scripts/helpers/get-root";
+import { tfInit } from "../../util/scripts/tf-init";
+import { updateKube } from "../../util/scripts/update-kube";
+import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
 interface EksSetupInput {
-  context: BaseContext;
+  context: PanfactumContext;
   verbose?: boolean;
   clusterName: string;
   clusterDescription: string;
@@ -54,25 +54,31 @@ export async function setupEks(input: EksSetupInput) {
     verbose: input.verbose,
   });
 
-  // Setup cluster_info metadata and CA certs
-  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-cluster_info-metadata-and-ca-certs
-  const terragruntVariables = await getTerragruntVariables({
+  const {aws_profile, environment, region} = await getPanfactumConfig({
     context: input.context,
   });
 
-  const { root } = await getRoot();
-  const kubeConfigPath = path.join(root, ".kube", "config.yaml");
+  // TODO: Error messages
+  if(!aws_profile){
+    throw new Error("PLACEHOLDER")
+  } else if (!environment){
+    throw new Error("PLACEHOLDER")
+  } else if (!region){
+    throw new Error("PLACEHODLER")
+  }
+
+  const kubeConfigPath = path.join(input.context.repoVariables.kube_dir, "config.yaml");
   const configExists = await Bun.file(kubeConfigPath).exists();
   if (!configExists) {
     const config = await Bun.file(kubeConfigPath).text();
     if (
       !config.includes(
-        `"${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"`
+        `"${environment}/${region}/aws_eks"`
       )
     ) {
       await Bun.write(
         kubeConfigPath,
-        `# A list of all clusters deployed via aws_eks\nclusters:\n  - module: "${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"`
+        `# A list of all clusters deployed via aws_eks\nclusters:\n  - module: "${environment}/${region}/aws_eks"`
       );
     }
   } else {
@@ -102,11 +108,11 @@ export async function setupEks(input: EksSetupInput) {
       !jsonConfig["clusters"].some(
         (cluster: { module: string }) =>
           cluster.module ===
-          `${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks`
+          `${environment}/${region}/aws_eks`
       )
     ) {
       jsonConfig["clusters"].push({
-        module: `${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks`,
+        module: `${environment}/${region}/aws_eks`,
       });
       await Bun.write(kubeConfigPath, yaml.stringify(jsonConfig));
     }
@@ -115,13 +121,12 @@ export async function setupEks(input: EksSetupInput) {
   await updateKube({
     context: input.context,
     buildConfig: true,
-    silent: true,
     verbose: input.verbose,
   });
 
   // Setup kubeconfig
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig
-  const kubeUserConfigPath = path.join(root, ".kube", "config.user.yaml");
+  const kubeUserConfigPath = path.join(input.context.repoVariables.kube_dir, "config.user.yaml");
   const kubeUserConfigExists = await Bun.file(kubeUserConfigPath).exists();
   if (!kubeUserConfigExists) {
     await Bun.write(
@@ -129,7 +134,7 @@ export async function setupEks(input: EksSetupInput) {
       `# A list of all clusters to add to your kubeconfig (clusters must be present in cluster_info file)\n` +
         `clusters:\n` +
         `  - name: "${input.clusterName}"\n` +
-        `    aws_profile: ${terragruntVariables["aws_profile"]}`
+        `    aws_profile: ${aws_profile}`
     );
   } else {
     const kubeUserConfig = await Bun.file(kubeUserConfigPath).text();
@@ -150,15 +155,14 @@ export async function setupEks(input: EksSetupInput) {
     ) {
       parsedUserConfig.clusters.push({
         name: input.clusterName,
-        aws_profile: terragruntVariables["aws_profile"],
+        aws_profile: aws_profile,
       });
       await Bun.write(kubeUserConfigPath, yaml.stringify(parsedUserConfig));
     }
   }
 
-  await updateKube({
+  await buildKubeConfig({
     context: input.context,
-    silent: true,
     verbose: input.verbose,
   });
 
@@ -174,8 +178,7 @@ export async function setupEks(input: EksSetupInput) {
 
   // Prepare to deploy kubernetes modules
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#prepare-to-deploy-kubernetes-modules
-  const repoVariables = await getRepoVariables({ context: input.context });
-  const clusterInfoFilePath = `${repoVariables.kube_dir}/cluster_info`;
+  const clusterInfoFilePath = `${input.context.repoVariables.kube_dir}/cluster_info`;
   const clusterInfoFile = await Bun.file(clusterInfoFilePath).text();
   const clusterInfoLines = clusterInfoFile.split("\n");
   const clusterInfo = clusterInfoLines.find((line) =>
@@ -206,15 +209,15 @@ export async function setupEks(input: EksSetupInput) {
   }
 
   const regionFilePath = path.join(
-    repoVariables.environments_dir,
-    terragruntVariables["environment"],
-    terragruntVariables["region"],
+    input.context.repoVariables.environments_dir,
+    environment,
+    region,
     "region.yaml"
   );
   const regionFileExists = await safeFileExists(regionFilePath);
   if (!regionFileExists) {
     throw new Error(
-      `Region file not found for ${terragruntVariables["environment"]}/${terragruntVariables["region"]}`
+      `Region file not found for ${environment}/${region}`
     );
   }
   const regionFile = Bun.file(regionFilePath);

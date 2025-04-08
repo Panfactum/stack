@@ -12,6 +12,7 @@ pkgs.stdenv.mkDerivation {
   nativeBuildInputs = with pkgs; [
     rsync
     bun
+    jq
   ];
 
   phases = [

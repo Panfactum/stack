@@ -3,7 +3,7 @@ import { parseData } from "../../../parse-data";
 import { progressMessage } from "../../../progress-message";
 import type { BaseContext } from "clipanion";
 
-export const getModuleOutputs = <T extends z.ZodTypeAny>({
+export const getModuleOutputs = async <T extends z.ZodTypeAny>({
   context,
   modulePath,
   silent = false,
@@ -28,29 +28,42 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
     context.stdout.write(`Retrieving module outputs from ${modulePath}...\n`);
   }
 
-  const moduleOutputs = Bun.spawnSync(
-    ["terragrunt", "output", "--json", "--terragrunt-working-dir", modulePath],
+  // TODO: You MUST verify that the user is logged in before running this command
+
+  const moduleOutputsProc = Bun.spawn(
+    ["terragrunt", "output", "--json"],
     {
+      cwd: modulePath,
       stdout: "pipe",
       stderr: "pipe",
     }
   );
 
+<<<<<<< HEAD
   !verbose && !silent && globalThis.clearInterval(moduleOutputProgress);
   !verbose && !silent && context.stdout.write("\n");
+||||||| parent of 7d0e2eec (chore: cli refactor)
+  !verbose && globalThis.clearInterval(moduleOutputProgress);
+  context.stdout.write("\n");
+=======
+  await moduleOutputsProc.exited
+  const stdout = await new Response(moduleOutputsProc.stdout).text()
 
-  if (verbose) {
+  !verbose && globalThis.clearInterval(moduleOutputProgress);
+  context.stdout.write("\n");
+>>>>>>> 7d0e2eec (chore: cli refactor)
+
+  if (true) {
     context.stdout.write(
-      "STDOUT: " + (moduleOutputs.stdout?.toString() ?? "") + "\n"
+      "STDOUT: " + stdout + "\n"
     );
+    const stderr = await new Response(moduleOutputsProc.stderr).text()
     context.stderr.write(
-      "STDERR: " + (moduleOutputs.stderr?.toString() ?? "") + "\n"
+      "STDERR: " + stderr + "\n"
     );
   }
 
-  const parsedModuleOutputs = JSON.parse(
-    moduleOutputs.stdout?.toString() ?? ""
-  );
+  const parsedModuleOutputs = JSON.parse(stdout);
   const validatedModuleOutputs = parseData(
     parsedModuleOutputs,
     validationSchema

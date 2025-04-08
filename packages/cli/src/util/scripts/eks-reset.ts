@@ -2,7 +2,7 @@ import { input, search } from "@inquirer/prompts";
 import yaml from "yaml";
 import { z } from "zod";
 import { safeFileExists } from "../safe-file-exists";
-import { getRepoVariables } from "./get-repo-variables";
+import { getRepoVariables } from "../getRepoVariables";
 import type { BaseContext } from "clipanion";
 
 // This script is intended to remove the default resources that AWS installs in an EKS

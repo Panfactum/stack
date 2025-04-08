@@ -28,12 +28,13 @@ import { getConfigFileKey } from "../../../util/get-config-file-key";
 import { printHelpInformation } from "../../../util/print-help-information";
 import { replaceYamlValue } from "../../../util/replace-yaml-value";
 import { safeFileExists } from "../../../util/safe-file-exists";
-import { getTerragruntVariables } from "../../../util/scripts/get-terragrunt-variables";
 import { backgroundProcessIds } from "../../../util/start-background-process";
 import { updateConfigFile } from "../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../util/write-error-to-debug-file";
+import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
+import type { PanfactumContext } from "../../../context";
 
-export class InstallClusterCommand extends Command {
+export class InstallClusterCommand extends Command<PanfactumContext> {
   static override paths = [["cluster", "install"]];
 
   verbose = Option.Boolean("-v,--verbose", {
@@ -65,8 +66,8 @@ export class InstallClusterCommand extends Command {
       this.context.stderr.write(
         pc.red(
           "ERROR: It appears you're not running this installer in the Panfactum devShell.\n" +
-            "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#integrate-the-panfactum-devshell\n"
+          "Please ensure you've completed the initial setup steps in the guide here:\n" +
+          "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#integrate-the-panfactum-devshell\n"
         )
       );
       printHelpInformation(this.context);
@@ -80,15 +81,15 @@ export class InstallClusterCommand extends Command {
       this.context.stderr.write(
         pc.red(
           "ERROR: Could not find panfactum.yaml in the current directory or any parent directory.\n" +
-            "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables\n"
+          "Please ensure you've completed the initial setup steps in the guide here:\n" +
+          "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables\n"
         )
       );
       printHelpInformation(this.context);
       return 1;
     }
 
-    const terragruntVariables = await getTerragruntVariables({
+    const terragruntVariables = await getPanfactumConfig({
       context: this.context,
     });
 
@@ -104,14 +105,14 @@ export class InstallClusterCommand extends Command {
     );
     const match = currentDirectory.match(pathRegex);
 
-    if (!match) {
+    if (!environment || !match) {
       this.context.stderr.write(
         pc.red(
           "ERROR: Cluster installation must be run from within a valid region-specific directory.\n" +
-            `Please change to a directory like ${environment}/<valid-aws-region> before continuing.\n` +
-            `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
-            "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
-            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo\n"
+          `Please change to a directory like ${environment}/<valid-aws-region> before continuing.\n` +
+          `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
+          "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
+          "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo\n"
         )
       );
       printHelpInformation(this.context);
@@ -601,9 +602,9 @@ export class InstallClusterCommand extends Command {
       this.context.stdout.write(
         pc.blue(
           "Vault serves several important purposes in the Panfactum framework:\n" +
-            "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
-            "2. Authorizes SSH authentication to our bastion hosts\n" +
-            "3. Provisions (and de-provisions) dynamic credentials for the framework’s supported databases\n"
+          "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
+          "2. Authorizes SSH authentication to our bastion hosts\n" +
+          "3. Provisions (and de-provisions) dynamic credentials for the framework’s supported databases\n"
         )
       );
 
@@ -982,23 +983,23 @@ export class InstallClusterCommand extends Command {
       pc.green(
         "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
       ) +
-        pc.blue(
-          "Run: " +
-            pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
-            "You should receive a response similar to the following:\n\n"
-        ) +
-        "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
-        "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
-        pc.blue(
-          "The Panfactum devShell ships with a TUI called k9s.\n" +
-            "To verify what pods are running in the cluster do the following:\n" +
-            `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
-            `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
-            `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
-            `4. You should see a minimal list of pods running in the cluster\n` +
-            `5. If you don't see any pods, please reach out to us on Discord\n` +
-            `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
-        )
+      pc.blue(
+        "Run: " +
+        pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+        "You should receive a response similar to the following:\n\n"
+      ) +
+      "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
+      "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
+      pc.blue(
+        "The Panfactum devShell ships with a TUI called k9s.\n" +
+        "To verify what pods are running in the cluster do the following:\n" +
+        `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
+        `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
+        `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
+        `4. You should see a minimal list of pods running in the cluster\n` +
+        `5. If you don't see any pods, please reach out to us on Discord\n` +
+        `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
+      )
     );
 
     return 0;

@@ -2,17 +2,17 @@
   "nodes": {
     "awsUtilsPkgsSrc": {
       "locked": {
-        "lastModified": 1733229606,
-        "narHash": "sha256-FLYY5M0rpa5C2QAE3CKLYAM6TwbKicdRK6qNrSHlNrE=",
+        "lastModified": 1743104940,
+        "narHash": "sha256-W7rlOTUE8c3SNoTV/voJEU2dBcSmxCQKguCrxjoxtWw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "566e53c2ad750c84f6d31f9ccb9d00f823165550",
+        "rev": "f27ec3a00d953eaf96c5ecdcd64bc30c44a20315",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "566e53c2ad750c84f6d31f9ccb9d00f823165550",
+        "rev": "f27ec3a00d953eaf96c5ecdcd64bc30c44a20315",
         "type": "github"
       }
     },

@@ -5,7 +5,7 @@ import { safeFileExists } from "../../safe-file-exists";
  * @param filePath - The path to the file to hash
  * @returns A promise that resolves to the MD5 hash of the file content
  */
-export async function getFileMd5Hash(filePath: string) {
+export async function getFileMD5Hash(filePath: string) {
   if (!(await safeFileExists(filePath))) {
     return "";
   }

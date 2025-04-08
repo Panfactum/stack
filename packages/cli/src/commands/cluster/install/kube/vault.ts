@@ -1,22 +1,21 @@
 import { $ } from "bun";
 import pc from "picocolors";
 import { z } from "zod";
-import kubeVaultTerragruntHcl from "../../../../templates/kube_vault_terragrunt.hcl" with { type: "file" };
-import vaultCoreResourcesTerragruntHcl from "../../../../templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
+import kubeVaultTerragruntHcl from "../../templates/kube_vault_terragrunt.hcl" with { type: "file" };
+import vaultCoreResourcesTerragruntHcl from "../../templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
+import { apply } from "../terragrunt/apply";
 import { checkStepCompletion } from "../../../../util/check-step-completion";
 import { ensureFileExists } from "../../../../util/ensure-file-exists";
-import { initAndApplyModule } from "../../../../util/init-and-apply-module";
-import { progressMessage } from "../../../../util/progress-message";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { safeFileExists } from "../../../../util/safe-file-exists";
-import { getRepoVariables } from "../../../../util/scripts/get-repo-variables";
+import { progressMessage } from "../../../../util/progress-message";
 import { tfInit } from "../../../../util/scripts/tf-init";
-import { sopsEncrypt } from "../../../../util/sops-encrypt";
-import { startBackgroundProcess } from "../../../../util/start-background-process";
-import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
-import { apply } from "../terragrunt/apply";
-import type { BaseContext } from "clipanion";
+import { updateConfigFile } from "../../../../util/update-config-file";
+import { sopsEncrypt } from "../../../../util/sops-encrypt";
+import type { PanfactumContext } from "../../../../context";
+import { safeFileExists } from "../../../../util/safe-file-exists";
+import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { initAndApplyModule } from "../../../../util/init-and-apply-module";
 
 export const setupVault = async ({
   context,
@@ -24,7 +23,7 @@ export const setupVault = async ({
   vaultDomain,
   verbose = false,
 }: {
-  context: BaseContext;
+  context: PanfactumContext;
   configPath: string;
   vaultDomain: string;
   verbose?: boolean;
@@ -303,11 +302,7 @@ export const setupVault = async ({
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#configure-vault
   context.stdout.write("7.d. Configuring Vault\n");
 
-  const repoVariables = await getRepoVariables({
-    context,
-  });
-
-  const repoRoot = repoVariables.repo_root;
+  const repoRoot = context.repoVariables.repo_root;
 
   // Add VAULT_ADDR and VAULT_TOKEN to .env file
   const envFilePath = `${repoRoot}/.env`;

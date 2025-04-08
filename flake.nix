@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     flake-utils.url = "github:numtide/flake-utils";
     kubeUtilsPkgsSrc.url = "github:NixOS/nixpkgs/0cb2fd7c59fed0cd82ef858cbcbdb552b9a33465";
-    awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/566e53c2ad750c84f6d31f9ccb9d00f823165550";
+    awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/f27ec3a00d953eaf96c5ecdcd64bc30c44a20315";
     tfUtilsPkgsSrc.url = "github:NixOS/nixpkgs/93dc9803a1ee435e590b02cde9589038d5cc3a4e";
     buildkitPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     redisPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";

@@ -1,6 +1,7 @@
 {
     "eslint.workingDirectories": [
         "./packages/website",
+        "./packages/cli"
     ],
     "[typescriptreact]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",

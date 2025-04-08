@@ -1,5 +1,5 @@
 import { safeFileExists } from "../safe-file-exists";
-import { getRepoVariables } from "./get-repo-variables";
+import { getRepoVariables } from "../getRepoVariables";
 import type { BaseContext } from "clipanion";
 
 // This function is intended to support getting an EKS auth token
