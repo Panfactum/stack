@@ -33,6 +33,7 @@ import { updateConfigFile } from "../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../util/write-error-to-debug-file";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { PanfactumContext } from "../../../context";
+import { setupAuthentik } from "./kube/authentik";
 
 export class InstallClusterCommand extends Command<PanfactumContext> {
   static override paths = [["cluster", "install"]];
@@ -81,8 +82,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
       this.context.stderr.write(
         pc.red(
           "ERROR: Could not find panfactum.yaml in the current directory or any parent directory.\n" +
-          "Please ensure you've completed the initial setup steps in the guide here:\n" +
-          "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables\n"
+            "Please ensure you've completed the initial setup steps in the guide here:\n" +
+            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables\n"
         )
       );
       printHelpInformation(this.context);
@@ -109,10 +110,10 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
       this.context.stderr.write(
         pc.red(
           "ERROR: Cluster installation must be run from within a valid region-specific directory.\n" +
-          `Please change to a directory like ${environment}/<valid-aws-region> before continuing.\n` +
-          `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
-          "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
-          "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo\n"
+            `Please change to a directory like ${environment}/<valid-aws-region> before continuing.\n` +
+            `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
+            "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
+            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo\n"
         )
       );
       printHelpInformation(this.context);
@@ -180,8 +181,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "setupVpc",
         stepCompleteMessage:
-          "1/13 Skipping VPC setup as it's already complete.\n",
-        stepNotCompleteMessage: "1/13 Setting up the AWS VPC\n\n",
+          "1/14 Skipping VPC setup as it's already complete.\n",
+        stepNotCompleteMessage: "1/14 Setting up the AWS VPC\n\n",
       });
     } catch {
       return 1;
@@ -263,9 +264,9 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "setupEcrPullThroughCache",
         stepCompleteMessage:
-          "2/13 Skipping ECR pull through cache setup as it's already complete.\n",
+          "2/14 Skipping ECR pull through cache setup as it's already complete.\n",
         stepNotCompleteMessage:
-          "2/13 Setting up the AWS ECR pull through cache\n\n",
+          "2/14 Setting up the AWS ECR pull through cache\n\n",
       });
     } catch {
       return 1;
@@ -365,8 +366,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "setupEks",
         stepCompleteMessage:
-          "3/13 Skipping EKS cluster setup as it's already complete.\n",
-        stepNotCompleteMessage: "3/13 Setting up the AWS EKS cluster\n\n",
+          "3/14 Skipping EKS cluster setup as it's already complete.\n",
+        stepNotCompleteMessage: "3/14 Setting up the AWS EKS cluster\n\n",
       });
     } catch {
       return 1;
@@ -458,9 +459,9 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "internalClusterNetworking",
         stepCompleteMessage:
-          "4/13 Skipping internal cluster networking setup as it's already complete.\n",
+          "4/14 Skipping internal cluster networking setup as it's already complete.\n",
         stepNotCompleteMessage:
-          "4/13 Setting up the internal cluster networking\n\n",
+          "4/14 Setting up the internal cluster networking\n\n",
       });
     } catch {
       return 1;
@@ -503,8 +504,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "policyController",
         stepCompleteMessage:
-          "5/13 Skipping policy controller setup as it's already complete.\n",
-        stepNotCompleteMessage: "5/13 Setting up the policy controller\n\n",
+          "5/14 Skipping policy controller setup as it's already complete.\n",
+        stepNotCompleteMessage: "5/14 Setting up the policy controller\n\n",
       });
     } catch {
       return 1;
@@ -547,9 +548,9 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "csiDrivers",
         stepCompleteMessage:
-          "6/13 Skipping CSI drivers setup as it's already complete.\n",
+          "6/14 Skipping CSI drivers setup as it's already complete.\n",
         stepNotCompleteMessage:
-          "6/13 Setting up the Container Storage Interface (CSI) drivers\n\n",
+          "6/14 Setting up the Container Storage Interface (CSI) drivers\n\n",
       });
     } catch {
       return 1;
@@ -591,8 +592,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "vault",
         stepCompleteMessage:
-          "7/13 Skipping Vault setup as it's already complete.\n",
-        stepNotCompleteMessage: "7/13 Setting up Vault\n\n",
+          "7/14 Skipping Vault setup as it's already complete.\n",
+        stepNotCompleteMessage: "7/14 Setting up Vault\n\n",
       });
     } catch {
       return 1;
@@ -602,9 +603,9 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
       this.context.stdout.write(
         pc.blue(
           "Vault serves several important purposes in the Panfactum framework:\n" +
-          "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
-          "2. Authorizes SSH authentication to our bastion hosts\n" +
-          "3. Provisions (and de-provisions) dynamic credentials for the framework’s supported databases\n"
+            "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
+            "2. Authorizes SSH authentication to our bastion hosts\n" +
+            "3. Provisions (and de-provisions) dynamic credentials for the framework’s supported databases\n"
         )
       );
 
@@ -672,8 +673,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "certManagement",
         stepCompleteMessage:
-          "8/13 Skipping certificate management setup as it's already complete.\n",
-        stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
+          "8/14 Skipping certificate management setup as it's already complete.\n",
+        stepNotCompleteMessage: "8/14 Setting up certificate management\n\n",
       });
     } catch {
       return 1;
@@ -744,8 +745,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "serviceMesh",
         stepCompleteMessage:
-          "9/13 Skipping service mesh setup as it's already complete.\n",
-        stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
+          "9/14 Skipping service mesh setup as it's already complete.\n",
+        stepNotCompleteMessage: "9/14 Setting up the service mesh\n\n",
       });
     } catch {
       return 1;
@@ -795,8 +796,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "autoscaling",
         stepCompleteMessage:
-          "10/13 Skipping autoscaling setup as it's already complete.\n",
-        stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
+          "10/14 Skipping autoscaling setup as it's already complete.\n",
+        stepNotCompleteMessage: "10/14 Setting up autoscaling\n\n",
       });
     } catch {
       return 1;
@@ -846,8 +847,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "inboundNetworking",
         stepCompleteMessage:
-          "11/13 Skipping inbound networking setup as it's already complete.\n",
-        stepNotCompleteMessage: "11/13 Setting up inbound networking\n\n",
+          "11/14 Skipping inbound networking setup as it's already complete.\n",
+        stepNotCompleteMessage: "11/14 Setting up inbound networking\n\n",
       });
     } catch {
       return 1;
@@ -897,8 +898,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "maintenanceControllers",
         stepCompleteMessage:
-          "12/13 Skipping maintenance controllers setup as it's already complete.\n",
-        stepNotCompleteMessage: "12/13 Setting up maintenance controllers\n\n",
+          "12/14 Skipping maintenance controllers setup as it's already complete.\n",
+        stepNotCompleteMessage: "12/14 Setting up maintenance controllers\n\n",
       });
     } catch {
       return 1;
@@ -941,8 +942,8 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
         context: this.context,
         step: "cloudNativePG",
         stepCompleteMessage:
-          "13/13 Skipping CloudNativePG setup as it's already complete.\n",
-        stepNotCompleteMessage: "13/13 Setting up CloudNativePG\n\n",
+          "13/14 Skipping CloudNativePG setup as it's already complete.\n",
+        stepNotCompleteMessage: "13/14 Setting up CloudNativePG\n\n",
       });
     } catch {
       return 1;
@@ -977,29 +978,77 @@ export class InstallClusterCommand extends Command<PanfactumContext> {
       });
     }
 
+    let setupAuthentikComplete = false;
+    try {
+      setupAuthentikComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "authentik",
+        stepCompleteMessage:
+          "14/14 Skipping Authentik setup as it's already complete.\n",
+        stepNotCompleteMessage: "14/14 Setting up Authentik\n\n",
+      });
+    } catch {
+      return 1;
+    }
+
+    if (!setupAuthentikComplete) {
+      try {
+        const exitCode = await setupAuthentik({
+          configPath,
+          context: this.context,
+          verbose: this.verbose,
+        });
+        // This happens when the user decides to not setup Authentik. We exit the CLI.
+        if (exitCode === 0) {
+          return 0;
+        }
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the Authentik: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          authentik: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
     // Verify connection to the cluster
     // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
     this.context.stdout.write(
       pc.green(
         "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
       ) +
-      pc.blue(
-        "Run: " +
-        pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
-        "You should receive a response similar to the following:\n\n"
-      ) +
-      "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
-      "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
-      pc.blue(
-        "The Panfactum devShell ships with a TUI called k9s.\n" +
-        "To verify what pods are running in the cluster do the following:\n" +
-        `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
-        `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
-        `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
-        `4. You should see a minimal list of pods running in the cluster\n` +
-        `5. If you don't see any pods, please reach out to us on Discord\n` +
-        `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
-      )
+        pc.blue(
+          "Run: " +
+            pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+            "You should receive a response similar to the following:\n\n"
+        ) +
+        "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
+        "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
+        pc.blue(
+          "The Panfactum devShell ships with a TUI called k9s.\n" +
+            "To verify what pods are running in the cluster do the following:\n" +
+            `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
+            `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
+            `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
+            `4. You should see a minimal list of pods running in the cluster\n` +
+            `5. If you don't see any pods, please reach out to us on Discord\n` +
+            `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
+        )
     );
 
     return 0;

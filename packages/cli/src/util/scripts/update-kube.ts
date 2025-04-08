@@ -119,7 +119,7 @@ export async function updateKube({
           validationSchema: z.object({
             cluster_ca_data: z.object({
               sensitive: z.boolean(),
-              type: z.string(),
+              type: z.any(),
               value: z.string().base64(),
             }),
             cluster_url: z.object({ value: z.string() }),
