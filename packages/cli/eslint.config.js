@@ -105,7 +105,7 @@ export default [
         "error",
         {
           cases: {
-            camelcase: true,
+            camelCase: true,
           },
         },
       ],

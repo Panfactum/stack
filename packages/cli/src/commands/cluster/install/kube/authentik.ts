@@ -763,11 +763,11 @@ export const setupAuthentik = async ({
             ]);
             const result = proc.stdout.toString().trim().replace("%", "");
             if (result !== "200") {
-              return "This does not appear to be a valid Docker Hub Access Token or the permissions are not correct";
+              return "This does not appear to be a valid Authentik Access Token. Please try again.";
             }
             return true;
           } catch {
-            return "Error validating Docker Hub Access Token, please try again.";
+            return "Error validating Authentik Access Token, please try again.";
           }
         },
       });
