@@ -19,7 +19,7 @@ export async function deployModule({
   terraguntContents,
   hclUpdates,
 }: {
-  terraguntContents: string;
+  terraguntContents?: string;
   clusterPath: string;
   context: PanfactumContext;
   moduleDirectory: string;
@@ -38,11 +38,12 @@ export async function deployModule({
     informStepComplete(context, stepName, stepNum, subStepNum);
   } else {
     informStepStart(context, stepName, stepNum, subStepNum);
-    await writeFile({
-      context,
-      path: hclFile,
-      contents: await Bun.file(terraguntContents).text(),
-      overwrite,
+    if (terraguntContents) {
+      await writeFile({
+        context,
+        path: hclFile,
+        contents: await Bun.file(terraguntContents).text(),
+        overwrite,
     });
 
     if (hclUpdates) {

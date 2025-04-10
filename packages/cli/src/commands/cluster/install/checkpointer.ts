@@ -101,6 +101,15 @@ const STEPS = z.object({
   setupLinkerd: z.boolean().default(false).catch(false),
   linkerdDeployment: z.boolean().default(false).catch(false),
   linkerdControlPlaneChecks: z.boolean().default(false).catch(false),
+  setupAutoscaling: z.boolean().default(false).catch(false),
+  metricsServerDeployment: z.boolean().default(false).catch(false),
+  vpaDeployment: z.boolean().default(false).catch(false),
+  allResourcesUpdatedForVPA: z.boolean().default(false).catch(false),
+  karpenterDeployment: z.boolean().default(false).catch(false),
+  nodePoolsDeployment: z.boolean().default(false).catch(false),
+  adjustNodePools: z.boolean().default(false).catch(false),
+  schedulerDeployment: z.boolean().default(false).catch(false),
+  kedaDeployment: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;
