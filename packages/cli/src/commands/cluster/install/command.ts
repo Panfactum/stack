@@ -5,6 +5,7 @@ import { CLIError } from "@/util/error/error";
 import { Checkpointer, type Step } from "./checkpointer";
 import { informStepComplete, informStepStart } from "./messages";
 import { setSLA } from "./setSLA";
+import { setupCertManagement } from "./setupCertManagement";
 import { setupCSIDrivers } from "./setupCSIDrivers";
 import { setupECR } from "./setupECR";
 import { setupEKS } from "./setupEKS";
@@ -68,6 +69,11 @@ const SETUP_STEPS: Array<{
     label: "Certificate Management",
     id: "setupCertManagement",
     setup: setupCertManagement,
+  },
+  {
+    label: "Certificate Issuers",
+    id: "setupCertificateIssuers",
+    setup: setupCertificateIssuers,
   },
 ];
 
@@ -156,6 +162,7 @@ export class InstallClusterCommand extends PanfactumCommand {
     const options: InstallClusterStepOptions = {
       context: this.context,
       environment,
+      environmentPath,
       kubeDomain,
       region,
       checkpointer,

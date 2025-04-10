@@ -3,6 +3,7 @@ import type { PanfactumContext } from "@/context/context";
 
 export interface InstallClusterStepOptions {
   clusterPath: string;
+  environmentPath: string;
   environment: string;
   kubeDomain: string;
   region: string;

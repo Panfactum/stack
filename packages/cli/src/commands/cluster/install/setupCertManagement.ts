@@ -8,7 +8,7 @@ import type { InstallClusterStepOptions } from "./common";
 export async function setupCertManagement(options: InstallClusterStepOptions) {
   const { checkpointer, clusterPath, context } = options;
 
-  const modulePath = join(clusterPath, "kube_vault");
+  const modulePath = join(clusterPath, "kube_cert_manager");
 
   const VAULT_TOKEN = await checkpointer.getSavedInput("vaultRootToken");
   const VAULT_ADDR = await checkpointer.getSavedInput("vaultAddress");

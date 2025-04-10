@@ -68,6 +68,7 @@ const SAVED_INPUTS = z.object({
   vaultDomain: z.string().optional(),
   vaultRootToken: z.string().optional(),
   vaultAddress: z.string().optional(),
+  certificateAlertEmail: z.string().optional(),
 });
 
 const STEPS = z.object({
@@ -93,6 +94,10 @@ const STEPS = z.object({
   vaultCoreResourcesDeployment: z.boolean().default(false).catch(false),
   setupCertManagement: z.boolean().default(false).catch(false),
   certManagerDeployment: z.boolean().default(false).catch(false),
+  setupCertificateIssuers: z.boolean().default(false).catch(false),
+  certIssuersDeployment: z.boolean().default(false).catch(false),
+  certIssuersIACDeployment: z.boolean().default(false).catch(false),
+  firstCertificateDeployment: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;
