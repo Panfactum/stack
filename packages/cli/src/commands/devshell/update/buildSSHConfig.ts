@@ -1,13 +1,13 @@
-import { z } from "zod";
-import type { PanfactumContext } from "../../../context";
-import { safeFileExists } from "../../../util/safe-file-exists";
-import { getModuleOutputs } from "../../../util/scripts/helpers/terragrunt/get-module-outputs";
-import { Glob } from "bun";
-import { getLastPathSegments } from "../../../util/getLastPathSegments";
 import path from "path";
+import { Glob } from "bun";
+import { z } from "zod";
+import { safeFileExists } from "../../../util/fs/safe-file-exists";
+import { getLastPathSegments } from "../../../util/getLastPathSegments";
+import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
 import { createNullWriter } from "../../../util/writers/createNullWriter";
+import type { PanfactumContext } from "../../../context/context";
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
+ 
 export async function buildSSHConfig({
   context,
 }: {
@@ -37,7 +37,7 @@ export async function buildSSHConfig({
     await Promise.all(Array.from(glob.scanSync(environments_dir)).map(async (bastionTerragruntHCL) => {
       const directory = path.dirname(bastionTerragruntHCL);
       context.stderr.write(`  Adding bastion at ${getLastPathSegments(directory,3)}...\n`);
-      const moduleOutput = await getModuleOutputs({
+      const moduleOutput = await terragruntOutput({
         context: {
           ...context,
           stdout: createNullWriter()

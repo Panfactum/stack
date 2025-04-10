@@ -1,5 +1,6 @@
 import path from "path";
 import yaml from "yaml";
+import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import kubeKarpenterNodePoolsTerragruntHcl from "../../../../templates/kube_karpenter_node_pools_terragrunt.hcl" with { type: "file" };
 import kubeKarpenterTerragruntHcl from "../../../../templates/kube_karpenter_terragrunt.hcl" with { type: "file" };
 import kubeKedaTerragruntHcl from "../../../../templates/kube_keda_terragrunt.hcl" with { type: "file" };
@@ -7,16 +8,14 @@ import kubeMetricsServerTerragruntHcl from "../../../../templates/kube_metrics_s
 import kubeSchedulerTerragruntHcl from "../../../../templates/kube_scheduler_terragrunt.hcl" with { type: "file" };
 import kubeVpaTerragruntHcl from "../../../../templates/kube_vpa_terragrunt.hcl" with { type: "file" };
 import { checkStepCompletion } from "../../../../util/check-step-completion";
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
+import { safeFileExists } from "../../../../util/fs/safe-file-exists";
+import { writeFile } from "../../../../util/fs/writeFile";
 import { initAndApplyModule } from "../../../../util/init-and-apply-module";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { safeFileExists } from "../../../../util/safe-file-exists";
-import { getRepoVariables } from "../../../../util/scripts/get-repo-variables";
-import { getTerragruntVariables } from "../../../../util/scripts/get-terragrunt-variables";
 import { startBackgroundProcess } from "../../../../util/start-background-process";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { runAllApply } from "../terragrunt/run-all-apply";
-import type { BaseContext } from "clipanion";
+import type { PanfactumContext } from "@/context/context";
 
 export const setupAutoscaling = async ({
   configPath,
@@ -24,11 +23,12 @@ export const setupAutoscaling = async ({
   verbose = false,
 }: {
   configPath: string;
-  context: BaseContext;
+  context: PanfactumContext;
   verbose?: boolean;
-  // eslint-disable-next-line sonarjs/cognitive-complexity
+   
 }) => {
   const env = process.env;
+
   let vaultPortForwardPid = 0;
   vaultPortForwardPid = startBackgroundProcess({
     args: [
@@ -45,17 +45,22 @@ export const setupAutoscaling = async ({
     env,
   });
 
-  // Multiple steps need these variables
-  const repoVariables = await getRepoVariables({
+
+  const {region, environment} = await getPanfactumConfig({
     context,
   });
-  const terragruntVariables = await getTerragruntVariables({
-    context,
-  });
+
+  // TODO: Error messages
+  if (!environment){
+    throw new Error("PLACEHOLDER")
+  } else if (!region){
+    throw new Error("PLACEHODLER")
+  }
+
   const regionFilePath = path.join(
-    repoVariables.environments_dir,
-    terragruntVariables["environment"],
-    terragruntVariables["region"],
+    context.repoVariables.environments_dir,
+    environment,
+    region,
     "region.yaml"
   );
 
@@ -75,10 +80,10 @@ export const setupAutoscaling = async ({
   }
 
   if (!metricsServerSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_metrics_server/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeMetricsServerTerragruntHcl).text(),
+      path: "./kube_metrics_server/terragrunt.hcl",
+      contents: await Bun.file(kubeMetricsServerTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
@@ -116,10 +121,10 @@ export const setupAutoscaling = async ({
   }
 
   if (!vpaSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_vpa/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeVpaTerragruntHcl).text(),
+      path: "./kube_vpa/terragrunt.hcl",
+      contents: await Bun.file(kubeVpaTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
@@ -158,7 +163,7 @@ export const setupAutoscaling = async ({
     const regionFileExists = await safeFileExists(regionFilePath);
     if (!regionFileExists) {
       throw new Error(
-        `Region file not found for ${terragruntVariables["environment"]}/${terragruntVariables["region"]}`
+        `Region file not found for ${environment}/${region}`
       );
     }
     const regionFile = Bun.file(regionFilePath);
@@ -224,10 +229,10 @@ export const setupAutoscaling = async ({
   }
 
   if (!karpenterSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_karpenter/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeKarpenterTerragruntHcl).text(),
+      path: "./kube_karpenter/terragrunt.hcl",
+      contents: await Bun.file(kubeKarpenterTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
@@ -265,10 +270,10 @@ export const setupAutoscaling = async ({
   }
 
   if (!nodePoolsSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_karpenter_node_pools/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeKarpenterNodePoolsTerragruntHcl).text(),
+      path: "./kube_karpenter_node_pools/terragrunt.hcl",
+      contents: await Bun.file(kubeKarpenterNodePoolsTerragruntHcl).text(),
     });
 
     const nodeSubnets: string[] = [];
@@ -407,10 +412,10 @@ export const setupAutoscaling = async ({
   }
 
   if (!binPackingKubernetesSchedulerDeployed) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_scheduler/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeSchedulerTerragruntHcl).text(),
+      path: "./kube_scheduler/terragrunt.hcl",
+      contents: await Bun.file(kubeSchedulerTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
@@ -453,10 +458,10 @@ export const setupAutoscaling = async ({
   }
 
   if (!kedaSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_keda/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeKedaTerragruntHcl).text(),
+      path: "./kube_keda/terragrunt.hcl",
+      contents: await Bun.file(kubeKedaTerragruntHcl).text(),
     });
 
     await initAndApplyModule({

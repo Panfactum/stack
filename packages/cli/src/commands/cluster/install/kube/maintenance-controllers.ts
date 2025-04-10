@@ -5,19 +5,17 @@ import kubePvcAutoresizerTerragruntHcl from "../../../../templates/kube_pvc_auto
 import kubeReloaderTerragruntHcl from "../../../../templates/kube_reloader_terragrunt.hcl" with { type: "file" };
 import kubeVeleroTerragruntHcl from "../../../../templates/kube_velero_terragrunt.hcl" with { type: "file" };
 import { checkStepCompletion } from "../../../../util/check-step-completion";
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
+import { writeFile } from "../../../../util/fs/writeFile";
 import { initAndApplyModule } from "../../../../util/init-and-apply-module";
 import { updateConfigFile } from "../../../../util/update-config-file";
-import type { BaseContext } from "clipanion";
+import type { PanfactumContext } from "@/context/context";
 
 export const setupMaintenanceControllers = async ({
   configPath,
-  context,
-  verbose = false,
+  context
 }: {
   configPath: string;
-  context: BaseContext;
-  verbose?: boolean;
+  context: PanfactumContext;
 }) => {
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#reloader
   let reloaderSetupComplete = false;
@@ -35,17 +33,16 @@ export const setupMaintenanceControllers = async ({
   }
 
   if (!reloaderSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_reloader/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeReloaderTerragruntHcl).text(),
+      path: "./kube_reloader/terragrunt.hcl",
+      contents: await Bun.file(kubeReloaderTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
       context,
       moduleName: "Reloader",
-      modulePath: "./kube_reloader",
-      verbose,
+      modulePath: "./kube_reloader"
     });
 
     await updateConfigFile({
@@ -71,10 +68,10 @@ export const setupMaintenanceControllers = async ({
   }
 
   if (!nodeImageCachesSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_node_image_cache_controller/terragrunt.hcl",
-      sourceFile: await Bun.file(
+      path: "./kube_node_image_cache_controller/terragrunt.hcl",
+      contents: await Bun.file(
         kubeNodeImageCacheControllerTerragruntHcl
       ).text(),
     });
@@ -82,8 +79,7 @@ export const setupMaintenanceControllers = async ({
     await initAndApplyModule({
       context,
       moduleName: "Node Image Caches",
-      modulePath: "./kube_node_image_cache_controller",
-      verbose,
+      modulePath: "./kube_node_image_cache_controller"
     });
 
     await updateConfigFile({
@@ -109,17 +105,16 @@ export const setupMaintenanceControllers = async ({
   }
 
   if (!pvcAutoresizerSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_pvc_autoresizer/terragrunt.hcl",
-      sourceFile: await Bun.file(kubePvcAutoresizerTerragruntHcl).text(),
+      path: "./kube_pvc_autoresizer/terragrunt.hcl",
+      contents: await Bun.file(kubePvcAutoresizerTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
       context,
       moduleName: "PVC Autoresizer",
-      modulePath: "./kube_pvc_autoresizer",
-      verbose,
+      modulePath: "./kube_pvc_autoresizer"
     });
 
     await updateConfigFile({
@@ -145,17 +140,16 @@ export const setupMaintenanceControllers = async ({
   }
 
   if (!deschedulerSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_descheduler/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeDeschedulerTerragruntHcl).text(),
+      path: "./kube_descheduler/terragrunt.hcl",
+      contents: await Bun.file(kubeDeschedulerTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
       context,
       moduleName: "Descheduler",
-      modulePath: "./kube_descheduler",
-      verbose,
+      modulePath: "./kube_descheduler"
     });
 
     await updateConfigFile({
@@ -183,17 +177,16 @@ export const setupMaintenanceControllers = async ({
   }
 
   if (!externalSnapshotterSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_external_snapshotter/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeExternalSnapshotterTerragruntHcl).text(),
+      path: "./kube_external_snapshotter/terragrunt.hcl",
+      contents: await Bun.file(kubeExternalSnapshotterTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
       context,
       moduleName: "External Snapshotter",
-      modulePath: "./kube_external_snapshotter",
-      verbose,
+      modulePath: "./kube_external_snapshotter"
     });
 
     await updateConfigFile({
@@ -219,17 +212,16 @@ export const setupMaintenanceControllers = async ({
   }
 
   if (!veleroSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_velero/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeVeleroTerragruntHcl).text(),
+      path: "./kube_velero/terragrunt.hcl",
+      contents: await Bun.file(kubeVeleroTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
       context,
       moduleName: "Velero",
-      modulePath: "./kube_velero",
-      verbose,
+      modulePath: "./kube_velero"
     });
 
     await updateConfigFile({

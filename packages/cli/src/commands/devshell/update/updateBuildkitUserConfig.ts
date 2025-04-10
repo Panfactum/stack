@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { safeFileExists } from "../../../util/safe-file-exists";
-import type { PanfactumContext } from "../../../context";
+import { safeFileExists } from "../../../util/fs/safe-file-exists";
+import type { PanfactumContext } from "../../../context/context";
 
 export async function updateBuildkitUserConfig({
   context,

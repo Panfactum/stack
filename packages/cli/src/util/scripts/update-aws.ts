@@ -2,12 +2,12 @@ import { mkdir } from "fs/promises";
 import { appendFileSync } from "node:fs";
 import yaml from "yaml";
 import { z } from "zod";
-import { safeFileExists } from "../safe-file-exists";
 import { checkRepoSetup } from "./check-repo-setup";
 import { getAWSStateHash } from "../../commands/devshell/update/getAWSStateHash";
-import { getRepoVariables } from "../getRepoVariables";
-import { getModuleOutputs } from "./helpers/terragrunt/get-module-outputs";
+import { getRepoVariables } from "../../context/getRepoVariables";
 import awsConfigExample from "../../files/aws/config.example.yaml" with { type: "file" };
+import { safeFileExists } from "../fs/safe-file-exists";
+import { terragruntOutput } from "../terragrunt/terragruntOutput";
 import type { BaseContext } from "clipanion";
 
 function camelToSnakeCase(str: string) {
@@ -167,7 +167,7 @@ export async function updateAWS({
       if (module) {
         const modulePath = `${repoVariables.environments_dir}/${module}`;
         context.stdout.write(`Retrieving roles from ${modulePath}...\n`);
-        const moduleOutput = getModuleOutputs({
+        const moduleOutput = terragruntOutput({
           context,
           modulePath,
           validationSchema: z.object({

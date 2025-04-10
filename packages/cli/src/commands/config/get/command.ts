@@ -1,8 +1,8 @@
 import { Command } from "clipanion";
-import type { PanfactumContext } from "../../../context";
+import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getPanfactumConfig } from "./getPanfactumConfig";
 
-export class ConfigGetCommand extends Command<PanfactumContext> {
+export class ConfigGetCommand extends PanfactumCommand {
     static override paths = [["config", "get"]];
 
     static override usage = Command.Usage({
@@ -11,7 +11,7 @@ export class ConfigGetCommand extends Command<PanfactumContext> {
         "Returns the Panfactum configuration",
     });
   
-    async execute(): Promise<number> {
+    async execute() {
         this.context.stdout.write(JSON.stringify(await getPanfactumConfig({context: this.context})))
         return 0
     }

@@ -3,14 +3,14 @@ import { mkdir } from "fs/promises";
 import pc from "picocolors";
 import yaml from "yaml";
 import { z } from "zod";
+import { checkRepoSetup } from "./check-repo-setup";
+import { getKubeUserStateHash } from "./get-kube-user-state-hash";
 import { getRepoVariables } from "./get-repo-variables";
-import { getModuleOutputs } from "./helpers/terragrunt/get-module-outputs";
 import kubeConfigExample from "../../files/kube/config.example.yaml" with { type: "file" };
 import kubeUserConfigExample from "../../files/kube/config.user.example.yaml" with { type: "file" };
-import { safeFileExists } from "../safe-file-exists";
-import { getKubeUserStateHash } from "./get-kube-user-state-hash";
-import { safeDirectoryExists } from "../safe-directory-exists";
-import { checkRepoSetup } from "./check-repo-setup";
+import { safeDirectoryExists } from "../fs/directoryExist";
+import { safeFileExists } from "../fs/safe-file-exists";
+import { terragruntOutput } from "../terragrunt/terragruntOutput";
 import type { BaseContext } from "clipanion";
 
 /**
@@ -26,7 +26,7 @@ import type { BaseContext } from "clipanion";
  * @param {BaseContext} options.context - The CLI context for logging
  * @throws {Error} If required files are missing or configuration is invalid
  */
-// eslint-disable-next-line sonarjs/cognitive-complexity
+ 
 export async function updateKube({
   buildConfig,
   context,
@@ -112,7 +112,7 @@ export async function updateKube({
           context.stderr.write(`Error: No module at ${modulePath}!\n`);
           throw new Error(`No module at ${modulePath}!`);
         }
-        const moduleOutput = getModuleOutputs({
+        const moduleOutput = terragruntOutput({
           context,
           modulePath,
           silent,

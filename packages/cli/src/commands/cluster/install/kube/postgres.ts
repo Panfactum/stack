@@ -1,27 +1,24 @@
 import postgresTerragruntHcl from "../../../../templates/kube_cloudnative_pg_terragrunt.hcl" with { type: "file" };
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
+import { writeFile } from "../../../../util/fs/writeFile";
 import { initAndApplyModule } from "../../../../util/init-and-apply-module";
-import type { BaseContext } from "clipanion";
+import type { PanfactumContext } from "@/context/context";
 
 export async function setupCloudNativePG({
   context,
-  verbose = false,
 }: {
-  context: BaseContext;
-  verbose?: boolean;
+  context: PanfactumContext;
 }) {
-  context.stdout.write("13.a. Setting up CloudNativePG (Postgres)\n");
+  context.logger.log("13.a. Setting up CloudNativePG (Postgres)");
 
-  await ensureFileExists({
+  await writeFile({
     context,
-    destinationFile: "./kube_cloudnative_pg/terragrunt.hcl",
-    sourceFile: await Bun.file(postgresTerragruntHcl).text(),
+    path: "./kube_cloudnative_pg/terragrunt.hcl",
+    contents: await Bun.file(postgresTerragruntHcl).text(),
   });
 
   await initAndApplyModule({
     context,
     moduleName: "CloudNativePG",
-    modulePath: "./kube_cloudnative_pg",
-    verbose,
+    modulePath: "./kube_cloudnative_pg"
   });
 }

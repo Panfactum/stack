@@ -2,21 +2,20 @@ import { readdir } from "fs/promises";
 import { checkbox, select } from "@inquirer/prompts";
 import pc from "picocolors";
 import { z } from "zod";
+import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { terragruntInitAndApply } from "@/util/terragrunt/terragruntInitAndApply";
 import kubeCertIssuersTerragruntHclNonProduction from "../../../../templates/kube_cert_issuers_non_production_terragrunt.hcl" with { type: "file" };
 import kubeCertIssuersTerragruntHclProduction from "../../../../templates/kube_cert_issuers_production_terragrunt.hcl" with { type: "file" };
 import kubeCertManagerTerragruntHcl from "../../../../templates/kube_cert_manager_terragrunt.hcl" with { type: "file" };
 import { checkStepCompletion } from "../../../../util/check-step-completion";
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
-import { initAndApplyModule } from "../../../../util/init-and-apply-module";
+import { writeFile } from "../../../../util/fs/writeFile";
 import { progressMessage } from "../../../../util/progress-message";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { getRepoVariables } from "../../../../util/scripts/get-repo-variables";
-import { getTerragruntVariables } from "../../../../util/scripts/get-terragrunt-variables";
 import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { terragruntApply } from "../../../../util/terragrunt/terragruntApply";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
-import { apply } from "../terragrunt/apply";
-import type { BaseContext } from "clipanion";
+import type { PanfactumContext } from "@/context/context";
 
 export const setupCertManagement = async ({
   context,
@@ -24,11 +23,11 @@ export const setupCertManagement = async ({
   alertEmail,
   verbose = false,
 }: {
-  context: BaseContext;
+  context: PanfactumContext;
   configPath: string;
   alertEmail: string;
   verbose?: boolean;
-  // eslint-disable-next-line sonarjs/cognitive-complexity
+   
 }) => {
   // Until the devShell fully reloads this must be explicitly set in the spawned processes
   const env = {
@@ -70,17 +69,15 @@ export const setupCertManagement = async ({
   }
 
   if (!certManagerIaCSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_cert_manager/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeCertManagerTerragruntHcl).text(),
+      path: "./kube_cert_manager/terragrunt.hcl",
+      contents: await Bun.file(kubeCertManagerTerragruntHcl).text(),
     });
 
-    await initAndApplyModule({
+    await terragruntInitAndApply({
       context,
-      moduleName: "Cert Manager",
-      modulePath: "./kube_cert_manager",
-      verbose,
+      modulePath: "./kube_cert_manager"
     });
 
     await updateConfigFile({
@@ -109,10 +106,13 @@ export const setupCertManagement = async ({
 
   if (!certIssuersSetupComplete) {
     // Find the delegated zones folders and see if this environment matches one of them
-    const repoVariables = await getRepoVariables({ context });
-    const terragruntVariables = await getTerragruntVariables({ context });
-    const environmentDir = repoVariables.environments_dir;
-    const environment = terragruntVariables.environment;
+    const {environment} = await getPanfactumConfig({ context });
+    const environmentDir = context.repoVariables.environments_dir;
+
+
+    if (!environment){
+      throw new Error("PLACEHOLDER")
+    } 
 
     // Find all delegated zones folders
     const delegatedZonesFolders: { path: string; folderName: string }[] = [];
@@ -306,10 +306,10 @@ export const setupCertManagement = async ({
     const templateFile = isProductionEnvironment
       ? kubeCertIssuersTerragruntHclProduction
       : kubeCertIssuersTerragruntHclNonProduction;
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: kubeCertIssuersTerragruntHclPath,
-      sourceFile: await Bun.file(templateFile).text(),
+      path: kubeCertIssuersTerragruntHclPath,
+      contents: await Bun.file(templateFile).text(),
     });
 
     const templateHcl = await Bun.file(kubeCertIssuersTerragruntHclPath).text();
@@ -395,11 +395,9 @@ export const setupCertManagement = async ({
       alertEmail
     );
 
-    await initAndApplyModule({
+    await terragruntInitAndApply({
       context,
-      moduleName: "certificate issuers",
-      modulePath: "./kube_cert_issuers",
-      verbose,
+      modulePath: "./kube_cert_issuers"
     });
 
     await updateConfigFile({
@@ -443,11 +441,9 @@ export const setupCertManagement = async ({
       }
 
       try {
-        apply({
+        terragruntApply({
           context,
-          silent: true,
           suppressErrors: true,
-          verbose,
           workingDirectory: "./kube_cert_manager",
         });
       } catch {

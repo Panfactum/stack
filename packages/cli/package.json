@@ -34,6 +34,7 @@
   "dependencies": {
     "@inquirer/prompts": "^7.4.0",
     "clipanion": "^4.0.0-rc.4",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "picocolors": "^1.1.1",
     "typanion": "^3.14.0",
     "yaml": "^2.7.0",

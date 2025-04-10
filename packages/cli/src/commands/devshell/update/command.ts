@@ -1,7 +1,7 @@
 import { Command } from "clipanion";
-import type { PanfactumContext } from "../../../context";
 import { buildKubeConfig } from "./buildKubeConfig";
 import { buildSSHConfig } from "./buildSSHConfig";
+import type { PanfactumContext } from "../../../context/context";
 
 export class DevShellUpdateCommand extends Command<PanfactumContext> {
     static override paths = [["devshell", "update"]];

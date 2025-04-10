@@ -1,5 +1,5 @@
 import { Command, Option } from "clipanion";
-import { tfInit } from "./tf-init";
+import { terragruntInit } from "../terragrunt/terragruntInit";
 export class TerragruntInitCommand extends Command {
   static override paths = [["tf-init"]];
 
@@ -18,7 +18,7 @@ export class TerragruntInitCommand extends Command {
   });
   async execute(): Promise<number> {
     try {
-      await tfInit({
+      await terragruntInit({
         context: this.context,
         verbose: this.verbose,
       });

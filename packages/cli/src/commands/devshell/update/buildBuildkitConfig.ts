@@ -1,10 +1,10 @@
 import { mkdir } from "fs/promises";
 import yaml from "yaml";
 import { z } from "zod";
+import { safeFileExists } from "../../../util/fs/safe-file-exists";
+import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
 import buildkitConfigExample from "../../files/buildkit/config.example.yaml" with { type: "file" };
-import type { PanfactumContext } from "../../../context";
-import { safeFileExists } from "../../../util/safe-file-exists";
-import { getModuleOutputs } from "../../../util/scripts/helpers/terragrunt/get-module-outputs";
+import type { PanfactumContext } from "../../../context/context";
 
 export async function buildBuildkitConfig({
   context,
@@ -51,7 +51,7 @@ export async function buildBuildkitConfig({
     context.stdout.write(
       `Extracting buildkit configuration from ${module}...\n`
     );
-    const moduleOutput = getModuleOutputs({
+    const moduleOutput = terragruntOutput({
       context,
       modulePath,
       validationSchema: z.object({

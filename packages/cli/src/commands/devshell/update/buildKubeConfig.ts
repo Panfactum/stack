@@ -1,15 +1,15 @@
 import { mkdir } from "fs/promises";
-import { z } from "zod";
-import type { PanfactumContext } from "../../../context";
-import { Glob } from "bun";
 import path from "path";
-import { safeFileExists } from "../../../util/safe-file-exists";
-import { getModuleOutputs } from "../../../util/scripts/helpers/terragrunt/get-module-outputs";
+import { Glob } from "bun";
+import { z } from "zod";
+import { safeFileExists } from "../../../util/fs/safe-file-exists";
 import { getLastPathSegments } from "../../../util/getLastPathSegments";
+import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
 import { createNullWriter } from "../../../util/writers/createNullWriter";
+import type { PanfactumContext } from "../../../context/context";
 
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
+ 
 export async function buildKubeConfig({ context }: { context: PanfactumContext }) {
   const { kube_dir, environments_dir } = context.repoVariables;
 
@@ -23,13 +23,15 @@ export async function buildKubeConfig({ context }: { context: PanfactumContext }
   const awsClusterHCLs = Array.from(glob.scanSync(environments_dir));
 
   if(awsClusterHCLs.length > 0){
-    context.stderr.write(`Connecting DevShell to deployed clusters:\n\n`);
+    context.logger.log(`Connecting DevShell to deployed clusters:\n`);
     await mkdir(kube_dir, { mode: 0o755, recursive: true });
     const clusterInfo: string[] = [];
     await Promise.all(Array.from(glob.scanSync(environments_dir)).map(async (clusterTerragruntHcl) => {
       const directory = path.dirname(clusterTerragruntHcl);
-      context.stderr.write(`  Adding cluster at ${getLastPathSegments(directory,3)}...\n`);
-      const moduleOutput = await getModuleOutputs({
+      context.logger.log(`Adding cluster at ${getLastPathSegments(directory,3)}...`, {
+        indentLevel: 1
+      });
+      const moduleOutput = await terragruntOutput({
         context: {
           ...context,
           stdout: createNullWriter()
@@ -66,6 +68,11 @@ export async function buildKubeConfig({ context }: { context: PanfactumContext }
       clusterInfo.join("\n")
     );
 
-    context.stderr.write(`\n  Clusters connected!\n`);
+    context.logger.log(`Clusters connected!`, {
+      style: "success",
+      leadingNewlines: 1,
+      trailingNewlines: 2,
+      indentLevel: 1
+    });
   }
 }

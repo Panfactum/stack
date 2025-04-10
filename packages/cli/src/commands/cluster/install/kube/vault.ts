@@ -1,33 +1,30 @@
 import { $ } from "bun";
 import pc from "picocolors";
 import { z } from "zod";
+import { checkStepCompletion } from "../../../../util/check-step-completion";
+import { safeFileExists } from "../../../../util/fs/safe-file-exists";
+import { writeFile } from "../../../../util/fs/writeFile";
+import { initAndApplyModule } from "../../../../util/init-and-apply-module";
+import { replaceHclValue } from "../../../../util/replace-hcl-value";
+import { sopsEncrypt } from "../../../../util/sops-encrypt";
+import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { terragruntApply } from "../../../../util/terragrunt/terragruntApply";
+import { terragruntInit } from "../../../../util/terragrunt/terragruntInit";
+import { updateConfigFile } from "../../../../util/update-config-file";
+import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
 import kubeVaultTerragruntHcl from "../../templates/kube_vault_terragrunt.hcl" with { type: "file" };
 import vaultCoreResourcesTerragruntHcl from "../../templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
-import { apply } from "../terragrunt/apply";
-import { checkStepCompletion } from "../../../../util/check-step-completion";
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
-import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { progressMessage } from "../../../../util/progress-message";
-import { tfInit } from "../../../../util/scripts/tf-init";
-import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
-import { updateConfigFile } from "../../../../util/update-config-file";
-import { sopsEncrypt } from "../../../../util/sops-encrypt";
-import type { PanfactumContext } from "../../../../context";
-import { safeFileExists } from "../../../../util/safe-file-exists";
-import { startBackgroundProcess } from "../../../../util/start-background-process";
-import { initAndApplyModule } from "../../../../util/init-and-apply-module";
+import type { PanfactumContext } from "../../../../context/context";
 
 export const setupVault = async ({
   context,
   configPath,
-  vaultDomain,
-  verbose = false,
+  vaultDomain
 }: {
   context: PanfactumContext;
   configPath: string;
   vaultDomain: string;
-  verbose?: boolean;
-  // eslint-disable-next-line sonarjs/cognitive-complexity
+   
 }) => {
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#deploy-vault
   let vaultIaCSetupComplete = false;
@@ -45,10 +42,10 @@ export const setupVault = async ({
   }
 
   if (!vaultIaCSetupComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_vault/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeVaultTerragruntHcl).text(),
+      path: "./kube_vault/terragrunt.hcl",
+      contents: await Bun.file(kubeVaultTerragruntHcl).text(),
     });
 
     await replaceHclValue(
@@ -58,40 +55,32 @@ export const setupVault = async ({
     );
 
     try {
-      let tfInitProgress: globalThis.Timer | undefined;
-      if (!verbose) {
-        tfInitProgress = progressMessage({
-          context,
-          message: `Initializing and upgrading Vault infrastructure module`,
-        });
-      }
 
-      tfInit({
+      const finishTFInit = context.logger.progressMessage(
+        'Initializing and upgrading Vault infrastructure module',
+        {
+          successMessage: 'Successfully initialized and applied Vault module.'
+        }
+      );
+
+      terragruntInit({
         context,
         silent: true,
-        verbose,
         workingDirectory: "./kube_vault",
       });
 
       try {
-        apply({
+        terragruntApply({
           context,
           silent: true,
           suppressErrors: true,
-          verbose,
           workingDirectory: "./kube_vault",
         });
       } catch {
         // It's okay if this fails as we must manually initialize the vault on first use
         // We'll ignore this and do more checks below to see if the vault was instantiated successfully
       }
-      !verbose && globalThis.clearInterval(tfInitProgress);
-      !verbose &&
-        context.stdout.write(
-          pc.green(
-            `\rSuccessfully initialized and applied Vault module.          \n`
-          )
-        );
+      finishTFInit()
     } catch (error) {
       writeErrorToDebugFile({
         context,
@@ -104,11 +93,13 @@ export const setupVault = async ({
     // If they are, we'll assume that the vault was instantiated successfully and we can proceed
     let allPodsRunning = false;
     let vaultPodNames: string[] = [];
-    const vaultStatusProgress = progressMessage({
-      context,
-      message: "Checking status of Vault pods",
-      interval: 10000,
-    });
+    const vaultStatusFinished = context.logger.progressMessage(
+      "Checking status of Vault pods",
+      "",
+      {
+        interval: 10000
+      }
+    );
     let count = 0;
     while (!allPodsRunning) {
       // Wait for 10 seconds
@@ -121,10 +112,7 @@ export const setupVault = async ({
       const result =
         await $`kubectl get pods --all-namespaces -o json | jq '[.items[] | select(.metadata.name | startswith("vault")) | {name: .metadata.name, namespace: .metadata.namespace, status: .status.phase}]'`.text();
 
-      if (verbose) {
-        context.stdout.write("getInstanceId STDOUT: " + result + "\n");
-        context.stderr.write("getInstanceId STDERR: " + result + "\n");
-      }
+      context.logger.log("getInstanceId: " + result, { level: "debug" });
 
       const pods = JSON.parse(result.trim());
       const podsSchema = z.array(
@@ -143,12 +131,9 @@ export const setupVault = async ({
       count++;
     }
 
-    globalThis.clearInterval(vaultStatusProgress);
-    context.stdout.write("\n");
+    vaultStatusFinished();
+    context.logger.log("Vault pods: " + vaultPodNames.join(", "), { level: "debug" });
 
-    if (verbose) {
-      context.stdout.write("Vault pods: " + vaultPodNames.join(", ") + "\n");
-    }
 
     await updateConfigFile({
       updates: {
@@ -180,20 +165,16 @@ export const setupVault = async ({
       result =
         await $`kubectl exec -i vault-0 --namespace=vault -- vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json`.text();
     } catch (error) {
-      context.stderr.write(
-        pc.red("Failed to initialize vault.\n" + JSON.stringify(error, null, 2))
-      );
+      context.logger.log("Failed to initialize vault.\n" + JSON.stringify(error, null, 2), {
+        level: "error"
+      })
       writeErrorToDebugFile({
         context,
         error,
       });
     }
 
-    if (verbose) {
-      context.stdout.write("vault operator init STDOUT: " + result + "\n");
-      context.stderr.write("vault operator init STDERR: " + result + "\n");
-    }
-
+    context.logger.log("vault operator init: " + result, { level: "debug" });
     const data = JSON.parse(result.trim());
     recoveryKeys = recoveryKeysSchema.parse(data);
   } catch (error) {
@@ -243,7 +224,10 @@ export const setupVault = async ({
 
       sealedStatus = unsealOutput.sealed;
       if (!sealedStatus) {
-        context.stdout.write(pc.green("\nVault successfully unsealed\n"));
+        context.logger.log("Vault successfully unsealed", {
+          leadingNewlines: 1,
+          style: "success"
+        })
         break;
       }
     }
@@ -252,7 +236,7 @@ export const setupVault = async ({
       error instanceof Error
         ? `Error unsealing Vault: ${error.message}`
         : "Error unsealing Vault";
-    context.stderr.write(`${pc.red(errorMessage)}\n`);
+    context.logger.log(errorMessage, { level: "error" })
     writeErrorToDebugFile({
       context,
       error,
@@ -261,9 +245,7 @@ export const setupVault = async ({
   }
 
   if (sealedStatus) {
-    context.stderr.write(
-      pc.red("Failed to unseal Vault after applying all recovery keys\n")
-    );
+    context.logger.log("Failed to unseal Vault after applying all recovery keys", { level: "error" })
     throw new Error("Failed to unseal Vault after applying all recovery keys");
   }
 
@@ -273,7 +255,10 @@ export const setupVault = async ({
 
   await replaceHclValue("./kube_vault/terragrunt.hcl", "inputs.wait", true);
 
-  context.stdout.write("\n7.c. 🔒 Encrypting secrets\n\n");
+  context.logger.log("7.c. 🔒 Encrypting secrets", {
+    leadingNewlines: 1,
+    trailingNewlines: 1
+  })
 
   await sopsEncrypt({
     context,
@@ -283,24 +268,21 @@ export const setupVault = async ({
     tempFilePath: "./.tmp-vault-secrets.yaml",
   });
 
-  context.stdout.write(
-    pc.blue(
-      pc.bold("NOTE: ") +
-        "The recovery keys and root token have been encrypted and saved in the kube_vault folder.\n" +
-        "The root token allows root access to the vault instance.\n" +
-        "The recovery keys allow creating new root tokens.\n" +
-        "These keys " +
-        pc.bold("SHOULD NOT ") +
-        "be left here.\n" +
-        "Decide how your organization recommends superusers store these keys.\n" +
-        "This should " +
-        pc.bold("not ") +
-        "be in a location that is accessible by all superusers (e.g. a company password vault).\n\n"
-    )
-  );
+  context.logger.log(
+    `${pc.bold("NOTE: ")}
+    The recovery keys and root token have been encrypted and saved in the kube_vault folder.
+    The root token allows root access to the vault instance.
+    These keys ${pc.bold("SHOULD NOT")} be left here.
+    Decide how your organization recommends superusers store these keys.
+    This should ${pc.bold("not")} be in a location that is accessible by all superusers (e.g. a company password vault).
+    `,
+    {
+      trailingNewlines: 1
+    }
+  )
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#configure-vault
-  context.stdout.write("7.d. Configuring Vault\n");
+  context.logger.log("7.d. Configuring Vault");
 
   const repoRoot = context.repoVariables.repo_root;
 
@@ -350,7 +332,7 @@ export const setupVault = async ({
   await Bun.write(envFilePath, envContent);
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#deploy-configuration-module
-  context.stdout.write("7.e. Deploying Vault configuration module\n");
+  context.logger.log("7.e. Deploying Vault configuration module");
 
   // The spawned processes need to inherit the environment variables
   // so we'll merge the current environment variables with the new ones
@@ -375,18 +357,17 @@ export const setupVault = async ({
     env,
   });
 
-  await ensureFileExists({
+  await writeFile({
     context,
-    destinationFile: "./vault_core_resources/terragrunt.hcl",
-    sourceFile: await Bun.file(vaultCoreResourcesTerragruntHcl).text(),
+    path: "./vault_core_resources/terragrunt.hcl",
+    contents: await Bun.file(vaultCoreResourcesTerragruntHcl).text(),
   });
 
   await initAndApplyModule({
     context,
     env,
     moduleName: "Vault Core Resources",
-    modulePath: "./vault_core_resources",
-    verbose,
+    modulePath: "./vault_core_resources"
   });
 
   // To mitigate the long-running background process dying over time, we'll kill it here

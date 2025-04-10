@@ -1,21 +1,19 @@
 import pc from "picocolors";
 import kubeLinkerdTerragruntHcl from "../../../../templates/kube_linkerd_terragrunt.hcl" with { type: "file" };
 import { checkStepCompletion } from "../../../../util/check-step-completion";
-import { ensureFileExists } from "../../../../util/ensure-file-exists";
+import { writeFile } from "../../../../util/fs/writeFile";
 import { initAndApplyModule } from "../../../../util/init-and-apply-module";
 import { startBackgroundProcess } from "../../../../util/start-background-process";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
-import type { BaseContext } from "clipanion";
+import type { PanfactumContext } from "@/context/context";
 
 export const setupLinkerd = async ({
   configPath,
-  context,
-  verbose = false,
+  context
 }: {
   configPath: string;
-  context: BaseContext;
-  verbose?: boolean;
+  context: PanfactumContext;
 }) => {
   const env = process.env;
   const vaultPortForwardPid = startBackgroundProcess({
@@ -49,18 +47,17 @@ export const setupLinkerd = async ({
   }
 
   if (!setupLinkerdComplete) {
-    await ensureFileExists({
+    await writeFile({
       context,
-      destinationFile: "./kube_linkerd/terragrunt.hcl",
-      sourceFile: await Bun.file(kubeLinkerdTerragruntHcl).text(),
+      path: "./kube_linkerd/terragrunt.hcl",
+      contents: await Bun.file(kubeLinkerdTerragruntHcl).text(),
     });
 
     await initAndApplyModule({
       context,
       env,
       moduleName: "Linkerd",
-      modulePath: "./kube_linkerd",
-      verbose,
+      modulePath: "./kube_linkerd"
     });
 
     await updateConfigFile({
