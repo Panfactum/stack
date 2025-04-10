@@ -5,11 +5,13 @@ import { CLIError } from "@/util/error/error";
 import { Checkpointer, type Step } from "./checkpointer";
 import { informStepComplete, informStepStart } from "./messages";
 import { setSLA } from "./setSLA";
+import { setupCertificateIssuers } from "./setupCertIssuers";
 import { setupCertManagement } from "./setupCertManagement";
 import { setupCSIDrivers } from "./setupCSIDrivers";
 import { setupECR } from "./setupECR";
 import { setupEKS } from "./setupEKS";
 import { setupInternalClusterNetworking } from "./setupInternalClusterNetworking";
+import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
 import { setupVaultCoreResources } from "./setupVaultCoreResources";
@@ -74,6 +76,11 @@ const SETUP_STEPS: Array<{
     label: "Certificate Issuers",
     id: "setupCertificateIssuers",
     setup: setupCertificateIssuers,
+  },
+  {
+    label: "Linkerd",
+    id: "setupLinkerd",
+    setup: setupLinkerd,
   },
 ];
 
@@ -188,78 +195,6 @@ export class InstallClusterCommand extends PanfactumCommand {
       }
     }
   }
-
-  //     let setupCertManagementComplete = false;
-  //     try {
-  //       setupCertManagementComplete = await checkStepCompletion({
-  //         configFilePath: configPath,
-  //         context: this.context,
-  //         step: "certManagement",
-  //         stepCompleteMessage:
-  //           "8/13 Skipping certificate management setup as it's already complete.\n",
-  //         stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
-  //       });
-  //     } catch {
-  //       return 1;
-  //     }
-
-  //     if (!setupCertManagementComplete) {
-  //       let alertEmail = "";
-  //       const alertEmailConfig = await getConfigFileKey({
-  //         configPath,
-  //         key: "alertEmail",
-  //         context: this.context,
-  //       });
-  //       if (!alertEmailConfig || typeof alertEmailConfig !== "string") {
-  //         const { alertEmail: alertEmailInput } = await certManagerPrompts();
-  //         await updateConfigFile({
-  //           updates: {
-  //             alertEmail: alertEmailInput,
-  //           },
-  //           configPath,
-  //           context: this.context,
-  //         });
-  //         alertEmail = alertEmailInput;
-  //       } else {
-  //         alertEmail = alertEmailConfig;
-  //       }
-
-  //       try {
-  //         await setupCertManagement({
-  //           configPath,
-  //           context: this.context,
-  //           alertEmail,
-  //           verbose: this.verbose,
-  //         });
-  //       } catch (error) {
-  //         writeErrorToDebugFile({
-  //           context: this.context,
-  //           error,
-  //         });
-  //         this.context.stderr.write(
-  //           pc.red(
-  //             `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
-  //           )
-  //         );
-  //         printHelpInformation(this.context);
-  //         backgroundProcessIds.forEach((pid) => {
-  //           try {
-  //             process.kill(pid);
-  //           } catch {
-  //             // Do nothing as it's already dead
-  //           }
-  //         });
-  //         return 1;
-  //       }
-
-  //       await updateConfigFile({
-  //         updates: {
-  //           certManagement: true,
-  //         },
-  //         configPath,
-  //         context: this.context,
-  //       });
-  //     }
 
   //     let setupServiceMeshComplete = false;
   //     try {
