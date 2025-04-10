@@ -88,6 +88,11 @@ const SETUP_STEPS: Array<{
     id: "setupAutoscaling",
     setup: setupAutoscaling,
   },
+  {
+    label: "Inbound Networking",
+    id: "setupInboundNetworking",
+    setup: setupInboundNetworking,
+  },
 ];
 
 export class InstallClusterCommand extends PanfactumCommand {
