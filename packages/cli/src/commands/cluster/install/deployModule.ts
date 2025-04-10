@@ -10,6 +10,7 @@ export async function deployModule({
   clusterPath,
   context,
   moduleDirectory,
+  overwrite = true,
   stepId,
   stepName,
   stepNum,
@@ -22,12 +23,13 @@ export async function deployModule({
   clusterPath: string;
   context: PanfactumContext;
   moduleDirectory: string;
+  overwrite?: boolean;
   stepName: string;
   stepNum: number;
   subStepNum?: number;
   checkpointer: Checkpointer;
   stepId: Step;
-  hclUpdates?: { [path: string]: string | number };
+  hclUpdates?: { [path: string]: string | number | boolean };
 }) {
   const modulePath = join(clusterPath, moduleDirectory);
   const hclFile = join(modulePath, "terragrunt.hcl");
@@ -40,7 +42,7 @@ export async function deployModule({
       context,
       path: hclFile,
       contents: await Bun.file(terraguntContents).text(),
-      overwrite: true,
+      overwrite,
     });
 
     if (hclUpdates) {

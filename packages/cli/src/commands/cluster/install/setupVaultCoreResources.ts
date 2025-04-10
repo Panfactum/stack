@@ -10,7 +10,7 @@ export async function setupVaultCoreResources(
   options: InstallClusterStepOptions
 ) {
   const { checkpointer, clusterPath, context, stepNum } = options;
-  const modulePath = join(clusterPath, "kube_vault");
+  const modulePath = join(clusterPath, "vault_core_resources");
 
   /***************************************************
    * Initialize Vault
