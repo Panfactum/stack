@@ -6,7 +6,6 @@ import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { terragruntInitAndApply } from "@/util/terragrunt/terragruntInitAndApply";
 import kubeCertIssuersTerragruntHclNonProduction from "../../../../templates/kube_cert_issuers_non_production_terragrunt.hcl" with { type: "file" };
 import kubeCertIssuersTerragruntHclProduction from "../../../../templates/kube_cert_issuers_production_terragrunt.hcl" with { type: "file" };
-import kubeCertManagerTerragruntHcl from "../../../../templates/kube_cert_manager_terragrunt.hcl" with { type: "file" };
 import { checkStepCompletion } from "../../../../util/check-step-completion";
 import { writeFile } from "../../../../util/fs/writeFile";
 import { progressMessage } from "../../../../util/progress-message";
@@ -49,44 +48,6 @@ export const setupCertManagement = async ({
     context,
     env,
   });
-
-  // https://panfactum.com/docs/edge/guides/bootstrapping/certificate-management#deploy-cert-manger
-  let certManagerIaCSetupComplete = false;
-  try {
-    certManagerIaCSetupComplete = await checkStepCompletion({
-      configFilePath: configPath,
-      context,
-      step: "certManagerIaCSetup",
-      stepCompleteMessage:
-        "8.a. Skipping Kubernetes cert manager as it's already complete.\n",
-      stepNotCompleteMessage: "8.a. Setting up Kubernetes cert manager\n",
-    });
-  } catch {
-    throw new Error(
-      "Failed to check if Kubernetes cert manager setup is complete"
-    );
-  }
-
-  if (!certManagerIaCSetupComplete) {
-    await writeFile({
-      context,
-      path: "./kube_cert_manager/terragrunt.hcl",
-      contents: await Bun.file(kubeCertManagerTerragruntHcl).text(),
-    });
-
-    await terragruntInitAndApply({
-      context,
-      modulePath: "./kube_cert_manager",
-    });
-
-    await updateConfigFile({
-      updates: {
-        certManagerIaCSetup: true,
-      },
-      configPath,
-      context,
-    });
-  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/certificate-management#deploy-issuers
   let certIssuersSetupComplete = false;
