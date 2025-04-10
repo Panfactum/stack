@@ -7,8 +7,8 @@ if [[ -n $GIT_USERNAME ]] && [[ -z $GIT_PASSWORD ]]; then
   exit 1
 fi
 
-if [[ -n $USERNAME ]]; then
-  REPO="https://$USERNAME:$PASSWORD@$CODE_REPO"
+if [[ -n $GIT_USERNAME ]]; then
+  REPO="https://$GIT_USERNAME:$GIT_PASSWORD@$CODE_REPO"
 else
   REPO="https://$CODE_REPO"
 fi
