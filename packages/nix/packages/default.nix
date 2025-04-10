@@ -12,6 +12,7 @@
   natsPkgs,
   bunPkgs,
   bun2nix,
+  withPFCLI,
 }:
 let
   # Custom Packages
@@ -54,10 +55,6 @@ with pkgs;
   # Custom Panfactum Scripts
   ####################################
   (import ./scripts { inherit pkgs; })
-  (pkgs.callPackage ../../cli/default.nix {
-    inherit bun2nix;
-    pkgs = bunPkgs;
-  })
 
   ####################################
   # Kubernetes
@@ -169,3 +166,14 @@ with pkgs;
   postgresPkgs.kubectl-cnpg # for managing the cnpg postgres databases
   # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
 ]
+++ (
+  if withPFCLI then
+    [
+      (pkgs.callPackage ../../cli/default.nix {
+        inherit bun2nix;
+        pkgs = bunPkgs;
+      })
+    ]
+  else
+    [ ]
+)

@@ -117,23 +117,26 @@
           };
         };
         bun2nix = inputs.bun2nix.defaultPackage.${system};
-        panfactumPackages = import ./packages/nix/packages {
-          inherit
-            pkgs
-            kubeUtilsPkgs
-            awsUtilsPkgs
-            tfUtilsPkgs
-            buildkitPkgs
-            redisPkgs
-            postgresPkgs
-            vaultPkgs
-            linkerdPkgs
-            kyvernoPkgs
-            natsPkgs
-            bunPkgs
-            bun2nix
-            ;
-        };
+        panfactumPackages =
+          withPFCLI:
+          import ./packages/nix/packages {
+            inherit
+              pkgs
+              kubeUtilsPkgs
+              awsUtilsPkgs
+              tfUtilsPkgs
+              buildkitPkgs
+              redisPkgs
+              postgresPkgs
+              vaultPkgs
+              linkerdPkgs
+              kyvernoPkgs
+              natsPkgs
+              bunPkgs
+              bun2nix
+              withPFCLI
+              ;
+          };
 
         localDevShell = import ./packages/nix/localDevShell { inherit pkgs bunPkgs bun2nix; };
 
@@ -143,10 +146,11 @@
             packages ? [ ],
             shellHook ? "",
             activateDefaultShellHook ? true,
+            withPFCLI ? true,
           }:
           pkgs.mkShell {
             name = name;
-            buildInputs = panfactumPackages ++ packages;
+            buildInputs = (panfactumPackages withPFCLI) ++ packages;
             shellHook = ''
               ${if activateDefaultShellHook then "source enter-shell-local" else ""}
               ${shellHook}
@@ -187,6 +191,7 @@
         formatter = pkgs.nixfmt-rfc-style;
 
         devShell = mkDevShell {
+          withPFCLI = false;
           activateDefaultShellHook = false;
           shellHook = localDevShell.shellHook;
           packages = localDevShell.packages;
