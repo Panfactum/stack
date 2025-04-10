@@ -110,6 +110,7 @@ const STEPS = z.object({
   adjustNodePools: z.boolean().default(false).catch(false),
   schedulerDeployment: z.boolean().default(false).catch(false),
   kedaDeployment: z.boolean().default(false).catch(false),
+  setupInboundNetworking: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;

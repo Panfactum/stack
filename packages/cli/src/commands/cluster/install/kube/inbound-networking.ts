@@ -13,7 +13,6 @@ import { getConfigFileKey } from "../../../../util/get-config-file-key";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
 import { replaceYamlValue } from "../../../../util/replace-yaml-value";
 import { sopsEncrypt } from "../../../../util/sops-encrypt";
-import { startBackgroundProcess } from "../../../../util/subprocess/backgroundProcess";
 import { terragruntApply } from "../../../../util/terragrunt/terragruntApply";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
@@ -26,22 +25,6 @@ export const setupInboundNetworking = async ({
   context: PanfactumContext;
   configPath: string;
 }) => {
-  const env = process.env;
-  const vaultPortForwardPid = startBackgroundProcess({
-    args: [
-      "-n",
-      "vault",
-      "port-forward",
-      "--address",
-      "0.0.0.0",
-      "svc/vault-active",
-      "8200:8200",
-    ],
-    command: "kubectl",
-    context,
-    env,
-  });
-
   const terragruntVariables = await getPanfactumConfig({
     context,
   });
