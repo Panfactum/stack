@@ -98,6 +98,9 @@ const STEPS = z.object({
   certIssuersDeployment: z.boolean().default(false).catch(false),
   certIssuersIACDeployment: z.boolean().default(false).catch(false),
   firstCertificateDeployment: z.boolean().default(false).catch(false),
+  setupLinkerd: z.boolean().default(false).catch(false),
+  linkerdDeployment: z.boolean().default(false).catch(false),
+  linkerdControlPlaneChecks: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;
