@@ -64,6 +64,11 @@ const SETUP_STEPS: Array<{
     id: "setupVaultCoreResources",
     setup: setupVaultCoreResources,
   },
+  {
+    label: "Certificate Management",
+    id: "setupCertManagement",
+    setup: setupCertManagement,
+  },
 ];
 
 export class InstallClusterCommand extends PanfactumCommand {
