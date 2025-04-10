@@ -12,7 +12,7 @@ import { safeFileExists } from "../../../../util/fs/safe-file-exists";
 import { writeFile } from "../../../../util/fs/writeFile";
 import { initAndApplyModule } from "../../../../util/init-and-apply-module";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { startBackgroundProcess } from "../../../../util/subprocess/backgroundProcess";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { runAllApply } from "../terragrunt/run-all-apply";
 import type { PanfactumContext } from "@/context/context";
@@ -25,7 +25,6 @@ export const setupAutoscaling = async ({
   configPath: string;
   context: PanfactumContext;
   verbose?: boolean;
-   
 }) => {
   const env = process.env;
 
@@ -45,16 +44,15 @@ export const setupAutoscaling = async ({
     env,
   });
 
-
-  const {region, environment} = await getPanfactumConfig({
+  const { region, environment } = await getPanfactumConfig({
     context,
   });
 
   // TODO: Error messages
-  if (!environment){
-    throw new Error("PLACEHOLDER")
-  } else if (!region){
-    throw new Error("PLACEHODLER")
+  if (!environment) {
+    throw new Error("PLACEHOLDER");
+  } else if (!region) {
+    throw new Error("PLACEHODLER");
   }
 
   const regionFilePath = path.join(
@@ -162,14 +160,11 @@ export const setupAutoscaling = async ({
   if (!vpaEnabled) {
     const regionFileExists = await safeFileExists(regionFilePath);
     if (!regionFileExists) {
-      throw new Error(
-        `Region file not found for ${environment}/${region}`
-      );
+      throw new Error(`Region file not found for ${environment}/${region}`);
     }
     const regionFile = Bun.file(regionFilePath);
     const regionFileText = await regionFile.text();
     const regionFileJson = yaml.parse(regionFileText);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     regionFileJson["extra_inputs"]["vpa_enabled"] = true;
     await Bun.write(regionFile, yaml.stringify(regionFileJson));
 
@@ -429,7 +424,6 @@ export const setupAutoscaling = async ({
     const regionFileAgain = Bun.file(regionFilePath);
     const regionFileTextAgain = await regionFileAgain.text();
     const regionFileJsonAgain = yaml.parse(regionFileTextAgain);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     regionFileJsonAgain["extra_inputs"]["panfactum_scheduler_enabled"] = true;
     await Bun.write(regionFileAgain, yaml.stringify(regionFileJsonAgain));
 

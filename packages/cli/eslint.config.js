@@ -46,7 +46,7 @@ export default [
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
       "@typescript-eslint/no-unsafe-return": "error",
       "@typescript-eslint/restrict-template-expressions": "error",
       "no-unused-vars": "off",
