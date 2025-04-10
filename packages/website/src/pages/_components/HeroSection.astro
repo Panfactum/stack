@@ -9,8 +9,25 @@ import {DISCORD_URL, SIGNUP_LINK} from "../../lib/constants";
 const pathname = new URL(Astro.request.url).pathname;
 ---
 
-<section class="flex flex-col items-center py-8 lg:py-16">
-  <div class="xl:px-8">
+<section class="flex flex-col items-center py-8 lg:py-16 relative">
+  <div class="grid-background" />
+  <style>
+    .grid-background {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  background-image:
+    repeating-linear-gradient(to right, rgba(100, 100, 100, 0.2) 0, rgba(100, 100, 100, 0.2) 1px, transparent 1px, transparent 100px),
+    repeating-linear-gradient(to bottom, rgba(100, 100, 100, 0.2) 0, rgba(100, 100, 100, 0.2) 1px, transparent 1px, transparent 100px);
+  
+  mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+    }
+  </style>
+  <div class="xl:px-8 z-10">
     <div class="flex flex-col items-center gap-8 xl:px-8">
       <div
         class="flex flex-col items-center gap-6 text-center"

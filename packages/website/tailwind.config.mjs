@@ -184,9 +184,6 @@ export default {
         machina: ["neue-machina", "sans-serif"],
         montreal: ["neue-montreal-mono", "monospace"],
       },
-      backgroundImage: {
-        "hero-pattern": "url('/hero-pattern.svg')",
-      },
       zIndex: {
         "top-navigation": 400,
         "top-navigation-mobile-menu": 405,

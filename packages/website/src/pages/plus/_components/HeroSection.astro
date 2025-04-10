@@ -1,0 +1,59 @@
+---
+
+const pfStyle = {
+  background: "linear-gradient(45deg, #9AD3F1 80%, #FFFFFF 100%)",
+  backgroundClip: "text",
+  textFillColor: "transparent",
+  "-webkit-text-fill-color": "transparent"
+}
+const plusStyle = {
+  background: "linear-gradient(45deg, #FFFFFF 0%, yellow 100%)",
+  backgroundClip: "text",
+  textFillColor: "transparent",
+  "-webkit-text-fill-color": "transparent"
+}
+---
+
+<section class="m-auto flex max-w-screen-xl flex-col py-8 lg:pt-16 px-8 gap-12 md:gap-24">
+  <div
+    class="flex items-center gap-6 justify-between "
+  >
+    <div class="flex flex-col gap-6">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-machina font-bold !leading-tight" 
+    >
+        <span style={pfStyle}>The&nbsp;Power&nbsp;of<br/>Panfactum</span>&nbsp;<span style={plusStyle}>Plus<br/>Fractional&nbsp;DevOps</span>
+      </h1>
+      <p class="text-display-sm max-w-[600px]">
+        Build <span class="font-bold">10x faster</span> and <span class="font-bold">save 90%</span><br/>versus hriing a full-time cloud engineer.
+      </p>
+      <div class="flex gap-4">
+        <a 
+          class="cursor-pointer rounded-xl bg-white px-5 py-3 font-bold text-black text-nowrap"
+          href="/plus/pricing"
+        >
+          See Pricing
+        </a>
+        <a class="cursor-pointer rounded-xl bg-white px-5 py-3 font-bold text-black text-nowrap">
+          Schedule Demo
+        </a>
+      </div>
+    </div>
+    <div class="hidden md:block">
+      <div class="bg-black h-[400px] w-[400px]">
+
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col gap-8 z-10">
+    <div class="flex items-center justify-center">
+      Trusted by Engineering Teams At
+    </div>
+    <div class="flex flex-wrap justify-center gap-x-12 gap-y-6">
+      <div class="bg-black h-[75px] w-[250px]"/>
+      <div class="bg-black h-[75px] w-[250px]"/>
+      <div class="bg-black h-[75px] w-[250px]"/>
+      <div class="bg-black h-[75px] w-[250px]"/>
+      <div class="bg-black h-[75px] w-[250px]"/>
+    </div>
+  </div>
+</section>
