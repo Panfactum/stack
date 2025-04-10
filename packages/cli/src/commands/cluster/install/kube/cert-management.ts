@@ -11,7 +11,7 @@ import { checkStepCompletion } from "../../../../util/check-step-completion";
 import { writeFile } from "../../../../util/fs/writeFile";
 import { progressMessage } from "../../../../util/progress-message";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
-import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { startBackgroundProcess } from "../../../../util/subprocess/backgroundProcess";
 import { terragruntApply } from "../../../../util/terragrunt/terragruntApply";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
@@ -27,7 +27,6 @@ export const setupCertManagement = async ({
   configPath: string;
   alertEmail: string;
   verbose?: boolean;
-   
 }) => {
   // Until the devShell fully reloads this must be explicitly set in the spawned processes
   const env = {
@@ -77,7 +76,7 @@ export const setupCertManagement = async ({
 
     await terragruntInitAndApply({
       context,
-      modulePath: "./kube_cert_manager"
+      modulePath: "./kube_cert_manager",
     });
 
     await updateConfigFile({
@@ -106,13 +105,12 @@ export const setupCertManagement = async ({
 
   if (!certIssuersSetupComplete) {
     // Find the delegated zones folders and see if this environment matches one of them
-    const {environment} = await getPanfactumConfig({ context });
+    const { environment } = await getPanfactumConfig({ context });
     const environmentDir = context.repoVariables.environments_dir;
 
-
-    if (!environment){
-      throw new Error("PLACEHOLDER")
-    } 
+    if (!environment) {
+      throw new Error("PLACEHOLDER");
+    }
 
     // Find all delegated zones folders
     const delegatedZonesFolders: { path: string; folderName: string }[] = [];
@@ -397,7 +395,7 @@ export const setupCertManagement = async ({
 
     await terragruntInitAndApply({
       context,
-      modulePath: "./kube_cert_issuers"
+      modulePath: "./kube_cert_issuers",
     });
 
     await updateConfigFile({

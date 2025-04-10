@@ -13,7 +13,7 @@ import { getConfigFileKey } from "../../../../util/get-config-file-key";
 import { replaceHclValue } from "../../../../util/replace-hcl-value";
 import { replaceYamlValue } from "../../../../util/replace-yaml-value";
 import { sopsEncrypt } from "../../../../util/sops-encrypt";
-import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { startBackgroundProcess } from "../../../../util/subprocess/backgroundProcess";
 import { terragruntApply } from "../../../../util/terragrunt/terragruntApply";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
@@ -21,11 +21,10 @@ import type { PanfactumContext } from "@/context/context";
 
 export const setupInboundNetworking = async ({
   context,
-  configPath
+  configPath,
 }: {
   context: PanfactumContext;
   configPath: string;
-   
 }) => {
   const env = process.env;
   const vaultPortForwardPid = startBackgroundProcess({
@@ -83,7 +82,7 @@ export const setupInboundNetworking = async ({
 
     await terragruntInitAndApply({
       context,
-      modulePath: "./kube_external_dns"
+      modulePath: "./kube_external_dns",
     });
 
     await updateConfigFile({
@@ -128,7 +127,7 @@ export const setupInboundNetworking = async ({
     await terragruntInitAndApply({
       context,
       moduleName: "AWS Load Balancer Controller",
-      modulePath: "./kube_aws_lb_controller"
+      modulePath: "./kube_aws_lb_controller",
     });
 
     await updateConfigFile({
@@ -157,7 +156,7 @@ export const setupInboundNetworking = async ({
     context.logger.log(
       `11.c. Generating a key used for TLS security
       ⏰ This may take a few minutes as it depends on your computer`
-    )
+    );
     //let dhparamProgress: globalThis.Timer | undefined;
 
     // TODO
@@ -182,7 +181,7 @@ export const setupInboundNetworking = async ({
       tempFilePath: "./.tmp-ingress-secrets.yaml",
     });
 
-    context.logger.log("11.d. Setting up the Ingress System")
+    context.logger.log("11.d. Setting up the Ingress System");
 
     await writeFile({
       context,
@@ -217,7 +216,7 @@ export const setupInboundNetworking = async ({
     await terragruntInitAndApply({
       context,
       moduleName: "Ingress System",
-      modulePath: "./kube_ingress_nginx"
+      modulePath: "./kube_ingress_nginx",
     });
 
     await updateConfigFile({
@@ -250,19 +249,18 @@ export const setupInboundNetworking = async ({
     );
 
     try {
-
       const finishVaultProgress = context.logger.progressMessage(
         "Setting up the Vault Ingress",
         {
-          successMessage: "Successfully setup the Vault Ingress."
+          successMessage: "Successfully setup the Vault Ingress.",
         }
-      )
+      );
       terragruntApply({
         context,
         env,
         workingDirectory: "./kube_vault",
       });
-      finishVaultProgress()
+      finishVaultProgress();
     } catch (error) {
       writeErrorToDebugFile({
         context,
@@ -291,7 +289,7 @@ export const setupInboundNetworking = async ({
         // Use delv to check DNS resolution
         const result = await $`delv @1.1.1.1 ${vaultDomain}`.text();
 
-        context.logger.log(`DNS check result: ${result}`, {level: "debug"})
+        context.logger.log(`DNS check result: ${result}`, { level: "debug" });
 
         // Check for successful validation without negative response
         if (
@@ -306,7 +304,9 @@ export const setupInboundNetworking = async ({
           error,
         });
 
-        context.logger.log(`DNS check error: ${JSON.stringify(error)}`, {level: "debug"});
+        context.logger.log(`DNS check error: ${JSON.stringify(error)}`, {
+          level: "debug",
+        });
         // Continue trying even if the command fails
       }
 
@@ -343,20 +343,19 @@ export const setupInboundNetworking = async ({
     );
 
     try {
-
-        const vaultIngressFinished = context.logger.progressMessage(
-          "Updating resources with new public Vault URL",
-          {
-            successMessage: "Successfully updated the Vault address."
-          }
-        );
+      const vaultIngressFinished = context.logger.progressMessage(
+        "Updating resources with new public Vault URL",
+        {
+          successMessage: "Successfully updated the Vault address.",
+        }
+      );
 
       terragruntApply({
         context,
         env,
         workingDirectory: "./vault_core_resources",
       });
-      vaultIngressFinished()
+      vaultIngressFinished();
     } catch (error) {
       writeErrorToDebugFile({
         context,
@@ -405,7 +404,7 @@ export const setupInboundNetworking = async ({
     await terragruntInitAndApply({
       context,
       moduleName: "Bastion",
-      modulePath: "./kube_bastion"
+      modulePath: "./kube_bastion",
     });
 
     await updateConfigFile({
@@ -433,7 +432,6 @@ export const setupInboundNetworking = async ({
   }
 
   if (!bastionConnectivityConfigComplete) {
-
     // TODO: Fix
     // await updateSSH({
     //   context,

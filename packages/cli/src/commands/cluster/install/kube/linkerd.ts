@@ -3,14 +3,14 @@ import kubeLinkerdTerragruntHcl from "../../../../templates/kube_linkerd_terragr
 import { checkStepCompletion } from "../../../../util/check-step-completion";
 import { writeFile } from "../../../../util/fs/writeFile";
 import { initAndApplyModule } from "../../../../util/init-and-apply-module";
-import { startBackgroundProcess } from "../../../../util/start-background-process";
+import { startBackgroundProcess } from "../../../../util/subprocess/backgroundProcess";
 import { updateConfigFile } from "../../../../util/update-config-file";
 import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
 import type { PanfactumContext } from "@/context/context";
 
 export const setupLinkerd = async ({
   configPath,
-  context
+  context,
 }: {
   configPath: string;
   context: PanfactumContext;
@@ -57,7 +57,7 @@ export const setupLinkerd = async ({
       context,
       env,
       moduleName: "Linkerd",
-      modulePath: "./kube_linkerd"
+      modulePath: "./kube_linkerd",
     });
 
     await updateConfigFile({
