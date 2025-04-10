@@ -2,24 +2,20 @@ import { join } from "node:path";
 import { select, confirm } from "@inquirer/prompts";
 import pc from "picocolors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import type { PANFACTUM_CONFIG_SCHEMA } from "@/commands/config/get/getPanfactumConfig";
 import type { PanfactumContext } from "@/context/context";
 import type { z } from "zod";
+import type { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 
 export async function setSLA(inputs: {
     slaTarget: z.infer<typeof PANFACTUM_CONFIG_SCHEMA.shape.sla_target>
     context: PanfactumContext,
     environmentPath: string,
     clusterPath: string
-}): NonNullable<typeof slaTarget> {
+}): Promise<NonNullable<typeof slaTarget>> {
 
     const { slaTarget, context, environmentPath, clusterPath } = inputs;
 
-    if (slaTarget) {
-        return slaTarget
-    }
-
-    let confirmedSLATarget: NonNullable<typeof slaTarget> = slaTarget
+    let confirmedSLATarget: NonNullable<typeof slaTarget> = slaTarget ?? 3
     let confirmed = false;
     if (slaTarget !== undefined) {
         context.logger.log(
@@ -73,4 +69,6 @@ export async function setSLA(inputs: {
             }
         })
     }
+
+    return confirmedSLATarget
 }
