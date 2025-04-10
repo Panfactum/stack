@@ -5,6 +5,7 @@ import { CLIError } from "@/util/error/error";
 import { Checkpointer, type Step } from "./checkpointer";
 import { informStepComplete, informStepStart } from "./messages";
 import { setSLA } from "./setSLA";
+import { setupAutoscaling } from "./setupAutoscaling";
 import { setupCertificateIssuers } from "./setupCertIssuers";
 import { setupCertManagement } from "./setupCertManagement";
 import { setupCSIDrivers } from "./setupCSIDrivers";
@@ -81,6 +82,11 @@ const SETUP_STEPS: Array<{
     label: "Linkerd",
     id: "setupLinkerd",
     setup: setupLinkerd,
+  },
+  {
+    label: "Autoscaling",
+    id: "setupAutoscaling",
+    setup: setupAutoscaling,
   },
 ];
 
@@ -195,108 +201,6 @@ export class InstallClusterCommand extends PanfactumCommand {
       }
     }
   }
-
-  //     let setupServiceMeshComplete = false;
-  //     try {
-  //       setupServiceMeshComplete = await checkStepCompletion({
-  //         configFilePath: configPath,
-  //         context: this.context,
-  //         step: "serviceMesh",
-  //         stepCompleteMessage:
-  //           "9/13 Skipping service mesh setup as it's already complete.\n",
-  //         stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
-  //       });
-  //     } catch {
-  //       return 1;
-  //     }
-
-  //     if (!setupServiceMeshComplete) {
-  //       try {
-  //         await setupLinkerd({
-  //           configPath,
-  //           context: this.context,
-  //           verbose: this.verbose,
-  //         });
-  //       } catch (error) {
-  //         writeErrorToDebugFile({
-  //           context: this.context,
-  //           error,
-  //         });
-  //         this.context.stderr.write(
-  //           pc.red(
-  //             `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
-  //           )
-  //         );
-  //         printHelpInformation(this.context);
-  //         backgroundProcessIds.forEach((pid) => {
-  //           try {
-  //             process.kill(pid);
-  //           } catch {
-  //             // Do nothing as it's already dead
-  //           }
-  //         });
-  //         return 1;
-  //       }
-
-  //       await updateConfigFile({
-  //         updates: {
-  //           serviceMesh: true,
-  //         },
-  //         configPath,
-  //         context: this.context,
-  //       });
-  //     }
-
-  //     let setupAutoscalingComplete = false;
-  //     try {
-  //       setupAutoscalingComplete = await checkStepCompletion({
-  //         configFilePath: configPath,
-  //         context: this.context,
-  //         step: "autoscaling",
-  //         stepCompleteMessage:
-  //           "10/13 Skipping autoscaling setup as it's already complete.\n",
-  //         stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
-  //       });
-  //     } catch {
-  //       return 1;
-  //     }
-
-  //     if (!setupAutoscalingComplete) {
-  //       try {
-  //         await setupAutoscaling({
-  //           configPath,
-  //           context: this.context,
-  //           verbose: this.verbose,
-  //         });
-  //       } catch (error) {
-  //         writeErrorToDebugFile({
-  //           context: this.context,
-  //           error,
-  //         });
-  //         this.context.stderr.write(
-  //           pc.red(
-  //             `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
-  //           )
-  //         );
-  //         printHelpInformation(this.context);
-  //         backgroundProcessIds.forEach((pid) => {
-  //           try {
-  //             process.kill(pid);
-  //           } catch {
-  //             // Do nothing as it's already dead
-  //           }
-  //         });
-  //         return 1;
-  //       }
-
-  //       await updateConfigFile({
-  //         updates: {
-  //           autoscaling: true,
-  //         },
-  //         configPath,
-  //         context: this.context,
-  //       });
-  //     }
 
   //     let setupInboundNetworkingComplete = false;
   //     try {

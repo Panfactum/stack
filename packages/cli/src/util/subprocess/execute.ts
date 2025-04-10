@@ -114,9 +114,11 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       retryCallback(i + 1, retValue);
     }
 
-    await new Promise((resolve) => {
-      globalThis.setTimeout(resolve, retryDelay);
-    });
+    if (retries > 0) {
+      await new Promise((resolve) => {
+        globalThis.setTimeout(resolve, retryDelay);
+      });
+    }
   }
 
   throw new CLISubprocessError(
