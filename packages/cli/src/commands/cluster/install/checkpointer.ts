@@ -91,6 +91,7 @@ const STEPS = z.object({
   vaultOperatorInit: z.boolean().default(false).catch(false),
   setupVaultCoreResources: z.boolean().default(false).catch(false),
   vaultCoreResourcesDeployment: z.boolean().default(false).catch(false),
+  setupCertManagement: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;

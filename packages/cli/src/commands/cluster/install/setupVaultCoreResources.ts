@@ -1,8 +1,7 @@
+import { join } from "node:path";
 import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
-import {
-  killBackgroundProcess,
-  startBackgroundProcess,
-} from "@/util/subprocess/backgroundProcess";
+import { killBackgroundProcess } from "@/util/subprocess/backgroundProcess";
+import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { deployModule } from "./deployModule";
 import { informStepComplete, informStepStart } from "./messages";
 import type { InstallClusterStepOptions } from "./common";
@@ -10,7 +9,8 @@ import type { InstallClusterStepOptions } from "./common";
 export async function setupVaultCoreResources(
   options: InstallClusterStepOptions
 ) {
-  const { checkpointer, context, stepNum } = options;
+  const { checkpointer, clusterPath, context, stepNum } = options;
+  const modulePath = join(clusterPath, "kube_vault");
 
   /***************************************************
    * Initialize Vault
@@ -27,18 +27,9 @@ export async function setupVaultCoreResources(
 
     const env = { ...process.env, VAULT_ADDR, VAULT_TOKEN };
 
-    const pid = startBackgroundProcess({
-      command: "kubectl",
-      args: [
-        "-n",
-        "vault",
-        "port-forward",
-        "--address",
-        "0.0.0.0",
-        "svc/vault-active",
-        "8200:8200",
-      ],
+    const pid = await startVaultProxy({
       env,
+      modulePath,
     });
 
     await deployModule({
