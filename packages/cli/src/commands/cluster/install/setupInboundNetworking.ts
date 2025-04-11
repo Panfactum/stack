@@ -108,7 +108,7 @@ export async function setupInboundNetworking(
     await sopsUpsert({
       context,
       filePath: secretsPath,
-      values: { dhparam: `|-\n    ${stdout.split("\n").join("\n    ")}` },
+      values: { dhparam: stdout },
     });
 
     await checkpointer.setStepComplete(generateIngressSecretId);
