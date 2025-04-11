@@ -141,13 +141,14 @@ export class InstallClusterCommand extends PanfactumCommand {
     );
 
     const {
+      aws_profile: awsProfile,
       environment,
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
     } = config;
 
-    if (!environment || !region || !kubeDomain) {
+    if (!environment || !region || !kubeDomain || !awsProfile) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
@@ -191,6 +192,7 @@ export class InstallClusterCommand extends PanfactumCommand {
      ***********************************************/
 
     const options: InstallClusterStepOptions = {
+      awsProfile,
       context: this.context,
       environment,
       environmentPath,

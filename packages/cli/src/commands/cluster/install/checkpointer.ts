@@ -5,24 +5,24 @@ import type { PanfactumContext } from "@/context/context";
 
 export const VPC_NAME = z
   .string()
-  .min(3)
-  .max(100)
+  .min(3, "VPC name must be at least 3 characters long")
+  .max(100, "VPC name must be less than 100 characters long")
   .regex(
     /^[a-zA-Z0-9_-]+$/,
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
   );
 export const VPC_DESCRIPTION = z
   .string()
-  .min(3)
-  .max(255)
+  .min(3, "VPC description must be at least 3 characters long")
+  .max(255, "VPC description must be less than 255 characters long")
   .regex(
     /^[a-zA-Z0-9_\- .:/=+@]+$/,
     "Must only contain spaces, the letters a-z (case-insensitive), numbers 0-9, and the following characters: _.:/=+-@"
   );
 export const DOCKERHUB_USERNAME = z
   .string()
-  .min(3)
-  .max(63)
+  .min(3, "DockerHub username must be at least 3 characters long")
+  .max(63, "DockerHub username must be less than 63 characters long")
   .regex(
     /^[a-zA-Z0-9_-]+$/,
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
@@ -30,8 +30,8 @@ export const DOCKERHUB_USERNAME = z
   .regex(/^(?!aws:).*$/i, "Cannot start with 'AWS:' (case insensitive)");
 export const GITHUB_USERNAME = z
   .string()
-  .min(3)
-  .max(63)
+  .min(3, "GitHub username must be at least 3 characters long")
+  .max(63, "GitHub username must be less than 63 characters long")
   .regex(
     /^[a-zA-Z0-9_-]+$/,
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
@@ -50,8 +50,8 @@ export const CLUSTER_NAME = z
   );
 export const CLUSTER_DESCRIPTION = z
   .string()
-  .min(3)
-  .max(255)
+  .min(3, "Cluster description must be at least 3 characters long")
+  .max(255, "Cluster description must be less than 255 characters long")
   .regex(
     /^[a-zA-Z0-9_\- .:/=+@]+$/,
     "Must only contain spaces, the letters a-z (case-insensitive), numbers 0-9, and the following characters: _.:/=+-@"
