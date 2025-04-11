@@ -100,9 +100,11 @@ async function appendToConfig({
 
 // Purpose: Adds the standard .aws configuration files
 export async function updateAWS({
+  awsProfile,
   buildAwsConfig,
   context,
 }: {
+  awsProfile: string;
   buildAwsConfig?: boolean;
   context: BaseContext;
 }) {
@@ -168,6 +170,7 @@ export async function updateAWS({
         const modulePath = `${repoVariables.environments_dir}/${module}`;
         context.stdout.write(`Retrieving roles from ${modulePath}...\n`);
         const moduleOutput = terragruntOutput({
+          awsProfile,
           context,
           modulePath,
           validationSchema: z.object({

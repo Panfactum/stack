@@ -8,7 +8,6 @@ import { runSsmCommand } from "../../../util/aws/runSSMCommand";
 import { scaleASG } from "../../../util/aws/scaleASG";
 import { testVPCNetworkBlocking } from "../../../util/aws/testVPCNetworkBlocking";
 import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
-import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { PanfactumContext } from "../../../context/context";
 
 const AWS_VPC_MODULE_OUTPUTS = z.object({
@@ -27,9 +26,11 @@ const AWS_VPC_MODULE_OUTPUTS = z.object({
 });
 
 export const vpcNetworkTest = async ({
+  awsProfile,
   context,
   modulePath,
 }: {
+  awsProfile: string;
   context: PanfactumContext;
   modulePath: string;
 }) => {
@@ -48,27 +49,14 @@ export const vpcNetworkTest = async ({
   //####################################################################
 
   const moduleOutputs = await terragruntOutput({
+    awsProfile,
     context,
     modulePath,
     validationSchema: AWS_VPC_MODULE_OUTPUTS,
   });
 
   //####################################################################
-  // Step 2: Select AWS profile to use to run the test
-  //####################################################################
-  const { aws_profile: awsProfile } = await getPanfactumConfig({
-    context,
-    directory: modulePath,
-  });
-
-  if (!awsProfile) {
-    throw new CLIError(
-      `Was not able to retrive an AWS profile for module at ${modulePath}`
-    );
-  }
-
-  //####################################################################
-  // Step 3: Run the tests
+  // Step 2: Run the tests
   //####################################################################
 
   const subnets = moduleOutputs.test_config.value.subnets;

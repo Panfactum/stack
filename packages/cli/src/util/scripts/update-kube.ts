@@ -26,13 +26,15 @@ import type { BaseContext } from "clipanion";
  * @param {BaseContext} options.context - The CLI context for logging
  * @throws {Error} If required files are missing or configuration is invalid
  */
- 
+
 export async function updateKube({
+  awsProfile,
   buildConfig,
   context,
   silent = false,
   verbose,
 }: {
+  awsProfile: string;
   buildConfig?: boolean;
   context: BaseContext;
   silent?: boolean;
@@ -113,6 +115,7 @@ export async function updateKube({
           throw new Error(`No module at ${modulePath}!`);
         }
         const moduleOutput = terragruntOutput({
+          awsProfile,
           context,
           modulePath,
           silent,

@@ -148,6 +148,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
     } else {
       informStepStart(context, subStepLabel, STEP_NUMBER, subStepNumber);
       await vpcNetworkTest({
+        awsProfile,
         context,
         modulePath: path.join(clusterPath, vpcModule),
       });

@@ -7,8 +7,10 @@ import buildkitConfigExample from "../../files/buildkit/config.example.yaml" wit
 import type { PanfactumContext } from "../../../context/context";
 
 export async function buildBuildkitConfig({
+  awsProfile,
   context,
 }: {
+  awsProfile: string;
   context: PanfactumContext;
 }) {
   const { buildkit_dir, environments_dir } = context.repoVariables;
@@ -52,6 +54,7 @@ export async function buildBuildkitConfig({
       `Extracting buildkit configuration from ${module}...\n`
     );
     const moduleOutput = terragruntOutput({
+      awsProfile,
       context,
       modulePath,
       validationSchema: z.object({
