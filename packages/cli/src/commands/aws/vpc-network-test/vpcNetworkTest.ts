@@ -128,7 +128,7 @@ export const vpcNetworkTest = async ({
       // Step 5: Ensure the public IP is correct
       if (publicIp !== natIp) {
         throw new CLIError(
-          `${instanceId} is NOT routing traffic thorugh through NAT!`
+          `${instanceId} is NOT routing traffic through NAT!`
         );
       }
 
