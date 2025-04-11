@@ -80,7 +80,6 @@ export async function setupInboundNetworking(
   } else {
     informStepStart(context, subStepLabel, stepNum, subStepNumber);
 
-    // TODO: @seth Options to make this quicker
     context.logger.log([
       "Generating a key used for TLS security",
       "⏰ This may take a few minutes as it depends on your computer",
@@ -94,7 +93,7 @@ export async function setupInboundNetworking(
     );
 
     const { stdout } = await execute({
-      command: ["openssl", "dhparam", "4096"],
+      command: ["openssl", "dhparam", "-dsaparam", "4096"],
       context,
       workingDirectory: clusterPath,
     });
