@@ -29,7 +29,9 @@ export async function deployModule({
   subStepNum?: number;
   checkpointer: Checkpointer;
   stepId: Step;
-  hclUpdates?: { [path: string]: string | number | boolean };
+  hclUpdates?: {
+    [path: string]: string | boolean | number | string[] | number[] | boolean[];
+  };
 }) {
   const modulePath = join(clusterPath, moduleDirectory);
   const hclFile = join(modulePath, "terragrunt.hcl");
@@ -44,7 +46,8 @@ export async function deployModule({
         path: hclFile,
         contents: await Bun.file(terraguntContents).text(),
         overwrite,
-    });
+      });
+    }
 
     if (hclUpdates) {
       for (const [inputPath, value] of Object.entries(hclUpdates)) {
