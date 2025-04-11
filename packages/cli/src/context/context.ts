@@ -7,10 +7,13 @@ export type PanfactumContext = BaseContext & {
   logger: Logger;
 };
 
-export const createPanfactumContext = async (context: BaseContext): Promise<PanfactumContext> => {
+export const createPanfactumContext = async (
+  context: BaseContext
+): Promise<PanfactumContext> => {
   return {
     ...context,
     repoVariables: await getRepoVariables(),
-    logger: new Logger(context.stderr)
-  }
-}
+    // TODO: @jack get the log level into this
+    logger: new Logger(context.stderr),
+  };
+};
