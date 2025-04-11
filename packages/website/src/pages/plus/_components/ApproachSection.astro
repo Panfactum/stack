@@ -1,0 +1,32 @@
+---
+import { Picture } from "astro:assets"
+
+import EngineerImg from "./images/engineer-1.png"
+---
+
+<section class="bg-white">
+  <div class="ma-w-screen-xl m-auto flex max-w-screen-xl gap-12 p-8 text-black md:gap-24 lg:pt-16 items-center">
+    <div class="rounded-4xl relative max-h-80 min-h-80 min-w-80 max-w-80 rounded-2xl bg-gold-25">
+      <div class="grid-background" style={{"--grid-background-spacing": "30px"}}/>
+      <Picture
+          class="absolute bottom-0 left-[6%] !w-[90%]"
+              sizes="(max-width: 64rem) 31rem, 41rem"
+              formats={["avif", "webp"]}
+              breakpoints={[496, 656]}
+              src={EngineerImg}
+              alt="Panfactum Engineer"
+      />
+    </div>
+    <div class="flex flex-col gap-2">
+      <div class="font-bold text-brand-700">
+        The Panfactum Approach
+      </div>
+      <h2 class="text-pretty font-machina text-4xl font-semibold">
+        It Takes More than Software to Master Your Cloud Infrastructure
+      </h2>
+      <p class="text-lg text-gray-dark-mode-700">
+        Customer success is at our core. Expert, proactive support has been our priority from day one.
+      </p>
+    </div>
+  </div>
+</section>

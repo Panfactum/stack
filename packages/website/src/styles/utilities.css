@@ -313,4 +313,22 @@ the website.
   .border-error {
     @apply border-error-600 dark:border-error-500;
   }
+
+  /****************************************************
+  **************   Extra    ***************
+  *****************************************************/
+  .grid-background {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+    height: 100%;
+    width: 100%;
+    background-image:
+      repeating-linear-gradient(to right, rgba(100, 100, 100, 0.2) 0, rgba(100, 100, 100, 0.2) 1px, transparent 1px, transparent var(--grid-background-spacing, 100px)),
+      repeating-linear-gradient(to bottom, rgba(100, 100, 100, 0.2) 0, rgba(100, 100, 100, 0.2) 1px, transparent 1px, transparent var(--grid-background-spacing, 100px));
+    
+    mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+  }
 }
