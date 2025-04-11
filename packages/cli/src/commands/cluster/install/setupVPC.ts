@@ -13,7 +13,7 @@ const STEP_LABEL = "AWS VPC";
 const STEP_NUMBER = 1;
 
 export async function setupVPC(options: InstallClusterStepOptions) {
-  const { checkpointer, context, environment, clusterPath } = options;
+  const { checkpointer, context, environment, clusterPath, region } = options;
 
   try {
     /***************************************************
@@ -36,10 +36,9 @@ export async function setupVPC(options: InstallClusterStepOptions) {
     ]);
 
     if (!name) {
-      // FIX: @seth add region to default
       name = await input({
         message: pc.magenta("Enter a name for your VPC:"),
-        default: `panfactum-${environment}`,
+        default: `panfactum-${environment}-${region}`,
         required: true,
         validate: (value) => {
           const { error } = VPC_NAME.safeParse(value);
@@ -56,10 +55,9 @@ export async function setupVPC(options: InstallClusterStepOptions) {
     }
 
     if (!description) {
-      // FIX: @seth add region to default
       description = await input({
         message: pc.magenta("Enter a description for your VPC:"),
-        default: `Panfactum VPC for the ${environment} environment`,
+        default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
         required: true,
         validate: (value) => {
           const { error } = VPC_DESCRIPTION.safeParse(value);
