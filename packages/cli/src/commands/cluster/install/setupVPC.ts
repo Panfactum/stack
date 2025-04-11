@@ -57,7 +57,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
         validate: async (value) => {
           const { error } = VPC_NAME.safeParse(value);
           if (error) {
-            return error.issues[0]?.message ?? "Invalid name";
+            return error?.issues[0]?.message ?? "Invalid name";
           } else {
             const vpcListCommand = [
               "aws",
@@ -67,12 +67,27 @@ export async function setupVPC(options: InstallClusterStepOptions) {
               `--filters=Name=tag:Name,Values=${value}`,
               "--output=json",
               `--profile=${awsProfile}`,
+              "--no-cli-pager",
             ];
 
-            const { stdout } = await execute({
+            context.logger.log(
+              "vpc list command: " + vpcListCommand.join(" "),
+              {
+                level: "debug",
+              }
+            );
+
+            const { stdout, stderr } = await execute({
               command: vpcListCommand,
               context: context,
               workingDirectory: clusterPath,
+            });
+
+            context.logger.log("aws ec2 describe-vps stdout: " + stdout, {
+              level: "debug",
+            });
+            context.logger.log("aws ec2 describe-vps stderr: " + stderr, {
+              level: "debug",
             });
 
             let vpcList;
