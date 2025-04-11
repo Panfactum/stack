@@ -11,7 +11,6 @@ import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { PanfactumContext } from "../../../context/context";
 
-
 const AWS_VPC_MODULE_OUTPUTS = z.object({
   test_config: z.object({
     value: z.object({
@@ -29,7 +28,7 @@ const AWS_VPC_MODULE_OUTPUTS = z.object({
 
 export const vpcNetworkTest = async ({
   context,
-  modulePath
+  modulePath,
 }: {
   context: PanfactumContext;
   modulePath: string;
@@ -40,7 +39,7 @@ export const vpcNetworkTest = async ({
   const awsDir = context.repoVariables.aws_dir;
   const awsConfigFile = path.join(awsDir, "config");
 
-  if (! await fileExists(awsConfigFile)) {
+  if (!(await fileExists(awsConfigFile))) {
     throw new Error("No AWS config file found.");
   }
 
@@ -51,19 +50,21 @@ export const vpcNetworkTest = async ({
   const moduleOutputs = await terragruntOutput({
     context,
     modulePath,
-    validationSchema: AWS_VPC_MODULE_OUTPUTS
+    validationSchema: AWS_VPC_MODULE_OUTPUTS,
   });
 
   //####################################################################
   // Step 2: Select AWS profile to use to run the test
   //####################################################################
-  const {aws_profile: awsProfile} = await getPanfactumConfig({
+  const { aws_profile: awsProfile } = await getPanfactumConfig({
     context,
-    directory: modulePath
+    directory: modulePath,
   });
 
-  if(!awsProfile){
-    throw new CLIError(`Was not able to retrive an AWS profile for module at ${modulePath}`)
+  if (!awsProfile) {
+    throw new CLIError(
+      `Was not able to retrive an AWS profile for module at ${modulePath}`
+    );
   }
 
   //####################################################################
@@ -71,28 +72,23 @@ export const vpcNetworkTest = async ({
   //####################################################################
 
   const subnets = moduleOutputs.test_config.value.subnets;
-  const awsRegion = moduleOutputs.test_config.value.region
+  const awsRegion = moduleOutputs.test_config.value.region;
 
   try {
     // Run the tests sequentially for all subnets
     for (const subnet of subnets) {
+      context.logger.log(`Running test for subnet: ${subnet.subnet}...`);
 
       const asg = subnet.asg;
       const natIp = subnet.nat_ip;
 
-      // FIX: @seth
-      // context.stdout.write(
-      //   `1.b.${i + 1}.a. Running test for subnet: ${subnet.subnet}...\n`
-      // );
-
       // Step 1: Create a test instance
-      // FIX: @seth Fix context.stdout.write(`1.b.${i + 1}.b. Scaling ASG ${asg} to 1...\n`);
       await scaleASG({
         asgName: asg,
         awsProfile,
         awsRegion,
         context,
-        desiredCapacity: 1
+        desiredCapacity: 1,
       });
 
       // Step 2: Get the instance id
@@ -106,16 +102,9 @@ export const vpcNetworkTest = async ({
         asgName: asg,
         awsProfile,
         awsRegion: moduleOutputs.test_config.value.region,
-        context
+        context,
       });
-      finishGettingInstanceId()
-
-
-      // FIX @seth
-      // context.stdout.write(`1.b.${i + 1}.c. Instance ID: ${instanceId}\n`);
-      // context.stdout.write(
-      //   `1.b.${i + 1}.d. Executing network test on ${instanceId}...\n`
-      // );
+      finishGettingInstanceId();
 
       // Step 3: Run the network test
       const commandHasStarted = context.logger.progressMessage(
@@ -128,9 +117,9 @@ export const vpcNetworkTest = async ({
         instanceId,
         awsProfile,
         awsRegion,
-        context
+        context,
       });
-      commandHasStarted()
+      commandHasStarted();
 
       // Step 4: Get the result of the network test
       const gotComamndOutput = context.logger.progressMessage(
@@ -144,28 +133,32 @@ export const vpcNetworkTest = async ({
         instanceId,
         awsProfile,
         awsRegion,
-        context
+        context,
       });
-      gotComamndOutput()
-
-      // FIX: @seth
-      // context.stdout.write(
-      //   `1.b.${i + 1}.e. Public IP for instance ${instanceId}: ${publicIp}\n`
-      // );
+      gotComamndOutput();
 
       // Step 5: Ensure the public IP is correct
       if (publicIp !== natIp) {
-        throw new CLIError(`${instanceId} is NOT routing traffic thorugh through NAT!`);
+        throw new CLIError(
+          `${instanceId} is NOT routing traffic thorugh through NAT!`
+        );
       }
 
       // Step 6: Ensure that the NAT_IP rejects inbound traffic
       await testVPCNetworkBlocking({
         natIp,
-        context
+        context,
       });
 
-      context.logger.log(`Test completed successfully for ${subnet.subnet}.`, {style: "success"})
-      context.logger.log("-----------------------------------------------------");
+      context.logger.log(
+        `\rTest completed successfully for ${subnet.subnet}.`,
+        {
+          style: "success",
+        }
+      );
+      context.logger.log(
+        "-----------------------------------------------------"
+      );
     }
   } finally {
     // scale down all ASGs no matter what
@@ -175,7 +168,7 @@ export const vpcNetworkTest = async ({
         awsProfile,
         awsRegion,
         context,
-        desiredCapacity: 0
+        desiredCapacity: 0,
       });
     }
   }
