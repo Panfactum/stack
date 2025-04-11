@@ -13,7 +13,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
   validationSchema: T;
 }) => {
 
-  // TODO: You MUST verify that the user is logged in before running this command
+  // TODO: @seth You MUST verify that the user is logged in before running this command
 
 
   const {stdout} = await execute({

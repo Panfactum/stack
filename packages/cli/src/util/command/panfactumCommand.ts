@@ -43,6 +43,6 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
             this.context.logger.log(JSON.stringify(error), {level: "error"})
         }
         this.context.logger.crashMessage()
-        // TODO: Add debug logs
+        // TODO: @jack Add debug logs
     }
 }

@@ -24,7 +24,7 @@ export async function setupEKS(options: InstallClusterStepOptions) {
         clusterName = await input({
             message: pc.magenta("Enter a name for your Kubernetes cluster:"),
             required: true,
-            default: `${environment}-${region}`, // TODO: Fix formatting to automatically convert to allowable values
+            default: `${environment}-${region}`, // FIX: @seth Fix formatting to automatically convert to allowable values
             validate: (value) => {
                 const { error } = CLUSTER_NAME.safeParse(value)
                 if (error) {
@@ -74,13 +74,13 @@ export async function setupEKS(options: InstallClusterStepOptions) {
     /***************************************************
     * Reset the cluster
     ***************************************************/
-    // TODO
+    // TODO @jack
 
     /***************************************************
     * Update the Kubernetes configuration files
     ***************************************************/
 
-    // TODO: Fix
+    // FIX: @jack
     // await updateKube({
     //   context: input.context,
     //   buildConfig: true,
@@ -99,7 +99,7 @@ export async function setupEKS(options: InstallClusterStepOptions) {
         filePath: path.join(clusterPath, "region.yaml"),
         values: {
             kube_config_context: clusterName,
-            kube_api_server: "" // TODO: FIX ME
+            kube_api_server: "" // FIX: @jack
         }
     })
 }

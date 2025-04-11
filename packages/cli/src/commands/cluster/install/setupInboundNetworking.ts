@@ -80,7 +80,7 @@ export async function setupInboundNetworking(
   } else {
     informStepStart(context, subStepLabel, stepNum, subStepNumber);
 
-    // TODO: Options to make this quicker
+    // TODO: @seth Options to make this quicker
     context.logger.log([
       "Generating a key used for TLS security",
       "⏰ This may take a few minutes as it depends on your computer",
@@ -105,7 +105,7 @@ export async function setupInboundNetworking(
       join(clusterPath, "kube_ingress_nginx"),
       "secrets.yaml"
     );
-    // TODO: Check if this works with this multi-line string
+    // TODO: @seth Check if this works with this multi-line string
     await sopsUpsert({
       context,
       filePath: secretsPath,
@@ -280,7 +280,7 @@ export async function setupInboundNetworking(
       bastionConnectivitySubStepNumber
     );
 
-    // TODO: Fix
+    // FIX: @jack
     // await updateSSH({
     //   context,
     //   verbose,

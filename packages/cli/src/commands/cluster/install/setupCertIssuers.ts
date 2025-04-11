@@ -95,7 +95,7 @@ export async function setupCertificateIssuers(
   } else {
     informStepStart(context, subStepLabel, stepNum, subStepNumber);
 
-    // TODO: Make this finding the delegated zone records better
+    // TODO: @jack Make this finding the delegated zone records better
     // Find all delegated zones folders
     const delegatedZonesFolders: { path: string; folderName: string }[] = [];
 

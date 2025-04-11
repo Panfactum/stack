@@ -1,6 +1,6 @@
 {
     "editor.codeActionsOnSave": {
-      "source.fixAll": "always"
+        "source.fixAll": "always"
     },
     "editor.formatOnSave": true,
     "eslint.workingDirectories": [
@@ -9,7 +9,10 @@
     ],
     "eslint.format.enable": true,
     "eslint.codeActionsOnSave.rules": null,
-    "eslint.validate": ["javascript", "typescript"],
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
     "files.associations": {
         "packages/website/**/*.css": "tailwindcss"
     },
@@ -32,7 +35,12 @@
     "javascript.updateImportsOnFileMove.enabled": "always",
     "typescript.updateImportsOnFileMove.enabled": "always",
     "todo-tree.tree.scanMode": "workspace only",
-    "todo-tree.general.tags": ["TODO", "@seth", "@jack", "FIX"],
+    "todo-tree.general.tags": [
+        "TODO",
+        "@seth",
+        "@jack",
+        "FIX"
+    ],
     "todo-tree.regex.subTagRegex": "(@[a-zA-Z0-9]+)",
     "todo-tree.tree.buttons.groupBySubTag": true,
     "todo-tree.highlights.highlightDelay": 0
