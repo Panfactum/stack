@@ -36,7 +36,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
     ]);
 
     if (!name) {
-      // TODO: add region to default?
+      // FIX: @seth add region to default
       name = await input({
         message: pc.magenta("Enter a name for your VPC:"),
         default: `panfactum-${environment}`,
@@ -46,7 +46,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
           if (error) {
             return error.issues[0]?.message ?? "Invalid name";
           } else {
-            // TODO: Validate that the VPC name is not already in use
+            // TODO: @seth Validate that the VPC name is not already in use
             return true;
           }
         },
@@ -56,7 +56,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
     }
 
     if (!description) {
-      // TODO: add region to default?
+      // FIX: @seth add region to default
       description = await input({
         message: pc.magenta("Enter a description for your VPC:"),
         default: `Panfactum VPC for the ${environment} environment`,

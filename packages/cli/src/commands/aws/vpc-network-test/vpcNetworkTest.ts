@@ -80,13 +80,13 @@ export const vpcNetworkTest = async ({
       const asg = subnet.asg;
       const natIp = subnet.nat_ip;
 
-      // TODO: Fix
+      // FIX: @seth
       // context.stdout.write(
       //   `1.b.${i + 1}.a. Running test for subnet: ${subnet.subnet}...\n`
       // );
 
       // Step 1: Create a test instance
-      // TODO: Fix context.stdout.write(`1.b.${i + 1}.b. Scaling ASG ${asg} to 1...\n`);
+      // FIX: @seth Fix context.stdout.write(`1.b.${i + 1}.b. Scaling ASG ${asg} to 1...\n`);
       await scaleASG({
         asgName: asg,
         awsProfile,
@@ -111,7 +111,7 @@ export const vpcNetworkTest = async ({
       finishGettingInstanceId()
 
 
-      // TODO: Fix
+      // FIX @seth
       // context.stdout.write(`1.b.${i + 1}.c. Instance ID: ${instanceId}\n`);
       // context.stdout.write(
       //   `1.b.${i + 1}.d. Executing network test on ${instanceId}...\n`
@@ -148,7 +148,7 @@ export const vpcNetworkTest = async ({
       });
       gotComamndOutput()
 
-      // TODO: fix
+      // FIX: @seth
       // context.stdout.write(
       //   `1.b.${i + 1}.e. Public IP for instance ${instanceId}: ${publicIp}\n`
       // );

@@ -19,5 +19,10 @@
     },
     "files.exclude": {
         "**/.git": false
-    }
+    },
+    "todo-tree.tree.scanMode": "workspace only",
+    "todo-tree.general.tags": ["TODO", "@seth", "@jack", "FIX"],
+    "todo-tree.regex.subTagRegex": "(@[a-zA-Z0-9]+)",
+    "todo-tree.tree.buttons.groupBySubTag": true,
+    "todo-tree.highlights.highlightDelay": 0
 }

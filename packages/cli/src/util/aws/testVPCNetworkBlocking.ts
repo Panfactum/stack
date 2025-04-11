@@ -22,7 +22,7 @@ export async function testVPCNetworkBlocking({
     context,
     workingDirectory: process.cwd(),
     errorMessage: `Network traffic not blocked to ${natIp}!`,
-    isSuccess: ({stdout}) => stdout.includes("100% packet loss") // TODO: verify this
+    isSuccess: ({stdout}) => stdout.includes("100% packet loss") // TODO: @seth verify this
   })
   return true
 }

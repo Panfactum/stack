@@ -37,7 +37,6 @@ export async function setupPolicyController(options: InstallClusterStepOptions) 
     /***************************************************
      * Network Test
      ***************************************************/
-
     // https://panfactum.com/docs/edge/guides/bootstrapping/policy-controller#run-network-tests
     // Not doing cilium tests at this time as there's an upstream issue with the tests. Will revisit when the issue is resolved.
     // context.stdout.write("5.c. Running network tests\n");
