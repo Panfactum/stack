@@ -10,7 +10,7 @@ import type { PanfactumContext } from "../../../context/context";
 
 
  
-export async function buildKubeConfig({ context }: { context: PanfactumContext }) {
+export async function buildKubeConfig({ awsProfile, context }: { awsProfile: string, context: PanfactumContext }) {
   const { kube_dir, environments_dir } = context.repoVariables;
 
   const clusterInfoFilePath = `${kube_dir}/cluster_info`;
@@ -32,6 +32,7 @@ export async function buildKubeConfig({ context }: { context: PanfactumContext }
         indentLevel: 1
       });
       const moduleOutput = await terragruntOutput({
+        awsProfile,
         context: {
           ...context,
           stdout: createNullWriter()

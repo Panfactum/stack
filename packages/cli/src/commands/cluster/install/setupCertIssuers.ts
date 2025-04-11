@@ -36,6 +36,7 @@ export async function setupCertificateIssuers(
   options: InstallClusterStepOptions
 ) {
   const {
+    awsProfile,
     checkpointer,
     clusterPath,
     context,
@@ -222,6 +223,7 @@ export async function setupCertificateIssuers(
     });
 
     const delegatedZoneOutput = await terragruntOutput({
+      awsProfile,
       context,
       modulePath: delegatedZoneForCurrentEnvironment.path,
       validationSchema: ZONE_OUTPUT_SCHEMA,

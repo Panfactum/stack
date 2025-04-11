@@ -9,8 +9,10 @@ import type { PanfactumContext } from "../../../context/context";
 
  
 export async function buildSSHConfig({
+  awsProfile,
   context,
 }: {
+  awsProfile: string;
   context: PanfactumContext;
 }) {
 
@@ -38,6 +40,7 @@ export async function buildSSHConfig({
       const directory = path.dirname(bastionTerragruntHCL);
       context.stderr.write(`  Adding bastion at ${getLastPathSegments(directory,3)}...\n`);
       const moduleOutput = await terragruntOutput({
+        awsProfile,
         context: {
           ...context,
           stdout: createNullWriter()
