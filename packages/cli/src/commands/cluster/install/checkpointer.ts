@@ -111,6 +111,23 @@ const STEPS = z.object({
   schedulerDeployment: z.boolean().default(false).catch(false),
   kedaDeployment: z.boolean().default(false).catch(false),
   setupInboundNetworking: z.boolean().default(false).catch(false),
+  deployExternalDns: z.boolean().default(false).catch(false),
+  deployAwsLbController: z.boolean().default(false).catch(false),
+  generateIngressSecret: z.boolean().default(false).catch(false),
+  deployNginxIngress: z.boolean().default(false).catch(false),
+  deployVaultIngress: z.boolean().default(false).catch(false),
+  updateVaultAddress: z.boolean().default(false).catch(false),
+  deployBastion: z.boolean().default(false).catch(false),
+  configureBastionConnectivity: z.boolean().default(false).catch(false),
+  setupMaintenanceControllers: z.boolean().default(false).catch(false),
+  deployReloader: z.boolean().default(false).catch(false),
+  deployNodeImageCaches: z.boolean().default(false).catch(false),
+  deployPvcAutoresizer: z.boolean().default(false).catch(false),
+  deployDescheduler: z.boolean().default(false).catch(false),
+  deployExternalSnapshotter: z.boolean().default(false).catch(false),
+  deployVelero: z.boolean().default(false).catch(false),
+  setupCloudNativePG: z.boolean().default(false).catch(false),
+  deployCloudNativePG: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;
