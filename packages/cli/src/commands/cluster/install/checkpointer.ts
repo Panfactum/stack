@@ -38,8 +38,8 @@ export const GITHUB_USERNAME = z
   );
 export const CLUSTER_NAME = z
   .string()
-  .min(3)
-  .max(63)
+  .min(3, "Cluster name must be at least 3 characters long")
+  .max(63, "Cluster name must be less than 63 characters long")
   .regex(
     /^[a-z0-9-]+$/,
     "Must only contain the letters a-z (lowercase), numbers 0-9, and hyphens (-)"
