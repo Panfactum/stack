@@ -11,18 +11,17 @@ import type { PanfactumContext } from "@/context/context";
  */
 export async function testVPCNetworkBlocking({
   natIp,
-  context
+  context,
 }: {
   natIp: string;
   context: PanfactumContext;
 }) {
-
   await execute({
     command: ["ping", "-q", "-w", "3", "-c", "1", natIp],
     context,
     workingDirectory: process.cwd(),
     errorMessage: `Network traffic not blocked to ${natIp}!`,
-    isSuccess: ({stdout}) => stdout.includes("100% packet loss") // TODO: @seth verify this
-  })
-  return true
+    isSuccess: ({ stdout }) => stdout.includes("100% packet loss"),
+  });
+  return true;
 }
