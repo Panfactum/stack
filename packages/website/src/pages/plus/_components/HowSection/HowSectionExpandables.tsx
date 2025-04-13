@@ -91,6 +91,12 @@ export const HowSectionExpandables: Component = () => {
             expert architectural guidance, and benchmark your system designs
             against what works best for other Panfactum clients.
           </p>
+          <p>
+            100% of the infrastructure-as-code we build lives in your team's
+            code repositories. Unlike legacy agencies, we've designed our
+            systems to allow your team to collaborate and self-service on the
+            systems we deploy and maintain for you.
+          </p>
         </HowSectionExpandable>
         <HowSectionExpandable
           title="Backed by World-leading Experts"

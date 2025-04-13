@@ -1,0 +1,176 @@
+---
+import { clsx } from "clsx";
+
+import Logo from "./images/logo.svg"
+
+// Define a type for table cell content
+type TableCellContent = string | { text: string; href?: string };
+
+const TABLE_DATA: TableCellContent[][] = [
+  ["", "Hire / Contract", "Legacy Agency", "Panfactum"],
+  [
+    "Dedicated Engineer",
+    "Yes",
+    "No",
+    "Yes (+ Experts)",
+  ],
+  [
+    "Cost",
+    {text: "$205K+ / year", href: "https://www.glassdoor.com/Salaries/platform-engineer-salary-SRCH_KO0,17.htm"},
+    "Hidden, highly variable",
+    {text: "Starting at $999 / month", href: "/plus/pricing"}
+  ],
+  [
+    "Time to Launch",
+    "3-12 months",
+    "3-12 months",
+    "Days",
+  ],
+  [
+    "Quality",
+    "Unproven",
+    "Unproven",
+    {text: "1,000's of users", href: "/"},
+  ],
+  [
+    "Initial Commitment",
+    "High",
+    "Medium",
+    "45-day refund period",
+  ],
+  [
+    "24/7/365 Monitoring",
+    "No",
+    "No",
+    "Yes",
+  ],
+  [
+    "Maintenance",
+    "100% up to you",
+    "Extra costs",
+    "Automatic",
+  ],
+  [
+    "Extensibility",
+    "100% up to you",
+    "Proprietary, rigid",
+    {text: "Extensible, open-source", href: "/"},
+  ],
+  [
+    "Documentation",
+    "100% up to you",
+    "None / Limited",
+    "100's of pages",
+  ],
+  [
+    "Audit / Compliance",
+    "100% up to you",
+    "None / Extra costs",
+    "SOC 2, HITRUST, etc.",
+  ],
+  [
+    "Spend Reduction",
+    "None",
+    "None / Limited",
+    {text: "Guaranteed savings", href: "/plus/pricing"},
+  ],
+];
+
+// Helper function to render cell content
+const renderContent = (content: TableCellContent) => {
+  if (typeof content === 'string') {
+    return content;
+  } else {
+    return content.href 
+      ? `<a href="${content.href}" class="underline decoration-dotted underline-offset-4 cursor-pointer decoration-2" target="_blank" rel="noopener noreferrer">${content.text}</a>`
+      : content.text;
+  }
+};
+
+const cellStyle = "flex min-h-16 min-w-48 sm:min-w-48 md:min-w-56 items-center px-4 lg:text-nowrap";
+const getRowStyleByIndex = (index: number) =>
+  index % 2 === 0 ? "bg-gray-dark-mode-200" : "bg-gray-dark-mode-50";
+const getPFRowStyleByIndex = () => "bg-gold-300";
+---
+<section class="bg-brand-900 py-24 text-white">
+  <div class="mx-auto">
+    <div class="mb-16 text-center">
+      <div class="mb-4 font-bold text-brand-400">
+        How We Compare
+      </div>
+      <h2 class="font-machina text-4xl font-semibold">10x Better Than the Alternatives</h2>
+    </div>
+
+    <div
+    class="mx-auto w-fit max-w-[90vw] overflow-x-scroll rounded-lg text-black"
+  >
+    {
+      TABLE_DATA.map((data, rowNum) => {
+        if (rowNum == 0) {
+          return (
+            <div class="flex">
+              {data.map((companyName, colNum) => {
+                const isFirstCol = colNum === 0;
+                const isSecondCol = colNum === 1;
+                const isLastCol = colNum === 3;
+
+                return (
+                  <div
+                    class:list={clsx(
+                      cellStyle,
+                      "text-nowrap px-0 py-0.5 text-lg font-bold",
+                      isFirstCol
+                        ? "lg:basis-1/4"
+                        : "grow lg:grow-0 lg:basis-1/4",
+                      isSecondCol && "lg:rounded-tl-lg",
+                      isLastCol ? "rounded-tl-lg bg-gold-300 lg:rounded-tl-none" : (isFirstCol ?  "bg-none" : "bg-gray-dark-mode-200"),
+                      !isLastCol && !isFirstCol && "hidden lg:flex",
+                    )}
+                  >
+                    {isLastCol ? (
+                      <div class="flex max-h-5 text-white md:max-h-7 -ml-8 lg:-ml-10">
+                        <Logo />
+                      </div>
+                    ) : (
+                      <Fragment set:html={renderContent(companyName)} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        } else {
+          return (
+            <div class="flex">
+              {data.map((content, colNum) => {
+                const isFirstCol = colNum === 0;
+                const isLastCol = colNum === 3;
+
+                return (
+                  <div
+                    class:list={clsx(
+                      cellStyle,
+                      "py-3 text-sm md:text-base",
+                      isFirstCol
+                        ? "text-display-xs font-semibold lg:basis-1/4"
+                        : "grow lg:grow-0 lg:basis-1/4",
+                      isFirstCol && rowNum === 1 && "rounded-tl-lg",
+                      isLastCol
+                        ? ["lg:font-semibold", getPFRowStyleByIndex()]
+                        : getRowStyleByIndex(rowNum),
+                      !isLastCol && !isFirstCol && "hidden lg:flex",
+                    )}
+                  >
+                    <Fragment set:html={renderContent(content)} />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+      })
+    }
+  </div>
+
+  </div>
+</section> 
