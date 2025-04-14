@@ -59,6 +59,7 @@ export const CLUSTER_DESCRIPTION = z
   .regex(/^(?!aws:).*$/i, "Cannot start with 'AWS:' (case insensitive)");
 
 const SAVED_INPUTS = z.object({
+  slaTarget: z.number().min(1).max(3).int().optional(),
   vpcName: VPC_NAME.optional(),
   vpcDescription: VPC_DESCRIPTION.optional(),
   dockerHubUsername: DOCKERHUB_USERNAME.optional(),
