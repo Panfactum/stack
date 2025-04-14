@@ -665,8 +665,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the Pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 
@@ -1013,8 +1014,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the Pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 

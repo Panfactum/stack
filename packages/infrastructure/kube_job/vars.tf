@@ -1,15 +1,15 @@
 variable "namespace" {
-  description = "The namespace the CronJob will be deployed in"
+  description = "The namespace the Job should be deployed to"
   type        = string
 }
 
 variable "name" {
-  description = "The name of this CronJob"
+  description = "The name of this Job"
   type        = string
 }
 
 variable "priority_class_name" {
-  description = "The priority class to use for Pods in the CronJob"
+  description = "The priority class to use for Pods in the Job"
   type        = string
   default     = null
 }
@@ -100,12 +100,6 @@ variable "containers" {
   }))
 }
 
-variable "restart_policy" {
-  description = "The Pod restart policy"
-  type        = string
-  default     = "OnFailure"
-}
-
 variable "mount_owner" {
   description = "The ID of the group that owns the mounted volumes"
   type        = number
@@ -123,7 +117,7 @@ variable "tmp_directories" {
 }
 
 variable "secret_mounts" {
-  description = "A mapping of Secret names to their mount configuration in the containers of the CronJob"
+  description = "A mapping of Secret names to their mount configuration in the containers of the Job"
   type = map(object({
     mount_path = string                     # Where in the containers to mount the Secret
     optional   = optional(bool, false)      # Whether the Pod can launch if this Secret does not exist
@@ -133,7 +127,7 @@ variable "secret_mounts" {
 }
 
 variable "config_map_mounts" {
-  description = "A mapping of ConfigMap names to their mount configuration in the containers of the CronJob"
+  description = "A mapping of ConfigMap names to their mount configuration in the containers of the Job"
   type = map(object({
     mount_path = string                     # Where in the containers to mount the ConfigMap
     optional   = optional(bool, false)      # Whether the Pod can launch if this ConfigMap does not exist
@@ -143,7 +137,7 @@ variable "config_map_mounts" {
 }
 
 variable "extra_pod_annotations" {
-  description = "Annotations to add to the pods in the CronJob"
+  description = "Annotations to add to the pods in the Job"
   type        = map(string)
   default     = {}
 }
@@ -196,29 +190,6 @@ variable "extra_pod_labels" {
   default     = {}
 }
 
-variable "cron_schedule" {
-  description = "The cron expression to use for the CronJob"
-  type        = string
-}
-
-variable "failed_jobs_history_limit" {
-  description = "The number of failed jobs to retain"
-  type        = number
-  default     = 1
-}
-
-variable "successful_jobs_history_limit" {
-  description = "The number of successful jobs to retain"
-  type        = number
-  default     = 0
-}
-
-variable "suspend" {
-  description = "Whether the CronJob is suspended"
-  type        = bool
-  default     = false
-}
-
 variable "starting_deadline_seconds" {
   description = "Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones."
   type        = number
@@ -235,18 +206,6 @@ variable "concurrency_policy" {
   }
 }
 
-variable "cron_job_annotations" {
-  description = "Annotations to add to the generated CronJob"
-  type        = map(string)
-  default     = {}
-}
-
-variable "job_annotations" {
-  description = "Annotations to add to generated Job resources"
-  type        = map(string)
-  default     = {}
-}
-
 variable "pod_parallelism" {
   description = "Specifies the maximum desired number of Pods the Job should run at any given time."
   type        = number
@@ -259,14 +218,18 @@ variable "ttl_seconds_after_finished" {
   default     = 60 * 10
 }
 
-variable "pod_replacement_policy" {
-  description = "Specifies when to create replacement Pods"
-  type        = string
-  default     = "Failed"
-  validation {
-    condition     = contains(["TerminatingOrFailed", "Failed"], var.pod_replacement_policy)
-    error_message = "pod_replacement_policy must be one of: TerminatingOrFailed, Failed"
-  }
+variable "extra_pod_failure_policy_rules" {
+  description = "Specifies when a pod is marked as failed. See [failure policy docs](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-failure-policy)"
+  type = list(object({
+    action            = optional(string, "Ignore")
+    on_pod_conditions = optional(list(object({ type = string })), [])
+    on_exit_codes = optional(object({
+      container_name = optional(string)
+      operator       = optional(string, "In")
+      values         = list(number)
+    }), null)
+  }))
+  default = []
 }
 
 variable "pod_completions" {
@@ -285,7 +248,7 @@ variable "active_deadline_seconds" {
 variable "backoff_limit" {
   description = "Specifies the number of retries before marking the Job failed."
   type        = number
-  default     = 6
+  default     = 1
 }
 
 variable "disruptions_enabled" {
@@ -325,19 +288,25 @@ variable "linkerd_required" {
 }
 
 variable "extra_labels" {
-  description = "A map of extra labels that will be added to the CronJob (not the pods)"
+  description = "A map of extra labels that will be added to the Job (not the pods)"
   type        = map(string)
   default     = {}
 }
 
 variable "extra_annotations" {
-  description = "A map of extra annotations that will be added to the CronJob (not the pods)"
+  description = "A map of extra annotations that will be added to the Job (not the pods)"
   type        = map(string)
   default     = {}
 }
 
 variable "linkerd_enabled" {
   description = "True iff the Linkerd sidecar should be injected into the pods"
+  type        = bool
+  default     = true
+}
+
+variable "wait_for_success" {
+  description = "True iff you want to wait for Job success before completing the apply"
   type        = bool
   default     = true
 }

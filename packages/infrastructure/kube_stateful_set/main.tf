@@ -96,6 +96,7 @@ module "pod_template" {
   cilium_required                      = var.cilium_required
   linkerd_required                     = var.linkerd_required
   linkerd_enabled                      = var.linkerd_enabled
+  lifetime_evictions_enabled           = var.lifetime_evictions_enabled
 }
 
 resource "kubernetes_service_account" "service_account" {

@@ -1,52 +1,70 @@
+variable "opensearch_version" {
+  description = "The version of OpenSearch to deploy. Note that we only test this module with the default version."
+  type        = string
+  default     = "2.19.1"
+}
+
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "namespace" {
-  description = "The namespace to deploy to the redis instances into"
+  description = "The namespace to deploy to the opensearch instances into"
   type        = string
 }
 
-variable "helm_version" {
-  description = "The version of the bitnami/redis helm chart to use"
-  type        = string
-  default     = "20.5.0"
-}
-
-variable "persistence_size_gb" {
-  description = "How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after cluster creation."
+variable "storage_initial_gb" {
+  description = "How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after installation."
   type        = number
-  default     = 1
+  default     = 10
 }
 
-variable "persistence_storage_limit_gb" {
-  description = "The maximum number of gigabytes of storage to provision for each redis node"
+variable "storage_limit_gb" {
+  description = "The maximum number of GB of storage to provision for each opensearch node"
   type        = number
   default     = null
 }
 
-variable "persistence_storage_increase_threshold_percent" {
+variable "storage_increase_threshold_percent" {
   description = "Dropping below this percent of free storage will trigger an automatic increase in storage size"
   type        = number
   default     = 20
 }
 
-variable "persistence_storage_increase_gb" {
+variable "storage_increase_gb" {
   description = "The amount of GB to increase storage by if free space drops below the threshold"
   type        = number
-  default     = 1
+  default     = 5
+}
+
+variable "storage_class" {
+  description = "The StorageClass to use for the disk storage. Cannot be changed after "
+  type        = string
+  default     = "ebs-standard"
+}
+
+variable "backups_force_delete" {
+  description = "Whether to delete backups on destroy"
+  type        = bool
+  default     = false
+}
+
+variable "aws_iam_ip_allow_list" {
+  description = "A list of IPs that can use the service account token to authenticate with AWS API"
+  type        = list(string)
+  default     = []
 }
 
 variable "persistence_backups_enabled" {
-  description = "Whether to enable backups of the Redis durable storage."
+  description = "Whether to enable backups of the persistent storage."
   type        = bool
   default     = true
 }
 
 variable "replica_count" {
-  description = "The number of redis replicas to deploy"
+  description = "The number of OpenSearch replicas to deploy"
   type        = number
   default     = 3
 
@@ -56,44 +74,26 @@ variable "replica_count" {
   }
 }
 
-variable "redis_flags" {
-  description = "Extra configuration flags to pass to each redis node"
-  type        = list(string)
-  default     = []
-}
-
-variable "redis_save" {
-  description = "Sets the save option for periodic snapshotting"
-  type        = string
-  default     = "300 100" # Every 5 min if at least 100 keys have changed
-}
-
 variable "spot_nodes_enabled" {
-  description = "Whether the database pods can be scheduled on spot nodes"
+  description = "Whether the opensearch pods can be scheduled on spot nodes"
   type        = bool
   default     = true
 }
 
 variable "burstable_nodes_enabled" {
-  description = "Whether the database pods can be scheduled on burstable nodes"
+  description = "Whether the opensearch pods can be scheduled on burstable nodes"
   type        = bool
   default     = true
 }
 
 variable "arm_nodes_enabled" {
-  description = "Whether the database pods can be scheduled on arm64 nodes"
+  description = "Whether the opensearch pods can be scheduled on arm64 nodes"
   type        = bool
   default     = true
 }
 
 variable "controller_nodes_enabled" {
   description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
-  type        = bool
-  default     = false
-}
-
-variable "lfu_cache_enabled" {
-  description = "Whether redis will be deployed as an LFU cache"
   type        = bool
   default     = false
 }
@@ -167,26 +167,22 @@ variable "vault_credential_lifetime_hours" {
   default     = 16
 }
 
-variable "creds_syncer_logging_enabled" {
-  description = "Whether to enable logging for the creds-syncer pods"
-  type        = bool
-  default     = false
-}
-
 variable "node_image_cached_enabled" {
   description = "Whether to add the container images to the node image cache for faster startup times"
   type        = bool
   default     = true
 }
 
-variable "disabled_commands" {
-  description = "Commands that are disabled in Redis. This can be used to provide global protection against unsafe commands."
-  type        = list(string)
-  default     = ["FLUSHDB", "FLUSHALL"]
-}
 
 variable "wait" {
   description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
   type        = bool
   default     = true
+}
+
+
+variable "s3_bucket_access_policy" {
+  description = "Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the backup S3 bucket."
+  type        = string
+  default     = null
 }

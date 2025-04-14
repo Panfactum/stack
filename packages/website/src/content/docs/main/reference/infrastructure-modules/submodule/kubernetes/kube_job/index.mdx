@@ -3,11 +3,11 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_cron_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cron_job" status="stable" type="submodule"/>
+<ModuleHeader name="kube_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_job" status="stable" type="submodule"/>
 
-# Kubernetes CronJob
+# Kubernetes Job
 
-Provides a production-hardened instance of a Kubernetes [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
+Provides a production-hardened instance of a Kubernetes [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
 with the following enhancements:
 
 - Standardized resource labels
@@ -32,7 +32,7 @@ This module follows the basic workload deployment patterns describe in [this gui
 
 ### Scheduling
 
-This module's has inputs that map one-for-one to the [standard Kubernetes CronJob API.](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#cronjobspec-v1-batch)
+This module has inputs that map one-for-one to the [standard Kubernetes Job API.](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#jobspec-v1-batch)
 
 ## Providers
 
@@ -82,21 +82,15 @@ list(object({
   }))
 ```
 
-### cron\_schedule
-
-Description: The cron expression to use for the CronJob
-
-Type: `string`
-
 ### name
 
-Description: The name of this CronJob
+Description: The name of this Job
 
 Type: `string`
 
 ### namespace
 
-Description: The namespace the CronJob will be deployed in
+Description: The namespace the Job should be deployed to
 
 Type: `string`
 
@@ -126,7 +120,7 @@ Description: Specifies the number of retries before marking the Job failed.
 
 Type: `number`
 
-Default: `6`
+Default: `1`
 
 ### burstable\_nodes\_enabled
 
@@ -200,7 +194,7 @@ Default: `"Forbid"`
 
 ### config\_map\_mounts
 
-Description: A mapping of ConfigMap names to their mount configuration in the containers of the CronJob
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Job
 
 Type:
 
@@ -222,14 +216,6 @@ Type: `bool`
 
 Default: `false`
 
-### cron\_job\_annotations
-
-Description: Annotations to add to the generated CronJob
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### disruptions\_enabled
 
 Description: Whether to enable disrupting the Pods in the middle of execution.
@@ -248,7 +234,7 @@ Default: `"ClusterFirst"`
 
 ### extra\_annotations
 
-Description: A map of extra annotations that will be added to the CronJob (not the pods)
+Description: A map of extra annotations that will be added to the Job (not the pods)
 
 Type: `map(string)`
 
@@ -256,7 +242,7 @@ Default: `{}`
 
 ### extra\_labels
 
-Description: A map of extra labels that will be added to the CronJob (not the pods)
+Description: A map of extra labels that will be added to the Job (not the pods)
 
 Type: `map(string)`
 
@@ -264,11 +250,31 @@ Default: `{}`
 
 ### extra\_pod\_annotations
 
-Description: Annotations to add to the pods in the CronJob
+Description: Annotations to add to the pods in the Job
 
 Type: `map(string)`
 
 Default: `{}`
+
+### extra\_pod\_failure\_policy\_rules
+
+Description: Specifies when a pod is marked as failed. See [failure policy docs](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-failure-policy)
+
+Type:
+
+```hcl
+list(object({
+    action            = optional(string, "Ignore")
+    on_pod_conditions = optional(list(object({ type = string })), [])
+    on_exit_codes = optional(object({
+      container_name = optional(string)
+      operator       = optional(string, "In")
+      values         = list(number)
+    }), null)
+  }))
+```
+
+Default: `[]`
 
 ### extra\_pod\_labels
 
@@ -294,22 +300,6 @@ list(object({
 ```
 
 Default: `[]`
-
-### failed\_jobs\_history\_limit
-
-Description: The number of failed jobs to retain
-
-Type: `number`
-
-Default: `1`
-
-### job\_annotations
-
-Description: Annotations to add to generated Job resources
-
-Type: `map(string)`
-
-Default: `{}`
 
 ### linkerd\_enabled
 
@@ -383,14 +373,6 @@ Type: `number`
 
 Default: `1`
 
-### pod\_replacement\_policy
-
-Description: Specifies when to create replacement Pods
-
-Type: `string`
-
-Default: `"Failed"`
-
 ### pod\_version\_labels\_enabled
 
 Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
@@ -401,7 +383,7 @@ Default: `true`
 
 ### priority\_class\_name
 
-Description: The priority class to use for Pods in the CronJob
+Description: The priority class to use for Pods in the Job
 
 Type: `string`
 
@@ -415,17 +397,9 @@ Type: `bool`
 
 Default: `true`
 
-### restart\_policy
-
-Description: The Pod restart policy
-
-Type: `string`
-
-Default: `"OnFailure"`
-
 ### secret\_mounts
 
-Description: A mapping of Secret names to their mount configuration in the containers of the CronJob
+Description: A mapping of Secret names to their mount configuration in the containers of the Job
 
 Type:
 
@@ -454,22 +428,6 @@ Description: Optional deadline in seconds for starting the job if it misses sche
 Type: `number`
 
 Default: `900`
-
-### successful\_jobs\_history\_limit
-
-Description: The number of successful jobs to retain
-
-Type: `number`
-
-Default: `0`
-
-### suspend
-
-Description: Whether the CronJob is suspended
-
-Type: `bool`
-
-Default: `false`
 
 ### termination\_grace\_period\_seconds
 
@@ -506,6 +464,14 @@ Default: `600`
 ### vpa\_enabled
 
 Description: Whether to enable the Vertical Pod Autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+### wait\_for\_success
+
+Description: True iff you want to wait for Job success before completing the apply
 
 Type: `bool`
 

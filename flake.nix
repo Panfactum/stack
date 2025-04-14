@@ -14,6 +14,7 @@
     linkerdPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     natsPkgsSrc.url = "github:NixOS/nixpkgs/34a626458d686f1b58139620a8b2793e9e123bba";
+    opensearchPkgsSrc.url = "github:NixOS/nixpkgs/67d2b8200c828903b36a6dd0fb952fe424aa0606";
     bunPkgsSrc.url = "github:NixOS/nixpkgs/573c650e8a14b2faa0041645ab18aed7e60f0c9a";
     bun2nix = {
       url = "github:baileyluTCD/bun2nix/b23a63c44bba437a37f012e5bcbf0f06bb902f17";
@@ -37,6 +38,7 @@
       vaultPkgsSrc,
       linkerdPkgsSrc,
       kyvernoPkgsSrc,
+      opensearchPkgsSrc,
       natsPkgsSrc,
       bunPkgsSrc,
       ...
@@ -104,6 +106,12 @@
             allowUnfree = true;
           };
         };
+        opensearchPkgs = import opensearchPkgsSrc {
+          inherit system;
+          config = {
+            allowUnfree = true;
+          };
+        };
         natsPkgs = import natsPkgsSrc {
           inherit system;
           config = {
@@ -132,6 +140,7 @@
               linkerdPkgs
               kyvernoPkgs
               natsPkgs
+              opensearchPkgs
               bunPkgs
               bun2nix
               withPFCLI
