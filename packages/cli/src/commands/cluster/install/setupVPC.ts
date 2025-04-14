@@ -140,7 +140,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
     const vpcModule = "aws_vpc";
     await deployModule({
       ...options,
-      stepId: "kyvernoIaCSetup",
+      stepId: "setupVPCIaC",
       stepName: "Infrastructure-as-code Setup",
       moduleDirectory: vpcModule,
       terraguntContents: awsVpcTerragruntHcl,

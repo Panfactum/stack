@@ -65,9 +65,11 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     });
     // eslint-disable-next-line prefer-const
     let [stdoutForMerge, stdoutForCapture] = proc.stdout.tee();
-
     // eslint-disable-next-line prefer-const
     let [stderrForMerge, stderrForCapture] = proc.stderr.tee();
+
+    let stdoutCallbackPromise = Promise.resolve();
+    let stderrCallbackPromise = Promise.resolve();
 
     if (onStdOutNewline) {
       let stdoutForCallback;
@@ -78,7 +80,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         onStdOutNewline,
         i
       );
-      stdoutReader.read().then(stdoutProcessor);
+      stdoutCallbackPromise = stdoutReader.read().then(stdoutProcessor);
     }
 
     if (onStdErrNewline) {
@@ -90,22 +92,33 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         onStdErrNewline,
         i
       );
-      stderrReader.read().then(stderrProcessor);
+      stderrCallbackPromise = stderrReader.read().then(stderrProcessor);
     }
 
+    const stdoutPromise = new globalThis.Response(stdoutForCapture).text();
+    const stderrPromise = new globalThis.Response(stderrForCapture).text();
     const mergedOutputStreams = concatStreams([stdoutForMerge, stderrForMerge]);
-    await proc.exited;
-    const output = await new globalThis.Response(mergedOutputStreams).text();
+    const mergedOutputStreamsPromise = new globalThis.Response(
+      mergedOutputStreams
+    ).text();
+
+    const [exitCode, stdout, stderr, output] = await Promise.all([
+      proc.exited,
+      stdoutPromise,
+      stderrPromise,
+      mergedOutputStreamsPromise,
+      stdoutCallbackPromise,
+      stderrCallbackPromise,
+    ]);
+
     context.logger.log(output, { level: "debug" });
     logsBuffer += output + "\n";
-    const stdout = (
-      await new globalThis.Response(stdoutForCapture).text()
-    ).trim();
-    const stderr = (
-      await new globalThis.Response(stderrForCapture).text()
-    ).trim();
-    const exitCode = proc.exitCode!;
-    const retValue = { exitCode, stderr, stdout };
+
+    const retValue = {
+      exitCode,
+      stderr: stderr.trim(),
+      stdout: stdout.trim(),
+    };
     if (isSuccess(retValue)) {
       return retValue;
     }

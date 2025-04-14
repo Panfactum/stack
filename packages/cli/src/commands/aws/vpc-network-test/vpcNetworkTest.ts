@@ -86,13 +86,19 @@ export const vpcNetworkTest = async ({
           interval: 10000,
         }
       );
-      const instanceId = await getInstanceId({
-        asgName: asg,
-        awsProfile,
-        awsRegion: moduleOutputs.test_config.value.region,
-        context,
-      });
-      finishGettingInstanceId();
+      let instanceId;
+      try {
+        instanceId = await getInstanceId({
+          asgName: asg,
+          awsProfile,
+          awsRegion: moduleOutputs.test_config.value.region,
+          context,
+        });
+        finishGettingInstanceId();
+      } catch (error) {
+        finishGettingInstanceId();
+        throw error;
+      }
 
       // Step 3: Run the network test
       const commandHasStarted = context.logger.progressMessage(
@@ -101,13 +107,19 @@ export const vpcNetworkTest = async ({
           interval: 5000,
         }
       );
-      const commandId = await runSsmCommand({
-        instanceId,
-        awsProfile,
-        awsRegion,
-        context,
-      });
-      commandHasStarted();
+      let commandId;
+      try {
+        commandId = await runSsmCommand({
+          instanceId,
+          awsProfile,
+          awsRegion,
+          context,
+        });
+        commandHasStarted();
+      } catch (error) {
+        commandHasStarted();
+        throw error;
+      }
 
       // Step 4: Get the result of the network test
       const gotComamndOutput = context.logger.progressMessage(
@@ -116,20 +128,24 @@ export const vpcNetworkTest = async ({
           interval: 5000,
         }
       );
-      const publicIp = await getSSMCommandOutput({
-        commandId,
-        instanceId,
-        awsProfile,
-        awsRegion,
-        context,
-      });
-      gotComamndOutput();
+      let publicIp;
+      try {
+        publicIp = await getSSMCommandOutput({
+          commandId,
+          instanceId,
+          awsProfile,
+          awsRegion,
+          context,
+        });
+        gotComamndOutput();
+      } catch (error) {
+        gotComamndOutput();
+        throw error;
+      }
 
       // Step 5: Ensure the public IP is correct
       if (publicIp !== natIp) {
-        throw new CLIError(
-          `${instanceId} is NOT routing traffic through NAT!`
-        );
+        throw new CLIError(`${instanceId} is NOT routing traffic through NAT!`);
       }
 
       // Step 6: Ensure that the NAT_IP rejects inbound traffic
