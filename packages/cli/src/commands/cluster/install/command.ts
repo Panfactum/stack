@@ -162,16 +162,6 @@ export class InstallClusterCommand extends PanfactumCommand {
     );
     const clusterPath = path.join(environmentPath, region);
 
-    /***********************************************
-     * Confirms the SLA target for the cluster
-     ***********************************************/
-    const confirmedSLATarget = await setSLA({
-      clusterPath,
-      environmentPath,
-      context: this.context,
-      slaTarget,
-    });
-
     /*******************************************
      * Checkpointer
      *
@@ -183,6 +173,17 @@ export class InstallClusterCommand extends PanfactumCommand {
       ".cluster-install.checkpoint.json"
     );
     const checkpointer = new Checkpointer(this.context, checkpointPath);
+
+    /***********************************************
+     * Confirms the SLA target for the cluster
+     ***********************************************/
+    const confirmedSLATarget = await setSLA({
+      checkpointer,
+      clusterPath,
+      environmentPath,
+      context: this.context,
+      slaTarget,
+    });
 
     /***********************************************
      * Main Setup Driver
@@ -205,15 +206,16 @@ export class InstallClusterCommand extends PanfactumCommand {
     };
 
     for (const [i, { setup, id, label, extraInfo }] of SETUP_STEPS.entries()) {
+      const stepNum = i + 1;
       if (await checkpointer.isStepComplete(id)) {
-        informStepComplete(this.context, label, i);
+        informStepComplete(this.context, label, stepNum);
       } else {
-        informStepStart(this.context, label, i);
+        informStepStart(this.context, label, stepNum);
         try {
           if (extraInfo) {
             this.context.logger.log(extraInfo, { style: "important" });
           }
-          await setup({ ...options, stepNum: i });
+          await setup({ ...options, stepNum });
           await checkpointer.setStepComplete(id);
         } catch (e) {
           throw new CLIError(`${label} setup failed`, e);
