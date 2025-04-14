@@ -5,6 +5,7 @@ import { CLIError } from "@/util/error/error";
 import { Checkpointer, type Step } from "./checkpointer";
 import { informStepComplete, informStepStart } from "./messages";
 import { setSLA } from "./setSLA";
+import { setupAuthentik } from "./setupAuthentik";
 import { setupAutoscaling } from "./setupAutoscaling";
 import { setupCertificateIssuers } from "./setupCertIssuers";
 import { setupCertManagement } from "./setupCertManagement";
@@ -106,6 +107,11 @@ const SETUP_STEPS: Array<{
     id: "setupCloudNativePG",
     setup: setupCloudNativePG,
   },
+  {
+    label: "Authentik",
+    id: "setupAuthentik",
+    setup: setupAuthentik,
+  },
 ];
 
 export class InstallClusterCommand extends PanfactumCommand {
@@ -201,6 +207,7 @@ export class InstallClusterCommand extends PanfactumCommand {
       region,
       checkpointer,
       clusterPath,
+      environmentsDir: this.context.repoVariables.environments_dir,
       slaTarget: confirmedSLATarget,
       stepNum: 0,
     };

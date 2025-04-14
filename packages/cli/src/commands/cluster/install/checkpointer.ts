@@ -70,6 +70,7 @@ const SAVED_INPUTS = z.object({
   vaultRootToken: z.string().optional(),
   vaultAddress: z.string().optional(),
   certificateAlertEmail: z.string().optional(),
+  authentikDomain: z.string().optional(),
 });
 
 const STEPS = z.object({
@@ -129,6 +130,10 @@ const STEPS = z.object({
   deployVelero: z.boolean().default(false).catch(false),
   setupCloudNativePG: z.boolean().default(false).catch(false),
   deployCloudNativePG: z.boolean().default(false).catch(false),
+  setupAuthentik: z.boolean().default(false).catch(false),
+  setupAWSSES: z.boolean().default(false).catch(false),
+  deployAWSSES: z.boolean().default(false).catch(false),
+  deployAuthentik: z.boolean().default(false).catch(false),
 });
 
 export type Step = keyof z.infer<typeof STEPS>;
