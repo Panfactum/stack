@@ -160,17 +160,32 @@ locals {
     mountPath = config.mount_path
   }]
 
-  common_secret_volume_mounts = [for name, config in var.secret_mounts : {
-    name      = "secret-${name}"
-    mountPath = config.mount_path
-    readOnly  = true
-  }]
+  common_secret_volume_mounts = flatten([for name, config in var.secret_mounts : length(config.sub_paths) > 0 ?
+    [for sub_path in config.sub_paths : {
+      name      = "secret-${name}"
+      mountPath = "${config.mount_path}/${sub_path}"
+      subPath   = sub_path
+      readOnly  = true
+    }]
+    : [{
+      name      = "secret-${name}"
+      mountPath = config.mount_path
+      readOnly  = true
+      subPath   = null
+  }]])
 
-  common_config_map_volume_mounts = [for name, config in var.config_map_mounts : {
-    name      = "config-map-${name}"
-    mountPath = config.mount_path
-    readOnly  = true
-  }]
+  common_config_map_volume_mounts = flatten([for name, config in var.config_map_mounts : length(config.sub_paths) > 0 ?
+    [for sub_path in config.sub_paths : {
+      name      = "config-map-${name}"
+      mountPath = "${config.mount_path}/${sub_path}"
+      subPath   = sub_path
+      readOnly  = true
+      }] : [{
+      name      = "config-map-${name}"
+      mountPath = config.mount_path
+      readOnly  = true
+      subPath   = null
+  }]])
 
   common_downward_api_mounts = [{
     name      = "podinfo"

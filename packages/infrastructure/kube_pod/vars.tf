@@ -123,8 +123,9 @@ variable "tmp_directories" {
 variable "secret_mounts" {
   description = "A mapping of Secret names to their mount configuration in the containers of the Pod"
   type = map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
   default = {}
 }
@@ -132,8 +133,9 @@ variable "secret_mounts" {
 variable "config_map_mounts" {
   description = "A mapping of ConfigMap names to their mount configuration in the containers of the Pod"
   type = map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
   default = {}
 }
@@ -310,6 +312,12 @@ variable "linkerd_enabled" {
 
 variable "default_permissions_enabled" {
   description = "True iff a set of default permissions should be granted to the Pod's service account (e.g., reading its own manifest)."
+  type        = bool
+  default     = true
+}
+
+variable "lifetime_evictions_enabled" {
+  description = "Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)"
   type        = bool
   default     = true
 }

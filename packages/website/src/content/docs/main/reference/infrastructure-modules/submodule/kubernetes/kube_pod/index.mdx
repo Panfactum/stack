@@ -198,8 +198,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 
@@ -316,6 +317,14 @@ Type: `bool`
 
 Default: `false`
 
+### lifetime\_evictions\_enabled
+
+Description: Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)
+
+Type: `bool`
+
+Default: `true`
+
 ### linkerd\_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
@@ -412,8 +421,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 

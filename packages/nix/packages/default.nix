@@ -10,6 +10,7 @@
   linkerdPkgs,
   kyvernoPkgs,
   natsPkgs,
+  opensearchPkgs,
   bunPkgs,
   bun2nix,
   withPFCLI,
@@ -84,6 +85,7 @@ with pkgs;
   ####################################
   tfUtilsPkgs.opentofu # declarative iac tool (open alternative to terraform)
   customTerragrunt # opentofu-runner
+  tfUtilsPkgs.terraform-ls # language server for editors
 
   ####################################
   # Editors
@@ -165,6 +167,11 @@ with pkgs;
   natsPkgs.nats-top # cli for configuring NATS accounts
   postgresPkgs.kubectl-cnpg # for managing the cnpg postgres databases
   # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
+
+  ####################################
+  # Opensearch Tools
+  ####################################
+  opensearchPkgs.opensearch-cli
 ]
 ++ (
   if withPFCLI then

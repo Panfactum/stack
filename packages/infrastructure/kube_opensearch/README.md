@@ -1,15 +1,8 @@
-import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
-
-{/* lint disable no-duplicate-headings */}
-
-{/* eslint-disable import/order */}
-<ModuleHeader name="kube_redis_sentinel" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_redis_sentinel" status="stable" type="submodule"/>
-
-# Redis with Sentinel
+# OpenSearch
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
-This module deploys a highly-available set of [Redis](https://redis.io/docs/) nodes.
+This module deploys a highly-available install of [OpenSearch](https://opensearch.org/).
 
 This is deployed in a single master, many replica configuration. Failover is handled
 by [Redis Sentinel](https://redis.io/docs/management/sentinel/) which is also
@@ -46,7 +39,7 @@ credentials that a pod receives are valid for `vault_credential_lifetime_hours` 
 
 The below example show how to connect to the Redis master
 using dynamically rotated admin credentials by setting various
-environment variables in our [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_deployment) module.
+environment variables in our [kube_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
 module "redis" {
@@ -57,6 +50,7 @@ module "redis" {
 module "deployment" {
   source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   ...
+  
   common_env_from_secrets = {
     REDIS_USERNAME = {
       secret_name = module.redis.admin_creds_secret
@@ -76,15 +70,15 @@ module "deployment" {
 
 ### Persistence
 
-Redis provides two mechanisms for persistence:
+Redis provides two mechanisms for persistence: 
 [AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/).
 This module uses RDB by default (tuned via `redis_save`).
 
 Using AOF (whether independently or concurrently with RDB) negates the ability to do [partial resynchronizations after restarts
 and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers). Instead, a copy of the database must be transferred from the current master to restarted or new replicas. This greatly increases
-the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence
-at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not
-from their local AOF. The only benefit would be if _all_ Redis nodes simultaneously failed with
+the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence 
+at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not 
+from their local AOF. The only benefit would be if _all_ Redis nodes simultaneously failed with 
 a non-graceful shutdown (an incredibly unlikely scenario).
 
 Persistence is always enabled in this module for similar reasons. Without persistence, an entire copy of the database would
@@ -93,7 +87,7 @@ data on disk is far less than the network costs associated with this transfer. M
 never impact performance as writes are completed asynchronously unless configured otherwise.
 
 Once the Redis cluster is running, the PVC autoresizer
-(provided by [kube\_pvc\_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer))
+(provided by [kube_pvc_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
 will automatically expand the EBS volumes once the free space
 drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling event until a maximum of `persistence_storage_limit_gb`.
@@ -124,7 +118,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the
-[kube\_disruption\_window\_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_disruption\_window\_controller)
+[kube_disruption_window_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
 submodule.
 
 #### Custom PDBs
@@ -201,355 +195,3 @@ will be of the highest precedence.
 For more information about passing flags through the commandline and available options,
 see [this documentation](https://redis.io/docs/latest/operate/oss_and_stack/management/config/).
 
-## Providers
-
-The following providers are needed by this module:
-
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
-
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
-
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
-
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
-
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
-
-- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
-
-## Required Inputs
-
-The following input variables are required:
-
-### namespace
-
-Description: The namespace to deploy to the redis instances into
-
-Type: `string`
-
-## Optional Inputs
-
-The following input variables are optional (have default values):
-
-### arm\_nodes\_enabled
-
-Description: Whether the database pods can be scheduled on arm64 nodes
-
-Type: `bool`
-
-Default: `true`
-
-### burstable\_nodes\_enabled
-
-Description: Whether the database pods can be scheduled on burstable nodes
-
-Type: `bool`
-
-Default: `true`
-
-### controller\_nodes\_enabled
-
-Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
-
-Type: `bool`
-
-Default: `false`
-
-### creds\_syncer\_logging\_enabled
-
-Description: Whether to enable logging for the creds-syncer pods
-
-Type: `bool`
-
-Default: `false`
-
-### disabled\_commands
-
-Description: Commands that are disabled in Redis. This can be used to provide global protection against unsafe commands.
-
-Type: `list(string)`
-
-Default:
-
-```json
-[
-  "FLUSHDB",
-  "FLUSHALL"
-]
-```
-
-### helm\_version
-
-Description: The version of the bitnami/redis helm chart to use
-
-Type: `string`
-
-Default: `"20.5.0"`
-
-### instance\_type\_anti\_affinity\_required
-
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
-
-Type: `bool`
-
-Default: `null`
-
-### lfu\_cache\_enabled
-
-Description: Whether redis will be deployed as an LFU cache
-
-Type: `bool`
-
-Default: `false`
-
-### minimum\_memory\_mb
-
-Description: The minimum memory in Mb to use for the redis nodes
-
-Type: `number`
-
-Default: `25`
-
-### monitoring\_enabled
-
-Description: Whether to allow monitoring CRs to be deployed in the namespace
-
-Type: `bool`
-
-Default: `false`
-
-### node\_image\_cached\_enabled
-
-Description: Whether to add the container images to the node image cache for faster startup times
-
-Type: `bool`
-
-Default: `true`
-
-### panfactum\_scheduler\_enabled
-
-Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
-
-Type: `bool`
-
-Default: `true`
-
-### persistence\_backups\_enabled
-
-Description: Whether to enable backups of the Redis durable storage.
-
-Type: `bool`
-
-Default: `true`
-
-### persistence\_size\_gb
-
-Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after cluster creation.
-
-Type: `number`
-
-Default: `1`
-
-### persistence\_storage\_increase\_gb
-
-Description: The amount of GB to increase storage by if free space drops below the threshold
-
-Type: `number`
-
-Default: `1`
-
-### persistence\_storage\_increase\_threshold\_percent
-
-Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
-
-Type: `number`
-
-Default: `20`
-
-### persistence\_storage\_limit\_gb
-
-Description: The maximum number of gigabytes of storage to provision for each redis node
-
-Type: `number`
-
-Default: `null`
-
-### pull\_through\_cache\_enabled
-
-Description: Whether to use the ECR pull through cache for the deployed images
-
-Type: `bool`
-
-Default: `true`
-
-### redis\_flags
-
-Description: Extra configuration flags to pass to each redis node
-
-Type: `list(string)`
-
-Default: `[]`
-
-### redis\_save
-
-Description: Sets the save option for periodic snapshotting
-
-Type: `string`
-
-Default: `"300 100"`
-
-### replica\_count
-
-Description: The number of redis replicas to deploy
-
-Type: `number`
-
-Default: `3`
-
-### spot\_nodes\_enabled
-
-Description: Whether the database pods can be scheduled on spot nodes
-
-Type: `bool`
-
-Default: `true`
-
-### vault\_credential\_lifetime\_hours
-
-Description: The lifetime of database credentials generated by Vault
-
-Type: `number`
-
-Default: `16`
-
-### voluntary\_disruption\_window\_cron\_schedule
-
-Description: The times when disruption windows should start
-
-Type: `string`
-
-Default: `"0 4 * * *"`
-
-### voluntary\_disruption\_window\_enabled
-
-Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
-
-Type: `bool`
-
-Default: `false`
-
-### voluntary\_disruption\_window\_seconds
-
-Description: The length of the disruption window in seconds
-
-Type: `number`
-
-Default: `3600`
-
-### voluntary\_disruptions\_enabled
-
-Description: Whether to enable voluntary disruptions of pods in this module.
-
-Type: `bool`
-
-Default: `true`
-
-### vpa\_enabled
-
-Description: Whether the VPA resources should be enabled
-
-Type: `bool`
-
-Default: `true`
-
-### wait
-
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
-
-Type: `bool`
-
-Default: `true`
-
-## Outputs
-
-The following outputs are exported:
-
-### admin\_creds\_secret
-
-Description: The name of the Kubernetes Secret holding credentials for the admin role in the Redis database
-
-### admin\_role
-
-Description: The Vault role used to get admin credentials for the created Redis cluster
-
-### master\_set
-
-Description: The value for the master set to use when configuring Sentinel-aware Redis clients
-
-### match\_labels
-
-Description: A label selector that matches all Redis pods in the cluster
-
-### match\_labels\_master
-
-Description: A label selector that matches only the Redis master pod in the cluster
-
-### namespace
-
-Description: Kubernetes namespace where module resources are created
-
-### reader\_creds\_secret
-
-Description: The name of the Kubernetes Secret holding credentials for the reader role in the Redis database
-
-### reader\_role
-
-Description: The Vault role used to get read-only credentials for the created Redis cluster
-
-### redis\_host
-
-Description: A service address that points to all Redis nodes
-
-### redis\_host\_list
-
-Description: A list of domain names for every Redis pod in the cluster
-
-### redis\_master\_host
-
-Description: A service address that points to only the writable redis master
-
-### redis\_port
-
-Description: The port that the Redis servers listen on
-
-### redis\_sentinel\_host
-
-Description: A service address that points to the Redis Sentinels
-
-### redis\_sentinel\_port
-
-Description: The port that the Sentinel servers listen on
-
-### root\_name
-
-Description: The name of the root user of the database
-
-### root\_password
-
-Description: The password for root user of the database
-
-### superuser\_creds\_secret
-
-Description: The name of the Kubernetes Secret holding credentials for the superuser role in the Redis database
-
-### superuser\_role
-
-Description: The Vault role used to get superuser credentials for the created Redis cluster
-
-## Usage
-
-No notes
-
-{/* eslint-enable import/order */}
-
-{/* lint enable no-duplicate-headings */}

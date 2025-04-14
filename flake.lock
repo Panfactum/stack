@@ -209,6 +209,22 @@
         "type": "github"
       }
     },
+    "opensearchPkgsSrc": {
+      "locked": {
+        "lastModified": 1744219666,
+        "narHash": "sha256-6F/IaCjitLkWfbR3prNYv+ytDVQRRGicHO9/IRcMcUU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "67d2b8200c828903b36a6dd0fb952fe424aa0606",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "67d2b8200c828903b36a6dd0fb952fe424aa0606",
+        "type": "github"
+      }
+    },
     "postgresPkgsSrc": {
       "locked": {
         "lastModified": 1735176300,
@@ -276,6 +292,7 @@
         "linkerdPkgsSrc": "linkerdPkgsSrc",
         "natsPkgsSrc": "natsPkgsSrc",
         "nixpkgs": "nixpkgs",
+        "opensearchPkgsSrc": "opensearchPkgsSrc",
         "postgresPkgsSrc": "postgresPkgsSrc",
         "redisPkgsSrc": "redisPkgsSrc",
         "tfUtilsPkgsSrc": "tfUtilsPkgsSrc",
