@@ -1,7 +1,7 @@
 import { dirname } from "node:path";
 import { z } from "zod";
 import { sopsDecrypt } from "./sopsDecrypt";
-import { CLIError } from "../error/error";
+import { CLISubprocessError } from "../error/error";
 import { fileExists } from "../fs/fileExists";
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
@@ -16,6 +16,7 @@ export const sopsUpsert = async (input: Input) => {
   const { values, filePath, context } = input;
 
   if (!(await fileExists(filePath))) {
+    await createDirectoryPath(filePath, context);
     await writeEncryptedData(input);
   } else {
     const existingData = await sopsDecrypt({
@@ -31,25 +32,56 @@ export const sopsUpsert = async (input: Input) => {
   }
 };
 
+const createDirectoryPath = async (
+  filePath: string,
+  context: PanfactumContext
+) => {
+  const fileDir = dirname(filePath);
+  if (fileDir !== process.cwd()) {
+    try {
+      await execute({
+        command: ["mkdir", "-p", fileDir],
+        context,
+        workingDirectory: process.cwd(),
+      });
+    } catch (error) {
+      throw new CLISubprocessError(
+        "Unable to create directories for encrypted file",
+        {
+          command: `mkdir -p ${fileDir}`,
+          subprocessLogs:
+            error instanceof Error ? error.message : "Unknown error",
+          workingDirectory: process.cwd(),
+        }
+      );
+    }
+  }
+};
+
 const writeEncryptedData = async ({ values, filePath, context }: Input) => {
+  const command = [
+    "sops",
+    "-e",
+    "--input-type",
+    "json",
+    "--output",
+    filePath,
+    "--filename-override",
+    filePath,
+    "/dev/stdin",
+  ];
   try {
     await execute({
-      command: [
-        "sops",
-        "-e",
-        "--input-type",
-        "json",
-        "--output",
-        filePath,
-        "--filename-override",
-        filePath,
-        "/dev/stdin",
-      ],
+      command,
       context,
       workingDirectory: dirname(filePath),
       stdin: new globalThis.Blob([JSON.stringify(values)]),
     });
-  } catch (e) {
-    throw new CLIError("Unable to write encrypted data", e);
+  } catch (error) {
+    throw new CLISubprocessError("Unable to write encrypted data", {
+      command: command.join(" "),
+      subprocessLogs: error instanceof Error ? error.message : "Unknown error",
+      workingDirectory: process.cwd(),
+    });
   }
 };

@@ -14,6 +14,6 @@ export const createPanfactumContext = async (
     ...context,
     repoVariables: await getRepoVariables(),
     // TODO: @jack get the log level into this
-    logger: new Logger(context.stderr),
+    logger: new Logger(context.stderr, { logLevel: "debug" }),
   };
 };

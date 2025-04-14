@@ -11,22 +11,29 @@ interface Inputs {
 }
 
 export const getSSMCommandOutput = async (inputs: Inputs): Promise<string> => {
-  
   const workingDirectory = process.cwd();
-  const status =  await getSSMCommandStatus({...inputs, workingDirectory});
+  const status = await getSSMCommandStatus({ ...inputs, workingDirectory });
 
   if (status === "Failed") {
-    await getSSMCommandStdErr({...inputs, workingDirectory})
+    await getSSMCommandStdErr({ ...inputs, workingDirectory });
   }
-  
-  return getSSMCommandStdOut({...inputs, workingDirectory})
+
+  return getSSMCommandStdOut({ ...inputs, workingDirectory });
 };
 
+async function getSSMCommandStdOut(
+  inputs: Inputs & { workingDirectory: string }
+) {
+  const {
+    awsRegion,
+    awsProfile,
+    instanceId,
+    commandId,
+    context,
+    workingDirectory,
+  } = inputs;
 
-async function getSSMCommandStdOut(inputs: Inputs & {workingDirectory: string}){
-  const {awsRegion, awsProfile, instanceId, commandId, context, workingDirectory} = inputs
-
-  const {stdout} = await execute({
+  const { stdout } = await execute({
     command: [
       "aws",
       "--region",
@@ -46,16 +53,25 @@ async function getSSMCommandStdOut(inputs: Inputs & {workingDirectory: string}){
     ],
     context,
     workingDirectory,
-    errorMessage: `Failed to get stdout from SSM command ${commandId} on instance ${instanceId}`
-  })
+    errorMessage: `Failed to get stdout from SSM command ${commandId} on instance ${instanceId}`,
+  });
 
-  return stdout
+  return stdout;
 }
 
-async function getSSMCommandStdErr(inputs: Inputs & {workingDirectory: string}){
-  const {awsRegion, awsProfile, instanceId, commandId, context, workingDirectory} = inputs
+async function getSSMCommandStdErr(
+  inputs: Inputs & { workingDirectory: string }
+) {
+  const {
+    awsRegion,
+    awsProfile,
+    instanceId,
+    commandId,
+    context,
+    workingDirectory,
+  } = inputs;
 
-  const {stdout} = await execute({
+  const { stdout } = await execute({
     command: [
       "aws",
       "--region",
@@ -75,23 +91,29 @@ async function getSSMCommandStdErr(inputs: Inputs & {workingDirectory: string}){
     ],
     context,
     workingDirectory,
-    errorMessage: `Failed to get stderr from SSM command ${commandId} on instance ${instanceId}`
-  })
+    errorMessage: `Failed to get stderr from SSM command ${commandId} on instance ${instanceId}`,
+  });
 
-  throw new CLISubprocessError(
-    `SSM command on remote instance failed`,
-    {
-      command: `SSM command ${commandId} on instance ${instanceId}`,
-      subprocessLogs: stdout,
-      workingDirectory
-    }
-  )
+  throw new CLISubprocessError(`SSM command on remote instance failed`, {
+    command: `SSM command ${commandId} on instance ${instanceId}`,
+    subprocessLogs: stdout,
+    workingDirectory,
+  });
 }
 
-async function getSSMCommandStatus(inputs: Inputs & {workingDirectory: string}){
-  const {awsRegion, awsProfile, instanceId, commandId, context, workingDirectory} = inputs
-  
-  const {stdout} = await execute({
+async function getSSMCommandStatus(
+  inputs: Inputs & { workingDirectory: string }
+) {
+  const {
+    awsRegion,
+    awsProfile,
+    instanceId,
+    commandId,
+    context,
+    workingDirectory,
+  } = inputs;
+
+  const { stdout } = await execute({
     command: [
       "aws",
       "--region",
@@ -112,8 +134,9 @@ async function getSSMCommandStatus(inputs: Inputs & {workingDirectory: string}){
     context,
     workingDirectory,
     errorMessage: `Failed to get SSM command status for command ${commandId} on instance ${instanceId}`,
-    retries: 20,
-    isSuccess: ({stdout, exitCode}) => exitCode === 0 && (stdout === "Success" || stdout === "Failed")
-  })
-  return stdout
+    retries: 60,
+    isSuccess: ({ stdout, exitCode }) =>
+      exitCode === 0 && (stdout === "Success" || stdout === "Failed"),
+  });
+  return stdout;
 }
