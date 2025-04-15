@@ -32,15 +32,15 @@ locals {
   namespace               = module.namespace.namespace
   memory_limit_multiplier = 1.3
 
-  #vault_mount         = "secret"  # The secret engine mount point
-  vault_prefix = "secret/airbyte" # The base path under the mount
-  #vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
-  #vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
-  #vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
+  vault_mount         = "secret"  # The secret engine mount point
+  vault_prefix        = "airbyte" # The base path under the mount
+  vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
+  vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
 
   # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
   # secret/data/airbyte
-  #vault_env_prefix = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_env_prefix = "${local.vault_mount}/${local.vault_prefix}"
   vault_address = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
@@ -373,34 +373,53 @@ resource "kubernetes_secret" "airbyte_secrets" {
 ***************************************/
 
 data "vault_policy_document" "airbyte" {
+  # Root paths for metadata (without wildcards)
   rule {
-    path         = "secret/*"
+    path         = "${local.vault_metadata_path}"
     capabilities = ["read", "list"]
-    description  = "Temporary broader read access"
+    description  = "List and read at metadata root"
   }
 
+  # Root paths for data (without wildcards)
   rule {
-    path         = "secret/*"
-    capabilities = ["list"]
-    description  = "List secrets"
+    path         = "${local.vault_data_path}"
+    capabilities = ["read", "create", "update", "delete", "list"]
+    description  = "Full access at data root"
   }
 
+  # Root paths for delete (without wildcards)
   rule {
-    path         = local.vault_prefix
-    capabilities = ["read"]
-    description  = "Read secrets base path"
+    path         = "${local.vault_delete_path}"
+    capabilities = ["update", "delete"]
+    description  = "Delete at root path"
   }
 
+  # Wildcard paths for metadata
   rule {
-    path         = "${local.vault_prefix}/*"
-    capabilities = ["create", "update", "read"]
-    description  = "Create and update secrets"
+    path         = "${local.vault_metadata_path}/*"
+    capabilities = ["read", "list"]
+    description  = "List secrets at any level"
   }
 
+  # Wildcard paths for data - combining read, create, update into one rule
   rule {
-    path         = local.vault_prefix
-    capabilities = ["create", "update", "read"]
-    description  = "Create and update secrets"
+    path         = "${local.vault_data_path}/*"
+    capabilities = ["read", "create", "update", "delete", "list"]
+    description  = "Full access to all secrets"
+  }
+
+  # Wildcard paths for delete
+  rule {
+    path         = "${local.vault_delete_path}/*"
+    capabilities = ["update", "delete"]
+    description  = "Delete secrets at any level"
+  }
+
+  # Additional rules for parent paths if needed
+  rule {
+    path         = "${local.vault_mount}/*"
+    capabilities = ["read", "list"]
+    description  = "Read and list at mount level"
   }
 }
 
@@ -698,7 +717,7 @@ resource "helm_release" "airbyte" {
 
           vault = {
             address            = local.vault_address
-            prefix             = local.vault_prefix
+            prefix             = local.vault_env_prefix
             authTokenSecretKey = "token"
           }
         }
