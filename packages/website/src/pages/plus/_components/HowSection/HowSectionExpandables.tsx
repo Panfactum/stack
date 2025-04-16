@@ -133,7 +133,7 @@ const HowSectionExpandable: ParentComponent<{ title: string; id: string }> = (
           <FiPlusCircle size={32} class="text-brand-600 transition-all" />
         </Accordion.Trigger>
       </Accordion.Header>
-      <Accordion.Content class="flex animate-kobalte-collapsible-up flex-col gap-4 overflow-hidden text-gray-dark-mode-700 data-[expanded]:animate-kobalte-collapsible-down [&_a]:underline [&_a]:hover:cursor-pointer">
+      <Accordion.Content class="flex animate-kobalte-collapsible-up flex-col gap-4 overflow-hidden data-[expanded]:animate-kobalte-collapsible-down dark:text-gray-dark-mode-400 [&_a]:underline [&_a]:hover:cursor-pointer">
         {props.children}
       </Accordion.Content>
     </Accordion.Item>

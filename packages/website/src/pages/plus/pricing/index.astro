@@ -1,0 +1,21 @@
+---
+
+import HeroSection from "./_components/HeroSection.astro";
+import Layout from "../../../layouts/Layout.astro";
+import MainSection from "../../../layouts/MainSection.astro";
+import PricingSection from "../../_components/PricingSection/PricingSection.astro"
+
+---
+
+<Layout
+  heroClass="bg-secondary"
+  hasBorder={false}
+  title="PanfactumPlus Pricing"
+  description="The Power of Panfactum Plus Fractional DevOps"
+>
+  <HeroSection slot="hero"/>
+
+  <MainSection>
+    <PricingSection/>
+  </MainSection>
+</Layout>

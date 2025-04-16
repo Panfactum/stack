@@ -92,7 +92,7 @@ const getRowStyleByIndex = (index: number) =>
   index % 2 === 0 ? "bg-gray-dark-mode-200" : "bg-gray-dark-mode-50";
 const getPFRowStyleByIndex = () => "bg-gold-300";
 ---
-<section class="bg-brand-900 py-24 text-white">
+<section class="bg-brand-950 py-24 text-white dark:bg-gray-dark-mode-800">
   <div class="mx-auto">
     <div class="mb-16 text-center">
       <div class="mb-4 font-bold text-brand-400">
@@ -123,12 +123,12 @@ const getPFRowStyleByIndex = () => "bg-gold-300";
                         ? "lg:basis-1/4"
                         : "grow lg:grow-0 lg:basis-1/4",
                       isSecondCol && "lg:rounded-tl-lg",
-                      isLastCol ? "rounded-tl-lg bg-gold-300 lg:rounded-tl-none" : (isFirstCol ?  "bg-none" : "bg-gray-dark-mode-200"),
+                      isLastCol ? "rounded-tr-lg bg-gold-300 lg:rounded-tl-none" : (isFirstCol ?  "bg-none" : "bg-gray-dark-mode-200"),
                       !isLastCol && !isFirstCol && "hidden lg:flex",
                     )}
                   >
                     {isLastCol ? (
-                      <div class="flex max-h-5 text-white md:max-h-7 -ml-8 lg:-ml-10">
+                      <div class="-ml-8 flex max-h-5 text-white md:max-h-7 lg:-ml-10">
                         <Logo />
                       </div>
                     ) : (
@@ -159,6 +159,8 @@ const getPFRowStyleByIndex = () => "bg-gold-300";
                         ? ["lg:font-semibold", getPFRowStyleByIndex()]
                         : getRowStyleByIndex(rowNum),
                       !isLastCol && !isFirstCol && "hidden lg:flex",
+                      rowNum === 11 && isFirstCol && "rounded-bl-lg",
+                      rowNum === 11 && isLastCol && "rounded-br-lg",
                     )}
                   >
                     <Fragment set:html={renderContent(content)} />

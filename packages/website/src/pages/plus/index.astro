@@ -6,7 +6,7 @@ import HeroSection from "./_components/HeroSection.astro";
 import HowSection from "./_components/HowSection/HowSection.astro";
 import PlansSection from "./_components/PlansSection.astro";
 import Layout from "../../layouts/Layout.astro";
-
+import FAQS from "../_components/FAQs/FAQs";
 ---
 
 <Layout
@@ -20,4 +20,19 @@ import Layout from "../../layouts/Layout.astro";
   <HowSection/>
   <PlansSection/>
   <ComparisonSection/>
+
+  <section class="flex flex-col items-center space-y-16 bg-white py-24 dark:bg-gray-dark-mode-950">
+    <div class="container flex max-w-screen-lg flex-col items-center gap-4">
+        <div class="mb-16 flex flex-col items-center gap-5 text-center">
+            <h1 class="text-display-xl font-machina font-medium leading-none">
+                Frequently Asked Questions
+            </h1>
+            <p class="text-display-sm pt-0">
+                Everything you need to know about the product and billing.
+            </p>
+        </div>
+        <FAQS client:idle/>
+    </div>
+  </section>
+  
 </Layout>

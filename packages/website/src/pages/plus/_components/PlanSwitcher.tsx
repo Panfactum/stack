@@ -224,13 +224,14 @@ export const PlanSwitcher: Component = () => {
                 "shrink-0 cursor-pointer text-nowrap px-6 py-2 text-center font-semibold text-gray-dark-mode-600 outline-none transition-colors sm:flex-1",
                 "data-[selected]:font-bold data-[selected]:text-brand-700",
                 "data-[selected=false]:text-gray-dark-mode-600 hover:data-[selected=false]:text-gray-dark-mode-800",
+                "dark:text-gray-dark-mode-400 dark:data-[selected]:text-gray-dark-mode-300 dark:hover:data-[selected=false]:text-gray-dark-mode-200",
               )}
             >
               {plan.name}
             </Tabs.Trigger>
           )}
         </For>
-        <Tabs.Indicator class="absolute bottom-0 left-0 z-10 h-[2px] bg-brand-700 transition-all duration-300" />
+        <Tabs.Indicator class="absolute bottom-0 left-0 z-10 h-[2px] bg-brand-700 transition-all duration-300 dark:bg-gray-dark-mode-300" />
       </Tabs.List>
 
       <div class="relative">
@@ -240,13 +241,15 @@ export const PlanSwitcher: Component = () => {
               <div class="mx-auto grid max-w-[80vw] grid-cols-1 items-center gap-12 lg:grid-cols-2 2xl:max-w-screen-xl">
                 <div class="space-y-8">
                   <div>
-                    <h3 class="mb-4 font-machina text-3xl font-medium">
+                    <h3 class="mb-4 font-machina text-3xl font-medium dark:text-white">
                       {plan.name}
                     </h3>
-                    <p class="mb-4 font-semibold text-brand-600">
+                    <p class="mb-4 font-semibold text-brand-600 dark:text-gray-dark-mode-400">
                       {plan.tagline}
                     </p>
-                    <p class="text-gray-dark-mode-600">{plan.description}</p>
+                    <p class="text-gray-dark-mode-600 dark:text-gray-dark-mode-400">
+                      {plan.description}
+                    </p>
                   </div>
 
                   <div class="rounded-xl bg-gray-dark-mode-50 px-6 ring-1 ring-gray-modern-300">
@@ -334,7 +337,7 @@ export const PlanSwitcher: Component = () => {
                     </span>
                   </div>
 
-                  <div class="flex w-full max-w-md flex-wrap items-center justify-center gap-3 rounded-3xl rounded-t-none border border-gray-dark-mode-300 px-8 py-6">
+                  <div class="flex w-full max-w-md flex-wrap items-center justify-center gap-3 rounded-3xl rounded-t-none border border-gray-dark-mode-300 bg-white px-8 py-6">
                     <For each={plan.image.baseTitles}>
                       {(title) => (
                         <span class="font-medium text-gray-light-mode-600">
