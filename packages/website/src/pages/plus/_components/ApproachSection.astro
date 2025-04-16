@@ -1,21 +1,25 @@
 ---
 import { Picture } from "astro:assets"
 
-import EngineerImg from "./images/engineer-1.png"
+import PersonImageLabel  from "./PersonImageLabel.astro"
+import EngineerImg from "./images/engineer-nathan-1.png"
 ---
 
 <section class="bg-white">
-  <div class="m-auto flex max-w-screen-xl items-center gap-12 p-8 text-black md:gap-24 lg:pt-16">
-    <div class="rounded-4xl relative max-h-80 min-h-80 min-w-80 max-w-80 rounded-2xl bg-gold-25">
-      <div class="grid-background" style={{"--grid-background-spacing": "30px"}}/>
-      <Picture
-          class="absolute bottom-0 left-[6%] !w-[90%]"
-              sizes="(max-width: 64rem) 31rem, 41rem"
-              formats={["avif", "webp"]}
-              breakpoints={[496, 656]}
-              src={EngineerImg}
-              alt="Panfactum Engineer"
-      />
+  <div class="m-auto flex max-w-screen-xl flex-col items-center gap-12 p-8 text-black md:flex-row md:items-start md:gap-24 lg:pt-16">
+    <div class="flex flex-col items-center">
+      <div class="relative max-h-80 min-h-80 min-w-80 max-w-80 rounded-2xl bg-gold-25">
+        <div class="grid-background" style={{"--grid-background-spacing": "30px"}}/>
+        <Picture
+            class="absolute bottom-0 left-[6%] !w-[90%]"
+            sizes="(max-width: 64rem) 31rem, 41rem"
+            formats={["webp", "avif"]}
+            breakpoints={[496, 656]}
+            src={EngineerImg}
+            alt="Panfactum Engineer"
+        />
+      </div>
+      <PersonImageLabel title="Nathan H." subtitle="Sr. Dev Ops Engineer"/>
     </div>
     <div class="flex flex-col gap-2">
       <div class="font-bold text-brand-700">

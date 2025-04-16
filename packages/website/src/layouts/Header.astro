@@ -5,7 +5,6 @@ import { NAV_LINKS, PLUS_NAV_LINKS } from "./NavLinks";
 import DiscordIcon from "../components/icons/discord.svg";
 import GithubIcon from "../components/icons/github.svg";
 import PanfactumLogo from "../components/icons/panfactum-logo.svg";
-import PanfactumMark from "../components/icons/panfactum-mark.svg";
 import PanfactumPlusLogo from "../components/icons/panfactum-plus-logo.svg";
 import GetStartedButton from "../components/ui/GetStartedButton.tsx";
 import SearchIconButton from "../components/ui/search/SearchIconButton";
@@ -77,7 +76,7 @@ const links = isPlus ? PLUS_NAV_LINKS : NAV_LINKS
                 </SavedLink>
               ))}
             </nav>
-            <div class="mt-2 h-1/2 w-[2px] bg-gray-dark-mode-400 hidden md:block"/>
+            <div class="mt-2 hidden h-1/2 w-[2px] bg-gray-dark-mode-400 md:block"/>
             <a 
               href={isPlus ? "/" : "/plus"}                     
               aria-label={isPlus ? "Panfactum Framework Homepage" : "Panfactum Plus Homepage"}

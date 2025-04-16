@@ -1,26 +1,91 @@
 ---
-import { HowSectionExpandables } from "./HowSectionExpandables";
+import { Picture } from "astro:assets";
 
+import { HowSectionExpandables } from "./HowSectionExpandables";
+import PersonImageLabel from "../PersonImageLabel.astro";
+import EmmaImg from "../images/engineer-emma.png"
+import LiamImg from "../images/engineer-liam.png"
+import NickImg from "../images/engineer-nick.png"
+import OliverImg from "../images/engineer-oliver.png"
 ---
 
 <section class="bg-white">
-  <div class="ma-w-screen-xl m-auto flex flex-col max-w-screen-xl gap-12 p-8 text-black md:gap-24 lg:pt-16">
-    <div class="flex flex-col gap-2 items-center">
+  <div class="m-auto flex max-w-screen-xl flex-col gap-12 p-8 text-black md:gap-24 lg:pt-16">
+    <div class="flex flex-col items-center gap-2">
       <div class="font-bold text-brand-700">
         How Panfactum Helps
       </div>
-      <h2 class="text-pretty font-machina text-4xl font-semibold text-center">
+      <h2 class="text-pretty text-center font-machina text-4xl font-semibold">
         End-to-end Cloud Management<br/>from Your Dedicated DevOps Engineer
       </h2>
-      <p class="text-lg text-gray-dark-mode-700 mt-4 max-w-192 text-center">
+      <p class="mt-4 max-w-192 text-center text-lg text-gray-dark-mode-700">
         Let us handle your cloud complexity so you and your team can focus on what matters most.
         One of our cloud experts will serve as the functional CTO for your cloud infrastructure.
       </p>
     </div>
 
-    <div class="flex w-full">
-        <div class="w-full">
+    <div class="flex w-full flex-col md:flex-row">
+        <div class="w-full md:w-7/12">
           <HowSectionExpandables client:idle/>
+        </div>
+        <div class="hidden md:flex md:w-5/12 md:flex-col md:items-center md:justify-center">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-12">
+            <div class="flex flex-col items-center">
+              <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25">
+                <Picture
+                    class="absolute bottom-0 left-[12%] !w-4/5"
+                    sizes="(max-width: 64rem) 15rem, 20rem"
+                    formats={["webp", "avif"]}
+                    breakpoints={[240, 320]}
+                    src={OliverImg}
+                    alt="Panfactum Engineer"
+                />
+              </div>
+              <PersonImageLabel title="Oliver J." small={true} subtitle="Lead Software Engineer" />
+            </div>
+            
+            <div class="flex flex-col items-center">
+              <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25">
+                <Picture
+                    class="absolute bottom-0 left-[12%] !w-4/5"
+                    sizes="(max-width: 64rem) 15rem, 20rem"
+                    formats={["webp", "avif"]}
+                    breakpoints={[240, 320]}
+                    src={NickImg}
+                    alt="Panfactum Engineer"
+                />
+              </div>
+              <PersonImageLabel title="Nick K." small={true} subtitle="Senior Systems Engineer" />
+            </div>
+            
+            <div class="flex flex-col items-center">
+              <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25">
+                <Picture
+                    class="absolute bottom-0 left-[12%] !w-4/5"
+                    sizes="(max-width: 64rem) 15rem, 20rem"
+                    formats={["webp", "avif"]}
+                    breakpoints={[240, 320]}
+                    src={EmmaImg}
+                    alt="Panfactum Engineer"
+                />
+              </div>
+              <PersonImageLabel title="Emma R." small={true} subtitle="Principal Cloud Engineer" />
+            </div>
+            
+            <div class="flex flex-col items-center">
+              <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25">
+                <Picture
+                    class="absolute bottom-0 left-[12%] !w-4/5"
+                    sizes="(max-width: 64rem) 15rem, 20rem"
+                    formats={["webp", "avif"]}
+                    breakpoints={[240, 320]}
+                    src={LiamImg}
+                    alt="Panfactum Engineer"
+                />
+              </div>
+              <PersonImageLabel title="Liam T." small={true} subtitle="Senior Infrastructure Engineer" />
+            </div>
+          </div>
         </div>
     </div>
   </div>

@@ -1,6 +1,24 @@
 import * as Tabs from "@kobalte/core/tabs";
 import { clsx } from "clsx";
-import { For, type Component } from "solid-js";
+import { For, type Component, createSignal } from "solid-js";
+
+import panfactumMark from "@/components/icons/panfactum-mark.svg";
+
+import contrastLogo from "./images/contrastai-logo.png";
+import floraFaunaLogo from "./images/flora-fauna-logo.png";
+import ikigaiLabsLogo from "./images/ikigai-labs-logo.png";
+import luminescenceLogo from "./images/luminescense-logo.png";
+import prometheusLogo from "./images/prometheus-logo.png";
+import bootstrapHover from "./images/use-case-01-hover.png";
+import bootstrap from "./images/use-case-01.png";
+import seedHover from "./images/use-case-02-hover.png";
+import seed from "./images/use-case-02.png";
+import seriesAHover from "./images/use-case-03-hover.png";
+import seriesA from "./images/use-case-03.png";
+import seriesBHover from "./images/use-case-04-hover.png";
+import seriesB from "./images/use-case-04.png";
+import seriesCHover from "./images/use-case-05-hover.png";
+import seriesC from "./images/use-case-05.png";
 
 interface Plan {
   name: string;
@@ -12,6 +30,16 @@ interface Plan {
     engHoursSaved: number | null;
     infrastructureSaved: number | null;
     totalSaved: number | null;
+  };
+  company: {
+    logo: ImageMetadata;
+    name: string;
+  };
+  image: {
+    base: ImageMetadata;
+    hover: ImageMetadata;
+    baseTitles: string[];
+    hoverPanfactumTitles: string[];
   };
 }
 
@@ -49,7 +77,7 @@ const MetricValue: Component<MetricValueProps> = (props) => {
     return `${props.value}${props.suffix ?? ""}`;
   };
 
-  return <span class=" text-brand-600 font-medium">{formattedValue()}</span>;
+  return <span class=" font-medium text-brand-600">{formattedValue()}</span>;
 };
 
 const plans: Plan[] = [
@@ -65,6 +93,16 @@ const plans: Plan[] = [
       infrastructureSaved: 1200,
       totalSaved: 8000,
     },
+    company: {
+      name: "ContrastAI",
+      logo: contrastLogo,
+    },
+    image: {
+      base: bootstrap,
+      hover: bootstrapHover,
+      baseTitles: ["Founder"],
+      hoverPanfactumTitles: ["Platform Engineer"],
+    },
   },
   {
     name: "Seed",
@@ -78,6 +116,16 @@ const plans: Plan[] = [
       engHoursSaved: 124,
       infrastructureSaved: 3800,
       totalSaved: 16200,
+    },
+    company: {
+      name: "Ikigai Labs",
+      logo: ikigaiLabsLogo,
+    },
+    image: {
+      base: seed,
+      hover: seedHover,
+      baseTitles: ["Co-founder", "Co-founder"],
+      hoverPanfactumTitles: ["Platform Engineer"],
     },
   },
   {
@@ -93,6 +141,16 @@ const plans: Plan[] = [
       infrastructureSaved: 11500,
       totalSaved: 28900,
     },
+    company: {
+      name: "Luminescence",
+      logo: luminescenceLogo,
+    },
+    image: {
+      base: seriesA,
+      hover: seriesAHover,
+      baseTitles: ["CEO", "VP Engineering"],
+      hoverPanfactumTitles: ["Platform Engineer"],
+    },
   },
   {
     name: "Series B",
@@ -107,10 +165,21 @@ const plans: Plan[] = [
       infrastructureSaved: 19500,
       totalSaved: 46100,
     },
+    company: {
+      name: "Flora&Fauna",
+      logo: floraFaunaLogo,
+    },
+    image: {
+      base: seriesB,
+      hover: seriesBHover,
+      baseTitles: ["CTO", "VP Engineering", "Staff Engineer"],
+      hoverPanfactumTitles: ["Platform Engineer"],
+    },
   },
   {
     name: "Series C+",
-    tagline: "Enterprise-grade infrastructure. Without the enterprise-grade bloat.",
+    tagline:
+      "Enterprise-grade infrastructure. Without the enterprise-grade bloat.",
     description:
       "As your company scales, so does the complexity. We deliver enterprise-grade reliabiltiy—global scale, mult-team collaboration, fine-grained cost controls—all while maintaing the same velocity that help you reach your current success.",
     metrics: {
@@ -120,10 +189,27 @@ const plans: Plan[] = [
       infrastructureSaved: 0.73,
       totalSaved: null,
     },
+    company: {
+      name: "Prometheus",
+      logo: prometheusLogo,
+    },
+    image: {
+      base: seriesC,
+      hover: seriesCHover,
+      baseTitles: [
+        "CTO",
+        "VP Engineering",
+        "Staff Engineer",
+        "Engineering Manager",
+      ],
+      hoverPanfactumTitles: ["Cloud Architect", "Platform Engineer"],
+    },
   },
 ];
 
 export const PlanSwitcher: Component = () => {
+  const [hovering, setHovering] = createSignal(false);
+
   return (
     <Tabs.Root class="mx-auto w-full max-w-screen-2xl overflow-hidden pb-4">
       <Tabs.List
@@ -135,7 +221,7 @@ export const PlanSwitcher: Component = () => {
             <Tabs.Trigger
               value={plan.name}
               class={clsx(
-                "shrink-0 cursor-pointer text-nowrap px-6 py-2 text-center text font-semibold text-gray-dark-mode-600 outline-none transition-colors sm:flex-1",
+                "shrink-0 cursor-pointer text-nowrap px-6 py-2 text-center font-semibold text-gray-dark-mode-600 outline-none transition-colors sm:flex-1",
                 "data-[selected]:font-bold data-[selected]:text-brand-700",
                 "data-[selected=false]:text-gray-dark-mode-600 hover:data-[selected=false]:text-gray-dark-mode-800",
               )}
@@ -213,28 +299,67 @@ export const PlanSwitcher: Component = () => {
                   </div>
                 </div>
 
-                <div class="relative">
-                  <div class="rounded-2xl bg-[#FFF5EB] p-8">
-                    <div class="flex items-center gap-8">
+                <div class="flex max-w-md flex-col">
+                  <div class="relative rounded-3xl rounded-b-none bg-[#FFF5EB]">
+                    <div class="flex size-[425px] max-w-full justify-center overflow-visible">
                       <img
-                        src="/images/cto-engineer.webp"
-                        alt="CTO and Lead Engineer collaborating"
-                        class="w-full max-w-md rounded-lg shadow-lg"
+                        src={plan.image.base.src}
+                        alt={`${plan.image.baseTitles.map((title, idx) => title + (idx === plan.image.baseTitles.length - 1 ? " collaborating" : " and")).join(" ")}`}
+                        class="absolute size-full w-auto max-w-none object-cover object-top"
+                        style={{
+                          "max-width": "none",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.src = plan.image.hover.src;
+                          setHovering(true);
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.src = plan.image.base.src;
+                          setHovering(false);
+                        }}
                       />
                     </div>
-                    <div class="mt-6 flex items-center gap-8">
-                      <div>
-                        <div class="font-medium">CTO</div>
-                      </div>
-                      <div>
-                        <div class="font-medium">Lead Engineer</div>
-                      </div>
-                    </div>
-                    <img
-                      src="/images/buildingblocks.svg"
-                      alt="Building Blocks Logo"
-                      class="mt-4 w-24"
-                    />
+                  </div>
+
+                  <div class="relative z-10 -my-5 mx-auto flex h-10 items-center justify-center rounded-full border border-gray-dark-mode-300 bg-[#ffffff]">
+                    <span class="flex items-center px-6 text-sm font-bold text-gray-light-mode-950">
+                      <img
+                        src={plan.company.logo.src}
+                        alt={plan.company.name + " Logo"}
+                        class="mr-1 h-4"
+                      />
+                      {plan.company.name}
+                    </span>
+                  </div>
+
+                  <div class="flex w-full max-w-md flex-wrap items-center justify-center gap-3 rounded-3xl rounded-t-none border border-gray-dark-mode-300 px-8 py-6">
+                    <For each={plan.image.baseTitles}>
+                      {(title) => (
+                        <span class="font-medium text-gray-light-mode-600">
+                          {title}
+                        </span>
+                      )}
+                    </For>
+                    {hovering() && (
+                      <For each={plan.image.hoverPanfactumTitles}>
+                        {(title) => (
+                          <span class="flex items-center gap-2 font-medium text-brand-600">
+                            <img
+                              src={panfactumMark.src}
+                              alt="Panfactum Logo"
+                              class="size-4"
+                              style={{
+                                filter:
+                                  "invert(30%) sepia(16%) saturate(1686%) hue-rotate(165deg) brightness(94%) contrast(87%)",
+                              }}
+                            />
+                            {title}
+                          </span>
+                        )}
+                      </For>
+                    )}
                   </div>
                 </div>
               </div>
