@@ -1,10 +1,8 @@
 ---
-
 import HeroSection from "./_components/HeroSection.astro";
+import TimelineSection from "./_components/TimelineSection.astro";
 import Layout from "../../../layouts/Layout.astro";
-import MainSection from "../../../layouts/MainSection.astro";
-import PricingSection from "../../_components/PricingSection/PricingSection.astro"
-
+import PricingSection from "../../_components/PricingSection/PricingSection.astro";
 ---
 
 <Layout
@@ -13,9 +11,14 @@ import PricingSection from "../../_components/PricingSection/PricingSection.astr
   title="PanfactumPlus Pricing"
   description="The Power of Panfactum Plus Fractional DevOps"
 >
-  <HeroSection slot="hero"/>
+  <HeroSection slot="hero" />
 
-  <MainSection>
-    <PricingSection/>
-  </MainSection>
+  <section class:list={["overflow-x-hidden", "bg-primary"]}>
+    <div
+      class="mx-auto flex max-w-screen-xl flex-col items-center px-4 pb-8 pt-12 md:px-8"
+    >
+      <PricingSection />
+    </div>
+    <TimelineSection />
+  </section>
 </Layout>
