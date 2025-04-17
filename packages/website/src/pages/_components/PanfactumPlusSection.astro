@@ -1,0 +1,56 @@
+---
+import { Picture } from "astro:assets"
+
+import EngineersImg from "./images/panfactum-plus-engineers.png"
+import PanfactumPlusLogo from "../../components/icons/panfactum-plus-logo.svg"
+
+const pfStyle = {
+  background: "linear-gradient(45deg, #9AD3F1 80%, #FFFFFF 100%)",
+  backgroundClip: "text",
+  textFillColor: "transparent",
+  "-webkit-text-fill-color": "transparent"
+}
+const plusStyle = {
+  background: "linear-gradient(45deg, #FFFFFF -10%, #ffe0ab 0%, #ffd07d 100%)",
+  backgroundClip: "text",
+  textFillColor: "transparent",
+  "-webkit-text-fill-color": "transparent"
+}
+---
+
+<section class="m-4 flex max-w-screen-xl flex-col gap-12 rounded-3xl bg-brand-800 p-4 md:m-auto md:gap-24 lg:pt-16">
+  <div class="flex flex-col justify-between md:flex-row">
+    <div class="flex flex-col gap-8 pl-4 pt-8 md:p-8">
+      <Picture
+        src={PanfactumPlusLogo}
+        alt="PanfactumPlus logo"
+      />
+      <h1 class="font-machina text-4xl font-bold !leading-tight sm:text-5xl lg:text-6xl">
+        <span style={pfStyle}>The&nbsp;Power&nbsp;of<br/>Panfactum</span>&nbsp;<span style={plusStyle}>Plus<br/>Fractional&nbsp;DevOps</span>
+      </h1>
+      <p class="text-display-sm max-w-[600px] text-white">
+        Build <span class="font-bold text-gold-100">10x faster</span> and <span class="font-bold text-gold-100">save 90%</span><br/>versus hiring a full-time cloud engineer.
+      </p>
+      <div class="flex justify-start gap-4">
+        <a 
+          class="cursor-pointer text-nowrap rounded-xl bg-white px-5 py-3 font-bold text-black"
+          href="/plus/pricing"
+        >
+          See Pricing
+        </a>
+        <a class="cursor-pointer text-nowrap rounded-xl bg-gold-300 px-5 py-3 font-bold text-black" href="https://hs.panfactum.com/meetings/jack-langston/intro">
+          Schedule Demo
+        </a>
+      </div>
+    </div>
+    <div class="flex items-center justify-center">
+      <Picture
+        sizes="(max-width: 64rem) 31rem, 41rem"
+        formats={["avif", "webp"]}
+        breakpoints={[496, 656]}
+        src={EngineersImg}
+        alt="Panfactum Engineers"
+      />
+    </div>
+  </div>
+</section>
