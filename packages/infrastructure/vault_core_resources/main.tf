@@ -53,6 +53,17 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
 }
 
 /***************************************
+* KV Secrets Backend
+***************************************/
+
+resource "vault_mount" "kv" {
+  path        = "secret"
+  type        = "kv"
+  options     = { version = "2" }
+  description = "KV Version 2 secret engine mount"
+}
+
+/***************************************
 * Database Secrets Backend
 ***************************************/
 

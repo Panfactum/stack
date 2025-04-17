@@ -31,6 +31,17 @@ locals {
   name                    = "airbyte"
   namespace               = module.namespace.namespace
   memory_limit_multiplier = 1.3
+
+  vault_mount         = "secret"  # The secret engine mount point
+  vault_prefix        = "airbyte" # The base path under the mount
+  vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
+  vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
+
+  # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
+  # secret/data/airbyte
+  vault_env_prefix = "${local.vault_mount}/${local.vault_prefix}/"
+  vault_address    = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
 data "pf_kube_labels" "labels" {
@@ -255,7 +266,7 @@ module "database" {
 
 resource "kubernetes_service_account" "airbyte_sa" {
   metadata {
-    name      = "airbyte-admin"
+    name      = local.name
     namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
@@ -358,6 +369,267 @@ resource "kubernetes_secret" "airbyte_secrets" {
 }
 
 /***************************************
+* Vault Policy for Airbyte
+***************************************/
+
+data "vault_policy_document" "airbyte" {
+  # Root paths for metadata (without wildcards)
+  rule {
+    path         = local.vault_metadata_path
+    capabilities = ["read", "list"]
+    description  = "List and read at metadata root"
+  }
+
+  # Root paths for data (without wildcards)
+  rule {
+    path         = local.vault_data_path
+    capabilities = ["read", "create", "update", "delete", "list"]
+    description  = "Full access at data root"
+  }
+
+  # Root paths for delete (without wildcards)
+  rule {
+    path         = local.vault_delete_path
+    capabilities = ["update", "delete"]
+    description  = "Delete at root path"
+  }
+
+  # Wildcard paths for metadata - single level
+  rule {
+    path         = "${local.vault_metadata_path}/*"
+    capabilities = ["read", "list"]
+    description  = "List secrets at first level"
+  }
+
+  # Wildcard paths for data - single level
+  rule {
+    path         = "${local.vault_data_path}/*"
+    capabilities = ["read", "create", "update", "delete", "list"]
+    description  = "Full access to first level secrets"
+  }
+
+  # Wildcard paths for delete - single level
+  rule {
+    path         = "${local.vault_delete_path}/*"
+    capabilities = ["update", "delete"]
+    description  = "Delete secrets at first level"
+  }
+}
+
+## todo: need to initialize secret mount with kv 2
+## potentially initialize secrets as well
+
+module "vault_auth_airbyte" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = kubernetes_service_account.airbyte_sa.metadata[0].name
+  service_account_namespace = local.namespace
+  vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
+}
+
+module "vault_auth_airbyte_cron" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = module.vault_token_rotator.service_account_name
+  service_account_namespace = local.namespace
+  vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
+}
+
+# Define the Kubernetes Role for allowing the airbyte service account to manage secrets
+resource "kubernetes_role" "airbyte_secrets_writer" {
+  metadata {
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer"
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get", "create", "update", "patch"]
+  }
+}
+
+# Define the Kubernetes RoleBinding to bind the Role to the airbyte service account
+resource "kubernetes_role_binding" "airbyte_secrets_writer_binding" {
+  metadata {
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer-binding"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.airbyte_sa.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    kind      = "Role"
+    name      = kubernetes_role.airbyte_secrets_writer.metadata[0].name
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+
+resource "kubernetes_role_binding" "airbyte_secrets_writer_binding_cron" {
+  metadata {
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer-binding-cron"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.vault_token_rotator.service_account_name
+    namespace = local.namespace
+  }
+  role_ref {
+    kind      = "Role"
+    name      = kubernetes_role.airbyte_secrets_writer.metadata[0].name
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+
+/***************************************
+* Vault Secrets Operator Resources
+***************************************/
+
+resource "kubernetes_job" "vault_token_init" {
+  metadata {
+    name      = "airbyte-vault-token-init"
+    namespace = local.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
+
+  spec {
+    template {
+      metadata {
+        labels = data.pf_kube_labels.labels.labels
+      }
+
+      spec {
+        service_account_name = kubernetes_service_account.airbyte_sa.metadata[0].name
+
+        container {
+          name  = "vault-token-generator"
+          image = "curlimages/curl:8.12.1"
+
+          env {
+            name  = "VAULT_ADDR"
+            value = local.vault_address
+          }
+
+          env {
+            name  = "VAULT_ROLE"
+            value = module.vault_auth_airbyte.role_name
+          }
+
+          env {
+            name  = "NAMESPACE"
+            value = local.namespace
+          }
+
+          command = [
+            "/bin/sh",
+            "-c",
+            file("${path.module}/scripts/vault_token_rotate.sh")
+          ]
+
+          security_context {
+            run_as_non_root           = true
+            run_as_user               = 1000
+            read_only_root_filesystem = true
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
+
+          resources {
+            requests = {
+              memory = "30Mi"
+              cpu    = "25m"
+            }
+            limits = {
+              memory = "40Mi"
+            }
+          }
+        }
+
+        restart_policy = "OnFailure"
+      }
+    }
+
+    backoff_limit              = 5
+    ttl_seconds_after_finished = 3600 # Clean up after 1 hour
+  }
+
+  depends_on = [
+    module.vault_auth_airbyte
+  ]
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+}
+
+/***************************************
+* Vault Token Rotation CronJob
+***************************************/
+
+module "vault_token_rotator" {
+  source = "../kube_cron_job"
+
+  namespace     = local.namespace
+  name          = "airbyte-vault-token-rotator"
+  cron_schedule = "0 */8 * * *" # every 8 hours
+
+  # Important parameters for the job
+  restart_policy                = "OnFailure"
+  backoff_limit                 = 3
+  active_deadline_seconds       = 900
+  concurrency_policy            = "Forbid"
+  pod_parallelism               = 1
+  pod_completions               = 1
+  failed_jobs_history_limit     = 3
+  successful_jobs_history_limit = 1
+
+  # Scheduling params to match your settings
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  arm_nodes_enabled           = var.arm_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+
+  # Use the existing airbyte service account
+  common_env = {
+    VAULT_ADDR = local.vault_address
+    VAULT_ROLE = module.vault_auth_airbyte_cron.role_name
+    NAMESPACE  = local.namespace
+  }
+
+  # Container configuration
+  containers = [
+    {
+      name                  = "vault-token-rotator"
+      image_registry        = "docker.io"
+      image_repository      = "curlimages/curl"
+      image_tag             = "8.12.1"
+      image_pin_enabled     = true
+      image_prepull_enabled = false
+
+      command = [
+        "/bin/sh",
+        "-c",
+        file("${path.module}/scripts/vault_token_rotate.sh")
+      ]
+
+      minimum_memory = 32
+      minimum_cpu    = 25
+
+      privileged  = false
+      run_as_root = false
+      readonly    = true
+    }
+  ]
+}
+
+/***************************************
 * Airbyte Helm Chart
 ***************************************/
 
@@ -438,6 +710,17 @@ resource "helm_release" "airbyte" {
           }
         }
 
+        secretsManager = {
+          type                     = "vault"
+          secretsManagerSecretName = "airbyte-vault-secret"
+
+          vault = {
+            address            = local.vault_address
+            prefix             = local.vault_env_prefix
+            authTokenSecretKey = "token"
+          }
+        }
+
         jobs = {
           resources = {
             requests = {
@@ -449,13 +732,29 @@ resource "helm_release" "airbyte" {
             }
           }
           kube = {
-            annotations = var.pod_annotations
-            labels      = module.util_jobs.labels
-            tolerations = module.util_jobs.tolerations
+            annotations        = var.pod_annotations
+            labels             = module.util_jobs.labels
+            tolerations        = module.util_jobs.tolerations
+            serviceAccountName = kubernetes_service_account.airbyte_sa.metadata[0].name
           }
         }
 
-        env_vars = var.jobs_env_env
+        env_vars = merge(
+          var.global_env,
+          {
+            # Job sync configuration
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_MAX_SUCCESSIVE         = tostring(var.jobs_sync_job_retries_complete_failures_max_successive)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_MAX_TOTAL              = tostring(var.jobs_sync_job_retries_complete_failures_max_total)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_MIN_INTERVAL_S = tostring(var.jobs_sync_job_retries_complete_failures_backoff_min_interval_s)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_MAX_INTERVAL_S = tostring(var.jobs_sync_job_retries_complete_failures_backoff_max_interval_s)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_BASE           = tostring(var.jobs_sync_job_retries_complete_failures_backoff_base)
+            SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_SUCCESSIVE          = tostring(var.jobs_sync_job_retries_partial_failures_max_successive)
+            SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_TOTAL               = tostring(var.jobs_sync_job_retries_partial_failures_max_total)
+            SYNC_JOB_MAX_TIMEOUT_DAYS                                 = tostring(var.jobs_sync_max_timeout_days)
+            VAULT_AUTH_METHOD                                         = "token"
+            SPEC_CACHE_BUCKET                                         = module.airbyte_bucket.bucket_name
+          }
+        )
       }
 
       # Disable the default PostgreSQL since we're using our own
@@ -496,10 +795,12 @@ resource "helm_release" "airbyte" {
 
       # Server configuration
       server = {
-        enabled        = true
-        replicaCount   = var.sla_target >= 2 ? 2 : 1
-        podLabels      = module.util_server.labels
-        podAnnotations = var.pod_annotations
+        enabled      = true
+        replicaCount = var.sla_target >= 2 ? 2 : 1
+        podLabels    = module.util_server.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_server.affinity
         tolerations = module.util_server.tolerations
@@ -517,14 +818,17 @@ resource "helm_release" "airbyte" {
             memory = "${var.server_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Worker configuration
       worker = {
-        enabled        = true
-        replicaCount   = var.worker_replicas
-        podLabels      = module.util_worker.labels
-        podAnnotations = var.pod_annotations
+        enabled      = true
+        replicaCount = var.worker_replicas
+        podLabels    = module.util_worker.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_worker.affinity
         tolerations = module.util_worker.tolerations
@@ -542,6 +846,14 @@ resource "helm_release" "airbyte" {
             memory = "${var.worker_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        env_vars = merge(var.worker_env, {
+          DISCOVER_REFRESH_WINDOW_MINUTES = tostring(var.worker_discovery_refresh_window_minutes)
+          MAX_CHECK_WORKERS               = tostring(var.worker_max_check_workers)
+          MAX_SYNC_WORKERS                = tostring(var.worker_max_sync_workers)
+        })
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Temporal configuration
@@ -550,9 +862,10 @@ resource "helm_release" "airbyte" {
         enabled      = true
         replicaCount = var.sla_target >= 2 ? 2 : 1
         podLabels    = module.util_temporal.labels
-        podAnnotations = {
+        podAnnotations = merge({
+          "reloader.stakater.com/auto"     = "true"
           "config.linkerd.io/opaque-ports" = "7233"
-        }
+        }, var.pod_annotations)
 
         affinity    = module.util_temporal.affinity
         tolerations = module.util_temporal.tolerations
@@ -575,30 +888,6 @@ resource "helm_release" "airbyte" {
         # Add temporal-specific env vars
         extraEnv = [
           {
-            name  = "TEMPORAL_DB_HOST"
-            value = module.database.rw_service_name # Direct connection for Temporal
-          },
-          {
-            name  = "TEMPORAL_DB_PORT"
-            value = tostring(module.database.rw_service_port)
-          },
-          {
-            name  = "POSTGRES_SEEDS"
-            value = module.database.rw_service_name # Direct connection
-          },
-          {
-            name  = "DB_PORT"
-            value = tostring(module.database.rw_service_port)
-          },
-          {
-            name  = "SQL_MAX_IDLE_CONNS"
-            value = tostring(var.temporal_db_max_idle_conns)
-          },
-          {
-            name  = "SQL_MAX_CONNS"
-            value = tostring(var.temporal_db_max_conns)
-          },
-          {
             name = "TEMPORAL_BROADCAST_ADDRESS"
             valueFrom = {
               fieldRef = {
@@ -606,24 +895,30 @@ resource "helm_release" "airbyte" {
               }
             }
           },
-          # Ensure proper service addressing
-          {
-            name  = "TEMPORAL_ADDRESS"
-            value = "airbyte-temporal:7233"
-          },
-          # Set appropriate timeouts to avoid protocol errors
-          {
-            name  = "TEMPORAL_CLI_TIMEOUT"
-            value = "60s"
-          }
         ]
+
+        env_vars = merge(var.temporal_env, {
+          TEMPORAL_HISTORY_RETENTION_IN_DAYS = tostring(var.temporal_history_retention_in_days)
+          TEMPORAL_DB_HOST                   = module.database.rw_service_name
+          TEMPORAL_DB_PORT                   = tostring(module.database.rw_service_port)
+          POSTGRES_SEEDS                     = module.database.rw_service_name
+          DB_PORT                            = tostring(module.database.rw_service_port)
+          SQL_MAX_IDLE_CONNS                 = tostring(var.temporal_db_max_idle_conns)
+          SQL_MAX_CONNS                      = tostring(var.temporal_db_max_conns)
+          TEMPORAL_ADDRESS                   = "airbyte-temporal:7233"
+          TEMPORAL_CLI_TIMEOUT               = "60s"
+        })
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Pod sweeper configuration
       "pod-sweeper" = {
-        enabled        = true
-        podLabels      = module.util_pod_sweeper.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_pod_sweeper.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_pod_sweeper.affinity
         tolerations = module.util_pod_sweeper.tolerations
@@ -641,9 +936,11 @@ resource "helm_release" "airbyte" {
 
       # Connector builder server configuration
       "connector-builder-server" = {
-        enabled        = true # required to be on https://github.com/airbytehq/airbyte/issues/25174
-        podLabels      = module.util_connector_builder.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true # required to be on https://github.com/airbytehq/airbyte/issues/25174
+        podLabels = module.util_connector_builder.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_connector_builder.affinity
         tolerations = module.util_connector_builder.tolerations
@@ -661,13 +958,17 @@ resource "helm_release" "airbyte" {
             memory = "${var.connector_min_builder_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Cron configuration
       "cron" = {
-        enabled        = true
-        podLabels      = module.util_cron.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_cron.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_cron.affinity
         tolerations = module.util_cron.tolerations
@@ -685,6 +986,8 @@ resource "helm_release" "airbyte" {
             memory = "${var.cron_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Disable MinIO since we're using S3
@@ -694,9 +997,11 @@ resource "helm_release" "airbyte" {
 
       # Workload API server configuration
       "workload-api-server" = {
-        enabled        = true
-        podLabels      = module.util_workload_api_server.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_workload_api_server.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_workload_api_server.affinity
         tolerations = module.util_workload_api_server.tolerations
@@ -710,13 +1015,17 @@ resource "helm_release" "airbyte" {
             memory = "${var.workload_api_min_server_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Workload launcher configuration
       "workload-launcher" = {
-        enabled        = true
-        podLabels      = module.util_workload_launcher.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_workload_launcher.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_workload_launcher.affinity
         tolerations = module.util_workload_launcher.tolerations
@@ -730,6 +1039,12 @@ resource "helm_release" "airbyte" {
             memory = "${var.workload_min_launcher_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        env_vars = merge(var.launcher_env, {
+          WORKLOAD_LAUNCHER_PARALLELISM = var.launcher_workload_launcher_parallelism
+        })
+
+        deploymentStrategyType = "RollingUpdate"
       }
     })
   ]
@@ -737,7 +1052,11 @@ resource "helm_release" "airbyte" {
   depends_on = [
     module.database,
     kubernetes_secret.airbyte_secrets,
-    module.aws_permissions
+    module.aws_permissions,
+    kubernetes_job.vault_token_init,
+    module.vault_token_rotator,
+    kubernetes_role_binding.airbyte_secrets_writer_binding_cron,
+    module.vault_auth_airbyte_cron
   ]
 }
 
@@ -1375,6 +1694,11 @@ module "image_cache" {
       registry   = "docker.io"
       repository = "temporalio/auto-setup"
       tag        = "1.26"
+    },
+    {
+      registry   = "docker.io"
+      repository = "curlimages/curl"
+      tag        = "8.12.1"
     }
   ]
 }
