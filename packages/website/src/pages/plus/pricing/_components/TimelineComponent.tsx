@@ -1,21 +1,20 @@
 import { clsx } from "clsx";
+import { IoWarningOutline } from "solid-icons/io";
 import {
   For,
   mergeProps,
   Show,
   type Component,
   type JSXElement,
+  type Setter,
 } from "solid-js";
-
-// Originally from https://www.solid-ui.com/docs/components/timeline
-// Modified to fit our needs
 
 type BulletType = "panfactum" | "warning" | "panfactum-muted";
 
 export type TimelineItemProps = {
   title: JSXElement;
   description?: JSXElement;
-  bullet?: JSXElement;
+  bullet?: Component<{ class: string; size: number }>;
   isLast?: boolean;
   bulletSize: number;
   time?: string;
@@ -33,7 +32,13 @@ export type TimelinePropsItem = Omit<
 
 export type TimelineProps = {
   items: TimelinePropsItem[];
+  buttons: {
+    icon?: Component<{ class: string; size: number }>;
+    text: string;
+    callbackValue: 2 | 1 | 3;
+  }[];
   bulletSize?: number;
+  buttonCallback: Setter<2 | 1 | 3>;
 };
 
 const Timeline: Component<TimelineProps> = (rawProps) => {
@@ -42,7 +47,7 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
   return (
     <ul
       style={{
-        "padding-left": `${props.bulletSize / 2 + 80}px`, // Added extra space for time
+        "padding-left": `${props.bulletSize / 2 + 80}px`,
       }}
     >
       <For each={props.items}>
@@ -53,12 +58,71 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
             description={item.description}
             bullet={item.bullet}
             time={item.time}
-            isLast={index() === props.items.length - 1}
+            isLast={
+              index() === props.items.length - 1 && props.buttons.length === 0
+            }
             bulletSize={props.bulletSize}
             lineSize={props.lineSize}
           />
         )}
       </For>
+
+      {/* Buttons section */}
+      <Show when={props.buttons.length > 0}>
+        <li
+          class="relative border-l border-l-white"
+          style={{ "border-left-width": `${props.lineSize}px` }}
+        >
+          <div class="flex flex-col gap-4 pl-8">
+            <For each={props.buttons}>
+              {(button, index) => {
+                const isLastButton = index() === props.buttons.length - 1;
+
+                return (
+                  <div class={clsx("relative", !isLastButton && "mb-2")}>
+                    {/* Horizontal connector line */}
+                    <div
+                      class="absolute bg-white"
+                      style={{
+                        width: "24px",
+                        height: `${props.lineSize}px`,
+                        left: "-32px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                      }}
+                    />
+
+                    <button
+                      class="flex items-center rounded border border-brand-300 bg-white px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      onClick={() => props.buttonCallback(button.callbackValue)}
+                    >
+                      <Show when={button.icon}>
+                        {(Icon) => {
+                          const IconComponent = Icon();
+                          return <IconComponent class="mr-2" size={24} />;
+                        }}
+                      </Show>
+                      <span>{button.text}</span>
+                    </button>
+                  </div>
+                );
+              }}
+            </For>
+          </div>
+
+          {/* Hide the vertical line below the last button */}
+          <div
+            class="absolute bg-gray-light-mode-950"
+            style={{
+              width: `${props.lineSize}px`,
+              height: "100%",
+              left: "-2px",
+              top: `calc(${props.buttons.length * 44}px)`,
+              "z-index": "1",
+            }}
+          />
+        </li>
+      </Show>
     </ul>
   );
 };
@@ -88,7 +152,7 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
       </Show>
       <div
         class={clsx(
-          `absolute top-0 flex items-center justify-center rounded-full border`,
+          `absolute top-0 flex items-center justify-center rounded-full`,
           props.type === "panfactum" && "bg-brand-500",
           props.type === "panfactum-muted" && "bg-brand-700",
           props.type === "warning" && "bg-gold-300",
@@ -100,7 +164,9 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
         }}
         aria-hidden="true"
       >
-        {props.bullet}
+        {props.bullet && (
+          <props.bullet class="text-white" size={props.bulletSize / 2} />
+        )}
       </div>
       <div
         class="mb-3 font-semibold leading-none text-white"
@@ -110,8 +176,16 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
       >
         {props.title}
       </div>
-      <Show when={props.description}>
-        <p class={clsx("text-sm", "text-white")}>{props.description}</p>
+      <Show when={props.description && props.type !== "warning"}>
+        <p class="text-sm text-white">{props.description}</p>
+      </Show>
+      <Show when={props.description && props.type === "warning"}>
+        <div class="rounded bg-gray-light-mode-600 ">
+          <div class="mx-2 flex items-center p-2">
+            <IoWarningOutline class="mr-1 text-gold-300" size={20} />
+            <p class="text-sm text-white">{props.description}</p>
+          </div>
+        </div>
       </Show>
     </li>
   );
