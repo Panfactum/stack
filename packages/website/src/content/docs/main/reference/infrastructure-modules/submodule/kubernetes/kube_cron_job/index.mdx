@@ -96,7 +96,7 @@ Type: `string`
 
 ### namespace
 
-Description: The namespace the cluster is in
+Description: The namespace the CronJob will be deployed in
 
 Type: `string`
 
@@ -134,7 +134,7 @@ Description: Whether to allow Pods to schedule on burstable nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### cilium\_required
 
@@ -206,8 +206,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the Pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 
@@ -430,8 +431,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the Pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 
@@ -500,14 +502,6 @@ Description: limits the lifetime of a Job that has finished execution (either Co
 Type: `number`
 
 Default: `600`
-
-### update\_type
-
-Description: The type of update that the CronJob should use
-
-Type: `string`
-
-Default: `"RollingUpdate"`
 
 ### vpa\_enabled
 

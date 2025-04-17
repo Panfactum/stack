@@ -1,0 +1,188 @@
+variable "opensearch_version" {
+  description = "The version of OpenSearch to deploy. Note that we only test this module with the default version."
+  type        = string
+  default     = "2.19.1"
+}
+
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the deployed images"
+  type        = bool
+  default     = false
+}
+
+variable "namespace" {
+  description = "The namespace to deploy to the opensearch instances into"
+  type        = string
+}
+
+variable "storage_initial_gb" {
+  description = "How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after installation."
+  type        = number
+  default     = 10
+}
+
+variable "storage_limit_gb" {
+  description = "The maximum number of GB of storage to provision for each opensearch node"
+  type        = number
+  default     = null
+}
+
+variable "storage_increase_threshold_percent" {
+  description = "Dropping below this percent of free storage will trigger an automatic increase in storage size"
+  type        = number
+  default     = 20
+}
+
+variable "storage_increase_gb" {
+  description = "The amount of GB to increase storage by if free space drops below the threshold"
+  type        = number
+  default     = 5
+}
+
+variable "storage_class" {
+  description = "The StorageClass to use for the disk storage. Cannot be changed after "
+  type        = string
+  default     = "ebs-standard"
+}
+
+variable "backups_force_delete" {
+  description = "Whether to delete backups on destroy"
+  type        = bool
+  default     = false
+}
+
+variable "aws_iam_ip_allow_list" {
+  description = "A list of IPs that can use the service account token to authenticate with AWS API"
+  type        = list(string)
+  default     = []
+}
+
+variable "persistence_backups_enabled" {
+  description = "Whether to enable backups of the persistent storage."
+  type        = bool
+  default     = true
+}
+
+variable "replica_count" {
+  description = "The number of OpenSearch replicas to deploy"
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.replica_count >= 3
+    error_message = "You must use at least three replicas for high-availability"
+  }
+}
+
+variable "spot_nodes_enabled" {
+  description = "Whether the opensearch pods can be scheduled on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether the opensearch pods can be scheduled on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "arm_nodes_enabled" {
+  description = "Whether the opensearch pods can be scheduled on arm64 nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
+  type        = bool
+  default     = false
+}
+
+variable "vpa_enabled" {
+  description = "Whether the VPA resources should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "minimum_memory_mb" {
+  description = "The minimum memory in Mb to use for the redis nodes"
+  type        = number
+  default     = 25
+
+  validation {
+    condition     = var.minimum_memory_mb >= 25
+    error_message = "Must specify at least 25Mb of memory"
+  }
+}
+
+variable "monitoring_enabled" {
+  description = "Whether to allow monitoring CRs to be deployed in the namespace"
+  type        = bool
+  default     = false
+}
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = true
+}
+
+variable "instance_type_anti_affinity_required" {
+  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla_target == 3."
+  type        = bool
+  default     = null
+}
+
+variable "voluntary_disruptions_enabled" {
+  description = "Whether to enable voluntary disruptions of pods in this module."
+  type        = bool
+  default     = true
+}
+
+variable "voluntary_disruption_window_enabled" {
+  description = "Whether to confine voluntary disruptions of pods in this module to specific time windows"
+  type        = bool
+  default     = false
+}
+
+variable "voluntary_disruption_window_seconds" {
+  description = "The length of the disruption window in seconds"
+  type        = number
+  default     = 3600
+  validation {
+    condition     = var.voluntary_disruption_window_seconds >= 900
+    error_message = "The disruption window must be at least 15 minutes to be effective."
+  }
+}
+
+variable "voluntary_disruption_window_cron_schedule" {
+  description = "The times when disruption windows should start"
+  type        = string
+  default     = "0 4 * * *"
+}
+
+variable "vault_credential_lifetime_hours" {
+  description = "The lifetime of database credentials generated by Vault"
+  type        = number
+  default     = 16
+}
+
+variable "node_image_cached_enabled" {
+  description = "Whether to add the container images to the node image cache for faster startup times"
+  type        = bool
+  default     = true
+}
+
+
+variable "wait" {
+  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
+}
+
+
+variable "s3_bucket_access_policy" {
+  description = "Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the backup S3 bucket."
+  type        = string
+  default     = null
+}

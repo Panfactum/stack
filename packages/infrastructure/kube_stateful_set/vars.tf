@@ -188,8 +188,9 @@ variable "tmp_directories" {
 variable "secret_mounts" {
   description = "A mapping of Secret names to their mount configuration in the containers of the Pod"
   type = map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
   default = {}
 }
@@ -197,8 +198,9 @@ variable "secret_mounts" {
 variable "config_map_mounts" {
   description = "A mapping of ConfigMap names to their mount configuration in the containers of the Pod"
   type = map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
   default = {}
 }
@@ -235,7 +237,7 @@ variable "spot_nodes_enabled" {
 variable "burstable_nodes_enabled" {
   description = "Whether to allow pods to schedule on burstable nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "arm_nodes_enabled" {
@@ -284,6 +286,11 @@ variable "pod_management_policy" {
   description = "The StatefulSets pod management policy "
   type        = string
   default     = "OrderedReady"
+
+  validation {
+    condition     = contains(["OrderedReady", "Parallel"], var.pod_management_policy)
+    error_message = "pod_management_policy must be one of: OrderedReady, Parallel"
+  }
 }
 
 variable "termination_grace_period_seconds" {
@@ -417,4 +424,11 @@ variable "voluntary_disruption_window_cron_schedule" {
   description = "The times when disruption windows should start"
   type        = string
   default     = "0 0/4 * * *"
+}
+
+
+variable "lifetime_evictions_enabled" {
+  description = "Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)"
+  type        = bool
+  default     = false
 }

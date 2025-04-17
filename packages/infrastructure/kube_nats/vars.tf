@@ -1,7 +1,7 @@
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "namespace" {
@@ -24,7 +24,7 @@ variable "spot_nodes_enabled" {
 variable "burstable_nodes_enabled" {
   description = "Whether the database pods can be scheduled on burstable nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "arm_nodes_enabled" {

@@ -400,6 +400,53 @@ resource "kubectl_manifest" "crds" {
   server_side_apply = true
 }
 
+resource "kubectl_manifest" "cert_fixup" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "Policy"
+    metadata = {
+      name      = "alb-cert-adjustments"
+      namespace = local.name
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      useServerSideApply = true
+      rules = [
+        {
+          name = "fix-certs"
+          match = {
+            resources = {
+              kinds = ["cert-manager.io/v1/Certificate"]
+              names = ["aws-load-balancer-*"]
+            }
+          }
+          mutate = {
+            patchStrategicMerge = {
+              spec = {
+                issuerRef = {
+                  group = "cert-manager.io"
+                  kind  = "ClusterIssuer"
+                  name  = "internal"
+                }
+                duration    = "24h0m0s"
+                renewBefore = "16h0m0s"
+                privateKey = {
+                  algorithm      = "ECDSA",
+                  size           = 256
+                  rotationPolicy = "Always"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+}
+
 resource "helm_release" "alb_controller" {
   namespace       = local.namespace
   name            = "eks"
@@ -430,10 +477,8 @@ resource "helm_release" "alb_controller" {
         "linkerd.io/inject"                      = "enabled"
         "config.linkerd.io/proxy-memory-request" = "5Mi"
       }
-      podLabels = module.util_controller.labels
-      additionalLabels = merge(module.util_controller.labels, {
-        customizationHash = md5(join("", [for filename in sort(fileset(path.module, "alb_kustomize/*")) : filesha256(filename)]))
-      })
+      podLabels        = module.util_controller.labels
+      additionalLabels = module.util_controller.labels
       resources = {
         requests = {
           memory = "${floor(85 / 1.3)}Mi"
@@ -443,12 +488,9 @@ resource "helm_release" "alb_controller" {
         }
       }
 
-      replicaCount      = var.sla_target >= 2 ? 2 : 1
-      priorityClassName = module.constants.cluster_important_priority_class_name
-      affinity          = module.util_controller.affinity
-      updateStrategy = {
-        type = "Recreate"
-      }
+      replicaCount              = 2 // Since failure policy is Fail, need to always have two running
+      priorityClassName         = module.constants.cluster_important_priority_class_name
+      affinity                  = module.util_controller.affinity
       tolerations               = module.util_controller.tolerations
       topologySpreadConstraints = module.util_controller.topology_spread_constraints
       podDisruptionBudget = {
@@ -458,8 +500,8 @@ resource "helm_release" "alb_controller" {
       updateStrategy = {
         type = "RollingUpdate"
         rollingUpdate = {
-          maxSurge       = "50%"
-          maxUnavailable = 0
+          maxSurge       = 0
+          maxUnavailable = 1
         }
       }
       configureDefaultAffinity = false
@@ -497,12 +539,9 @@ resource "helm_release" "alb_controller" {
     })
   ]
 
-  postrender {
-    binary_path = "${path.module}/alb_kustomize/kustomize.sh"
-  }
-
   depends_on = [
     kubectl_manifest.crds,
+    kubectl_manifest.cert_fixup,
     module.aws_permissions
   ]
 }

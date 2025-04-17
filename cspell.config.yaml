@@ -215,7 +215,8 @@ words: [
   "mongodbatlas",
   "PersistentVolumes",
   "Airbyte",
-  "workflowtemplate"
+  "workflowtemplate",
+  "opensearch"
 ]
 languageSettings:
   - languageId: markdown,mdx

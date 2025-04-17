@@ -19,11 +19,37 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Breaking Changes
+
+* We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed. 
+  See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
+
+* `burstable_nodes_enabled` now defaults to `true` for all modules. This fixes the default behavior which was broken in `edge.25-03-26`.
+
+### Added
+
+* Adds the [kube_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_job) submodule to support running one-off
+ [Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/) as a part of larger module deployment processes. This can be used to execute
+ pre-/post-deployment scripts such as database migrations.
+
+* Adds [KEDA](https://keda.sh/) to the base cluster installation with
+ the [kube_keda](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda) module.
+
+* Adds `sub_paths` to `config_map_mounts` and `secret_mounts` inputs in all applicable Panfactum submodules to support more granular control over
+mounted files.
+
+
 ### Fixed
 
 * Fixes the default value for `min_node_cpu` of
   [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) so
   that an error no longer occurs.
+
+* Addressed an issue that slowed down node bootstrapping due to self-imposed rate-limits on image pulling.
+
+* Fixes private repo authentication in [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+
+* Adds missing `lifetime_evictions_enabled` input to [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
 
 ## edge.25-04-03
 
@@ -55,7 +81,7 @@ count is now configurable via the `retry_max_attempts` input.
 * Resolves issue in [kube_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) that prevented ACKs from being sent when synchronously publishing events in some cases. In the degenerate cases,
 this could result in an inability to publish events at all until either the publisher or the NATS server was restarted. This had significant impact on the overall availability of Argo Events.
 
-* Resolves issue in [kube_argo](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo) that prevented resources controlled by Argo Events from being updated without a controller restart.
+* Resolves issue in [kube_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) that prevented resources controlled by Argo Events from being updated without a controller restart.
 
 * Fixes the nix version check to take into account the new version format provided by the Determinate Systems nix installer.
 

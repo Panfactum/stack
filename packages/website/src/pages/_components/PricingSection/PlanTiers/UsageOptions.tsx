@@ -21,6 +21,7 @@ import {
   MODULE_DEPLOYMENT_COST,
 } from "../priceConstants";
 
+// FIX seth
 const ClusterPrice = (props: { clusterPrice: number; discount: number }) => {
   return (
     <div class="text-nowrap font-machina text-2xl font-semibold md:text-3xl">

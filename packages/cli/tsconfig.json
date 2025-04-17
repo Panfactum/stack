@@ -43,6 +43,10 @@
     
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "bin", "build.config.ts"]

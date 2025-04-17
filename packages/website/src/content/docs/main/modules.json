@@ -281,12 +281,22 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_job",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_karpenter",
       "type": "direct",
       "group": "kubernetes"
     },
     {
       "module": "kube_karpenter_node_pools",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_keda",
       "type": "direct",
       "group": "kubernetes"
     },
@@ -343,6 +353,11 @@
     {
       "module": "kube_open_cost",
       "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_opensearch",
+      "type": "submodule",
       "group": "kubernetes"
     },
     {

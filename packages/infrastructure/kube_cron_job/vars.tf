@@ -1,5 +1,5 @@
 variable "namespace" {
-  description = "The namespace the cluster is in"
+  description = "The namespace the CronJob will be deployed in"
   type        = string
 }
 
@@ -12,12 +12,6 @@ variable "priority_class_name" {
   description = "The priority class to use for Pods in the CronJob"
   type        = string
   default     = null
-}
-
-variable "update_type" {
-  description = "The type of update that the CronJob should use"
-  type        = string
-  default     = "RollingUpdate"
 }
 
 variable "extra_tolerations" {
@@ -131,8 +125,9 @@ variable "tmp_directories" {
 variable "secret_mounts" {
   description = "A mapping of Secret names to their mount configuration in the containers of the CronJob"
   type = map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the Pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
   default = {}
 }
@@ -140,8 +135,9 @@ variable "secret_mounts" {
 variable "config_map_mounts" {
   description = "A mapping of ConfigMap names to their mount configuration in the containers of the CronJob"
   type = map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the Pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
   default = {}
 }
@@ -167,7 +163,7 @@ variable "spot_nodes_enabled" {
 variable "burstable_nodes_enabled" {
   description = "Whether to allow Pods to schedule on burstable nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "arm_nodes_enabled" {

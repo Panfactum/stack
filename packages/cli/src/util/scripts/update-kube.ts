@@ -3,14 +3,14 @@ import { mkdir } from "fs/promises";
 import pc from "picocolors";
 import yaml from "yaml";
 import { z } from "zod";
+import { checkRepoSetup } from "./check-repo-setup";
+import { getKubeUserStateHash } from "./get-kube-user-state-hash";
 import { getRepoVariables } from "./get-repo-variables";
-import { getModuleOutputs } from "./helpers/terragrunt/get-module-outputs";
 import kubeConfigExample from "../../files/kube/config.example.yaml" with { type: "file" };
 import kubeUserConfigExample from "../../files/kube/config.user.example.yaml" with { type: "file" };
-import { safeFileExists } from "../safe-file-exists";
-import { getKubeUserStateHash } from "./get-kube-user-state-hash";
-import { safeDirectoryExists } from "../safe-directory-exists";
-import { checkRepoSetup } from "./check-repo-setup";
+import { safeDirectoryExists } from "../fs/directoryExist";
+import { safeFileExists } from "../fs/safe-file-exists";
+import { terragruntOutput } from "../terragrunt/terragruntOutput";
 import type { BaseContext } from "clipanion";
 
 /**
@@ -26,14 +26,18 @@ import type { BaseContext } from "clipanion";
  * @param {BaseContext} options.context - The CLI context for logging
  * @throws {Error} If required files are missing or configuration is invalid
  */
-// eslint-disable-next-line sonarjs/cognitive-complexity
+
 export async function updateKube({
+  awsProfile,
   buildConfig,
   context,
+  silent = false,
   verbose,
 }: {
+  awsProfile: string;
   buildConfig?: boolean;
   context: BaseContext;
+  silent?: boolean;
   verbose?: boolean;
 }) {
   // ############################################################
@@ -71,7 +75,7 @@ export async function updateKube({
 
   if (buildConfig) {
     if (configFileExists) {
-      context.stderr.write("Building cluster_info file...\n");
+      !silent && context.stdout.write("Building cluster_info file...\n");
       if (clusterInfoFileExists) {
         await Bun.file(clusterInfoFilePath).delete();
       }
@@ -105,14 +109,16 @@ export async function updateKube({
           throw new Error(`No cluster specified in ${configFilePath}!`);
         }
         const modulePath = `${environmentsDir}/${cluster.module}`;
-        context.stdout.write(`Adding cluster at ${modulePath}...\n`);
+        !silent && context.stdout.write(`Adding cluster at ${modulePath}...\n`);
         if (!(await safeDirectoryExists(modulePath))) {
           context.stderr.write(`Error: No module at ${modulePath}!\n`);
           throw new Error(`No module at ${modulePath}!`);
         }
-        const moduleOutput = getModuleOutputs({
+        const moduleOutput = terragruntOutput({
+          awsProfile,
           context,
           modulePath,
+          silent,
           validationSchema: z.object({
             cluster_ca_data: z.object({
               sensitive: z.boolean(),
@@ -150,11 +156,12 @@ export async function updateKube({
           );
         }
 
-        context.stdout.write(pc.green("Cluster added successfully!\n"));
+        !silent &&
+          context.stdout.write(pc.green("Cluster added successfully!\n"));
       }
 
-      context.stdout.write("cluster_info updated!\n");
-      context.stdout.write("-----------------------------------\n");
+      !silent && context.stdout.write("cluster_info updated!\n");
+      !silent && context.stdout.write("-----------------------------------\n");
     } else {
       context.stderr.write(
         `Error: No configuration file exists at ${configFilePath}. See https://panfactum.com/docs/reference/configuration/kubernetes.\n`
@@ -172,7 +179,10 @@ export async function updateKube({
   const userConfigFileExists = await safeFileExists(userConfigFilePath);
 
   if (userConfigFileExists && clusterInfoFileExists) {
-    context.stdout.write(`Building kubeconfig file at ${kubeDir}/config...\n`);
+    !silent &&
+      context.stdout.write(
+        `Building kubeconfig file at ${kubeDir}/config...\n`
+      );
 
     const userConfigFileJson = yaml.parse(
       await Bun.file(userConfigFilePath).text()
@@ -208,9 +218,10 @@ export async function updateKube({
       const clusterName = cluster.name;
       const awsProfile = cluster.aws_profile;
 
-      context.stdout.write(
-        `Adding ${clusterName} using ${awsProfile} for authentication...\n`
-      );
+      !silent &&
+        context.stdout.write(
+          `Adding ${clusterName} using ${awsProfile} for authentication...\n`
+        );
 
       // Validate the AWS profile
       const proc = Bun.spawnSync(["aws", "configure", "list-profiles"]);
@@ -315,10 +326,10 @@ export async function updateKube({
         }
       );
 
-      context.stdout.write("Done!\n");
+      !silent && context.stdout.write("Done!\n");
     }
 
-    context.stdout.write("All clusters configured!\n");
+    !silent && context.stdout.write("All clusters configured!\n");
   } else {
     context.stderr.write(
       `Warning: No cluster_info file exists at ${clusterInfoFilePath}. A superuser must run 'pf update-kube --build' to generate this file. Skipping kubeconfig setup!\n`
@@ -329,10 +340,14 @@ export async function updateKube({
   const userStateHash = await getKubeUserStateHash({ context });
   await Bun.write(Bun.file(`${kubeDir}/state.user.lock`), userStateHash);
 
-  context.stdout.write(
-    "-----------------------------------------------------------\n"
-  );
-  context.stdout.write(`Kubernetes config files in ${kubeDir} were updated.\n`);
+  !silent &&
+    context.stdout.write(
+      "-----------------------------------------------------------\n"
+    );
+  !silent &&
+    context.stdout.write(
+      `Kubernetes config files in ${kubeDir} were updated.\n`
+    );
 
   if (process.env["PF_SKIP_CHECK_REPO_SETUP"] !== "1") {
     await checkRepoSetup({ context });

@@ -1,4 +1,8 @@
-{ pkgs }:
+{
+  pkgs,
+  bunPkgs,
+  bun2nix,
+}:
 {
 
   shellHook = ''
@@ -19,10 +23,12 @@
     ####################################
     # Programming Langauges
     ####################################
-    nodejs_22
+    nodejs_22 # nodejs runtime
     nodePackages_latest.pnpm # nodejs package manager
-    go
+    go # go programming language
     upx # compressing go binaries
+    bunPkgs.bun # bun runtime
+    bun2nix.bin # utility for building nix derivations from bun projects
 
     ####################################
     # Version Control
@@ -33,7 +39,7 @@
     #########################################
     # IaC Tools
     #########################################
-    terraform-docs
+    terraform-docs # tool for generating documentation from terraform modules
 
     #########################################
     # Linters

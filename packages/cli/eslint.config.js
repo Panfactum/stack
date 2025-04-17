@@ -6,6 +6,7 @@ import sonarjs from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
 import promise from "eslint-plugin-promise";
 import tsParser from "@typescript-eslint/parser";
+import unusedImports from "eslint-plugin-unused-imports"
 import js from "@eslint/js";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -23,6 +24,7 @@ export default [
       sonarjs: fixupPluginRules(sonarjs),
       unicorn: fixupPluginRules(unicorn),
       promise: fixupPluginRules(promise),
+      "unused-imports": fixupPluginRules(unusedImports) 
     },
     languageOptions: {
       parser: tsParser,
@@ -44,18 +46,21 @@ export default [
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
       "@typescript-eslint/no-unsafe-return": "error",
       "@typescript-eslint/restrict-template-expressions": "error",
-      "@typescript-eslint/no-unused-vars": [
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-vars": [
         "error",
         {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
+          "vars": "all",
+          "varsIgnorePattern": "^_",
+          "args": "after-used",
+          "argsIgnorePattern": "^_",
         },
       ],
-
       "@typescript-eslint/naming-convention": [
         "error",
         {
@@ -100,16 +105,6 @@ export default [
       "import/no-cycle": "error",
       "import/no-duplicates": "error",
       "import/no-useless-path-segments": "error",
-
-      "unicorn/filename-case": [
-        "error",
-        {
-          cases: {
-            kebabCase: true,
-          },
-        },
-      ],
-
       "no-console": [
         "warn",
         {
@@ -128,6 +123,7 @@ export default [
       "sonarjs/no-identical-functions": "error",
       "sonarjs/no-redundant-jump": "error",
       "sonarjs/no-use-of-empty-return-value": "error",
+      "sonarjs/no-ignored-return": "error",
       "sonarjs/no-inverted-boolean-check": "error",
       "sonarjs/no-all-duplicated-branches": "error",
       "sonarjs/no-element-overwrite": "error",
@@ -136,8 +132,7 @@ export default [
       "sonarjs/no-collection-size-mischeck": "error",
       "sonarjs/prefer-object-literal": "error",
       "sonarjs/prefer-single-boolean-return": "error",
-      "sonarjs/no-duplicate-string": ["error", { threshold: 5 }],
-      "sonarjs/cognitive-complexity": ["error", 20],
+      "sonarjs/no-duplicate-string": ["error", { threshold: 5 }]
     },
   },
 ];

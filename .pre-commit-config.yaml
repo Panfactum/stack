@@ -14,7 +14,7 @@ repos:
         name: Shellcheck
         entry: shellcheck
         language: system
-        files: ^packages/nix/.*\.sh$
+        files: ^packages/(nix|installer|infrastructure)/.*\.sh$
         pass_filenames: true
         description: "Runs shellcheck on shell scripts"
         fail_fast: true
@@ -23,7 +23,7 @@ repos:
         name: Shell Format
         entry: shfmt --diff -i 2
         language: system
-        files: ^packages/nix/.*\.sh$
+        files: ^packages/(nix|installer|infrastructure)/.*\.sh$
         pass_filenames: true
         description: "Runs shfmt on shell scripts"
         fail_fast: true
@@ -32,7 +32,7 @@ repos:
         name: Nix Format
         entry: nixfmt -c
         language: system
-        files: ^packages/nix/.*\.nix$
+        files: ^packages/(nix|cli)/.*\.nix$
         pass_filenames: true
         description: "Runs nixfmt on Nix files"
         fail_fast: true
@@ -50,8 +50,7 @@ repos:
         name: Tofu Format
         entry: tofu fmt -diff -check
         language: system
-        files: ^packages/infrastructure/
-        exclude: \.sh$
+        files: ^packages/infrastructure/.*\.tf$
         pass_filenames: true
         description: "Runs tofu fmt on the infrastructure code"
         fail_fast: false
@@ -78,7 +77,7 @@ repos:
         name: Lint Website
         entry: precommit-lint-website
         language: system
-        files: ^packages/website/
+        files: ^packages/website/.*\.(ts|tsx|astro)$
         pass_filenames: true
         description: "Runs linting for the website code"
         fail_fast: true
