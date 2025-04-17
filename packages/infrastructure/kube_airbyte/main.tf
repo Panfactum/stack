@@ -818,6 +818,7 @@ resource "helm_release" "airbyte" {
             memory = "${var.server_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Worker configuration
@@ -851,6 +852,8 @@ resource "helm_release" "airbyte" {
           MAX_CHECK_WORKERS               = tostring(var.worker_max_check_workers)
           MAX_SYNC_WORKERS                = tostring(var.worker_max_sync_workers)
         })
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Temporal configuration
@@ -905,6 +908,8 @@ resource "helm_release" "airbyte" {
           TEMPORAL_ADDRESS                   = "airbyte-temporal:7233"
           TEMPORAL_CLI_TIMEOUT               = "60s"
         })
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Pod sweeper configuration
@@ -953,6 +958,8 @@ resource "helm_release" "airbyte" {
             memory = "${var.connector_min_builder_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Cron configuration
@@ -979,6 +986,8 @@ resource "helm_release" "airbyte" {
             memory = "${var.cron_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Disable MinIO since we're using S3
@@ -1006,6 +1015,8 @@ resource "helm_release" "airbyte" {
             memory = "${var.workload_api_min_server_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        deploymentStrategyType = "RollingUpdate"
       }
 
       # Workload launcher configuration
@@ -1032,6 +1043,8 @@ resource "helm_release" "airbyte" {
         env_vars = merge(var.launcher_env, {
           WORKLOAD_LAUNCHER_PARALLELISM = var.launcher_workload_launcher_parallelism
         })
+
+        deploymentStrategyType = "RollingUpdate"
       }
     })
   ]
