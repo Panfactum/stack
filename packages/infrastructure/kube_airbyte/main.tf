@@ -795,10 +795,12 @@ resource "helm_release" "airbyte" {
 
       # Server configuration
       server = {
-        enabled        = true
-        replicaCount   = var.sla_target >= 2 ? 2 : 1
-        podLabels      = module.util_server.labels
-        podAnnotations = var.pod_annotations
+        enabled      = true
+        replicaCount = var.sla_target >= 2 ? 2 : 1
+        podLabels    = module.util_server.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_server.affinity
         tolerations = module.util_server.tolerations
@@ -820,10 +822,12 @@ resource "helm_release" "airbyte" {
 
       # Worker configuration
       worker = {
-        enabled        = true
-        replicaCount   = var.worker_replicas
-        podLabels      = module.util_worker.labels
-        podAnnotations = var.pod_annotations
+        enabled      = true
+        replicaCount = var.worker_replicas
+        podLabels    = module.util_worker.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_worker.affinity
         tolerations = module.util_worker.tolerations
@@ -855,9 +859,10 @@ resource "helm_release" "airbyte" {
         enabled      = true
         replicaCount = var.sla_target >= 2 ? 2 : 1
         podLabels    = module.util_temporal.labels
-        podAnnotations = {
+        podAnnotations = merge({
+          "reloader.stakater.com/auto"     = "true"
           "config.linkerd.io/opaque-ports" = "7233"
-        }
+        }, var.pod_annotations)
 
         affinity    = module.util_temporal.affinity
         tolerations = module.util_temporal.tolerations
@@ -904,9 +909,11 @@ resource "helm_release" "airbyte" {
 
       # Pod sweeper configuration
       "pod-sweeper" = {
-        enabled        = true
-        podLabels      = module.util_pod_sweeper.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_pod_sweeper.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_pod_sweeper.affinity
         tolerations = module.util_pod_sweeper.tolerations
@@ -924,9 +931,11 @@ resource "helm_release" "airbyte" {
 
       # Connector builder server configuration
       "connector-builder-server" = {
-        enabled        = true # required to be on https://github.com/airbytehq/airbyte/issues/25174
-        podLabels      = module.util_connector_builder.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true # required to be on https://github.com/airbytehq/airbyte/issues/25174
+        podLabels = module.util_connector_builder.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_connector_builder.affinity
         tolerations = module.util_connector_builder.tolerations
@@ -948,9 +957,11 @@ resource "helm_release" "airbyte" {
 
       # Cron configuration
       "cron" = {
-        enabled        = true
-        podLabels      = module.util_cron.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_cron.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_cron.affinity
         tolerations = module.util_cron.tolerations
@@ -977,9 +988,11 @@ resource "helm_release" "airbyte" {
 
       # Workload API server configuration
       "workload-api-server" = {
-        enabled        = true
-        podLabels      = module.util_workload_api_server.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_workload_api_server.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_workload_api_server.affinity
         tolerations = module.util_workload_api_server.tolerations
@@ -997,9 +1010,11 @@ resource "helm_release" "airbyte" {
 
       # Workload launcher configuration
       "workload-launcher" = {
-        enabled        = true
-        podLabels      = module.util_workload_launcher.labels
-        podAnnotations = var.pod_annotations
+        enabled   = true
+        podLabels = module.util_workload_launcher.labels
+        podAnnotations = merge({
+          "reloader.stakater.com/auto" = "true"
+        }, var.pod_annotations)
 
         affinity    = module.util_workload_launcher.affinity
         tolerations = module.util_workload_launcher.tolerations
