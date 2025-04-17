@@ -6,7 +6,7 @@ import FAQItem from "@/components/ui/FAQItem";
 
 const FAQS: Component = () => {
   return (
-    <section class="flex w-full flex-col items-center space-y-16 bg-white py-24 dark:bg-gray-dark-mode-800">
+    <section class="flex w-full flex-col items-center space-y-16 bg-white px-4 py-24 dark:bg-gray-dark-mode-800">
       <div class="container flex max-w-screen-lg flex-col items-center gap-4">
         <div class=" flex flex-col items-center gap-5 text-center">
           <h1 class="text-display-xl font-machina font-medium leading-none text-brand-900 dark:text-white">

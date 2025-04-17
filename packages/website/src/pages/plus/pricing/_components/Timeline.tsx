@@ -249,7 +249,7 @@ const LaunchOptions: LaunchOption[] = [
 ];
 
 const tabItemClasses =
-  "flex cursor-pointer items-center justify-center text-nowrap rounded py-2 font-semibold hover:bg-gold-300 hover:text-gray-light-mode-700 w-60";
+  "flex grow cursor-pointer items-center justify-center text-nowrap rounded py-2 font-semibold hover:bg-gold-300 hover:text-gray-light-mode-700 md:w-60 text-xs md:text-base";
 
 const Timeline: Component = () => {
   const [planValue, setPlanValue] = createSignal<1 | 2 | 3>(1);
@@ -265,8 +265,8 @@ const Timeline: Component = () => {
 
   return (
     <>
-      <div class="flex grow flex-col gap-2">
-        <div class="flex h-16 gap-4 rounded-md bg-gray-light-mode-800 p-3 shadow-md dark:bg-brand-800">
+      <div class="flex w-full grow flex-col gap-2 px-2 sm:w-auto sm:px-4">
+        <div class="flex h-16 gap-1 rounded-md bg-gray-light-mode-800 p-2 shadow-md md:gap-4 md:p-3 dark:bg-brand-800">
           <For each={LaunchOptions}>
             {(option) => {
               const IconComponent = option.icon;
@@ -286,7 +286,7 @@ const Timeline: Component = () => {
                   {option.label}{" "}
                   <IconComponent
                     class={clsx(
-                      "ml-1",
+                      "ml-1 text-sm md:text-base",
                       planValue() === option.value
                         ? "text-gray-light-mode-700"
                         : "text-gold-300",
@@ -299,8 +299,8 @@ const Timeline: Component = () => {
           </For>
         </div>
       </div>
-      <div class="flex grow flex-col gap-2">
-        <div class="mt-4 flex grow items-center justify-between">
+      <div class="flex grow flex-col gap-2 px-2 sm:px-4">
+        <div class="mt-4 flex grow flex-col items-start justify-between gap-4 sm:flex-row sm:items-center sm:gap-0">
           <div class="flex items-center">
             <FiCalendar class="mr-1 text-brand-300" />
             <SolidSwitch>
@@ -345,20 +345,22 @@ const Timeline: Component = () => {
             </div>
           </Switch>
         </div>
-        <div class="mt-6 flex w-full min-w-[850px] gap-4">
-          <div class="w-3/4">
-            <TimelineComponent
-              items={
-                buildWithOurTeam()
-                  ? plan().timeline.timelineItems.panfactumTimeline
-                  : plan().timeline.timelineItems.withoutPanfactumTimeline
-              }
-              bulletSize={48}
-              buttons={plan().timeline.timelineItems.buttons}
-              buttonCallback={setPlanValue}
-            />
+        <div class="mt-6 flex w-full min-w-0 flex-col gap-4 lg:min-w-[850px] lg:flex-row">
+          <div class="w-full lg:w-3/4">
+            <div class="max-w-full">
+              <TimelineComponent
+                items={
+                  buildWithOurTeam()
+                    ? plan().timeline.timelineItems.panfactumTimeline
+                    : plan().timeline.timelineItems.withoutPanfactumTimeline
+                }
+                bulletSize={48}
+                buttons={plan().timeline.timelineItems.buttons}
+                buttonCallback={setPlanValue}
+              />
+            </div>
           </div>
-          <div class="w-1/4">
+          <div class="hidden w-full lg:block lg:w-1/4">
             <div class="flex flex-col gap-2 rounded bg-white p-4 text-sm text-gray-light-mode-600">
               <div class="flex justify-between">
                 <span>SPEND</span>

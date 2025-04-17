@@ -41,7 +41,7 @@ const PriceCalculator: Component = () => {
   return (
     <div class="flex w-full flex-col gap-8">
       <div class="flex flex-wrap gap-8">
-        <div class="flex flex-col gap-2">
+        <div class="flex w-full flex-col gap-2 sm:w-auto">
           <div class="text-display-xs font-semibold text-white">
             Commitment:
           </div>
