@@ -1,4 +1,5 @@
 ---
+import FAQS from "./_components/FAQs.tsx";
 import HeroSection from "./_components/HeroSection.astro";
 import TimelineSection from "./_components/TimelineSection.astro";
 import Layout from "../../../layouts/Layout.astro";
@@ -20,5 +21,6 @@ import PricingSection from "../../_components/PricingSection/PricingSection.astr
       <PricingSection />
     </div>
     <TimelineSection />
+    <FAQS client:idle/>
   </section>
 </Layout>

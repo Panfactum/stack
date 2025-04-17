@@ -18,7 +18,7 @@ module.exports = {
     extraFileExtensions: ['.astro']
   },
   ignorePatterns: [
-    "*.js", "*.cjs", "*.mjs", "*.mdx", "*.md", "*.png"
+    "*.js", "*.cjs", "*.mjs", "*.mdx", "*.md", "*.png", "*.css"
   ],
   rules: {
     "no-console": "error",
