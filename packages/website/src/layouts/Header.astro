@@ -43,7 +43,7 @@ const links = isPlus ? PLUS_NAV_LINKS : NAV_LINKS
       : background === "secondary"
         ? "bg-secondary"
         : "bg-transparent",
-    isFixed ? "md:fixed top-0 z-10" : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
+    isFixed ? "md:fixed top-0 z-20" : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
   ]}
 >
     <HeaderBanner client:load transition:persist />

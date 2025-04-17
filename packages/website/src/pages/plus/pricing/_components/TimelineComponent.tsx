@@ -9,12 +9,13 @@ import {
   type Setter,
 } from "solid-js";
 
+import panfactumMark from "@/components/icons/panfactum-mark.svg";
 type BulletType = "panfactum" | "warning" | "panfactum-muted";
 
 export type TimelineItemProps = {
   title: JSXElement;
   description?: JSXElement;
-  bullet?: Component<{ class: string; size: number }>;
+  bullet?: Component<{ class: string; size: number }> | "panfactum";
   isLast?: boolean;
   bulletSize: number;
   time?: string;
@@ -112,7 +113,7 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
 
           {/* Hide the vertical line below the last button */}
           <div
-            class="absolute bg-gray-light-mode-950"
+            class="absolute bg-gray-light-mode-950 dark:bg-gray-dark-mode-800"
             style={{
               width: `${props.lineSize}px`,
               height: "100%",
@@ -164,9 +165,20 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
         }}
         aria-hidden="true"
       >
-        {props.bullet && (
+        <Show when={props.bullet && props.bullet !== "panfactum"}>
+          {/* @ts-expect-error props.bullet is for sure a component */}
           <props.bullet class="text-white" size={props.bulletSize / 2} />
-        )}
+        </Show>
+        <Show when={props.bullet === "panfactum"}>
+          <img
+            src={panfactumMark.src}
+            alt="Panfactum Logo"
+            class="size-6"
+            style={{
+              filter: "brightness(0) invert(1)",
+            }}
+          />
+        </Show>
       </div>
       <div
         class="mb-3 font-semibold leading-none text-white"

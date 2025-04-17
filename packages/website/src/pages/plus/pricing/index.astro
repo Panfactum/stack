@@ -1,26 +1,29 @@
 ---
+import Layout from "@/layouts/Layout.astro";
+
 import FAQS from "./_components/FAQs.tsx";
 import HeroSection from "./_components/HeroSection.astro";
+import PriceCalculator from "./_components/PricingSection/PriceCalculator.tsx";
 import TimelineSection from "./_components/TimelineSection.astro";
-import Layout from "../../../layouts/Layout.astro";
-import PricingSection from "../../_components/PricingSection/PricingSection.astro";
+import TalkToAnEngineer from "../_components/TalkToAnEngineer.astro";
 ---
 
 <Layout
-  heroClass="bg-secondary"
+  heroClass="bg-gray-light-mode-950 dark:bg-gray-dark-mode-800 text-white"
   hasBorder={false}
   title="PanfactumPlus Pricing"
   description="The Power of Panfactum Plus Fractional DevOps"
 >
   <HeroSection slot="hero" />
 
-  <section class:list={["overflow-x-hidden", "bg-primary"]}>
+  <section class:list={["overflow-x-hidden", "bg-gray-light-mode-950 dark:bg-gray-dark-mode-800"]}>
     <div
       class="mx-auto flex max-w-screen-xl flex-col items-center px-4 pb-8 pt-12 md:px-8"
     >
-      <PricingSection />
+      <PriceCalculator client:load />
     </div>
     <TimelineSection />
     <FAQS client:idle/>
+    <TalkToAnEngineer/>
   </section>
 </Layout>

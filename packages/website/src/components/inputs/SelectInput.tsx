@@ -11,7 +11,7 @@ import { isServer } from "solid-js/web";
 
 import { useBackgroundContext } from "@/components/context/background.ts";
 
-import InputBase from "../../pages/_components/PricingSection/SavingsEstimator/inputs/InputBase.tsx";
+import InputBase from "../../pages/plus/pricing/_components/PricingSection/SavingsEstimator/inputs/InputBase.tsx";
 
 type SelectInputOptions = Array<{ id: string; name: string }>;
 

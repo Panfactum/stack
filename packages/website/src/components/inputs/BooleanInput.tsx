@@ -3,7 +3,7 @@ import { type Component, createEffect, type JSX } from "solid-js";
 
 import { useBackgroundContext } from "@/components/context/background.ts";
 
-import InputBase from "../../pages/_components/PricingSection/SavingsEstimator/inputs/InputBase.tsx";
+import InputBase from "../../pages/plus/pricing/_components/PricingSection/SavingsEstimator/inputs/InputBase.tsx";
 
 interface BooleanInputProps {
   id: string;

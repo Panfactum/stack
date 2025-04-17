@@ -22,14 +22,14 @@ const LAUNCH_WITH_PANFACTUM_TIMELINE: TimelinePropsItem[] = [
   {
     title: "Launch development cluster in your AWS organization",
     description: "Setup your cluster with everything you need",
-    bullet: HiOutlineRocketLaunch,
+    bullet: "panfactum",
     type: "panfactum-muted",
     time: "2 days",
   },
   {
     title: "Launch production cluster in your AWS organization",
     description: "Setup your cluster with everything you need",
-    bullet: HiOutlineRocketLaunch,
+    bullet: "panfactum",
     type: "panfactum",
     time: "10 days",
   },
@@ -110,8 +110,8 @@ interface LaunchOption {
   value: 1 | 2 | 3;
   icon: Component<{ class: string }>;
   timeline: {
-    panfactumTotalTime: string;
-    withoutPanfactumTotalTime: string;
+    panfactumTotalTime: number;
+    withoutPanfactumTotalTime: number;
     timelineItems: {
       panfactumTimeline: TimelinePropsItem[];
       withoutPanfactumTimeline: TimelinePropsItem[];
@@ -137,8 +137,8 @@ const LaunchOptions: LaunchOption[] = [
     value: 1,
     icon: HiOutlineRocketLaunch,
     timeline: {
-      panfactumTotalTime: "12 days",
-      withoutPanfactumTotalTime: "20 days",
+      panfactumTotalTime: 12,
+      withoutPanfactumTotalTime: 20,
       timelineItems: {
         panfactumTimeline: LAUNCH_WITH_PANFACTUM_TIMELINE,
         withoutPanfactumTimeline: LAUNCH_WITHOUT_PANFACTUM_TIMELINE,
@@ -179,8 +179,8 @@ const LaunchOptions: LaunchOption[] = [
     value: 2,
     icon: CgArrowsExpandRight,
     timeline: {
-      panfactumTotalTime: "5 days",
-      withoutPanfactumTotalTime: "10 days",
+      panfactumTotalTime: 5,
+      withoutPanfactumTotalTime: 10,
       timelineItems: {
         panfactumTimeline: EXPAND_TIMELINE,
         withoutPanfactumTimeline: EXPAND_TIMELINE,
@@ -213,8 +213,8 @@ const LaunchOptions: LaunchOption[] = [
     value: 3,
     icon: HiOutlineArrowUpCircle,
     timeline: {
-      panfactumTotalTime: "5 days",
-      withoutPanfactumTotalTime: "10 days",
+      panfactumTotalTime: 5,
+      withoutPanfactumTotalTime: 10,
       timelineItems: {
         panfactumTimeline: UPGRADE_TIMELINE,
         withoutPanfactumTimeline: UPGRADE_TIMELINE,
@@ -307,20 +307,23 @@ const Timeline: Component = () => {
               <Match when={buildWithOurTeam()}>
                 <div>
                   <span class="text-gray-light-mode-400 line-through">
-                    {plan().timeline.withoutPanfactumTotalTime}
+                    {plan().timeline.withoutPanfactumTotalTime} days
                   </span>{" "}
                   <span class="text-white">
-                    {plan().timeline.panfactumTotalTime}
+                    {plan().timeline.panfactumTotalTime} days
                   </span>
                 </div>
               </Match>
               <Match when={!buildWithOurTeam()}>
                 <div>
                   <span class="text-gold-300">
-                    {plan().timeline.withoutPanfactumTotalTime}
+                    {plan().timeline.withoutPanfactumTotalTime} days
                   </span>{" "}
                   <span class="italic text-white">
-                    Save 60 Days with PanfactumPlus
+                    Save{" "}
+                    {plan().timeline.withoutPanfactumTotalTime -
+                      plan().timeline.panfactumTotalTime}{" "}
+                    days with PanfactumPlus
                   </span>
                 </div>
               </Match>
@@ -332,7 +335,7 @@ const Timeline: Component = () => {
             onChange={setBuildWithOurTeam}
           >
             <Switch.Input />
-            <Switch.Control class="inline-flex h-6 w-12 items-center rounded-full bg-gray-light-mode-400 transition-all duration-200 ease-in-out data-[checked]:bg-gold-300 dark:bg-gray-dark-mode-100 dark:data-[checked]:bg-brand-300">
+            <Switch.Control class="inline-flex h-6 w-12 items-center rounded-full bg-gray-light-mode-400 transition-all duration-200 ease-in-out data-[checked]:bg-gold-300">
               <Switch.Thumb class="size-6 rounded-full bg-gray-dark-mode-200 ring-1 ring-inset ring-gray-dark-mode-400 transition-all duration-200 ease-in-out data-[checked]:translate-x-[calc(100%-1px)]" />
             </Switch.Control>
             <div class="flex items-center justify-between gap-4 text-white">
