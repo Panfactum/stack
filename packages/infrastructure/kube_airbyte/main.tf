@@ -40,8 +40,8 @@ locals {
 
   # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
   # secret/data/airbyte
-  vault_env_prefix = "${local.vault_mount}/${local.vault_prefix}"
-  vault_address = "http://vault-active.vault.svc.cluster.local:8200"
+  vault_env_prefix = "${local.vault_mount}/${local.vault_prefix}/"
+  vault_address    = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
 data "pf_kube_labels" "labels" {
@@ -375,51 +375,44 @@ resource "kubernetes_secret" "airbyte_secrets" {
 data "vault_policy_document" "airbyte" {
   # Root paths for metadata (without wildcards)
   rule {
-    path         = "${local.vault_metadata_path}"
+    path         = local.vault_metadata_path
     capabilities = ["read", "list"]
     description  = "List and read at metadata root"
   }
 
   # Root paths for data (without wildcards)
   rule {
-    path         = "${local.vault_data_path}"
+    path         = local.vault_data_path
     capabilities = ["read", "create", "update", "delete", "list"]
     description  = "Full access at data root"
   }
 
   # Root paths for delete (without wildcards)
   rule {
-    path         = "${local.vault_delete_path}"
+    path         = local.vault_delete_path
     capabilities = ["update", "delete"]
     description  = "Delete at root path"
   }
 
-  # Wildcard paths for metadata
+  # Wildcard paths for metadata - single level
   rule {
     path         = "${local.vault_metadata_path}/*"
     capabilities = ["read", "list"]
-    description  = "List secrets at any level"
+    description  = "List secrets at first level"
   }
 
-  # Wildcard paths for data - combining read, create, update into one rule
+  # Wildcard paths for data - single level
   rule {
     path         = "${local.vault_data_path}/*"
     capabilities = ["read", "create", "update", "delete", "list"]
-    description  = "Full access to all secrets"
+    description  = "Full access to first level secrets"
   }
 
-  # Wildcard paths for delete
+  # Wildcard paths for delete - single level
   rule {
     path         = "${local.vault_delete_path}/*"
     capabilities = ["update", "delete"]
-    description  = "Delete secrets at any level"
-  }
-
-  # Additional rules for parent paths if needed
-  rule {
-    path         = "${local.vault_mount}/*"
-    capabilities = ["read", "list"]
-    description  = "Read and list at mount level"
+    description  = "Delete secrets at first level"
   }
 }
 
@@ -566,6 +559,12 @@ resource "kubernetes_job" "vault_token_init" {
   depends_on = [
     module.vault_auth_airbyte
   ]
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
 
 /***************************************
@@ -577,7 +576,7 @@ module "vault_token_rotator" {
 
   namespace     = local.namespace
   name          = "airbyte-vault-token-rotator"
-  cron_schedule = "0 */8 * * 0" # every 8 hours
+  cron_schedule = "0 */8 * * *" # every 8 hours
 
   # Important parameters for the job
   restart_policy                = "OnFailure"

@@ -27,7 +27,8 @@ AUTH_PAYLOAD=$(
   cat <<PAYLOAD
 {
   "jwt": "$JWT",
-  "role": "$VAULT_ROLE"
+  "role": "$VAULT_ROLE",
+  "ttl": "48h"
 }
 PAYLOAD
 )
