@@ -505,7 +505,7 @@ resource "kubernetes_job" "vault_token_init" {
 
         container {
           name  = "vault-token-generator"
-          image = "curlimages/curl:8.5.0" # Official curl image based on Alpine
+          image = "curlimages/curl:8.12.1"
 
           env {
             name  = "VAULT_ADDR"
@@ -1666,6 +1666,11 @@ module "image_cache" {
       registry   = "docker.io"
       repository = "temporalio/auto-setup"
       tag        = "1.26"
+    },
+    {
+      registry   = "docker.io"
+      repository = "curlimages/curl"
+      tag        = "8.12.1"
     }
   ]
 }
