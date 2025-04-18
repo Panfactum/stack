@@ -149,7 +149,7 @@ const SavingsEstimator: Component<{
           </Collapsible.Content>
         </Collapsible>
         <Collapsible open={showDetails()} class="w-full">
-          <Collapsible.Content class="relative flex w-full animate-kobalte-collapsible-up justify-center gap-16 overflow-hidden border-t-2 border-gray-light-mode-400 px-4 py-6  data-[expanded]:animate-kobalte-collapsible-down md:px-8 lg:mx-0 lg:justify-between dark:border-gray-dark-mode-800">
+          <Collapsible.Content class="relative flex w-full animate-kobalte-collapsible-up justify-center gap-16 overflow-hidden border-t-2 border-gray-light-mode-400 px-4 py-6 data-[expanded]:animate-kobalte-collapsible-down md:px-8 lg:mx-0 lg:justify-between dark:border-gray-dark-mode-800">
             <div
               class="hidden size-full lg:block"
               data-fillout-id="qPCz1EpEoHus"
@@ -165,7 +165,7 @@ const SavingsEstimator: Component<{
                 </div>
                 <div class="h-0.5 grow bg-gray-light-mode-300 dark:bg-gray-dark-mode-800" />
               </div>
-              <div class="text-display-lg flex items-baseline justify-center gap-2 font-semibold text-success-600 dark:text-success-300">
+              <div class="text-display-lg flex items-baseline justify-center gap-2 font-machina font-semibold text-success-600 dark:text-success-300">
                 {CURRENCY_FORMAT.format(totalSavings())}{" "}
                 <span class="text-base">/ month</span>
               </div>
@@ -186,7 +186,7 @@ const SavingsEstimator: Component<{
                     </span>
                     Labor
                   </div>
-                  <div class="text-display-md text-nowrap text-success-600 dark:text-success-300">
+                  <div class="text-display-md text-nowrap font-machina text-success-600 dark:text-success-300">
                     -
                     {CURRENCY_FORMAT.format(
                       laborSavings() * calculatorStore.laborHourlyCost -
@@ -215,7 +215,7 @@ const SavingsEstimator: Component<{
                     </span>
                     Infrastructure
                   </div>
-                  <div class="text-display-md text-nowrap text-success-600 dark:text-success-300">
+                  <div class="text-display-md text-nowrap font-machina text-success-600 dark:text-success-300">
                     -{CURRENCY_FORMAT.format(infrastructureSavings())}{" "}
                     <span class="text-base">/ month</span>
                   </div>
