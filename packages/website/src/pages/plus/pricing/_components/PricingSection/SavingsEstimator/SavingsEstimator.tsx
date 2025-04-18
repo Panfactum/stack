@@ -119,7 +119,7 @@ const SavingsEstimator: Component<{
                 showDetails() && "opacity-0",
               )}
             >
-              <div class="text-display-lg flex items-baseline justify-center gap-2 text-nowrap font-semibold text-success-600 dark:text-success-300">
+              <div class="text-display-lg flex items-baseline justify-center gap-2 text-nowrap font-machina font-semibold text-success-600 dark:text-success-300">
                 {CURRENCY_FORMAT.format(totalSavings())}{" "}
                 <span class="text-base">/ month</span>
               </div>

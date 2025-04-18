@@ -254,7 +254,8 @@ const tabItemClasses =
 const Timeline: Component = () => {
   const [planValue, setPlanValue] = createSignal<1 | 2 | 3>(1);
   const [plan, setPlan] = createSignal<LaunchOption>(LaunchOptions[0]);
-  const [buildWithOurTeam, setBuildWithOurTeam] = createSignal(true);
+  const [buildWithPanfactumPlus, setBuildWithPanfactumPlus] =
+    createSignal(true);
 
   createEffect(() => {
     const selectedPlan = LaunchOptions.find((opt) => opt.value === planValue());
@@ -266,7 +267,7 @@ const Timeline: Component = () => {
   return (
     <>
       <div class="flex w-full grow flex-col gap-2 px-2 sm:w-auto sm:px-4">
-        <div class="flex h-16 gap-1 rounded-md bg-gray-light-mode-800 p-2 shadow-md md:gap-4 md:p-3 dark:bg-brand-800">
+        <div class="flex h-16 gap-1 rounded-lg bg-gray-light-mode-800 p-2 shadow-md md:gap-4 md:p-3 dark:bg-gray-dark-mode-950">
           <For each={LaunchOptions}>
             {(option) => {
               const IconComponent = option.icon;
@@ -304,7 +305,7 @@ const Timeline: Component = () => {
           <div class="flex items-center">
             <FiCalendar class="mr-1 text-brand-300" />
             <SolidSwitch>
-              <Match when={buildWithOurTeam()}>
+              <Match when={buildWithPanfactumPlus()}>
                 <div>
                   <span class="text-gray-light-mode-400 line-through">
                     {plan().timeline.withoutPanfactumTotalTime} days
@@ -314,7 +315,7 @@ const Timeline: Component = () => {
                   </span>
                 </div>
               </Match>
-              <Match when={!buildWithOurTeam()}>
+              <Match when={!buildWithPanfactumPlus()}>
                 <div>
                   <span class="text-gold-300">
                     {plan().timeline.withoutPanfactumTotalTime} days
@@ -331,8 +332,8 @@ const Timeline: Component = () => {
           </div>
           <Switch
             class="inline-flex items-center gap-2"
-            checked={buildWithOurTeam()}
-            onChange={setBuildWithOurTeam}
+            checked={buildWithPanfactumPlus()}
+            onChange={setBuildWithPanfactumPlus}
           >
             <Switch.Input />
             <Switch.Control class="inline-flex h-6 w-12 items-center rounded-full bg-gray-light-mode-400 transition-all duration-200 ease-in-out data-[checked]:bg-gold-300">
@@ -340,7 +341,7 @@ const Timeline: Component = () => {
             </Switch.Control>
             <div class="flex items-center justify-between gap-4 text-white">
               <Switch.Label class={clsx("text-sm")}>
-                Build with our team
+                Build with PanfactumPlus
               </Switch.Label>
             </div>
           </Switch>
@@ -350,7 +351,7 @@ const Timeline: Component = () => {
             <div class="max-w-full">
               <TimelineComponent
                 items={
-                  buildWithOurTeam()
+                  buildWithPanfactumPlus()
                     ? plan().timeline.timelineItems.panfactumTimeline
                     : plan().timeline.timelineItems.withoutPanfactumTimeline
                 }
@@ -361,14 +362,14 @@ const Timeline: Component = () => {
             </div>
           </div>
           <div class="hidden w-full lg:block lg:w-1/4">
-            <div class="flex flex-col gap-2 rounded bg-white p-4 text-sm text-gray-light-mode-600">
+            <div class="flex flex-col gap-2 rounded-lg bg-white p-4 text-sm text-gray-light-mode-600 dark:bg-gray-dark-mode-600 dark:text-gray-dark-mode-50">
               <div class="flex justify-between">
-                <span>SPEND</span>
-                <span class="font-semibold text-brand-700">
+                <span>AWS SPEND</span>
+                <span class="font-semibold text-brand-700 dark:text-gold-300">
                   {plan().overview.spend}
                 </span>
               </div>
-              <hr class="border-gray-light-mode-400" />
+              <hr class="border-gray-light-mode-400 dark:border-gray-dark-mode-50" />
               <For each={plan().overview.items}>
                 {(item) => (
                   <div class="flex justify-between">

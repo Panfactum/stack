@@ -290,7 +290,7 @@ export const PlanSwitcher: Component = () => {
                 </div>
 
                 <div class="flex max-w-md flex-col">
-                  <div class="relative rounded-3xl rounded-b-none bg-[#FFF5EB]">
+                  <div class="relative rounded-3xl rounded-b-none bg-gold-25 dark:bg-gray-dark-mode-900">
                     <div class="flex size-[425px] max-w-full justify-center overflow-visible">
                       <img
                         src={plan.image.base.src}
@@ -305,7 +305,7 @@ export const PlanSwitcher: Component = () => {
                     </div>
                   </div>
 
-                  <div class="relative z-10 -my-5 mx-auto flex h-10 items-center justify-center rounded-full border border-gray-dark-mode-300 bg-[#ffffff]">
+                  <div class="relative z-10 -my-5 mx-auto flex h-10 items-center justify-center rounded-full border border-gray-dark-mode-300 bg-white">
                     <span class="flex items-center px-6 text-sm font-bold text-gray-light-mode-950">
                       <img
                         src={plan.company.logo.src}
@@ -316,7 +316,7 @@ export const PlanSwitcher: Component = () => {
                     </span>
                   </div>
 
-                  <div class="flex w-full max-w-md flex-wrap items-center justify-center gap-3 rounded-3xl rounded-t-none border border-gray-dark-mode-300 bg-white px-8 py-6">
+                  <div class="flex w-full max-w-md flex-wrap items-center justify-center gap-3 rounded-3xl rounded-t-none border border-gray-dark-mode-300 bg-white px-8 py-6 dark:border-gray-dark-mode-900">
                     <For each={plan.image.baseTitles}>
                       {(title) => (
                         <span class="font-medium text-gray-light-mode-600">

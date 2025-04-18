@@ -2,26 +2,74 @@
 import { Picture } from "astro:assets"
 
 import PersonImageLabel  from "./PersonImageLabel.astro"
-import EngineerImg from "./images/engineer-nathan-1.png"
+import EmmaImg from "./images/engineer-emma.png"
+import LiamImg from "./images/engineer-liam.png"
+import NickImg from "./images/engineer-nick.png"
+import OliverImg from "./images/engineer-oliver.png"
 ---
 
 <section class="bg-white dark:bg-gray-dark-mode-950">
   <div class="m-auto flex max-w-screen-xl flex-col items-center gap-12 p-8 text-black md:flex-row md:items-start md:gap-24 lg:pt-16 dark:text-white">
-    <div class="mt-8 flex flex-col items-center sm:mt-0">
-      <div class="relative max-h-80 min-h-80 min-w-80 max-w-80 rounded-2xl bg-gold-25">
-        <div class="grid-background" style={{"--grid-background-spacing": "30px"}}/>
-        <Picture
-            class="absolute bottom-0 left-[6%] !w-[90%]"
-            sizes="(max-width: 64rem) 31rem, 41rem"
-            formats={["webp", "avif"]}
-            breakpoints={[496, 656]}
-            src={EngineerImg}
-            alt="Panfactum Engineer"
-        />
+    <div class="flex flex-col items-center">
+      <div class="grid grid-cols-2 gap-x-4 gap-y-12">
+        <div class="flex flex-col items-center">
+          <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25 dark:bg-gray-dark-mode-900">
+            <Picture
+                class="absolute bottom-0 left-[12%] !w-4/5"
+                sizes="(max-width: 64rem) 15rem, 20rem"
+                formats={["webp", "avif"]}
+                breakpoints={[240, 320]}
+                src={OliverImg}
+                alt="Panfactum Engineer"
+            />
+          </div>
+          <PersonImageLabel title="Oliver J." small={true} subtitle="Lead Software Engineer" />
+        </div>
+        
+        <div class="flex flex-col items-center">
+          <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25 dark:bg-gray-dark-mode-900">
+            <Picture
+                class="absolute bottom-0 left-[12%] !w-4/5"
+                sizes="(max-width: 64rem) 15rem, 20rem"
+                formats={["webp", "avif"]}
+                breakpoints={[240, 320]}
+                src={NickImg}
+                alt="Panfactum Engineer"
+            />
+          </div>
+          <PersonImageLabel title="Nick K." small={true} subtitle="Senior Systems Engineer" />
+        </div>
+        
+        <div class="flex flex-col items-center">
+          <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25 dark:bg-gray-dark-mode-900">
+            <Picture
+                class="absolute bottom-0 left-[12%] !w-4/5"
+                sizes="(max-width: 64rem) 15rem, 20rem"
+                formats={["webp", "avif"]}
+                breakpoints={[240, 320]}
+                src={EmmaImg}
+                alt="Panfactum Engineer"
+            />
+          </div>
+          <PersonImageLabel title="Emma R." small={true} subtitle="Principal Cloud Engineer" />
+        </div>
+        
+        <div class="flex flex-col items-center">
+          <div class="relative max-h-44 min-h-44 min-w-44 max-w-44 rounded-2xl bg-gold-25 dark:bg-gray-dark-mode-900">
+            <Picture
+                class="absolute bottom-0 left-[12%] !w-4/5"
+                sizes="(max-width: 64rem) 15rem, 20rem"
+                formats={["webp", "avif"]}
+                breakpoints={[240, 320]}
+                src={LiamImg}
+                alt="Panfactum Engineer"
+            />
+          </div>
+          <PersonImageLabel title="Liam T." small={true} subtitle="Senior Infrastructure Engineer" />
+        </div>
       </div>
-      <PersonImageLabel title="Nathan H." subtitle="Sr. Dev Ops Engineer"/>
     </div>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2 sm:w-7/12">
       <div class="font-bold text-brand-700 dark:text-gray-dark-mode-400">
         The Panfactum Approach
       </div>

@@ -71,7 +71,7 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
       {/* Buttons section */}
       <Show when={props.buttons.length > 0}>
         <li
-          class="relative border-l border-l-white"
+          class="relative border-l border-l-white dark:border-l-gray-dark-mode-600"
           style={{ "border-left-width": `${props.lineSize}px` }}
         >
           <div class="flex flex-col gap-4 pl-8">
@@ -83,7 +83,7 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
                   <div class={clsx("relative", !isLastButton && "mb-2")}>
                     {/* Horizontal connector line */}
                     <div
-                      class="absolute bg-white"
+                      class="absolute bg-white dark:bg-gray-dark-mode-600"
                       style={{
                         width: "24px",
                         height: `${props.lineSize}px`,
@@ -94,7 +94,11 @@ const Timeline: Component<TimelineProps> = (rawProps) => {
                     />
 
                     <button
-                      class="flex items-center rounded border border-brand-300 bg-white px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      class={clsx(
+                        "flex items-center rounded-md border px-4 py-2 font-semibold focus:outline-none focus:ring-2",
+                        "border-brand-300 bg-white text-brand-700 hover:bg-brand-50 focus:ring-brand-500",
+                        "dark:border-gray-dark-mode-700 dark:bg-gray-dark-mode-900 dark:text-gray-dark-mode-300 dark:hover:bg-gray-dark-mode-800 dark:focus:ring-gray-dark-mode-700",
+                      )}
                       onClick={() => props.buttonCallback(button.callbackValue)}
                     >
                       <Show when={button.icon}>
@@ -133,7 +137,9 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
     <li
       class={clsx(
         "relative border-l pb-8 pl-8",
-        props.isLast ? "border-l-transparent pb-0" : "border-l-white",
+        props.isLast
+          ? "border-l-transparent pb-0"
+          : "border-l-white dark:border-l-gray-dark-mode-600",
       )}
       style={{
         "border-left-width": `${props.lineSize}px`,

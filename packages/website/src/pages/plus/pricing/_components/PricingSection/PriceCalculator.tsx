@@ -45,7 +45,7 @@ const PriceCalculator: Component = () => {
           <div class="text-display-xs font-semibold text-white">
             Commitment:
           </div>
-          <div class="flex h-16 gap-4 rounded-md bg-gray-light-mode-800 p-2 text-white shadow-md md:h-20 md:p-4 dark:bg-brand-800">
+          <div class="flex h-16 gap-4 rounded-md bg-gray-light-mode-800 p-2 text-white shadow-md md:h-20 md:p-4 dark:bg-gray-dark-mode-950">
             <button
               onClick={() => {
                 setCalculatorStore("annualSpendCommitmentEnabled", false);
@@ -84,7 +84,7 @@ const PriceCalculator: Component = () => {
           <div class="text-display-xs font-semibold text-white">
             Select your monthly AWS spend:
           </div>
-          <div class="flex h-12 gap-4 rounded-md bg-gray-light-mode-800 p-2 text-white shadow-md md:h-20 md:p-4 dark:bg-brand-800">
+          <div class="flex h-12 gap-4 rounded-md bg-gray-light-mode-800 p-2 text-white shadow-md md:h-20 md:p-4 dark:bg-gray-dark-mode-950">
             <For each={PlanOptions}>
               {(option) => (
                 <button
