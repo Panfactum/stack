@@ -14,6 +14,11 @@ import {
 import type { Component } from "solid-js";
 
 import {
+  calculatorStore,
+  PlanOptions,
+} from "@/pages/plus/pricing/_components/PricingSection/calculatorStore";
+
+import {
   Timeline as TimelineComponent,
   type TimelinePropsItem,
 } from "./TimelineComponent";
@@ -366,7 +371,11 @@ const Timeline: Component = () => {
               <div class="flex justify-between">
                 <span>AWS SPEND</span>
                 <span class="font-semibold text-brand-700 dark:text-gold-300">
-                  {plan().overview.spend}
+                  {
+                    PlanOptions.find(
+                      (opt) => opt.value === calculatorStore.plan,
+                    )?.label
+                  }
                 </span>
               </div>
               <hr class="border-gray-light-mode-400 dark:border-gray-dark-mode-50" />
