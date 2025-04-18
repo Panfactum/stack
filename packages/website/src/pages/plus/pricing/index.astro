@@ -17,11 +17,7 @@ import TalkToAnEngineer from "../_components/TalkToAnEngineer.astro";
   <HeroSection slot="hero" />
 
   <section class:list={["overflow-x-hidden", "bg-gray-light-mode-950 dark:bg-gray-dark-mode-800"]}>
-    <div
-      class="mx-auto flex max-w-screen-xl flex-col items-center px-4 pb-8 pt-12 md:px-8"
-    >
-      <PriceCalculator client:load />
-    </div>
+    <PriceCalculator client:load />
     <TimelineSection />
     <FAQS client:idle/>
     <TalkToAnEngineer/>
