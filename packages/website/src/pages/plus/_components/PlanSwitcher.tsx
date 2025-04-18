@@ -1,6 +1,6 @@
 import * as Tabs from "@kobalte/core/tabs";
 import { clsx } from "clsx";
-import { For, type Component, createSignal } from "solid-js";
+import { For, type Component } from "solid-js";
 
 import panfactumMark from "@/components/icons/panfactum-mark.svg";
 
@@ -9,15 +9,10 @@ import floraFaunaLogo from "./images/flora-fauna-logo.png";
 import ikigaiLabsLogo from "./images/ikigai-labs-logo.png";
 import luminescenceLogo from "./images/luminescense-logo.png";
 import prometheusLogo from "./images/prometheus-logo.png";
-import bootstrapHover from "./images/use-case-01-hover.png";
 import bootstrap from "./images/use-case-01.png";
-import seedHover from "./images/use-case-02-hover.png";
 import seed from "./images/use-case-02.png";
-import seriesAHover from "./images/use-case-03-hover.png";
 import seriesA from "./images/use-case-03.png";
-import seriesBHover from "./images/use-case-04-hover.png";
 import seriesB from "./images/use-case-04.png";
-import seriesCHover from "./images/use-case-05-hover.png";
 import seriesC from "./images/use-case-05.png";
 
 interface Plan {
@@ -37,9 +32,8 @@ interface Plan {
   };
   image: {
     base: ImageMetadata;
-    hover: ImageMetadata;
     baseTitles: string[];
-    hoverPanfactumTitles: string[];
+    panfactumTitles: string[];
   };
 }
 
@@ -77,7 +71,11 @@ const MetricValue: Component<MetricValueProps> = (props) => {
     return `${props.value}${props.suffix ?? ""}`;
   };
 
-  return <span class=" font-medium text-brand-600">{formattedValue()}</span>;
+  return (
+    <span class="font-medium text-brand-600 dark:text-gray-dark-mode-400">
+      {formattedValue()}
+    </span>
+  );
 };
 
 const plans: Plan[] = [
@@ -99,9 +97,8 @@ const plans: Plan[] = [
     },
     image: {
       base: bootstrap,
-      hover: bootstrapHover,
       baseTitles: ["Founder"],
-      hoverPanfactumTitles: ["Platform Engineer"],
+      panfactumTitles: ["Platform Engineer"],
     },
   },
   {
@@ -123,9 +120,8 @@ const plans: Plan[] = [
     },
     image: {
       base: seed,
-      hover: seedHover,
       baseTitles: ["Co-founder", "Co-founder"],
-      hoverPanfactumTitles: ["Platform Engineer"],
+      panfactumTitles: ["Platform Engineer"],
     },
   },
   {
@@ -147,9 +143,8 @@ const plans: Plan[] = [
     },
     image: {
       base: seriesA,
-      hover: seriesAHover,
       baseTitles: ["CEO", "VP Engineering"],
-      hoverPanfactumTitles: ["Platform Engineer"],
+      panfactumTitles: ["Platform Engineer"],
     },
   },
   {
@@ -171,9 +166,8 @@ const plans: Plan[] = [
     },
     image: {
       base: seriesB,
-      hover: seriesBHover,
       baseTitles: ["CTO", "VP Engineering", "Staff Engineer"],
-      hoverPanfactumTitles: ["Platform Engineer"],
+      panfactumTitles: ["Platform Engineer"],
     },
   },
   {
@@ -195,21 +189,18 @@ const plans: Plan[] = [
     },
     image: {
       base: seriesC,
-      hover: seriesCHover,
       baseTitles: [
         "CTO",
         "VP Engineering",
         "Staff Engineer",
         "Engineering Manager",
       ],
-      hoverPanfactumTitles: ["Cloud Architect", "Platform Engineer"],
+      panfactumTitles: ["Cloud Architect", "Platform Engineer"],
     },
   },
 ];
 
 export const PlanSwitcher: Component = () => {
-  const [hovering, setHovering] = createSignal(false);
-
   return (
     <Tabs.Root class="mx-auto w-full max-w-screen-2xl overflow-hidden pb-4">
       <Tabs.List
@@ -241,7 +232,7 @@ export const PlanSwitcher: Component = () => {
               <div class="mx-auto grid max-w-[80vw] grid-cols-1 items-center gap-12 lg:grid-cols-2 2xl:max-w-screen-xl">
                 <div class="space-y-8">
                   <div>
-                    <h3 class="mb-4 font-machina text-3xl font-medium dark:text-white">
+                    <h3 class="mb-4 font-machina text-3xl font-medium dark:text-gray-dark-mode-50">
                       {plan.name}
                     </h3>
                     <p class="mb-4 font-semibold text-brand-600 dark:text-gray-dark-mode-400">
@@ -252,26 +243,24 @@ export const PlanSwitcher: Component = () => {
                     </p>
                   </div>
 
-                  <div class="rounded-xl bg-gray-dark-mode-50 px-6 ring-1 ring-gray-modern-300">
-                    <div
-                      class={clsx(
-                        "flex items-center justify-between border-b border-gray-modern-300 py-4",
-                      )}
-                    >
-                      <span class="font-semibold text-gray-dark-mode-700">
+                  <div class="rounded-xl bg-gray-dark-mode-50 px-6 ring-1 ring-gray-modern-300 dark:bg-gray-dark-mode-950 dark:ring-gray-dark-mode-800">
+                    <div class="flex items-center justify-between border-b border-gray-modern-300 py-4 dark:border-gray-dark-mode-800">
+                      <span class="font-semibold text-gray-dark-mode-700 dark:text-gray-dark-mode-50">
                         AWS Spend
                       </span>
                       <MetricValue value={plan.metrics.awsSpend} />
                     </div>
                     <div class="flex items-center justify-between py-2 pt-4">
-                      <span class="text-gray-dark-mode-700">Launch Time</span>
+                      <span class="text-gray-dark-mode-700 dark:text-gray-dark-mode-300">
+                        Launch Time
+                      </span>
                       <MetricValue
                         value={plan.metrics.launchTime}
                         suffix=" days"
                       />
                     </div>
                     <div class="flex items-center justify-between py-2">
-                      <span class="text-gray-dark-mode-700">
+                      <span class="text-gray-dark-mode-700 dark:text-gray-dark-mode-300">
                         Eng Hours Saved
                       </span>
                       <MetricValue
@@ -280,7 +269,7 @@ export const PlanSwitcher: Component = () => {
                       />
                     </div>
                     <div class="flex items-center justify-between py-2">
-                      <span class="text-gray-dark-mode-700">
+                      <span class="text-gray-dark-mode-700 dark:text-gray-dark-mode-300">
                         Infrastructure $ Saved
                       </span>
                       <MetricValue
@@ -288,12 +277,10 @@ export const PlanSwitcher: Component = () => {
                         formatAsCurrency
                       />
                     </div>
-                    <div
-                      class={clsx(
-                        "-mx-6 mt-2 flex items-center justify-between rounded-b-xl border-t border-gray-modern-300 bg-gray-dark-mode-200 p-4 px-6",
-                      )}
-                    >
-                      <span class="text-gray-dark-mode-700">Total $ Saved</span>
+                    <div class="-mx-6 mt-2 flex items-center justify-between rounded-b-xl border-t border-gray-modern-300 bg-gray-dark-mode-200 p-4 px-6 dark:border-gray-dark-mode-800 dark:bg-gray-dark-mode-900">
+                      <span class="text-gray-dark-mode-700 dark:text-gray-dark-mode-50">
+                        Total $ Saved
+                      </span>
                       <MetricValue
                         value={plan.metrics.totalSaved}
                         formatAsCurrency
@@ -313,14 +300,6 @@ export const PlanSwitcher: Component = () => {
                           "max-width": "none",
                           left: "50%",
                           transform: "translateX(-50%)",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.src = plan.image.hover.src;
-                          setHovering(true);
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.src = plan.image.base.src;
-                          setHovering(false);
                         }}
                       />
                     </div>
@@ -345,24 +324,22 @@ export const PlanSwitcher: Component = () => {
                         </span>
                       )}
                     </For>
-                    {hovering() && (
-                      <For each={plan.image.hoverPanfactumTitles}>
-                        {(title) => (
-                          <span class="flex items-center gap-2 font-medium text-brand-600">
-                            <img
-                              src={panfactumMark.src}
-                              alt="Panfactum Logo"
-                              class="size-4"
-                              style={{
-                                filter:
-                                  "invert(30%) sepia(16%) saturate(1686%) hue-rotate(165deg) brightness(94%) contrast(87%)",
-                              }}
-                            />
-                            {title}
-                          </span>
-                        )}
-                      </For>
-                    )}
+                    <For each={plan.image.panfactumTitles}>
+                      {(title) => (
+                        <span class="flex items-center gap-2 font-medium text-brand-600">
+                          <img
+                            src={panfactumMark.src}
+                            alt="Panfactum Logo"
+                            class="size-4"
+                            style={{
+                              filter:
+                                "invert(30%) sepia(16%) saturate(1686%) hue-rotate(165deg) brightness(94%) contrast(87%)",
+                            }}
+                          />
+                          {title}
+                        </span>
+                      )}
+                    </For>
                   </div>
                 </div>
               </div>

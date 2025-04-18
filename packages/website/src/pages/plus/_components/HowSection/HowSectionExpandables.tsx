@@ -125,10 +125,10 @@ const HowSectionExpandable: ParentComponent<{ title: string; id: string }> = (
   return (
     <Accordion.Item
       value={props.id}
-      class="rounded-xl border-2 border-gray-dark-mode-300  px-4 py-2"
+      class="rounded-xl border-2 border-gray-dark-mode-300 px-4 py-2 dark:border-gray-dark-mode-800"
     >
       <Accordion.Header class="[&[data-expanded]_svg]:rotate-45">
-        <Accordion.Trigger class="flex w-full cursor-pointer items-center justify-between gap-4 py-4 text-left text-xl font-semibold">
+        <Accordion.Trigger class="flex w-full cursor-pointer items-center justify-between gap-4 py-4 text-left text-xl font-semibold dark:text-gray-dark-mode-50">
           {props.title}
           <FiPlusCircle size={32} class="text-brand-600 transition-all" />
         </Accordion.Trigger>

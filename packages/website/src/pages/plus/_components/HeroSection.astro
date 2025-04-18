@@ -1,6 +1,11 @@
 ---
 import { Picture } from "astro:assets"
 
+import BambeeLogoDark from "./images/client-logo-bambee-dark.png"
+import HavenLogoDark from "./images/client-logo-haven-dark.png"
+import HudsonLogoDark from "./images/client-logo-hudson-dark.png"
+import ImplentioLogoDark from "./images/client-logo-implentio-dark.png"
+import SelflesslyLogoDark from "./images/client-logo-selflessly-dark.png"
 import HeroImg from "./images/hero.png"
 
 const pfStyle = {
@@ -57,11 +62,46 @@ const plusStyle = {
       Trusted by Engineering Teams At
     </div>
     <div class="flex flex-wrap justify-center gap-x-12 gap-y-6">
-      <div class="h-[75px] w-[250px] bg-black"/>
-      <div class="h-[75px] w-[250px] bg-black"/>
-      <div class="h-[75px] w-[250px] bg-black"/>
-      <div class="h-[75px] w-[250px] bg-black"/>
-      <div class="h-[75px] w-[250px] bg-black"/>
+      <Picture 
+        src={ImplentioLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Implentio Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={BambeeLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Bambee Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={HavenLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Haven Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={SelflesslyLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Selflessly Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={HudsonLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Hudson Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
     </div>
   </div>
 </section>

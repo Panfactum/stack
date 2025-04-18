@@ -89,7 +89,7 @@ const renderContent = (content: TableCellContent) => {
 
 const cellStyle = "flex min-h-16 min-w-48 sm:min-w-48 md:min-w-56 items-center px-4 lg:text-nowrap";
 const getRowStyleByIndex = (index: number) =>
-  index % 2 === 0 ? "bg-gray-dark-mode-200" : "bg-gray-dark-mode-50";
+  index % 2 === 0 ? "bg-gray-dark-mode-200 dark:bg-gray-dark-mode-900" : "bg-gray-dark-mode-50 dark:bg-gray-dark-mode-950";
 const getPFRowStyleByIndex = () => "bg-gold-300";
 ---
 <section class="bg-brand-950 py-24 text-white dark:bg-gray-dark-mode-800">
@@ -102,7 +102,7 @@ const getPFRowStyleByIndex = () => "bg-gold-300";
     </div>
 
     <div
-    class="mx-auto w-fit max-w-[90vw] overflow-x-scroll rounded-lg text-black"
+    class="scrollbar-hide mx-auto w-fit max-w-[90vw] overflow-x-auto rounded-lg text-black dark:text-gray-dark-mode-300"
   >
     {
       TABLE_DATA.map((data, rowNum) => {
@@ -123,7 +123,7 @@ const getPFRowStyleByIndex = () => "bg-gold-300";
                         ? "lg:basis-1/4"
                         : "grow lg:grow-0 lg:basis-1/4",
                       isSecondCol && "lg:rounded-tl-lg",
-                      isLastCol ? "rounded-tr-lg bg-gold-300 lg:rounded-tl-none" : (isFirstCol ?  "bg-none" : "bg-gray-dark-mode-200"),
+                      isLastCol ? "rounded-tr-lg bg-gold-300 lg:rounded-tl-none" : (isFirstCol ?  "bg-none" : "bg-gray-dark-mode-200 dark:bg-gray-dark-mode-900"),
                       !isLastCol && !isFirstCol && "hidden lg:flex",
                     )}
                   >
@@ -156,7 +156,7 @@ const getPFRowStyleByIndex = () => "bg-gold-300";
                         : "grow lg:grow-0 lg:basis-1/4",
                       isFirstCol && rowNum === 1 && "rounded-tl-lg",
                       isLastCol
-                        ? ["lg:font-semibold", getPFRowStyleByIndex()]
+                        ? ["text-black lg:font-semibold", getPFRowStyleByIndex()]
                         : getRowStyleByIndex(rowNum),
                       !isLastCol && !isFirstCol && "hidden lg:flex",
                       rowNum === 11 && isFirstCol && "rounded-bl-lg",
