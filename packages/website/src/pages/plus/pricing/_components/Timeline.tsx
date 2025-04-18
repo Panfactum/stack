@@ -118,12 +118,8 @@ interface LaunchOption {
     panfactumTotalTime: number;
     withoutPanfactumTotalTime: number;
     timelineItems: {
-      planOptions: {
-        [K in (typeof PlanOptions)[number]["value"]]: {
-          panfactumTimeline: TimelinePropsItem[];
-          withoutPanfactumTimeline: TimelinePropsItem[];
-        };
-      };
+      panfactumTimeline: TimelinePropsItem[];
+      withoutPanfactumTimeline: TimelinePropsItem[];
       buttons: {
         icon: Component<{ class: string }>;
         text: string;
@@ -132,12 +128,11 @@ interface LaunchOption {
     };
   };
   overview: {
-    planOptions: {
-      [K in (typeof PlanOptions)[number]["value"]]: {
-        label: string;
-        value: string;
-      }[];
-    };
+    spend: string;
+    items: {
+      label: string;
+      value: string;
+    }[];
   };
 }
 
@@ -150,24 +145,8 @@ const LaunchOptions: LaunchOption[] = [
       panfactumTotalTime: 12,
       withoutPanfactumTotalTime: 20,
       timelineItems: {
-        planOptions: {
-          1: {
-            panfactumTimeline: LAUNCH_WITH_PANFACTUM_TIMELINE,
-            withoutPanfactumTimeline: LAUNCH_WITHOUT_PANFACTUM_TIMELINE,
-          },
-          2: {
-            panfactumTimeline: LAUNCH_WITH_PANFACTUM_TIMELINE,
-            withoutPanfactumTimeline: LAUNCH_WITHOUT_PANFACTUM_TIMELINE,
-          },
-          3: {
-            panfactumTimeline: LAUNCH_WITH_PANFACTUM_TIMELINE,
-            withoutPanfactumTimeline: LAUNCH_WITHOUT_PANFACTUM_TIMELINE,
-          },
-          4: {
-            panfactumTimeline: LAUNCH_WITH_PANFACTUM_TIMELINE,
-            withoutPanfactumTimeline: LAUNCH_WITHOUT_PANFACTUM_TIMELINE,
-          },
-        },
+        panfactumTimeline: LAUNCH_WITH_PANFACTUM_TIMELINE,
+        withoutPanfactumTimeline: LAUNCH_WITHOUT_PANFACTUM_TIMELINE,
         buttons: [
           {
             icon: CgArrowsExpandRight,
@@ -183,60 +162,21 @@ const LaunchOptions: LaunchOption[] = [
       },
     },
     overview: {
-      planOptions: {
-        1: [
-          {
-            label: "Databases",
-            value: "1",
-          },
-          {
-            label: "Workloads",
-            value: "1",
-          },
-        ],
-        2: [
-          {
-            label: "Modules",
-            value: "1",
-          },
-          {
-            label: "Databases",
-            value: "2",
-          },
-          {
-            label: "Workloads",
-            value: "2",
-          },
-        ],
-        3: [
-          {
-            label: "Modules",
-            value: "2",
-          },
-          {
-            label: "Databases",
-            value: "2",
-          },
-          {
-            label: "Workloads",
-            value: "4",
-          },
-        ],
-        4: [
-          {
-            label: "Modules",
-            value: "5",
-          },
-          {
-            label: "Databases",
-            value: "4",
-          },
-          {
-            label: "Workloads",
-            value: "10",
-          },
-        ],
-      },
+      spend: "$2.5-5K",
+      items: [
+        {
+          label: "Modules",
+          value: "3",
+        },
+        {
+          label: "Databases",
+          value: "2",
+        },
+        {
+          label: "Workloads",
+          value: "3",
+        },
+      ],
     },
   },
   {
@@ -247,24 +187,8 @@ const LaunchOptions: LaunchOption[] = [
       panfactumTotalTime: 5,
       withoutPanfactumTotalTime: 10,
       timelineItems: {
-        planOptions: {
-          1: {
-            panfactumTimeline: EXPAND_TIMELINE,
-            withoutPanfactumTimeline: EXPAND_TIMELINE,
-          },
-          2: {
-            panfactumTimeline: EXPAND_TIMELINE,
-            withoutPanfactumTimeline: EXPAND_TIMELINE,
-          },
-          3: {
-            panfactumTimeline: EXPAND_TIMELINE,
-            withoutPanfactumTimeline: EXPAND_TIMELINE,
-          },
-          4: {
-            panfactumTimeline: EXPAND_TIMELINE,
-            withoutPanfactumTimeline: EXPAND_TIMELINE,
-          },
-        },
+        panfactumTimeline: EXPAND_TIMELINE,
+        withoutPanfactumTimeline: EXPAND_TIMELINE,
         buttons: [
           {
             icon: HiOutlineRocketLaunch,
@@ -280,40 +204,13 @@ const LaunchOptions: LaunchOption[] = [
       },
     },
     overview: {
-      planOptions: {
-        1: [
-          {
-            label: "Modules",
-            value: "1",
-          },
-          {
-            label: "Databases",
-            value: "1",
-          },
-          {
-            label: "Workloads",
-            value: "1",
-          },
-        ],
-        2: [
-          {
-            label: "Modules",
-            value: "3",
-          },
-        ],
-        3: [
-          {
-            label: "Modules",
-            value: "3",
-          },
-        ],
-        4: [
-          {
-            label: "Modules",
-            value: "3",
-          },
-        ],
-      },
+      spend: "$3K",
+      items: [
+        {
+          label: "Modules",
+          value: "3",
+        },
+      ],
     },
   },
   {
@@ -324,24 +221,8 @@ const LaunchOptions: LaunchOption[] = [
       panfactumTotalTime: 5,
       withoutPanfactumTotalTime: 10,
       timelineItems: {
-        planOptions: {
-          1: {
-            panfactumTimeline: UPGRADE_TIMELINE,
-            withoutPanfactumTimeline: UPGRADE_TIMELINE,
-          },
-          2: {
-            panfactumTimeline: UPGRADE_TIMELINE,
-            withoutPanfactumTimeline: UPGRADE_TIMELINE,
-          },
-          3: {
-            panfactumTimeline: UPGRADE_TIMELINE,
-            withoutPanfactumTimeline: UPGRADE_TIMELINE,
-          },
-          4: {
-            panfactumTimeline: UPGRADE_TIMELINE,
-            withoutPanfactumTimeline: UPGRADE_TIMELINE,
-          },
-        },
+        panfactumTimeline: UPGRADE_TIMELINE,
+        withoutPanfactumTimeline: UPGRADE_TIMELINE,
         buttons: [
           {
             icon: HiOutlineRocketLaunch,
@@ -357,40 +238,17 @@ const LaunchOptions: LaunchOption[] = [
       },
     },
     overview: {
-      planOptions: {
-        1: [
-          {
-            label: "Modules",
-            value: "1",
-          },
-          {
-            label: "Databases",
-            value: "1",
-          },
-          {
-            label: "Workloads",
-            value: "1",
-          },
-        ],
-        2: [
-          {
-            label: "Modules",
-            value: "3",
-          },
-        ],
-        3: [
-          {
-            label: "Modules",
-            value: "3",
-          },
-        ],
-        4: [
-          {
-            label: "Modules",
-            value: "3",
-          },
-        ],
-      },
+      spend: "$5K",
+      items: [
+        {
+          label: "Modules",
+          value: "3",
+        },
+        {
+          label: "Workloads",
+          value: "3",
+        },
+      ],
     },
   },
 ];
@@ -499,12 +357,8 @@ const Timeline: Component = () => {
               <TimelineComponent
                 items={
                   buildWithPanfactumPlus()
-                    ? plan().timeline.timelineItems.planOptions[
-                        calculatorStore.plan
-                      ].panfactumTimeline
-                    : plan().timeline.timelineItems.planOptions[
-                        calculatorStore.plan
-                      ].withoutPanfactumTimeline
+                    ? plan().timeline.timelineItems.panfactumTimeline
+                    : plan().timeline.timelineItems.withoutPanfactumTimeline
                 }
                 bulletSize={48}
                 buttons={plan().timeline.timelineItems.buttons}
@@ -525,7 +379,7 @@ const Timeline: Component = () => {
                 </span>
               </div>
               <hr class="border-gray-light-mode-400 dark:border-gray-dark-mode-50" />
-              <For each={plan().overview.planOptions[calculatorStore.plan]}>
+              <For each={plan().overview.items}>
                 {(item) => (
                   <div class="flex justify-between">
                     <span>{item.label}</span>
