@@ -14,7 +14,7 @@ For in-cluster applications, credentials can be sourced from the following Kuber
 - `admin_creds_secret`: Read and write access to all indices including the ability to configure index settings
 - `reader_creds_secret`: Read-only access to all indices
 
-Authenticating with NATS is done via [x.509 authentication.](https://docs.opensearch.org/docs/latest/security/authentication-backends/client-auth/)
+Authenticating with OpenSearch is done via [x.509 authentication.](https://docs.opensearch.org/docs/latest/security/authentication-backends/client-auth/)
 Each of the above named Secrets contains the following values:
 
 - `ca.crt`: The CA certificate used to verify the server-provided certificate.
@@ -52,15 +52,12 @@ module "deployment" {
   
   common_env = {
     OPENSEARCH_HOST = module.opensearch.host
-    OPENSEARCH_HOST = module.opensearch.client_port
-    OPENSEARCH_KEY = "/etc/opensearch-certs/tls.key"
-    OPENSEARCH_CERT = "/etc/opensearch-certs/tls.crt"
-    OPENSEARCH_CA = "/etc/opensearch-certs/ca.crt"
+    OPENSEARCH_PORT = module.opensearch.client_port
   }
 }
 ```
 
-Note that you also must configure the client to use the certificates. For example, if using the [nats NPM package](https://www.npmjs.com/package/nats):
+Note that you also must configure the client to use the certificates. For example, if using the [opensearch NPM package](https://www.npmjs.com/package/@opensearch-project/opensearch):
 
 ```typescript
 import { Client } from "@opensearch-project/opensearch";
@@ -69,9 +66,9 @@ import { readFileSync } from "fs";
 const client = new Client({
   node:`http://${process.env.OPENSEARCH_HOST}:${process.env.OPENSEARCH_PORT}`,
   ssl: {
-    ca: readFileSync(process.env.OPENSEARCH_CA),
-    cert: readFileSync(process.env.OPENSEARCH_CERT),
-    key: readFileSync(process.env.OPENSEARCH_KEY)
+    ca: readFileSync("/etc/opensearch-certs/ca.crt"),
+    cert: readFileSync("/etc/opensearch-certs/tls.crt"),
+    key: readFileSync("/etc/opensearch-certs/tls.key")
   },
 });
 ```
