@@ -1,43 +1,58 @@
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
+import {join} from "node:path"
 
 export async function terragruntInit({
   context,
-  workingDirectory = ".",
+  environment,
+  region,
+  module,
+  onLogLine
 }: {
   context: PanfactumContext;
-  workingDirectory?: string;
+  environment: string;
+  region: string;
+  module: string;
+  onLogLine?: (line: string) => void
 }) {
+
+  const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
 
   // Step 1: Init the module and upgrade it's modules
   await execute({
     command: [
       "terragrunt",
-      "run-all",
       "init",
       "-upgrade",
-      "--terragrunt-ignore-external-dependencies",
+      "-no-color",
+      "--terragrunt-non-interactive",
+      "--terragrunt-no-color"
     ],
     context,
     workingDirectory,
-    errorMessage: "Failed to init infrastructure modules"
+    errorMessage: "Failed to init infrastructure modules",
+    onStdErrNewline: onLogLine,
+    onStdOutNewline: onLogLine
   })
 
   // Step 2: Update the platform locks to include all platforms
   await execute({
     command: [
       "terragrunt",
-      "run-all",
       "providers",
       "lock",
+      "-no-color",
       "-platform=linux_amd64",
       "-platform=linux_arm64",
       "-platform=darwin_amd64",
       "-platform=darwin_arm64",
-      "--terragrunt-ignore-external-dependencies",
+      "--terragrunt-non-interactive",
+      "--terragrunt-no-color"
     ],
     context,
     workingDirectory,
-    errorMessage: "Failed to generate locks for module providers"
+    errorMessage: "Failed to generate locks for module providers",
+    onStdErrNewline: onLogLine,
+    onStdOutNewline: onLogLine
   })
 }

@@ -41,6 +41,22 @@ const AWS_REGION_SCHEMA = z
   })
   .optional();
 
+
+export const BUCKET_NAME_SCHEMA = z.string()
+.max(63, "S3 bucket names must be less than 64 characters long")
+.min(3, "S3 bucket names must be at least three characters")
+.regex(/^[a-z0-9][a-z0-9.-]+[a-z0-9]$/, "S3 bucket names can only contain lowercase letters, numbers, periods, and hyphens, and must begin and end with a letter or number")
+.refine(val => !val.includes(".."), "S3 bucket names must not contain adjacent periods")
+.refine(val => !val.endsWith("-s3alias") && !val.endsWith("--ol-s3") && !val.endsWith(".mrap") && !val.endsWith("--x-s3") && !val.endsWith("--table-s3"), "S3 bucket names must not end with any of: -s3alias, --ol-s3, .mrap, --x-s3, --table-s3")
+.refine(val => !val.startsWith("xn--") && !val.startsWith("sthree-") && !val.startsWith("amzn-s3-demo-"), "S3 bucket names must not start with any of: xn--, sthree-, amzn-s3-demo-")
+.refine(val => {
+  // Check if the bucket name is formatted like an IP address
+  const ipv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+  return !ipv4Regex.test(val);
+}, "S3 bucket names must not be formatted as IP addresses")
+
+
+
 export const PANFACTUM_CONFIG_SCHEMA = z.object({
   // Global Settings
   control_plane_domain: z.string().optional(),
@@ -70,7 +86,7 @@ export const PANFACTUM_CONFIG_SCHEMA = z.object({
   tf_state_account_id: z.string().optional(),
   tf_state_profile: z.string().optional(),
   tf_state_region: AWS_REGION_SCHEMA,
-  tf_state_bucket: z.string().optional(),
+  tf_state_bucket: BUCKET_NAME_SCHEMA.optional(),
   tf_state_lock_table: z.string().optional(),
 
   // AWS Provider

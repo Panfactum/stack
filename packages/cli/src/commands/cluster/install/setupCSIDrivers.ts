@@ -12,7 +12,7 @@ export async function setupCSIDrivers(options: InstallClusterStepOptions) {
     ...options,
     stepId: "awsEBSCSIDriver",
     stepName: "AWS EBS CSI Driver",
-    moduleDirectory: "kube_aws_ebs_csi",
+    module: "kube_aws_ebs_csi",
     terraguntContents: awsEbsCsiDriverTerragruntHcl,
     stepNum: stepNum,
     subStepNum: 1,

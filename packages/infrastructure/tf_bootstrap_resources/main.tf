@@ -1,9 +1,8 @@
 terraform {
   required_providers {
     aws = {
-      source                = "hashicorp/aws"
-      version               = "5.80.0"
-      configuration_aliases = [aws.secondary]
+      source  = "hashicorp/aws"
+      version = "5.80.0"
     }
     pf = {
       source  = "panfactum/pf"
@@ -12,17 +11,9 @@ terraform {
   }
 }
 
-data "aws_region" "secondary" {
-  provider = aws.secondary
-}
 
 data "pf_aws_tags" "tags" {
   module = "tf_bootstrap_resources"
-}
-
-data "pf_aws_tags" "seondary_tags" {
-  module          = "tf_bootstrap_resources"
-  region_override = data.aws_region.secondary.name
 }
 
 data "pf_metadata" "metadata" {}
@@ -165,10 +156,6 @@ resource "aws_dynamodb_table" "lock" {
   attribute {
     name = "LockID"
     type = "S"
-  }
-
-  replica {
-    region_name = data.aws_region.secondary.name
   }
 
   tags = merge(data.pf_aws_tags.tags.tags, {

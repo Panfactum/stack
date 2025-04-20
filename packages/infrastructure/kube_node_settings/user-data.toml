@@ -35,4 +35,9 @@ memory = "${SYSTEM_RESERVED_MEMORY}Mi"
 "user.max_user_namespaces" = "16384"
 "vm.max_map_count" = "262144"
 
+[settings.oci-defaults.resource-limits.max-locked-memory]
+soft-limit = "unlimited"
+hard-limit = "unlimited"
+
+
 

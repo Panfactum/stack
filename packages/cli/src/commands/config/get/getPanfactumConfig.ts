@@ -40,9 +40,10 @@ export const getPanfactumConfig = async ({
     CONFIG_FILES.forEach((fileName) => {
       searchPromises.push(
         (async () => {
-          const values = await getConfigValuesFromFile(
-            join(currentDir, fileName)
-          );
+          const values = await getConfigValuesFromFile({
+            filePath:            join(currentDir, fileName),
+            context
+          });
           if (values) {
             configFileValues[fileName] = values;
           }

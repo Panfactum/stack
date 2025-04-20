@@ -12,13 +12,9 @@ export class CLIError extends Error {
       super(formattedMessage);
     }
   }
-}
 
-export class CLIConfigFileValidationError extends CLIError {
-  filePath: string;
-  constructor(message: string, opts: { filePath: string }) {
-    super(message);
-    this.filePath = opts.filePath;
+  getDetailedMessage(){
+    return ""
   }
 }
 
@@ -40,6 +36,12 @@ export class CLISubprocessError extends CLIError {
     this.subprocessLogs = opts.subprocessLogs;
     this.workingDirectory = opts.workingDirectory;
   }
+
+  override getDetailedMessage() {
+    return `Command: ${this.command}\n` +
+    `WorkingDirectory: ${this.workingDirectory}\n` +
+    `Subprocess Logs:\n\n` + this.subprocessLogs
+  }
 }
 
 export class PanfactumZodError extends CLIError {
@@ -49,5 +51,11 @@ export class PanfactumZodError extends CLIError {
     super(message, error);
     this.location = location;
     this.validationError = error;
+  }
+
+  override getDetailedMessage() {
+    return `Location: ${this.location}\n` +
+    `Validation Issues:\n\n` +
+    this.validationError.issues.map(issue => `* ${issue.path.join(".")}: ${issue.message}`).join("\n")      
   }
 }
