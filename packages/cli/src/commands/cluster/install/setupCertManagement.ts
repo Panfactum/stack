@@ -27,7 +27,7 @@ export async function setupCertManagement(options: InstallClusterStepOptions) {
     ...options,
     stepId: "certManagerDeployment",
     stepName: "Cert Manager Deployment",
-    moduleDirectory: "kube_cert_manager",
+    module: "kube_cert_manager",
     terraguntContents: kubeCertManagerTemplate,
   });
 

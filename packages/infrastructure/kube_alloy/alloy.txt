@@ -92,6 +92,12 @@ loki.process "pod_logs" {
     }
   }
 
+  // Unnecessary labels that greatly
+  // increase the cost because of cardinality
+  stage.label_drop {
+    values = ["filename", "job", "pod"]
+  }
+
   // Convert all levels to lowercase
   stage.template {
       source   = "level"

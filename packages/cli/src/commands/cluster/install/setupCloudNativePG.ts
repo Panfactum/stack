@@ -8,7 +8,7 @@ export async function setupCloudNativePG(options: InstallClusterStepOptions) {
    ***************************************************/
   await deployModule({
     ...options,
-    moduleDirectory: "kube_cloudnative_pg",
+    module: "kube_cloudnative_pg",
     terraguntContents: await Bun.file(postgresTerragruntHcl).text(),
     stepName: "Cloud Native PostgreSQL Deployment",
     stepId: "deployCloudNativePG",

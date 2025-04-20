@@ -28,7 +28,7 @@ export async function setupLinkerd(options: InstallClusterStepOptions) {
     ...options,
     stepId: "linkerdDeployment",
     stepName: "Linkerd Deployment",
-    moduleDirectory: "kube_linkerd",
+    module: "kube_linkerd",
     terraguntContents: kubeLinkerdTerragruntHcl,
     subStepNum: 1,
   });

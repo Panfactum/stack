@@ -32,10 +32,20 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@aws-sdk/client-iam": "^3.787.0",
+    "@aws-sdk/client-organizations": "^3.787.0",
+    "@aws-sdk/client-s3": "^3.787.0",
+    "@aws-sdk/client-sts": "^3.787.0",
     "@inquirer/prompts": "^7.4.0",
+    "@listr2/prompt-adapter-inquirer": "^2.0.21",
+    "@types/ini": "^4.1.1",
     "clipanion": "^4.0.0-rc.4",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "ini": "^5.0.0",
+    "init": "^0.1.2",
+    "listr2": "^8.3.2",
     "picocolors": "^1.1.1",
+    "terminal-link": "^4.0.0",
     "typanion": "^3.14.0",
     "yaml": "^2.7.0",
     "zod": "^3.24.2"

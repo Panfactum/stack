@@ -2,7 +2,7 @@ import { Writable } from 'node:stream';
 import pc from "picocolors";
 
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'none'
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'none'
 type LogStyle = 'default' | 'input' | 'success' | 'failure' | 'important' | 'warning'
 export class Logger {
 

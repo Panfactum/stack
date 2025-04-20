@@ -12,7 +12,4 @@ dependency "cert_issuers" {
   skip_outputs = true
 }
 
-inputs = {
-  # Alpha: Do not use
-  prometheus_enabled = false
-}
+inputs = { }

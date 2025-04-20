@@ -135,7 +135,7 @@ export async function setupECR(options: InstallClusterStepOptions) {
         ...options,
         stepId: "ecrDeployment",
         stepName: "ECR Deployment",
-        moduleDirectory: moduleName,
+        module: moduleName,
         terraguntContents: ecrPullThroughCacheTemplate,
         stepNum: stepNum,
         subStepNum: 1,

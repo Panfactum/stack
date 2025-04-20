@@ -11,24 +11,22 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module deploys a highly-available install of [OpenSearch](https://opensearch.org/).
 
-This is deployed in a single master, many replica configuration. Failover is handled
-by [Redis Sentinel](https://redis.io/docs/management/sentinel/) which is also
-deployed by this module.
-
 ## Usage
 
 ### Credentials
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
 
-- `superuser_creds_secret`: Complete access to the database
-- `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
-- `reader_creds_secret`: Read-only access to the database
+- `superuser_creds_secret`: Full access to the cluster, including the ability to manage sensitive settings like replication and permissions
+- `admin_creds_secret`: Read and write access to all indices including the ability to configure index settings
+- `reader_creds_secret`: Read-only access to all indices
 
+Authenticating with NATS is done via [x.509 authentication.](https://docs.opensearch.org/docs/latest/security/authentication-backends/client-auth/)
 Each of the above named Secrets contains the following values:
 
-- `username`: The username to use for authentication
-- `password`: The password to use for authentication
+- `ca.crt`: The CA certificate used to verify the server-provided certificate.
+- `tls.crt`: The certificate that the OpenSearch client should provide to the server for authentication.
+- `tls.key`: The TLS key that the OpenSearch client will use for securing communications with the server.
 
 The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
 Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
@@ -37,81 +35,59 @@ The credential lifetime is configured by the `vault_credential_lifetime_hours` i
 to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thus, in the worst-case,
 credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
 
-<MarkdownAlert severity="warning">
-    The module also supplies `root_name` and `root_password` outputs for the root user of the database.
-    These credentials are **unsafe** to use as they are not automatically rotated.
-</MarkdownAlert>
-
 ### Connecting
 
-The below example show how to connect to the Redis master
-using dynamically rotated admin credentials by setting various
-environment variables in our [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_deployment) module.
+The below example show how to connect to the OpenSearch cluster
+using dynamically rotated admin credentials by mounting the client certificates
+in our [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_deployment) module.
 
 ```hcl
-module "redis" {
-  source = "${var.pf_module_source}kube_redis_sentinel${var.pf_module_ref}"
+module "opensearch" {
+  source = "${var.pf_module_source}kube_opensearch${var.pf_module_ref}"
   ...
 }
 
 module "deployment" {
   source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   ...
-  common_env_from_secrets = {
-    REDIS_USERNAME = {
-      secret_name = module.redis.admin_creds_secret
-      key = "username"
-    }
-    REDIS_PASSWORD = {
-      secret_name = module.redis.admin_creds_secret
-      key = "password"
+  secret_mounts = {
+    "${module.opensearch.admin_creds_secret}" = {
+      mount_path = "/etc/opensearch-certs"
     }
   }
   common_env = {
-    REDIS_HOST = module.redis.redis_master_host
-    REDIS_PORT = module.redis.redis_port
+    OPENSEARCH_HOST = module.opensearch.host
+    OPENSEARCH_HOST = module.opensearch.client_port
+    OPENSEARCH_KEY = "/etc/opensearch-certs/tls.key"
+    OPENSEARCH_CERT = "/etc/opensearch-certs/tls.crt"
+    OPENSEARCH_CA = "/etc/opensearch-certs/ca.crt"
   }
 }
 ```
 
+Note that you also must configure the client to use the certificates. For example, if using the [nats NPM package](https://www.npmjs.com/package/nats):
+
+```typescript
+import { Client } from "@opensearch-project/opensearch";
+import { readFileSync } from "fs";
+
+const client = new Client({
+  node:`http://${process.env.OPENSEARCH_HOST}:${process.env.OPENSEARCH_PORT}`,
+  ssl: {
+    ca: readFileSync(process.env.OPENSEARCH_CA),
+    cert: readFileSync(process.env.OPENSEARCH_CERT),
+    key: readFileSync(process.env.OPENSEARCH_KEY)
+  },
+});
+```
+
 ### Persistence
 
-Redis provides two mechanisms for persistence:
-[AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/).
-This module uses RDB by default (tuned via `redis_save`).
-
-Using AOF (whether independently or concurrently with RDB) negates the ability to do [partial resynchronizations after restarts
-and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers). Instead, a copy of the database must be transferred from the current master to restarted or new replicas. This greatly increases
-the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence
-at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not
-from their local AOF. The only benefit would be if _all_ Redis nodes simultaneously failed with
-a non-graceful shutdown (an incredibly unlikely scenario).
-
-Persistence is always enabled in this module for similar reasons. Without persistence, an entire copy of the database would
-have to be transferred from the master to each replica on every Redis node restart. The cost of storing
-data on disk is far less than the network costs associated with this transfer. Moreover, persistence should
-never impact performance as writes are completed asynchronously unless configured otherwise.
-
-Once the Redis cluster is running, the PVC autoresizer
-(provided by [kube\_pvc\_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer))
-will automatically expand the EBS volumes once the free space
-drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
-The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling event until a maximum of `persistence_storage_limit_gb`.
-
-<MarkdownAlert severity="warning">
-    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-    ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
-</MarkdownAlert>
+TODO once upstream issue is merged
 
 ### Disruptions
 
-By default, failovers of Redis pods in this module can be initiated at any time. This enables the cluster to automatically
-perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a Redis pod
-is disrupted, a short period of downtime might occur if the disrupted
-pod is the master instance.
-
-While this can generally be mitigated when using a [Sentinel-aware client](https://redis.io/docs/latest/develop/reference/sentinel-clients/),
-you may want to provide more control over when these failovers can occur, so we provide the following options:
+TODO: adjust once the flexible topology is enabled
 
 #### Disruption Windows
 
@@ -127,51 +103,11 @@ For more information on how this works, see the
 [kube\_disruption\_window\_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_disruption\_window\_controller)
 submodule.
 
-#### Custom PDBs
-
-Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and disallowed.
-
-You can do this by managing your own [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/).
-This module provides outputs that will allow you to match certain subsets of Redis pods.
-
-For example:
-
-```hcl
-module "redis" {
-  source = "${var.pf_module_source}kube_redis_sentinel${var.pf_module_ref}"
-  ...
-}
-
-resource "kubectl_manifest" "pdb" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = "custom-pdb"
-      namespace = module.redis.namespace
-    }
-    spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
-      selector = {
-        matchLabels = module.redis.match_labels_master # Selects only the Redis master (writable) pod
-      }
-      maxUnavailable = 0 # Prevents any disruptions
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-}
-```
-
-While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application
-logic via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
-operation that you do not want disrupted and then delete it upon completion.
-
 #### Completely Disabling Voluntary Disruptions
 
-Allowing the cluster to periodically initiate failovers of Redis is critical to maintaining system health. However,
+Allowing the cluster to periodically initiate restarts of OpenSearch nodes is critical to maintaining system health. However,
 there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
-the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any Redis
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any OpenSearch
 pod in this module.
 
 This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
@@ -179,7 +115,7 @@ This is *strongly* discouraged. If limiting any and all potential disruptions is
 - Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
 - Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
 
-Note that the above configuration will significantly increase the costs of running the Redis cluster (2.5-5x) versus more
+Note that the above configuration will significantly increase the costs of running the OpenSearch cluster (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
 
 <MarkdownAlert severity="warning">
@@ -190,16 +126,6 @@ flexible settings. In the vast majority of cases, this is entirely unnecessary, 
     An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
     you should still implement defensive coding practices in your client code to account for potential disruptions.
 </MarkdownAlert>
-
-### Extra Redis Configuration
-
-You can add extra Redis configuration flags via the `redis_flags` module variable.
-
-These flags are passed as commandline arguments to the redis servers. This ensures they
-will be of the highest precedence.
-
-For more information about passing flags through the commandline and available options,
-see [this documentation](https://redis.io/docs/latest/operate/oss_and_stack/management/config/).
 
 ## Providers
 
@@ -345,7 +271,7 @@ Default: `3`
 
 ### s3\_bucket\_access\_policy
 
-Description: Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the backup S3 bucket.
+Description: Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the remote-storage S3 bucket.
 
 Type: `string`
 
@@ -407,6 +333,14 @@ Type: `number`
 
 Default: `16`
 
+### vault\_internal\_url
+
+Description: The url to the vault instance for internal cert issuance
+
+Type: `string`
+
+Default: `"http://vault-active.vault.svc.cluster.local:8200"`
+
 ### voluntary\_disruption\_window\_cron\_schedule
 
 Description: The times when disruption windows should start
@@ -457,7 +391,27 @@ Default: `true`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### admin\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding certificate credentials for the admin role in the OpenSearch cluster
+
+### client\_port
+
+Description: The port that OpenSearch clients should connect to.
+
+### host
+
+Description: The OpenSearch cluster hostname to connect to,
+
+### reader\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding certificate credentials for the reader role in the OpenSearch cluster
+
+### superuser\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the OpenSearch cluster
 
 ## Maintainer Notes
 

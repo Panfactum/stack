@@ -35,7 +35,7 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
     subStepNum: 1,
     stepId: "metricsServerDeployment",
     stepName: "Metrics Server Deployment",
-    moduleDirectory: "kube_metrics_server",
+    module: "kube_metrics_server",
     terraguntContents: kubeMetricsServerTerragruntHcl,
   });
 
@@ -47,7 +47,7 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
     subStepNum: 2,
     stepId: "vpaDeployment",
     stepName: "Vertical Pod Autoscaler Deployment",
-    moduleDirectory: "kube_vpa",
+    module: "kube_vpa",
     terraguntContents: kubeVpaTerragruntHcl,
   });
 
@@ -101,7 +101,7 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
     subStepNum: 4,
     stepId: "karpenterDeployment",
     stepName: "Karpenter Deployment",
-    moduleDirectory: "kube_karpenter",
+    module: "kube_karpenter",
     terraguntContents: kubeKarpenterTerragruntHcl,
   });
 
@@ -201,9 +201,10 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
       context,
     });
 
+    // TODO @seth why not deployModule?
     await terragruntInitAndApply({
-      context,
-      modulePath: hclFilePath,
+      ...options,
+      module: "kube_karpenter_node_pools",
     });
 
     await checkpointer.setStepComplete(nodePoolsStepId);
@@ -217,7 +218,7 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
     subStepNum: 6,
     stepId: "adjustNodePools",
     stepName: "EKS NodePools Adjustment",
-    moduleDirectory: "aws_eks",
+    module: "aws_eks",
     overwrite: false,
     hclUpdates: {
       "inputs.bootstrap_mode_enabled": false,
@@ -232,7 +233,7 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
     subStepNum: 7,
     stepId: "schedulerDeployment",
     stepName: "Bin Packing Kubernetes Scheduler Deployment",
-    moduleDirectory: "kube_scheduler",
+    module: "kube_scheduler",
     terraguntContents: kubeSchedulerTerragruntHcl,
   });
 
@@ -253,7 +254,7 @@ export async function setupAutoscaling(options: InstallClusterStepOptions) {
     subStepNum: 8,
     stepId: "kedaDeployment",
     stepName: "KEDA Deployment",
-    moduleDirectory: "kube_keda",
+    module: "kube_keda",
     terraguntContents: kubeKedaTerragruntHcl,
   });
 

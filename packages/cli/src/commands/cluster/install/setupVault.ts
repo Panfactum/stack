@@ -62,7 +62,7 @@ export async function setupVault(options: InstallClusterStepOptions) {
     ...options,
     stepId: "vaultDeployment",
     stepName: "Vault Deployment",
-    moduleDirectory: "kube_vault",
+    module: "kube_vault",
     terraguntContents: kubeVaultTemplate,
     stepNum,
     subStepNum: 1,

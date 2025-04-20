@@ -1,5 +1,5 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
-import { CLISubprocessError } from "../error/error";
+import { CLIError, CLISubprocessError } from "../error/error";
 import { concatStreams } from "../streams/concatStreams";
 import type { PanfactumContext } from "@/context/context";
 
@@ -56,13 +56,23 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
   } = inputs;
   let logsBuffer = "";
   for (let i = 0; i < retries + 1; i++) {
-    const proc = Bun.spawn(command, {
-      cwd: workingDirectory,
-      env,
-      stdout: "pipe",
-      stderr: "pipe",
-      stdin,
-    });
+    let proc
+    try {
+      proc = Bun.spawn(command, {
+        cwd: workingDirectory,
+        env,
+        stdout: "pipe",
+        stderr: "pipe",
+        stdin,
+      });
+    } catch (e) {
+      throw new CLISubprocessError("Failed to spawn subprocess", {
+        command: command.join(" "),
+        subprocessLogs: e instanceof Error ? e.message : String(e),
+        workingDirectory,
+      })
+    }
+
     // eslint-disable-next-line prefer-const
     let [stdoutForMerge, stdoutForCapture] = proc.stdout.tee();
     // eslint-disable-next-line prefer-const

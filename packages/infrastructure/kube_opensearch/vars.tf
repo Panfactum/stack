@@ -180,9 +180,14 @@ variable "wait" {
   default     = true
 }
 
-
 variable "s3_bucket_access_policy" {
-  description = "Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the backup S3 bucket."
+  description = "Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the remote-storage S3 bucket."
   type        = string
   default     = null
+}
+
+variable "vault_internal_url" {
+  description = "The url to the vault instance for internal cert issuance"
+  type        = string
+  default     = "http://vault-active.vault.svc.cluster.local:8200"
 }

@@ -36,7 +36,7 @@ export async function setupVaultCoreResources(
       ...options,
       stepId: "vaultCoreResourcesDeployment",
       stepName: "Vault Core Resources Deployment",
-      moduleDirectory: "vault_core_resources",
+      module: "vault_core_resources",
       terraguntContents: vaultCoreResourcesTemplate,
     });
 
