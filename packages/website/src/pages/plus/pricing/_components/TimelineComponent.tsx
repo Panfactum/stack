@@ -200,7 +200,7 @@ const TimelineItem: Component<TimelineItemProps> = (props) => {
       <Show when={props.description && props.type === "warning"}>
         <div class="rounded bg-gray-light-mode-600 ">
           <div class="mx-2 flex items-center p-2">
-            <IoWarningOutline class="mr-1 text-gold-300" size={20} />
+            <IoWarningOutline class="mr-2 text-gold-300" size={20} />
             <p class="text-sm text-white">{props.description}</p>
           </div>
         </div>
