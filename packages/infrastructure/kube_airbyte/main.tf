@@ -512,8 +512,8 @@ module "kube_job_vault_token_init" {
   source = "../kube_job"
 
   # Pod metadata
-  namespace                  = local.namespace
-  name                       = "airbyte-vault-token-init"
+  namespace = local.namespace
+  name      = "airbyte-vault-token-init"
 
   common_env = {
     VAULT_ADDR = var.vault_address
@@ -523,10 +523,10 @@ module "kube_job_vault_token_init" {
 
   containers = [
     {
-      name = "vault-token-generator"
-      image_registry   = "docker.io"
-      image_repository = "curlimages/curl"
-      image_tag        = "8.12.1"
+      name             = "vault-token-generator"
+      image_registry   = module.constants.images.devShell.registry
+      image_repository = module.constants.images.devShell.repository
+      image_tag        = module.constants.images.devShell.tag
       command = [
         "/bin/sh",
         "-c",
@@ -1055,10 +1055,12 @@ module "ingress" {
   namespace = local.namespace
   name      = "airbyte"
   domains   = [var.domain]
-  ingress_configs = [{
-    service      = "${local.name}-airbyte-webapp-svc"
-    service_port = 80
-  }]
+  ingress_configs = [
+    {
+      service      = "${local.name}-airbyte-webapp-svc"
+      service_port = 80
+    }
+  ]
 
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = false
@@ -1103,9 +1105,11 @@ resource "kubectl_manifest" "pdb_webapp" {
       maxUnavailable = 1
     }
   })
+
   force_conflicts   = true
   server_side_apply = true
-  depends_on        = [helm_release.airbyte]
+
+  depends_on = [helm_release.airbyte]
 }
 
 resource "kubectl_manifest" "pdb_server" {
@@ -1302,19 +1306,23 @@ resource "kubectl_manifest" "vpa_webapp" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "webapp"
-          minAllowed = {
-            memory = "${var.webapp_min_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "webapp"
+            minAllowed = {
+              memory = "${var.webapp_min_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1340,19 +1348,23 @@ resource "kubectl_manifest" "vpa_server" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "server"
-          minAllowed = {
-            memory = "${var.server_min_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "server"
+            minAllowed = {
+              memory = "${var.server_min_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1378,19 +1390,23 @@ resource "kubectl_manifest" "vpa_worker" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "worker"
-          minAllowed = {
-            memory = "${var.worker_min_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "worker"
+            minAllowed = {
+              memory = "${var.worker_min_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1416,19 +1432,23 @@ resource "kubectl_manifest" "vpa_connector_builder" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "airbyte-connector-builder-server"
-          minAllowed = {
-            memory = "${var.connector_min_builder_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "airbyte-connector-builder-server"
+            minAllowed = {
+              memory = "${var.connector_min_builder_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1454,19 +1474,23 @@ resource "kubectl_manifest" "vpa_cron" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "airbyte-cron"
-          minAllowed = {
-            memory = "${var.cron_min_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "airbyte-cron"
+            minAllowed = {
+              memory = "${var.cron_min_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1492,19 +1516,23 @@ resource "kubectl_manifest" "vpa_pod_sweeper" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "airbyte-pod-sweeper"
-          minAllowed = {
-            memory = "${var.pod_min_sweeper_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "airbyte-pod-sweeper"
+            minAllowed = {
+              memory = "${var.pod_min_sweeper_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1530,19 +1558,23 @@ resource "kubectl_manifest" "vpa_temporal" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "airbyte-temporal"
-          minAllowed = {
-            memory = "${var.temporal_min_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "airbyte-temporal"
+            minAllowed = {
+              memory = "${var.temporal_min_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1568,19 +1600,23 @@ resource "kubectl_manifest" "vpa_workload_api_server" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "airbyte-workload-api-server"
-          minAllowed = {
-            memory = "${var.workload_api_min_server_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "airbyte-workload-api-server"
+            minAllowed = {
+              memory = "${var.workload_api_min_server_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"
@@ -1606,19 +1642,23 @@ resource "kubectl_manifest" "vpa_workload_launcher" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "airbyte-workload-launcher"
-          minAllowed = {
-            memory = "${var.workload_min_launcher_memory_mb}Mi"
+        containerPolicies = [
+          {
+            containerName = "airbyte-workload-launcher"
+            minAllowed = {
+              memory = "${var.workload_min_launcher_memory_mb}Mi"
+            }
           }
-        }]
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "apps/v1"

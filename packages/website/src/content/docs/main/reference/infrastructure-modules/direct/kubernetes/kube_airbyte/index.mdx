@@ -236,7 +236,7 @@ Default: `null`
 
 ### global\_env
 
-Description: Additional global environment variables for Airbyte configuration https://docs.airbyte.com/operator-guides/configuring-airbyte
+Description: Additional global environment variables for [Airbyte configuration](https://docs.airbyte.com/operator-guides/configuring-airbyte)
 
 Type: `map(string)`
 
@@ -593,6 +593,14 @@ Description: Memory request for temporal containers
 Type: `number`
 
 Default: `512`
+
+### vault\_address
+
+Description: The address of the Vault server
+
+Type: `string`
+
+Default: `"http://vault-active.vault.svc.cluster.local:8200"`
 
 ### vpa\_enabled
 
