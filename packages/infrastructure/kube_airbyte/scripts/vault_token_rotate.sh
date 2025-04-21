@@ -48,7 +48,7 @@ if [ -z "$CLIENT_TOKEN" ] || [ "$CLIENT_TOKEN" = "null" ]; then
 fi
 
 # Update the existing Kubernetes secret with the Vault token
-echo "Updating Kubernetes secret 'airbyte-config-secrets' with Vault token..." >&2
+echo "Updating Kubernetes secret 'airbyte-vault-secret' with Vault token..." >&2
 
 SECRET_NAME="airbyte-vault-secret"
 SECRET_KEY="token"
