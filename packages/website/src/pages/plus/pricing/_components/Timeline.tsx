@@ -234,24 +234,24 @@ const UPGRADE_WITH_PANFACTUM_TIMELINE: TimelinePropsItem[] = [
     title: "Scaling Improvements",
     description:
       "Seamlessly integrated horizontal, vertical, and dynamic autoscaling for nodes, pods, and containers that intelligently optimizes resource allocation with unparalleled efficiency and precision built into the Panfactum Framework.",
-    bullet: HiOutlineRocketLaunch,
-    type: "panfactum-muted",
+    bullet: "panfactum",
+    type: "panfactum",
     time: "0 days",
   },
   {
     title: "Backup and Disaster Recovery",
     description:
       "Enterprise-grade backup and disaster recovery solutions, rigorously tested and seamlessly integrated into the Panfactum Framework, ensuring business continuity with zero additional configuration.",
-    bullet: TbArrowBackUp,
-    type: "panfactum-muted",
+    bullet: "panfactum",
+    type: "panfactum",
     time: "0 days",
   },
   {
     title: "Cost Optimization",
     description:
       "Infrastructure costs are automatically optimized through the intelligent scaling mechanisms built into the Panfactum Framework. The platform ensures maximum resource efficiency with dynamic allocation, spot instance utilization, and optimal cloud spending - delivering the most cost-effective infrastructure possible with zero additional configuration.",
-    bullet: RiFinanceMoneyDollarCircleLine,
-    type: "panfactum-muted",
+    bullet: "panfactum",
+    type: "panfactum",
     time: "0 days",
   },
 ];
