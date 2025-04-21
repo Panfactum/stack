@@ -41,7 +41,6 @@ locals {
   # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
   # secret/data/airbyte
   vault_env_prefix = "${local.vault_mount}/${local.vault_prefix}/"
-  vault_address    = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
 data "pf_kube_labels" "labels" {
@@ -416,9 +415,6 @@ data "vault_policy_document" "airbyte" {
   }
 }
 
-## todo: need to initialize secret mount with kv 2
-## potentially initialize secrets as well
-
 module "vault_auth_airbyte" {
   source = "../kube_sa_auth_vault"
 
@@ -431,6 +427,14 @@ module "vault_auth_airbyte_cron" {
   source = "../kube_sa_auth_vault"
 
   service_account           = module.vault_token_rotator.service_account_name
+  service_account_namespace = local.namespace
+  vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
+}
+
+module "vault_auth_airbyte_job" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = module.kube_job_vault_token_init.service_account_name
   service_account_namespace = local.namespace
   vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
 }
@@ -483,88 +487,54 @@ resource "kubernetes_role_binding" "airbyte_secrets_writer_binding_cron" {
   }
 }
 
+resource "kubernetes_role_binding" "airbyte_secrets_writer_binding_job" {
+  metadata {
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer-binding-job"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.kube_job_vault_token_init.service_account_name
+    namespace = local.namespace
+  }
+  role_ref {
+    kind      = "Role"
+    name      = kubernetes_role.airbyte_secrets_writer.metadata[0].name
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+
 /***************************************
-* Vault Secrets Operator Resources
+* Vault Secrets Resources
 ***************************************/
 
-resource "kubernetes_job" "vault_token_init" {
-  metadata {
-    name      = "airbyte-vault-token-init"
-    namespace = local.namespace
-    labels    = data.pf_kube_labels.labels.labels
+module "kube_job_vault_token_init" {
+  source = "../kube_job"
+
+  # Pod metadata
+  namespace                  = local.namespace
+  name                       = "airbyte-vault-token-init"
+
+  common_env = {
+    VAULT_ADDR = var.vault_address
+    VAULT_ROLE = module.vault_auth_airbyte_job.role_name
+    NAMESPACE  = local.namespace
   }
 
-  spec {
-    template {
-      metadata {
-        labels = data.pf_kube_labels.labels.labels
-      }
-
-      spec {
-        service_account_name = kubernetes_service_account.airbyte_sa.metadata[0].name
-
-        container {
-          name  = "vault-token-generator"
-          image = "curlimages/curl:8.12.1"
-
-          env {
-            name  = "VAULT_ADDR"
-            value = local.vault_address
-          }
-
-          env {
-            name  = "VAULT_ROLE"
-            value = module.vault_auth_airbyte.role_name
-          }
-
-          env {
-            name  = "NAMESPACE"
-            value = local.namespace
-          }
-
-          command = [
-            "/bin/sh",
-            "-c",
-            file("${path.module}/scripts/vault_token_rotate.sh")
-          ]
-
-          security_context {
-            run_as_non_root           = true
-            run_as_user               = 1000
-            read_only_root_filesystem = true
-            capabilities {
-              drop = ["ALL"]
-            }
-          }
-
-          resources {
-            requests = {
-              memory = "30Mi"
-              cpu    = "25m"
-            }
-            limits = {
-              memory = "40Mi"
-            }
-          }
-        }
-
-        restart_policy = "OnFailure"
-      }
+  containers = [
+    {
+      name = "vault-token-generator"
+      image_registry   = "docker.io"
+      image_repository = "curlimages/curl"
+      image_tag        = "8.12.1"
+      command = [
+        "/bin/sh",
+        "-c",
+        file("${path.module}/scripts/vault_token_rotate.sh")
+      ]
+      minimum_memory = 30
     }
-
-    backoff_limit              = 5
-    ttl_seconds_after_finished = 3600 # Clean up after 1 hour
-  }
-
-  depends_on = [
-    module.vault_auth_airbyte
   ]
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 
 /***************************************
@@ -598,7 +568,7 @@ module "vault_token_rotator" {
 
   # Use the existing airbyte service account
   common_env = {
-    VAULT_ADDR = local.vault_address
+    VAULT_ADDR = var.vault_address
     VAULT_ROLE = module.vault_auth_airbyte_cron.role_name
     NAMESPACE  = local.namespace
   }
@@ -621,10 +591,6 @@ module "vault_token_rotator" {
 
       minimum_memory = 32
       minimum_cpu    = 25
-
-      privileged  = false
-      run_as_root = false
-      readonly    = true
     }
   ]
 }
@@ -715,7 +681,7 @@ resource "helm_release" "airbyte" {
           secretsManagerSecretName = "airbyte-vault-secret"
 
           vault = {
-            address            = local.vault_address
+            address            = var.vault_address
             prefix             = local.vault_env_prefix
             authTokenSecretKey = "token"
           }
@@ -1053,7 +1019,7 @@ resource "helm_release" "airbyte" {
     module.database,
     kubernetes_secret.airbyte_secrets,
     module.aws_permissions,
-    kubernetes_job.vault_token_init,
+    module.kube_job_vault_token_init,
     module.vault_token_rotator,
     kubernetes_role_binding.airbyte_secrets_writer_binding_cron,
     module.vault_auth_airbyte_cron
@@ -1664,41 +1630,4 @@ resource "kubectl_manifest" "vpa_workload_launcher" {
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [helm_release.airbyte]
-}
-
-/***************************************
-* Image Cache (Optional)
-***************************************/
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [
-    {
-      registry   = "docker.io"
-      repository = "airbyte/webapp"
-      tag        = var.airbyte_version
-    },
-    {
-      registry   = "docker.io"
-      repository = "airbyte/server"
-      tag        = var.airbyte_version
-    },
-    {
-      registry   = "docker.io"
-      repository = "airbyte/worker"
-      tag        = var.airbyte_version
-    },
-    {
-      registry   = "docker.io"
-      repository = "temporalio/auto-setup"
-      tag        = "1.26"
-    },
-    {
-      registry   = "docker.io"
-      repository = "curlimages/curl"
-      tag        = "8.12.1"
-    }
-  ]
 }

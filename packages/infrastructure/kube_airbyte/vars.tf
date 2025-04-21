@@ -4,6 +4,12 @@ variable "namespace" {
   default     = "airbyte"
 }
 
+variable "vault_address" {
+  description = "The address of the Vault server"
+  type        = string
+  default     = "http://vault-active.vault.svc.cluster.local:8200"
+}
+
 variable "helm_timeout_seconds" {
   description = "The timeout in seconds for Helm operations"
   type        = number
@@ -271,7 +277,7 @@ variable "jobs_cpu_min_millicores" {
 }
 
 variable "global_env" {
-  description = "Additional global environment variables for Airbyte configuration https://docs.airbyte.com/operator-guides/configuring-airbyte"
+  description = "Additional global environment variables for [Airbyte configuration](https://docs.airbyte.com/operator-guides/configuring-airbyte)"
   type        = map(string)
   default     = {}
 }

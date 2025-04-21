@@ -1,26 +1,26 @@
 #!/bin/sh
 
-echo "Using Vault address: $VAULT_ADDR"
-echo "Using Vault role: $VAULT_ROLE"
-echo "Using namespace: $NAMESPACE"
+echo "Using Vault address: $VAULT_ADDR" >&2
+echo "Using Vault role: $VAULT_ROLE" >&2
+echo "Using namespace: $NAMESPACE" >&2
 
 # Get the JWT token from the service account
 JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-echo "JWT token length: $(echo $JWT | wc -c) characters"
+echo "JWT token length: $(echo $JWT | wc -c) characters" >&2
 
 # Test connectivity to Vault
-echo "Testing Vault connectivity..."
+echo "Testing Vault connectivity..." >&2
 HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $VAULT_ADDR/v1/sys/health)
-echo "Vault health status: $HEALTH_STATUS"
+echo "Vault health status: $HEALTH_STATUS" >&2
 
 if [ "$HEALTH_STATUS" != "200" ] && [ "$HEALTH_STATUS" != "429" ] && [ "$HEALTH_STATUS" != "472" ] && [ "$HEALTH_STATUS" != "473" ]; then
-  echo "Failed to connect to Vault at $VAULT_ADDR"
+  echo "Failed to connect to Vault at $VAULT_ADDR" >&2
   exit 1
 fi
 
 # Login to Vault using Kubernetes auth with debug info
-echo "Authenticating with Vault at $VAULT_ADDR/v1/auth/kubernetes/login..."
-echo "Using role: $VAULT_ROLE"
+echo "Authenticating with Vault at $VAULT_ADDR/v1/auth/kubernetes/login..." >&2
+echo "Using role: $VAULT_ROLE" >&2
 
 # Create the JSON payload for the request
 AUTH_PAYLOAD=$(
@@ -44,15 +44,15 @@ LOGIN_RESPONSE=$(curl -s \
 CLIENT_TOKEN=$(echo $LOGIN_RESPONSE | grep -o '"client_token":"[^"]*"' | sed 's/"client_token":"//;s/"$//')
 
 if [ -z "$CLIENT_TOKEN" ]; then
-  echo "Failed to get client token from Vault"
-  echo "Login response: $LOGIN_RESPONSE"
+  echo "Failed to get client token from Vault" >&2
+  echo "Login response: $LOGIN_RESPONSE" >&2
   exit 1
 fi
 
-echo "xSuccessfully extracted token of length: $(echo $CLIENT_TOKEN | wc -c) characters"
+echo "Successfully extracted token of length: $(echo $CLIENT_TOKEN | wc -c) characters" >&2
 
 # Update the existing Kubernetes secret with the Vault token
-echo "Updating Kubernetes secret 'airbyte-config-secrets' with Vault token..."
+echo "Updating Kubernetes secret 'airbyte-config-secrets' with Vault token..." >&2
 
 K8S_API_SERVER="https://kubernetes.default.svc"
 CACERT="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
@@ -82,7 +82,7 @@ SECRET_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
   --header "Authorization: Bearer $K8S_TOKEN" \
   "$K8S_API_SERVER/api/v1/namespaces/$NAMESPACE/secrets/$SECRET_NAME")
 
-echo "Secret exists check returned status: $SECRET_EXISTS"
+echo "Secret exists check returned status: $SECRET_EXISTS" >&2
 
 if [ "$SECRET_EXISTS" = "200" ]; then
   # Update the secret using patch
@@ -94,7 +94,7 @@ if [ "$SECRET_EXISTS" = "200" ]; then
     --data "$PATCH_JSON" \
     "$K8S_API_SERVER/api/v1/namespaces/$NAMESPACE/secrets/$SECRET_NAME")
 
-  echo "Patch result: $PATCH_RESULT"
+  echo "Patch result: $PATCH_RESULT" >&2
 else
   CREATE_PAYLOAD=$(
     cat <<JSON
@@ -113,7 +113,7 @@ else
 JSON
   )
   # Create new secret
-  echo "Creating new secret..."
+  echo "Creating new secret..." >&2
   CREATE_RESULT=$(curl -s -w "\nStatus code: %{http_code}" \
     --cacert $CACERT \
     --header "Authorization: Bearer $K8S_TOKEN" \
@@ -122,7 +122,7 @@ JSON
     --data "$CREATE_PAYLOAD" \
     "$K8S_API_SERVER/api/v1/namespaces/$NAMESPACE/secrets")
 
-  echo "Create result: $CREATE_RESULT"
+  echo "Create result: $CREATE_RESULT" >&2
 fi
 
-echo "Vault token rotation completed"
+echo "Vault token rotation completed" >&2
