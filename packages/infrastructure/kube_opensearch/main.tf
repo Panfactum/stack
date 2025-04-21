@@ -556,6 +556,7 @@ resource "kubernetes_config_map" "config" {
       "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.name
       "s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
       "s3.client.default.region"                             = data.aws_region.region.name
+      "s3.client.default.endpoint"                           = "s3.${data.aws_region.region.name}.amazonaws.com"
 
       // Segment Replication
       // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/segment-replication/index/
