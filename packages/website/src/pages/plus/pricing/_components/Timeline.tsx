@@ -298,7 +298,7 @@ const UPGRADE_WITHOUT_PANFACTUM_TIMELINE: TimelinePropsItem[] = [
     time: "5 days",
   },
   {
-    title: "Cost Optimization",
+    title: "Cost Optimization Causes Issues",
     description:
       "Resource quotas occasionally prevent critical system pods from scheduling during high utilization periods. Spot instances are unexpectedly terminated during important processing jobs, requiring complex handling of interruption events that wasn't initially planned.",
     bullet: IoWarningOutline,
