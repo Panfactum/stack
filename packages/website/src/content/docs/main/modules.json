@@ -96,6 +96,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_organization",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
       "module": "aws_registered_domains",
       "type": "direct",
       "group": "aws"

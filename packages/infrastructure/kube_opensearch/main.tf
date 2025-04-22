@@ -210,7 +210,7 @@ module "util" {
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.instance_type_anti_affinity_required != null ? var.instance_type_anti_affinity_required : local.sla_target == 3
   host_anti_affinity_required          = local.sla_target >= 2
-  az_spread_required                   = true
+  az_spread_required                   = true // stateful
   az_spread_preferred                  = true // stateful
   lifetime_evictions_enabled           = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -221,18 +221,144 @@ module "constants" {
 }
 
 /***************************************
-* Root Password
+* Certificates - Used for authentication
 ***************************************/
 
-// TODO: Figure out a way to rotate this automatically
-resource "random_password" "root_password" {
-  length  = 64
-  special = false
+resource "vault_mount" "opensearch" {
+  path                      = "pki/db/${var.namespace}-${local.cluster_name}"
+  type                      = "pki"
+  description               = "Root CA for the ${local.cluster_name} opensearchcluster"
+  default_lease_ttl_seconds = 60 * 60 * 24
+  max_lease_ttl_seconds     = 60 * 60 * 24 * 365 * 10
+}
+
+resource "vault_pki_secret_backend_root_cert" "opensearch" {
+  backend              = vault_mount.opensearch.path
+  type                 = "internal"
+  common_name          = var.vault_internal_url
+  ttl                  = 60 * 60 * 24 * 365 * 10
+  format               = "pem"
+  private_key_format   = "der"
+  key_type             = "ec"
+  key_bits             = 256
+  exclude_cn_from_sans = true
+  ou                   = "engineering"
+  organization         = "panfactum"
+}
+
+resource "vault_pki_secret_backend_config_urls" "opensearch" {
+  backend = vault_mount.opensearch.path
+  issuing_certificates = [
+    "${var.vault_internal_url}/v1/pki/ca"
+  ]
+  crl_distribution_points = [
+    "${var.vault_internal_url}/v1/pki/crl"
+  ]
+}
+
+resource "kubernetes_service_account" "vault_issuer" {
+  metadata {
+    name      = "${var.namespace}-${local.cluster_name}-issuer"
+    namespace = "cert-manager"
+    labels    = data.pf_kube_labels.labels.labels
+  }
+}
+
+resource "kubernetes_role" "vault_issuer" {
+  metadata {
+    name      = kubernetes_service_account.vault_issuer.metadata[0].name
+    namespace = "cert-manager"
+    labels    = data.pf_kube_labels.labels.labels
+  }
+  rule {
+    verbs          = ["create"]
+    resources      = ["serviceaccounts/token"]
+    resource_names = [kubernetes_service_account.vault_issuer.metadata[0].name]
+    api_groups     = [""]
+  }
+}
+
+resource "kubernetes_role_binding" "vault_issuer" {
+  metadata {
+    name      = kubernetes_service_account.vault_issuer.metadata[0].name
+    namespace = "cert-manager"
+    labels    = data.pf_kube_labels.labels.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "cert-manager"
+    namespace = "cert-manager"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.vault_issuer.metadata[0].name
+  }
+}
+
+data "vault_policy_document" "vault_issuer" {
+  rule {
+    capabilities = ["create", "read", "update"]
+    path         = "${vault_mount.opensearch.path}/sign/${vault_pki_secret_backend_role.vault_issuer.name}"
+  }
+}
+
+module "vault_role" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = kubernetes_service_account.vault_issuer.metadata[0].name
+  service_account_namespace = "cert-manager"
+  vault_policy_hcl          = data.vault_policy_document.vault_issuer.hcl
+  audience                  = "vault://db-${var.namespace}-${local.cluster_name}"
+  token_ttl_seconds         = 120
+}
+
+resource "vault_pki_secret_backend_role" "vault_issuer" {
+  backend                     = vault_mount.opensearch.path
+  name                        = kubernetes_service_account.vault_issuer.metadata[0].name
+  allow_any_name              = true
+  allow_wildcard_certificates = true
+  enforce_hostnames           = false
+  allow_ip_sans               = true
+  require_cn                  = false
+
+  key_type = "rsa"
+  key_bits = 4096
+
+  max_ttl = 60 * 60 * 24 * 14 // Certs need to be rotated at least every 2 weeks (TODO: Make configurable)
+}
+
+resource "kubectl_manifest" "cluster_issuer" {
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name   = "db-${var.namespace}-${local.cluster_name}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      vault = {
+        path   = "${vault_mount.opensearch.path}/sign/${vault_pki_secret_backend_role.vault_issuer.name}"
+        server = var.vault_internal_url
+        auth = {
+          kubernetes = {
+            role      = module.vault_role.role_name
+            mountPath = "/v1/auth/kubernetes"
+            serviceAccountRef = {
+              name = kubernetes_service_account.vault_issuer.metadata[0].name
+            }
+          }
+        }
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 
 /***************************************
-* Node Certificates
+* Node Certs
 ***************************************/
 
 module "node_certs" {
@@ -242,21 +368,34 @@ module "node_certs" {
   private_key_encoding  = "PKCS8" // must be PKCS8 for java compat
   private_key_algorithm = "RSA"
   common_name           = "${local.cluster_name}.${var.namespace}"
+  issuer_name           = "db-${var.namespace}-${local.cluster_name}"
   service_names = concat(
     [
       local.cluster_name,
     ],
     [for i in range(var.replica_count) : "${local.cluster_name}-master-${i}.${local.cluster_name}-headless"]
   )
+
+  depends_on = [kubectl_manifest.cluster_issuer]
 }
 
-module "superuser_certs" {
+
+/***************************************
+* Client Certs
+***************************************/
+
+module "client_certs" {
+  for_each = toset(["superuser", "admin", "reader"])
+
   source                = "../kube_internal_cert"
   namespace             = var.namespace
-  secret_name           = "${local.cluster_name}-superuser-certs"
+  secret_name           = "${local.cluster_name}-${each.key}-certs"
   private_key_encoding  = "PKCS8" // must be PKCS8 for java compat
   private_key_algorithm = "RSA"
-  common_name           = "superuser.${local.cluster_name}.${var.namespace}"
+  common_name           = "${each.key}.${local.cluster_name}.${var.namespace}"
+  issuer_name           = "db-${var.namespace}-${local.cluster_name}"
+
+  depends_on = [kubectl_manifest.cluster_issuer]
 }
 
 /***************************************
@@ -308,6 +447,10 @@ module "irsa" {
 /***************************************
 * OpenSearch Configs
 ***************************************/
+resource "random_id" "encryption_key" {
+  byte_length = 16 # 16 bytes = 32 hex characters
+  prefix      = ""
+}
 
 resource "kubernetes_secret" "security_config" {
   metadata {
@@ -413,6 +556,7 @@ resource "kubernetes_config_map" "config" {
       "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.name
       "s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
       "s3.client.default.region"                             = data.aws_region.region.name
+      "s3.client.default.endpoint"                           = "s3.${data.aws_region.region.name}.amazonaws.com"
 
       // Segment Replication
       // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/segment-replication/index/
@@ -489,6 +633,10 @@ module "opensearch" {
   vpa_enabled                          = var.vpa_enabled
   priority_class_name                  = module.constants.workload_important_priority_class_name
 
+  voluntary_disruptions_enabled             = var.voluntary_disruptions_enabled
+  voluntary_disruption_window_enabled       = var.voluntary_disruption_window_enabled
+  voluntary_disruption_window_cron_schedule = var.voluntary_disruption_window_cron_schedule
+  voluntary_disruption_window_seconds       = var.voluntary_disruption_window_seconds
 
   containers = [
     {
@@ -543,7 +691,7 @@ module "opensearch" {
     "${module.node_certs.secret_name}" = {
       mount_path = "/usr/share/opensearch/config/node-certs"
     }
-    "${module.superuser_certs.secret_name}" = {
+    "${module.client_certs.superuser.secret_name}" = {
       mount_path = "/usr/share/opensearch/config/superuser-certs"
     }
   }
@@ -554,13 +702,18 @@ module "opensearch" {
     DISABLE_INSTALL_DEMO_CONFIG = "true" // Needed if using the default entrypoint
   }
 
+  common_secrets = {
+    OPENSEARCH_MASTER_KEY = random_id.encryption_key.hex
+  }
+
   termination_grace_period_seconds = 120
   volume_retention_policy = {
     when_scaled  = "Delete"
     when_deleted = "Delete"
   }
 
-  depends_on = [module.node_certs, module.superuser_certs]
+
+  depends_on = [module.node_certs, module.client_certs]
 }
 
 // This is required to enable RBAC in the cluster. For whatever reason, the opensearch team has decided that this
@@ -599,7 +752,7 @@ module "security_update_job" {
   ]
 
   secret_mounts = {
-    "${module.superuser_certs.secret_name}" = {
+    "${module.client_certs.superuser.secret_name}" = {
       mount_path = "/usr/share/opensearch/config/superuser-certs"
     }
     "${local.cluster_name}-security-config" = {
@@ -609,214 +762,3 @@ module "security_update_job" {
 
   depends_on = [module.opensearch]
 }
-
-/***************************************
-* Vault Authentication
-***************************************/
-
-# resource "vault_database_secret_backend_role" "reader" {
-#   backend             = "db"
-#   name                = "reader-${var.namespace}-${local.cluster_name}"
-#   db_name             = vault_database_secret_backend_connection.redis.name
-#   creation_statements = [jsonencode(["%R~*", "&*", "+@all", "-@write", "-@admin", "-@dangerous"])]
-#   default_ttl         = 60 * 60 * var.vault_credential_lifetime_hours
-#   max_ttl             = 60 * 60 * var.vault_credential_lifetime_hours
-# }
-
-# resource "vault_database_secret_backend_role" "admin" {
-#   backend             = "db"
-#   name                = "admin-${var.namespace}-${local.cluster_name}"
-#   db_name             = vault_database_secret_backend_connection.redis.name
-#   creation_statements = [jsonencode(["%RW~*", "&*", "+@all", "-@admin", "-@dangerous"])]
-#   default_ttl         = 60 * 60 * var.vault_credential_lifetime_hours
-#   max_ttl             = 60 * 60 * var.vault_credential_lifetime_hours
-# }
-
-# resource "vault_database_secret_backend_role" "superuser" {
-#   backend             = "db"
-#   name                = "superuser-${var.namespace}-${local.cluster_name}"
-#   db_name             = vault_database_secret_backend_connection.redis.name
-#   creation_statements = [jsonencode(["~*", "&*", "+@all", "-acl|deluser", "-acl|genpass", "-acl|log", "-acl|setuser"])]
-#   default_ttl         = 60 * 60 * var.vault_credential_lifetime_hours
-#   max_ttl             = 60 * 60 * var.vault_credential_lifetime_hours
-# }
-
-# resource "vault_database_secret_backend_connection" "redis" {
-#   backend     = "db"
-#   name        = "${var.namespace}-${local.cluster_name}"
-#   plugin_name = "redis-database-plugin"
-
-#   allowed_roles = [
-#     "reader-${var.namespace}-${local.cluster_name}",
-#     "admin-${var.namespace}-${local.cluster_name}",
-#     "superuser-${var.namespace}-${local.cluster_name}",
-#   ]
-
-#   redis {
-#     host     = "${local.cluster_name}-master.${var.namespace}"
-#     port     = 6379
-#     tls      = false
-#     password = random_password.root_password.result
-#     username = "default" // This is the main superuser
-#   }
-
-#   verify_connection = true
-
-#   depends_on = [helm_release.redis]
-# }
-
-
-/***************************************
-* Vault Secrets
-***************************************/
-
-# data "vault_policy_document" "vault_secrets" {
-#   rule {
-#     path         = "db/creds/${vault_database_secret_backend_role.reader.name}"
-#     capabilities = ["read", "list"]
-#     description  = "Allows getting read-only database credentials"
-#   }
-#   rule {
-#     path         = "db/creds/${vault_database_secret_backend_role.admin.name}"
-#     capabilities = ["read", "list"]
-#     description  = "Allows getting admin database credentials"
-#   }
-#   rule {
-#     path         = "db/creds/${vault_database_secret_backend_role.superuser.name}"
-#     capabilities = ["read", "list"]
-#     description  = "Allows getting superuser database credentials"
-#   }
-# }
-
-# module "vault_auth_vault_secrets" {
-#   source                    = "../kube_sa_auth_vault"
-#   service_account           = local.cluster_name
-#   service_account_namespace = var.namespace
-#   vault_policy_hcl          = data.vault_policy_document.vault_secrets.hcl
-#   audience                  = "vault"
-# }
-
-# resource "kubectl_manifest" "vault_connection" {
-#   yaml_body = yamlencode({
-#     apiVersion = "secrets.hashicorp.com/v1beta1"
-#     kind       = "VaultConnection"
-#     metadata = {
-#       name      = local.cluster_name
-#       namespace = var.namespace
-#       labels    = module.util.labels
-#     }
-#     spec = {
-#       address = "http://vault-active.vault.svc.cluster.local:8200"
-#     }
-#   })
-#   force_conflicts   = true
-#   server_side_apply = true
-# }
-
-# resource "kubectl_manifest" "vault_auth" {
-#   yaml_body = yamlencode({
-#     apiVersion = "secrets.hashicorp.com/v1beta1"
-#     kind       = "VaultAuth"
-#     metadata = {
-#       name      = local.cluster_name
-#       namespace = var.namespace
-#       labels    = module.util.labels
-#     }
-#     spec = {
-#       vaultConnectionRef = local.cluster_name
-#       method             = "kubernetes"
-#       mount              = "kubernetes"
-#       allowedNamespaces  = [var.namespace]
-#       kubernetes = {
-#         role           = module.vault_auth_vault_secrets.role_name
-#         serviceAccount = local.cluster_name
-#         audiences      = ["vault"]
-#       }
-#     }
-#   })
-#   force_conflicts   = true
-#   server_side_apply = true
-#   depends_on        = [kubectl_manifest.vault_connection]
-# }
-
-# resource "kubectl_manifest" "vault_secrets" {
-#   for_each = {
-#     admin     = "creds/${vault_database_secret_backend_role.admin.name}"
-#     reader    = "creds/${vault_database_secret_backend_role.reader.name}"
-#     superuser = "creds/${vault_database_secret_backend_role.superuser.name}"
-#   }
-#   yaml_body = yamlencode({
-#     apiVersion = "secrets.hashicorp.com/v1beta1"
-#     kind       = "VaultDynamicSecret"
-#     metadata = {
-#       name      = "${local.cluster_name}-${each.key}-creds"
-#       namespace = var.namespace
-#       labels    = module.util.labels
-#     }
-#     spec = {
-#       vaultAuthRef   = local.cluster_name
-#       mount          = "db"
-#       path           = each.value
-#       renewalPercent = 50
-#       destination = {
-#         create = true
-#         name   = "${local.cluster_name}-${each.key}-creds"
-#       }
-#     }
-#   })
-#   force_conflicts   = true
-#   server_side_apply = true
-#   depends_on        = [kubectl_manifest.vault_auth]
-# }
-
-/***************************************
-* Disruption Windows
-***************************************/
-
-# module "disruption_window_controller" {
-#   count  = var.voluntary_disruption_window_enabled ? 1 : 0
-#   source = "../kube_disruption_window_controller"
-
-#   namespace                   = var.namespace
-#   vpa_enabled                 = var.vpa_enabled
-#   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-#   pull_through_cache_enabled  = var.pull_through_cache_enabled
-
-#   cron_schedule = var.voluntary_disruption_window_cron_schedule
-# }
-
-/***************************************
-* Image Cache
-***************************************/
-
-# module "image_cache" {
-#   count  = var.node_image_cached_enabled ? 1 : 0
-#   source = "../kube_node_image_cache"
-
-#   images = [
-#     {
-#       registry          = "docker.io"
-#       repository        = "bitnami/redis"
-#       tag               = "7.4.1-debian-12-r2"
-#       arm_nodes_enabled = var.arm_nodes_enabled
-#     },
-#     {
-#       registry          = "docker.io"
-#       repository        = "bitnami/redis-sentinel"
-#       tag               = "7.4.1-debian-12-r2"
-#       arm_nodes_enabled = var.arm_nodes_enabled
-#     },
-#     {
-#       registry          = "docker.io"
-#       repository        = "bitnami/redis-exporter"
-#       tag               = "1.66.0-debian-12-r2"
-#       arm_nodes_enabled = var.arm_nodes_enabled
-#     },
-#     {
-#       registry          = "docker.io"
-#       repository        = "bitnami/kubectl"
-#       tag               = "1.31.2-debian-12-r6"
-#       arm_nodes_enabled = var.arm_nodes_enabled
-#     }
-#   ]
-# }

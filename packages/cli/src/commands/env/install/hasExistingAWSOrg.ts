@@ -1,0 +1,25 @@
+import { select } from "@inquirer/prompts";
+import pc from "picocolors"
+import terminalLink from 'terminal-link';
+import type { PanfactumContext } from "@/context/context";
+
+export async function hasExistingAWSOrg(context: PanfactumContext): Promise<boolean> {
+    context.logger.log("")
+    const message = terminalLink.isSupported ? 
+        `Are your existing AWS accounts managed by an ${terminalLink("AWS Organization", "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html")}?\n` :
+        `Are your existing AWS accounts managed by an AWS Organization?\nIf you aren't sure, see these docs: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html\n`
+    return select({
+        message: pc.magenta(message),
+        choices: [
+          {
+            name: "Yes:  Our accounts are part of the same AWS Organization.",
+            value: true,
+          },
+          {
+            name: "No:   Our existing accounts are standalone.",
+            value: false,
+          }
+        ],
+        default: true,
+      });
+}

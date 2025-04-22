@@ -341,7 +341,7 @@ export async function setupCertificateIssuers(
       subStepNum: 1,
       stepId: "certIssuersIACDeployment",
       stepName: "Certificate Issuers Deployment",
-      moduleDirectory: "kube_cert_issuers",
+      module: "kube_cert_issuers",
       terraguntContents: kubeCertIssuersTerragruntHclProduction,
       overwrite: false,
       hclUpdates: {
@@ -367,7 +367,7 @@ export async function setupCertificateIssuers(
     subStepNum: 2,
     stepId: "firstCertificateDeployment",
     stepName: "First Certificate Deployment",
-    moduleDirectory: "kube_cert_manager",
+    module: "kube_cert_manager",
     terraguntContents: kubeCertIssuersTerragruntHclProduction,
     overwrite: false,
     hclUpdates: {

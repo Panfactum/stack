@@ -1,5 +1,5 @@
 import { getRepoVariables } from "./getRepoVariables";
-import { Logger } from "./logger";
+import { Logger, type LogLevel } from "./logger";
 import type { BaseContext } from "clipanion";
 
 export type PanfactumContext = BaseContext & {
@@ -8,12 +8,16 @@ export type PanfactumContext = BaseContext & {
 };
 
 export const createPanfactumContext = async (
-  context: BaseContext
+  context: BaseContext,
+  opts: {
+    logLevel: LogLevel
+  }
 ): Promise<PanfactumContext> => {
+
   return {
     ...context,
     repoVariables: await getRepoVariables(),
     // TODO: @jack get the log level into this
-    logger: new Logger(context.stderr, { logLevel: "debug" }),
+    logger: new Logger(context.stderr, { logLevel: opts.logLevel }),
   };
 };

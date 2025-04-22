@@ -264,6 +264,8 @@ resource "helm_release" "loki" {
           "reloader.stakater.com/auto" = "true"
         }
         storage = {
+          type   = "s3"
+          region = data.aws_region.current.name
           bucketNames = {
             chunks = module.logs_bucket.bucket_name
             ruler  = module.loki_ruler_bucket.bucket_name
@@ -287,6 +289,7 @@ resource "helm_release" "loki" {
           }
 
           frontend = {
+            address                   = "loki-read.${local.namespace}.svc.cluster.local"
             scheduler_address         = "loki-backend.${local.namespace}.svc.cluster.local:9095"
             tail_proxy_url            = "http://loki-backend.${local.namespace}.svc.cluster.local:3100"
             graceful_shutdown_timeout = "90s"
@@ -294,12 +297,16 @@ resource "helm_release" "loki" {
             log_queries_longer_than   = "5s"
           }
 
+          querier = {
+            max_concurrent = 4
+          }
+
           frontend_worker = {
             scheduler_address = "loki-backend.${local.namespace}.svc.cluster.local:9095"
           }
 
           compactor = {
-            compaction_interval    = "20m"
+            compaction_interval    = "75m"
             retention_enabled      = true
             delete_request_store   = "s3"
             retention_delete_delay = "30m"
@@ -314,21 +321,32 @@ resource "helm_release" "loki" {
             query_timeout                 = "60s"
             reject_old_samples            = true
             reject_old_samples_max_age    = "24h"
-            split_queries_by_interval     = "15m"
-            volume_enabled                = true
-            retention_period              = "${var.log_retention_period_hours}h"
+            split_queries_by_interval     = "6h"
+            max_query_parallelism         = 4
+            tsdb_max_query_parallelism    = 4
+            ingestion_rate_mb             = 50
+            ingestion_burst_size_mb       = 100
+
+            volume_enabled               = true
+            retention_period             = "${var.log_retention_period_hours}h"
+            max_concurrent_tail_requests = 100 // Bump this as every loki canary needs a tail slot so we run out very quickly
           }
 
 
           chunk_store_config = {
             chunk_cache_config = {
-              default_validity = "1h"
+              default_validity = "12h"
               redis = {
-                endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                db         = 0
-                expiration = "1h"
-                username   = "$${REDIS_USERNAME}"
-                password   = "$${REDIS_PASSWORD}"
+                endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                db                 = 0
+                timeout            = "2s"
+                pool_size          = 100
+                idle_timeout       = "30s"
+                max_connection_age = "60s"
+                route_randomly     = true
+                expiration         = "12h"
+                username           = "$${REDIS_USERNAME}"
+                password           = "$${REDIS_PASSWORD}"
               }
             }
           }
@@ -348,13 +366,18 @@ resource "helm_release" "loki" {
             results_cache = {
               compression = "snappy"
               cache = {
-                default_validity = "1h"
+                default_validity = "12h"
                 redis = {
-                  endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                  db         = 1
-                  expiration = "1h"
-                  username   = "$${REDIS_USERNAME}"
-                  password   = "$${REDIS_PASSWORD}"
+                  endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                  db                 = 1
+                  timeout            = "2s"
+                  pool_size          = 100
+                  idle_timeout       = "30s"
+                  max_connection_age = "60s"
+                  route_randomly     = true
+                  expiration         = "12h"
+                  username           = "$${REDIS_USERNAME}"
+                  password           = "$${REDIS_PASSWORD}"
                 }
               }
             }
@@ -363,13 +386,18 @@ resource "helm_release" "loki" {
             index_stats_results_cache = {
               compression = "snappy"
               cache = {
-                default_validity = "1h"
+                default_validity = "12h"
                 redis = {
-                  endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                  db         = 2
-                  expiration = "1h"
-                  username   = "$${REDIS_USERNAME}"
-                  password   = "$${REDIS_PASSWORD}"
+                  endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                  db                 = 2
+                  timeout            = "2s"
+                  pool_size          = 100
+                  idle_timeout       = "30s"
+                  max_connection_age = "60s"
+                  route_randomly     = true
+                  expiration         = "12h"
+                  username           = "$${REDIS_USERNAME}"
+                  password           = "$${REDIS_PASSWORD}"
                 }
               }
             }
@@ -378,13 +406,18 @@ resource "helm_release" "loki" {
             volume_results_cache = {
               compression = "snappy"
               cache = {
-                default_validity = "1h"
+                default_validity = "12h"
                 redis = {
-                  endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                  db         = 3
-                  expiration = "1h"
-                  username   = "$${REDIS_USERNAME}"
-                  password   = "$${REDIS_PASSWORD}"
+                  endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                  db                 = 3
+                  timeout            = "2s"
+                  pool_size          = 100
+                  idle_timeout       = "30s"
+                  max_connection_age = "60s"
+                  route_randomly     = true
+                  expiration         = "12h"
+                  username           = "$${REDIS_USERNAME}"
+                  password           = "$${REDIS_PASSWORD}"
                 }
               }
             }
@@ -394,13 +427,18 @@ resource "helm_release" "loki" {
             instant_metric_results_cache = {
               compression = "snappy"
               cache = {
-                default_validity = "1h"
+                default_validity = "12h"
                 redis = {
-                  endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                  db         = 4
-                  expiration = "1h"
-                  username   = "$${REDIS_USERNAME}"
-                  password   = "$${REDIS_PASSWORD}"
+                  endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                  db                 = 4
+                  timeout            = "2s"
+                  pool_size          = 100
+                  idle_timeout       = "30s"
+                  max_connection_age = "60s"
+                  route_randomly     = true
+                  expiration         = "12h"
+                  username           = "$${REDIS_USERNAME}"
+                  password           = "$${REDIS_PASSWORD}"
                 }
               }
             }
@@ -409,13 +447,18 @@ resource "helm_release" "loki" {
             series_results_cache = {
               compression = "snappy"
               cache = {
-                default_validity = "1h"
+                default_validity = "12h"
                 redis = {
-                  endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                  db         = 5
-                  expiration = "1h"
-                  username   = "$${REDIS_USERNAME}"
-                  password   = "$${REDIS_PASSWORD}"
+                  endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                  db                 = 5
+                  timeout            = "2s"
+                  pool_size          = 100
+                  idle_timeout       = "30s"
+                  max_connection_age = "60s"
+                  route_randomly     = true
+                  expiration         = "12h"
+                  username           = "$${REDIS_USERNAME}"
+                  password           = "$${REDIS_PASSWORD}"
                 }
               }
             }
@@ -424,13 +467,18 @@ resource "helm_release" "loki" {
             label_results_cache = {
               compression = "snappy"
               cache = {
-                default_validity = "1h"
+                default_validity = "12h"
                 redis = {
-                  endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                  db         = 6
-                  expiration = "1h"
-                  username   = "$${REDIS_USERNAME}"
-                  password   = "$${REDIS_PASSWORD}"
+                  endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                  db                 = 6
+                  timeout            = "2s"
+                  pool_size          = 100
+                  idle_timeout       = "30s"
+                  max_connection_age = "60s"
+                  route_randomly     = true
+                  expiration         = "12h"
+                  username           = "$${REDIS_USERNAME}"
+                  password           = "$${REDIS_PASSWORD}"
                 }
               }
             }
@@ -476,25 +524,42 @@ resource "helm_release" "loki" {
 
           storage_config = {
             tsdb_shipper = {
+              resync_interval      = "60m"
+              query_ready_num_days = 1
+              cache_ttl            = "24h"
               index_gateway_client = {
                 server_address = "dns+loki-backend-headless.${local.namespace}.svc.cluster.local:9095"
+
+              }
+            }
+            aws = {
+              s3 = "s3://${data.aws_region.current.name}/${module.logs_bucket.bucket_name}"
+              http_config = {
+                # timeout = "5s"
+                idle_conn_timeout       = "30s"
+                response_header_timeout = "5s" // https://github.com/grafana/loki/issues/4790
               }
             }
 
-            hedging = {
-              at             = "250ms"
-              max_per_second = 20
-              up_to          = 3
-            }
-            disable_broad_index_queries = true
+            # hedging = {
+            #   at             = "250ms"
+            #   max_per_second = 20
+            #   up_to          = 3
+            # }
+            disable_broad_index_queries = false // TODO: Verify - docs say this results in higher queries on backend
             index_queries_cache_config = {
-              default_validity = "1h"
+              default_validity = "12h"
               redis = {
-                endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
-                db         = 7
-                expiration = "1h"
-                username   = "$${REDIS_USERNAME}"
-                password   = "$${REDIS_PASSWORD}"
+                endpoint           = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
+                db                 = 7
+                expiration         = "12h"
+                timeout            = "2s"
+                pool_size          = 100
+                idle_timeout       = "30s"
+                max_connection_age = "60s"
+                route_randomly     = true
+                username           = "$${REDIS_USERNAME}"
+                password           = "$${REDIS_PASSWORD}"
               }
             }
           }
@@ -692,7 +757,7 @@ resource "helm_release" "loki" {
         resources   = local.default_resources
         extraArgs = [
           "-addr=loki-read.${local.namespace}.svc.cluster.local:3100",
-          "-interval=15s" // Adjust from the default of 1s to reduce log volume; since we only scrape metrics every 60s, this doesn't need to be very quick
+          "-interval=15s", // Adjust from the default of 1s to reduce log volume; since we only scrape metrics every 60s, this doesn't need to be very quick
         ]
         updateStrategy = {
           type = "RollingUpdate"

@@ -16,7 +16,7 @@ export async function setupMaintenanceControllers(
   await deployModule({
     ...options,
     subStepNum: 1,
-    moduleDirectory: "kube_reloader",
+    module: "kube_reloader",
     terraguntContents: await Bun.file(kubeReloaderTerragruntHcl).text(),
     stepName: "Reloader Deployment",
     stepId: "deployReloader",
@@ -28,7 +28,7 @@ export async function setupMaintenanceControllers(
   await deployModule({
     ...options,
     subStepNum: 2,
-    moduleDirectory: "kube_node_image_cache_controller",
+    module: "kube_node_image_cache_controller",
     terraguntContents: kubeNodeImageCacheControllerTerragruntHcl,
     stepName: "Node Image Caches Deployment",
     stepId: "deployNodeImageCaches",
@@ -40,7 +40,7 @@ export async function setupMaintenanceControllers(
   await deployModule({
     ...options,
     subStepNum: 3,
-    moduleDirectory: "kube_pvc_autoresizer",
+    module: "kube_pvc_autoresizer",
     terraguntContents: kubePvcAutoresizerTerragruntHcl,
     stepName: "PVC Autoresizer Deployment",
     stepId: "deployPvcAutoresizer",
@@ -52,7 +52,7 @@ export async function setupMaintenanceControllers(
   await deployModule({
     ...options,
     subStepNum: 4,
-    moduleDirectory: "kube_descheduler",
+    module: "kube_descheduler",
     terraguntContents: kubeDeschedulerTerragruntHcl,
     stepName: "Descheduler Deployment",
     stepId: "deployDescheduler",
@@ -64,7 +64,7 @@ export async function setupMaintenanceControllers(
   await deployModule({
     ...options,
     subStepNum: 5,
-    moduleDirectory: "kube_external_snapshotter",
+    module: "kube_external_snapshotter",
     terraguntContents: kubeExternalSnapshotterTerragruntHcl,
     stepName: "External Snapshotter Deployment",
     stepId: "deployExternalSnapshotter",
@@ -76,7 +76,7 @@ export async function setupMaintenanceControllers(
   await deployModule({
     ...options,
     subStepNum: 6,
-    moduleDirectory: "kube_velero",
+    module: "kube_velero",
     terraguntContents: kubeVeleroTerragruntHcl,
     stepName: "Velero Deployment",
     stepId: "deployVelero",

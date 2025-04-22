@@ -2,7 +2,7 @@
 variable "loki_chart_version" {
   description = "The version of the grafana/loki helm chart to deploy"
   type        = string
-  default     = "6.6.2"
+  default     = "6.29.0"
 }
 
 variable "aws_iam_ip_allow_list" {
@@ -14,7 +14,7 @@ variable "aws_iam_ip_allow_list" {
 variable "log_level" {
   description = "The log level for the Loki pods"
   type        = string
-  default     = "warn"
+  default     = "info"
   validation {
     condition     = contains(["info", "error", "debug", "warn"], var.log_level)
     error_message = "Invalid log_level provided."

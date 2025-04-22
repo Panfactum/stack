@@ -8,4 +8,5 @@ ln -s "$AWS_WEB_IDENTITY_TOKEN_FILE" "${OPENSEARCH_PATH_CONF}/aws-web-identity-t
 export AWS_WEB_IDENTITY_TOKEN_FILE="${OPENSEARCH_PATH_CONF}/aws-web-identity-token-file"
 
 ./bin/opensearch \
-  -Enode.name="$POD_NAME"
+  -Enode.name="$POD_NAME" \
+  -Eplugins.query.datasources.encryption.masterkey="$OPENSEARCH_MASTER_KEY"

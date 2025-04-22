@@ -45,7 +45,7 @@ export async function setupInboundNetworking(
    ***************************************************/
   await deployModule({
     ...options,
-    moduleDirectory: "kube_external_dns",
+    module: "kube_external_dns",
     terraguntContents: await Bun.file(kubeExternalDnsTerragruntHcl).text(),
     subStepNum: 1,
     stepName: "ExternalDNS Deployment",
@@ -63,7 +63,7 @@ export async function setupInboundNetworking(
   await deployModule({
     ...options,
     subStepNum: 2,
-    moduleDirectory: "kube_aws_lb_controller",
+    module: "kube_aws_lb_controller",
     terraguntContents: templateFile,
     stepName: "AWS Load Balancer Controller Deployment",
     stepId: "deployAwsLbController",
@@ -125,7 +125,7 @@ export async function setupInboundNetworking(
   await deployModule({
     ...options,
     subStepNum: 4,
-    moduleDirectory: "kube_ingress_nginx",
+    module: "kube_ingress_nginx",
     terraguntContents: await Bun.file(kubeNginxIngressTerragruntHcl).text(),
     stepName: "Nginx Ingress Deployment",
     stepId: "deployNginxIngress",
@@ -249,7 +249,7 @@ export async function setupInboundNetworking(
   await deployModule({
     ...options,
     subStepNum: 7,
-    moduleDirectory: "kube_bastion",
+    module: "kube_bastion",
     terraguntContents: await Bun.file(kubeBastionTerragruntHcl).text(),
     stepName: "Bastion Deployment",
     stepId: "deployBastion",

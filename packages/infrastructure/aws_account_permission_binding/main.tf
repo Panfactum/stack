@@ -59,9 +59,9 @@ resource "aws_ssoadmin_account_assignment" "admin" {
   target_id   = var.aws_account_id
   target_type = "AWS_ACCOUNT"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 ######################### Reader #######################################
@@ -78,9 +78,9 @@ resource "aws_ssoadmin_account_assignment" "reader" {
   target_id   = var.aws_account_id
   target_type = "AWS_ACCOUNT"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 ######################### Restricted Reader #######################################
@@ -97,9 +97,9 @@ resource "aws_ssoadmin_account_assignment" "restricted_reader" {
   target_id   = var.aws_account_id
   target_type = "AWS_ACCOUNT"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 ######################### Billing Admin #######################################
@@ -116,7 +116,7 @@ resource "aws_ssoadmin_account_assignment" "billing_admin" {
   target_id   = var.aws_account_id
   target_type = "AWS_ACCOUNT"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }

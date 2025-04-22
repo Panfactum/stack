@@ -1,44 +1,29 @@
-import { Command } from "clipanion";
-import { CLIError, CLISubprocessError, PanfactumZodError } from "../error/error";
+import { Command, Option } from "clipanion";
+import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/context/context";
+import type { LogLevel } from "@/context/logger";
 
 export abstract class PanfactumCommand extends Command<PanfactumContext> {
 
+    logLevel: LogLevel = Option.String("--log-level,-v", "info", {
+        env: "PF_LOG_LEVEL",
+        description: "The verbosity of logging. Must be one of: debug, info, warn, error.",
+        arity: 1
+    });
+
     override async catch(error: unknown){
-        if(error instanceof PanfactumZodError){
-            this.context.logger.log(`${error.message}`, {level: "error"})
-            const zodError = error.validationError;
-            this.context.logger.log(
-                `Location: ${error.location}
-                Validation Issues:
-                
-                ${zodError.issues.map(issue => `* ${issue.path.join(".")}: ${issue.message}`).join("\n")}
-                `,
-                {
-                    leadingNewlines: 1,
-                    level: "error"
-                }
-            )
-        }else if(error instanceof CLIError){
+
+        if(error instanceof Error){
             this.context.logger.log(`${error.message}`, {level: "error"})
 
-            const {cause} = error;
-            if(cause instanceof CLISubprocessError){
-                this.context.logger.log(
-                    `Command: ${cause.command}
-                    WorkingDirectory: ${cause.workingDirectory}
-                    Subprocess Logs:
-                    
-                    ${cause.subprocessLogs}
-                    `,
-                    {
-                        leadingNewlines: 1,
-                        level: "error"
-                    }
-                )
+            // The detailed error message should always come from the error cause 
+            // if there is no `cause` property, that means the `error` IS the cause
+            // and not just a wrapper.
+            const cause = error.cause || error 
+            if(cause instanceof CLIError){
+                this.context.logger.log(cause.getDetailedMessage(), {level: "error"})
             }
-        }else if(error instanceof Error){
-            this.context.logger.log(`${error.message}`, {level: "error"})
+
         } else {
             this.context.logger.log(JSON.stringify(error), {level: "error"})
         }

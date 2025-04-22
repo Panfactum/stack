@@ -142,7 +142,7 @@ export async function setupVPC(options: InstallClusterStepOptions) {
       ...options,
       stepId: "setupVPCIaC",
       stepName: "Infrastructure-as-code Setup",
-      moduleDirectory: vpcModule,
+      module: vpcModule,
       terraguntContents: awsVpcTerragruntHcl,
       stepNum: STEP_NUMBER,
       subStepNum: 1,

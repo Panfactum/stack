@@ -1,23 +1,15 @@
 import { terragruntApply } from "./terragruntApply";
-import { terragruntInit } from "./terragruntInit";
 import type { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/context/context";
+import { terragruntInit } from "./terragruntInit";
 
-export async function terragruntInitAndApply({
-  context,
-  modulePath
-}: {
+export async function terragruntInitAndApply(inputs: {
   context: PanfactumContext;
-  modulePath: string;
+  environment: string;
+  region: string;
+  module: string;
 }): Promise<void | CLIError> {
 
-  await terragruntInit({
-    context,
-    workingDirectory: modulePath,
-  });
-
-  return terragruntApply({
-    context,
-    workingDirectory: modulePath,
-  });
+  await terragruntInit(inputs);
+  return terragruntApply(inputs);
 }

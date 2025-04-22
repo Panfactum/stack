@@ -2,16 +2,19 @@ import {stringify} from "yaml";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { CLIError } from "../error/error";
 import type { TGConfigFile } from "./schemas";
+import { writeFile } from "../fs/writeFile";
+import type { PanfactumContext } from "@/context/context";
 
 interface UpsertConfigValuesInput {
+    context: PanfactumContext;
     values: TGConfigFile
     filePath: string
 }
 
 export async function upsertConfigValues(input: UpsertConfigValuesInput){
-    const {values, filePath} = input;
+    const {values, filePath, context} = input;
 
-    const existingValues = await getConfigValuesFromFile(filePath)
+    const existingValues = await getConfigValuesFromFile(input)
     const yamlOpts = {
         doubleQuotedAsJSON: true,
       }
@@ -31,7 +34,12 @@ export async function upsertConfigValues(input: UpsertConfigValuesInput){
                  }
             }, yamlOpts))
         }else{
-            await Bun.write(filePath, stringify(values, yamlOpts))
+            await writeFile({
+                contents: stringify(values, yamlOpts),
+                path: filePath,
+                overwrite: true,
+                context
+            })
         }
     } catch (e) {
         throw new CLIError(`Failed to write new config values to ${filePath}`, e)

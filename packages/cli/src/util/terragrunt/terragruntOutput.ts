@@ -2,43 +2,65 @@ import { z, ZodError } from "zod";
 import { CLIError, PanfactumZodError } from "../error/error";
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
+import {join} from "node:path"
+import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 
 export const terragruntOutput = async <T extends z.ZodType<object>>({
   awsProfile,
   context,
-  modulePath,
+  environment,
+  region,
+  module,
   validationSchema,
 }: {
-  awsProfile: string;
+  awsProfile?: string;
   context: PanfactumContext;
-  modulePath: string;
+  environment: string;
+  region: string;
+  module: string;
   validationSchema: T;
 }) => {
-  const { exitCode } = await execute({
-    command: ["aws", "sts", "get-caller-identity", "--profile", awsProfile],
-    workingDirectory: modulePath,
-    context,
-  });
 
-  if (exitCode !== 0) {
-    context.logger.log(
-      `Not logged in to AWS with profile ${awsProfile}. Logging you in...`
-    );
+  const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
+
+
+  if(!awsProfile){
+    const config = await getPanfactumConfig({context, directory: workingDirectory})
+    awsProfile = config.aws_profile
+  }
+
+  if(awsProfile){
     const { exitCode } = await execute({
       command: ["aws", "sts", "get-caller-identity", "--profile", awsProfile],
-      workingDirectory: modulePath,
+      workingDirectory,
       context,
-      errorMessage: `Not logged in to AWS with profile ${awsProfile}.`,
     });
-
+  
     if (exitCode !== 0) {
-      throw new CLIError(`Unable to log in to AWS with profile ${awsProfile}.`);
+      context.logger.log(
+        `Not logged in to AWS with profile ${awsProfile}. Logging you in...`
+      );
+      const { exitCode } = await execute({
+        command: ["aws", "sts", "get-caller-identity", "--profile", awsProfile],
+        workingDirectory,
+        context,
+        errorMessage: `Not logged in to AWS with profile ${awsProfile}.`,
+      });
+  
+      if (exitCode !== 0) {
+        throw new CLIError(`Unable to log in to AWS with profile ${awsProfile}.`);
+      }
     }
   }
 
   const { stdout } = await execute({
-    command: ["terragrunt", "output", "--json"],
-    workingDirectory: modulePath,
+    command: [
+      "terragrunt",
+       "output",
+        "--json",
+         "--terragrunt-non-interactive"
+        ],
+    workingDirectory,
     context,
     errorMessage: "Failed to get outputs from infrastructure module",
   });
@@ -49,12 +71,12 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
     if (e instanceof ZodError) {
       throw new PanfactumZodError(
         `Unexpected outputs from infrastructure module`,
-        modulePath,
+        workingDirectory,
         e
       );
     } else {
       throw new CLIError(
-        `Unable to parse outputs from infrastructure module at ${modulePath}.`,
+        `Unable to parse outputs from infrastructure module at ${workingDirectory}.`,
         e
       );
     }

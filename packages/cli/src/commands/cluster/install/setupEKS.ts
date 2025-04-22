@@ -68,7 +68,7 @@ export async function setupEKS(options: InstallClusterStepOptions) {
     ...options,
     stepId: "eksDeployment",
     stepName: "EKS Setup",
-    moduleDirectory: "aws_eks",
+    module: "aws_eks",
     terraguntContents:
       slaTarget === 1 ? awsEksSla1Template : awsEksSla2Template,
     stepNum,

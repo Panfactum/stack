@@ -7,9 +7,10 @@ import type { Checkpointer, Step } from "./checkpointer";
 import type { PanfactumContext } from "@/context/context";
 
 export async function deployModule({
-  clusterPath,
   context,
-  moduleDirectory,
+  environment,
+  region,
+  module,
   overwrite = true,
   stepId,
   stepName,
@@ -20,21 +21,21 @@ export async function deployModule({
   hclUpdates,
 }: {
   terraguntContents?: string;
-  clusterPath: string;
   context: PanfactumContext;
-  moduleDirectory: string;
   overwrite?: boolean;
   stepName: string;
   stepNum: number;
   subStepNum?: number;
   checkpointer: Checkpointer;
+  environment: string;
+  region: string;
+  module: string;
   stepId: Step;
   hclUpdates?: {
     [path: string]: string | boolean | number | string[] | number[] | boolean[];
   };
 }) {
-  const modulePath = join(clusterPath, moduleDirectory);
-  const hclFile = join(modulePath, "terragrunt.hcl");
+  const hclFile = join(context.repoVariables.environments_dir, environment, region, module, "terragrunt.hcl");
 
   if (await checkpointer.isStepComplete(stepId)) {
     informStepComplete(context, stepName, stepNum, subStepNum);
@@ -57,7 +58,9 @@ export async function deployModule({
 
     await terragruntInitAndApply({
       context,
-      modulePath,
+      environment,
+      region,
+      module
     });
 
     await checkpointer.setStepComplete(stepId);
