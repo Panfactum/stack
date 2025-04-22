@@ -4,6 +4,12 @@ variable "namespace" {
   default     = "airbyte"
 }
 
+variable "vault_address" {
+  description = "The address of the Vault server"
+  type        = string
+  default     = "http://vault-active.vault.svc.cluster.local:8200"
+}
+
 variable "helm_timeout_seconds" {
   description = "The timeout in seconds for Helm operations"
   type        = number
@@ -270,8 +276,8 @@ variable "jobs_cpu_min_millicores" {
   default     = 100
 }
 
-variable "jobs_env_env" {
-  description = "Additional environment variables for Airbyte jobs configuration (e.g. SYNC_JOB_MAX_ATTEMPTS, JOB_MAIN_CONTAINER_MEMORY_LIMIT, etc.) https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs"
+variable "global_env" {
+  description = "Additional global environment variables for [Airbyte configuration](https://docs.airbyte.com/operator-guides/configuring-airbyte)"
   type        = map(string)
   default     = {}
 }
@@ -285,7 +291,7 @@ variable "jobs_sync_job_retries_complete_failures_max_successive" {
 variable "jobs_sync_job_retries_complete_failures_max_total" {
   description = "Defines the max number of attempts in which no data was synchronized before failing the job."
   type        = number
-  default     = 30
+  default     = 9
 }
 
 variable "jobs_sync_job_retries_complete_failures_backoff_min_interval_s" {
@@ -315,7 +321,7 @@ variable "jobs_sync_job_retries_partial_failures_max_successive" {
 variable "jobs_sync_job_retries_partial_failures_max_total" {
   description = "Defines the max number of attempts in which some data was synchronized before failing the job."
   type        = number
-  default     = 30
+  default     = 9
 }
 
 variable "jobs_sync_max_timeout_days" {
@@ -360,6 +366,31 @@ variable "worker_min_cpu_millicores" {
   default     = 100
 }
 
+variable "worker_discovery_refresh_window_minutes" {
+  description = "The minimum number of minutes Airbyte will wait to refresh a schema. By setting a larger number, you delay automatic schema refreshes and improve sync performance. The lowest interval you can set is 1 (once per minute). Set this to 0 to disable automatic schema refreshes."
+  type        = number
+  default     = 15
+}
+
+variable "worker_env" {
+  description = "Additional env for the worker container"
+  type        = map(string)
+  default     = {}
+}
+
+variable "worker_max_check_workers" {
+  description = "Maximum amount of check instances to be running"
+  type        = number
+  default     = 5
+}
+
+variable "worker_max_sync_workers" {
+  description = "Maximum amount of sync instances to be running"
+  type        = number
+  default     = 10
+}
+
+
 variable "temporal_min_memory_mb" {
   description = "Memory request for temporal containers"
   type        = number
@@ -382,6 +413,18 @@ variable "temporal_db_max_conns" {
   description = "Maximum number of connections for Temporal database (SQL_MAX_CONNS)"
   type        = number
   default     = 100 # Higher than max_idle_conns, as recommended
+}
+
+variable "temporal_env" {
+  description = "Additional temporal env variables"
+  type        = map(string)
+  default     = {}
+}
+
+variable "temporal_history_retention_in_days" {
+  description = "TEMPORAL_HISTORY_RETENTION_IN_DAYS"
+  type        = number
+  default     = 30
 }
 
 variable "connector_min_builder_memory_mb" {
@@ -459,4 +502,16 @@ variable "connected_s3_bucket_arns" {
   description = "List of S3 bucket ARNs that airbyte will use as connector destinations"
   type        = list(string)
   default     = []
+}
+
+variable "launcher_env" {
+  description = "Additional env vars for the launcher container"
+  type        = map(string)
+  default     = {}
+}
+
+variable "launcher_workload_launcher_parallelism" {
+  description = "Defines the number of jobs that can be started at once."
+  type        = number
+  default     = 10
 }
