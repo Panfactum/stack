@@ -1,25 +1,18 @@
-import { Command, Option } from "clipanion";
+import { Command } from "clipanion";
+import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
-import { hasExistingEnvironments } from "./hasExistingEnvironments";
-import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
-import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
-import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
-import { env } from "bun";
-import { hasExistingAWSInfra } from "./hasExistingAWSInfra";
-import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
-import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
-import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { getEnvironments } from "@/util/config/getEnvironments";
-import { provisionAWSAccount } from "./provisionAWSAccount";
+import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { getEnvironmentName } from "./getEnvironmentName";
+import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
+import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
+import { hasExistingAWSInfra } from "./hasExistingAWSInfra";
+import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
+import { provisionAWSAccount } from "./provisionAWSAccount";
 import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
-import { directoryExists } from "@/util/fs/directoryExist";
-import {join} from "node:path"
+import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
 import { updateIAMIdentityCenter } from "./updateIAMIdentityCenter";
 
-import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
-import { syncAWSIdentityCenter } from "@/util/devshell/syncAWSIdentityCenter";
-import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 
 const DEFAULT_MANAGEMENT_PROFILE =  "management-superuser"
 
@@ -29,7 +22,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
     static override usage = Command.Usage({
         description: "Install a Panfactum environment",
         details:
-            "Executes a guided installation of the automated Panfactum environment installer",
+            "Executes a guided installation of a Panfactum environment",
     });
 
     async execute() {

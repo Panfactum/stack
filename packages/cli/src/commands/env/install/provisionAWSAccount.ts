@@ -1,31 +1,26 @@
-import type { PanfactumContext } from "@/context/context"
-import { directoryExists } from "@/util/fs/directoryExist"
-import { writeFile } from "@/util/fs/writeFile";
-import { terragruntInitAndApply } from "@/util/terragrunt/terragruntInitAndApply";
 import { join } from "node:path"
-import orgHCL from "@/templates/aws_organization.hcl" with { type: "file" };
-import { stringify } from "yaml"
-import { CLIError } from "@/util/error/error";
-import { AWS_ACCOUNT_ALIAS_SCHEMA, AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "./common";
-import { input, search } from '@inquirer/prompts';
+import { CreateUserCommand, AttachUserPolicyCommand, CreateAccessKeyCommand, IAMClient } from "@aws-sdk/client-iam";
+import { ListAccountsCommand, OrganizationsClient } from "@aws-sdk/client-organizations";
+import { STSClient, AssumeRoleCommand } from "@aws-sdk/client-sts";
+import { input } from '@inquirer/prompts';
+import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import { Listr } from "listr2";
 import pc from "picocolors"
 import { z } from "zod";
-import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { ListAccountsCommand, OrganizationsClient } from "@aws-sdk/client-organizations";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
-import { CreateUserCommand, AttachUserPolicyCommand, CreateAccessKeyCommand, IAMClient } from "@aws-sdk/client-iam";
-import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
-import { fileContains } from "@/util/fs/fileContains";
-import { getIdentity } from "@/util/aws/getIdentity";
-import { STSClient, AssumeRoleCommand } from "@aws-sdk/client-sts";
-import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
-import { Listr, type ListrTask } from "listr2";
-import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
-import { applyColors } from "@/util/colors/applyColors";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import orgHCL from "@/templates/aws_organization.hcl" with { type: "file" };
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
+import { getIdentity } from "@/util/aws/getIdentity";
+import { applyColors } from "@/util/colors/applyColors";
+import { CLIError } from "@/util/error/error";
+import { directoryExists } from "@/util/fs/directoryExist"
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
+import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { AWS_ACCOUNT_ALIAS_SCHEMA } from "./common";
+import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
+import type { PanfactumContext } from "@/context/context"
 
 export const AWS_ORG_MODULE = "aws_organization"
 

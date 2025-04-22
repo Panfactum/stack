@@ -221,7 +221,7 @@ module "constants" {
 }
 
 /***************************************
-* Certificates - Used for authentication
+* Certificate Issuer - Used for authentication
 ***************************************/
 
 resource "vault_mount" "opensearch" {

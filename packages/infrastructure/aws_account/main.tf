@@ -75,6 +75,33 @@ resource "aws_account_alternate_contact" "billing" {
 
 
 ###########################################################################
+## Quota Increases
+###########################################################################
+
+// TODO @jack move to aws_account
+resource "aws_servicequotas_service_quota" "cf_origin_request_policy" {
+  provider     = aws.global
+  quota_code   = "L-C3659C43"
+  service_code = "cloudfront"
+  value        = 100
+}
+
+resource "aws_servicequotas_service_quota" "cf_response_header_policy" {
+  provider     = aws.global
+  quota_code   = "L-CF0D4FC5"
+  service_code = "cloudfront"
+  value        = 100
+}
+
+resource "aws_servicequotas_service_quota" "cf_cache_policy" {
+  provider     = aws.global
+  quota_code   = "L-7D134442"
+  service_code = "cloudfront"
+  value        = 100
+}
+
+
+###########################################################################
 ## Create the service linked role for working with spot instances
 ###########################################################################
 

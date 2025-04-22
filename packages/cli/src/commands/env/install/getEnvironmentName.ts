@@ -1,9 +1,9 @@
-import type { PanfactumContext } from "@/context/context";
 import { input } from "@inquirer/prompts";
 import pc from "picocolors";
-import { ENVIRONMENT_NAME_SCHEMA } from "./common";
-import { getEnvironments } from "@/util/config/getEnvironments";
 import { applyColors } from "@/util/colors/applyColors";
+import { getEnvironments } from "@/util/config/getEnvironments";
+import { ENVIRONMENT_NAME_SCHEMA } from "./common";
+import type { PanfactumContext } from "@/context/context";
 
 export async function getEnvironmentName(inputs: { context: PanfactumContext }) {
     const { context } = inputs;

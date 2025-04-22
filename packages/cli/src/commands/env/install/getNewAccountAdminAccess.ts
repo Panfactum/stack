@@ -1,8 +1,7 @@
 import { confirm } from "@inquirer/prompts";
 import pc from "picocolors"
-import terminalLink from 'terminal-link';
-import type { PanfactumContext } from "@/context/context";
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
+import type { PanfactumContext } from "@/context/context";
 
 export async function getNewAccountAdminAccess(inputs: { context: PanfactumContext, type: "management" | "standalone" | "manual-org" }) {
     const { context, type} = inputs

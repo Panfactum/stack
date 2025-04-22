@@ -1,10 +1,10 @@
-import type { PanfactumContext } from "@/context/context";
-import pc from "picocolors";
 import { input, search } from '@inquirer/prompts';
-import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "./common";
-import { z } from "zod";
-import type { PanfactumTaskWrapper } from "@/util/listr/types";
 import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import pc from "picocolors";
+import { z } from "zod";
+import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "./common";
+import type { PanfactumContext } from "@/context/context";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function getPrimaryContactInfo(inputs: {context: PanfactumContext, parentTask: PanfactumTaskWrapper}){
     

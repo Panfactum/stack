@@ -1,20 +1,19 @@
-import type { PanfactumContext } from "@/context/context";
-import type { PanfactumTaskWrapper } from "@/util/listr/types";
-import { Listr, type ListrTask } from "listr2";
-import { terragruntApply } from "../terragruntApply";
-import { terragruntInit } from "../terragruntInit";
-import { CLIError } from "@/util/error/error";
-import { applyColors } from "@/util/colors/applyColors";
-import { fileExists } from "@/util/fs/fileExists";
 import { join } from "node:path"
-import { writeFile } from "@/util/fs/writeFile";
+import { type ListrTask } from "listr2";
+import pc from "picocolors";
 import { z } from "zod";
-import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
+import { applyColors } from "@/util/colors/applyColors";
+import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
 import { fileContains } from "@/util/fs/fileContains";
-import pc from "picocolors";
+import { fileExists } from "@/util/fs/fileExists";
+import { writeFile } from "@/util/fs/writeFile";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
+import { terragruntApply } from "../terragruntApply";
 import { terragruntImport } from "../terragruntImport";
+import { terragruntInit } from "../terragruntInit";
+import type { PanfactumContext } from "@/context/context";
 
 export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
     schema: T;
@@ -23,17 +22,22 @@ export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
     return config;
 }
 
+
+
 export async function buildDeployModuleTask<T extends {}>(inputs: {
     context: PanfactumContext;
     environment: string;
     region: string;
     module: string;
-    initModule?: boolean;
-    hclIfMissing?: string
+    initModule?: boolean; // should init be run
+    hclIfMissing?: string  // contents of the HCL file to create if the module doesn't already exist
     taskTitle?: string;
-    realModuleName?: string;
+    realModuleName?: string; // if the `module` string is different from the Panfactum module to actually deploy (e.g., `sops` => `aws_kms_encryption_key`)
     imports?: {
-        [resourcePath: string]: string | ((ctx: T) => string)
+        [resourcePath: string]: {
+            shouldImport?: ((ctx: T) => Promise<boolean>)
+            resourceId: string | ((ctx: T) => string)
+        }
     }
     inputUpdates?: {
         [inputName: string]: ReturnType<typeof defineInputUpdate<z.ZodType, T>>
@@ -162,10 +166,11 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             // If needed, import the resource before running apply
             //////////////////////////////////////////////////////////////
-            subtasks.add(Object.entries(imports).map(([resourcePath, resourceId]) => {
+            subtasks.add(Object.entries(imports).map(([resourcePath, {resourceId, shouldImport}]) => {
                 const resolvedId = typeof resourceId === "string" ? resourceId : resourceId(ctx)
                 return {
                     title: applyColors(`Import ${resourcePath} ${resolvedId}`, {highlights: [{phrase: resolvedId, style: "subtle"}]}),
+                    enabled: async(ctx) => shouldImport ? await shouldImport(ctx) : true,
                     task: async (_, task) => {
                         task.title = applyColors(`Importing ${resourcePath} ${resolvedId}`, {highlights: [{phrase: resolvedId, style: "subtle"}]})
                         await terragruntImport({

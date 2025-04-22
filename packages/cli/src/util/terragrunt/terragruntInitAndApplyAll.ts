@@ -1,7 +1,7 @@
-import type { CLIError } from "../error/error";
-import type { PanfactumContext } from "@/context/context";
 import { terragruntApplyAll } from "./terragruntApplyAll";
 import { terragruntInitAll } from "./terragruntInitAll";
+import type { CLIError } from "../error/error";
+import type { PanfactumContext } from "@/context/context";
 
 export async function terragruntInitAndApplyAll(inputs: {
   context: PanfactumContext;

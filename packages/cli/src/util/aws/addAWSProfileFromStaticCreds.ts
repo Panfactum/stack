@@ -1,9 +1,9 @@
-import type { PanfactumContext } from "@/context/context";
+import { join } from "node:path"
+import { stringify, parse } from 'ini'
+import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
-import { stringify, parse } from 'ini'
-import { join } from "node:path"
-import { CLIError } from "@/util/error/error";
+import type { PanfactumContext } from "@/context/context";
 
 export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumContext, creds: { secretAccessKey: string, accessKeyId: string }, profile: string }) {
     const {

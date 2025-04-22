@@ -47,39 +47,6 @@ resource "aws_iam_organizations_features" "org" {
 }
 
 ###########################################################################
-## Quota Increases
-###########################################################################
-
-// TODO @jack move to aws_account
-# resource "aws_servicequotas_template" "cf_origin_request_policy" {
-#   provider = aws.global
-#   region = "us-east-1"
-#   quota_code = "L-C3659C43"
-#   service_code = "cloudfront"
-#   value = 100
-# }
-
-# resource "aws_servicequotas_template" "cf_response_header_policy" {
-#   provider = aws.global
-#   region = "us-east-1"
-#   quota_code = "L-CF0D4FC5"
-#   service_code = "cloudfront"
-#   value = 100
-# }
-
-# resource "aws_servicequotas_template" "cf_cache_policy" {
-#   provider = aws.global
-#   region = "us-east-1"
-#   quota_code = "L-7D134442"
-#   service_code = "cloudfront"
-#   value = 100
-# }
-
-# resource "aws_servicequotas_template_association" "quotas" {
-#   provider = aws.global
-# }
-
-###########################################################################
 ## Accounts
 ###########################################################################
 
@@ -163,40 +130,3 @@ resource "aws_account_alternate_contact" "sub" {
 
   depends_on = [aws_organizations_organization.org]
 }
-
-
-# ###########################################################################
-# ## Create the service linked role for working with spot instances
-# ###########################################################################
-
-# resource "aws_iam_service_linked_role" "spot" {
-#   aws_service_name = "spot.amazonaws.com"
-#   description      = "Used by various controllers to launch spot instances"
-#   tags             = data.pf_aws_tags.tags.tags
-# }
-
-# /***************************************
-# * Spot Data Feed
-# * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html
-# ***************************************/
-
-# resource "random_id" "spot_data_feed_bucket_name" {
-#   byte_length = 8
-#   prefix      = "spot-data-"
-# }
-
-# module "data_feed_bucket" {
-#   source      = "../aws_s3_private_bucket"
-#   bucket_name = random_id.spot_data_feed_bucket_name.hex
-#   description = "Spot instance data feed"
-
-#   expire_after_days               = 7
-#   expire_old_versions             = true
-#   intelligent_transitions_enabled = false
-#   acl_enabled                     = true
-# }
-
-# resource "aws_spot_datafeed_subscription" "feed" {
-#   bucket     = module.data_feed_bucket.bucket_name
-#   depends_on = [module.data_feed_bucket]
-# }

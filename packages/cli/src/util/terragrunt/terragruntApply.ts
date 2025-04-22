@@ -1,6 +1,6 @@
+import {join} from "node:path";
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
-import {join} from "node:path";
 
 export async function terragruntApply({
   context,
