@@ -55,10 +55,10 @@ SECRET_KEY="token"
 
 # Create or update the secret using kubectl apply
 echo "Applying secret '$SECRET_NAME' in namespace '$NAMESPACE'..."
-printf "%s" "$CLIENT_TOKEN" | kubectl create secret generic "$SECRET_NAME" \
-  --dry-run=client \
+kubectl create secret generic "$SECRET_NAME" \
   --from-literal="$SECRET_KEY=$CLIENT_TOKEN" \
-  -o yaml | kubectl apply -n "$NAMESPACE" -f -
+  --dry-run=client \
+  -o yaml | kubectl apply --server-side=true -n "$NAMESPACE" -f -
 
 APPLY_RESULT=$?
 echo "Apply result exit code: $APPLY_RESULT" >&2

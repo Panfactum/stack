@@ -577,9 +577,9 @@ module "vault_token_rotator" {
   containers = [
     {
       name                  = "vault-token-rotator"
-      image_registry        = "docker.io"
-      image_repository      = "curlimages/curl"
-      image_tag             = "8.12.1"
+      image_registry        = module.constants.images.devShell.registry
+      image_repository      = module.constants.images.devShell.repository
+      image_tag             = module.constants.images.devShell.tag
       image_pin_enabled     = true
       image_prepull_enabled = false
 
