@@ -1,10 +1,9 @@
 import { IAMClient, ListAttachedUserPoliciesCommand } from "@aws-sdk/client-iam";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { input, password, confirm } from "@inquirer/prompts";
-import pc from "picocolors";
-import type { PanfactumContext } from "@/context/context";
 import { AWS_ACCESS_KEY_ID_SCHEMA, AWS_SECRET_KEY_SCHEMA } from "@/util/aws/schemas";
 import { applyColors } from "@/util/colors/applyColors";
+import type { PanfactumContext } from "@/context/context";
 
 
 export async function getAdminAccessCredentials(context: PanfactumContext): Promise<{accessKeyId: string, secretAccessKey: string}> {

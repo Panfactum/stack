@@ -1,5 +1,5 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
-import { CLIError, CLISubprocessError } from "../error/error";
+import { CLISubprocessError } from "../error/error";
 import { concatStreams } from "../streams/concatStreams";
 import type { PanfactumContext } from "@/context/context";
 

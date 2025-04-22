@@ -6,5 +6,7 @@ export enum MODULES {
     AWS_ORGANIZATION = "aws_organization",
     TF_BOOTSTRAP_RESOURCES = "tf_bootstrap_resources",
     AWS_KMS_ENCRYPT_KEY = "aws_kms_encrypt_key",
-    AWS_ACCOUNT = "aws_account"
+    AWS_ACCOUNT = "aws_account",
+    AWS_EKS = "aws_eks",
+    KUBE_BASTION = "kube_bastion"
 }

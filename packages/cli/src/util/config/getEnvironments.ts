@@ -1,10 +1,9 @@
-import type { PanfactumContext } from "@/context/context";
+import {dirname, basename,join} from "node:path";
 import { Glob } from "bun";
-import {dirname, basename} from "node:path";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { asyncIterMap } from "../asyncIterMap";
 import { CLIError } from "../error/error";
-import {join} from "node:path"
+import type { PanfactumContext } from "@/context/context";
 
 interface EnvironmentMeta {
     path: string; // Absolute path to the directory for the environment

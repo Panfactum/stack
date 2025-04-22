@@ -6,8 +6,11 @@ import type { PanfactumContext } from "../../../context/context";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
 type OutputValues = InputValues & {
-  environment_domain?: string;
-  kube_domain?: string;
+  environment_domain?: string; // the FQDN of the environment
+  kube_domain?: string; // the FQDN of the kubernetes cluster
+  environment_dir?: string; // the environment directory name (as might differ from the environment name)
+  region_dir? : string; // the region directory name (as might differ from region name)
+  module_dir?: string; // the module directory name (as might differ from actual module name)
 };
 
 // WARNING: The order here is extremely important
@@ -140,6 +143,15 @@ export const getPanfactumConfig = async ({
   }
   if (values.environment_domain && values.kube_subdomain) {
     values.kube_domain = `${values.kube_subdomain}.${values.environment_domain}`;
+  }
+  if(parts.length >= 1){
+    values.environment_dir = parts[0]!
+  }
+  if(parts.length >= 2){
+    values.region_dir = parts[1]!
+  }
+  if(parts.length >= 3){
+    values.module_dir = parts[2]!
   }
 
   return values as OutputValues;

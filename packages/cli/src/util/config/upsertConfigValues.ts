@@ -1,8 +1,8 @@
 import {stringify} from "yaml";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { CLIError } from "../error/error";
-import type { TGConfigFile } from "./schemas";
 import { writeFile } from "../fs/writeFile";
+import type { TGConfigFile } from "./schemas";
 import type { PanfactumContext } from "@/context/context";
 
 interface UpsertConfigValuesInput {

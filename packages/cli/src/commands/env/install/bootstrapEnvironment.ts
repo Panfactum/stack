@@ -1,40 +1,32 @@
-import { IAMClient, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand } from "@aws-sdk/client-iam";
-import { search } from "@inquirer/prompts";
 import { join } from "node:path"
-import pc from "picocolors"
+import { GetRoleCommand, IAMClient, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk/client-iam";
+import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { search , input } from "@inquirer/prompts";
+import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import { Listr } from "listr2";
+import { stringify, parse } from "yaml";
+import { z } from "zod";
+import awsAccountHCL from "@/templates/aws_account.hcl" with { type: "file" };
+import sopsHCL from "@/templates/sops.hcl" with { type: "file" };
+import tfBootstrapResourcesHCL from "@/templates/tf_bootstrap_resources.hcl" with { type: "file" };
 import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
+import { applyColors } from "@/util/colors/applyColors";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { AWS_REGIONS } from "@/util/config/schemas";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
 import { fileExists } from "@/util/fs/fileExists";
-import type { PanfactumContext } from "@/context/context";
-import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { writeFile } from "@/util/fs/writeFile";
-import { terragruntInitAndApply } from "@/util/terragrunt/terragruntInitAndApply";
-import tfBootstrapResourcesHCL from "@/templates/tf_bootstrap_resources.hcl" with { type: "file" };
-import sopsHCL from "@/templates/sops.hcl" with { type: "file" };
-import { terragruntInitAll } from "@/util/terragrunt/terragruntInitAll";
-import { terragruntImport } from "@/util/terragrunt/terragruntImport";
-import { terragruntApply } from "@/util/terragrunt/terragruntApply";
-import { replaceHCLValue } from "@/util/terragrunt/replaceHCLValue";
-import { stringify, parse } from "yaml";
-import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import { z } from "zod";
-import { terragruntInit } from "@/util/terragrunt/terragruntInit";
 import { removeDirectory } from "@/util/fs/removeDirectory";
+import { writeFile } from "@/util/fs/writeFile";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
-import { Listr } from "listr2";
-import { applyColors } from "@/util/colors/applyColors";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
-import awsAccountHCL from "@/templates/aws_account.hcl" with { type: "file" };
-import { input } from '@inquirer/prompts';
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { AWS_ACCOUNT_ALIAS_SCHEMA } from "./common";
+import type { PanfactumContext } from "@/context/context";
 
 
 export async function bootstrapEnvironment(inputs: {
@@ -315,7 +307,6 @@ export async function bootstrapEnvironment(inputs: {
                     }
                 }
             }
-
             task.title = applyColors(`Generated unique state bucket name ${ctx.bucketName}`, { highlights: [{ phrase: ctx.bucketName, style: "subtle" }] })
         }
     })
@@ -463,8 +454,12 @@ export async function bootstrapEnvironment(inputs: {
             hclIfMissing: await Bun.file(tfBootstrapResourcesHCL).text(),
             taskTitle: "Deploy IaC state bucket",
             imports: {
-                "aws_s3_bucket.state": (ctx) => ctx.bucketName!,
-                "aws_dynamodb_table.lock": (ctx) => ctx.locktableName!
+                "aws_s3_bucket.state": {
+                    resourceId: (ctx) => ctx.bucketName!
+                },
+                "aws_dynamodb_table.lock": {
+                    resourceId: (ctx) => ctx.locktableName!
+                }
             }
         })
     )
@@ -592,6 +587,35 @@ export async function bootstrapEnvironment(inputs: {
                     schema: z.string(),
                     update: (_, ctx) => ctx.accountId!
                 })
+            },
+            imports: {
+                "aws_iam_service_linked_role.spot": {
+                    shouldImport: async (ctx) => {
+                        const credentials = await getCredsFromFile({ context, profile: ctx.profile! });
+                        try {
+                            const iamClient = new IAMClient({
+                                region: GLOBAL_REGION,
+                                credentials
+                            });
+                            
+                            const getRoleCommand = new GetRoleCommand({
+                                RoleName: 'AWSServiceRoleForEC2Spot'
+                            });
+                            
+                            await iamClient.send(getRoleCommand);
+                            return true;
+                        } catch (error) {
+                            if (error instanceof NoSuchEntityException) {
+                                return false;
+                            } else{
+                                // For any other error, swallow it, just in case we can recover
+                                context.logger.log(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`, {level: "debug"})
+                                return false;
+                            }
+                        }
+                    },
+                    resourceId: (ctx) => `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
+                }
             }
         })
     )

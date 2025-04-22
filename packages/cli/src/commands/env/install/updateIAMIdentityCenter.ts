@@ -1,26 +1,20 @@
-import type { PanfactumContext } from "@/context/context";
-import { getIdentity } from "@/util/aws/getIdentity";
-import { fileContains } from "@/util/fs/fileContains";
 import { join } from "node:path"
-import { directoryExists } from "@/util/fs/directoryExist";
-import { CLIError } from "@/util/error/error";
-import { checkbox } from "@inquirer/prompts";
-import pc from "picocolors";
-import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { z } from "zod";
-import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import { terragruntInitAndApply } from "@/util/terragrunt/terragruntInitAndApply";
-import { parse } from "ini"
-import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
-import { syncAWSIdentityCenter } from "@/util/devshell/syncAWSIdentityCenter";
-import { Listr } from 'listr2'
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
-import type { PanfactumTaskWrapper } from "@/util/listr/types";
-import { applyColors } from "@/util/colors/applyColors";
-import { env } from "node:process";
-import { addTaskListAsSubtask, buildDeployModuleTask, defineInputUpdate, getDeployModuleTasks } from "@/util/terragrunt/tasks/deployModuleTask";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { DeleteAccessKeyCommand, IAMClient } from "@aws-sdk/client-iam";
+import { checkbox } from "@inquirer/prompts";
+import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import { Listr } from 'listr2'
+import pc from "picocolors";
+import { z } from "zod";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { getIdentity } from "@/util/aws/getIdentity";
+import { applyColors } from "@/util/colors/applyColors";
+import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
+import { CLIError } from "@/util/error/error";
+import { directoryExists } from "@/util/fs/directoryExist";
+import { fileContains } from "@/util/fs/fileContains";
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
+import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import type { PanfactumContext } from "@/context/context";
 
 
 interface TaskContext {
@@ -209,22 +203,7 @@ export async function updateIAMIdentityCenter(inputs: {
                 })
             }
         }),
-        {
-            title: `Sync AWS Identity Center updates to DevShell`,
-            task: (_, task) => {
-                task.title = "Syncing AWS Identity Center updates to DevShell"
-                return syncAWSIdentityCenter({
-                    context,
-                    subtaskConfig: {
-                        parentTask: task as PanfactumTaskWrapper,
-                        onComplete: () => {
-                            task.title = "DevShell synced"
-                        }
-
-                    }
-                })
-            }
-        },
+        await buildSyncAWSIdentityCenterTask({context}),
         {
             title: applyColors(`Revoke static IAM credentials ${creds?.accessKeyId}`, {highlights: [{phrase: creds!.accessKeyId, style: "subtle"}]}),
             enabled: () => Boolean(creds?.accessKeyId),

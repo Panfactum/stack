@@ -1,6 +1,6 @@
 import { select } from "@inquirer/prompts";
-import type { PanfactumContext } from "@/context/context";
 import pc from "picocolors"
+import type { PanfactumContext } from "@/context/context";
 
 export async function hasExistingAWSInfra(_: PanfactumContext): Promise<boolean> {
     return select({

@@ -1,11 +1,10 @@
-import type { PanfactumContext } from "@/context/context"
-import { input } from "@inquirer/prompts"
-import { fileExists } from "../fs/fileExists"
 import {join} from "node:path"
 import {parse} from "ini"
 import { z, ZodError } from "zod"
 import { AWS_ACCESS_KEY_ID_SCHEMA, AWS_SECRET_KEY_SCHEMA } from "./schemas"
 import { CLIError, PanfactumZodError } from "../error/error"
+import { fileExists } from "../fs/fileExists"
+import type { PanfactumContext } from "@/context/context"
 
 type CredsPayload =  {
     accessKeyId: string;
