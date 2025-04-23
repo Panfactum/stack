@@ -682,3 +682,17 @@ resource "aws_route53_record" "cdn" {
     zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
   }
 }
+
+resource "aws_route53_record" "cdn_ipv6" {
+  for_each = toset(var.domains)
+
+  allow_overwrite = true
+  name            = each.key
+  type            = "AAAA"
+  zone_id         = local.domain_to_zone[each.key]
+  alias {
+    evaluate_target_health = false
+    name                   = aws_cloudfront_distribution.cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
+  }
+}
