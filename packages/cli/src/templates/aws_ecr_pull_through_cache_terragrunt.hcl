@@ -13,8 +13,6 @@ locals {
 }
 
 inputs = {
-  docker_hub_username     = ""
   docker_hub_access_token = local.secrets.docker_hub_access_token
-  github_username         = ""
   github_access_token     = local.secrets.github_access_token
 }

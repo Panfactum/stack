@@ -12,8 +12,4 @@ dependency "ebs_csi" {
   skip_outputs = true
 }
 
-inputs = {
-  ingress_enabled = false
-  vault_domain    = ""
-  wait            = false
-}
+inputs = {}

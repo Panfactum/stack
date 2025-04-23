@@ -1,14 +1,21 @@
 import { join } from "path";
-import pc from "picocolors";
+import { Listr } from "listr2";
 import { z } from "zod";
 import kubeVaultTemplate from "@/templates/kube_vault_terragrunt.hcl" with { type: "file" };
+import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
+import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
-import { replaceHCLValue } from "@/util/terragrunt/replaceHCLValue";
-import { deployModule } from "./deployModule";
-import { informStepComplete, informStepStart } from "./messages";
+import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
+import { startVaultProxy } from "@/util/subprocess/vaultProxy";
+import { MODULES } from "@/util/terragrunt/constants";
+import {
+  buildDeployModuleTask,
+  defineInputUpdate,
+} from "@/util/terragrunt/tasks/deployModuleTask";
+import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 
 const RECOVER_KEYS_SCHEMA = z.object({
@@ -47,208 +54,268 @@ const UNSEAL_OUTPUT_SCHEMA = z.object({
   raft_applied_index: z.number(),
 });
 
-export async function setupVault(options: InstallClusterStepOptions) {
-  const { checkpointer, clusterPath, context, kubeDomain, stepNum } = options;
+export async function setupVault(
+  options: InstallClusterStepOptions,
+  completed: boolean
+) {
+  const { awsProfile, context, environment, clusterPath, kubeDomain, region } =
+    options;
 
-  const modulePath = join(clusterPath, "kube_vault");
-  const hclFile = join(modulePath, "terragrunt.hcl");
-  const secretsPath = join(modulePath, "secrets.yaml");
-
-  /***************************************************
-   * Deploy the Vault Module
-   ***************************************************/
   const vaultDomain = `vault.${kubeDomain}`;
-  await deployModule({
-    ...options,
-    stepId: "vaultDeployment",
-    stepName: "Vault Deployment",
-    module: "kube_vault",
-    terraguntContents: kubeVaultTemplate,
-    stepNum,
-    subStepNum: 1,
-    hclUpdates: {
-      "inputs.vault_domain": vaultDomain,
-    },
-  });
 
-  checkpointer.updateSavedInput("vaultDomain", vaultDomain);
+  const tasks = new Listr([]);
 
-  /***************************************************
-   * Wait for all Vault pods to start running
-   ***************************************************/
-  const vaultPodsRunning = context.logger.progressMessage(
-    "Checking status of the Vault pods",
-    { interval: 10000 }
-  );
-  const workingDirectory = process.cwd();
-  const command = ["kubectl", "get", "pods", "--all-namespaces", "-o", "json"];
-  await execute({
-    command,
-    context,
-    workingDirectory,
-    errorMessage: "Vault pods failed to start",
-    retries: 20,
-    isSuccess: (result) => {
-      try {
-        const pods = JSON.parse(result.stdout);
-        const podsSchema = z.object({
-          items: z.array(
-            z.object({
-              metadata: z.object({
-                name: z.string(),
-                namespace: z.string(),
-              }),
-              status: z.object({
-                phase: z.string(),
-              }),
-            })
-          ),
-        });
-        const parsedPods = podsSchema.parse(pods);
-        return parsedPods.items.every((pod) => pod.status.phase === "Running");
-      } catch {
-        context.logger.log("Failed to parse Vault pods", {
-          level: "debug",
-          style: "warning",
-        });
-        return false;
+  tasks.add({
+    skip: () => completed,
+    title: "Deploy Vault",
+
+    task: async (_, parentTask) => {
+      interface VaultContext {
+        vaultToken?: string;
+        vaultProxyPid?: number;
+        vaultProxyPort?: number;
       }
-    },
-  });
-  vaultPodsRunning();
-
-  /***************************************************
-   * Initialize Vault
-   ***************************************************/
-  const subStepLabel = "Vault Operator Init";
-  const subStepNumber = 2;
-  const vaultOperatorInitStepId = "vaultOperatorInit";
-  if (await checkpointer.isStepComplete(vaultOperatorInitStepId)) {
-    informStepComplete(context, subStepLabel, stepNum, subStepNumber);
-  } else {
-    informStepStart(context, subStepLabel, stepNum, subStepNumber);
-
-    const vaultOperatorInitCommand = [
-      "kubectl",
-      "exec",
-      "-i",
-      "vault-0",
-      "--namespace=vault",
-      "--",
-      "vault",
-      "operator",
-      "init",
-      "-recovery-shares=1",
-      "-recovery-threshold=1",
-      "-format=json",
-    ];
-    let recoveryKeys: z.infer<typeof RECOVER_KEYS_SCHEMA>;
-    try {
-      const { stdout } = await execute({
-        command: vaultOperatorInitCommand,
-        context,
-        workingDirectory,
-        errorMessage: "Failed to initialize vault",
-      });
-
-      context.logger.log("vault operator init: " + stdout, { level: "debug" });
-
-      const data = JSON.parse(stdout.trim());
-      recoveryKeys = RECOVER_KEYS_SCHEMA.parse(data);
-    } catch (error) {
-      parseErrorHandler({
-        error,
-        zodErrorMessage: "Failed to parse vault operator init",
-        genericErrorMessage: "Unable to parse outputs from vault operator init",
-        command: vaultOperatorInitCommand.join(" "),
-      });
-    }
-
-    let vaultUnsealCommand: string[] = [];
-    try {
-      let sealedStatus = true;
-      for (const key of recoveryKeys!.recovery_keys_hex) {
-        vaultUnsealCommand = [
-          "kubectl",
-          "exec",
-          "-i",
-          "vault-0",
-          "--namespace=vault",
-          "--",
-          "vault",
-          "operator",
-          "unseal",
-          "-format=json",
-          key,
-        ];
-        const { stdout } = await execute({
-          command: vaultUnsealCommand,
-          context,
-          workingDirectory,
-          errorMessage: "Failed to unseal Vault",
-        });
-
-        const statusData = JSON.parse(stdout.trim());
-        const unsealOutput = UNSEAL_OUTPUT_SCHEMA.parse(statusData);
-        sealedStatus = unsealOutput.sealed;
-        if (!sealedStatus) {
-          context.logger.log("Vault successfully unsealed", {
-            leadingNewlines: 1,
-            style: "success",
-          });
-          break;
-        }
-      }
-
-      if (sealedStatus) {
-        context.logger.log(
-          "Failed to unseal Vault after applying all recovery keys",
-          { level: "error" }
-        );
-        throw new CLIError(
-          "Failed to unseal Vault after applying all recovery keys"
-        );
-      }
-
-      await replaceHCLValue(hclFile, "inputs.wait", true);
-
-      checkpointer.updateSavedInput("vaultRootToken", recoveryKeys!.root_token);
-      checkpointer.updateSavedInput("vaultAddress", "http://127.0.0.1:8200");
-
-      await sopsUpsert({
-        values: {
-          root_token: recoveryKeys!.root_token,
-          recovery_keys: recoveryKeys!.recovery_keys_hex.map((key) => key),
-        },
-        context,
-        filePath: secretsPath,
-      });
-
-      context.logger.log(
-        [
-          pc.bold("NOTE: "),
-          "The recovery keys and root token have been encrypted and saved in the kube_vault folder.",
-          "The root token allows root access to the vault instance.",
-          `These keys ${pc.bold("SHOULD NOT")} be left here.`,
-          "Decide how your organization recommends superusers store these keys.",
-          `This should ${pc.bold("not")} be in a location that is accessible by all superusers (e.g. a company password vault).`,
-        ],
+      return parentTask.newListr<VaultContext>([
         {
-          trailingNewlines: 1,
-        }
-      );
+          title: "Verify access",
+          task: async () => {
+            await getIdentity({ context, profile: awsProfile });
+          },
+        },
+        await buildDeployModuleTask({
+          context,
+          environment,
+          region,
+          module: MODULES.KUBE_VAULT,
+          initModule: true,
+          hclIfMissing: kubeVaultTemplate,
+          inputUpdates: {
+            vault_domain: defineInputUpdate({
+              schema: z.string(),
+              update: () => vaultDomain,
+            }),
+            wait: defineInputUpdate({
+              schema: z.boolean(),
+              update: () => false,
+            }),
+            ingress_enabled: defineInputUpdate({
+              schema: z.boolean(),
+              update: () => false,
+            }),
+          },
+        }),
+        {
+          title: "Checking status of the Vault pods",
+          task: async () => {
+            await execute({
+              command: [
+                "kubectl",
+                "get",
+                "pods",
+                "--all-namespaces",
+                "-o",
+                "json",
+              ],
+              context,
+              workingDirectory: process.cwd(),
+              errorMessage: "Vault pods failed to start",
+              retries: 20,
+              isSuccess: (result) => {
+                try {
+                  const pods = JSON.parse(result.stdout);
+                  const podsSchema = z.object({
+                    items: z.array(
+                      z.object({
+                        metadata: z.object({
+                          name: z.string(),
+                          namespace: z.string(),
+                        }),
+                        status: z.object({
+                          phase: z.string(),
+                        }),
+                      })
+                    ),
+                  });
+                  const parsedPods = podsSchema.parse(pods);
+                  return parsedPods.items.every(
+                    (pod) => pod.status.phase === "Running"
+                  );
+                } catch {
+                  context.logger.log("Failed to parse Vault pods", {
+                    level: "debug",
+                    style: "warning",
+                  });
+                  return false;
+                }
+              },
+            });
+          },
+        },
+        {
+          title: "Vault Operator Initialization",
+          task: async (ctx) => {
+            const modulePath = join(clusterPath, MODULES.KUBE_VAULT);
+            const vaultOperatorInitCommand = [
+              "kubectl",
+              "exec",
+              "-i",
+              "vault-0",
+              "--namespace=vault",
+              "--",
+              "vault",
+              "operator",
+              "init",
+              "-recovery-shares=1",
+              "-recovery-threshold=1",
+              "-format=json",
+            ];
+            let recoveryKeys: z.infer<typeof RECOVER_KEYS_SCHEMA>;
+            try {
+              const { stdout } = await execute({
+                command: vaultOperatorInitCommand,
+                context,
+                workingDirectory: process.cwd(),
+                errorMessage: "Failed to initialize vault",
+              });
 
-      /***************************************************
-       * Mark Finished
-       ***************************************************/
-      await checkpointer.setStepComplete(vaultOperatorInitStepId);
-    } catch (error) {
-      parseErrorHandler({
-        error,
-        zodErrorMessage: "Failed to unseal Vault",
-        genericErrorMessage: "Failed to unseal Vault",
-        command: vaultUnsealCommand.join(" "),
-      });
-    }
-  }
+              const data = JSON.parse(stdout.trim());
+              recoveryKeys = RECOVER_KEYS_SCHEMA.parse(data);
+            } catch (error) {
+              parseErrorHandler({
+                error,
+                zodErrorMessage: "Failed to parse vault operator init",
+                genericErrorMessage:
+                  "Unable to parse outputs from vault operator init",
+                command: vaultOperatorInitCommand.join(" "),
+              });
+            }
+
+            let vaultUnsealCommand: string[] = [];
+            try {
+              let sealedStatus = true;
+              for (const key of recoveryKeys!.recovery_keys_hex) {
+                vaultUnsealCommand = [
+                  "kubectl",
+                  "exec",
+                  "-i",
+                  "vault-0",
+                  "--namespace=vault",
+                  "--",
+                  "vault",
+                  "operator",
+                  "unseal",
+                  "-format=json",
+                  key,
+                ];
+                const { stdout } = await execute({
+                  command: vaultUnsealCommand,
+                  context,
+                  workingDirectory: process.cwd(),
+                  errorMessage: "Failed to unseal Vault",
+                });
+
+                const statusData = JSON.parse(stdout.trim());
+                const unsealOutput = UNSEAL_OUTPUT_SCHEMA.parse(statusData);
+                sealedStatus = unsealOutput.sealed;
+                if (!sealedStatus) {
+                  context.logger.log("Vault successfully unsealed", {
+                    leadingNewlines: 1,
+                    style: "success",
+                  });
+                  break;
+                }
+              }
+
+              if (sealedStatus) {
+                throw new CLIError(
+                  "Failed to unseal Vault after applying all recovery keys"
+                );
+              }
+
+              await updateModuleYAMLFile({
+                context,
+                environment,
+                region,
+                module: MODULES.KUBE_VAULT,
+                inputUpdates: { wait: true },
+              });
+
+              ctx.vaultToken = recoveryKeys!.root_token;
+
+              await sopsUpsert({
+                values: {
+                  root_token: recoveryKeys!.root_token,
+                  recovery_keys: recoveryKeys!.recovery_keys_hex.map(
+                    (key) => key
+                  ),
+                },
+                context,
+                filePath: join(modulePath, "secrets.yaml"),
+              });
+
+              // TODO: @jack how do we want to handle this? - Seth
+              // context.logger.log(
+              //   [
+              //     pc.bold("NOTE: "),
+              //     "The recovery keys and root token have been encrypted and saved in the kube_vault folder.",
+              //     "The root token allows root access to the vault instance.",
+              //     `These keys ${pc.bold("SHOULD NOT")} be left here.`,
+              //     "Decide how your organization recommends superusers store these keys.",
+              //     `This should ${pc.bold("not")} be in a location that is accessible by all superusers (e.g. a company password vault).`,
+              //   ],
+              //   {
+              //     trailingNewlines: 1,
+              //   }
+              // );
+            } catch (error) {
+              parseErrorHandler({
+                error,
+                zodErrorMessage: "Failed to unseal Vault",
+                genericErrorMessage: "Failed to unseal Vault",
+                command: vaultUnsealCommand.join(" "),
+              });
+            }
+          },
+        },
+        {
+          title: "Start Vault Proxy",
+          task: async (ctx) => {
+            const modulePath = join(clusterPath, MODULES.VAULT_CORE_RESOURCES);
+            const env = { ...process.env, VAULT_TOKEN: ctx.vaultToken };
+            const { pid, port } = await startVaultProxy({
+              env,
+              modulePath,
+            });
+            ctx.vaultProxyPid = pid;
+            ctx.vaultProxyPort = port;
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              context,
+              environment,
+              region,
+              module: MODULES.VAULT_CORE_RESOURCES,
+              initModule: true,
+              hclIfMissing: vaultCoreResourcesTemplate,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: ctx.vaultToken,
+              },
+            });
+          },
+        },
+        {
+          title: "Stop Vault Proxy",
+          task: async (ctx) => {
+            if (ctx.vaultProxyPid) {
+              killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+            }
+          },
+        },
+      ]);
+    },
+  });
 }
