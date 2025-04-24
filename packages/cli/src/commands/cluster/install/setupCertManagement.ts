@@ -29,7 +29,7 @@ export async function setupCertManagement(
 
   tasks.add({
     skip: () => completed,
-    title: "Deploy CSI Drivers",
+    title: "Deploy Certificate Management",
     task: async (_, parentTask) => {
       interface Context {
         vaultProxyPid?: number;
@@ -88,6 +88,6 @@ export async function setupCertManagement(
   try {
     await tasks.run();
   } catch (e) {
-    throw new CLIError("Failed to deploy CSI drivers", e);
+    throw new CLIError("Failed to deploy Certificate Management", e);
   }
 }
