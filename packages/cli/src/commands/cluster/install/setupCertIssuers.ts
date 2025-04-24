@@ -69,6 +69,15 @@ export async function setupCertificateIssuers(
                   extra_inputs: z
                     .object({
                       alert_email: z.string().optional(),
+                      route53_zones: z
+                        .record(
+                          z.string(),
+                          z.object({
+                            zone_id: z.string(),
+                            record_manager_role_arn: z.string(),
+                          })
+                        )
+                        .optional(),
                     })
                     .passthrough()
                     .optional()
@@ -156,21 +165,26 @@ export async function setupCertificateIssuers(
                       schema: z.string(),
                       update: (_, ctx) => ctx.alertEmail!,
                     }),
-                    // route53_zones: defineInputUpdate({
-                    //   schema: z.array(z.string()),
-                    //   update: (_, ctx) => ctx.route53Zones!,
-                    // }),
+                    route53_zones: defineInputUpdate({
+                      schema: z
+                        .record(
+                          z.string(),
+                          z.object({
+                            zone_id: z.string(),
+                            record_manager_role_arn: z.string(),
+                          })
+                        )
+                        .optional(),
+                      update: () => ({
+                        "development.panfactum.com": {
+                          zone_id: "Z00914472Z7HO5DHUBPV1",
+                          record_manager_role_arn:
+                            "arn:aws:iam::471112902605:role/route53-record-manager-20240405144117207000000006",
+                        },
+                      }),
+                    }),
                   },
                 }),
-              ],
-              { ctx }
-            );
-          },
-        },
-        {
-          task: async (ctx, task) => {
-            return task.newListr<Context>(
-              [
                 await buildDeployModuleTask<Context>({
                   context,
                   env: {
