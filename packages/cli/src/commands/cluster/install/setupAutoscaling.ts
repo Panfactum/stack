@@ -11,13 +11,13 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
-import { execute } from "@/util/subprocess/execute";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import type { InstallClusterStepOptions } from "./common";
 
 export async function setupAutoscaling(
@@ -67,44 +67,45 @@ export async function setupAutoscaling(
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_METRICS_SERVER,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeMetricsServerTerragruntHcl
-              ).text(),
-            });
-          },
-        },
-        {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_VPA,
-              initModule: true,
-              hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
-            });
-          },
-        },
-        {
-          title: "Applying VPA to all modules",
           task: async (ctx, task) => {
+            return task.newListr<Context>(
+              [
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_METRICS_SERVER,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    kubeMetricsServerTerragruntHcl
+                  ).text(),
+                }),
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_VPA,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
+                }),
+              ],
+              { ctx }
+            );
+          },
+        },
+        {
+          title: "Enabling Vertical Pod Autoscaler",
+          task: async () => {
             await upsertConfigValues({
               context,
               filePath: join(clusterPath, "region.yaml"),
@@ -114,20 +115,20 @@ export async function setupAutoscaling(
                 },
               },
             });
-            await execute({
-              command: [
-                "terragrunt",
-                "run-all",
-                "apply",
-                "--terragrunt-non-interactive",
-              ],
-              workingDirectory: clusterPath,
+          },
+        },
+        {
+          title: "Applying VPA to all modules",
+          task: async (ctx, task) => {
+            await terragruntApplyAll({
+              context,
+              environment,
+              region,
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                 VAULT_TOKEN: vaultRootToken,
               },
-              context,
               task,
             });
           },
@@ -136,87 +137,84 @@ export async function setupAutoscaling(
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_KARPENTER,
-              initModule: true,
-              hclIfMissing: await Bun.file(kubeKarpenterTerragruntHcl).text(),
-            });
-          },
-        },
-        {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_KARPENTER_NODE_POOLS,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeKarpenterNodePoolsTerragruntHcl
-              ).text(),
-              inputUpdates: {
-                node_subnets: defineInputUpdate({
-                  schema: z.array(z.string()),
-                  update: () =>
-                    slaTarget === 1
-                      ? ["PRIVATE_A"]
-                      : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
+          task: async (ctx, task) => {
+            return task.newListr<Context>(
+              [
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_KARPENTER,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    kubeKarpenterTerragruntHcl
+                  ).text(),
                 }),
-              },
-            });
-          },
-        },
-        {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              taskTitle: "EKS NodePools Adjustment",
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.AWS_EKS,
-              inputUpdates: {
-                bootstrap_mode_enabled: defineInputUpdate({
-                  schema: z.boolean(),
-                  update: () => false,
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_KARPENTER_NODE_POOLS,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    kubeKarpenterNodePoolsTerragruntHcl
+                  ).text(),
+                  inputUpdates: {
+                    node_subnets: defineInputUpdate({
+                      schema: z.array(z.string()),
+                      update: () =>
+                        slaTarget === 1
+                          ? ["PRIVATE_A"]
+                          : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
+                    }),
+                  },
                 }),
-              },
-            });
-          },
-        },
-        {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_SCHEDULER,
-              initModule: true,
-              hclIfMissing: await Bun.file(kubeSchedulerTerragruntHcl).text(),
-            });
+                await buildDeployModuleTask({
+                  taskTitle: "EKS NodePools Adjustment",
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.AWS_EKS,
+                  inputUpdates: {
+                    bootstrap_mode_enabled: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => false,
+                    }),
+                  },
+                }),
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_SCHEDULER,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    kubeSchedulerTerragruntHcl
+                  ).text(),
+                }),
+              ],
+              { ctx }
+            );
           },
         },
         {
@@ -231,6 +229,25 @@ export async function setupAutoscaling(
                 },
               },
             });
+          },
+        },
+        {
+          title: "Applying Bin Packing Scheduler to all modules",
+          task: async (ctx, task) => {
+            await terragruntApplyAll({
+              context,
+              environment,
+              region,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              task,
+            });
+          },
+          rendererOptions: {
+            outputBar: 5,
           },
         },
         {

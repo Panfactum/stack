@@ -1,5 +1,6 @@
 import path from "node:path";
 import { input } from "@inquirer/prompts";
+import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
@@ -8,13 +9,18 @@ import awsEksSla2Template from "@/templates/aws_eks_sla_2_terragrunt.hcl" with {
 import { getIdentity } from "@/util/aws/getIdentity";
 import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
+import {
+  buildSyncKubeClustersTask,
+  EKS_MODULE_OUTPUT_SCHEMA,
+} from "@/util/devshell/tasks/syncKubeClustersTask";
 import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
+
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { clusterReset } from "../reset/clusterReset";
 import type { InstallClusterStepOptions } from "./common";
@@ -74,6 +80,7 @@ export async function setupEKS(
           {
             title: "Get EKS configuration",
             task: async (ctx, task) => {
+              const prompt = task.prompt(ListrInquirerPromptAdapter);
               task.output = applyColors(
                 "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer a couple questions",
                 { style: "important" }
@@ -111,7 +118,7 @@ export async function setupEKS(
               }
 
               if (!ctx.clusterName) {
-                ctx.clusterName = await input({
+                ctx.clusterName = await prompt.run(input, {
                   message: pc.magenta(
                     "Enter a name for your Kubernetes cluster:"
                   ),
@@ -132,7 +139,7 @@ export async function setupEKS(
               }
 
               if (!ctx.clusterDescription) {
-                ctx.clusterDescription = await input({
+                ctx.clusterDescription = await prompt.run(input, {
                   message: "Enter a description for your Kubernetes cluster:",
                   required: true,
                   default: `Panfactum Kubernetes cluster in the ${region} region of the ${environment} environment`,
@@ -157,18 +164,22 @@ export async function setupEKS(
             region,
             module: MODULES.AWS_EKS,
             initModule: true,
-            hclIfMissing:
-              slaTarget === 1 ? awsEksSla1Template : awsEksSla2Template,
+            hclIfMissing: await (slaTarget === 1
+              ? Bun.file(awsEksSla1Template).text()
+              : Bun.file(awsEksSla2Template).text()),
             inputUpdates: {
-              "inputs.cluster_name": defineInputUpdate({
+              cluster_name: defineInputUpdate({
                 schema: z.string(),
                 update: (_, ctx) => ctx.clusterName!,
               }),
-              "inputs.cluster_description": defineInputUpdate({
+              cluster_description: defineInputUpdate({
                 schema: z.string(),
                 update: (_, ctx) => ctx.clusterDescription!,
               }),
             },
+          }),
+          await buildSyncKubeClustersTask({
+            context,
           }),
           {
             title: "Reset the cluster",
@@ -186,23 +197,21 @@ export async function setupEKS(
             },
           },
           {
-            title: "Update the Kubernetes configuration files",
-            task: async () => {
-              // TODO: @seth confirm this is the correct task to use
-              await buildSyncAWSIdentityCenterTask({
-                context,
-              });
-            },
-          },
-          {
             title: "Update Configuration File",
             task: async (ctx) => {
+              const moduleOutput = await terragruntOutput({
+                context,
+                environment,
+                region,
+                module: MODULES.AWS_EKS,
+                validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
+              });
               await upsertConfigValues({
                 context,
                 filePath: path.join(clusterPath, "region.yaml"),
                 values: {
                   kube_config_context: ctx.clusterName!,
-                  kube_api_server: "", // FIX: @jack
+                  kube_api_server: moduleOutput.cluster_url.value,
                 },
               });
             },

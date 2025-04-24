@@ -1,22 +1,28 @@
-import {join} from "node:path"
+import { join } from "node:path";
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
 
 export async function terragruntInit({
   context,
+  env,
   environment,
   region,
   module,
-  onLogLine
+  onLogLine,
 }: {
   context: PanfactumContext;
+  env?: Record<string, string | undefined>;
   environment: string;
   region: string;
   module: string;
-  onLogLine?: (line: string) => void
+  onLogLine?: (line: string) => void;
 }) {
-
-  const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
+  const workingDirectory = join(
+    context.repoVariables.environments_dir,
+    environment,
+    region,
+    module
+  );
 
   // Step 1: Init the module and upgrade it's modules
   await execute({
@@ -26,14 +32,15 @@ export async function terragruntInit({
       "-upgrade",
       "-no-color",
       "--terragrunt-non-interactive",
-      "--terragrunt-no-color"
+      "--terragrunt-no-color",
     ],
     context,
+    env,
     workingDirectory,
     errorMessage: "Failed to init infrastructure modules",
     onStdErrNewline: onLogLine,
-    onStdOutNewline: onLogLine
-  })
+    onStdOutNewline: onLogLine,
+  });
 
   // Step 2: Update the platform locks to include all platforms
   await execute({
@@ -47,12 +54,13 @@ export async function terragruntInit({
       "-platform=darwin_amd64",
       "-platform=darwin_arm64",
       "--terragrunt-non-interactive",
-      "--terragrunt-no-color"
+      "--terragrunt-no-color",
     ],
     context,
+    env,
     workingDirectory,
     errorMessage: "Failed to generate locks for module providers",
     onStdErrNewline: onLogLine,
-    onStdOutNewline: onLogLine
-  })
+    onStdOutNewline: onLogLine,
+  });
 }

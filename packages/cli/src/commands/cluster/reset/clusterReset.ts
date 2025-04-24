@@ -154,7 +154,6 @@ export async function clusterReset({
     context,
     workingDirectory: process.cwd(),
   });
-
   // ############################################################
   // ## Step 7: Terminate all nodes so old node-local configuration settings are wiped
   // ############################################################
@@ -180,8 +179,7 @@ export async function clusterReset({
     context,
     workingDirectory: process.cwd(),
   });
-  const instanceIdsArray = instanceIds.split("\n");
-  if (instanceIdsArray.length !== 0) {
+  if (instanceIds.length !== 0) {
     await execute({
       command: [
         "aws",
@@ -192,7 +190,7 @@ export async function clusterReset({
         "ec2",
         "terminate-instances",
         "--instance-ids",
-        instanceIdsArray.join(","),
+        ...instanceIds.trim().split(/\s+/),
       ],
       context,
       workingDirectory: process.cwd(),

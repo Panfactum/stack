@@ -130,56 +130,68 @@ export async function setupCertificateIssuers(
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask<Context>({
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_CERT_ISSUERS,
-              initModule: true,
-              hclIfMissing: ctx.productionEnvironment
-                ? await Bun.file(kubeCertIssuersTerragruntHclProduction).text()
-                : await Bun.file(
-                    kubeCertIssuersTerragruntHclNonProduction
-                  ).text(),
-              inputUpdates: {
-                alert_email: defineInputUpdate({
-                  schema: z.string(),
-                  update: (_, ctx) => ctx.alertEmail!,
+          task: async (ctx, task) => {
+            return task.newListr<Context>(
+              [
+                await buildDeployModuleTask<Context>({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_TOKEN: vaultRootToken,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_CERT_ISSUERS,
+                  initModule: true,
+                  hclIfMissing: ctx.productionEnvironment
+                    ? await Bun.file(
+                        kubeCertIssuersTerragruntHclProduction
+                      ).text()
+                    : await Bun.file(
+                        kubeCertIssuersTerragruntHclNonProduction
+                      ).text(),
+                  inputUpdates: {
+                    alert_email: defineInputUpdate({
+                      schema: z.string(),
+                      update: (_, ctx) => ctx.alertEmail!,
+                    }),
+                    // route53_zones: defineInputUpdate({
+                    //   schema: z.array(z.string()),
+                    //   update: (_, ctx) => ctx.route53Zones!,
+                    // }),
+                  },
                 }),
-                // route53_zones: defineInputUpdate({
-                //   schema: z.array(z.string()),
-                //   update: (_, ctx) => ctx.route53Zones!,
-                // }),
-              },
-            });
+              ],
+              { ctx }
+            );
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask<Context>({
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_CERT_MANAGER,
-              initModule: true,
-              inputUpdates: {
-                self_generated_certs_enabled: defineInputUpdate({
-                  schema: z.boolean(),
-                  update: () => false,
+          task: async (ctx, task) => {
+            return task.newListr<Context>(
+              [
+                await buildDeployModuleTask<Context>({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_TOKEN: vaultRootToken,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_CERT_MANAGER,
+                  initModule: true,
+                  inputUpdates: {
+                    self_generated_certs_enabled: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => false,
+                    }),
+                  },
                 }),
-              },
-            });
+              ],
+              { ctx }
+            );
           },
         },
         {
