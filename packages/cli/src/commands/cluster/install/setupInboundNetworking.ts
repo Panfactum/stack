@@ -44,7 +44,7 @@ export async function setupInboundNetworking(
 
   tasks.add({
     skip: () => completed,
-    title: "Deploy CSI Drivers",
+    title: "Deploy Inbound Networking",
     task: async (_, parentTask) => {
       interface Context {
         vaultDomain?: string;
@@ -217,6 +217,6 @@ export async function setupInboundNetworking(
   try {
     await tasks.run();
   } catch (e) {
-    throw new CLIError("Failed to deploy CSI drivers", e);
+    throw new CLIError("Failed to deploy Inbound Networking", e);
   }
 }
