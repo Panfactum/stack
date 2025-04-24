@@ -157,13 +157,7 @@ export class InstallClusterCommand extends PanfactumCommand {
       sla_target: slaTarget,
     } = config;
 
-    if (
-      !environment ||
-      !region ||
-      !kubeDomain ||
-      !awsProfile ||
-      !environmentDomain
-    ) {
+    if (!environment || !region || !awsProfile || !environmentDomain) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
@@ -198,7 +192,8 @@ export class InstallClusterCommand extends PanfactumCommand {
       environment,
       environmentDomain,
       environmentPath,
-      kubeDomain,
+      // TODO: Remove this once we have a user defined and validated kubeDomain
+      kubeDomain: kubeDomain!,
       region,
       clusterPath,
       slaTarget: confirmedSLATarget,
