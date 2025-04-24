@@ -22,11 +22,7 @@ dependency "vault" {
 }
 
 inputs = {
-  alert_email        = ""
   vault_internal_url = dependency.vault.outputs.vault_internal_url
-
-  route53_zones = {
-  }
 }
 
 

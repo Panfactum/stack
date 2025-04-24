@@ -20,7 +20,6 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
   module: string;
   validationSchema: T;
 }) => {
-
   const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
 
 

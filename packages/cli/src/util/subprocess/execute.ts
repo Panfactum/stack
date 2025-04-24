@@ -1,6 +1,8 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
+import { applyColors } from "../colors/applyColors";
 import { CLISubprocessError } from "../error/error";
 import { concatStreams } from "../streams/concatStreams";
+import type { PanfactumTaskWrapper } from "../listr/types";
 import type { PanfactumContext } from "@/context/context";
 
 type IsSuccessFn = (results: {
@@ -29,6 +31,7 @@ interface ExecInputs {
     | number
     | "inherit"
     | null;
+  task?: PanfactumTaskWrapper;
 }
 
 interface ExecReturn {
@@ -53,10 +56,11 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     onStdErrNewline,
     isSuccess = defaultIsSuccess,
     stdin = null,
+    task,
   } = inputs;
   let logsBuffer = "";
   for (let i = 0; i < retries + 1; i++) {
-    let proc
+    let proc;
     try {
       proc = Bun.spawn(command, {
         cwd: workingDirectory,
@@ -70,7 +74,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         command: command.join(" "),
         subprocessLogs: e instanceof Error ? e.message : String(e),
         workingDirectory,
-      })
+      });
     }
 
     // eslint-disable-next-line prefer-const
@@ -121,7 +125,11 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       stderrCallbackPromise,
     ]);
 
-    context.logger.log(output, { level: "debug" });
+    if (task) {
+      task.output = applyColors(output, { style: "subtle" });
+    } else {
+      context.logger.log(output, { level: "debug" });
+    }
     logsBuffer += output + "\n";
 
     const retValue = {

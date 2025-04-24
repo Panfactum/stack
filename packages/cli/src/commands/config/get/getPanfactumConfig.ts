@@ -9,7 +9,7 @@ type OutputValues = InputValues & {
   environment_domain?: string; // the FQDN of the environment
   kube_domain?: string; // the FQDN of the kubernetes cluster
   environment_dir?: string; // the environment directory name (as might differ from the environment name)
-  region_dir? : string; // the region directory name (as might differ from region name)
+  region_dir?: string; // the region directory name (as might differ from region name)
   module_dir?: string; // the module directory name (as might differ from actual module name)
 };
 
@@ -44,8 +44,8 @@ export const getPanfactumConfig = async ({
       searchPromises.push(
         (async () => {
           const values = await getConfigValuesFromFile({
-            filePath:            join(currentDir, fileName),
-            context
+            filePath: join(currentDir, fileName),
+            context,
           });
           if (values) {
             configFileValues[fileName] = values;
@@ -144,14 +144,14 @@ export const getPanfactumConfig = async ({
   if (values.environment_domain && values.kube_subdomain) {
     values.kube_domain = `${values.kube_subdomain}.${values.environment_domain}`;
   }
-  if(parts.length >= 1){
-    values.environment_dir = parts[0]!
+  if (parts.length >= 1) {
+    values.environment_dir = parts[0]!;
   }
-  if(parts.length >= 2){
-    values.region_dir = parts[1]!
+  if (parts.length >= 2) {
+    values.region_dir = parts[1]!;
   }
-  if(parts.length >= 3){
-    values.module_dir = parts[2]!
+  if (parts.length >= 3) {
+    values.module_dir = parts[2]!;
   }
 
   return values as OutputValues;

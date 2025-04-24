@@ -1,14 +1,15 @@
 import path from "node:path";
 import { z } from "zod";
+import { applyColors } from "@/util/colors/applyColors";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
-import { getInstanceId } from "../../../util/aws/getInstanceId";
+import { execute } from "@/util/subprocess/execute";
+import { MODULES } from "@/util/terragrunt/constants";
 import { getSSMCommandOutput } from "../../../util/aws/getSSMCommandOutput";
-import { runSsmCommand } from "../../../util/aws/runSSMCommand";
 import { scaleASG } from "../../../util/aws/scaleASG";
-import { testVPCNetworkBlocking } from "../../../util/aws/testVPCNetworkBlocking";
 import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
 import type { PanfactumContext } from "../../../context/context";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const AWS_VPC_MODULE_OUTPUTS = z.object({
   test_config: z.object({
@@ -28,11 +29,15 @@ const AWS_VPC_MODULE_OUTPUTS = z.object({
 export const vpcNetworkTest = async ({
   awsProfile,
   context,
-  modulePath,
+  environment,
+  region,
+  task,
 }: {
   awsProfile: string;
   context: PanfactumContext;
-  modulePath: string;
+  environment: string;
+  region: string;
+  task: PanfactumTaskWrapper;
 }) => {
   //####################################################################
   // Step 0: Validation
@@ -41,7 +46,7 @@ export const vpcNetworkTest = async ({
   const awsConfigFile = path.join(awsDir, "config");
 
   if (!(await fileExists(awsConfigFile))) {
-    throw new Error("No AWS config file found.");
+    throw new CLIError("No AWS config file found.");
   }
 
   //####################################################################
@@ -51,7 +56,9 @@ export const vpcNetworkTest = async ({
   const moduleOutputs = await terragruntOutput({
     awsProfile,
     context,
-    modulePath,
+    environment,
+    region,
+    module: MODULES.AWS_VPC,
     validationSchema: AWS_VPC_MODULE_OUTPUTS,
   });
 
@@ -65,7 +72,10 @@ export const vpcNetworkTest = async ({
   try {
     // Run the tests sequentially for all subnets
     for (const subnet of subnets) {
-      context.logger.log(`Running test for subnet: ${subnet.subnet}...`);
+      task.output = applyColors(
+        `Running test for subnet: ${subnet.subnet}...`,
+        { style: "subtle" }
+      );
 
       const asg = subnet.asg;
       const natIp = subnet.nat_ip;
@@ -77,71 +87,83 @@ export const vpcNetworkTest = async ({
         awsRegion,
         context,
         desiredCapacity: 1,
+        task,
       });
 
       // Step 2: Get the instance id
-      const finishGettingInstanceId = context.logger.progressMessage(
-        "Waiting for instance to be created",
-        {
-          interval: 10000,
-        }
-      );
-      let instanceId;
-      try {
-        instanceId = await getInstanceId({
-          asgName: asg,
+      task.output = applyColors("Waiting for instance to be created", {
+        style: "subtle",
+      });
+      const { stdout: instanceId } = await execute({
+        command: [
+          "aws",
+          "--region",
+          awsRegion,
+          "--profile",
           awsProfile,
-          awsRegion: moduleOutputs.test_config.value.region,
-          context,
-        });
-        finishGettingInstanceId();
-      } catch (error) {
-        finishGettingInstanceId();
-        throw error;
-      }
+          "autoscaling",
+          "describe-auto-scaling-groups",
+          "--auto-scaling-group-names",
+          asg,
+          "--query",
+          "AutoScalingGroups[0].Instances[0].InstanceId",
+          "--output",
+          "text",
+        ],
+        context,
+        workingDirectory: process.cwd(),
+        errorMessage: "Failed to get instance ID",
+        retries: 10,
+        retryDelay: 10000,
+        isSuccess({ stdout }) {
+          return stdout !== "None" && stdout !== "";
+        },
+      });
 
       // Step 3: Run the network test
-      const commandHasStarted = context.logger.progressMessage(
+      task.output = applyColors(
         `Waiting for instance ${instanceId} to become ready`,
-        {
-          interval: 5000,
-        }
+        { style: "subtle" }
       );
-      let commandId;
-      try {
-        commandId = await runSsmCommand({
-          instanceId,
-          awsProfile,
+      const { stdout: commandId } = await execute({
+        command: [
+          "aws",
+          "--region",
           awsRegion,
-          context,
-        });
-        commandHasStarted();
-      } catch (error) {
-        commandHasStarted();
-        throw error;
-      }
+          "--profile",
+          awsProfile,
+          "ssm",
+          "send-command",
+          "--instance-ids",
+          instanceId,
+          "--document-name",
+          "AWS-RunShellScript",
+          "--comment",
+          "Get Public IP",
+          "--parameters",
+          'commands=["curl -m 10 ifconfig.me"]',
+          "--query",
+          "Command.CommandId",
+          "--output",
+          "text",
+        ],
+        context,
+        workingDirectory: process.cwd(),
+        errorMessage: `Failed to execute SSM command`,
+        retries: 20,
+      });
 
       // Step 4: Get the result of the network test
-      const gotComamndOutput = context.logger.progressMessage(
-        "Waiting for test to complete",
-        {
-          interval: 5000,
-        }
-      );
-      let publicIp;
-      try {
-        publicIp = await getSSMCommandOutput({
-          commandId,
-          instanceId,
-          awsProfile,
-          awsRegion,
-          context,
-        });
-        gotComamndOutput();
-      } catch (error) {
-        gotComamndOutput();
-        throw error;
-      }
+      task.output = applyColors("Waiting for test to complete", {
+        style: "subtle",
+      });
+      const publicIp = await getSSMCommandOutput({
+        commandId,
+        instanceId,
+        awsProfile,
+        awsRegion,
+        context,
+      });
 
       // Step 5: Ensure the public IP is correct
       if (publicIp !== natIp) {
@@ -149,19 +171,17 @@ export const vpcNetworkTest = async ({
       }
 
       // Step 6: Ensure that the NAT_IP rejects inbound traffic
-      await testVPCNetworkBlocking({
-        natIp,
+      await execute({
+        command: ["ping", "-q", "-w", "3", "-c", "1", natIp],
         context,
+        workingDirectory: process.cwd(),
+        errorMessage: `Network traffic not blocked to ${natIp}!`,
+        isSuccess: ({ stdout }) => stdout.includes("100% packet loss"),
       });
 
-      context.logger.log(
-        `\rTest completed successfully for ${subnet.subnet}.`,
-        {
-          style: "success",
-        }
-      );
-      context.logger.log(
-        "-----------------------------------------------------"
+      task.output = applyColors(
+        `Test completed successfully for ${subnet.subnet}.`,
+        { style: "subtle" }
       );
     }
   } finally {

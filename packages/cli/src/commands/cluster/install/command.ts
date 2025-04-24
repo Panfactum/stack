@@ -1,110 +1,118 @@
-import path from "node:path";
+import path, { join } from "node:path";
 import { Command } from "clipanion";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { CLIError } from "@/util/error/error";
-import { Checkpointer, type Step } from "./checkpointer";
-import { informStepComplete, informStepStart } from "./messages";
+import { directoryExists } from "@/util/fs/directoryExist";
+import { MODULES } from "@/util/terragrunt/constants";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
 import { setupCertificateIssuers } from "./setupCertIssuers";
 import { setupCertManagement } from "./setupCertManagement";
-import { setupCloudNativePG } from "./setupCloudNativePG";
 import { setupCSIDrivers } from "./setupCSIDrivers";
-import { setupECR } from "./setupECR";
 import { setupEKS } from "./setupEKS";
 import { setupInboundNetworking } from "./setupInboundNetworking";
 import { setupInternalClusterNetworking } from "./setupInternalClusterNetworking";
 import { setupLinkerd } from "./setupLinkerd";
-import { setupMaintenanceControllers } from "./setupMaintenanceControllers";
 import { setupPolicyController } from "./setupPolicyController";
+import { setupSupportServices } from "./setupSupportServices";
 import { setupVault } from "./setupVault";
-import { setupVaultCoreResources } from "./setupVaultCoreResources";
-import { setupVPC } from "./setupVPC";
+import { setupVPCandECR } from "./setupVPCandECR";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { InstallClusterStepOptions } from "./common";
 
 const SETUP_STEPS: Array<{
   label: string;
-  id: Step;
-  setup: (options: InstallClusterStepOptions) => Promise<void>;
-  extraInfo?: string;
+  id: string;
+  setup: (
+    options: InstallClusterStepOptions,
+    completed: boolean
+  ) => Promise<void>;
+  completed: boolean;
+  lastModule: MODULES; // Used to determine if the step has been completed
 }> = [
   {
-    label: "AWS VPC",
-    id: "setupVPC",
-    setup: setupVPC,
-  },
-  {
-    label: "AWS ECR Pull Through Cache",
-    id: "setupECRPullThroughCache",
-    setup: setupECR,
+    label: "AWS VPC and ECR",
+    id: "setupVPCandECR",
+    setup: setupVPCandECR,
+    completed: false,
+    lastModule: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
   },
   {
     label: "Base EKS Cluster",
     id: "setupEKS",
     setup: setupEKS,
+    completed: false,
+    lastModule: MODULES.AWS_EKS,
   },
   {
     label: "Internal Cluster Networking",
-    id: "internalClusterNetworking",
+    id: "setupInternalClusterNetworking",
     setup: setupInternalClusterNetworking,
-    extraInfo:
-      "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer a couple questions",
+    completed: false,
+    lastModule: MODULES.KUBE_CORE_DNS,
   },
   {
     label: "Policy Controller",
-    id: "policyController",
+    id: "setupPolicyController",
     setup: setupPolicyController,
+    completed: false,
+    lastModule: MODULES.KUBE_POLICIES,
   },
   {
     label: "CSI Drivers",
-    id: "csiDrivers",
+    id: "setupCSIDrivers",
     setup: setupCSIDrivers,
+    completed: false,
+    lastModule: MODULES.KUBE_AWS_EBS_CSI,
   },
   {
     label: "Vault",
     id: "setupVault",
     setup: setupVault,
-  },
-  {
-    label: "Vault Core Resources",
-    id: "setupVaultCoreResources",
-    setup: setupVaultCoreResources,
+    completed: false,
+    lastModule: MODULES.VAULT_CORE_RESOURCES,
   },
   {
     label: "Certificate Management",
     id: "setupCertManagement",
     setup: setupCertManagement,
+    completed: false,
+    lastModule: MODULES.KUBE_CERT_MANAGER,
   },
   {
     label: "Certificate Issuers",
     id: "setupCertificateIssuers",
     setup: setupCertificateIssuers,
+    completed: false,
+    lastModule: MODULES.KUBE_CERT_ISSUERS,
   },
   {
     label: "Linkerd",
     id: "setupLinkerd",
     setup: setupLinkerd,
+    completed: false,
+    lastModule: MODULES.KUBE_LINKERD,
   },
   {
     label: "Autoscaling",
     id: "setupAutoscaling",
     setup: setupAutoscaling,
+    completed: false,
+    lastModule: MODULES.KUBE_SCHEDULER,
+  },
+  {
+    label: "Support Services",
+    id: "setupSupportServices",
+    setup: setupSupportServices,
+    completed: false,
+    lastModule: MODULES.KUBE_RELOADER,
   },
   {
     label: "Inbound Networking",
     id: "setupInboundNetworking",
     setup: setupInboundNetworking,
-  },
-  {
-    label: "Maintenance Controllers",
-    id: "setupMaintenanceControllers",
-    setup: setupMaintenanceControllers,
-  },
-  {
-    label: "Cloud Native PostgreSQL",
-    id: "setupCloudNativePG",
-    setup: setupCloudNativePG,
+    completed: false,
+    lastModule: MODULES.KUBE_INGRESS_NGINX,
   },
 ];
 
@@ -129,7 +137,6 @@ export class InstallClusterCommand extends PanfactumCommand {
      *
      * Loads the configuration necessary for the installation process
      *******************************************/
-
     const config = await getPanfactumConfig({
       context: this.context,
       directory: process.cwd(),
@@ -143,12 +150,19 @@ export class InstallClusterCommand extends PanfactumCommand {
     const {
       aws_profile: awsProfile,
       environment,
+      environment_domain: environmentDomain,
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
     } = config;
 
-    if (!environment || !region || !kubeDomain || !awsProfile) {
+    if (
+      !environment ||
+      !region ||
+      !kubeDomain ||
+      !awsProfile ||
+      !environmentDomain
+    ) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
@@ -162,25 +176,11 @@ export class InstallClusterCommand extends PanfactumCommand {
     );
     const clusterPath = path.join(environmentPath, region);
 
-    /*******************************************
-     * Checkpointer
-     *
-     * This allows us to skip steps that have already been completed
-     * if this command is resumed
-     *******************************************/
-    const checkpointPath = path.join(
-      clusterPath,
-      ".cluster-install.checkpoint.json"
-    );
-    const checkpointer = new Checkpointer(this.context, checkpointPath);
-
     /***********************************************
      * Confirms the SLA target for the cluster
      ***********************************************/
     const confirmedSLATarget = await setSLA({
-      checkpointer,
       clusterPath,
-      environmentPath,
       context: this.context,
       slaTarget,
     });
@@ -188,38 +188,40 @@ export class InstallClusterCommand extends PanfactumCommand {
     /***********************************************
      * Main Setup Driver
      *
-     * Executes each step in SETUP_STEPS sequentially and provides
-     * checkpointing functionality
+     * Executes each step in SETUP_STEPS sequentially
+     *  and provides checkpointing functionality
      ***********************************************/
-
     const options: InstallClusterStepOptions = {
       awsProfile,
       context: this.context,
       environment,
+      environmentDomain,
       environmentPath,
       kubeDomain,
       region,
-      checkpointer,
       clusterPath,
       slaTarget: confirmedSLATarget,
-      stepNum: 0,
     };
 
-    for (const [i, { setup, id, label, extraInfo }] of SETUP_STEPS.entries()) {
-      const stepNum = i + 1;
-      if (await checkpointer.isStepComplete(id)) {
-        informStepComplete(this.context, label, stepNum);
-      } else {
-        informStepStart(this.context, label, stepNum);
-        try {
-          if (extraInfo) {
-            this.context.logger.log(extraInfo, { style: "important" });
-          }
-          await setup({ ...options, stepNum });
-          await checkpointer.setStepComplete(id);
-        } catch (e) {
-          throw new CLIError(`${label} setup failed`, e);
-        }
+    // Check each step and mark as completed if directory exists
+    for (const step of SETUP_STEPS) {
+      const moduleDir = join(clusterPath, step.lastModule);
+      step.completed = await directoryExists(moduleDir);
+    }
+
+    // Update the last completed module to not completed to re-check it
+    const completedModules = SETUP_STEPS.filter(
+      (step) => step.completed
+    ).length;
+    if (completedModules > 0) {
+      SETUP_STEPS[completedModules - 1]!.completed = false;
+    }
+
+    for (const [_, { setup, label, completed }] of SETUP_STEPS.entries()) {
+      try {
+        await setup({ ...options }, completed);
+      } catch (e) {
+        throw new CLIError(`${label} setup failed`, e);
       }
     }
 
