@@ -8,7 +8,10 @@ import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
-import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
+import {
+  buildDeployModuleTask,
+  defineInputUpdate,
+} from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
 
 export async function setupCertManagement(
@@ -72,6 +75,12 @@ export async function setupCertManagement(
                   module: MODULES.KUBE_CERT_MANAGER,
                   initModule: true,
                   hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
+                  inputUpdates: {
+                    self_generated_certs_enabled: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => true,
+                    }),
+                  },
                 }),
               ],
               { ctx }

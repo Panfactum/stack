@@ -28,6 +28,4 @@ inputs = {
   node_instance_profile  = dependency.cluster.outputs.node_instance_profile
   node_vpc_id            = dependency.vpc.outputs.vpc_id
   node_security_group_id = dependency.cluster.outputs.node_security_group_id
-  node_subnets = [
-  ]
 }

@@ -17,7 +17,4 @@ dependency "kyverno" {
   skip_outputs = true
 }
 
-inputs = {
-  // When bootstrapping, change this to true
-  self_generated_certs_enabled = true
-}
+inputs = {}

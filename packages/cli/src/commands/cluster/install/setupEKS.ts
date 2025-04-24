@@ -176,6 +176,10 @@ export async function setupEKS(
                 schema: z.string(),
                 update: (_, ctx) => ctx.clusterDescription!,
               }),
+              bootstrap_mode_enabled: defineInputUpdate({
+                schema: z.boolean(),
+                update: () => true,
+              }),
             },
           }),
           await buildSyncKubeClustersTask({

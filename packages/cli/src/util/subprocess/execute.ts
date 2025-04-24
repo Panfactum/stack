@@ -42,6 +42,7 @@ interface ExecReturn {
 
 const defaultIsSuccess: IsSuccessFn = ({ exitCode }) => exitCode === 0;
 
+// TODO: Add a way to stream this to the task.output
 export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
   const {
     command,

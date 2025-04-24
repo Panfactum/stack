@@ -18,6 +18,7 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
+import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 
 export async function setupAutoscaling(
@@ -154,7 +155,27 @@ export async function setupAutoscaling(
                   hclIfMissing: await Bun.file(
                     kubeKarpenterTerragruntHcl
                   ).text(),
+                  inputUpdates: {
+                    wait: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => false,
+                    }),
+                  },
                 }),
+                {
+                  title: "Remove Karpenter Bootstrap Variable",
+                  task: async () => {
+                    await updateModuleYAMLFile({
+                      context,
+                      environment,
+                      region,
+                      module: MODULES.KUBE_KARPENTER,
+                      inputUpdates: {
+                        wait: true,
+                      },
+                    });
+                  },
+                },
                 await buildDeployModuleTask({
                   context,
                   env: {
