@@ -15,9 +15,6 @@ inputs = {
   vpc_id     = dependency.aws_vpc.outputs.vpc_id
   egress_ips = dependency.aws_vpc.outputs.nat_ips
 
-  cluster_name        = ""
-  cluster_description = ""
-
   bootstrap_mode_enabled = true # Set this to true when you are completing the bootstrap guide
   node_subnets = [
     "PRIVATE_A",

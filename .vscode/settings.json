@@ -1,8 +1,18 @@
 {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "always"
+    },
+    "editor.formatOnSave": true,
     "eslint.workingDirectories": [
         "./packages/website",
         "./packages/cli"
     ],
+    "eslint.format.enable": true,
+    "eslint.codeActionsOnSave.rules": null,
+    "eslint.validate": ["javascript", "typescript"],
+    "files.associations": {
+        "packages/website/**/*.css": "tailwindcss"
+    },
     "[typescriptreact]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     },
@@ -12,14 +22,15 @@
     "[astro]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "eslint.format.enable": true,
-    "eslint.codeActionsOnSave.rules": null,
-    "files.associations": {
-        "packages/website/**/*.css": "tailwindcss"
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "files.exclude": {
         "**/.git": false
     },
+    "prettier.prettierPath": "./node_modules/prettier",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always",
     "todo-tree.tree.scanMode": "workspace only",
     "todo-tree.general.tags": ["TODO", "@seth", "@jack", "FIX"],
     "todo-tree.regex.subTagRegex": "(@[a-zA-Z0-9]+)",

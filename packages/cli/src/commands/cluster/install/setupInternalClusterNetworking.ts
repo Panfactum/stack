@@ -1,36 +1,54 @@
+import { Listr } from "listr2";
 import kubeCiliumTerragruntHcl from "@/templates/kube_cilium_terragrunt.hcl" with { type: "file" };
 import kubeCoreDnsTerragruntHcl from "@/templates/kube_core_dns_terragrunt.hcl" with { type: "file" };
-import { deployModule } from "./deployModule";
+import { getIdentity } from "@/util/aws/getIdentity";
+import { CLIError } from "@/util/error/error";
+import { MODULES } from "@/util/terragrunt/constants";
+import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
 
 export async function setupInternalClusterNetworking(
-  options: InstallClusterStepOptions
+  options: InstallClusterStepOptions,
+  completed: boolean
 ) {
-  const { stepNum } = options;
+  const { awsProfile, context, environment, region } = options;
 
-  /***************************************************
-   * Deploy the Cilium Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    stepId: "setupCilium",
-    stepName: "Cilium Setup",
-    module: "kube_cilium",
-    terraguntContents: kubeCiliumTerragruntHcl,
-    stepNum,
-    subStepNum: 1,
+  const tasks = new Listr([]);
+
+  tasks.add({
+    skip: () => completed,
+    title: "Deploy Internal Cluster Networking",
+    task: async (_, parentTask) => {
+      return parentTask.newListr([
+        {
+          title: "Verify access",
+          task: async () => {
+            await getIdentity({ context, profile: awsProfile });
+          },
+        },
+        await buildDeployModuleTask({
+          context,
+          environment,
+          region,
+          module: MODULES.KUBE_CILIUM,
+          initModule: true,
+          hclIfMissing: await Bun.file(kubeCiliumTerragruntHcl).text(),
+        }),
+        await buildDeployModuleTask({
+          context,
+          environment,
+          region,
+          module: MODULES.KUBE_CORE_DNS,
+          initModule: true,
+          hclIfMissing: await Bun.file(kubeCoreDnsTerragruntHcl).text(),
+        }),
+      ]);
+    },
   });
 
-  /***************************************************
-   * Deploy the CoreDNS Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    stepId: "setupCoreDNS",
-    stepName: "CoreDNS Setup",
-    module: "kube_core_dns",
-    terraguntContents: kubeCoreDnsTerragruntHcl,
-    stepNum,
-    subStepNum: 2,
-  });
+  try {
+    await tasks.run();
+  } catch (e) {
+    throw new CLIError("Failed to deploy internal cluster networking", e);
+  }
 }

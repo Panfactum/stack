@@ -1,262 +1,253 @@
 import { join } from "node:path";
+import { Listr } from "listr2";
+import { z } from "zod";
 import kubeKarpenterNodePoolsTerragruntHcl from "@/templates/kube_karpenter_node_pools_terragrunt.hcl" with { type: "file" };
 import kubeKarpenterTerragruntHcl from "@/templates/kube_karpenter_terragrunt.hcl" with { type: "file" };
-import kubeKedaTerragruntHcl from "@/templates/kube_keda_terragrunt.hcl" with { type: "file" };
 import kubeMetricsServerTerragruntHcl from "@/templates/kube_metrics_server_terragrunt.hcl" with { type: "file" };
 import kubeSchedulerTerragruntHcl from "@/templates/kube_scheduler_terragrunt.hcl" with { type: "file" };
 import kubeVpaTerragruntHcl from "@/templates/kube_vpa_terragrunt.hcl" with { type: "file" };
+import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { writeFile } from "@/util/fs/writeFile";
-import { killBackgroundProcess } from "@/util/subprocess/backgroundProcess";
+import { CLIError } from "@/util/error/error";
+import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
+import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { execute } from "@/util/subprocess/execute";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
-import { terragruntInitAndApply } from "@/util/terragrunt/terragruntInitAndApply";
-import { deployModule } from "./deployModule";
-import { informStepComplete, informStepStart } from "./messages";
+import { MODULES } from "@/util/terragrunt/constants";
+import {
+  buildDeployModuleTask,
+  defineInputUpdate,
+} from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
 
-export async function setupAutoscaling(options: InstallClusterStepOptions) {
-  const { checkpointer, clusterPath, context, stepNum } = options;
+export async function setupAutoscaling(
+  options: InstallClusterStepOptions,
+  completed: boolean
+) {
+  const { awsProfile, context, environment, clusterPath, region, slaTarget } =
+    options;
 
-  const VAULT_TOKEN = await checkpointer.getSavedInput("vaultRootToken");
-  const VAULT_ADDR = await checkpointer.getSavedInput("vaultAddress");
-  const env = { ...process.env, VAULT_ADDR, VAULT_TOKEN };
+  const tasks = new Listr([]);
 
-  const pid = await startVaultProxy({
-    env,
-    modulePath: clusterPath,
+  const { root_token: vaultRootToken } = await sopsDecrypt({
+    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
+    context,
+    validationSchema: z.object({
+      root_token: z.string(),
+    }),
   });
 
-  /***************************************************
-   * Deploy the Metrics Server Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    subStepNum: 1,
-    stepId: "metricsServerDeployment",
-    stepName: "Metrics Server Deployment",
-    module: "kube_metrics_server",
-    terraguntContents: kubeMetricsServerTerragruntHcl,
-  });
-
-  /***************************************************
-   * Deploy the Vertical Pod Autoscaler Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    subStepNum: 2,
-    stepId: "vpaDeployment",
-    stepName: "Vertical Pod Autoscaler Deployment",
-    module: "kube_vpa",
-    terraguntContents: kubeVpaTerragruntHcl,
-  });
-
-  /***************************************************
-   * Apply the VPA to all modules
-   ***************************************************/
-  const vpaSubStepLabel = "Applying VPA to all modules";
-  const vpaSubStepNumber = 3;
-  const allResourcesUpdatedForVPA = "allResourcesUpdatedForVPA";
-  if (await checkpointer.isStepComplete(allResourcesUpdatedForVPA)) {
-    informStepComplete(context, vpaSubStepLabel, stepNum, vpaSubStepNumber);
-  } else {
-    informStepStart(context, vpaSubStepLabel, stepNum, vpaSubStepNumber);
-
-    await upsertConfigValues({
-      filePath: join(clusterPath, "region.yaml"),
-      values: {
-        extra_inputs: {
-          vpa_enabled: true,
+  tasks.add({
+    skip: () => completed,
+    title: "Deploy Autoscaling",
+    task: async (_, parentTask) => {
+      interface Context {
+        vaultProxyPid?: number;
+        vaultProxyPort?: number;
+      }
+      return parentTask.newListr<Context>([
+        {
+          title: "Verify access",
+          task: async () => {
+            await getIdentity({ context, profile: awsProfile });
+          },
         },
-      },
-    });
-
-    const finishApplyingVPA = context.logger.progressMessage(
-      "Applying VPA to all modules",
-      {
-        interval: 10000,
-      }
-    );
-    await execute({
-      command: [
-        "terragrunt",
-        "run-all",
-        "apply",
-        "--terragrunt-non-interactive",
-      ],
-      workingDirectory: clusterPath,
-      env,
-      context,
-    });
-    finishApplyingVPA();
-
-    await checkpointer.setStepComplete(allResourcesUpdatedForVPA);
-  }
-
-  /***************************************************
-   * Deploy the Karpenter Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    subStepNum: 4,
-    stepId: "karpenterDeployment",
-    stepName: "Karpenter Deployment",
-    module: "kube_karpenter",
-    terraguntContents: kubeKarpenterTerragruntHcl,
-  });
-
-  /***************************************************
-   * Deploy the NodePools Module
-   ***************************************************/
-  const nodePoolsSubStepLabel = "NodePools Deployment";
-  const nodePoolsSubStepNumber = 5;
-  const nodePoolsStepId = "nodePoolsDeployment";
-  if (await checkpointer.isStepComplete(nodePoolsStepId)) {
-    informStepComplete(
-      context,
-      nodePoolsSubStepLabel,
-      stepNum,
-      nodePoolsSubStepNumber
-    );
-  } else {
-    informStepStart(
-      context,
-      nodePoolsSubStepLabel,
-      stepNum,
-      nodePoolsSubStepNumber
-    );
-
-    const hclFilePath = join(
-      clusterPath,
-      "kube_karpenter_node_pools",
-      "terragrunt.hcl"
-    );
-    await writeFile({
-      context,
-      path: hclFilePath,
-      contents: await Bun.file(kubeKarpenterNodePoolsTerragruntHcl).text(),
-      overwrite: true,
-    });
-
-    // TODO: Better HCL templating
-    const nodeSubnets: string[] = [];
-    // Get the subnets from the aws_eks module
-    const eksTerragruntHcl = await Bun.file("./aws_eks/terragrunt.hcl").text();
-    const eksTerragruntHclLines = eksTerragruntHcl.split("\n");
-    let startCopying = false;
-    for (const line of eksTerragruntHclLines) {
-      if (startCopying) {
-        if (line.includes("]")) {
-          break;
-        }
-        nodeSubnets.push(line.replace(",", "").trim());
-      }
-      if (line.includes("node_subnets")) {
-        startCopying = true;
-      }
-    }
-
-    // take in the template HCL and iterate through the subnets writing the subnets
-    // Read existing content
-    const updatedKarpenterNodePoolsTerragruntHclLines: string[] = [];
-    const kubeKarpenterNodepoolsTerragruntHclCopy =
-      await Bun.file(hclFilePath).text();
-    const kubeKarpenterNodepoolsTerragruntHclLines =
-      kubeKarpenterNodepoolsTerragruntHclCopy.split("\n");
-    let writeNodePools = false;
-
-    for (const line of kubeKarpenterNodepoolsTerragruntHclLines) {
-      if (writeNodePools) {
-        // write the new lines in a loop here
-        // set startWriting back to false to conitue
-        // add the raw string as we will call hclfmt on the file later
-        updatedKarpenterNodePoolsTerragruntHclLines.push(
-          nodeSubnets.map((subnet) => `${subnet}`).join(", ")
-        );
-        writeNodePools = false;
-      }
-
-      updatedKarpenterNodePoolsTerragruntHclLines.push(line);
-
-      // We want to insert the subnets after the start of this block
-      if (line.includes("node_subnets")) {
-        writeNodePools = true;
-      }
-    }
-    const updatedKarpenterNodePoolsTerragruntHcl =
-      updatedKarpenterNodePoolsTerragruntHclLines.join("\n");
-
-    // Write the updated template HCL to the file
-    await writeFile({
-      context,
-      path: hclFilePath,
-      contents: updatedKarpenterNodePoolsTerragruntHcl,
-      overwrite: true,
-    });
-
-    // Format the file
-    await execute({
-      command: ["terragrunt", "hclfmt", hclFilePath],
-      workingDirectory: clusterPath,
-      context,
-    });
-
-    // TODO @seth why not deployModule?
-    await terragruntInitAndApply({
-      ...options,
-      module: "kube_karpenter_node_pools",
-    });
-
-    await checkpointer.setStepComplete(nodePoolsStepId);
-  }
-
-  /***************************************************
-   * Adjust the NodePools
-   ***************************************************/
-  await deployModule({
-    ...options,
-    subStepNum: 6,
-    stepId: "adjustNodePools",
-    stepName: "EKS NodePools Adjustment",
-    module: "aws_eks",
-    overwrite: false,
-    hclUpdates: {
-      "inputs.bootstrap_mode_enabled": false,
+        {
+          title: "Start Vault Proxy",
+          task: async (ctx) => {
+            const { pid, port } = await startVaultProxy({
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
+            });
+            ctx.vaultProxyPid = pid;
+            ctx.vaultProxyPort = port;
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_METRICS_SERVER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeMetricsServerTerragruntHcl
+              ).text(),
+            });
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_VPA,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
+            });
+          },
+        },
+        {
+          title: "Applying VPA to all modules",
+          task: async (ctx, task) => {
+            await upsertConfigValues({
+              context,
+              filePath: join(clusterPath, "region.yaml"),
+              values: {
+                extra_inputs: {
+                  vpa_enabled: true,
+                },
+              },
+            });
+            await execute({
+              command: [
+                "terragrunt",
+                "run-all",
+                "apply",
+                "--terragrunt-non-interactive",
+              ],
+              workingDirectory: clusterPath,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              context,
+              task,
+            });
+          },
+          rendererOptions: {
+            outputBar: 5,
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_KARPENTER,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeKarpenterTerragruntHcl).text(),
+            });
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_KARPENTER_NODE_POOLS,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeKarpenterNodePoolsTerragruntHcl
+              ).text(),
+              inputUpdates: {
+                node_subnets: defineInputUpdate({
+                  schema: z.array(z.string()),
+                  update: () =>
+                    slaTarget === 1
+                      ? ["PRIVATE_A"]
+                      : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
+                }),
+              },
+            });
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              taskTitle: "EKS NodePools Adjustment",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.AWS_EKS,
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            });
+          },
+        },
+        {
+          task: async (ctx) => {
+            await buildDeployModuleTask({
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_SCHEDULER,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeSchedulerTerragruntHcl).text(),
+            });
+          },
+        },
+        {
+          title: "Enable Bin Packing Scheduler",
+          task: async () => {
+            await upsertConfigValues({
+              context,
+              filePath: join(clusterPath, "region.yaml"),
+              values: {
+                extra_inputs: {
+                  panfactum_scheduler_enabled: true,
+                },
+              },
+            });
+          },
+        },
+        {
+          title: "Stop Vault Proxy",
+          task: async (ctx) => {
+            if (ctx.vaultProxyPid) {
+              killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+            }
+          },
+        },
+      ]);
     },
   });
 
-  /***************************************************
-   * Deploy the Scheduler Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    subStepNum: 7,
-    stepId: "schedulerDeployment",
-    stepName: "Bin Packing Kubernetes Scheduler Deployment",
-    module: "kube_scheduler",
-    terraguntContents: kubeSchedulerTerragruntHcl,
-  });
-
-  await upsertConfigValues({
-    filePath: join(clusterPath, "region.yaml"),
-    values: {
-      extra_inputs: {
-        panfactum_scheduler_enabled: true,
-      },
-    },
-  });
-
-  /***************************************************
-   * Deploy the KEDA Module
-   ***************************************************/
-  await deployModule({
-    ...options,
-    subStepNum: 8,
-    stepId: "kedaDeployment",
-    stepName: "KEDA Deployment",
-    module: "kube_keda",
-    terraguntContents: kubeKedaTerragruntHcl,
-  });
-
-  killBackgroundProcess({ pid, context });
+  try {
+    await tasks.run();
+  } catch (e) {
+    throw new CLIError("Failed to setup Autoscaling", e);
+  }
 }

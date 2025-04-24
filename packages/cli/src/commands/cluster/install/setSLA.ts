@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import { select, confirm } from "@inquirer/prompts";
 import pc from "picocolors";
+import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import type { Checkpointer } from "./checkpointer";
 import type { PanfactumContext } from "@/context/context";
 import type { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import type { z } from "zod";
@@ -10,18 +10,19 @@ import type { z } from "zod";
 type SlaTarget = z.infer<typeof PANFACTUM_CONFIG_SCHEMA.shape.sla_target>;
 
 export async function setSLA(inputs: {
-  checkpointer: Checkpointer;
   slaTarget: SlaTarget;
   context: PanfactumContext;
-  environmentPath: string;
   clusterPath: string;
 }): Promise<NonNullable<SlaTarget>> {
-  const { slaTarget, context, environmentPath, clusterPath, checkpointer } =
-    inputs;
+  const { slaTarget, context, clusterPath } = inputs;
 
-  const savedSlaTarget = await checkpointer.getSavedInput("slaTarget");
-  if (savedSlaTarget) {
-    return savedSlaTarget as NonNullable<SlaTarget>;
+  const regionConfig = await getConfigValuesFromFile({
+    filePath: join(clusterPath, "region.yaml"),
+    context,
+  });
+
+  if (regionConfig?.sla_target) {
+    return regionConfig.sla_target as NonNullable<SlaTarget>;
   }
 
   let confirmedSLATarget: NonNullable<SlaTarget> = slaTarget ?? 3;
@@ -61,23 +62,13 @@ export async function setSLA(inputs: {
     });
   }
 
-  if (slaTarget === undefined) {
-    await upsertConfigValues({
-      filePath: join(environmentPath, "environment.yaml"),
-      values: {
-        sla_target: confirmedSLATarget,
-      },
-    });
-  } else if (slaTarget !== confirmedSLATarget) {
-    await upsertConfigValues({
-      filePath: join(clusterPath, "region.yaml"),
-      values: {
-        sla_target: confirmedSLATarget,
-      },
-    });
-  }
-
-  await checkpointer.updateSavedInput("slaTarget", confirmedSLATarget);
+  await upsertConfigValues({
+    filePath: join(clusterPath, "region.yaml"),
+    values: {
+      sla_target: confirmedSLATarget,
+    },
+    context,
+  });
 
   return confirmedSLATarget;
 }
