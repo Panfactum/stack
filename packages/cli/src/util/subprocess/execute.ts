@@ -153,7 +153,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
   }
 
   throw new CLISubprocessError(
-    errorMessage ?? `Command failed with execute successfully`,
+    errorMessage ?? `Command failed to execute successfully`,
     {
       command: command.join(" "),
       subprocessLogs: logsBuffer,

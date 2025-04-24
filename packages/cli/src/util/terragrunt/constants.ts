@@ -37,4 +37,8 @@ export enum MODULES {
     KUBE_DESCHEDULER = "kube_descheduler",
     KUBE_CLOUDNATIVE_PG = "kube_cloudnative_pg",
     KUBE_INGRESS_NGINX = "kube_ingress_nginx",
+    AWS_REGISTERED_DOMAINS = "aws_registered_domains",
+    AWS_DNS_ZONES = "aws_dns_zones",
+    AWS_DNS_RECORDS = "aws_dns_records",
+    AWS_DNS_LINKS = "aws_dns_links"
 }

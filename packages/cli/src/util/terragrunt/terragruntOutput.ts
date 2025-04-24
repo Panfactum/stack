@@ -4,6 +4,7 @@ import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { CLIError, PanfactumZodError } from "../error/error";
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
+import { getIdentity } from "../aws/getIdentity";
 
 export const terragruntOutput = async <T extends z.ZodType<object>>({
   awsProfile,
@@ -29,27 +30,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
   }
 
   if(awsProfile){
-    const { exitCode } = await execute({
-      command: ["aws", "sts", "get-caller-identity", "--profile", awsProfile],
-      workingDirectory,
-      context,
-    });
-  
-    if (exitCode !== 0) {
-      context.logger.log(
-        `Not logged in to AWS with profile ${awsProfile}. Logging you in...`
-      );
-      const { exitCode } = await execute({
-        command: ["aws", "sts", "get-caller-identity", "--profile", awsProfile],
-        workingDirectory,
-        context,
-        errorMessage: `Not logged in to AWS with profile ${awsProfile}.`,
-      });
-  
-      if (exitCode !== 0) {
-        throw new CLIError(`Unable to log in to AWS with profile ${awsProfile}.`);
-      }
-    }
+    await getIdentity({context, profile: awsProfile})
   }
 
   const { stdout } = await execute({

@@ -32,8 +32,11 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@aws-sdk/client-account": "^3.794.0",
     "@aws-sdk/client-iam": "^3.787.0",
     "@aws-sdk/client-organizations": "^3.787.0",
+    "@aws-sdk/client-route-53": "^3.787.0",
+    "@aws-sdk/client-route-53-domains": "^3.787.0",
     "@aws-sdk/client-s3": "^3.787.0",
     "@aws-sdk/client-sts": "^3.787.0",
     "@inquirer/prompts": "^7.4.0",
@@ -45,6 +48,7 @@
     "init": "^0.1.2",
     "listr2": "^8.3.2",
     "picocolors": "^1.1.1",
+    "terminal-columns": "^2.0.0",
     "terminal-link": "^4.0.0",
     "typanion": "^3.14.0",
     "yaml": "^2.7.0",

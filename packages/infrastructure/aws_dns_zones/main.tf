@@ -27,12 +27,12 @@ data "pf_aws_tags" "tags" {
 ##########################################################################
 
 resource "aws_route53_delegation_set" "zones" {
-  for_each       = var.domain_names
+  for_each       = var.domains
   reference_name = each.key
 }
 
 resource "aws_route53_zone" "zones" {
-  for_each          = var.domain_names
+  for_each          = var.domains
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
   tags              = data.pf_aws_tags.tags.tags
@@ -54,12 +54,16 @@ module "iam_role" {
 ## DNSSEC Setup
 ##########################################################################
 
+locals {
+  dnssec_zones = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id if var.domains[domain].dnssec_enabled }
+}
+
 module "dnssec" {
-  count  = var.dnssec_enabled ? 1 : 0
+  count  = length(keys(local.dnssec_zones)) > 0 ? 1 : 0
   source = "../aws_dnssec"
   providers = {
     aws.global = aws.global
   }
 
-  hosted_zones = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
+  hosted_zones = local.dnssec_zones
 }

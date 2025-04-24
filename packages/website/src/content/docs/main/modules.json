@@ -51,6 +51,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_dns_links",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
       "module": "aws_dns_records",
       "type": "direct",
       "group": "aws"
