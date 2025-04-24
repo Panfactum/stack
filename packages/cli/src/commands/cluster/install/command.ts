@@ -3,6 +3,7 @@ import { Command } from "clipanion";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist";
+import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import { MODULES } from "@/util/terragrunt/constants";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
@@ -221,6 +222,7 @@ export class InstallClusterCommand extends PanfactumCommand {
       try {
         await setup({ ...options }, completed);
       } catch (e) {
+        killAllBackgroundProcesses({ context: this.context });
         throw new CLIError(`${label} setup failed`, e);
       }
     }

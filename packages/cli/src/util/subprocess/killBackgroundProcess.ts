@@ -18,3 +18,32 @@ export const killBackgroundProcess = ({
     });
   }
 };
+
+export const killAllBackgroundProcesses = ({
+  context,
+}: {
+  context: PanfactumContext;
+}) => {
+  if (BACKGROUND_PROCESS_PIDS.length === 0) {
+    context.logger.log("No background processes to kill", {
+      level: "debug",
+    });
+    return;
+  }
+
+  context.logger.log(
+    `Killing ${BACKGROUND_PROCESS_PIDS.length} background processes`,
+    {
+      level: "debug",
+    }
+  );
+
+  for (const pid of [...BACKGROUND_PROCESS_PIDS]) {
+    killBackgroundProcess({ pid, context });
+    // Remove the pid from the array
+    const index = BACKGROUND_PROCESS_PIDS.indexOf(pid);
+    if (index !== -1) {
+      BACKGROUND_PROCESS_PIDS.splice(index, 1);
+    }
+  }
+};

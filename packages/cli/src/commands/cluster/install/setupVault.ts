@@ -88,7 +88,7 @@ export async function setupVault(
           region,
           module: MODULES.KUBE_VAULT,
           initModule: true,
-          hclIfMissing: kubeVaultTemplate,
+          hclIfMissing: await Bun.file(kubeVaultTemplate).text(),
           inputUpdates: {
             vault_domain: defineInputUpdate({
               schema: z.string(),
@@ -108,18 +108,11 @@ export async function setupVault(
           title: "Checking status of the Vault pods",
           task: async () => {
             await execute({
-              command: [
-                "kubectl",
-                "get",
-                "pods",
-                "--all-namespaces",
-                "-o",
-                "json",
-              ],
+              command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json"],
               context,
               workingDirectory: process.cwd(),
               errorMessage: "Vault pods failed to start",
-              retries: 20,
+              retries: 60,
               isSuccess: (result) => {
                 try {
                   const pods = JSON.parse(result.stdout);
@@ -281,7 +274,10 @@ export async function setupVault(
           title: "Start Vault Proxy",
           task: async (ctx) => {
             const modulePath = join(clusterPath, MODULES.VAULT_CORE_RESOURCES);
-            const env = { ...process.env, VAULT_TOKEN: ctx.vaultToken };
+            const env = {
+              ...process.env,
+              VAULT_TOKEN: ctx.vaultToken,
+            };
             const { pid, port } = await startVaultProxy({
               env,
               modulePath,
@@ -291,20 +287,27 @@ export async function setupVault(
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              environment,
-              region,
-              module: MODULES.VAULT_CORE_RESOURCES,
-              initModule: true,
-              hclIfMissing: vaultCoreResourcesTemplate,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: ctx.vaultToken,
-              },
-            });
+          task: async (ctx, task) => {
+            return task.newListr<VaultContext>(
+              [
+                await buildDeployModuleTask({
+                  context,
+                  environment,
+                  region,
+                  module: MODULES.VAULT_CORE_RESOURCES,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    vaultCoreResourcesTemplate
+                  ).text(),
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: ctx.vaultToken,
+                  },
+                }),
+              ],
+              { ctx }
+            );
           },
         },
         {
@@ -318,4 +321,10 @@ export async function setupVault(
       ]);
     },
   });
+
+  try {
+    await tasks.run();
+  } catch (e) {
+    throw new CLIError("Failed to setup Vault", e);
+  }
 }

@@ -57,20 +57,25 @@ export async function setupCertManagement(
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_CERT_MANAGER,
-              initModule: true,
-              hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
-            });
+          task: async (ctx, task) => {
+            return task.newListr<Context>(
+              [
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_CERT_MANAGER,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
+                }),
+              ],
+              { ctx }
+            );
           },
         },
         {

@@ -35,7 +35,7 @@ export async function setupInboundNetworking(
   const tasks = new Listr([]);
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX, "secrets.yaml"),
+    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
     context,
     validationSchema: z.object({
       root_token: z.string(),
@@ -95,53 +95,54 @@ export async function setupInboundNetworking(
           },
         },
         {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_INGRESS_NGINX,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeNginxIngressTerragruntHcl
-              ).text(),
-              inputUpdates: {
-                ingress_domains: defineInputUpdate({
-                  schema: z.array(z.string()),
-                  update: () => [environmentDomain],
+          task: async (ctx, task) => {
+            return task.newListr<Context>(
+              [
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_INGRESS_NGINX,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    kubeNginxIngressTerragruntHcl
+                  ).text(),
+                  inputUpdates: {
+                    ingress_domains: defineInputUpdate({
+                      schema: z.array(z.string()),
+                      update: () => [environmentDomain],
+                    }),
+                    sla_level: defineInputUpdate({
+                      schema: z.number(),
+                      update: () => slaTarget,
+                    }),
+                  },
                 }),
-                sla_level: defineInputUpdate({
-                  schema: z.number(),
-                  update: () => slaTarget,
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_VAULT,
+                  inputUpdates: {
+                    ingress_enabled: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => true,
+                    }),
+                  },
                 }),
-              },
-            });
-          },
-        },
-        {
-          task: async (ctx) => {
-            await buildDeployModuleTask({
-              context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              module: MODULES.KUBE_VAULT,
-              inputUpdates: {
-                ingress_enabled: defineInputUpdate({
-                  schema: z.boolean(),
-                  update: () => true,
-                }),
-              },
-            });
+              ],
+              { ctx }
+            );
           },
         },
         {
