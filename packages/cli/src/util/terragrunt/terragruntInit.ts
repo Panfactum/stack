@@ -33,6 +33,7 @@ export async function terragruntInit({
       "-no-color",
       "--terragrunt-non-interactive",
       "--terragrunt-no-color",
+      "--terragrunt-provider-cache"
     ],
     context,
     env,
@@ -55,6 +56,8 @@ export async function terragruntInit({
       "-platform=darwin_arm64",
       "--terragrunt-non-interactive",
       "--terragrunt-no-color",
+      "--terragrunt-provider-cache"
+
     ],
     context,
     env,

@@ -207,7 +207,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                 highlights: [{ phrase: resolvedId, style: "subtle" }],
               }),
               enabled: async (ctx) =>
-                shouldImport ? await shouldImport(ctx) : true,
+                shouldImport ? shouldImport(ctx) : true,
               task: async (_, task) => {
                 task.title = applyColors(
                   `Importing ${resourcePath} ${resolvedId}`,

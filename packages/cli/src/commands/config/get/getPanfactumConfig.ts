@@ -2,6 +2,7 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
+import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "../../../context/context";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
@@ -33,13 +34,18 @@ export const getPanfactumConfig = async ({
   context: PanfactumContext;
   directory?: string;
 }): Promise<OutputValues> => {
+  
   // Get the actual file contents for each config file
   const configFileValues: Partial<{
     [fileName in (typeof CONFIG_FILES)[number]]: InputValues;
   }> = {};
   const searchPromises: Array<Promise<void>> = [];
+
+  if(!directory.startsWith("/")){
+    throw new CLIError(`getPanfactumConfig must be called with an absolute path. Given '${directory}'`)
+  }
   let currentDir = directory;
-  while (currentDir !== context.repoVariables.repo_root && currentDir !== "/") {
+  while (currentDir !== context.repoVariables.repo_root && currentDir !== "/" && currentDir !== ".") {
     CONFIG_FILES.forEach((fileName) => {
       searchPromises.push(
         (async () => {
@@ -124,28 +130,20 @@ export const getPanfactumConfig = async ({
   if (values.kube_config_context === undefined) {
     values.kube_config_context = values.kube_name;
   }
-  if (values.kube_subdomain === undefined && values.region !== undefined) {
-    values.kube_subdomain = `${values.region.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}`;
-  }
-  if (
-    values.environment_suddomain === undefined &&
-    values.environment !== undefined
-  ) {
-    values.environment_suddomain = `${values.environment.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}`;
-  }
+
   if (values.version === undefined) {
     values.version = "local";
   }
 
   // Provide computed values
-  if (values.control_plane_domain && values.environment_suddomain) {
-    values.environment_domain = `${values.environment_suddomain}.${values.control_plane_domain}`;
+  if (values.control_plane_domain && values.environment_subdomain) {
+    values.environment_domain = `${values.environment_subdomain}.${values.control_plane_domain}`;
   }
   if (values.environment_domain && values.kube_subdomain) {
     values.kube_domain = `${values.kube_subdomain}.${values.environment_domain}`;
   }
-  if (parts.length >= 1) {
-    values.environment_dir = parts[0]!;
+  if(parts.length >= 1){
+    values.environment_dir = parts[0]!
   }
   if (parts.length >= 2) {
     values.region_dir = parts[1]!;

@@ -57,48 +57,48 @@ resource "aws_route53domains_registered_domain" "domain" {
   }
 
   admin_contact {
-    contact_type      = var.admin_contact_type == "DEFAULT" ? (var.admin_organization_name == null ? "PERSON" : "COMPANY") : var.admin_contact_type
-    organization_name = var.admin_organization_name
-    first_name        = var.admin_first_name
-    last_name         = var.admin_last_name
-    email             = var.admin_email_address
-    phone_number      = var.admin_phone_number
-    address_line_1    = var.admin_address_line_1
-    address_line_2    = var.admin_address_line_2
-    city              = var.admin_city
-    state             = var.admin_state
-    zip_code          = var.admin_zip_code
-    country_code      = var.admin_country_code
+    contact_type      = var.admin_contact.contact_type == "DEFAULT" ? (var.admin_contact.organization_name == null ? "PERSON" : "COMPANY") : var.admin_contact.contact_type
+    organization_name = var.admin_contact.organization_name
+    first_name        = var.admin_contact.first_name
+    last_name         = var.admin_contact.last_name
+    email             = var.admin_contact.email_address
+    phone_number      = var.admin_contact.phone_number
+    address_line_1    = var.admin_contact.address_line_1
+    address_line_2    = var.admin_contact.address_line_2
+    city              = var.admin_contact.city
+    state             = var.admin_contact.state
+    zip_code          = var.admin_contact.zip_code
+    country_code      = var.admin_contact.country_code
   }
 
   tech_contact {
-    contact_type      = var.tech_contact_type == "DEFAULT" ? (var.tech_organization_name == null ? "PERSON" : "COMPANY") : var.tech_contact_type
-    organization_name = var.tech_organization_name
-    first_name        = var.tech_first_name
-    last_name         = var.tech_last_name
-    email             = var.tech_email_address
-    phone_number      = var.tech_phone_number
-    address_line_1    = var.tech_address_line_1
-    address_line_2    = var.tech_address_line_2
-    city              = var.tech_city
-    state             = var.tech_state
-    zip_code          = var.tech_zip_code
-    country_code      = var.tech_country_code
+    contact_type      = var.tech_contact.contact_type == "DEFAULT" ? (var.tech_contact.organization_name == null ? "PERSON" : "COMPANY") : var.tech_contact.contact_type
+    organization_name = var.tech_contact.organization_name
+    first_name        = var.tech_contact.first_name
+    last_name         = var.tech_contact.last_name
+    email             = var.tech_contact.email_address
+    phone_number      = var.tech_contact.phone_number
+    address_line_1    = var.tech_contact.address_line_1
+    address_line_2    = var.tech_contact.address_line_2
+    city              = var.tech_contact.city
+    state             = var.tech_contact.state
+    zip_code          = var.tech_contact.zip_code
+    country_code      = var.tech_contact.country_code
   }
 
   registrant_contact {
-    contact_type      = var.registrant_contact_type == "DEFAULT" ? (var.registrant_organization_name == null ? "PERSON" : "COMPANY") : var.registrant_contact_type
-    organization_name = var.registrant_organization_name
-    first_name        = var.registrant_first_name
-    last_name         = var.registrant_last_name
-    email             = var.registrant_email_address
-    phone_number      = var.registrant_phone_number
-    address_line_1    = var.registrant_address_line_1
-    address_line_2    = var.registrant_address_line_2
-    city              = var.registrant_city
-    state             = var.registrant_state
-    zip_code          = var.registrant_zip_code
-    country_code      = var.registrant_country_code
+    contact_type      = var.registrant_contact.contact_type == "DEFAULT" ? (var.registrant_contact.organization_name == null ? "PERSON" : "COMPANY") : var.registrant_contact.contact_type
+    organization_name = var.registrant_contact.organization_name
+    first_name        = var.registrant_contact.first_name
+    last_name         = var.registrant_contact.last_name
+    email             = var.registrant_contact.email_address
+    phone_number      = var.registrant_contact.phone_number
+    address_line_1    = var.registrant_contact.address_line_1
+    address_line_2    = var.registrant_contact.address_line_2
+    city              = var.registrant_contact.city
+    state             = var.registrant_contact.state
+    zip_code          = var.registrant_contact.zip_code
+    country_code      = var.registrant_contact.country_code
   }
 
   tags = data.pf_aws_tags.tags.tags

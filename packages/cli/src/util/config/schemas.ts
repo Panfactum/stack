@@ -56,6 +56,32 @@ export const BUCKET_NAME_SCHEMA = z.string()
 }, "S3 bucket names must not be formatted as IP addresses")
 
 
+export const DOMAIN = z.string()
+  .regex(/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, "Must be a valid domain name (lowercase)")
+  .refine(domain => {
+    // Check that no label is longer than 63 characters
+    const labels = domain.split('.');
+    return labels.every(label => label.length <= 63);
+  }, "Domain name labels must be 63 characters or less")
+  .refine(domain => {
+    // Check total length doesn't exceed 253 characters
+    return domain.length <= 253;
+  }, "Domain name must be 253 characters or less")
+  .refine(domain => {
+    // Ensure domain is lowercase
+    return domain === domain.toLowerCase();
+  }, "Domain name must be lowercase");
+
+export const SUBDOMAIN = z.string()
+  .regex(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/, "Must be a valid subdomain segment (lowercase)")
+  .refine(subdomain => {
+    // Check that the label is not longer than 63 characters
+    return subdomain.length <= 63;
+  }, "Subdomain must be 63 characters or less")
+  .refine(subdomain => {
+    // Ensure subdomain is lowercase
+    return subdomain === subdomain.toLowerCase();
+  }, "Subdomain must be lowercase");
 
 export const PANFACTUM_CONFIG_SCHEMA = z.object({
   // Global Settings
@@ -67,7 +93,7 @@ export const PANFACTUM_CONFIG_SCHEMA = z.object({
 
   // Environment Settings
   environment: z.string().optional(),
-  environment_suddomain: z.string().optional(),
+  environment_subdomain: SUBDOMAIN.optional(),
 
   // Region Settings
   region: z.string().optional(),

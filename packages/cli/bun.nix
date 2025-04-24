@@ -188,6 +188,17 @@ let
         hash = "sha256-NPQmB7B1bXrBJRy7ifJKkqfLFRHGojl13dkf6i1u970=";
       };
     };
+    "@aws-sdk/client-account" = {
+      out_path = "@aws-sdk/client-account";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-account@3.794.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-account/-/client-account-3.794.0.tgz";
+        hash = "sha256-e1IxKVtcYwRUc7L4tyN7LLiikBeaBPifrfl78vomZ/Q=";
+      };
+    };
     "@aws-sdk/client-iam" = {
       out_path = "@aws-sdk/client-iam";
       binaries =
@@ -208,6 +219,28 @@ let
         name = "@aws-sdk/client-organizations@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-organizations/-/client-organizations-3.787.0.tgz";
         hash = "sha256-mTUNKeQ84H27nnDmLvlviYmftEt+1elfx4v2X4yA47c=";
+      };
+    };
+    "@aws-sdk/client-route-53" = {
+      out_path = "@aws-sdk/client-route-53";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-route-53@3.787.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-route-53/-/client-route-53-3.787.0.tgz";
+        hash = "sha256-ErQqG54zZIxsHZNwVATfE/VDLSHfEUjxNoaeaGWM0ZE=";
+      };
+    };
+    "@aws-sdk/client-route-53-domains" = {
+      out_path = "@aws-sdk/client-route-53-domains";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-route-53-domains@3.787.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-route-53-domains/-/client-route-53-domains-3.787.0.tgz";
+        hash = "sha256-25DU/MievNOEQz4Z9e7tWa0nhW4frUHW7QJ2ofyJ6bM=";
       };
     };
     "@aws-sdk/client-s3" = {
@@ -406,6 +439,17 @@ let
         name = "@aws-sdk/middleware-recursion-detection@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.775.0.tgz";
         hash = "sha256-qR24ULM5EQtKz0LnbGU0mD4sCnZioAw4szdzj3gj2tI=";
+      };
+    };
+    "@aws-sdk/middleware-sdk-route53" = {
+      out_path = "@aws-sdk/middleware-sdk-route53";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/middleware-sdk-route53@3.775.0";
+        url = "https://registry.npmjs.org/@aws-sdk/middleware-sdk-route53/-/middleware-sdk-route53-3.775.0.tgz";
+        hash = "sha256-5NuD2EIv9tHoKvM83vqpqQSoIJkffdAPqqX61Q6KKSs=";
       };
     };
     "@aws-sdk/middleware-sdk-s3" = {
@@ -5356,6 +5400,17 @@ let
         name = "synckit@0.11.2";
         url = "https://registry.npmjs.org/synckit/-/synckit-0.11.2.tgz";
         hash = "sha256-Rt0RvGggA/QKxCgw7KllbxYK9NSwDE5a+YYOTWhxHrs=";
+      };
+    };
+    "terminal-columns" = {
+      out_path = "terminal-columns";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "terminal-columns@2.0.0";
+        url = "https://registry.npmjs.org/terminal-columns/-/terminal-columns-2.0.0.tgz";
+        hash = "sha256-nA+BolqV7PCPMuugaxS2RSUdsbe8gdCax2h8Vp92IQs=";
       };
     };
     "terminal-link" = {

@@ -27,237 +27,90 @@ variable "enable_auto_renew" {
   default     = true
 }
 
-variable "admin_contact_type" {
-  description = "The type of the contact. Defaults to PERSON if admin_organization_name is not provided. Otherwise, defaults to COMPANY."
-  type        = string
-  default     = "DEFAULT"
+variable "admin_contact" {
+  description = "Admin contact information for the domain"
+  type = object({
+    contact_type      = optional(string, "DEFAULT") # The type of the contact. Defaults to PERSON if organization_name is not provided. Otherwise, defaults to COMPANY.
+    organization_name = optional(string)            # The name of the organization that the admin contact works for
+    first_name        = string                      # The first name of the domain admin contact
+    last_name         = string                      # The last name of the domain admin contact
+    email_address     = string                      # The email address of the domain contact
+    phone_number      = string                      # The phone number of the domain contact
+    address_line_1    = string                      # The street address (1) of the domain admin contact
+    address_line_2    = optional(string)            # The street address (2) of the domain admin contact
+    city              = string                      # The city of the domain admin contact
+    state             = string                      # The state or province of the domain admin contact
+    zip_code          = string                      # The ZIP code of the domain admin contact
+    country_code      = string                      # The country code of the domain admin contact
+  })
+  sensitive = true
 
   validation {
-    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.admin_contact_type)
-    error_message = "admin_contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
+    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.admin_contact.contact_type)
+    error_message = "admin_contact.contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
   }
-}
 
-variable "admin_organization_name" {
-  description = "The name of the organization that the admin contact works for"
-  type        = string
-  default     = null
-}
-
-variable "admin_first_name" {
-  description = "The first name of the domain admin contact"
-  type        = string
-}
-
-variable "admin_last_name" {
-  description = "The last name of the domain admin contact"
-  type        = string
-}
-
-variable "admin_email_address" {
-  description = "The email address of the domain contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "admin_phone_number" {
-  description = "The phone number of the domain contact"
-  type        = string
-  sensitive   = true
   validation {
-    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.admin_phone_number)) && length(var.admin_phone_number) <= 30
+    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.admin_contact.phone_number)) && length(var.admin_contact.phone_number) <= 30
     error_message = "The phone number must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890, with a maximum length of 30 characters."
   }
 }
 
-variable "admin_address_line_1" {
-  description = "The street address (1) of the domain admin contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "admin_address_line_2" {
-  description = "The street address (2) of the domain admin contact"
-  type        = string
-  default     = null
-  sensitive   = true
-}
-
-variable "admin_city" {
-  description = "The city of the domain admin contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "admin_state" {
-  description = "The state or province of the domain admin contact"
-  type        = string
-}
-
-variable "admin_zip_code" {
-  description = "The ZIP code of the domain admin contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "admin_country_code" {
-  description = "The country code of the domain admin contact"
-  type        = string
-}
-
-variable "registrant_contact_type" {
-  description = "The type of the contact. Defaults to PERSON if registrant_organization_name is not provided. Otherwise, defaults to COMPANY."
-  type        = string
-  default     = "DEFAULT"
+variable "registrant_contact" {
+  description = "Registrant contact information for the domain"
+  type = object({
+    contact_type      = optional(string, "DEFAULT") # The type of the contact. Defaults to PERSON if organization_name is not provided. Otherwise, defaults to COMPANY.
+    organization_name = optional(string)            # The name of the organization that the registrant contact works for
+    first_name        = string                      # The first name of the domain registrant contact
+    last_name         = string                      # The last name of the domain registrant contact
+    email_address     = string                      # The email address of the domain contact
+    phone_number      = string                      # The phone number of the domain contact
+    address_line_1    = string                      # The street address (1) of the domain registrant contact
+    address_line_2    = optional(string)            # The street address (2) of the domain registrant contact
+    city              = string                      # The city of the domain registrant contact
+    state             = string                      # The state or province of the domain registrant contact
+    zip_code          = string                      # The ZIP code of the domain registrant contact
+    country_code      = string                      # The country code of the domain registrant contact
+  })
+  sensitive = true
 
   validation {
-    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.registrant_contact_type)
-    error_message = "registrant_contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
+    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.registrant_contact.contact_type)
+    error_message = "registrant_contact.contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
   }
-}
 
-variable "registrant_organization_name" {
-  description = "The name of the organization that the registrant contact works for"
-  type        = string
-  default     = null
-}
-
-variable "registrant_first_name" {
-  description = "The first name of the domain registrant contact"
-  type        = string
-}
-
-variable "registrant_last_name" {
-  description = "The last name of the domain registrant contact"
-  type        = string
-}
-
-variable "registrant_email_address" {
-  description = "The email address of the domain contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "registrant_phone_number" {
-  description = "The phone number of the domain contact"
-  type        = string
-  sensitive   = true
   validation {
-    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.registrant_phone_number)) && length(var.registrant_phone_number) <= 30
+    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.registrant_contact.phone_number)) && length(var.registrant_contact.phone_number) <= 30
     error_message = "The phone number must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890, with a maximum length of 30 characters."
   }
 }
 
-variable "registrant_address_line_1" {
-  description = "The street address (1) of the domain registrant contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "registrant_address_line_2" {
-  description = "The street address (2) of the domain registrant contact"
-  type        = string
-  default     = null
-  sensitive   = true
-}
-
-variable "registrant_city" {
-  description = "The city of the domain registrant contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "registrant_state" {
-  description = "The state or province of the domain registrant contact"
-  type        = string
-}
-
-variable "registrant_zip_code" {
-  description = "The ZIP code of the domain registrant contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "registrant_country_code" {
-  description = "The country code of the domain registrant contact"
-  type        = string
-}
-
-variable "tech_organization_name" {
-  description = "The name of the organization that the tech contact works for"
-  type        = string
-  default     = null
-}
-
-variable "tech_contact_type" {
-  description = "The type of the contact. Defaults to PERSON if tech_organization_name is not provided. Otherwise, defaults to COMPANY."
-  type        = string
-  default     = "DEFAULT"
+variable "tech_contact" {
+  description = "Tech contact information for the domain"
+  type = object({
+    contact_type      = optional(string, "DEFAULT") # The type of the contact. Defaults to PERSON if organization_name is not provided. Otherwise, defaults to COMPANY.
+    organization_name = optional(string)            # The name of the organization that the tech contact works for
+    first_name        = string                      # The first name of the domain tech contact
+    last_name         = string                      # The last name of the domain tech contact
+    email_address     = string                      # The email address of the domain contact
+    phone_number      = string                      # The phone number of the domain contact
+    address_line_1    = string                      # The street address (1) of the domain tech contact
+    address_line_2    = optional(string)            # The street address (2) of the domain tech contact
+    city              = string                      # The city of the domain tech contact
+    state             = string                      # The state or province of the domain tech contact
+    zip_code          = string                      # The ZIP code of the domain tech contact
+    country_code      = string                      # The country code of the domain tech contact
+  })
+  sensitive = true
 
   validation {
-    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.tech_contact_type)
-    error_message = "tech_contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
+    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.tech_contact.contact_type)
+    error_message = "tech_contact.contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
   }
-}
 
-variable "tech_first_name" {
-  description = "The first name of the domain tech contact"
-  type        = string
-}
-
-variable "tech_last_name" {
-  description = "The last name of the domain tech contact"
-  type        = string
-}
-
-variable "tech_email_address" {
-  description = "The email address of the domain contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "tech_phone_number" {
-  description = "The phone number of the domain contact"
-  type        = string
-  sensitive   = true
   validation {
-    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.tech_phone_number)) && length(var.tech_phone_number) <= 30
+    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.tech_contact.phone_number)) && length(var.tech_contact.phone_number) <= 30
     error_message = "The phone number must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890, with a maximum length of 30 characters."
   }
-}
-
-variable "tech_address_line_1" {
-  description = "The street address (1) of the domain tech contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "tech_address_line_2" {
-  description = "The street address (2) of the domain tech contact"
-  type        = string
-  default     = null
-  sensitive   = true
-}
-
-variable "tech_city" {
-  description = "The city of the domain tech contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "tech_state" {
-  description = "The state or province of the domain tech contact"
-  type        = string
-}
-
-variable "tech_zip_code" {
-  description = "The ZIP code of the domain tech contact"
-  type        = string
-  sensitive   = true
-}
-
-variable "tech_country_code" {
-  description = "The country code of the domain tech contact"
-  type        = string
 }
 

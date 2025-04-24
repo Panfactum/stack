@@ -5,9 +5,10 @@ import { asyncIterMap } from "../asyncIterMap";
 import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/context/context";
 
-interface EnvironmentMeta {
+export interface EnvironmentMeta {
     path: string; // Absolute path to the directory for the environment
     name: string; // Name of the environment
+    subdomain?: string;
 }
 
 export async function getEnvironments(context: PanfactumContext): Promise<Array<EnvironmentMeta>> {
@@ -17,10 +18,11 @@ export async function getEnvironments(context: PanfactumContext): Promise<Array<
         const filePath = join(context.repoVariables.environments_dir, path)
         const envPath = dirname(filePath);
         try {
-            const {environment} = await getConfigValuesFromFile({filePath: path, context}) || {}
+            const {environment, environment_subdomain: subdomain} = await getConfigValuesFromFile({filePath, context}) || {}
             return {
                 name: environment ?? basename(envPath),
-                path: envPath
+                path: envPath,
+                subdomain
             }
         } catch (e) {
             throw new CLIError("Unable to get environments", e)

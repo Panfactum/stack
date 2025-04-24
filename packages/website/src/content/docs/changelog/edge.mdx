@@ -30,6 +30,12 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
   single objects for each contact as they are no longer strictly required due to the new [aws_organization](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization)
   module.
 
+* The contact information variables on [aws_registered_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) have been consolidated to
+  single objects for each contact to provide better compatibility with the new Panfactum CLI.
+
+* The inputs to [aws_dns_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) have been consolidated to a single
+  `domains` object in order to provide better per-domain granular configuration.
+  
 ### Added
 
 * Adds the [kube_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_job) submodule to support running one-off
