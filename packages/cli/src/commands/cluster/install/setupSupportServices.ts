@@ -44,7 +44,7 @@ export async function setupSupportServices(
 
   tasks.add({
     skip: () => completed,
-    title: "Deploy CSI Drivers",
+    title: "Deploy Support Services",
     task: async (_, parentTask) => {
       interface Context {
         vaultProxyPid?: number;
@@ -92,7 +92,7 @@ export async function setupSupportServices(
                           initModule: true,
                           hclIfMissing: await Bun.file(awsLbController).text(),
                           inputUpdates: {
-                            subneets: defineInputUpdate({
+                            subnets: defineInputUpdate({
                               schema: z.array(z.string()),
                               update: () =>
                                 slaTarget === 1

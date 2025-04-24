@@ -220,7 +220,7 @@ export async function setupAutoscaling(
           },
         },
         {
-          title: "Enable Bin Packging Scheduler",
+          title: "Enable Bin Packing Scheduler",
           task: async () => {
             await upsertConfigValues({
               context,
@@ -248,6 +248,6 @@ export async function setupAutoscaling(
   try {
     await tasks.run();
   } catch (e) {
-    throw new CLIError("Failed to deploy CSI drivers", e);
+    throw new CLIError("Failed to setup Autoscaling", e);
   }
 }

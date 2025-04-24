@@ -37,7 +37,7 @@ export async function setupCertificateIssuers(
 
   tasks.add({
     skip: () => completed,
-    title: "Deploy CSI Drivers",
+    title: "Deploy Certificate Issuers",
     task: async (_, parentTask) => {
       interface Context {
         alertEmail?: string;
@@ -99,7 +99,6 @@ export async function setupCertificateIssuers(
                   const emailRegex =
                     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                   if (!emailRegex.test(value.trim())) {
-                    z;
                     return "Please enter a valid email address";
                   }
                   return true;
@@ -198,6 +197,6 @@ export async function setupCertificateIssuers(
   try {
     await tasks.run();
   } catch (e) {
-    throw new CLIError("Failed to deploy CSI drivers", e);
+    throw new CLIError("Failed to deploy Certificate Issuers", e);
   }
 }
