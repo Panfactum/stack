@@ -129,6 +129,45 @@ export async function setupSupportServices(
                     );
                   },
                 },
+                {
+                  task: async (ctx, parentTask) => {
+                    return parentTask.newListr(
+                      [
+                        await buildDeployModuleTask({
+                          context,
+                          env: {
+                            ...process.env,
+                            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                            VAULT_TOKEN: vaultRootToken,
+                          },
+                          environment,
+                          region,
+                          module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER,
+                          initModule: true,
+                          hclIfMissing: await Bun.file(
+                            kubeExternalSnapshotterTerragruntHcl
+                          ).text(),
+                        }),
+                        await buildDeployModuleTask({
+                          context,
+                          env: {
+                            ...process.env,
+                            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                            VAULT_TOKEN: vaultRootToken,
+                          },
+                          environment,
+                          region,
+                          module: MODULES.KUBE_VELERO,
+                          initModule: true,
+                          hclIfMissing: await Bun.file(
+                            kubeVeleroTerragruntHcl
+                          ).text(),
+                        }),
+                      ],
+                      { ctx, concurrent: false }
+                    );
+                  },
+                },
                 await buildDeployModuleTask({
                   context,
                   env: {
@@ -201,34 +240,6 @@ export async function setupSupportServices(
                   hclIfMissing: await Bun.file(
                     kubeDeschedulerTerragruntHcl
                   ).text(),
-                }),
-                await buildDeployModuleTask({
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeExternalSnapshotterTerragruntHcl
-                  ).text(),
-                }),
-                await buildDeployModuleTask({
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_VELERO,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(kubeVeleroTerragruntHcl).text(),
                 }),
                 await buildDeployModuleTask({
                   context,
