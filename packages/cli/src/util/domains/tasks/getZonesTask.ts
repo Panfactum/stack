@@ -1,15 +1,15 @@
-import type { PanfactumContext } from "@/context/context";
-import { MODULES } from "../../terragrunt/constants";
-import { Glob } from "bun";
 import {join, dirname} from "node:path"
-import { terragruntOutput } from "../../terragrunt/terragruntOutput";
-import { CLIError } from "../../error/error";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { Glob } from "bun";
 import { z } from "zod";
-import type { ListrTask } from "listr2";
+import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { applyColors } from "@/util/colors/applyColors";
 import { getRegisteredDomainsTask } from "./getRegisteredDomainsTask";
+import { CLIError } from "../../error/error";
+import { MODULES } from "../../terragrunt/constants";
+import { terragruntOutput } from "../../terragrunt/terragruntOutput";
 import type { DomainConfigs } from "./types";
+import type { PanfactumContext } from "@/context/context";
+import type { ListrTask } from "listr2";
 
 export async function getZonesTask<T extends {}>(inputs: {
     context: PanfactumContext

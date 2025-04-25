@@ -1,7 +1,6 @@
-import { Route53DomainsClient, ListPricesCommand, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
+import { Route53DomainsClient, ListPricesCommand } from "@aws-sdk/client-route-53-domains";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
 import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";

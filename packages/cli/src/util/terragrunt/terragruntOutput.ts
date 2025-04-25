@@ -1,10 +1,10 @@
 import {join} from "node:path"
 import { z, ZodError } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getIdentity } from "../aws/getIdentity";
 import { CLIError, PanfactumZodError } from "../error/error";
 import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/context/context";
-import { getIdentity } from "../aws/getIdentity";
 
 export const terragruntOutput = async <T extends z.ZodType<object>>({
   awsProfile,

@@ -1,18 +1,18 @@
-import type { PanfactumContext } from "@/context/context";
-import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import { confirm } from "@inquirer/prompts"
+import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import { Listr } from "listr2";
+import { z, ZodError } from "zod";
+import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
+import { applyColors } from "@/util/colors/applyColors";
+import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
+import { validateDomainConfig, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import { Listr } from "listr2";
-import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
-import { z } from "zod";
-import { applyColors } from "@/util/colors/applyColors";
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
-import { CLIError } from "@/util/error/error";
-import { confirm } from "@inquirer/prompts"
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
-import { testDNSResolutionTask } from "./testDNSResolutionTask";
-import type { DomainConfig } from "@/util/domains/tasks/types";
+import type { PanfactumContext } from "@/context/context";
+import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 
 interface TaskContext {
     nameServers: string[]
@@ -27,10 +27,10 @@ export async function manualZoneSetup(inputs: {
     const { context, domain, env } = inputs;
 
     const tasks = new Listr<TaskContext>([])
-    const testZones: {[domain: string]: {env: EnvironmentMeta, zoneId?: string, recordManagerRoleARN?: string}} = {
-        [domain]: {
-            env
-        }
+    const domainConfig: Partial<DomainConfig> = {
+        env,
+        domain,
+        module: MODULES.AWS_DNS_ZONES
     }
 
     ///////////////////////////////////////////////
@@ -81,17 +81,13 @@ export async function manualZoneSetup(inputs: {
             }
             ctx.nameServers = zoneInfo.name_servers
 
-            // A bit of a hack to get the test task working
-            const testZone = testZones[domain]
-            if(testZone){
-                testZone.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
-                testZone.zoneId = zoneInfo.zone_id 
-            }
+            domainConfig.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
+            domainConfig.zoneId = zoneInfo.zone_id
         }
     })
 
     ///////////////////////////////////////////////
-    // Get NS and DNSSec Records
+    // Set NS Records
     ///////////////////////////////////////////////
     tasks.add({
         title: "Set NS (nameserver) records with registrar",
@@ -120,7 +116,7 @@ export async function manualZoneSetup(inputs: {
 
     tasks.add(await testDNSResolutionTask({
         context,
-        zones: testZones
+        zones: {[domain]: domainConfig} as DomainConfigs
     }))
 
     ///////////////////////////////////////////////////////
@@ -140,28 +136,17 @@ export async function manualZoneSetup(inputs: {
                 { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
                 {trailingNewlines: 1}
     )
-
-        // This is all a bit hacky - sorry
-        const zoneInfo = testZones[domain];
-        if(!zoneInfo){
-            throw new CLIError("Error retrieving zone info. This should never occur.")
-        }
-        const {recordManagerRoleARN, zoneId} = zoneInfo
-        if(!recordManagerRoleARN){
-            throw new CLIError("Error retrieving record manager role ARN. This should never occur.")
-        } else if (!zoneId){
-            throw new CLIError("Error retrieving record manager role ARN. This should never occur.")
-        }
-
-        return {
-            domain,
-            recordManagerRoleARN,
-            envDir: env.path,
-            envName: env.name,
-            module: MODULES.AWS_DNS_ZONES,
-            zoneId
-        }
     } catch (e) {
         throw new CLIError(`Failed to setup zone for ${domain}`, e)
+    }
+
+    try {
+        return validateDomainConfig(domainConfig)
+    } catch(e){
+        if (e instanceof ZodError){
+            throw new PanfactumZodError("Failed to parse domain config", "manualZoneSetup", e)
+        } else {
+            throw new CLIError("Failed to parse domain config", e)
+        }
     }
 }

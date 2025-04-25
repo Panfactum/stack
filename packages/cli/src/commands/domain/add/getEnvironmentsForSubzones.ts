@@ -1,11 +1,10 @@
-import type { PanfactumContext } from "@/context/context";
-import { applyColors } from "@/util/colors/applyColors";
-import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
-import { DOMAIN, SUBDOMAIN } from "@/util/config/schemas";
-import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
-import { checkbox, input } from "@inquirer/prompts";
 import {join} from "node:path"
+import { checkbox, input } from "@inquirer/prompts";
+import { applyColors } from "@/util/colors/applyColors";
+import { type EnvironmentMeta } from "@/util/config/getEnvironments";
+import { SUBDOMAIN } from "@/util/config/schemas";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
+import type { PanfactumContext } from "@/context/context";
 
 export async function getEnvironmentsForSubzones(inputs: {
     context: PanfactumContext,
