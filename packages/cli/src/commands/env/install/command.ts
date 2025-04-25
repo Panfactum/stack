@@ -14,7 +14,7 @@ import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
 import { updateIAMIdentityCenter } from "./updateIAMIdentityCenter";
 
 
-const DEFAULT_MANAGEMENT_PROFILE =  "management-superuser"
+const DEFAULT_MANAGEMENT_PROFILE = "management-superuser"
 
 export class EnvironmentInstallCommand extends PanfactumCommand {
     static override paths = [["env", "install"]];
@@ -26,13 +26,13 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
     });
 
     async execute() {
-        const {context} = this
+        const { context } = this
 
         const existingEnvs = await getEnvironments(context);
         let hasManagementEnv = existingEnvs.findIndex(env => env.name === "management") !== -1;
         let hasAWSOrg = false;
 
-        let managementAccountCreds: {secretAccessKey: string, accessKeyId: string} | undefined;
+        let managementAccountCreds: { secretAccessKey: string, accessKeyId: string } | undefined;
         if (existingEnvs.length === 0) {
 
             //////////////////////////////////////////////////////////////////////////////////////////
@@ -46,31 +46,31 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             context.logger.log(
                 `It looks like you are installing your first Panfactum environment!\n` +
                 `There will be a few preliminary questions to ensure that setup goes smoothly...`,
-                {trailingNewlines: 1, leadingNewlines: 1}
+                { trailingNewlines: 1, leadingNewlines: 1 }
             )
-            if(await hasExistingAWSInfra(context)){
+            if (await hasExistingAWSInfra(context)) {
                 if (await hasExistingAWSOrg(context)) {
                     hasAWSOrg = true
-                    if(await shouldPanfactumManageAWSOrg(context)){
+                    if (await shouldPanfactumManageAWSOrg(context)) {
                         managementAccountCreds = await getRootAccountAdminAccess(context)
                     }
                 } else {
                     context.logger.log(
                         `Got it! Panfactum uses AWS Organizations to create AWS accounts for your environments.\n` +
                         `We will need to set that up first.`,
-                        {trailingNewlines: 1, leadingNewlines: 1}
+                        { trailingNewlines: 1, leadingNewlines: 1 }
                     )
-                    managementAccountCreds = await getNewAccountAdminAccess({context, type: "management"})
+                    managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
                 }
             } else {
                 context.logger.log(
                     `Got it! Since you are using Panfactum for the first time, let's create an AWS Organization\n` +
                     `to manage the AWS accounts for the environments that you create.`,
-                    {trailingNewlines: 1, leadingNewlines: 1}
+                    { trailingNewlines: 1, leadingNewlines: 1 }
                 )
-                managementAccountCreds = await getNewAccountAdminAccess({context, type: "management"})
+                managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
             }
-        } else if(!hasManagementEnv){
+        } else if (!hasManagementEnv) {
 
             //////////////////////////////////////////////////////////////////////////////////////////
             // If the user has environments, but not a management environment, we should continue
@@ -79,13 +79,13 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             //
             // However, we still let them opt-out of this.
             //////////////////////////////////////////////////////////////////////////////////////////
-            if(await hasExistingAWSOrg(context)){
+            if (await hasExistingAWSOrg(context)) {
                 hasAWSOrg = true
-                if(await shouldPanfactumManageAWSOrg(context)){
+                if (await shouldPanfactumManageAWSOrg(context)) {
                     managementAccountCreds = await getRootAccountAdminAccess(context)
                 }
-            } else if(await shouldCreateAWSOrg(context)){
-                managementAccountCreds = await getNewAccountAdminAccess({context, type: "management"})
+            } else if (await shouldCreateAWSOrg(context)) {
+                managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
             }
         }
 
@@ -112,7 +112,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         ////////////////////////////////////////////////////////////////
         // Get the name of the environment that the user wants to create
         ////////////////////////////////////////////////////////////////
-        const environmentName = await getEnvironmentName({context});
+        const environmentName = await getEnvironmentName({ context });
         const environmentProfile = `${environmentName}-superuser`
 
         ////////////////////////////////////////////////////////////////
@@ -126,21 +126,22 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         //
         //  (b) If not, then we need to take them through the manual setup steps
         ////////////////////////////////////////////////////////////////
-        
+
         if (hasManagementEnv) {
             // Note that 'provisionAWSAccount' leverages the AWS Organization to create the account.
             // If the AWS Organization is not set up yet, it also takes care of that process.
-            await provisionAWSAccount({context, environmentName, environmentProfile})
+            await provisionAWSAccount({ context, environmentName, environmentProfile })
         } else {
             // Otherwise, they need to manually create the account, the 'AdministratorAccess'
             // IAM user, and the access credentials to provide the installer
-             await getNewAccountAdminAccess({
+            await getNewAccountAdminAccess({
                 context,
                 type: hasAWSOrg ? "manual-org" : "standalone",
                 environmentProfile
             })
         }
 
+        // TODO: Pass through the actual account name
         await bootstrapEnvironment({
             context,
             environmentProfile,
@@ -155,7 +156,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         // // This allows us to replace their static credentials
         // // with an SSO login flow for improved security and user-ergonomics
         // ////////////////////////////////////////////////////////////////
-        if(hasManagementEnv){
+        if (hasManagementEnv) {
             await updateIAMIdentityCenter({
                 context,
                 environmentProfile,

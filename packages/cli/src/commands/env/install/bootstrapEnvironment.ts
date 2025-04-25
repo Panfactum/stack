@@ -58,6 +58,9 @@ export async function bootstrapEnvironment(inputs: {
         ctx: {
             profile: environmentProfile,
             accountName
+        },
+        rendererOptions: {
+            collapseErrors: false
         }
     })
 
@@ -551,7 +554,7 @@ export async function bootstrapEnvironment(inputs: {
     tasks.add(
         {
             title: "Set AWS account alias",
-            enabled: (ctx) => Boolean(ctx.accountName),
+            enabled: (ctx) => ctx.accountName === undefined,
             task: async (ctx, task) => {
                 ctx.accountName = await task.prompt(ListrInquirerPromptAdapter).run(input, {
                     message: applyColors('Unique Account Alias:', { style: "question" }),
@@ -587,7 +590,12 @@ export async function bootstrapEnvironment(inputs: {
             inputUpdates: {
                 alias: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.accountName!
+                    update: (_, { accountName }) => {
+                        if (accountName === undefined) {
+                            throw new CLIError("accountName is undefined")
+                        }
+                        return accountName
+                    }
                 })
             },
             imports: {
