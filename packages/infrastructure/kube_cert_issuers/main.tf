@@ -65,7 +65,8 @@ locals {
 
   all_domains = tolist(toset(concat(
     [for domain, _ in var.route53_zones : domain],
-    [for _, domain in var.cloudflare_zones : domain]
+    [for _, domain in var.cloudflare_zones : domain],
+    [var.kube_domain]
   )))
 
   all_domains_with_subdomains = flatten([for domain in local.all_domains : (alltrue([for possible_parent in local.all_domains : (domain == possible_parent || !endswith(domain, possible_parent))]) ? [domain, "*.${domain}"] : ["*.${domain}"])])
@@ -530,10 +531,7 @@ resource "kubectl_manifest" "ingress_cert" {
     }
     spec = {
       secretName = "ingress-tls"
-      dnsNames = concat(
-        local.all_domains_with_subdomains,
-        [var.kube_domain, "*.${var.kube_domain}"]
-      )
+      dnsNames   = local.all_domains_with_subdomains
 
       // We don't rotate this as frequently to both respect
       // the rate limits: https://letsencrypt.org/docs/rate-limits/
