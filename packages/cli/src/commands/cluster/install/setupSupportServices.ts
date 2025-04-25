@@ -44,7 +44,7 @@ export async function setupSupportServices(
 
   tasks.add({
     skip: () => completed,
-    title: "Deploy Support Services",
+    title: "Deploy Support Services", // TODO: @seth - I don't like the term "Support Services"
     task: async (_, parentTask) => {
       interface Context {
         vaultProxyPid?: number;
@@ -75,6 +75,7 @@ export async function setupSupportServices(
           task: async (ctx, parentTask) => {
             return parentTask.newListr(
               [
+                // @seth - Why would this not be in the inbound networking section?
                 {
                   task: async (ctx, parentTask) => {
                     return parentTask.newListr(
@@ -91,6 +92,7 @@ export async function setupSupportServices(
                           module: MODULES.KUBE_AWS_LB_CONTROLLER,
                           initModule: true,
                           hclIfMissing: await Bun.file(awsLbController).text(),
+                          // TODO: @jack - This should come from the aws_eks module
                           inputUpdates: {
                             subnets: defineInputUpdate({
                               schema: z.array(z.string()),

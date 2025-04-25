@@ -406,6 +406,16 @@ export class DomainAddCommand extends PanfactumCommand {
                     }
                 })
 
+                ////////////////////////////////////////////////////////
+                // Skip environment subzone setup
+                //
+                // If the user is adding a subdomain and has already
+                // added one of its ancestors, it seems very
+                // unlikely that they want to set up environment subzones
+                //
+                // TODO: Add a flag to force this
+                ////////////////////////////////////////////////////////
+
             } else {
 
                 context.logger.log(

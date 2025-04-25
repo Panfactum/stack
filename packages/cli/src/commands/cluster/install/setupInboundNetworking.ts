@@ -170,6 +170,9 @@ export async function setupInboundNetworking(
 
             ctx.vaultDomain = data!.extra_inputs.vault_domain;
 
+            // TODO: @seth - Feels like there could be some better logging here (e.g., attempt #)
+            // TODO: @seth - I think you want to validate the Vault healtcheck endpoint, not just the DNS
+            // record
             await execute({
               command: ["delv", "@1.1.1.1", data!.extra_inputs.vault_domain],
               context,
@@ -198,6 +201,7 @@ export async function setupInboundNetworking(
               },
             });
 
+            // FIX: @seth - This isn't going to run anything as is, so I believe this is a bug
             await buildDeployModuleTask({
               context,
               environment,

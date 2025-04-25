@@ -98,6 +98,7 @@ export async function setupLinkerd(
               },
             });
           },
+          // TODO: @seth does this actually work?
           rendererOptions: {
             outputBar: 5,
           },

@@ -118,6 +118,10 @@ export async function setupAutoscaling(
             });
           },
         },
+
+        // TODO: @seth - Not sure that I like the logging provided here
+        // perhaps concurrent task with discrete applies would be better - 
+        // perhaps not
         {
           title: "Applying VPA to all modules",
           task: async (ctx, task) => {
@@ -126,7 +130,7 @@ export async function setupAutoscaling(
               environment,
               region,
               env: {
-                ...process.env,
+                ...process.env, //TODO: @seth Use context.env
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                 VAULT_TOKEN: vaultRootToken,
               },
@@ -144,7 +148,7 @@ export async function setupAutoscaling(
                 await buildDeployModuleTask({
                   context,
                   env: {
-                    ...process.env,
+                    ...process.env, //TODO: @seth Use context.env
                     VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
@@ -190,6 +194,8 @@ export async function setupAutoscaling(
                   hclIfMissing: await Bun.file(
                     kubeKarpenterNodePoolsTerragruntHcl
                   ).text(),
+                  // TODO: @jack - This should be pulled from the aws_eks module
+                  // to keep things in sync
                   inputUpdates: {
                     node_subnets: defineInputUpdate({
                       schema: z.array(z.string()),
@@ -200,6 +206,10 @@ export async function setupAutoscaling(
                     }),
                   },
                 }),
+
+                // TODO: @seth - This feels like it could happen at the very
+                // end and concurrently with the install of the remaining support
+                // services
                 await buildDeployModuleTask({
                   taskTitle: "EKS NodePools Adjustment",
                   context,
@@ -252,6 +262,9 @@ export async function setupAutoscaling(
             });
           },
         },
+
+        // TODO: @seth - I wonder if the VPA run-all and this run-all can 
+        // be combined into a single "enable enhanced autoscaling run-all"
         {
           title: "Applying Bin Packing Scheduler to all modules",
           task: async (ctx, task) => {

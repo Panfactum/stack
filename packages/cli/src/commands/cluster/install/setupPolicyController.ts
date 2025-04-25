@@ -26,10 +26,12 @@ export async function setupPolicyController(
             await getIdentity({ context, profile: awsProfile });
           },
         },
+        // TODO: @seth - Need task titles
         await buildDeployModuleTask({
           context,
           environment,
           region,
+          taskTitle: "Deploy controller",
           module: MODULES.KUBE_KYVERNO,
           initModule: true,
           hclIfMissing: await Bun.file(kyvernoTerragruntHcl).text(),
@@ -38,6 +40,7 @@ export async function setupPolicyController(
           context,
           environment,
           region,
+          taskTitle: "Deploy default policies",
           module: MODULES.KUBE_POLICIES,
           initModule: true,
           hclIfMissing: await Bun.file(kubePoliciesTerragruntHcl).text(),

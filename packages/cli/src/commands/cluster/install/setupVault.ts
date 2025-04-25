@@ -107,6 +107,7 @@ export async function setupVault(
         {
           title: "Checking status of the Vault pods",
           task: async () => {
+            // TODO: @seth Use the kubernetes SDK, not exec
             await execute({
               command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json"],
               context,

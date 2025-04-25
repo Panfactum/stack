@@ -1,10 +1,12 @@
+import { join } from "node:path"
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 
 import awsDNSLinksModuleHCL from "@/templates/aws_dns_links.hcl" with { type: "file" };
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
 import { applyColors } from "@/util/colors/applyColors";
-import { validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
+import { validateDomainConfig, validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
@@ -24,9 +26,8 @@ export async function createDescendentZones(inputs: {
     const { context, ancestorZone, descendentZones } = inputs;
 
     const tasks = new Listr([])
-    const domainConfigs: {[domain in keyof DomainConfigs]: Partial<DomainConfig>} = Object.fromEntries(Object.entries(descendentZones).map(([domain, {env}]) => ([domain, {
-        envDir: env.path,
-        envName: env.name,
+    const domainConfigs: { [domain in keyof DomainConfigs]: Partial<DomainConfig> } = Object.fromEntries(Object.entries(descendentZones).map(([domain, { env }]) => ([domain, {
+        env: env,
         module: MODULES.AWS_DNS_ZONES,
         domain
     }])))
@@ -68,7 +69,7 @@ export async function createDescendentZones(inputs: {
                                 region: GLOBAL_REGION,
                                 module: MODULES.AWS_DNS_ZONES,
                                 hclIfMissing: await Bun.file(awsDNSZonesModuleHCL).text(),
-                                taskTitle: "Deploy descendent zone",
+                                taskTitle: "Deploy zone",
                                 inputUpdates: {
                                     domains: defineInputUpdate({
                                         schema: z.record(z.string(), z.object({
@@ -106,11 +107,11 @@ export async function createDescendentZones(inputs: {
                                 }
 
                                 const domainConfig = domainConfigs[domain]
-                                if(domainConfig){
+                                if (domainConfig) {
                                     domainConfig.zoneId = zoneInfo.zone_id
                                     domainConfig.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
                                 }
-                               
+
                                 ctx.nameServers = zoneInfo.name_servers
                             }
                         })
@@ -171,9 +172,32 @@ export async function createDescendentZones(inputs: {
     }))
 
     ///////////////////////////////////////////////////////
-    // Add to clusters
+    // Add to environment.yaml
     ///////////////////////////////////////////////////////
-    // TODO
+    tasks.add({
+        title: "Update DevShell",
+        task: async () => {
+            await Promise.all(Object.entries(domainConfigs).map(async ([domain, domainConfig]) => {
+                const validatedDomainConfig = validateDomainConfig(domainConfig)
+                await upsertConfigValues({
+                    context,
+                    filePath: join(validatedDomainConfig.env.path, "environment.yaml"),
+                    values: {
+                        domains: {
+                            [domain]: {
+                                zone_id: validatedDomainConfig.zoneId,
+                                record_manager_role_arn: validatedDomainConfig.recordManagerRoleARN
+                            }
+                        }
+                    }
+                })
+            }))
+        }
+    })
+
+    ///////////////////////////////////////////////////////
+    // Update clusters
+    ///////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////
     // Run Tasks
@@ -186,8 +210,8 @@ export async function createDescendentZones(inputs: {
 
     try {
         return validateDomainConfigs(domainConfigs)
-    } catch(e){
-        if (e instanceof ZodError){
+    } catch (e) {
+        if (e instanceof ZodError) {
             throw new PanfactumZodError("Failed to parse domain configs", "createDescendentZones", e)
         } else {
             throw new CLIError("Failed to parse dependent zones", e)
