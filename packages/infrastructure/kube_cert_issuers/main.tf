@@ -532,7 +532,7 @@ resource "kubectl_manifest" "ingress_cert" {
       secretName = "ingress-tls"
       dnsNames = concat(
         local.all_domains_with_subdomains,
-        [kube_domain, "*.${kube_domain}"]
+        [var.kube_domain, "*.${var.kube_domain}"]
       )
 
       // We don't rotate this as frequently to both respect
