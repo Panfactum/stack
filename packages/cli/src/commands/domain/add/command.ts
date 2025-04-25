@@ -35,7 +35,7 @@ export class DomainAddCommand extends PanfactumCommand {
         arity: 1
     });
 
-    forceIsRegistered: boolean | undefined = Option.Boolean("--force-is-registerd", {
+    forceIsRegistered: boolean | undefined = Option.Boolean("--force-is-registered", {
         description: "Use this to override our heuristic for determining whether the provided domain is already registered.",
 
     })

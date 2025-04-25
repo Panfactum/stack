@@ -446,7 +446,6 @@ export async function registerDomain(inputs: {
                     throw new CLIError("Failed to get registration status", e)
                 }
 
-
                 // 1) Handle terminal statuses first:
                 if (status === "SUCCESSFUL") {
                     task.title = applyColors("Got registrtion status Success", { highlights: [{ phrase: "Success", style: "subtle" }] })
@@ -492,6 +491,8 @@ export async function registerDomain(inputs: {
                                 `Unexpected StatusFlag '${flag as string}'". Please consult the AWS console.`
                             );
                     }
+                } else {
+                    // Update with status if no flag is provided
                 }
 
                 await new Promise((r) => globalThis.setTimeout(r, 15000));
