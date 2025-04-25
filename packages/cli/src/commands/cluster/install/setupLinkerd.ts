@@ -81,8 +81,9 @@ export async function setupLinkerd(
         },
         {
           title: "Run Linkerd Control Plane Checks",
-          task: async (ctx) => {
+          task: async (ctx, task) => {
             await execute({
+              task,
               command: ["linkerd", "check", "--cni-namespace=linkerd"],
               context,
               workingDirectory: process.cwd(),
@@ -96,6 +97,9 @@ export async function setupLinkerd(
                 VAULT_TOKEN: vaultRootToken,
               },
             });
+          },
+          rendererOptions: {
+            outputBar: 5,
           },
         },
         {
