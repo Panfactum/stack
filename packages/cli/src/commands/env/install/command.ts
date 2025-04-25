@@ -134,10 +134,14 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         } else {
             // Otherwise, they need to manually create the account, the 'AdministratorAccess'
             // IAM user, and the access credentials to provide the installer
-            await getNewAccountAdminAccess({
+            const newAccountCreds = await getNewAccountAdminAccess({
                 context,
-                type: hasAWSOrg ? "manual-org" : "standalone",
-                environmentProfile
+                type: hasAWSOrg ? "manual-org" : "standalone"
+            })
+            await addAWSProfileFromStaticCreds({
+                context,
+                creds: newAccountCreds,
+                profile: environmentProfile
             })
         }
 

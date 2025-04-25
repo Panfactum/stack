@@ -46,8 +46,11 @@ export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumC
         } catch (e) {
             throw new CLIError(`Failed to read existing AWS config at ${configFilePath}`, e)
         }
+    } else {
+        config = configUpdate
+    }
 
-        // FIX: @jack - Need to verify that credentials file exists before reading it
+    if (await fileExists(credentialsFilePath)) {
         try {
             const awsCredentialsFile = Bun.file(credentialsFilePath);
             const originalAWSCredentials = parse(await awsCredentialsFile.text());
@@ -58,9 +61,7 @@ export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumC
         } catch (e) {
             throw new CLIError(`Failed to read existing AWS credentials at ${credentialsFilePath}`, e)
         }
-
     } else {
-        config = configUpdate
         credentials = credentialUpdate
     }
 
