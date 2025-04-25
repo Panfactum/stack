@@ -4,7 +4,6 @@ import { z } from "zod";
 import kubeBastionTerragruntHcl from "@/templates/kube_bastion_terragrunt.hcl" with { type: "file" };
 import postgresTerragruntHcl from "@/templates/kube_cloudnative_pg_terragrunt.hcl" with { type: "file" };
 import kubeDeschedulerTerragruntHcl from "@/templates/kube_descheduler_terragrunt.hcl" with { type: "file" };
-import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
 import kubeExternalSnapshotterTerragruntHcl from "@/templates/kube_external_snapshotter_terragrunt.hcl" with { type: "file" };
 import kubeKedaTerragruntHcl from "@/templates/kube_keda_terragrunt.hcl" with { type: "file" };
 import kubeNodeImageCacheControllerTerragruntHcl from "@/templates/kube_node_image_cache_controller_terragrunt.hcl" with { type: "file" };
@@ -205,20 +204,6 @@ export async function setupClusterExtensions(
                   module: MODULES.KUBE_CLOUDNATIVE_PG,
                   initModule: true,
                   hclIfMissing: await Bun.file(postgresTerragruntHcl).text(),
-                }),
-                await buildDeployModuleTask({
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_EXTERNAL_DNS,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeExternalDnsTerragruntHcl
-                  ).text(),
                 }),
                 await buildDeployModuleTask({
                   taskTitle: "EKS NodePools Adjustment",

@@ -2,8 +2,10 @@ import { join } from "node:path";
 import { Listr } from "listr2";
 import { z } from "zod";
 import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
+import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
 import kubeNginxIngressTerragruntHcl from "@/templates/kube_ingress_nginx_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
@@ -103,6 +105,20 @@ export async function setupInboundNetworking(
                   context,
                   env: {
                     ...process.env,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.KUBE_EXTERNAL_DNS,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(
+                    kubeExternalDnsTerragruntHcl
+                  ).text(),
+                }),
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
                     VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
@@ -171,7 +187,7 @@ export async function setupInboundNetworking(
         },
         {
           title: "Verifying the Vault Ingress",
-          task: async (ctx) => {
+          task: async (ctx, task) => {
             const moduleDir = join(
               context.repoVariables.environments_dir,
               environment,
@@ -192,26 +208,39 @@ export async function setupInboundNetworking(
               throwOnMissing: true,
             });
 
-            ctx.vaultDomain = data!.extra_inputs.vault_domain;
+            if (!data?.extra_inputs.vault_domain) {
+              throw new CLIError("Vault domain not found in the module.yaml file");
+            }
 
-            // TODO: @seth - Feels like there could be some better logging here (e.g., attempt #)
-            // TODO: @seth - I think you want to validate the Vault healtcheck endpoint, not just the DNS
-            // record
-            await execute({
-              command: ["delv", "@1.1.1.1", data!.extra_inputs.vault_domain],
-              context,
-              workingDirectory: join(clusterPath, MODULES.KUBE_VAULT),
-              retries: 30,
-              retryDelay: 10000,
-              isSuccess: ({ stdout }) => {
-                return (
-                  (stdout as string).includes("; fully validated") &&
-                  !(stdout as string).includes(
-                    "; negative response, fully validated"
-                  )
-                );
-              },
-            });
+            ctx.vaultDomain = data.extra_inputs.vault_domain;
+
+            let attempts = 0;
+            const maxAttempts = 30;
+            const retryDelay = 10000;
+
+            while (attempts < maxAttempts) {
+              try {
+                task.output = applyColors(`Checking Vault health endpoint (attempt ${attempts + 1}/${maxAttempts})`, { style: "subtle" });
+                const response = await Bun.fetch(`https://${data!.extra_inputs.vault_domain}/v1/sys/health`);
+
+                if (response.status === 200) {
+                  task.output = applyColors("Vault health check successful", { style: "subtle" });
+                  break;
+                }
+
+                task.output = applyColors(`Vault health check failed with status: ${response.status}`, { style: "subtle" });
+              } catch (error) {
+                throw new CLIError("Vault health check failed", error);
+              }
+              attempts++;
+
+              if (attempts < maxAttempts) {
+                task.output = applyColors(`Retrying in ${retryDelay / 1000} seconds...`, { style: "subtle" });
+                await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+              } else {
+                throw new CLIError(`Failed to connect to Vault health endpoint after ${maxAttempts} attempts`);
+              }
+            }
           },
         },
         {
