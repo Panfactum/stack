@@ -199,6 +199,193 @@ let
         hash = "sha256-e1IxKVtcYwRUc7L4tyN7LLiikBeaBPifrfl78vomZ/Q=";
       };
     };
+    "@aws-sdk/client-ec2" = {
+      out_path = "@aws-sdk/client-ec2";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-ec2@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-ec2/-/client-ec2-3.796.0.tgz";
+        hash = "sha256-cv/8D992QX39LWFZB8O5tT0pWbXD0wuCKZL7UGUv0wQ=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/core" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/core";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/core@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.796.0.tgz";
+        hash = "sha256-UvQcA/N1z4lEwJV3QOOP0pwOhDHINLTw6YbNs2EUwLc=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/core/@smithy/signature-v4" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/signature-v4@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
+        hash = "sha256-tNABHMG1lBQYLZnhbfXBfM7yrNHc6kPCWiXOSBCffk4=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-node@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.796.0.tgz";
+        hash = "sha256-Owfj5UjTsFeU0N3H1iSlb0jHE20PUSANYTajlzINpAA=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-env@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.796.0.tgz";
+        hash = "sha256-Y9zObSzcfWvdgJSuqtZ3v5Yj7fpM7xgQC2elxsjUCKk=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-http@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.796.0.tgz";
+        hash = "sha256-pZjZcBeJR66S08Pa0gLcRwnTPB+MGQxMrB2tjlx6okI=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-ini@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.796.0.tgz";
+        hash = "sha256-7KOvTYQS3WCHJJ0hBZ3fVX2EFM/fc9Hdd0NiEt2ZpPk=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/nested-clients@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
+        hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-process@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.796.0.tgz";
+        hash = "sha256-BgZwSVJF+MgVfBGGMlL4JNQDsrQaMU0xtzU5R0zbHh8=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-sso@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.796.0.tgz";
+        hash = "sha256-p6XGn3bXKviRgegIxGmXg6ikNVvdvmRCtsavv5VLhfA=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-sso@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.796.0.tgz";
+        hash = "sha256-f0zOz5maAUy72RgxzR6dutVAfYufFCigdFW5wbrwv5Y=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/token-providers@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.796.0.tgz";
+        hash = "sha256-rNhEw71OE+zIXqeXvORFeT/G/9mqIuMi/jpd13vyqTY=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/nested-clients@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
+        hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/credential-provider-web-identity@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.796.0.tgz";
+        hash = "sha256-B7q22q8jt0ZHSO/hvpXrEBrBG+GPm8gnJ/XxVXBCe7k=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/nested-clients@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
+        hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/middleware-user-agent" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/middleware-user-agent";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/middleware-user-agent@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.796.0.tgz";
+        hash = "sha256-2kVi/Jw6QzX9AfIRIzMVusXRYwm/+mEeEJfHJN5ZuRw=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/util-user-agent-node" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/util-user-agent-node";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/util-user-agent-node@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.796.0.tgz";
+        hash = "sha256-CVuT/IAAnDaLrej88UzB94aHBzJbp43fcpExdoUUTwU=";
+      };
+    };
     "@aws-sdk/client-iam" = {
       out_path = "@aws-sdk/client-iam";
       binaries =
@@ -441,6 +628,28 @@ let
         hash = "sha256-qR24ULM5EQtKz0LnbGU0mD4sCnZioAw4szdzj3gj2tI=";
       };
     };
+    "@aws-sdk/middleware-sdk-ec2" = {
+      out_path = "@aws-sdk/middleware-sdk-ec2";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/middleware-sdk-ec2@3.796.0";
+        url = "https://registry.npmjs.org/@aws-sdk/middleware-sdk-ec2/-/middleware-sdk-ec2-3.796.0.tgz";
+        hash = "sha256-NOIjZf6dgn4+WoSUNpPq0Dl0ZF2l9sBMUZZ8ULX7Nlo=";
+      };
+    };
+    "@aws-sdk/middleware-sdk-ec2/@smithy/signature-v4" = {
+      out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/signature-v4";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/signature-v4@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
+        hash = "sha256-tNABHMG1lBQYLZnhbfXBfM7yrNHc6kPCWiXOSBCffk4=";
+      };
+    };
     "@aws-sdk/middleware-sdk-route53" = {
       out_path = "@aws-sdk/middleware-sdk-route53";
       binaries =
@@ -560,6 +769,17 @@ let
         name = "@aws-sdk/util-endpoints@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.787.0.tgz";
         hash = "sha256-vroY3KIlCrriWVqo6p8FeyqJNYEE1ndCA/qb218in4s=";
+      };
+    };
+    "@aws-sdk/util-format-url" = {
+      out_path = "@aws-sdk/util-format-url";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/util-format-url@3.775.0";
+        url = "https://registry.npmjs.org/@aws-sdk/util-format-url/-/util-format-url-3.775.0.tgz";
+        hash = "sha256-+zOu+mMlIfMMhlVyURhH0wkrmOLmA3J2HAjTfMp6yC0=";
       };
     };
     "@aws-sdk/util-locate-window" = {
@@ -2012,6 +2232,17 @@ let
         name = "@types/normalize-package-data@2.4.4";
         url = "https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.4.tgz";
         hash = "sha256-5y7XImebHw/nCh2cqPXK45zSpfIYXkxtMELlrmCf3ys=";
+      };
+    };
+    "@types/uuid" = {
+      out_path = "@types/uuid";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@types/uuid@9.0.8";
+        url = "https://registry.npmjs.org/@types/uuid/-/uuid-9.0.8.tgz";
+        hash = "sha256-e1s3tcnSQk++9JfW1EFusO7Ioh7hJ61h9FQgUfxeL6g=";
       };
     };
     "@types/ws" = {

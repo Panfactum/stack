@@ -4,8 +4,7 @@ import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
-import kubeCertIssuersTerragruntHclNonProduction from "@/templates/kube_cert_issuers_non_production_terragrunt.hcl" with { type: "file" };
-import kubeCertIssuersTerragruntHclProduction from "@/templates/kube_cert_issuers_production_terragrunt.hcl" with { type: "file" };
+import kubeCertIssuersTerragruntHcl from "@/templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
@@ -23,7 +22,7 @@ export async function setupCertificateIssuers(
   options: InstallClusterStepOptions,
   completed: boolean
 ) {
-  const { awsProfile, clusterPath, context, environment, region } = options;
+  const { awsProfile, clusterPath, context, domains, environment, region } = options;
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -105,27 +104,15 @@ export async function setupCertificateIssuers(
                 ),
                 required: true,
                 validate: (value: string) => {
-                  // From https://emailregex.com/
-                  // FIX: @seth - Use Zod email parser
-
-                  const emailRegex =
-                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                  if (!emailRegex.test(value.trim())) {
-                    return "Please enter a valid email address";
+                  const { error } = z.string().email().safeParse(value);
+                  if (error) {
+                    return error.issues?.[0]?.message || "Please enter a valid email address";
                   }
+
                   return true;
-                },
+                }
               });
           },
-        },
-        {
-          title: "Get Route53 Delegated Zone Records",
-          task: async () => {
-            // TODO: @jack get the delegated zone records for the current environment
-            // to pass to the Certificate Issuers Module. Also define if this is a production
-            // or non-production environment as the template file is different.
-          },
-          enabled: () => false,
         },
         {
           title: "Start Vault Proxy",
@@ -156,15 +143,7 @@ export async function setupCertificateIssuers(
                   region,
                   module: MODULES.KUBE_CERT_ISSUERS,
                   initModule: true,
-                  // FIX: @seth - Not necessary to have two templates
-                  // as we will not be pulling dependencies from the hosted zones
-                  hclIfMissing: ctx.productionEnvironment
-                    ? await Bun.file(
-                      kubeCertIssuersTerragruntHclProduction
-                    ).text()
-                    : await Bun.file(
-                      kubeCertIssuersTerragruntHclNonProduction
-                    ).text(),
+                  hclIfMissing: await Bun.file(kubeCertIssuersTerragruntHcl).text(),
                   inputUpdates: {
                     alert_email: defineInputUpdate({
                       schema: z.string(),
@@ -180,13 +159,7 @@ export async function setupCertificateIssuers(
                           })
                         )
                         .optional(),
-                      update: () => ({
-                        "development.panfactum.com": {
-                          zone_id: "Z00914472Z7HO5DHUBPV1",
-                          record_manager_role_arn:
-                            "arn:aws:iam::471112902605:role/route53-record-manager-20240405144117207000000006",
-                        },
-                      }),
+                      update: () => domains,
                     }),
                   },
                 }),
