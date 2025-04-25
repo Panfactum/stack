@@ -530,7 +530,10 @@ resource "kubectl_manifest" "ingress_cert" {
     }
     spec = {
       secretName = "ingress-tls"
-      dnsNames   = local.all_domains_with_subdomains
+      dnsNames = concat(
+        local.all_domains_with_subdomains,
+        [kube_domain, "*.${kube_domain}"]
+      )
 
       // We don't rotate this as frequently to both respect
       // the rate limits: https://letsencrypt.org/docs/rate-limits/

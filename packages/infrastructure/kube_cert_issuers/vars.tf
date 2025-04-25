@@ -47,3 +47,8 @@ variable "aws_iam_ip_allow_list" {
   type        = list(string)
   default     = []
 }
+
+variable "kube_domain" {
+  description = "The domain under which cluster utilities have subdomains registered."
+  type        = string
+}
