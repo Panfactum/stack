@@ -118,29 +118,6 @@ export async function setupAutoscaling(
             });
           },
         },
-
-        // TODO: @seth - Not sure that I like the logging provided here
-        // perhaps concurrent task with discrete applies would be better - 
-        // perhaps not
-        {
-          title: "Applying VPA to all modules",
-          task: async (ctx, task) => {
-            await terragruntApplyAll({
-              context,
-              environment,
-              region,
-              env: {
-                ...process.env, //TODO: @seth Use context.env
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              task,
-            });
-          },
-          rendererOptions: {
-            outputBar: 5,
-          },
-        },
         {
           task: async (ctx, task) => {
             return task.newListr<Context>(
@@ -206,28 +183,6 @@ export async function setupAutoscaling(
                     }),
                   },
                 }),
-
-                // TODO: @seth - This feels like it could happen at the very
-                // end and concurrently with the install of the remaining support
-                // services
-                await buildDeployModuleTask({
-                  taskTitle: "EKS NodePools Adjustment",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.AWS_EKS,
-                  inputUpdates: {
-                    bootstrap_mode_enabled: defineInputUpdate({
-                      schema: z.boolean(),
-                      update: () => false,
-                    }),
-                  },
-                }),
                 await buildDeployModuleTask({
                   context,
                   env: {
@@ -262,11 +217,10 @@ export async function setupAutoscaling(
             });
           },
         },
-
         // TODO: @seth - I wonder if the VPA run-all and this run-all can 
         // be combined into a single "enable enhanced autoscaling run-all"
         {
-          title: "Applying Bin Packing Scheduler to all modules",
+          title: "Enable Enhanced Autoscaling",
           task: async (ctx, task) => {
             await terragruntApplyAll({
               context,

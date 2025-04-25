@@ -18,6 +18,7 @@ import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
+  defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
 
@@ -218,6 +219,23 @@ export async function setupClusterExtensions(
                   hclIfMissing: await Bun.file(
                     kubeExternalDnsTerragruntHcl
                   ).text(),
+                }),
+                await buildDeployModuleTask({
+                  taskTitle: "EKS NodePools Adjustment",
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.AWS_EKS,
+                  inputUpdates: {
+                    bootstrap_mode_enabled: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => false,
+                    }),
+                  },
                 }),
               ],
               { ctx, concurrent: true }

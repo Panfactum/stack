@@ -219,23 +219,24 @@ export class InstallClusterCommand extends PanfactumCommand {
       aws_profile: awsProfile,
       domains,
       environment,
+      kube_config_context: kubeConfigContext,
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
     } = config;
-
-    if (!domains) {
-      throw new CLIError([
-        "At least one domain must be available in the environment to install a cluster.",
-        "Please run `pf env add -e {environment}` to add a domain to the environment.",
-      ]);
-    }
 
     if (!environment || !region || !awsProfile) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
         "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
+      ]);
+    }
+
+    if (!domains) {
+      throw new CLIError([
+        "At least one domain must be available in the environment to install a cluster.",
+        "Please run `pf env add -e {environment}` to add a domain to the environment.",
       ]);
     }
 
@@ -263,6 +264,8 @@ export class InstallClusterCommand extends PanfactumCommand {
         choices: Object.keys(domains),
       });
 
+      // TODO: already have validation built, use that.
+      // Validate input to not have periods in it.
       const kubeDomain = await input({
         message: applyColors("Enter the subdomain for the cluster where all cluster utilities will be hosted", { style: "question" }),
         default: `${region}.${subdomain}`,
@@ -321,6 +324,7 @@ export class InstallClusterCommand extends PanfactumCommand {
       environment,
       domains,
       environmentPath,
+      kubeConfigContext,
       region,
       clusterPath,
       slaTarget: confirmedSLATarget,

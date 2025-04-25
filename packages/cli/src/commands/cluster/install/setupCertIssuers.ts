@@ -163,6 +163,8 @@ export async function setupCertificateIssuers(
                     }),
                   },
                 }),
+                // TODO: rollout reset of cert manager every 90 seconds until the above task is completed
+                // check for the certificate to be provisioned
                 await buildDeployModuleTask<Context>({
                   context,
                   env: {

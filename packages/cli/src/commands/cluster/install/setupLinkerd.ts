@@ -79,6 +79,7 @@ export async function setupLinkerd(
             );
           },
         },
+        // TODO: @seth - Ensure the kubectx is correct for Linkerd
         {
           title: "Run Linkerd Control Plane Checks",
           task: async (ctx, task) => {
