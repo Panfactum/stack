@@ -14,6 +14,7 @@ type OutputValues = InputValues & {
 
 // WARNING: The order here is extremely important
 // DO NOT CHANGE unless you know exactly what you are doing
+// TODO: Is the order here correct?
 const CONFIG_FILES = [
   "module.user.yaml",
   "module.yaml",
