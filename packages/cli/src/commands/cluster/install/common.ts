@@ -5,6 +5,7 @@ export interface InstallClusterStepOptions {
   clusterPath: string;
   environmentPath: string;
   environment: string;
+  kubeConfigContext?: string;
   domains: Record<string, { zone_id: string; record_manager_role_arn: string; }>;
   region: string;
   context: PanfactumContext;
