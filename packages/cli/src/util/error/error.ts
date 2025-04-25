@@ -5,7 +5,8 @@ export class CLIError extends Error {
     const formattedMessage =
       typeof message === "string" ? message : message.join("\n");
     if (error instanceof Error) {
-      super(`${formattedMessage}: ${error.message}`, { cause: error });
+      const newCause = error.cause || error
+      super(`${formattedMessage}: ${error.message}`, { cause: newCause });
     } else if (error !== undefined) {
       super(`${formattedMessage}: ${JSON.stringify(error)}`);
     } else {
@@ -13,7 +14,7 @@ export class CLIError extends Error {
     }
   }
 
-  getDetailedMessage(){
+  getDetailedMessage() {
     return ""
   }
 }
@@ -39,8 +40,8 @@ export class CLISubprocessError extends CLIError {
 
   override getDetailedMessage() {
     return `Command: ${this.command}\n` +
-    `WorkingDirectory: ${this.workingDirectory}\n` +
-    `Subprocess Logs:\n\n` + this.subprocessLogs
+      `WorkingDirectory: ${this.workingDirectory}\n` +
+      `Subprocess Logs:\n\n` + this.subprocessLogs
   }
 }
 
@@ -55,7 +56,7 @@ export class PanfactumZodError extends CLIError {
 
   override getDetailedMessage() {
     return `Location: ${this.location}\n` +
-    `Validation Issues:\n\n` +
-    this.validationError.issues.map(issue => `* ${issue.path.join(".")}: ${issue.message}`).join("\n")      
+      `Validation Issues:\n\n` +
+      this.validationError.issues.map(issue => `* ${issue.path.join(".")}: ${issue.message}`).join("\n")
   }
 }
