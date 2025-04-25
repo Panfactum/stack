@@ -24,6 +24,8 @@ export async function setupCertificateIssuers(
 ) {
   const { awsProfile, clusterPath, context, domains, environment, region } = options;
 
+  const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
+
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
     context,
@@ -160,6 +162,10 @@ export async function setupCertificateIssuers(
                         )
                         .optional(),
                       update: () => domains,
+                    }),
+                    kube_domain: defineInputUpdate({
+                      schema: z.string(),
+                      update: () => kubeDomain,
                     }),
                   },
                 }),
