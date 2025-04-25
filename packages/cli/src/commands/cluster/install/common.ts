@@ -5,8 +5,7 @@ export interface InstallClusterStepOptions {
   clusterPath: string;
   environmentPath: string;
   environment: string;
-  environmentDomain: string;
-  kubeDomain: string;
+  domains: Record<string, { zone_id: string; record_manager_role_arn: string; }>;
   region: string;
   context: PanfactumContext;
   slaTarget: 1 | 2 | 3;

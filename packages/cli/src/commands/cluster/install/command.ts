@@ -1,10 +1,16 @@
 import path, { join } from "node:path";
+import { select, input } from "@inquirer/prompts";
+import { Glob } from "bun";
 import { Command } from "clipanion";
+import { z } from "zod";
+import { applyColors } from "@/util/colors/applyColors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist";
 import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import { MODULES } from "@/util/terragrunt/constants";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
 import { setupCertificateIssuers } from "./setupCertIssuers";
@@ -20,6 +26,67 @@ import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { InstallClusterStepOptions } from "./common";
+
+// Ripped from https://github.com/validatorjs/validator.js and customized for our needs
+function isFQDN(str: string) {
+  const parts = str.split('.');
+  const tld = parts[parts.length - 1];
+
+  if (!tld) {
+    return false;
+  }
+
+  // disallow fqdns without tld
+  if (parts.length < 2) {
+    return false;
+  }
+
+  // disallow invalid TLDs
+  if (!/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)) {
+    return false;
+  }
+
+  // disallow spaces
+  if (/\s/.test(tld)) {
+    return false;
+  }
+
+
+  // reject numeric TLDs
+  if (/^\d+$/.test(tld)) {
+    return false;
+  }
+
+  return parts.every((part) => {
+    // disallow parts longer than 63 characters
+    if (part.length > 63) {
+      return false;
+    }
+
+    // disallow parts with invalid characters
+    if (!/^[a-z_\u00a1-\uffff0-9-]+$/i.test(part)) {
+      return false;
+    }
+
+    // disallow full-width chars
+    if (/[\uff01-\uff5e]/.test(part)) {
+      return false;
+    }
+
+    // disallow parts starting or ending with hyphen
+    if (/^-|-$/.test(part)) {
+      return false;
+    }
+
+    // disallow underscores
+    // eslint-disable-next-line sonarjs/prefer-single-boolean-return
+    if (/_/.test(part)) {
+      return false;
+    }
+
+    return true;
+  });
+}
 
 const SETUP_STEPS: Array<{
   label: string;
@@ -156,11 +223,19 @@ export class InstallClusterCommand extends PanfactumCommand {
 
     const {
       aws_profile: awsProfile,
+      domains,
       environment,
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
     } = config;
+
+    if (!domains) {
+      throw new CLIError([
+        "At least one domain must be available in the environment to install a cluster.",
+        "Please run `pf env add -e {environment}` to add a domain to the environment.",
+      ]);
+    }
 
     if (!environment || !region || !awsProfile) {
       throw new CLIError([
@@ -169,10 +244,6 @@ export class InstallClusterCommand extends PanfactumCommand {
         "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
       ]);
     }
-
-
-    // TODO: verify at least one domain available in environment
-    // tell them to run `pf env add -e {environment}` if not
 
     const environmentPath = path.join(
       this.context.repoVariables.environments_dir,
@@ -189,16 +260,60 @@ export class InstallClusterCommand extends PanfactumCommand {
       slaTarget,
     });
 
-    // TODO: decide domain for the cluster
-    // Two steps:
-    //  (1) Which ancestor domain
-    //  (2) What is the subdomain for the cluster (explain that all cluster utilities (vault, etc.) will be hosted under this)
-    //      provide recommendation
-    // Validation:
-    // - MUST be valid DNS string
-    // - MUST not be taken by another cluster (verify against ALL environments/clusters)
-    //
-    // Saved under `kube_domain` for the region
+    if (!kubeDomain) {
+      const subdomain: string = await select({
+        message:
+          applyColors(
+            "Select the domain your cluster will live under", { style: "question" }
+          ),
+        choices: Object.keys(domains),
+      });
+
+      const kubeDomain = await input({
+        message: applyColors("Enter the subdomain for the cluster where all cluster utilities will be hosted", { style: "question" }),
+        default: `${region}.${subdomain}`,
+        validate: async (value) => {
+          if (!isFQDN(`${value}.${subdomain}`)) {
+            return "Invalid subdomain";
+          }
+          try {
+            const glob = new Glob('**/region.yaml')
+            // Find all region.yaml files across all environments
+            const regionFiles = Array.from(glob.scanSync(environmentPath));
+
+            for (const regionFile of regionFiles) {
+              // Skip checking the current cluster's region.yaml
+              if (regionFile === join(clusterPath, "region.yaml")) continue;
+
+              // Read and parse the region.yaml file
+              const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) });
+
+              // Check if this region.yaml has a kube_domain that matches our proposed domain
+              if (yamlContent && yamlContent.kube_domain === `${value}.${subdomain}`) {
+                return `Domain ${value}.${subdomain} is already used by another cluster`;
+              }
+            }
+          } catch (error) {
+            this.context.logger.log(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`, { level: "debug" });
+            // Continue even if there's an error reading files
+          }
+
+          return true;
+        },
+        transformer: (value) => {
+          return `${value}.${subdomain}`;
+        },
+        required: true,
+      })
+
+      await upsertConfigValues({
+        filePath: join(clusterPath, "region.yaml"),
+        values: {
+          kube_domain: `${kubeDomain}.${subdomain}`,
+        },
+        context: this.context,
+      });
+    }
 
     /***********************************************
      * Main Setup Driver
@@ -210,10 +325,8 @@ export class InstallClusterCommand extends PanfactumCommand {
       awsProfile,
       context: this.context,
       environment,
-      environmentDomain,
+      domains,
       environmentPath,
-      // TODO: Remove this once we have a user defined and validated kubeDomain
-      kubeDomain: kubeDomain!,
       region,
       clusterPath,
       slaTarget: confirmedSLATarget,
