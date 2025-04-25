@@ -1,7 +1,7 @@
 import { join } from "node:path"
 import { GetRoleCommand, IAMClient, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk/client-iam";
 import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { search , input } from "@inquirer/prompts";
+import { search, input } from "@inquirer/prompts";
 import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import { stringify, parse } from "yaml";
@@ -40,7 +40,7 @@ export async function bootstrapEnvironment(inputs: {
 
     context.logger.log(
         "🛈  Now that account is provisioned, we will configure it for management via infrastructure-as-code.",
-        {trailingNewlines: 1, leadingNewlines: 1}
+        { trailingNewlines: 1, leadingNewlines: 1 }
     )
 
     interface TaskCtx {
@@ -302,6 +302,8 @@ export async function bootstrapEnvironment(inputs: {
                     if (error instanceof Error && error.name === 'NotFound') {
                         ctx.bucketName = proposedBucketName;
                         ctx.locktableName = proposedBucketName;
+
+                        // TODO @jack - retry loop - fails in af-south-1 for some reason? 
                     } else {
                         throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
                     }
@@ -354,7 +356,7 @@ export async function bootstrapEnvironment(inputs: {
                             throw new CLIError("S3 service did not activate after multiple attempts. The AWS account may still be provisioning S3 access.", error);
                         }
                     } else {
-                         // If it's some other error, S3 service is likely active but there's another issue
+                        // If it's some other error, S3 service is likely active but there's another issue
                         // so we can continue safely
                         break;
                     }
@@ -362,7 +364,7 @@ export async function bootstrapEnvironment(inputs: {
             }
 
             if (bucketCreated) {
-                task.title =applyColors(`S3 service is active Cleaning up test bucket`, {highlights: [{phrase: "Cleaning up test bucket", style: "subtle"}]})
+                task.title = applyColors(`S3 service is active Cleaning up test bucket`, { highlights: [{ phrase: "Cleaning up test bucket", style: "subtle" }] })
                 let deleteRetries = 0;
                 const maxDeleteRetries = 10;
                 while (deleteRetries < maxDeleteRetries) {
@@ -377,8 +379,8 @@ export async function bootstrapEnvironment(inputs: {
                             context.logger.log(`Failed to delete dummy bucket ${dummyBucketName} after ${maxDeleteRetries} attempts: ${JSON.stringify(e)}`);
                         } else {
                             context.logger.log(`Retry ${deleteRetries}/${maxDeleteRetries} deleting dummy bucket ${dummyBucketName}`);
-                            const delay = Math.min(15000, 1000 * Math.pow(2, deleteRetries)) + 
-                                         (Math.random() * 1000);
+                            const delay = Math.min(15000, 1000 * Math.pow(2, deleteRetries)) +
+                                (Math.random() * 1000);
                             await new Promise((resolve) => {
                                 globalThis.setTimeout(resolve, delay);
                             });
@@ -552,17 +554,17 @@ export async function bootstrapEnvironment(inputs: {
             enabled: (ctx) => Boolean(ctx.accountName),
             task: async (ctx, task) => {
                 ctx.accountName = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                    message: applyColors('Unique Account Alias:', {style: "question"}),
+                    message: applyColors('Unique Account Alias:', { style: "question" }),
                     required: true,
                     validate: async (value) => {
                         const { error } = AWS_ACCOUNT_ALIAS_SCHEMA.safeParse(value)
                         if (error) {
-                            return applyColors(error.issues[0]?.message ?? "Invalid account name", {style: "error"})
+                            return applyColors(error.issues[0]?.message ?? "Invalid account name", { style: "error" })
                         }
 
                         const response = await globalThis.fetch(`https://${value}.signin.aws.amazon.com`)
                         if (response.status !== 404) {
-                            return applyColors(`Every account must have a globally unique name. Name is already taken.`, {style: "error"})
+                            return applyColors(`Every account must have a globally unique name. Name is already taken.`, { style: "error" })
                         }
                         return true
                     }
@@ -585,7 +587,7 @@ export async function bootstrapEnvironment(inputs: {
             inputUpdates: {
                 alias: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.accountId!
+                    update: (_, ctx) => ctx.accountName!
                 })
             },
             imports: {
@@ -597,19 +599,19 @@ export async function bootstrapEnvironment(inputs: {
                                 region: GLOBAL_REGION,
                                 credentials
                             });
-                            
+
                             const getRoleCommand = new GetRoleCommand({
                                 RoleName: 'AWSServiceRoleForEC2Spot'
                             });
-                            
+
                             await iamClient.send(getRoleCommand);
                             return true;
                         } catch (error) {
                             if (error instanceof NoSuchEntityException) {
                                 return false;
-                            } else{
+                            } else {
                                 // For any other error, swallow it, just in case we can recover
-                                context.logger.log(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`, {level: "debug"})
+                                context.logger.log(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`, { level: "debug" })
                                 return false;
                             }
                         }
