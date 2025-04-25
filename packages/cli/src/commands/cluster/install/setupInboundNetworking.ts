@@ -226,7 +226,7 @@ export async function setupInboundNetworking(
             ctx.vaultDomain = data.extra_inputs.vault_domain;
 
             let attempts = 0;
-            const maxAttempts = 30;
+            const maxAttempts = 60;
             const retryDelay = 10000;
 
             while (attempts < maxAttempts) {
