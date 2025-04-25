@@ -26,7 +26,7 @@ export async function setupInboundNetworking(
     awsProfile,
     context,
     environment,
-    environmentDomain,
+    kubeDomain,
     clusterPath,
     region,
     slaTarget,
@@ -86,7 +86,6 @@ export async function setupInboundNetworking(
               "secrets.yaml"
             );
 
-            // TODO: @seth Check if this works with this multi-line string
             await sopsUpsert({
               context,
               filePath: secretsPath,
@@ -115,7 +114,8 @@ export async function setupInboundNetworking(
                   inputUpdates: {
                     ingress_domains: defineInputUpdate({
                       schema: z.array(z.string()),
-                      update: () => [environmentDomain],
+                      // TODO: Make sure kubeDomain gets here correctly
+                      update: () => [kubeDomain],
                     }),
                     sla_level: defineInputUpdate({
                       schema: z.number(),
@@ -159,15 +159,19 @@ export async function setupInboundNetworking(
               filePath: moduleYAMLPath,
               context,
               validationSchema: z.object({
-                vault_addr: z.string(),
+                extra_inputs: z.object({
+                  ingress_enabled: z.boolean(),
+                  vault_domain: z.string(),
+                  wait: z.boolean(),
+                }),
               }),
               throwOnMissing: true,
             });
 
-            ctx.vaultDomain = data!.vault_addr;
+            ctx.vaultDomain = data!.extra_inputs.vault_domain;
 
             await execute({
-              command: ["delv", "@1.1.1.1", data!.vault_addr],
+              command: ["delv", "@1.1.1.1", data!.extra_inputs.vault_domain],
               context,
               workingDirectory: join(clusterPath, MODULES.KUBE_VAULT),
               retries: 30,

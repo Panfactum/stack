@@ -13,8 +13,4 @@ dependency "aws_vpc" {
 
 inputs = {
   vpc_id = dependency.aws_vpc.outputs.vpc_id
-  subnets = [
-    "PUBLIC_A",
-    "PUBLIC_B"
-  ]
 }
