@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-account": "^3.794.0",
+    "@aws-sdk/client-ec2": "^3.796.0",
     "@aws-sdk/client-iam": "^3.787.0",
     "@aws-sdk/client-organizations": "^3.787.0",
     "@aws-sdk/client-route-53": "^3.787.0",

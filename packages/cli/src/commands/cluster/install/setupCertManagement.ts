@@ -59,8 +59,6 @@ export async function setupCertManagement(
             ctx.vaultProxyPort = port;
           },
         },
-
-        // TODO: @seth - Why nested?
         {
           task: async (ctx, task) => {
             return task.newListr<Context>(

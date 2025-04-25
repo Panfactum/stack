@@ -15,6 +15,7 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 
@@ -58,9 +59,10 @@ export async function setupVault(
   options: InstallClusterStepOptions,
   completed: boolean
 ) {
-  const { awsProfile, context, environment, clusterPath, kubeDomain, region } =
+  const { awsProfile, context, environment, clusterPath, region } =
     options;
 
+  const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
   const vaultDomain = `vault.${kubeDomain}`;
 
   const tasks = new Listr([]);

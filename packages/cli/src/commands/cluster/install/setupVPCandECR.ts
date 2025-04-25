@@ -2,7 +2,6 @@ import path from "node:path";
 import { input, password } from "@inquirer/prompts";
 import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
-import pc from "picocolors";
 import { z } from "zod";
 import { vpcNetworkTest } from "@/commands/aws/vpc-network-test/vpcNetworkTest";
 import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
@@ -65,7 +64,6 @@ const VPC_NAME = z
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
   );
 
-// TODO: @seth - Replace `pc` with `applyColors`
 export async function setupVPCandECR(
   options: InstallClusterStepOptions,
   completed: boolean
@@ -125,7 +123,7 @@ export async function setupVPCandECR(
             ctx.vpcName = await task
               .prompt(ListrInquirerPromptAdapter)
               .run(input, {
-                message: pc.magenta("Enter a name for your VPC:"),
+                message: applyColors("Enter a name for your VPC:", { style: "question" }),
                 default: `panfactum-${environment}-${region}`,
                 required: true,
                 validate: async (value) => {
@@ -133,7 +131,6 @@ export async function setupVPCandECR(
                   if (error) {
                     return error?.issues[0]?.message ?? "Invalid name";
                   } else {
-
                     // FIX: @seth - Use AWS SDK
                     const vpcListCommand = [
                       "aws",
@@ -199,7 +196,7 @@ export async function setupVPCandECR(
             ctx.vpcDescription = await task
               .prompt(ListrInquirerPromptAdapter)
               .run(input, {
-                message: pc.magenta("Enter a description for your VPC:"),
+                message: applyColors("Enter a description for your VPC:", { style: "question" }),
                 default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
                 required: true,
                 validate: (value) => {
@@ -291,10 +288,11 @@ export async function setupVPCandECR(
               dhPAT = await task
                 .prompt(ListrInquirerPromptAdapter)
                 .run(password, {
-                  message: pc.magenta(
+                  message: applyColors(
                     `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\n` +
                     `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n` +
-                    `${pc.red("This will be encrypted and stored securely")}:`
+                    `This will be encrypted and stored securely:`,
+                    { style: "question", highlights: [{ phrase: "This will be encrypted and stored securely", style: "important" }] }
                   ),
                   mask: true,
                   validate: async (value) => {
@@ -344,10 +342,11 @@ export async function setupVPCandECR(
               ghPAT = await task
                 .prompt(ListrInquirerPromptAdapter)
                 .run(password, {
-                  message: pc.magenta(
+                  message: applyColors(
                     `Enter your classic GitHub Personal Access Token with 'read:packages' scope\n` +
                     `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n` +
-                    `${pc.red("This will be encrypted and stored securely")}:`
+                    `This will be encrypted and stored securely:`,
+                    { style: "question", highlights: [{ phrase: "This will be encrypted and stored securely", style: "important" }] }
                   ),
                   mask: true,
                   validate: async (value) => {

@@ -15,13 +15,13 @@ import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
 import { setupCertificateIssuers } from "./setupCertIssuers";
 import { setupCertManagement } from "./setupCertManagement";
+import { setupClusterExtensions } from "./setupClusterExtensions";
 import { setupCSIDrivers } from "./setupCSIDrivers";
 import { setupEKS } from "./setupEKS";
 import { setupInboundNetworking } from "./setupInboundNetworking";
 import { setupInternalClusterNetworking } from "./setupInternalClusterNetworking";
 import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
-import { setupSupportServices } from "./setupSupportServices";
 import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
@@ -168,25 +168,19 @@ const SETUP_STEPS: Array<{
       completed: false,
       lastModule: MODULES.KUBE_SCHEDULER,
     },
-    // TODO: @seth - It feels like inbound networking should come
-    // ASAP b/c getting vault off of the vault proxy
-    // is critical for reliability of the install
-    // The proxy is fairly flaky and can cause disruptions
-    // if the connected vault pod restarts for some reason.
-    // This will start to occur more frequently immediately after enabling autoscaling
-    {
-      label: "Support Services",
-      id: "setupSupportServices",
-      setup: setupSupportServices,
-      completed: false,
-      lastModule: MODULES.KUBE_RELOADER,
-    },
     {
       label: "Inbound Networking",
       id: "setupInboundNetworking",
       setup: setupInboundNetworking,
       completed: false,
       lastModule: MODULES.KUBE_INGRESS_NGINX,
+    },
+    {
+      label: "Cluster Extensions",
+      id: "setupClusterExtensions",
+      setup: setupClusterExtensions,
+      completed: false,
+      lastModule: MODULES.KUBE_RELOADER,
     },
   ];
 

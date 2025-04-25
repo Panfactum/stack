@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { Listr } from "listr2";
 import { z } from "zod";
+import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeNginxIngressTerragruntHcl from "@/templates/kube_ingress_nginx_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
@@ -26,7 +27,6 @@ export async function setupInboundNetworking(
     awsProfile,
     context,
     environment,
-    kubeDomain,
     clusterPath,
     region,
     slaTarget,
@@ -41,6 +41,8 @@ export async function setupInboundNetworking(
       root_token: z.string(),
     }),
   });
+
+  const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
   tasks.add({
     skip: () => completed,
@@ -106,6 +108,29 @@ export async function setupInboundNetworking(
                   },
                   environment,
                   region,
+                  module: MODULES.KUBE_AWS_LB_CONTROLLER,
+                  initModule: true,
+                  hclIfMissing: await Bun.file(awsLbController).text(),
+                  // TODO: @jack - This should come from the aws_eks module
+                  inputUpdates: {
+                    subnets: defineInputUpdate({
+                      schema: z.array(z.string()),
+                      update: () =>
+                        slaTarget === 1
+                          ? ["PUBLIC_A", "PUBLIC_B"]
+                          : ["PUBLIC_A", "PUBLIC_B", "PUBLIC_C"],
+                    }),
+                  },
+                }),
+                await buildDeployModuleTask({
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
                   module: MODULES.KUBE_INGRESS_NGINX,
                   initModule: true,
                   hclIfMissing: await Bun.file(
@@ -114,7 +139,6 @@ export async function setupInboundNetworking(
                   inputUpdates: {
                     ingress_domains: defineInputUpdate({
                       schema: z.array(z.string()),
-                      // TODO: Make sure kubeDomain gets here correctly
                       update: () => [kubeDomain],
                     }),
                     sla_level: defineInputUpdate({
@@ -200,17 +224,15 @@ export async function setupInboundNetworking(
                 vault_addr: `https://${ctx.vaultDomain}`,
               },
             });
-
-            // FIX: @seth - This isn't going to run anything as is, so I believe this is a bug
-            await buildDeployModuleTask({
-              context,
-              environment,
-              region,
-              module: MODULES.VAULT_CORE_RESOURCES,
-              initModule: false,
-            });
           },
         },
+        await buildDeployModuleTask({
+          context,
+          environment,
+          region,
+          module: MODULES.VAULT_CORE_RESOURCES,
+          initModule: false,
+        }),
         {
           title: "Stop Vault Proxy",
           task: async (ctx) => {

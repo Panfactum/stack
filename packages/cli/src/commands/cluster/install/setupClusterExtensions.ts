@@ -1,7 +1,6 @@
 import { join } from "node:path";
 import { Listr } from "listr2";
 import { z } from "zod";
-import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeBastionTerragruntHcl from "@/templates/kube_bastion_terragrunt.hcl" with { type: "file" };
 import postgresTerragruntHcl from "@/templates/kube_cloudnative_pg_terragrunt.hcl" with { type: "file" };
 import kubeDeschedulerTerragruntHcl from "@/templates/kube_descheduler_terragrunt.hcl" with { type: "file" };
@@ -16,20 +15,17 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
-import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
-import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
-  defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
 
-export async function setupSupportServices(
+export async function setupClusterExtensions(
   options: InstallClusterStepOptions,
   completed: boolean
 ) {
-  const { awsProfile, context, environment, clusterPath, region, slaTarget } =
+  const { awsProfile, context, environment, clusterPath, region } =
     options;
 
   const tasks = new Listr([]);
@@ -44,7 +40,7 @@ export async function setupSupportServices(
 
   tasks.add({
     skip: () => completed,
-    title: "Deploy Support Services", // TODO: @seth - I don't like the term "Support Services"
+    title: "Deploy Cluster Extensions",
     task: async (_, parentTask) => {
       interface Context {
         vaultProxyPid?: number;
@@ -58,24 +54,9 @@ export async function setupSupportServices(
           },
         },
         {
-          title: "Start Vault Proxy",
-          task: async (ctx) => {
-            const { pid, port } = await startVaultProxy({
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              modulePath: join(clusterPath, MODULES.KUBE_AWS_LB_CONTROLLER),
-            });
-            ctx.vaultProxyPid = pid;
-            ctx.vaultProxyPort = port;
-          },
-        },
-        {
           task: async (ctx, parentTask) => {
             return parentTask.newListr(
               [
-                // @seth - Why would this not be in the inbound networking section?
                 {
                   task: async (ctx, parentTask) => {
                     return parentTask.newListr(
@@ -84,30 +65,6 @@ export async function setupSupportServices(
                           context,
                           env: {
                             ...process.env,
-                            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                            VAULT_TOKEN: vaultRootToken,
-                          },
-                          environment,
-                          region,
-                          module: MODULES.KUBE_AWS_LB_CONTROLLER,
-                          initModule: true,
-                          hclIfMissing: await Bun.file(awsLbController).text(),
-                          // TODO: @jack - This should come from the aws_eks module
-                          inputUpdates: {
-                            subnets: defineInputUpdate({
-                              schema: z.array(z.string()),
-                              update: () =>
-                                slaTarget === 1
-                                  ? ["PUBLIC_A", "PUBLIC_B"]
-                                  : ["PUBLIC_A", "PUBLIC_B", "PUBLIC_C"],
-                            }),
-                          },
-                        }),
-                        await buildDeployModuleTask({
-                          context,
-                          env: {
-                            ...process.env,
-                            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                             VAULT_TOKEN: vaultRootToken,
                           },
                           environment,
@@ -139,7 +96,6 @@ export async function setupSupportServices(
                           context,
                           env: {
                             ...process.env,
-                            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                             VAULT_TOKEN: vaultRootToken,
                           },
                           environment,
@@ -154,7 +110,6 @@ export async function setupSupportServices(
                           context,
                           env: {
                             ...process.env,
-                            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                             VAULT_TOKEN: vaultRootToken,
                           },
                           environment,
@@ -174,7 +129,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -187,7 +141,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -202,7 +155,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -217,7 +169,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -232,7 +183,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -247,7 +197,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -260,7 +209,6 @@ export async function setupSupportServices(
                   context,
                   env: {
                     ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                     VAULT_TOKEN: vaultRootToken,
                   },
                   environment,
@@ -274,14 +222,6 @@ export async function setupSupportServices(
               ],
               { ctx, concurrent: true }
             );
-          },
-        },
-        {
-          title: "Stop Vault Proxy",
-          task: async (ctx) => {
-            if (ctx.vaultProxyPid) {
-              killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
-            }
           },
         },
       ]);
