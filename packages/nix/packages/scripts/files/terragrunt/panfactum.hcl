@@ -12,49 +12,9 @@ locals {
   # see https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables
   ############################################################################################
 
-  global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), {})
-  global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), {})
-  global_vars         = merge({}, local.global_raw_vars, local.global_user_vars)
-  global_extra_tags   = lookup(local.global_vars, "extra_tags", {})
-  global_extra_inputs = lookup(local.global_vars, "extra_inputs", {})
-
-  environment_raw_vars     = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), {})
-  environment_user_vars    = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), {})
-  environment_vars         = merge({}, local.environment_raw_vars, local.environment_user_vars)
-  environment_extra_tags   = lookup(local.environment_vars, "extra_tags", {})
-  environment_extra_inputs = lookup(local.environment_vars, "extra_inputs", {})
-
-  region_raw_vars     = try(yamldecode(file(find_in_parent_folders("region.yaml"))), {})
-  region_user_vars    = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), {})
-  region_vars         = merge({}, local.region_raw_vars, local.region_user_vars)
-  region_extra_tags   = lookup(local.region_vars, "extra_tags", {})
-  region_extra_inputs = lookup(local.region_vars, "extra_inputs", {})
-
-  module_raw_vars     = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), {})
-  module_user_vars    = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), {})
-  module_vars         = merge({}, local.module_raw_vars, local.module_user_vars)
-  module_extra_tags   = lookup(local.module_vars, "extra_tags", {})
-  module_extra_inputs = lookup(local.module_vars, "extra_inputs", {})
-
-  # Merge all of the vars with order of precedence
-  vars = merge(
-    local.global_vars,
-    local.environment_vars,
-    local.region_vars,
-    local.module_vars
-  )
-  extra_tags = merge(
-    local.global_extra_tags,
-    local.environment_extra_tags,
-    local.region_extra_tags,
-    local.module_extra_tags
-  )
-  extra_inputs = merge(
-    local.global_extra_inputs,
-    local.environment_extra_inputs,
-    local.region_extra_inputs,
-    local.module_extra_inputs
-  )
+  vars = jsondecode(run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "config", "get"))
+  extra_inputs = local.vars.extra_inputs
+  extra_tags = local.vars.extra_tags
 
   ############################################################################################
   # Provider Activation
@@ -185,7 +145,7 @@ locals {
   # Kubernetes Connection
   ############################################################################################
   kube_api_server     = try(local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server, "")
-  kube_config_context = try(local.is_ci ? "ci" : local.vars.kube_config_context, "")
+  kube_config_context = try(local.is_ci ? "ci" : local.kube_api_server == "" ? "" : local.vars.kube_config_context, "")
 
   ############################################################################################
   # Miscellaneous
@@ -436,12 +396,12 @@ remote_state {
   }
 
   config = {
-    profile        = local.is_ci ? "ci" : local.environment_vars.tf_state_profile
-    bucket         = local.environment_vars.tf_state_bucket
+    profile        = local.is_ci ? "ci" : local.vars.tf_state_profile
+    bucket         = local.vars.tf_state_bucket
     key            = "${local.repo_name}/${local.is_local ? "${local.local_dev_namespace}/" : ""}${path_relative_to_include()}/terraform.tfstate"
-    region         = local.environment_vars.tf_state_region
+    region         = local.vars.tf_state_region
     encrypt        = true
-    dynamodb_table = local.environment_vars.tf_state_lock_table
+    dynamodb_table = local.vars.tf_state_lock_table
   }
 }
 
