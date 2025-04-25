@@ -365,7 +365,6 @@ export async function registerDomain(inputs: {
     tasks.add(
         {
             title: `Submitting registration request to AWS`,
-            skip: true,
             task: async (ctx, task) => {
                 try {
 
