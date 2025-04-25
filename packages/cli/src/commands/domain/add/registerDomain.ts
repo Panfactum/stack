@@ -4,30 +4,30 @@ import { AccountClient, GetContactInformationCommand } from "@aws-sdk/client-acc
 import {
     Route53Client,
     ListHostedZonesByNameCommand,
-    ListResourceRecordSetsCommand,
-    DeleteHostedZoneCommand,
     type HostedZone
 } from "@aws-sdk/client-route-53";
 import { ContactType, CountryCode, GetOperationDetailCommand, RegisterDomainCommand, ResendOperationAuthorizationCommand, Route53DomainsClient, type ContactDetail } from "@aws-sdk/client-route-53-domains";
-import { confirm, input, search } from "@inquirer/prompts";
+import { input, search } from "@inquirer/prompts";
+import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
-import { z } from "zod";
-import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
+import { z, ZodError } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { COUNTRY_CODES } from "@/commands/env/install/common";
+import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { applyColors } from "@/util/colors/applyColors";
-import { CLIError } from "@/util/error/error";
+import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
+import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { getDomainPrice } from "./getDomainPrice";
+import { isDomainAvailableFromAWS } from "./isDomainAvailableFromAWS";
+import { REGISTERED_DOMAINS_MODULE_OUTPUT_SCHEMA } from "./types";
 import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
-import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { COUNTRY_CODES } from "@/commands/env/install/common";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
-import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
-import type { DomainConfig } from "@/util/domains/tasks/types";
-import { isDomainAvailableFromAWS } from "./isDomainAvailableFromAWS";
-import { getDomainPrice } from "./getDomainPrice";
 
 // Constants for validation
 const MIN_NAME_LENGTH = 2;
@@ -58,6 +58,11 @@ export async function registerDomain(inputs: {
 }): Promise<DomainConfig> {
     const { context, env, domain, tld } = inputs;
 
+    const domainConfig: Partial<DomainConfig> = {
+        domain,
+        env,
+        module: MODULES.AWS_REGISTERED_DOMAINS,
+    }
 
     ////////////////////////////////////////////////////////
     // Verify the domain is available -- TODO: Make a part of the task list
@@ -579,6 +584,30 @@ export async function registerDomain(inputs: {
         })
     )
 
+    //////////////////////////////////////////////////////////
+    // Get the modules outputs
+    //////////////////////////////////////////////////////////
+    tasks.add({
+        title: "Get DNS zone metadata",
+        task: async () => {
+            const moduleOutput = await terragruntOutput({
+                context,
+                environment: env.name,
+                region: GLOBAL_REGION,
+                module: MODULES.AWS_REGISTERED_DOMAINS,
+                validationSchema: REGISTERED_DOMAINS_MODULE_OUTPUT_SCHEMA,
+            });
+
+            const zoneInfo = moduleOutput.zones.value[domain]
+
+            if (!zoneInfo) {
+                throw new CLIError(`Could not find zone for ${domain} in module outputs`)
+            }
+            domainConfig.zoneId = zoneInfo.zone_id
+            domainConfig.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
+        }
+    })
+
     ///////////////////////////////////////////////////////
     // Add to clusters
     ///////////////////////////////////////////////////////
@@ -588,19 +617,33 @@ export async function registerDomain(inputs: {
     //////////////////////////////////////////////////////////
     // Run the registration
     //////////////////////////////////////////////////////////
-    context.logger.log(
-        applyColors(`Registering ${domain}...`, { highlights: [domain] }),
-        { trailingNewlines: 1, leadingNewlines: 1 }
-    )
-    await tasks.run();
 
-    context.logger.log(
-        applyColors(
-            `${domain} registered in ${env.name} successfully!`,
-            { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
-            {trailingNewlines: 1}
-    )
+    try {
+        context.logger.log(
+            applyColors(`Registering ${domain}...`, { highlights: [domain] }),
+            { trailingNewlines: 1, leadingNewlines: 1 }
+        )
+        await tasks.run();
+    
+        context.logger.log(
+            applyColors(
+                `${domain} registered in ${env.name} successfully!`,
+                { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
+                {trailingNewlines: 1}
+        )
+    } catch (e) {
+        throw new CLIError(`Failed to register domain ${domain}`, e)
+    }
 
+    try {
+        return validateDomainConfig(domainConfig)
+    } catch(e){
+        if(e instanceof ZodError){
+            throw new PanfactumZodError("Failed to parse domain config", "registerDomain", e)
+        } else {
+            throw new CLIError("Failed to parse domain config", e)
+        }
+    }
 }
 
 

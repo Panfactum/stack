@@ -76,5 +76,5 @@ export async function getIdentity(input: { context: PanfactumContext, profile: s
             throw new CLIError(`Failed to get identity for profile '${profile}'`, e)
         }
     }
-    throw new CLIError(`Failed to get identity for profile '${profile}'`, e)
+    throw new CLIError(`Failed to get identity for profile '${profile}'`)
 }

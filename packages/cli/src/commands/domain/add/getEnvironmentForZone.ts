@@ -1,16 +1,24 @@
-import type { PanfactumContext } from "@/context/context";
+import { confirm, input, search } from "@inquirer/prompts";
 import { applyColors } from "@/util/colors/applyColors";
-import { getEnvironments } from "@/util/config/getEnvironments";
+import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { CLIError } from "@/util/error/error";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
-import { confirm, input, search } from "@inquirer/prompts";
+import type { PanfactumContext } from "@/context/context";
 
 export async function getEnvironmentForZone(inputs: {
     context: PanfactumContext,
     domain: string,
     shouldBeProduction?: boolean
+    environmentMeta?: EnvironmentMeta
 }) {
-    const { context, domain, shouldBeProduction } = inputs;
+    const { context, domain, shouldBeProduction , environmentMeta} = inputs;
+
+    if(environmentMeta){
+        if(!environmentMeta.name.includes("prod") && shouldBeProduction){
+            await confirmIfNotProd(context, environmentMeta.name, domain)
+        }
+        return environmentMeta
+    }
 
     const environments = await getEnvironments(context)
     const possibleEnvironment = environments.filter(({ name }) => name !== MANAGEMENT_ENVIRONMENT)

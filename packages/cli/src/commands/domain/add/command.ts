@@ -1,32 +1,20 @@
-import { search, confirm, input, checkbox } from "@inquirer/prompts";
+import { confirm, input } from "@inquirer/prompts";
 import { Command, Option } from "clipanion";
+import { Listr } from "listr2";
+import { ZodError } from "zod";
 import { applyColors } from "@/util/colors/applyColors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
-import { CLIError } from "@/util/error/error";
-import { MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { DOMAIN } from "@/util/config/schemas";
-import { getEnvironmentForZone } from "./getEnvironmentForZone";
-import { Listr } from "listr2";
-import { getRegisteredDomainsTask } from "@/util/domains/tasks/getRegisteredDomainsTask";
-import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
 import { isRegistered } from "@/util/domains/isRegistered";
-import { terminalColumns } from 'terminal-columns'
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
-import { join } from "node:path"
-import { getIdentity } from "@/util/aws/getIdentity";
-import { Route53DomainsClient, CheckDomainAvailabilityCommand, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
-import { isDomainAvailableFromAWS } from "./isDomainAvailableFromAWS";
-import { getDomainPrice } from "./getDomainPrice";
-import { directoryExists } from "@/util/fs/directoryExist";
-import { registerDomain } from "./registerDomain";
-import { createDescendentZonesAndConnectToAncestor } from "./createDescendentZonesAndConnectToAncestor";
-import { manualZoneSetup } from "./manualZoneSetup";
-import pc from "picocolors";
-import { ZodError } from "zod";
-import { getEnvironmentsForSubzones } from "./getEnvironmentsForSubzones";
-import type { PanfactumContext } from "@/context/context";
+import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
+import { CLIError } from "@/util/error/error";
+import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
+import { createDescendentZones } from "./createDescendentZones";
 import { createEnvironmentSubzones } from "./createEnvironmentSubzones";
+import { getEnvironmentForZone } from "./getEnvironmentForZone";
+import { manualZoneSetup } from "./manualZoneSetup";
+import { registerDomain } from "./registerDomain";
 
 export class DomainAddCommand extends PanfactumCommand {
     static override paths = [["domain", "add"]];
@@ -47,8 +35,13 @@ export class DomainAddCommand extends PanfactumCommand {
         arity: 1
     });
 
+    forceIsRegistered: boolean | undefined = Option.Boolean("--force-is-registerd", {
+        description: "Use this to override our heuristic for determining whether the provided domain is already registered.",
+
+    })
+
     async execute() {
-        const { context, environment, domain } = this
+        const { context, environment, domain, forceIsRegistered = false } = this
 
         let newDomain = domain;
 
@@ -155,237 +148,241 @@ export class DomainAddCommand extends PanfactumCommand {
                 return domain === newDomain
             }) ?? []
 
-            
+
+        if (existingDomainConfig) {
+
+            // TODO: Verify if environment is different from the environment where the domain is deployed
+
+            context.logger.log(
+                applyColors(`You've already added ${newDomain} to ${existingDomainConfig.env.name}.`,
+                    { highlights: [newDomain, existingDomainConfig.env.name] }),
+                { trailingNewlines: 1, leadingNewlines: 1 }
+            )
+
+            ////////////////////////////////////////////////////////
+            // Environment subzones - Auto
+            ////////////////////////////////////////////////////////
+            await createEnvironmentSubzones({
+                context,
+                domain: newDomain,
+                existingDomainConfigs: domainConfigs
+            })
+
+        }
+
         /////////////////////////////////////////////////////////////////////////
         // Main Logic 
         /////////////////////////////////////////////////////////////////////////
 
         if (isApex) {
 
-            if (existingDomainConfig) {
-
-                // TODO: Verify if environment is different from the environment where the domain is deployed
-
+            ////////////////////////////////////////////////////////
+            // Check if domain is already registered
+            ////////////////////////////////////////////////////////
+            if (forceIsRegistered || await isRegistered({ domain: newDomain, context })) {
                 context.logger.log(
-                    applyColors(`You've already added ${newDomain} to ${existingDomainConfig.envName}.`, 
-                        { highlights: [newDomain, existingDomainConfig.envName] }),
+                    applyColors(`${newDomain} has been purchased but has not been added to Panfactum yet.`, {
+                        highlights: [
+                            { phrase: newDomain, style: "important" },
+                            { phrase: "not", style: "warning" }
+                        ]
+                    }),
                     { trailingNewlines: 1, leadingNewlines: 1 }
                 )
 
                 ////////////////////////////////////////////////////////
-                // Environment subzones - Auto
+                // Confirm the user is the owner
                 ////////////////////////////////////////////////////////
-                await createEnvironmentSubzones({context, ancestorDomainConfig: existingDomainConfig})  
 
-            } else {
+                const ownsDomain = await confirm({
+                    message: applyColors(`Are you the owner of ${newDomain}?`, { style: "question", highlights: [newDomain] }),
+                    default: true
+                })
 
-                ////////////////////////////////////////////////////////
-                // Check if domain is already registered
-                ////////////////////////////////////////////////////////
-                if (await isRegistered({ domain: newDomain, context })) {
+                if (!ownsDomain) {
                     context.logger.log(
-                        applyColors(`${newDomain} has been purchased but has not been added to Panfactum yet.`, {
-                            highlights: [
-                                { phrase: newDomain, style: "important" },
-                                { phrase: "not", style: "warning" }
-                            ]
-                        }),
+                        applyColors(`You cannot add ${newDomain} to Panfactum unless you own it.`, { highlights: [newDomain], style: "error" }),
                         { trailingNewlines: 1, leadingNewlines: 1 }
                     )
-
-                    ////////////////////////////////////////////////////////
-                    // Confirm the user is the owner
-                    ////////////////////////////////////////////////////////
-
-                    const ownsDomain = await confirm({
-                        message: applyColors(`Are you the owner of ${newDomain}?`, { style: "question", highlights: [newDomain] }),
-                        default: true
-                    })
-
-                    if (!ownsDomain) {
-                        context.logger.log(
-                            applyColors(`You cannot add ${newDomain} to Panfactum unless you own it.`, { highlights: [newDomain], style: "error" }),
-                            { trailingNewlines: 1, leadingNewlines: 1 }
-                        )
-                        return 1
-                    }
-
-                    ////////////////////////////////////////////////////////
-                    // Check whether the user wants Panfactum to host the domain
-                    ////////////////////////////////////////////////////////
-                    context.logger.log(
-                        applyColors(
-                            `In order for Panfactum infrastructure to run workloads that are accessible at\n` +
-                            `${newDomain}, Panfactum needs to host its DNS servers.`
-                            ,
-                            {
-                                highlights: [newDomain]
-                            }),
-                        { trailingNewlines: 1, leadingNewlines: 1 }
-                    )
-
-                    context.logger.log(
-                        applyColors(
-                            `WARNING: We do NOT recommend this if you are already hosting records under ${newDomain}\n` +
-                            `as this will invalidate existing DNS records.`,
-                            {
-                                style: "warning",
-                                highlights: [newDomain]
-                            }),
-                        { trailingNewlines: 1 }
-                    )
-
-                    context.logger.log(
-                        applyColors(
-                            `If you choose to skip this step, you can still run workloads under subdomains such\n` +
-                            `as <your_subdomain>.${domain}, but you should re-run with these arguments:\n\n`,
-                            {
-                                highlights: [`<your_subdomain>.${newDomain}`, newDomain]
-                            }) + `pf domain add -d <your_subdomain>.${newDomain}`,
-                        { trailingNewlines: 1 }
-                    )
-
-                    const shouldHostZone = await confirm({
-                        message: applyColors(`Would you like to configure Panfactum to host the DNS for ${newDomain}?`, { style: "question", highlights: [newDomain] }),
-                        default: true
-                    })
-
-                    if (shouldHostZone) {
-
-                        ////////////////////////////////////////////////////////
-                        // Zone Setup - Manual
-                        ////////////////////////////////////////////////////////
-                        if (!environmentMeta) {
-                            environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, shouldBeProduction: true })
-                        } else {
-                            // TODO: Verify production
-                        }
-
-                        ////////////////////////////////////////////////////////
-                        // Zone Setup - Manual
-                        ////////////////////////////////////////////////////////
-
-                        context.logger.log(
-                            applyColors(
-                                `Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`,
-                                {
-                                    highlights: [newDomain]
-                                }),
-                            { leadingNewlines: 1, trailingNewlines: 1 }
-                        )
-
-                        const apexConfig = await manualZoneSetup({ context, domain: newDomain, env: environmentMeta })
-
-                        ////////////////////////////////////////////////////////
-                        // Environment subzones - Auto
-                        ////////////////////////////////////////////////////////
-                        await createEnvironmentSubzones({context, ancestorDomainConfig: apexConfig})  
-
-                    } else {
-
-                        ////////////////////////////////////////////////////////
-                        // Environment subzones - Manual
-                        ////////////////////////////////////////////////////////
-
-                        // TODO
-                    }
-                } else {
-
-                    ////////////////////////////////////////////////////////
-                    // Confirm purchase
-                    ////////////////////////////////////////////////////////
-                    context.logger.log(
-                        applyColors(`${newDomain} has not been added to Panfactum, and it also has not yet been purchased.`, {
-                            highlights: [
-                                { phrase: newDomain, style: "important" },
-                                { phrase: "not", style: "warning" }
-                            ]
-                        }),
-                        { trailingNewlines: 1, leadingNewlines: 1 }
-                    )
-
-                    const shouldRegister = await confirm({
-                        message: applyColors(`Would you like to use Panfactum to purchase ${newDomain}?`, { style: "question", highlights: [newDomain] }),
-                        default: true
-                    })
-
-                    if (!shouldRegister) {
-                        context.logger.log(
-                            applyColors(
-                                `Cannot add ${newDomain} if it has not been purchased!\n\n` +
-                                `While you do not need to use this CLI to purchase the domain, you will need to purchase\n` +
-                                `it via an alternative mechanism such as the AWS web console:\n` +
-                                `https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html\n\n` +
-                                `Note that AWS does not support registering domains on all TLDs, so you may need to use an alternative registrar\n` +
-                                `such as https://www.namecheap.com/.\n\n` +
-                                `Either way, once you have purchased ${newDomain}, run this command to continue adding the domain to\n` +
-                                `this Panfactum installation:\n\n`, {
-                                style: "error",
-                                highlights: [
-                                    { phrase: newDomain, style: "important" }
-                                ]
-                            }) + `pf domain add -d ${newDomain} ${environmentMeta ? `-e ${environmentMeta.name}` : ""}`,
-                            { trailingNewlines: 1, leadingNewlines: 1 }
-                        )
-                        return 1
-                    }
-
-                    ////////////////////////////////////////////////////////
-                    // Choose environment
-                    ////////////////////////////////////////////////////////
-                    if (!environmentMeta) {
-                        environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, shouldBeProduction: true })
-                    } else {
-                        // TODO confirm production
-                    }
-
-                    ////////////////////////////////////////////////////////
-                    // Purchase the domain
-                    ////////////////////////////////////////////////////////
-                    const registeredDomainConfig = await registerDomain({ context, env: environmentMeta, domain: newDomain, tld })
-
-                    ////////////////////////////////////////////////////////
-                    // Setup environment zones - Auto
-                    ////////////////////////////////////////////////////////
-                    await createEnvironmentSubzones({context, ancestorDomainConfig: registeredDomainConfig})
+                    return 1
                 }
-            }
-        } else {
-
-            // FIX: This could be innaccurate if there are multiple ancestors
-            const [ancestorDomain, existingAncestorConfig] = Object.entries(domainConfigs)
-                .find(([domain]) => {
-                    return newDomain.endsWith(`.${domain}`)
-                }) ?? []
-
-
-            if (existingDomainConfig) {
 
                 ////////////////////////////////////////////////////////
-                // If subdomain and already connected, there is nothing to do.
+                // Check whether the user wants Panfactum to host the domain
                 ////////////////////////////////////////////////////////
                 context.logger.log(
                     applyColors(
-                        `You've already added ${newDomain} with ${existingDomainConfig.module} in ${existingDomainConfig.envName}.\n` +
-                        "Nothing more to do.",
-                        { highlights: [newDomain, existingDomainConfig.envName] }),
+                        `In order for Panfactum infrastructure to run workloads that are accessible at\n` +
+                        `${newDomain}, Panfactum needs to host its DNS servers.`
+                        ,
+                        {
+                            highlights: [newDomain]
+                        }),
                     { trailingNewlines: 1, leadingNewlines: 1 }
                 )
-                return 1;
 
-            } else if (ancestorDomain && existingAncestorConfig) {
+                context.logger.log(
+                    applyColors(
+                        `WARNING: We do NOT recommend this if you are already hosting records under ${newDomain}\n` +
+                        `as this will invalidate existing DNS records.`,
+                        {
+                            style: "warning",
+                            highlights: [newDomain]
+                        }),
+                    { trailingNewlines: 1 }
+                )
+
+                context.logger.log(
+                    applyColors(
+                        `If you choose to skip this step, you can still run workloads under subdomains such\n` +
+                        `as <your_subdomain>.${domain}, but you should re-run with these arguments:\n\n`,
+                        {
+                            highlights: [`<your_subdomain>.${newDomain}`, newDomain]
+                        }) + `pf domain add -d <your_subdomain>.${newDomain}`,
+                    { trailingNewlines: 1 }
+                )
+
+                const shouldHostZone = await confirm({
+                    message: applyColors(`Would you like to configure Panfactum to host the DNS for ${newDomain}?`, { style: "question", highlights: [newDomain] }),
+                    default: true
+                })
+
+                if (shouldHostZone) {
+
+                    ////////////////////////////////////////////////////////
+                    // Get environment
+                    ////////////////////////////////////////////////////////
+                    environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta, shouldBeProduction: true })
+
+                    ////////////////////////////////////////////////////////
+                    // Zone Setup - Manual
+                    ////////////////////////////////////////////////////////
+
+                    context.logger.log(
+                        applyColors(
+                            `Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`,
+                            {
+                                highlights: [newDomain]
+                            }),
+                        { leadingNewlines: 1, trailingNewlines: 1 }
+                    )
+
+                    const apexConfig = await manualZoneSetup({ context, domain: newDomain, env: environmentMeta })
+
+                    ////////////////////////////////////////////////////////
+                    // Environment subzones - Auto
+                    ////////////////////////////////////////////////////////
+                    await createEnvironmentSubzones({
+                        context,
+                        domain: newDomain,
+                        existingDomainConfigs: {
+                            ...domainConfigs,
+                            ...{
+                                [newDomain]: apexConfig
+                            }
+                        }
+                    })
+
+                } else {
+
+                    ////////////////////////////////////////////////////////
+                    // Environment subzones - Manual
+                    ////////////////////////////////////////////////////////
+                    await createEnvironmentSubzones({
+                        context,
+                        domain: newDomain,
+                        existingDomainConfigs: domainConfigs
+                    })
+                }
+            } else {
+
+                ////////////////////////////////////////////////////////
+                // Confirm purchase
+                ////////////////////////////////////////////////////////
+                context.logger.log(
+                    applyColors(`${newDomain} has not been added to Panfactum, and it also has not yet been purchased.`, {
+                        highlights: [
+                            { phrase: newDomain, style: "important" },
+                            { phrase: "not", style: "warning" }
+                        ]
+                    }),
+                    { trailingNewlines: 1, leadingNewlines: 1 }
+                )
+
+                const shouldRegister = await confirm({
+                    message: applyColors(`Would you like to use Panfactum to purchase ${newDomain}?`, { style: "question", highlights: [newDomain] }),
+                    default: true
+                })
+
+                if (!shouldRegister) {
+                    context.logger.log(
+                        applyColors(
+                            `Cannot add ${newDomain} if it has not been purchased!\n\n` +
+                            `While you do not need to use this CLI to purchase the domain, you will need to purchase\n` +
+                            `it via an alternative mechanism such as the AWS web console:\n` +
+                            `https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html\n\n` +
+                            `Note that AWS does not support registering domains on all TLDs, so you may need to use an alternative registrar\n` +
+                            `such as https://www.namecheap.com/.\n\n` +
+                            `Either way, once you have purchased ${newDomain}, run this command to continue adding the domain to\n` +
+                            `this Panfactum installation:\n\n`, {
+                            style: "error",
+                            highlights: [
+                                { phrase: newDomain, style: "important" }
+                            ]
+                        }) + `pf domain add -d ${newDomain} ${environmentMeta ? `-e ${environmentMeta.name}` : ""}`,
+                        { trailingNewlines: 1, leadingNewlines: 1 }
+                    )
+                    return 1
+                }
+
+                ////////////////////////////////////////////////////////
+                // Choose environment
+                ////////////////////////////////////////////////////////
+                environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta, shouldBeProduction: true })
+
+
+                ////////////////////////////////////////////////////////
+                // Purchase the domain
+                ////////////////////////////////////////////////////////
+                const registeredDomainConfig = await registerDomain({ context, env: environmentMeta, domain: newDomain, tld })
+
+                ////////////////////////////////////////////////////////
+                // Setup environment zones - Auto
+                ////////////////////////////////////////////////////////
+                await createEnvironmentSubzones({
+                    context,
+                    domain: newDomain,
+                    existingDomainConfigs: {
+                        ...domainConfigs,
+                        ...{
+                            [newDomain]: registeredDomainConfig
+                        }
+                    }
+                })
+            }
+
+        } else {
+
+            // Note that this handles the case where there could be multiple ancestors 
+            // (e.g., `a.prod.panfactum.com` has ancestors `prod.panfactum.com` and `panfactum.com`)
+            // For the below logic to work, we want to select "first" ancestor which will be the longest ancestor domain
+            const [ancestorDomain, existingAncestorConfig] = Object.entries(domainConfigs)
+                .filter(([domain]) => {
+                    return newDomain.endsWith(`.${domain}`)
+                })
+                .sort(([domainA], [domainB]) => domainB.length - domainA.length)[0] ?? []
+
+            if (ancestorDomain && existingAncestorConfig) {
                 ////////////////////////////////////////////////////////
                 // If subdomain and has ancestor configured with Panfactum,
                 // create a new zone for the subdomain and link to nearest ancestor
                 ////////////////////////////////////////////////////////
                 context.logger.log(
-                    applyColors(`Confirmed! You've already added its ancestor ${ancestorDomain} with ${existingAncestorConfig.module} in ${existingAncestorConfig.envName}.`, { highlights: [ancestorDomain, existingAncestorConfig.envName] }),
+                    applyColors(`Confirmed! You've already added its ancestor ${ancestorDomain} with ${existingAncestorConfig.module} in ${existingAncestorConfig.env.name}.`,
+                        { highlights: [ancestorDomain, existingAncestorConfig.env.name] }),
                     { leadingNewlines: 1 }
                 )
-
-                if (!environmentMeta) {
-                    environmentMeta = await getEnvironmentForZone({ context, domain: newDomain })
-                }
+                environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta })
 
                 ////////////////////////////////////////////////////////
                 // Connect with parent
@@ -399,7 +396,7 @@ export class DomainAddCommand extends PanfactumCommand {
                     { leadingNewlines: 1, trailingNewlines: 1 }
                 )
 
-                await createDescendentZonesAndConnectToAncestor({
+                await createDescendentZones({
                     context,
                     ancestorZone: existingAncestorConfig,
                     descendentZones: {
@@ -412,7 +409,7 @@ export class DomainAddCommand extends PanfactumCommand {
             } else {
 
                 context.logger.log(
-                    applyColors(`You haven't added ${newDomain} and any ancestor domains.`, { highlights: [newDomain] }),
+                    applyColors(`You haven't added ${newDomain} or any ancestor domains.`, { highlights: [newDomain] }),
                     { trailingNewlines: 1, leadingNewlines: 1 }
                 )
 
@@ -420,7 +417,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 // If no ancestor configured with Panfactum BUT the apex is registered,
                 // let's check to see if the user want to connect the apex to Panfactum.
                 ////////////////////////////////////////////////////////
-                if (await isRegistered({ domain: apexDomain, context })) {
+                if (forceIsRegistered || await isRegistered({ domain: apexDomain, context })) {
                     context.logger.log(
                         applyColors(`However, it appears the apex domain for ${newDomain} (${apexDomain}) has already been purchased.`, {
                             highlights: [
@@ -485,7 +482,7 @@ export class DomainAddCommand extends PanfactumCommand {
                         // Select environment for the apex domain - should be prod
                         ////////////////////////////////////////////////////////
                         const apexEnvironmentMeta = await getEnvironmentForZone({ context, domain: apexDomain, shouldBeProduction: true })
-                        
+
                         ////////////////////////////////////////////////////////
                         // Apex Zone Setup - Manual
                         ////////////////////////////////////////////////////////
@@ -494,10 +491,9 @@ export class DomainAddCommand extends PanfactumCommand {
                         ////////////////////////////////////////////////////////
                         // User-specified DNS Zone Setup - Auto
                         ////////////////////////////////////////////////////////
-                        if(!environmentMeta){
-                            environmentMeta = await getEnvironmentForZone({ context, domain: newDomain})
-                        }
-                        const domainConfigs = await createDescendentZonesAndConnectToAncestor({
+                        environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta })
+
+                        const descendentConfigs = await createDescendentZones({
                             context,
                             ancestorZone: apexConfig,
                             descendentZones: {
@@ -510,28 +506,41 @@ export class DomainAddCommand extends PanfactumCommand {
                         ////////////////////////////////////////////////////////
                         // Environment subzones for user-specified Zone - Auto
                         ////////////////////////////////////////////////////////
-                        const domainConfig = domainConfigs[newDomain]
-                        if(domainConfig){
-                            await createEnvironmentSubzones({context, ancestorDomainConfig: domainConfig })
-                        }
+                        await createEnvironmentSubzones({
+                            context,
+                            domain: newDomain,
+                            existingDomainConfigs: {
+                                ...domainConfigs,
+                                ...descendentConfigs
+                            },
+                        })
+
 
                     } else {
                         ////////////////////////////////////////////////////////
                         // Select environment for the new domain
                         ////////////////////////////////////////////////////////
-                        if(!environmentMeta){
-                            environmentMeta = await getEnvironmentForZone({ context, domain: newDomain})
-                        }
+                        environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta })
+
 
                         ////////////////////////////////////////////////////////
                         // User-specified Zone Setup - Manual
                         ////////////////////////////////////////////////////////
-                        const domainConfig = await manualZoneSetup({context, domain: newDomain, env: environmentMeta})
+                        const domainConfig = await manualZoneSetup({ context, domain: newDomain, env: environmentMeta })
 
                         ////////////////////////////////////////////////////////
                         //  Environment subzones for user-specified Zone - Auto
                         ////////////////////////////////////////////////////////
-                        await createEnvironmentSubzones({context, ancestorDomainConfig: domainConfig })
+                        await createEnvironmentSubzones({
+                            context,
+                            domain: newDomain,
+                            existingDomainConfigs: {
+                                ...domainConfigs,
+                                ...{
+                                    [newDomain]: domainConfig
+                                }
+                            }
+                        })
                     }
 
                 } else {
@@ -554,7 +563,7 @@ export class DomainAddCommand extends PanfactumCommand {
                         default: true
                     })
 
-                    if(!shouldPurchase){
+                    if (!shouldPurchase) {
                         context.logger.log(
                             applyColors(`You cannot add ${newDomain} to Panfactum unless you own its apex domain ${apexDomain}.`, { highlights: [newDomain, apexDomain], style: "error" }),
                             { trailingNewlines: 1, leadingNewlines: 1 }
@@ -575,14 +584,12 @@ export class DomainAddCommand extends PanfactumCommand {
                     ////////////////////////////////////////////////////////
                     // Select environment for the new domain
                     ////////////////////////////////////////////////////////
-                    if(!environmentMeta){
-                        environmentMeta = await getEnvironmentForZone({ context, domain: newDomain})
-                    }
+                    environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta })
 
                     ////////////////////////////////////////////////////////
                     // User-specified DNS Zone Setup - Auto
                     ////////////////////////////////////////////////////////
-                    const domainConfigs = await createDescendentZonesAndConnectToAncestor({
+                    const descendentConfigs = await createDescendentZones({
                         context,
                         ancestorZone: registeredDomainConfig,
                         descendentZones: {
@@ -595,10 +602,14 @@ export class DomainAddCommand extends PanfactumCommand {
                     ////////////////////////////////////////////////////////
                     // Environment Subzones Setup - Auto
                     ////////////////////////////////////////////////////////
-                    const domainConfig = domainConfigs[newDomain]
-                    if(domainConfig){
-                        await createEnvironmentSubzones({context, ancestorDomainConfig: domainConfig })
-                    }
+                    await createEnvironmentSubzones({
+                        context,
+                        domain: newDomain,
+                        existingDomainConfigs: {
+                            ...domainConfigs,
+                            ...descendentConfigs
+                        },
+                    })
                 }
             }
         }

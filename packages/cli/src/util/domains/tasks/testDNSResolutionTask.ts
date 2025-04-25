@@ -1,11 +1,11 @@
+import { ChangeResourceRecordSetsCommand, Route53Client } from "@aws-sdk/client-route-53"
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig"
-import type { PanfactumContext } from "@/context/context"
 import { getIdentity } from "@/util/aws/getIdentity"
 import { applyColors } from "@/util/colors/applyColors"
-import type { EnvironmentMeta } from "@/util/config/getEnvironments"
 import { CLIError } from "@/util/error/error"
 import { execute } from "@/util/subprocess/execute"
-import { ChangeResourceRecordSetsCommand, Route53Client } from "@aws-sdk/client-route-53"
+import type { PanfactumContext } from "@/context/context"
+import type { EnvironmentMeta } from "@/util/config/getEnvironments"
 import type { ListrTask } from "listr2"
 
 export async function testDNSResolutionTask<T extends {}>(inputs: {

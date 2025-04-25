@@ -1,25 +1,21 @@
-import { ChangeResourceRecordSetsCommand, Route53Client } from "@aws-sdk/client-route-53";
 import { Listr } from "listr2";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import awsDNSLinksModuleHCL from "@/templates/aws_dns_links.hcl" with { type: "file" };
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
-import { getIdentity } from "@/util/aws/getIdentity";
 import { applyColors } from "@/util/colors/applyColors";
-import { CLIError } from "@/util/error/error";
-import { execute } from "@/util/subprocess/execute";
+import { validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 
+import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
+import { testDNSResolutionTask } from "../../../util/domains/tasks/testDNSResolutionTask";
 import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
-import type { DomainConfig, DomainConfigs } from "@/util/domains/tasks/types";
-import { testDNSResolutionTask } from "./testDNSResolutionTask";
-import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
 
-export async function createDescendentZonesAndConnectToAncestor(inputs: {
+export async function createDescendentZones(inputs: {
     context: PanfactumContext,
     ancestorZone: DomainConfig,
     descendentZones: { [domain: string]: { env: EnvironmentMeta } }
@@ -27,9 +23,13 @@ export async function createDescendentZonesAndConnectToAncestor(inputs: {
 
     const { context, ancestorZone, descendentZones } = inputs;
 
-    interface ZoneInfo { [domain: string]: { zoneId?: string, env: EnvironmentMeta } }
-    const descendentZoneInfo: ZoneInfo = {...descendentZones}
     const tasks = new Listr([])
+    const domainConfigs: {[domain in keyof DomainConfigs]: Partial<DomainConfig>} = Object.fromEntries(Object.entries(descendentZones).map(([domain, {env}]) => ([domain, {
+        envDir: env.path,
+        envName: env.name,
+        module: MODULES.AWS_DNS_ZONES,
+        domain
+    }])))
 
     ///////////////////////////////////////////////////////
     // Connect zones
@@ -105,9 +105,10 @@ export async function createDescendentZonesAndConnectToAncestor(inputs: {
                                     throw new CLIError(`Could not find zone for ${domain} in module outputs`)
                                 }
 
-                                const domainInfo = descendentZoneInfo[domain]
-                                if(domainInfo){
-                                    domainInfo.zoneId = zoneInfo.zone_id
+                                const domainConfig = domainConfigs[domain]
+                                if(domainConfig){
+                                    domainConfig.zoneId = zoneInfo.zone_id
+                                    domainConfig.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
                                 }
                                
                                 ctx.nameServers = zoneInfo.name_servers
@@ -121,7 +122,7 @@ export async function createDescendentZonesAndConnectToAncestor(inputs: {
                         subsubtasks.add(
                             await buildDeployModuleTask<ConnectTask>({
                                 context,
-                                environment: ancestorZone.envName,
+                                environment: ancestorZone.env.name,
                                 region: GLOBAL_REGION,
                                 module: MODULES.AWS_DNS_LINKS,
                                 hclIfMissing: await Bun.file(awsDNSLinksModuleHCL).text(),
@@ -166,7 +167,7 @@ export async function createDescendentZonesAndConnectToAncestor(inputs: {
 
     tasks.add(await testDNSResolutionTask({
         context,
-        zones: descendentZoneInfo
+        zones: domainConfigs as DomainConfigs
     }))
 
     ///////////////////////////////////////////////////////
@@ -180,7 +181,17 @@ export async function createDescendentZonesAndConnectToAncestor(inputs: {
     try {
         await tasks.run()
     } catch (e) {
-        throw new CLIError("Failed to link ancestor and descendent DNS zones", e)
+        throw new CLIError("Failed to create descendent DNS zones", e)
+    }
+
+    try {
+        return validateDomainConfigs(domainConfigs)
+    } catch(e){
+        if (e instanceof ZodError){
+            throw new PanfactumZodError("Failed to parse domain configs", "createDescendentZones", e)
+        } else {
+            throw new CLIError("Failed to parse dependent zones", e)
+        }
     }
 
 }

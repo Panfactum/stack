@@ -4,5 +4,5 @@
  */
 export async function getRoot(): Promise<string> {
   const proc = Bun.spawn(["git", "rev-parse", "--show-toplevel"])
-  return (await new Response(proc.stdout).text()).trim()
+  return (await new globalThis.Response(proc.stdout).text()).trim()
 }
