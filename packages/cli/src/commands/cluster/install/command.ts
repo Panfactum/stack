@@ -31,91 +31,97 @@ const SETUP_STEPS: Array<{
   completed: boolean;
   lastModule: MODULES; // Used to determine if the step has been completed
 }> = [
-  {
-    label: "AWS VPC and ECR",
-    id: "setupVPCandECR",
-    setup: setupVPCandECR,
-    completed: false,
-    lastModule: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
-  },
-  {
-    label: "Base EKS Cluster",
-    id: "setupEKS",
-    setup: setupEKS,
-    completed: false,
-    lastModule: MODULES.AWS_EKS,
-  },
-  {
-    label: "Internal Cluster Networking",
-    id: "setupInternalClusterNetworking",
-    setup: setupInternalClusterNetworking,
-    completed: false,
-    lastModule: MODULES.KUBE_CORE_DNS,
-  },
-  {
-    label: "Policy Controller",
-    id: "setupPolicyController",
-    setup: setupPolicyController,
-    completed: false,
-    lastModule: MODULES.KUBE_POLICIES,
-  },
-  {
-    label: "CSI Drivers",
-    id: "setupCSIDrivers",
-    setup: setupCSIDrivers,
-    completed: false,
-    lastModule: MODULES.KUBE_AWS_EBS_CSI,
-  },
-  {
-    label: "Vault",
-    id: "setupVault",
-    setup: setupVault,
-    completed: false,
-    lastModule: MODULES.VAULT_CORE_RESOURCES,
-  },
-  {
-    label: "Certificate Management",
-    id: "setupCertManagement",
-    setup: setupCertManagement,
-    completed: false,
-    lastModule: MODULES.KUBE_CERT_MANAGER,
-  },
-  {
-    label: "Certificate Issuers",
-    id: "setupCertificateIssuers",
-    setup: setupCertificateIssuers,
-    completed: false,
-    lastModule: MODULES.KUBE_CERT_ISSUERS,
-  },
-  {
-    label: "Linkerd",
-    id: "setupLinkerd",
-    setup: setupLinkerd,
-    completed: false,
-    lastModule: MODULES.KUBE_LINKERD,
-  },
-  {
-    label: "Autoscaling",
-    id: "setupAutoscaling",
-    setup: setupAutoscaling,
-    completed: false,
-    lastModule: MODULES.KUBE_SCHEDULER,
-  },
-  {
-    label: "Support Services",
-    id: "setupSupportServices",
-    setup: setupSupportServices,
-    completed: false,
-    lastModule: MODULES.KUBE_RELOADER,
-  },
-  {
-    label: "Inbound Networking",
-    id: "setupInboundNetworking",
-    setup: setupInboundNetworking,
-    completed: false,
-    lastModule: MODULES.KUBE_INGRESS_NGINX,
-  },
-];
+    {
+      label: "AWS VPC and ECR",
+      id: "setupVPCandECR",
+      setup: setupVPCandECR,
+      completed: false,
+      lastModule: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
+    },
+    {
+      label: "Base EKS Cluster",
+      id: "setupEKS",
+      setup: setupEKS,
+      completed: false,
+      lastModule: MODULES.AWS_EKS,
+    },
+    {
+      label: "Internal Cluster Networking",
+      id: "setupInternalClusterNetworking",
+      setup: setupInternalClusterNetworking,
+      completed: false,
+      lastModule: MODULES.KUBE_CORE_DNS,
+    },
+    {
+      label: "Policy Controller",
+      id: "setupPolicyController",
+      setup: setupPolicyController,
+      completed: false,
+      lastModule: MODULES.KUBE_POLICIES,
+    },
+    {
+      label: "CSI Drivers",
+      id: "setupCSIDrivers",
+      setup: setupCSIDrivers,
+      completed: false,
+      lastModule: MODULES.KUBE_AWS_EBS_CSI,
+    },
+    {
+      label: "Vault",
+      id: "setupVault",
+      setup: setupVault,
+      completed: false,
+      lastModule: MODULES.VAULT_CORE_RESOURCES,
+    },
+    {
+      label: "Certificate Management",
+      id: "setupCertManagement",
+      setup: setupCertManagement,
+      completed: false,
+      lastModule: MODULES.KUBE_CERT_MANAGER,
+    },
+    {
+      label: "Certificate Issuers",
+      id: "setupCertificateIssuers",
+      setup: setupCertificateIssuers,
+      completed: false,
+      lastModule: MODULES.KUBE_CERT_ISSUERS,
+    },
+    {
+      label: "Linkerd",
+      id: "setupLinkerd",
+      setup: setupLinkerd,
+      completed: false,
+      lastModule: MODULES.KUBE_LINKERD,
+    },
+    {
+      label: "Autoscaling",
+      id: "setupAutoscaling",
+      setup: setupAutoscaling,
+      completed: false,
+      lastModule: MODULES.KUBE_SCHEDULER,
+    },
+    // TODO: @seth - It feels like inbound networking should come
+    // ASAP b/c getting vault off of the vault proxy
+    // is critical for reliability of the install
+    // The proxy is fairly flaky and can cause disruptions
+    // if the connected vault pod restarts for some reason.
+    // This will start to occur more frequently immediately after enabling autoscaling
+    {
+      label: "Support Services",
+      id: "setupSupportServices",
+      setup: setupSupportServices,
+      completed: false,
+      lastModule: MODULES.KUBE_RELOADER,
+    },
+    {
+      label: "Inbound Networking",
+      id: "setupInboundNetworking",
+      setup: setupInboundNetworking,
+      completed: false,
+      lastModule: MODULES.KUBE_INGRESS_NGINX,
+    },
+  ];
 
 export class InstallClusterCommand extends PanfactumCommand {
   static override paths = [["cluster", "install"]];
@@ -151,19 +157,22 @@ export class InstallClusterCommand extends PanfactumCommand {
     const {
       aws_profile: awsProfile,
       environment,
-      environment_domain: environmentDomain,
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
     } = config;
 
-    if (!environment || !region || !awsProfile || !environmentDomain) {
+    if (!environment || !region || !awsProfile) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
         "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
       ]);
     }
+
+
+    // TODO: verify at least one domain available in environment
+    // tell them to run `pf env add -e {environment}` if not
 
     const environmentPath = path.join(
       this.context.repoVariables.environments_dir,
@@ -179,6 +188,17 @@ export class InstallClusterCommand extends PanfactumCommand {
       context: this.context,
       slaTarget,
     });
+
+    // TODO: decide domain for the cluster
+    // Two steps:
+    //  (1) Which ancestor domain
+    //  (2) What is the subdomain for the cluster (explain that all cluster utilities (vault, etc.) will be hosted under this)
+    //      provide recommendation
+    // Validation:
+    // - MUST be valid DNS string
+    // - MUST not be taken by another cluster (verify against ALL environments/clusters)
+    //
+    // Saved under `kube_domain` for the region
 
     /***********************************************
      * Main Setup Driver

@@ -7,8 +7,6 @@ import type { PanfactumContext } from "../../../context/context";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
 type OutputValues = InputValues & {
-  environment_domain?: string; // the FQDN of the environment
-  kube_domain?: string; // the FQDN of the kubernetes cluster
   environment_dir?: string; // the environment directory name (as might differ from the environment name)
   region_dir?: string; // the region directory name (as might differ from region name)
   module_dir?: string; // the module directory name (as might differ from actual module name)
@@ -34,14 +32,14 @@ export const getPanfactumConfig = async ({
   context: PanfactumContext;
   directory?: string;
 }): Promise<OutputValues> => {
-  
+
   // Get the actual file contents for each config file
   const configFileValues: Partial<{
     [fileName in (typeof CONFIG_FILES)[number]]: InputValues;
   }> = {};
   const searchPromises: Array<Promise<void>> = [];
 
-  if(!directory.startsWith("/")){
+  if (!directory.startsWith("/")) {
     throw new CLIError(`getPanfactumConfig must be called with an absolute path. Given '${directory}'`)
   }
   let currentDir = directory;
@@ -79,6 +77,10 @@ export const getPanfactumConfig = async ({
           ...(values.extra_inputs ?? {}),
           ...(toMerge.extra_inputs ?? {}),
         },
+        domains: {
+          ...(values.domains ?? {}),
+          ...(toMerge.domains ?? {})
+        }
       };
     }
   }
@@ -87,8 +89,8 @@ export const getPanfactumConfig = async ({
   const inEnvDir = directory.startsWith(context.repoVariables.environments_dir);
   const parts = inEnvDir
     ? directory
-        .substring(context.repoVariables.environments_dir.length + 1)
-        .split("/")
+      .substring(context.repoVariables.environments_dir.length + 1)
+      .split("/")
     : [];
   if (values.tf_state_account_id === undefined) {
     values.tf_state_account_id = values.aws_account_id;
@@ -130,19 +132,12 @@ export const getPanfactumConfig = async ({
   if (values.kube_config_context === undefined) {
     values.kube_config_context = values.kube_name;
   }
-
   if (values.version === undefined) {
     values.version = "local";
   }
 
   // Provide computed values
-  if (values.control_plane_domain && values.environment_subdomain) {
-    values.environment_domain = `${values.environment_subdomain}.${values.control_plane_domain}`;
-  }
-  if (values.environment_domain && values.kube_subdomain) {
-    values.kube_domain = `${values.kube_subdomain}.${values.environment_domain}`;
-  }
-  if(parts.length >= 1){
+  if (parts.length >= 1) {
     values.environment_dir = parts[0]!
   }
   if (parts.length >= 2) {

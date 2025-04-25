@@ -97,14 +97,17 @@ export async function setupCertificateIssuers(
             ctx.alertEmail = await task
               .prompt(ListrInquirerPromptAdapter)
               .run(input, {
+                // FIX: @seth - Avoid multine input prompts; use task.output for more info / warnings
                 message: pc.magenta(
                   "This email will receive notifications if your certificates fail to renew.\n" +
-                    "Enter an email that is actively monitored to prevent unexpected service disruptions.\n" +
-                    "->"
+                  "Enter an email that is actively monitored to prevent unexpected service disruptions.\n" +
+                  "->"
                 ),
                 required: true,
                 validate: (value: string) => {
                   // From https://emailregex.com/
+                  // FIX: @seth - Use Zod email parser
+
                   const emailRegex =
                     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                   if (!emailRegex.test(value.trim())) {
@@ -153,13 +156,15 @@ export async function setupCertificateIssuers(
                   region,
                   module: MODULES.KUBE_CERT_ISSUERS,
                   initModule: true,
+                  // FIX: @seth - Not necessary to have two templates
+                  // as we will not be pulling dependencies from the hosted zones
                   hclIfMissing: ctx.productionEnvironment
                     ? await Bun.file(
-                        kubeCertIssuersTerragruntHclProduction
-                      ).text()
+                      kubeCertIssuersTerragruntHclProduction
+                    ).text()
                     : await Bun.file(
-                        kubeCertIssuersTerragruntHclNonProduction
-                      ).text(),
+                      kubeCertIssuersTerragruntHclNonProduction
+                    ).text(),
                   inputUpdates: {
                     alert_email: defineInputUpdate({
                       schema: z.string(),

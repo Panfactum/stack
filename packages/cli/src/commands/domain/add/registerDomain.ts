@@ -16,6 +16,7 @@ import { COUNTRY_CODES } from "@/commands/env/install/common";
 import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { applyColors } from "@/util/colors/applyColors";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
@@ -519,7 +520,7 @@ export async function registerDomain(inputs: {
             try {
                 const response = await route53Client.send(listHostedZonesCommand);
                 hostedZones = response.HostedZones ?? []
-            } catch (e){
+            } catch (e) {
                 throw new CLIError(`Failed to call ListHostedZonesByNameCommand`, e)
             }
 
@@ -609,10 +610,31 @@ export async function registerDomain(inputs: {
     })
 
     ///////////////////////////////////////////////////////
-    // Add to clusters
+    // Add to environment.yaml
     ///////////////////////////////////////////////////////
-    // TODO
+    tasks.add({
+        title: "Update DevShell",
+        task: async () => {
 
+            const validatedDomainConfig = validateDomainConfig(domainConfig);
+            await upsertConfigValues({
+                context,
+                filePath: join(env.path, "environment.yaml"),
+                values: {
+                    domains: {
+                        [domain]: {
+                            zone_id: validatedDomainConfig.zoneId,
+                            record_manager_role_arn: validatedDomainConfig.recordManagerRoleARN
+                        }
+                    }
+                }
+            })
+        }
+    })
+
+    ///////////////////////////////////////////////////////
+    // Update clusters
+    ///////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////
     // Run the registration
@@ -624,12 +646,12 @@ export async function registerDomain(inputs: {
             { trailingNewlines: 1, leadingNewlines: 1 }
         )
         await tasks.run();
-    
+
         context.logger.log(
             applyColors(
                 `${domain} registered in ${env.name} successfully!`,
                 { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
-                {trailingNewlines: 1}
+            { trailingNewlines: 1 }
         )
     } catch (e) {
         throw new CLIError(`Failed to register domain ${domain}`, e)
@@ -637,8 +659,8 @@ export async function registerDomain(inputs: {
 
     try {
         return validateDomainConfig(domainConfig)
-    } catch(e){
-        if(e instanceof ZodError){
+    } catch (e) {
+        if (e instanceof ZodError) {
             throw new PanfactumZodError("Failed to parse domain config", "registerDomain", e)
         } else {
             throw new CLIError("Failed to parse domain config", e)

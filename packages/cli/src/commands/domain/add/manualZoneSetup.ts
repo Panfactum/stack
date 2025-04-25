@@ -1,9 +1,11 @@
+import { join } from "node:path"
 import { confirm } from "@inquirer/prompts"
 import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
 import { applyColors } from "@/util/colors/applyColors";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
 import { validateDomainConfig, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
@@ -116,13 +118,35 @@ export async function manualZoneSetup(inputs: {
 
     tasks.add(await testDNSResolutionTask({
         context,
-        zones: {[domain]: domainConfig} as DomainConfigs
+        zones: { [domain]: domainConfig } as DomainConfigs
     }))
 
     ///////////////////////////////////////////////////////
-    // Add to clusters
+    // Add to environment.yaml
     ///////////////////////////////////////////////////////
-    // TODO
+    tasks.add({
+        title: "Update DevShell",
+        task: async () => {
+
+            const validatedDomainConfig = validateDomainConfig(domainConfig);
+            await upsertConfigValues({
+                context,
+                filePath: join(env.path, "environment.yaml"),
+                values: {
+                    domains: {
+                        [domain]: {
+                            zone_id: validatedDomainConfig.zoneId,
+                            record_manager_role_arn: validatedDomainConfig.recordManagerRoleARN
+                        }
+                    }
+                }
+            })
+        }
+    })
+
+    ///////////////////////////////////////////////////////
+    // Update clusters
+    ///////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////
     // Run Tasks
@@ -134,19 +158,23 @@ export async function manualZoneSetup(inputs: {
             applyColors(
                 `${domain} added to ${env.name} successfully!`,
                 { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
-                {trailingNewlines: 1}
-    )
+            { trailingNewlines: 1 }
+        )
     } catch (e) {
         throw new CLIError(`Failed to setup zone for ${domain}`, e)
     }
 
     try {
         return validateDomainConfig(domainConfig)
-    } catch(e){
-        if (e instanceof ZodError){
+    } catch (e) {
+        if (e instanceof ZodError) {
             throw new PanfactumZodError("Failed to parse domain config", "manualZoneSetup", e)
         } else {
             throw new CLIError("Failed to parse domain config", e)
         }
     }
+}
+
+function join(path: string, arg1: string): string {
+    throw new Error("Function not implemented.");
 }

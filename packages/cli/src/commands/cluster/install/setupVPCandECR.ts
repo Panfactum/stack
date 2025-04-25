@@ -8,6 +8,7 @@ import { vpcNetworkTest } from "@/commands/aws/vpc-network-test/vpcNetworkTest";
 import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
@@ -64,6 +65,7 @@ const VPC_NAME = z
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
   );
 
+// TODO: @seth - Replace `pc` with `applyColors`
 export async function setupVPCandECR(
   options: InstallClusterStepOptions,
   completed: boolean
@@ -131,6 +133,8 @@ export async function setupVPCandECR(
                   if (error) {
                     return error?.issues[0]?.message ?? "Invalid name";
                   } else {
+
+                    // FIX: @seth - Use AWS SDK
                     const vpcListCommand = [
                       "aws",
                       "ec2",
@@ -260,15 +264,17 @@ export async function setupVPCandECR(
               ctx.dockerHubUsername =
                 originalInputs.extra_inputs.docker_hub_username;
               ctx.githubUsername = originalInputs.extra_inputs.github_username;
-              task.skip("Already have ECR configuration, skipping...");
+              task.skip("Skip: Already have ECR configuration");
               return;
             }
 
+            // FIX: @seth - Doesn't seem correct - where is this being set on ctx? - will always run
+            // See how I fixed the setupEKS step
             if (!ctx.dockerHubUsername) {
               ctx.dockerHubUsername = await task
                 .prompt(ListrInquirerPromptAdapter)
                 .run(input, {
-                  message: pc.magenta("Enter your Docker Hub username:"),
+                  message: applyColors("Enter your Docker Hub username:", { style: "question" }),
                   required: true,
                   validate: (value) => {
                     const { error } = DOCKERHUB_USERNAME.safeParse(value);
@@ -287,8 +293,8 @@ export async function setupVPCandECR(
                 .run(password, {
                   message: pc.magenta(
                     `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\n` +
-                      `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n` +
-                      `${pc.red("This will be encrypted and stored securely")}:`
+                    `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n` +
+                    `${pc.red("This will be encrypted and stored securely")}:`
                   ),
                   mask: true,
                   validate: async (value) => {
@@ -321,7 +327,7 @@ export async function setupVPCandECR(
               ctx.githubUsername = await task
                 .prompt(ListrInquirerPromptAdapter)
                 .run(input, {
-                  message: pc.magenta("Enter your GitHub username:"),
+                  message: applyColors("Enter your GitHub username:", { style: "question" }),
                   required: true,
                   validate: (value) => {
                     const { error } = GITHUB_USERNAME.safeParse(value);
@@ -340,8 +346,8 @@ export async function setupVPCandECR(
                 .run(password, {
                   message: pc.magenta(
                     `Enter your classic GitHub Personal Access Token with 'read:packages' scope\n` +
-                      `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n` +
-                      `${pc.red("This will be encrypted and stored securely")}:`
+                    `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n` +
+                    `${pc.red("This will be encrypted and stored securely")}:`
                   ),
                   mask: true,
                   validate: async (value) => {
@@ -402,6 +408,8 @@ export async function setupVPCandECR(
                         {
                           title: "Run the VPC Network Test",
                           task: async (_, task) => {
+                            // TODO: @seth - It would be good if the vpcNetworkTest was a task
+                            // so we could see the discrete steps
                             await vpcNetworkTest({
                               awsProfile,
                               context,
@@ -428,6 +436,12 @@ export async function setupVPCandECR(
                   hclIfMissing: await Bun.file(
                     awsEcrPullThroughCacheTerragruntHcl
                   ).text(),
+                  // TODO: @seth - Interested in your opinion
+                  // I don't like `ctx.dockerHubUsername!` even though I've been using it
+                  // I think we may want to incorporate some sort of runtime validation here.
+                  // as I believe we should be doing EXTREMELY defensive coding
+                  // b/c of how annoying it would be for users if something messed up
+                  // with a vague error (e.g., dockerHubUsername being undefined accidentally)
                   inputUpdates: {
                     docker_hub_username: defineInputUpdate({
                       schema: z.string(),

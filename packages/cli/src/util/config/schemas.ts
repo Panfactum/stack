@@ -43,17 +43,17 @@ const AWS_REGION_SCHEMA = z
 
 
 export const BUCKET_NAME_SCHEMA = z.string()
-.max(63, "S3 bucket names must be less than 64 characters long")
-.min(3, "S3 bucket names must be at least three characters")
-.regex(/^[a-z0-9][a-z0-9.-]+[a-z0-9]$/, "S3 bucket names can only contain lowercase letters, numbers, periods, and hyphens, and must begin and end with a letter or number")
-.refine(val => !val.includes(".."), "S3 bucket names must not contain adjacent periods")
-.refine(val => !val.endsWith("-s3alias") && !val.endsWith("--ol-s3") && !val.endsWith(".mrap") && !val.endsWith("--x-s3") && !val.endsWith("--table-s3"), "S3 bucket names must not end with any of: -s3alias, --ol-s3, .mrap, --x-s3, --table-s3")
-.refine(val => !val.startsWith("xn--") && !val.startsWith("sthree-") && !val.startsWith("amzn-s3-demo-"), "S3 bucket names must not start with any of: xn--, sthree-, amzn-s3-demo-")
-.refine(val => {
-  // Check if the bucket name is formatted like an IP address
-  const ipv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-  return !ipv4Regex.test(val);
-}, "S3 bucket names must not be formatted as IP addresses")
+  .max(63, "S3 bucket names must be less than 64 characters long")
+  .min(3, "S3 bucket names must be at least three characters")
+  .regex(/^[a-z0-9][a-z0-9.-]+[a-z0-9]$/, "S3 bucket names can only contain lowercase letters, numbers, periods, and hyphens, and must begin and end with a letter or number")
+  .refine(val => !val.includes(".."), "S3 bucket names must not contain adjacent periods")
+  .refine(val => !val.endsWith("-s3alias") && !val.endsWith("--ol-s3") && !val.endsWith(".mrap") && !val.endsWith("--x-s3") && !val.endsWith("--table-s3"), "S3 bucket names must not end with any of: -s3alias, --ol-s3, .mrap, --x-s3, --table-s3")
+  .refine(val => !val.startsWith("xn--") && !val.startsWith("sthree-") && !val.startsWith("amzn-s3-demo-"), "S3 bucket names must not start with any of: xn--, sthree-, amzn-s3-demo-")
+  .refine(val => {
+    // Check if the bucket name is formatted like an IP address
+    const ipv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+    return !ipv4Regex.test(val);
+  }, "S3 bucket names must not be formatted as IP addresses")
 
 
 export const DOMAIN = z.string()
@@ -84,8 +84,12 @@ export const SUBDOMAIN = z.string()
   }, "Subdomain must be lowercase");
 
 export const PANFACTUM_CONFIG_SCHEMA = z.object({
-  // Global Settings
-  control_plane_domain: z.string().optional(),
+
+  // Domains
+  domains: z.record(DOMAIN, z.object({
+    zone_id: z.string(),
+    record_manager_role_arn: z.string()
+  })).optional(),
 
   // Misc Metadata
   sla_target: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
@@ -126,7 +130,7 @@ export const PANFACTUM_CONFIG_SCHEMA = z.object({
   // Kubernetes Provider
   kube_api_server: z.string().optional(),
   kube_name: z.string().optional(),
-  kube_subdomain: z.string().optional(),
+  kube_domain: z.string().optional(),
   kube_config_context: z.string().optional(),
 
   // Vault Provider

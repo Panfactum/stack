@@ -64,6 +64,7 @@ export async function setupEKS(
     skip: () => completed,
     title: "Setup EKS Kubernetes cluster",
     task: async (ctx, parentTask) => {
+
       interface Context {
         clusterName?: string;
         clusterDescription?: string;
@@ -81,10 +82,16 @@ export async function setupEKS(
             title: "Get EKS configuration",
             task: async (ctx, task) => {
               const prompt = task.prompt(ListrInquirerPromptAdapter);
+
+              // TODO: @seth - It feels like we should only present this warning AFTER they have
+              // already entered all the info
               task.output = applyColors(
                 "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer a couple questions",
                 { style: "important" }
               );
+
+              // TODO: @seth - It feels like we should have a helper fx
+              // for the action of "reading inputs from module.yaml"
               const originalInputs = await readYAMLFile({
                 filePath: path.join(
                   clusterPath,
@@ -105,14 +112,14 @@ export async function setupEKS(
                   })
                   .passthrough(),
               });
+              ctx.clusterName = originalInputs?.extra_inputs.cluster_name;
+              ctx.clusterDescription =
+                originalInputs?.extra_inputs.cluster_description;
 
               if (
-                originalInputs?.extra_inputs?.cluster_name &&
-                originalInputs?.extra_inputs?.cluster_description
+                ctx.clusterName &&
+                ctx.clusterDescription
               ) {
-                ctx.clusterName = originalInputs.extra_inputs.cluster_name;
-                ctx.clusterDescription =
-                  originalInputs.extra_inputs.cluster_description;
                 task.skip("Already have EKS configuration, skipping...");
                 return;
               }
@@ -123,8 +130,8 @@ export async function setupEKS(
                     "Enter a name for your Kubernetes cluster:"
                   ),
                   required: true,
-                  default: `${environment}-${region}`,
-                  transformer: (value) => clusterNameFormatter(value),
+                  default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
+                  transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
                   validate: (value) => {
                     const transformed = clusterNameFormatter(value);
                     const { error } = CLUSTER_NAME.safeParse(transformed);
@@ -166,7 +173,7 @@ export async function setupEKS(
             initModule: true,
             hclIfMissing: await (slaTarget === 1
               ? Bun.file(awsEksSla1Template).text()
-              : Bun.file(awsEksSla2Template).text()),
+              : Bun.file(awsEksSla2Template).text()), // TODO: @seth - Does it make sense to have two templates?
             inputUpdates: {
               cluster_name: defineInputUpdate({
                 schema: z.string(),
@@ -176,6 +183,7 @@ export async function setupEKS(
                 schema: z.string(),
                 update: (_, ctx) => ctx.clusterDescription!,
               }),
+              // TODO: @jack - Move to region.yaml
               bootstrap_mode_enabled: defineInputUpdate({
                 schema: z.boolean(),
                 update: () => true,
@@ -188,6 +196,7 @@ export async function setupEKS(
           {
             title: "Reset the cluster",
             task: async (ctx, task) => {
+              // TODO: @seth - Would be good if this was isn't own subtask
               await clusterReset({
                 awsProfile,
                 clusterName: ctx.clusterName!,
@@ -203,6 +212,9 @@ export async function setupEKS(
           {
             title: "Update Configuration File",
             task: async (ctx) => {
+
+              // TODO: @seth - This is unnecessary
+              // as we can read from `.kube/clusters.yaml
               const moduleOutput = await terragruntOutput({
                 context,
                 environment,
@@ -210,6 +222,7 @@ export async function setupEKS(
                 module: MODULES.AWS_EKS,
                 validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
               });
+              
               await upsertConfigValues({
                 context,
                 filePath: path.join(clusterPath, "region.yaml"),
