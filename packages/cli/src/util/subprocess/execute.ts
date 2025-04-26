@@ -1,8 +1,6 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
-import { applyColors } from "../colors/applyColors";
 import { CLISubprocessError } from "../error/error";
 import { concatStreams } from "../streams/concatStreams";
-import type { PanfactumTaskWrapper } from "../listr/types";
 import type { PanfactumContext } from "@/context/context";
 
 type IsSuccessFn = (results: {
@@ -24,14 +22,13 @@ interface ExecInputs {
   retryCallback?: (attemptNumber: number, lastResults: ExecReturn) => void;
   isSuccess?: IsSuccessFn;
   stdin?:
-    | globalThis.Request
-    | globalThis.ReadableStream
-    | globalThis.File
-    | globalThis.Blob
-    | number
-    | "inherit"
-    | null;
-  task?: PanfactumTaskWrapper;
+  | globalThis.Request
+  | globalThis.ReadableStream
+  | globalThis.File
+  | globalThis.Blob
+  | number
+  | "inherit"
+  | null;
 }
 
 interface ExecReturn {
@@ -57,7 +54,6 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     onStdErrNewline,
     isSuccess = defaultIsSuccess,
     stdin = null,
-    task,
   } = inputs;
   let logsBuffer = "";
   for (let i = 0; i < retries + 1; i++) {
@@ -94,7 +90,6 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         stdoutReader,
         onStdOutNewline,
         i,
-        task
       );
       stdoutCallbackPromise = stdoutReader.read().then(stdoutProcessor);
     }
@@ -107,7 +102,6 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         stderrReader,
         onStdErrNewline,
         i,
-        task
       );
       stderrCallbackPromise = stderrReader.read().then(stderrProcessor);
     }
@@ -165,7 +159,6 @@ const createTextOutputProcessor = (
   reader: ReadableStreamDefaultReader,
   processLine: (line: string, runNum: number) => void,
   runNum: number,
-  task?: PanfactumTaskWrapper
 ) => {
   let buffer = ""; // Buffer to store incomplete lines
   const decoder = new globalThis.TextDecoder("utf-8");
@@ -185,9 +178,6 @@ const createTextOutputProcessor = (
       for (let i = 0; i < lines.length - 1; i++) {
         // Process each complete line
         processLine(lines[i]!, runNum);
-        if (task) {
-          task.output = applyColors(lines[i]!, { style: "subtle" });
-        }
       }
 
       // Keep the last (potentially incomplete) line in the buffer
@@ -198,9 +188,6 @@ const createTextOutputProcessor = (
       // Process any remaining content in the buffer when the stream is done
       if (buffer.length > 0) {
         processLine(buffer, runNum);
-        if (task) {
-          task.output = applyColors(buffer, { style: "subtle" });
-        }
       }
       return Promise.resolve();
     }

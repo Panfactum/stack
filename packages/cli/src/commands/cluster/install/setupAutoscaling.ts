@@ -20,6 +20,7 @@ import {
 import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
+import { applyColors } from "@/util/colors/applyColors";
 
 export async function setupAutoscaling(
   options: InstallClusterStepOptions,
@@ -234,7 +235,9 @@ export async function setupAutoscaling(
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                 VAULT_TOKEN: vaultRootToken,
               },
-              task,
+              onLogLine: (line) => {
+                task.output = applyColors(line, { style: "subtle" });
+              },
             });
           },
           rendererOptions: {
