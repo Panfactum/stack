@@ -123,42 +123,45 @@ export async function setupEKS(
                 return;
               }
 
-              ctx.clusterName = await prompt.run(input, {
-                message: pc.magenta(
-                  "Enter a name for your Kubernetes cluster:"
-                ),
-                required: true,
-                default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
-                transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
-                validate: (value) => {
-                  const transformed = clusterNameFormatter(value);
-                  const { error } = CLUSTER_NAME.safeParse(transformed);
-                  if (error) {
-                    return error.issues[0]?.message ?? "Invalid cluster name";
-                  } else {
-                    return true;
-                  }
-                },
-              });
-              ctx.clusterName = clusterNameFormatter(ctx.clusterName);
+              if (!ctx.clusterName) {
+                ctx.clusterName = await prompt.run(input, {
+                  message: pc.magenta(
+                    "Enter a name for your Kubernetes cluster:"
+                  ),
+                  required: true,
+                  default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
+                  transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
+                  validate: (value) => {
+                    const transformed = clusterNameFormatter(value);
+                    const { error } = CLUSTER_NAME.safeParse(transformed);
+                    if (error) {
+                      return error.issues[0]?.message ?? "Invalid cluster name";
+                    } else {
+                      return true;
+                    }
+                  },
+                });
+                ctx.clusterName = clusterNameFormatter(ctx.clusterName);
+              }
 
-              ctx.clusterDescription = await prompt.run(input, {
-                message: "Enter a description for your Kubernetes cluster:",
-                required: true,
-                default: `Panfactum Kubernetes cluster in the ${region} region of the ${environment} environment`,
-                validate: (value) => {
-                  const { error } = CLUSTER_DESCRIPTION.safeParse(value);
-                  if (error) {
-                    return (
-                      error.issues[0]?.message ??
-                      "Invalid cluster description"
-                    );
-                  } else {
-                    return true;
-                  }
-                },
-              });
-
+              if (!ctx.clusterDescription) {
+                ctx.clusterDescription = await prompt.run(input, {
+                  message: "Enter a description for your Kubernetes cluster:",
+                  required: true,
+                  default: `Panfactum Kubernetes cluster in the ${region} region of the ${environment} environment`,
+                  validate: (value) => {
+                    const { error } = CLUSTER_DESCRIPTION.safeParse(value);
+                    if (error) {
+                      return (
+                        error.issues[0]?.message ??
+                        "Invalid cluster description"
+                      );
+                    } else {
+                      return true;
+                    }
+                  },
+                });
+              }
             },
           },
           await buildDeployModuleTask<Context>({

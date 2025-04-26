@@ -110,104 +110,109 @@ export async function setupVPCandECR(
                 .passthrough(),
             });
 
+            ctx.vpcName = originalInputs?.extra_inputs.vpc_name;
+            ctx.vpcDescription = originalInputs?.extra_inputs.vpc_description;
+
             if (
-              originalInputs?.extra_inputs?.vpc_name &&
-              originalInputs?.extra_inputs?.vpc_description
+              ctx.vpcName &&
+              ctx.vpcDescription
             ) {
-              ctx.vpcName = originalInputs.extra_inputs.vpc_name;
-              ctx.vpcDescription = originalInputs.extra_inputs.vpc_description;
               task.skip("Already have VPC configuration, skipping...");
               return;
             }
 
-            ctx.vpcName = await task
-              .prompt(ListrInquirerPromptAdapter)
-              .run(input, {
-                message: applyColors("Enter a name for your VPC:", { style: "question" }),
-                default: `panfactum-${environment}-${region}`,
-                required: true,
-                validate: async (value) => {
-                  const { error } = VPC_NAME.safeParse(value);
-                  if (error) {
-                    return error?.issues[0]?.message ?? "Invalid name";
-                  } else {
-                    // FIX: @seth - Use AWS SDK
-                    const vpcListCommand = [
-                      "aws",
-                      "ec2",
-                      "describe-vpcs",
-                      `--region=${region}`,
-                      `--filters=Name=tag:Name,Values=${value}`,
-                      "--output=json",
-                      `--profile=${awsProfile}`,
-                      "--no-cli-pager",
-                    ];
+            if (!ctx.vpcName) {
+              ctx.vpcName = await task
+                .prompt(ListrInquirerPromptAdapter)
+                .run(input, {
+                  message: applyColors("Enter a name for your VPC:", { style: "question" }),
+                  default: `panfactum-${environment}-${region}`,
+                  required: true,
+                  validate: async (value) => {
+                    const { error } = VPC_NAME.safeParse(value);
+                    if (error) {
+                      return error?.issues[0]?.message ?? "Invalid name";
+                    } else {
+                      // FIX: @seth - Use AWS SDK
+                      const vpcListCommand = [
+                        "aws",
+                        "ec2",
+                        "describe-vpcs",
+                        `--region=${region}`,
+                        `--filters=Name=tag:Name,Values=${value}`,
+                        "--output=json",
+                        `--profile=${awsProfile}`,
+                        "--no-cli-pager",
+                      ];
 
-                    context.logger.log(
-                      "vpc list command: " + vpcListCommand.join(" "),
-                      {
-                        level: "debug",
-                      }
-                    );
+                      context.logger.log(
+                        "vpc list command: " + vpcListCommand.join(" "),
+                        {
+                          level: "debug",
+                        }
+                      );
 
-                    const { stdout, stderr } = await execute({
-                      command: vpcListCommand,
-                      context: context,
-                      workingDirectory: clusterPath,
-                    });
-
-                    context.logger.log(
-                      "aws ec2 describe-vps stdout: " + stdout,
-                      {
-                        level: "debug",
-                      }
-                    );
-                    context.logger.log(
-                      "aws ec2 describe-vps stderr: " + stderr,
-                      {
-                        level: "debug",
-                      }
-                    );
-
-                    let vpcList;
-                    try {
-                      const vpc = JSON.parse(stdout);
-                      vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
-                    } catch (e) {
-                      parseErrorHandler({
-                        error: e,
-                        genericErrorMessage:
-                          "Failed checking if VPC name is already in use.",
-                        zodErrorMessage:
-                          "Failed checking if VPC name is already in use.",
-                        command: vpcListCommand.join(" "),
+                      const { stdout, stderr } = await execute({
+                        command: vpcListCommand,
+                        context: context,
+                        workingDirectory: clusterPath,
                       });
-                    }
 
-                    if (vpcList?.Vpcs.length && vpcList.Vpcs.length > 0) {
-                      return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;
+                      context.logger.log(
+                        "aws ec2 describe-vps stdout: " + stdout,
+                        {
+                          level: "debug",
+                        }
+                      );
+                      context.logger.log(
+                        "aws ec2 describe-vps stderr: " + stderr,
+                        {
+                          level: "debug",
+                        }
+                      );
+
+                      let vpcList;
+                      try {
+                        const vpc = JSON.parse(stdout);
+                        vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
+                      } catch (e) {
+                        parseErrorHandler({
+                          error: e,
+                          genericErrorMessage:
+                            "Failed checking if VPC name is already in use.",
+                          zodErrorMessage:
+                            "Failed checking if VPC name is already in use.",
+                          command: vpcListCommand.join(" "),
+                        });
+                      }
+
+                      if (vpcList?.Vpcs.length && vpcList.Vpcs.length > 0) {
+                        return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;
+                      } else {
+                        return true;
+                      }
+                    }
+                  },
+                });
+            }
+
+            if (!ctx.vpcDescription) {
+              ctx.vpcDescription = await task
+                .prompt(ListrInquirerPromptAdapter)
+                .run(input, {
+                  message: applyColors("Enter a description for your VPC:", { style: "question" }),
+                  default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
+                  required: true,
+                  validate: (value) => {
+                    const { error } = VPC_DESCRIPTION.safeParse(value);
+                    if (error) {
+                      return error.issues[0]?.message ?? "Invalid description";
                     } else {
                       return true;
                     }
-                  }
-                },
-              });
-
-            ctx.vpcDescription = await task
-              .prompt(ListrInquirerPromptAdapter)
-              .run(input, {
-                message: applyColors("Enter a description for your VPC:", { style: "question" }),
-                default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
-                required: true,
-                validate: (value) => {
-                  const { error } = VPC_DESCRIPTION.safeParse(value);
-                  if (error) {
-                    return error.issues[0]?.message ?? "Invalid description";
-                  } else {
-                    return true;
-                  }
-                },
-              });
+                  },
+                });
+            }
           },
         },
         {
@@ -252,6 +257,9 @@ export async function setupVPCandECR(
                 .passthrough(),
             });
 
+            ctx.dockerHubUsername = originalInputs?.extra_inputs.docker_hub_username;
+            ctx.githubUsername = originalInputs?.extra_inputs.github_username;
+
             if (
               originalInputs?.extra_inputs?.docker_hub_username &&
               originalInputs?.extra_inputs?.github_username &&
@@ -265,8 +273,6 @@ export async function setupVPCandECR(
               return;
             }
 
-            // FIX: @seth - Doesn't seem correct - where is this being set on ctx? - will always run
-            // See how I fixed the setupEKS step
             if (!ctx.dockerHubUsername) {
               ctx.dockerHubUsername = await task
                 .prompt(ListrInquirerPromptAdapter)
