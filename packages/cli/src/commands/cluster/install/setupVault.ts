@@ -190,8 +190,8 @@ export async function setupVault(
             } catch (error) {
               parseErrorHandler({
                 error,
-                zodErrorMessage: "Failed to parse vault operator init",
-                genericErrorMessage:
+                errorMessage: "Failed to parse vault operator init",
+                nonZodErrorMessage:
                   "Unable to parse outputs from vault operator init",
                 command: vaultOperatorInitCommand.join(" "),
               });
@@ -267,8 +267,8 @@ export async function setupVault(
             } catch (error) {
               parseErrorHandler({
                 error,
-                zodErrorMessage: "Failed to unseal Vault",
-                genericErrorMessage: "Failed to unseal Vault",
+                errorMessage: "Failed to unseal Vault",
+                nonZodErrorMessage: "Failed to unseal Vault",
                 command: vaultUnsealCommand.join(" "),
               });
             }

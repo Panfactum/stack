@@ -1,13 +1,9 @@
 import { join } from "node:path"
 import { DeleteAccessKeyCommand, IAMClient } from "@aws-sdk/client-iam";
-import { checkbox } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from 'listr2'
-import pc from "picocolors";
 import { z } from "zod";
 import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
 import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist";
@@ -48,29 +44,24 @@ export async function updateIAMIdentityCenter(inputs: {
     /////////////////////////////////////////////////////////////////////
 
     if (!await directoryExists(modulePath)) {
-        context.logger.log("Skipping IAM Identity center update as it is not deployed", { level: "debug" })
+        context.logger.debug("Skipping IAM Identity center update as it is not deployed")
     }
 
     if (await fileContains({ context, filePath: moduleHCLPath, regex: /account_access_configuration\s*=/ })) {
-        context.logger.log(
-            "You have IAM Identity Center deployed, but you are configuring it via `terragrunt.hcl` input rather than using `module.yaml`.\n" +
-            "As a result, this installer cannot automatically update the settings."
-            ,
-            { style: "warning" }
+        context.logger.warn(
+            `You have IAM Identity Center deployed, but you are configuring it via \`terragrunt.hcl\` input rather than using \`module.yaml\`.
+            As a result, this installer cannot automatically update the settings.`
         )
         return
     }
 
-    context.logger.log(
-        "🛈  Setting up SSO for the new AWS account",
-        {trailingNewlines: 1, leadingNewlines: 1}
-    )
+    context.logger.info("Setting up SSO for the new AWS account")
 
 
     /////////////////////////////////////////////////////////////////////
     // Save the Access Key, so we can deprovision it (if necessary)
     /////////////////////////////////////////////////////////////////////
-    const creds = await getCredsFromFile({context, profile: environmentProfile})
+    const creds = await getCredsFromFile({ context, profile: environmentProfile })
 
     /////////////////////////////////////////////////////////////////////
     // Run the tasks
@@ -78,15 +69,9 @@ export async function updateIAMIdentityCenter(inputs: {
 
     const tasks = new Listr<TaskContext>([
         {
-            title: applyColors(
-                `Retrieve AWS account ID for ${environmentName} environment`,
-                { highlights: [{ phrase: environmentName, style: "important" }] }
-            ),
+            title: context.logger.applyColors(`Retrieve AWS account ID for ${environmentName} environment`),
             task: async (ctx, task) => {
-                task.title = applyColors(
-                    `Retrieving AWS account ID for ${environmentName} environment`,
-                    { highlights: [{ phrase: environmentName, style: "important" }] }
-                )
+                task.title = context.logger.applyColors(`Retrieving AWS account ID for ${environmentName} environment`)
                 try {
                     const identity = await getIdentity({ context, profile: environmentProfile })
                     ctx.accountId = identity.Account
@@ -96,13 +81,10 @@ export async function updateIAMIdentityCenter(inputs: {
                 if (!ctx.accountId) {
                     throw new CLIError(`Was not able to get identity for environment's profile '${environmentProfile}'`)
                 }
-                task.title = applyColors(
+                task.title = context.logger.applyColors(
                     `Retrieved AWS account ID for ${environmentName} environment ${ctx.accountId}`,
                     {
-                        highlights: [
-                            { phrase: environmentName, style: "important" },
-                            { phrase: ctx.accountId, style: "subtle" }
-                        ]
+                        lowlights: [ctx.accountId]
                     }
                 )
             }
@@ -119,50 +101,68 @@ export async function updateIAMIdentityCenter(inputs: {
                     "restricted_engineers"
                 ]
 
+                const permissions = [
+                    "superuser",
+                    "admin (read / write)",
+                    "read-only (including secrets)",
+                    "read-only (NOT including secrets)"
+                ] as const
+
+                for (const group of authentikGroups) {
+                    context.logger.addIdentifier(group)
+                }
+                for (const permission of permissions) {
+                    context.logger.addIdentifier(permission)
+                }
+
                 const generateQuestionText = (permissions: string) => {
-                    return applyColors(`Select Authentik groups which will have ${permissions} access to the ${environmentName} environment`, {
-                        style: "question",
-                        highlights: [environmentName, permissions]
-                    })
+                    return `Select Authentik groups which will have ${permissions} access to the ${environmentName} environment`
                 }
 
                 const possibleSuperuserGroups = authentikGroups
-                ctx.superuserGroups = await task.prompt(ListrInquirerPromptAdapter).run(checkbox, {
-                    message: generateQuestionText("superuser"),
+                ctx.superuserGroups = await context.logger.checkbox({
+                    message: generateQuestionText(permissions[0]),
                     choices: possibleSuperuserGroups.map(group => ({ name: group, value: group, checked: group === "superusers" })),
-                    instructions: false,
                     validate: (choices) => {
                         if (choices.findIndex(el => el.value === "superusers" && el.checked) === -1) {
-                            return pc.red(`The ${pc.white("superusers")} group must always have superuser access to all environments`)
+                            return `The superusers group must always have superuser access to all environments`
                         } else {
                             return true
                         }
-                    }
-                }) as string[]
+                    },
+                    task
+                })
                 const possibleAdminGroups = possibleSuperuserGroups.filter(group => !ctx.superuserGroups.includes(group))
                 if (possibleAdminGroups.length > 0) {
-                    ctx.adminGroups = await task.prompt(ListrInquirerPromptAdapter).run(checkbox, {
-                        message: generateQuestionText("admin (read / write)"),
-                        choices: possibleAdminGroups,
-                        instructions: false
-                    }) as string[]
+                    ctx.adminGroups = await context.logger.checkbox({
+                        message: generateQuestionText(permissions[1]),
+                        choices: possibleAdminGroups.map(group => ({ name: group, value: group })),
+                        task
+                    })
 
                     const possibleReaderGroups = possibleAdminGroups.filter(group => !ctx.adminGroups.includes(group))
                     if (possibleReaderGroups.length > 0) {
-                        ctx.readerGroups = await task.prompt(ListrInquirerPromptAdapter).run(checkbox, {
-                            message: generateQuestionText("read-only (including secrets)"),
-                            choices: possibleReaderGroups,
-                            instructions: false
-                        }) as string[]
+                        ctx.readerGroups = await context.logger.checkbox({
+                            message: generateQuestionText(permissions[2]),
+                            choices: possibleReaderGroups.map(group => ({ name: group, value: group })),
+                            task
+                        })
                         const possibleRestrictedReaderGroups = possibleReaderGroups.filter(group => !ctx.readerGroups.includes(group))
                         if (possibleRestrictedReaderGroups.length > 0) {
-                            ctx.restrictedReaderGroups = await task.prompt(ListrInquirerPromptAdapter).run(checkbox, {
-                                message: generateQuestionText("read-only (NOT including secrets)"),
-                                choices: possibleRestrictedReaderGroups,
-                                instructions: false
-                            }) as string[]
+                            ctx.restrictedReaderGroups = await context.logger.checkbox({
+                                message: generateQuestionText(permissions[3]),
+                                choices: possibleRestrictedReaderGroups.map(group => ({ name: group, value: group })),
+                                task
+                            })
                         }
                     }
+                }
+
+                for (const group of authentikGroups) {
+                    context.logger.removeIdentifier(group)
+                }
+                for (const permission of permissions) {
+                    context.logger.removeIdentifier(permission)
                 }
             }
         },
@@ -183,7 +183,7 @@ export async function updateIAMIdentityCenter(inputs: {
                         billing_admin_groups: z.array(z.string()).default([])
                     }).passthrough()).optional().default({}),
                     update: (oldVal, ctx) => {
-                        if(!ctx.accountId){
+                        if (!ctx.accountId) {
                             throw new CLIError(`AWS Account ID missing on task context. This should never happen.`)
                         }
                         return {
@@ -203,9 +203,9 @@ export async function updateIAMIdentityCenter(inputs: {
                 })
             }
         }),
-        await buildSyncAWSIdentityCenterTask({context}),
+        await buildSyncAWSIdentityCenterTask({ context }),
         {
-            title: applyColors(`Revoke static IAM credentials ${creds?.accessKeyId}`, {highlights: [{phrase: creds!.accessKeyId, style: "subtle"}]}),
+            title: context.logger.applyColors(`Revoke static IAM credentials ${creds?.accessKeyId}`, { lowlights: [creds!.accessKeyId] }),
             enabled: () => Boolean(creds?.accessKeyId),
             task: async () => {
                 try {
@@ -213,12 +213,12 @@ export async function updateIAMIdentityCenter(inputs: {
                         region: "us-east-1",
                         credentials: creds
                     })
-  
+
                     // Delete the access key
                     await iamClient.send(new DeleteAccessKeyCommand({
                         AccessKeyId: creds!.accessKeyId
                     }))
-                    
+
                 } catch (error) {
                     throw new CLIError(`Failed to revoke IAM access key ${creds!.accessKeyId}`, error)
                 }

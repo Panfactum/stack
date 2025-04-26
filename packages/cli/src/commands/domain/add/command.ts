@@ -1,14 +1,13 @@
-import { confirm, input } from "@inquirer/prompts";
 import { Command, Option } from "clipanion";
 import { Listr } from "listr2";
+import pc from "picocolors";
 import { ZodError } from "zod";
-import { applyColors } from "@/util/colors/applyColors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { DOMAIN } from "@/util/config/schemas";
 import { isRegistered } from "@/util/domains/isRegistered";
 import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
-import { CLIError } from "@/util/error/error";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { createDescendentZones } from "./createDescendentZones";
 import { createEnvironmentSubzones } from "./createEnvironmentSubzones";
@@ -21,12 +20,55 @@ export class DomainAddCommand extends PanfactumCommand {
 
     static override usage = Command.Usage({
         description: "Add a domain to the Panfactum framework installation",
-        details:
-            "Connects a domain to the Panfactum framework installation so that created infrastructure can interact with it and its subdomains.",
+        details: `
+        Connects a domain to the Panfactum framework installation so that clusters and workloads can use it.
+
+        In Panfactum, ${pc.italic("domains")} are added to ${pc.italic("environments")}. Any workload in an environment can
+        host resources on the environment's domains (or subdomains of those domains). All necessary DNS and TLS infrastructure
+        will be automatically handled by the Panfactum framework.
+
+        This CLI can handle the following scenarios (automatically detected):
+        
+          * Purchasing a new domain via AWS
+
+          * Adding an already-purchased domain from another registrar
+
+          * Adding a subdomain of a domain that has already been added
+
+          * Migrating domains from one environment to another (coming soon)
+
+        Tip #1
+
+        Workloads in one environment CANNOT directly access domains in other environments (for security).
+        For example, workloads in your ${pc.magentaBright("development")} environment would not be able to alter records attached to domains
+        added to your ${pc.blue("production")} environment.
+
+        However, this utility CAN create subdomains for existing domains and automatically link those across environments.
+        For example, if you have the ${pc.blue("mycompany.com")} domain added to your ${pc.blue("production")} environment,
+        you can run 
+        
+          ${pc.bold("pf domain add --domain dev.panfactum.com --environment development")}
+        
+        to allow workloads in ${pc.magentaBright("development")} to use ${pc.magentaBright("api.dev.mycompany.com")}
+        (but not ${pc.blue("api.mycompany.com")}).
+
+        Tip #2
+
+        Migrating domains from one environment to another will likely involve some amount of downtime as DNS records are heavily
+        cached all over the globe. As a result, we recommend putting extra care into ensuring
+        your customer-facing domains are added to the environment you plan on using for customer-facing workloads.
+        `,
+
+        examples: [
+            ["Use the interactive prompts", "$0 domain add"],
+            ["Preselect the domain and environment", "$0 domain add --domain mycompany.com --environment production"],
+        ]
+
     });
 
+
     environment: string | undefined = Option.String("--environment,-e", {
-        description: "The environment to add the domain to",
+        description: "The environment to which the domain will be added",
         arity: 1
     });
 
@@ -36,7 +78,7 @@ export class DomainAddCommand extends PanfactumCommand {
     });
 
     forceIsRegistered: boolean | undefined = Option.Boolean("--force-is-registered", {
-        description: "Use this to override our heuristic for determining whether the provided domain is already registered.",
+        description: "Overrides built-in heuristic for determining whether the provided domain is already registered",
 
     })
 
@@ -60,6 +102,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 environmentMeta = environments[environmentMetaIndex]!
             }
         }
+        environments.forEach(env => context.logger.addIdentifier(env.name))
 
         /////////////////////////////////////////////////////////////////////////
         // Download valid domain suffices
@@ -81,16 +124,19 @@ export class DomainAddCommand extends PanfactumCommand {
         /////////////////////////////////////////////////////////////////////////
 
         if (!newDomain) {
-            newDomain = await input({
-                message: applyColors("Enter domain:", { style: "question" }),
-                required: true,
+            newDomain = await context.logger.input({
+                explainer: `
+                    In Panfactum, ${pc.italic("domains")} are added to ${pc.italic("environments")}. Any workload in an environment can
+                    host resources on the environment's domains (or subdomains of those domains).
+                `,
+                message: "Enter domain:",
                 validate: async (val) => {
                     const { error } = DOMAIN.safeParse(val)
                     if (error) {
-                        return applyColors(error.issues[0]?.message ?? "Invalid domain", { style: "error" })
+                        return error.issues[0]?.message ?? "Invalid domain"
                     }
                     if (!domainSuffices.some(suffix => val.endsWith(`.${suffix}`))) {
-                        return applyColors("TLD not recognized", { style: "error" })
+                        return "TLD not recognized"
                     }
                     return true
                 }
@@ -100,12 +146,13 @@ export class DomainAddCommand extends PanfactumCommand {
                 newDomain = DOMAIN.parse(newDomain)
             } catch (e) {
                 if (e instanceof ZodError) {
-                    throw new CLIError("Invalid domain format", e)
+                    throw new PanfactumZodError("Invalid domain format", "--domain", e)
                 } else {
                     throw new CLIError("Failed to parse domain", e)
                 }
             }
         }
+        context.logger.addIdentifier(newDomain)
 
         /////////////////////////////////////////////////////////////////////////
         // Check if apex
@@ -127,18 +174,18 @@ export class DomainAddCommand extends PanfactumCommand {
             }
         }
 
+        if (apexDomain) {
+            context.logger.addIdentifier(apexDomain)
+        }
+
+        if (tld) {
+            context.logger.addIdentifier(tld)
+        }
+
         /////////////////////////////////////////////////////////////////////////
         // Check if already added
         /////////////////////////////////////////////////////////////////////////
-        context.logger.log(
-            applyColors(`Verifying if ${newDomain} has already been added to this Panfactum installation.`, {
-                highlights: [
-                    { phrase: newDomain, style: "important" },
-                    { phrase: "apex domain", style: "warning" }
-                ]
-            }),
-            { trailingNewlines: 1, leadingNewlines: 1 }
-        )
+        context.logger.info(`Verifying if ${newDomain} has already been added to this Panfactum installation.`)
 
         const { task, domainConfigs } = await getZonesTask({ context })
         await new Listr(task).run()
@@ -153,11 +200,7 @@ export class DomainAddCommand extends PanfactumCommand {
 
             // TODO: Verify if environment is different from the environment where the domain is deployed
 
-            context.logger.log(
-                applyColors(`You've already added ${newDomain} to ${existingDomainConfig.env.name}.`,
-                    { highlights: [newDomain, existingDomainConfig.env.name] }),
-                { trailingNewlines: 1, leadingNewlines: 1 }
-            )
+            context.logger.info(`You've already added ${newDomain} to ${existingDomainConfig.env.name}.`)
 
             ////////////////////////////////////////////////////////
             // Environment subzones - Auto
@@ -180,71 +223,44 @@ export class DomainAddCommand extends PanfactumCommand {
             // Check if domain is already registered
             ////////////////////////////////////////////////////////
             if (forceIsRegistered || await isRegistered({ domain: newDomain, context })) {
-                context.logger.log(
-                    applyColors(`${newDomain} has been purchased but has not been added to Panfactum yet.`, {
-                        highlights: [
-                            { phrase: newDomain, style: "important" },
-                            { phrase: "not", style: "warning" }
-                        ]
-                    }),
-                    { trailingNewlines: 1, leadingNewlines: 1 }
-                )
 
                 ////////////////////////////////////////////////////////
                 // Confirm the user is the owner
                 ////////////////////////////////////////////////////////
 
-                const ownsDomain = await confirm({
-                    message: applyColors(`Are you the owner of ${newDomain}?`, { style: "question", highlights: [newDomain] }),
+                const ownsDomain = await context.logger.confirm({
+                    explainer: `${newDomain} has been purchased but has not been added to Panfactum yet.`,
+                    message: `Are you the owner of ${newDomain}?`,
                     default: true
                 })
 
                 if (!ownsDomain) {
-                    context.logger.log(
-                        applyColors(`You cannot add ${newDomain} to Panfactum unless you own it.`, { highlights: [newDomain], style: "error" }),
-                        { trailingNewlines: 1, leadingNewlines: 1 }
-                    )
+                    context.logger.error(`You cannot add ${newDomain} to Panfactum unless you own it.`)
                     return 1
                 }
 
                 ////////////////////////////////////////////////////////
                 // Check whether the user wants Panfactum to host the domain
                 ////////////////////////////////////////////////////////
-                context.logger.log(
-                    applyColors(
-                        `In order for Panfactum infrastructure to run workloads that are accessible at\n` +
-                        `${newDomain}, Panfactum needs to host its DNS servers.`
-                        ,
-                        {
-                            highlights: [newDomain]
-                        }),
-                    { trailingNewlines: 1, leadingNewlines: 1 }
-                )
+                context.logger.info(`
+                    In order for Panfactum infrastructure to run workloads that are accessible at
+                    ${newDomain}, Panfactum needs to host its DNS servers.
+                `)
 
-                context.logger.log(
-                    applyColors(
-                        `WARNING: We do NOT recommend this if you are already hosting records under ${newDomain}\n` +
-                        `as this will invalidate existing DNS records.`,
-                        {
-                            style: "warning",
-                            highlights: [newDomain]
-                        }),
-                    { trailingNewlines: 1 }
-                )
+                context.logger.warn(`
+                    We do NOT recommend this if you are already hosting records under ${newDomain}
+                    as this will invalidate existing DNS records.
+                `)
 
-                context.logger.log(
-                    applyColors(
-                        `If you choose to skip this step, you can still run workloads under subdomains such\n` +
-                        `as <your_subdomain>.${domain}, but you should re-run with these arguments:\n\n`,
-                        {
-                            highlights: [`<your_subdomain>.${newDomain}`, newDomain]
-                        }) + `pf domain add -d <your_subdomain>.${newDomain}`,
-                    { trailingNewlines: 1 }
-                )
+                context.logger.write(`
+                    If you choose to skip this step, you can still run workloads under subdomains such
+                    as <your_subdomain>.${domain}, but you should re-run with these arguments:
 
-                const shouldHostZone = await confirm({
-                    message: applyColors(`Would you like to configure Panfactum to host the DNS for ${newDomain}?`, { style: "question", highlights: [newDomain] }),
-                    default: true
+                        pf domain add -d <your_subdomain>.${newDomain}
+                `)
+
+                const shouldHostZone = await context.logger.confirm({
+                    message: `Would you like to configure Panfactum to host the DNS for ${newDomain}?`,
                 })
 
                 if (shouldHostZone) {
@@ -258,15 +274,7 @@ export class DomainAddCommand extends PanfactumCommand {
                     // Zone Setup - Manual
                     ////////////////////////////////////////////////////////
 
-                    context.logger.log(
-                        applyColors(
-                            `Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`,
-                            {
-                                highlights: [newDomain]
-                            }),
-                        { leadingNewlines: 1, trailingNewlines: 1 }
-                    )
-
+                    context.logger.info(`Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`)
                     const apexConfig = await manualZoneSetup({ context, domain: newDomain, env: environmentMeta })
 
                     ////////////////////////////////////////////////////////
@@ -299,39 +307,29 @@ export class DomainAddCommand extends PanfactumCommand {
                 ////////////////////////////////////////////////////////
                 // Confirm purchase
                 ////////////////////////////////////////////////////////
-                context.logger.log(
-                    applyColors(`${newDomain} has not been added to Panfactum, and it also has not yet been purchased.`, {
-                        highlights: [
-                            { phrase: newDomain, style: "important" },
-                            { phrase: "not", style: "warning" }
-                        ]
-                    }),
-                    { trailingNewlines: 1, leadingNewlines: 1 }
-                )
+                context.logger.info(`${newDomain} has not been added to Panfactum, and it also has not yet been purchased.`)
 
-                const shouldRegister = await confirm({
-                    message: applyColors(`Would you like to use Panfactum to purchase ${newDomain}?`, { style: "question", highlights: [newDomain] }),
-                    default: true
+                const shouldRegister = await context.logger.confirm({
+                    message: `Would you like to use Panfactum to purchase ${newDomain}?`
                 })
 
                 if (!shouldRegister) {
-                    context.logger.log(
-                        applyColors(
-                            `Cannot add ${newDomain} if it has not been purchased!\n\n` +
-                            `While you do not need to use this CLI to purchase the domain, you will need to purchase\n` +
-                            `it via an alternative mechanism such as the AWS web console:\n` +
-                            `https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html\n\n` +
-                            `Note that AWS does not support registering domains on all TLDs, so you may need to use an alternative registrar\n` +
-                            `such as https://www.namecheap.com/.\n\n` +
-                            `Either way, once you have purchased ${newDomain}, run this command to continue adding the domain to\n` +
-                            `this Panfactum installation:\n\n`, {
-                            style: "error",
-                            highlights: [
-                                { phrase: newDomain, style: "important" }
-                            ]
-                        }) + `pf domain add -d ${newDomain} ${environmentMeta ? `-e ${environmentMeta.name}` : ""}`,
-                        { trailingNewlines: 1, leadingNewlines: 1 }
-                    )
+                    context.logger.error(`
+                        Cannot add ${newDomain} if it has not been purchased!
+
+                        While you do not need to use this CLI to purchase the domain, you will need to purchase
+                        it via an alternative mechanism such as the AWS web console:
+
+                        https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html
+
+                        Note that AWS does not support registering domains on all TLDs, so you may need to use an alternative registrar
+                        such as https://www.namecheap.com/.
+
+                        Either way, once you have purchased ${newDomain}, run this command to continue adding the domain to
+                        this Panfactum installation:
+
+                        pf domain add -d ${newDomain} ${environmentMeta ? `-e ${environmentMeta.name}` : ""}
+                    `)
                     return 1
                 }
 
@@ -377,25 +375,16 @@ export class DomainAddCommand extends PanfactumCommand {
                 // If subdomain and has ancestor configured with Panfactum,
                 // create a new zone for the subdomain and link to nearest ancestor
                 ////////////////////////////////////////////////////////
-                context.logger.log(
-                    applyColors(`Confirmed! You've already added its ancestor ${ancestorDomain} with ${existingAncestorConfig.module} in ${existingAncestorConfig.env.name}.`,
-                        { highlights: [ancestorDomain, existingAncestorConfig.env.name] }),
-                    { leadingNewlines: 1 }
-                )
+                context.logger.info(`
+                    Confirmed! You've already added its ancestor
+                    ${ancestorDomain} with ${existingAncestorConfig.module} in ${existingAncestorConfig.env.name}.
+                `)
                 environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta })
 
                 ////////////////////////////////////////////////////////
                 // Connect with parent
                 ////////////////////////////////////////////////////////
-                context.logger.log(
-                    applyColors(
-                        `Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`,
-                        {
-                            highlights: [newDomain]
-                        }),
-                    { leadingNewlines: 1, trailingNewlines: 1 }
-                )
-
+                context.logger.info(`Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`)
                 await createDescendentZones({
                     context,
                     ancestorZone: existingAncestorConfig,
@@ -418,71 +407,44 @@ export class DomainAddCommand extends PanfactumCommand {
 
             } else {
 
-                context.logger.log(
-                    applyColors(`You haven't added ${newDomain} or any ancestor domains.`, { highlights: [newDomain] }),
-                    { trailingNewlines: 1, leadingNewlines: 1 }
-                )
+                context.logger.info(`You haven't added ${newDomain} or any ancestor domains.`)
 
                 ////////////////////////////////////////////////////////
                 // If no ancestor configured with Panfactum BUT the apex is registered,
                 // let's check to see if the user want to connect the apex to Panfactum.
                 ////////////////////////////////////////////////////////
                 if (forceIsRegistered || await isRegistered({ domain: apexDomain, context })) {
-                    context.logger.log(
-                        applyColors(`However, it appears the apex domain for ${newDomain} (${apexDomain}) has already been purchased.`, {
-                            highlights: [
-                                { phrase: newDomain, style: "important" },
-                                { phrase: apexDomain, style: "important" }
-                            ]
-                        }),
-                        { trailingNewlines: 1 }
-                    )
+                    context.logger.write(`However, it appears the apex domain for ${newDomain} (${apexDomain}) has already been purchased.`)
 
                     ////////////////////////////////////////////////////////
                     // Confirm the user is the owner
                     ////////////////////////////////////////////////////////
 
-                    const ownsDomain = await confirm({
-                        message: applyColors(`Are you the owner of ${apexDomain}?`, { style: "question", highlights: [apexDomain] }),
-                        default: true
+                    const ownsDomain = await context.logger.confirm({
+                        message: `Are you the owner of ${apexDomain}?`,
                     })
 
                     if (!ownsDomain) {
-                        context.logger.log(
-                            applyColors(`You cannot add ${newDomain} to Panfactum unless you own its apex domain ${apexDomain}.`, { highlights: [newDomain, apexDomain], style: "error" }),
-                            { trailingNewlines: 1, leadingNewlines: 1 }
-                        )
+                        context.logger.error(`You cannot add ${newDomain} to Panfactum unless you own its apex domain ${apexDomain}.`)
                         return 1
                     }
 
                     ////////////////////////////////////////////////////////
                     // (Optional) Link the apex zone to the domain registration
                     ////////////////////////////////////////////////////////
-                    context.logger.log(
-                        applyColors(
-                            `Would you like to configure Panfactum to host the DNS servers for ${apexDomain}?\n` +
-                            `This isn't required to add ${newDomain}, but it will make adding\n` +
-                            `additional subdomains of ${apexDomain} easier in the future.`
-                            ,
-                            {
-                                highlights: [newDomain, apexDomain]
-                            }),
-                        { trailingNewlines: 1, leadingNewlines: 1 }
-                    )
+                    context.logger.info(`
+                        Would you like to configure Panfactum to host the DNS servers for ${apexDomain}?
+                        This isn't required to add ${newDomain}, but it will make adding
+                        additional subdomains of ${apexDomain} easier in the future.
+                    `)
 
-                    context.logger.log(
-                        applyColors(
-                            `WARNING: We do NOT recommend this if you are already hosting records under ${apexDomain}\n` +
-                            `as you this will invalidate existing DNS records.`,
-                            {
-                                style: "warning",
-                                highlights: [apexDomain]
-                            }),
-                        { trailingNewlines: 1 }
-                    )
+                    context.logger.warn(`
+                        We do NOT recommend this if you are already hosting records under ${apexDomain}
+                        as you this will invalidate existing DNS records.
+                    `)
 
-                    const shouldHostApexZone = await confirm({
-                        message: applyColors(`Would you like to configure Panfactum to host the DNS for ${apexDomain}?`, { style: "question", highlights: [apexDomain] }),
+                    const shouldHostApexZone = await context.logger.confirm({
+                        message: `Would you like to configure Panfactum to host the DNS for ${apexDomain}?`,
                         default: true
                     })
 
@@ -554,30 +516,18 @@ export class DomainAddCommand extends PanfactumCommand {
                     }
 
                 } else {
-                    context.logger.log(
-                        applyColors(`Moreover, it appears the apex domain for ${newDomain} (${apexDomain}) is available for purchase.`, {
-                            highlights: [
-                                { phrase: newDomain, style: "important" },
-                                { phrase: apexDomain, style: "important" }
-                            ]
-                        }),
-                        { trailingNewlines: 1 }
-                    )
+                    context.logger.write(`Moreover, it appears the apex domain for ${newDomain} (${apexDomain}) is available for purchase.`)
 
                     ////////////////////////////////////////////////////////
                     // If the apex is not registered,
                     // let's check to see if the user want to purchase it.
                     ////////////////////////////////////////////////////////
-                    const shouldPurchase = await confirm({
-                        message: applyColors(`Would you like to purcahse ${apexDomain}?`, { style: "question", highlights: [apexDomain] }),
-                        default: true
+                    const shouldPurchase = await context.logger.confirm({
+                        message: `Would you like to purcahse ${apexDomain}?`
                     })
 
                     if (!shouldPurchase) {
-                        context.logger.log(
-                            applyColors(`You cannot add ${newDomain} to Panfactum unless you own its apex domain ${apexDomain}.`, { highlights: [newDomain, apexDomain], style: "error" }),
-                            { trailingNewlines: 1, leadingNewlines: 1 }
-                        )
+                        context.logger.error(`You cannot add ${newDomain} to Panfactum unless you own its apex domain ${apexDomain}.`)
                         return 1
                     }
 

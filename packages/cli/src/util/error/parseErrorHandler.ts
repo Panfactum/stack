@@ -3,18 +3,18 @@ import { PanfactumZodError, CLIError } from "./error";
 
 export function parseErrorHandler({
   error,
-  zodErrorMessage,
-  genericErrorMessage,
+  errorMessage,
+  nonZodErrorMessage,
   command,
 }: {
   error: unknown;
-  zodErrorMessage: string;
-  genericErrorMessage: string;
+  errorMessage: string;
+  nonZodErrorMessage?: string;
   command: string;
 }) {
   if (error instanceof ZodError) {
-    throw new PanfactumZodError(zodErrorMessage, command, error);
+    throw new PanfactumZodError(errorMessage, command, error);
   } else {
-    throw new CLIError(genericErrorMessage, error);
+    throw new CLIError(nonZodErrorMessage ?? errorMessage, error);
   }
 }

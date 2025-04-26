@@ -4,7 +4,6 @@ import { z, ZodError } from "zod";
 
 import awsDNSLinksModuleHCL from "@/templates/aws_dns_links.hcl" with { type: "file" };
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
-import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
@@ -37,9 +36,9 @@ export async function createDescendentZones(inputs: {
     ///////////////////////////////////////////////////////
 
     tasks.add({
-        title: applyColors(
+        title: context.logger.applyColors(
             `Create and connect descendent DNS zones to ancestor ${ancestorZone.domain}`,
-            { highlights: [{ phrase: ancestorZone.domain, style: "subtle" }] }
+            { lowlights: [ancestorZone.domain] }
         ),
         task: async (_, grandParentTask) => {
             const subtasks = grandParentTask.newListr([])
@@ -47,12 +46,11 @@ export async function createDescendentZones(inputs: {
             interface ConnectTask { nameServers?: string[] }
             for (const [domain, config] of Object.entries(descendentZones)) {
                 subtasks.add({
-                    title: applyColors(
+                    title: context.logger.applyColors(
                         `Create and connect ${domain} ${config.env.name}`,
                         {
-                            highlights: [
-                                { phrase: config.env.name, style: "subtle" },
-                                { phrase: domain, style: "important" }
+                            lowlights: [
+                                config.env.name
                             ]
                         }
                     ),
@@ -127,7 +125,7 @@ export async function createDescendentZones(inputs: {
                                 region: GLOBAL_REGION,
                                 module: MODULES.AWS_DNS_LINKS,
                                 hclIfMissing: await Bun.file(awsDNSLinksModuleHCL).text(),
-                                taskTitle: applyColors(`Deploy NS and DNSSEC records in ${ancestorZone.domain}`, { highlights: [ancestorZone.domain] }),
+                                taskTitle: context.logger.applyColors(`Deploy NS and DNSSEC records in ${ancestorZone.domain}`),
                                 inputUpdates: {
                                     links: defineInputUpdate({
                                         schema: z.record(z.string(), z.array(z.object({

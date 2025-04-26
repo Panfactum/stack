@@ -43,11 +43,10 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             //
             // However, they can also opt-out of this and continue to use standalone AWS accounts
             //////////////////////////////////////////////////////////////////////////////////////////
-            context.logger.log(
-                `It looks like you are installing your first Panfactum environment!\n` +
-                `There will be a few preliminary questions to ensure that setup goes smoothly...`,
-                { trailingNewlines: 1, leadingNewlines: 1 }
-            )
+            context.logger.info(`
+               It looks like you are installing your first Panfactum environment!
+               There will be a few preliminary questions to ensure that setup goes smoothly...
+            `)
             if (await hasExistingAWSInfra(context)) {
                 if (await hasExistingAWSOrg(context)) {
                     hasAWSOrg = true
@@ -55,19 +54,17 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                         managementAccountCreds = await getRootAccountAdminAccess(context)
                     }
                 } else {
-                    context.logger.log(
-                        `Got it! Panfactum uses AWS Organizations to create AWS accounts for your environments.\n` +
-                        `We will need to set that up first.`,
-                        { trailingNewlines: 1, leadingNewlines: 1 }
-                    )
+                    context.logger.info(`
+                        Got it! Panfactum uses AWS Organizations to create AWS accounts for your environments.
+                        We will need to set that up first.
+                    `)
                     managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
                 }
             } else {
-                context.logger.log(
-                    `Got it! Since you are using Panfactum for the first time, let's create an AWS Organization\n` +
-                    `to manage the AWS accounts for the environments that you create.`,
-                    { trailingNewlines: 1, leadingNewlines: 1 }
-                )
+                context.logger.info(`
+                    Got it! Since you are using Panfactum for the first time, let's create an AWS Organization
+                    to manage the AWS accounts for the environments that you create.
+                `)
                 managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
             }
         } else if (!hasManagementEnv) {
