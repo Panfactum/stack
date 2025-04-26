@@ -1,6 +1,5 @@
 import { join } from "node:path";
 import { execute } from "../subprocess/execute";
-import type { PanfactumTaskWrapper } from "../listr/types";
 import type { PanfactumContext } from "@/context/context";
 
 export async function terragruntApplyAll({
@@ -8,13 +7,13 @@ export async function terragruntApplyAll({
   env,
   environment,
   region,
-  task,
+  onLogLine,
 }: {
   context: PanfactumContext;
   env?: Record<string, string | undefined>;
   environment: string;
   region?: string;
-  task?: PanfactumTaskWrapper;
+  onLogLine?: (line: string) => void;
 }) {
   const workingDirectory = join(
     context.repoVariables.environments_dir,
@@ -33,6 +32,7 @@ export async function terragruntApplyAll({
     context,
     workingDirectory,
     errorMessage: "Failed to apply infrastructure modules",
-    task,
+    onStdOutNewline: onLogLine,
+    onStdErrNewline: onLogLine,
   });
 }
