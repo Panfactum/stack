@@ -135,6 +135,7 @@ export async function setupCertificateIssuers(
             return task.newListr<Context>(
               [
                 await buildDeployModuleTask<Context>({
+                  taskTitle: "Deploy Certificate Issuers",
                   context,
                   env: {
                     ...process.env,
@@ -172,6 +173,7 @@ export async function setupCertificateIssuers(
                 // TODO: rollout reset of cert manager every 90 seconds until the above task is completed
                 // check for the certificate to be provisioned
                 await buildDeployModuleTask<Context>({
+                  taskTitle: "Deploy The First Certificate",
                   context,
                   env: {
                     ...process.env,

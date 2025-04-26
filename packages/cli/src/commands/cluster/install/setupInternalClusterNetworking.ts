@@ -26,9 +26,8 @@ export async function setupInternalClusterNetworking(
             await getIdentity({ context, profile: awsProfile });
           },
         },
-
-        // TODO: @seth - Need task titles
         await buildDeployModuleTask({
+          taskTitle: "Deploy Cilium",
           context,
           environment,
           region,
@@ -37,6 +36,7 @@ export async function setupInternalClusterNetworking(
           hclIfMissing: await Bun.file(kubeCiliumTerragruntHcl).text(),
         }),
         await buildDeployModuleTask({
+          taskTitle: "Deploy Core DNS",
           context,
           environment,
           region,

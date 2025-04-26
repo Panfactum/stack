@@ -110,6 +110,7 @@ export async function setupInboundNetworking(
                     }
                     return parentTask.newListr<Context>([
                       await buildDeployModuleTask({
+                        taskTitle: "Deploy External DNS",
                         context,
                         env: {
                           ...process.env,
@@ -124,6 +125,7 @@ export async function setupInboundNetworking(
                         ).text(),
                       }),
                       await buildDeployModuleTask({
+                        taskTitle: "Deploy AWS Load Balancer Controller",
                         context,
                         env: {
                           ...process.env,
@@ -150,6 +152,7 @@ export async function setupInboundNetworking(
                   },
                 },
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Ingress NGINX",
                   context,
                   env: {
                     ...process.env,
@@ -175,6 +178,7 @@ export async function setupInboundNetworking(
                   },
                 }),
                 await buildDeployModuleTask({
+                  taskTitle: "Update Vault to use Ingress",
                   context,
                   env: {
                     ...process.env,
@@ -270,6 +274,7 @@ export async function setupInboundNetworking(
           },
         },
         await buildDeployModuleTask({
+          taskTitle: "Deploy Vault Core Resources with permanent Vault Address",
           context,
           environment,
           region,

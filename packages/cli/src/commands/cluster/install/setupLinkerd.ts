@@ -62,6 +62,7 @@ export async function setupLinkerd(
             return task.newListr<Context>(
               [
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Linkerd Service Mesh",
                   context,
                   env: {
                     ...process.env,
@@ -99,7 +100,6 @@ export async function setupLinkerd(
               },
             });
           },
-          // TODO: @seth does this actually work?
           rendererOptions: {
             outputBar: 5,
           },

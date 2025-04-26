@@ -63,8 +63,8 @@ export async function setupCertManagement(
           task: async (ctx, task) => {
             return task.newListr<Context>(
               [
-                // TODO: @seth - Need task titles
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Certificate Manager",
                   context,
                   env: {
                     ...process.env,

@@ -85,6 +85,7 @@ export async function setupVault(
           },
         },
         await buildDeployModuleTask({
+          taskTitle: "Deploy Vault",
           context,
           environment,
           region,
@@ -233,10 +234,6 @@ export async function setupVault(
                 const unsealOutput = UNSEAL_OUTPUT_SCHEMA.parse(statusData);
                 sealedStatus = unsealOutput.sealed;
                 if (!sealedStatus) {
-                  context.logger.log("Vault successfully unsealed", {
-                    leadingNewlines: 1,
-                    style: "success",
-                  });
                   break;
                 }
               }
@@ -267,21 +264,6 @@ export async function setupVault(
                 context,
                 filePath: join(modulePath, "secrets.yaml"),
               });
-
-              // TODO: @jack how do we want to handle this? - Seth
-              // context.logger.log(
-              //   [
-              //     pc.bold("NOTE: "),
-              //     "The recovery keys and root token have been encrypted and saved in the kube_vault folder.",
-              //     "The root token allows root access to the vault instance.",
-              //     `These keys ${pc.bold("SHOULD NOT")} be left here.`,
-              //     "Decide how your organization recommends superusers store these keys.",
-              //     `This should ${pc.bold("not")} be in a location that is accessible by all superusers (e.g. a company password vault).`,
-              //   ],
-              //   {
-              //     trailingNewlines: 1,
-              //   }
-              // );
             } catch (error) {
               parseErrorHandler({
                 error,
@@ -313,6 +295,7 @@ export async function setupVault(
             return task.newListr<VaultContext>(
               [
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Vault Core Resources",
                   context,
                   environment,
                   region,

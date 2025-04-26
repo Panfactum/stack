@@ -26,7 +26,6 @@ export async function setupPolicyController(
             await getIdentity({ context, profile: awsProfile });
           },
         },
-        // TODO: @seth - Need task titles
         await buildDeployModuleTask({
           context,
           environment,

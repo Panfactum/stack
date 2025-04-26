@@ -4,8 +4,7 @@ import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
-import awsEksSla1Template from "@/templates/aws_eks_sla_1_terragrunt.hcl" with { type: "file" };
-import awsEksSla2Template from "@/templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
+import awsEksTemplate from "@/templates/aws_eks_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
@@ -124,56 +123,52 @@ export async function setupEKS(
                 return;
               }
 
-              if (!ctx.clusterName) {
-                ctx.clusterName = await prompt.run(input, {
-                  message: pc.magenta(
-                    "Enter a name for your Kubernetes cluster:"
-                  ),
-                  required: true,
-                  default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
-                  transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
-                  validate: (value) => {
-                    const transformed = clusterNameFormatter(value);
-                    const { error } = CLUSTER_NAME.safeParse(transformed);
-                    if (error) {
-                      return error.issues[0]?.message ?? "Invalid cluster name";
-                    } else {
-                      return true;
-                    }
-                  },
-                });
-                ctx.clusterName = clusterNameFormatter(ctx.clusterName);
-              }
+              ctx.clusterName = await prompt.run(input, {
+                message: pc.magenta(
+                  "Enter a name for your Kubernetes cluster:"
+                ),
+                required: true,
+                default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
+                transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
+                validate: (value) => {
+                  const transformed = clusterNameFormatter(value);
+                  const { error } = CLUSTER_NAME.safeParse(transformed);
+                  if (error) {
+                    return error.issues[0]?.message ?? "Invalid cluster name";
+                  } else {
+                    return true;
+                  }
+                },
+              });
+              ctx.clusterName = clusterNameFormatter(ctx.clusterName);
 
-              if (!ctx.clusterDescription) {
-                ctx.clusterDescription = await prompt.run(input, {
-                  message: "Enter a description for your Kubernetes cluster:",
-                  required: true,
-                  default: `Panfactum Kubernetes cluster in the ${region} region of the ${environment} environment`,
-                  validate: (value) => {
-                    const { error } = CLUSTER_DESCRIPTION.safeParse(value);
-                    if (error) {
-                      return (
-                        error.issues[0]?.message ??
-                        "Invalid cluster description"
-                      );
-                    } else {
-                      return true;
-                    }
-                  },
-                });
-              }
+              ctx.clusterDescription = await prompt.run(input, {
+                message: "Enter a description for your Kubernetes cluster:",
+                required: true,
+                default: `Panfactum Kubernetes cluster in the ${region} region of the ${environment} environment`,
+                validate: (value) => {
+                  const { error } = CLUSTER_DESCRIPTION.safeParse(value);
+                  if (error) {
+                    return (
+                      error.issues[0]?.message ??
+                      "Invalid cluster description"
+                    );
+                  } else {
+                    return true;
+                  }
+                },
+              });
+
             },
           },
           await buildDeployModuleTask<Context>({
+            taskTitle: "Deploy EKS",
             context,
             environment,
             region,
             module: MODULES.AWS_EKS,
             initModule: true,
-            hclIfMissing: await (slaTarget === 1
-              ? Bun.file(awsEksSla1Template).text()
-              : Bun.file(awsEksSla2Template).text()), // TODO: @seth - Does it make sense to have two templates?
+            hclIfMissing: await Bun.file(awsEksTemplate).text(),
             inputUpdates: {
               cluster_name: defineInputUpdate({
                 schema: z.string(),
@@ -187,6 +182,10 @@ export async function setupEKS(
               bootstrap_mode_enabled: defineInputUpdate({
                 schema: z.boolean(),
                 update: () => true,
+              }),
+              node_subnets: defineInputUpdate({
+                schema: z.array(z.string()),
+                update: () => slaTarget === 1 ? ["PRIVATE_A"] : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
               }),
             },
           }),
@@ -212,7 +211,6 @@ export async function setupEKS(
           {
             title: "Update Configuration File",
             task: async (ctx) => {
-
               // TODO: @seth - This is unnecessary
               // as we can read from `.kube/clusters.yaml
               const moduleOutput = await terragruntOutput({
@@ -222,7 +220,7 @@ export async function setupEKS(
                 module: MODULES.AWS_EKS,
                 validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
               });
-              
+
               await upsertConfigValues({
                 context,
                 filePath: path.join(clusterPath, "region.yaml"),
