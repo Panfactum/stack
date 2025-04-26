@@ -72,6 +72,7 @@ export async function setupAutoscaling(
             return task.newListr<Context>(
               [
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Metrics Server",
                   context,
                   env: {
                     ...process.env,
@@ -87,6 +88,7 @@ export async function setupAutoscaling(
                   ).text(),
                 }),
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Vertical Pod Autoscaler",
                   context,
                   env: {
                     ...process.env,
@@ -123,6 +125,7 @@ export async function setupAutoscaling(
             return task.newListr<Context>(
               [
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Karpenter",
                   context,
                   env: {
                     ...process.env, //TODO: @seth Use context.env
@@ -158,6 +161,7 @@ export async function setupAutoscaling(
                   },
                 },
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Karpenter Node Pools",
                   context,
                   env: {
                     ...process.env,
@@ -184,6 +188,7 @@ export async function setupAutoscaling(
                   },
                 }),
                 await buildDeployModuleTask({
+                  taskTitle: "Deploy Scheduler",
                   context,
                   env: {
                     ...process.env,
@@ -217,8 +222,6 @@ export async function setupAutoscaling(
             });
           },
         },
-        // TODO: @seth - I wonder if the VPA run-all and this run-all can 
-        // be combined into a single "enable enhanced autoscaling run-all"
         {
           title: "Enable Enhanced Autoscaling",
           task: async (ctx, task) => {

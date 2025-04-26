@@ -26,67 +26,9 @@ import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { InstallClusterStepOptions } from "./common";
-
-// Ripped from https://github.com/validatorjs/validator.js and customized for our needs
-function isFQDN(str: string) {
-  const parts = str.split('.');
-  const tld = parts[parts.length - 1];
-
-  if (!tld) {
-    return false;
-  }
-
-  // disallow fqdns without tld
-  if (parts.length < 2) {
-    return false;
-  }
-
-  // disallow invalid TLDs
-  if (!/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)) {
-    return false;
-  }
-
-  // disallow spaces
-  if (/\s/.test(tld)) {
-    return false;
-  }
-
-
-  // reject numeric TLDs
-  if (/^\d+$/.test(tld)) {
-    return false;
-  }
-
-  return parts.every((part) => {
-    // disallow parts longer than 63 characters
-    if (part.length > 63) {
-      return false;
-    }
-
-    // disallow parts with invalid characters
-    if (!/^[a-z_\u00a1-\uffff0-9-]+$/i.test(part)) {
-      return false;
-    }
-
-    // disallow full-width chars
-    if (/[\uff01-\uff5e]/.test(part)) {
-      return false;
-    }
-
-    // disallow parts starting or ending with hyphen
-    if (/^-|-$/.test(part)) {
-      return false;
-    }
-
-    // disallow underscores
-    // eslint-disable-next-line sonarjs/prefer-single-boolean-return
-    if (/_/.test(part)) {
-      return false;
-    }
-
-    return true;
-  });
-}
+import { Listr } from "listr2";
+import { SUBDOMAIN } from "@/util/config/schemas";
+import pc from "picocolors";
 
 const SETUP_STEPS: Array<{
   label: string;
@@ -264,14 +206,13 @@ export class InstallClusterCommand extends PanfactumCommand {
         choices: Object.keys(domains),
       });
 
-      // TODO: already have validation built, use that.
-      // Validate input to not have periods in it.
       const kubeDomain = await input({
         message: applyColors("Enter the subdomain for the cluster where all cluster utilities will be hosted", { style: "question" }),
         default: `${region}.${subdomain}`,
         validate: async (value) => {
-          if (!isFQDN(`${value}.${subdomain}`)) {
-            return "Invalid subdomain";
+          const { error } = SUBDOMAIN.safeParse(value);
+          if (error) {
+            return error.issues[0]?.message ?? "Invalid subdomain";
           }
           try {
             const glob = new Glob('**/region.yaml')
@@ -296,9 +237,6 @@ export class InstallClusterCommand extends PanfactumCommand {
           }
 
           return true;
-        },
-        transformer: (value) => {
-          return `${value}.${subdomain}`;
         },
         required: true,
       })
@@ -344,15 +282,40 @@ export class InstallClusterCommand extends PanfactumCommand {
       SETUP_STEPS[completedModules - 1]!.completed = false;
     }
 
+    const tasks = new Listr([]);
+
     for (const [_, { setup, label, completed }] of SETUP_STEPS.entries()) {
-      try {
-        await setup({ ...options }, completed);
-      } catch (e) {
-        killAllBackgroundProcesses({ context: this.context });
-        throw new CLIError(`${label} setup failed`, e);
-      }
+      tasks.add({
+        title: `${label} ${completed ? `${applyColors("(skipped)", { style: "subtle" })}` : ""}`,
+        skip: () => completed,
+        task: async () => {
+          await setup(options, completed);
+        }
+      });
+    }
+
+    try {
+      await tasks.run();
+    } catch (e) {
+      killAllBackgroundProcesses({ context: this.context });
+      throw new CLIError("Failed to Install Cluster", e);
     }
 
     this.context.logger.clusterInstallSuccess();
+
+    // TODO: @seth - Use applyColors() for equivalent functionality
+    this.context.logger.log(
+      [
+        pc.bold("NOTE: "),
+        "The recovery keys and root token have been encrypted and saved in the kube_vault folder.",
+        "The root token allows root access to the vault instance.",
+        `These keys ${pc.bold("SHOULD NOT")} be left here.`,
+        "Decide how your organization recommends superusers store these keys.",
+        `This should ${pc.bold("not")} be in a location that is accessible by all superusers (e.g. a company password vault).`,
+      ],
+      {
+        trailingNewlines: 1,
+      }
+    );
   }
 }

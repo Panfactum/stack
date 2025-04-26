@@ -386,6 +386,7 @@ export async function setupVPCandECR(
                     return parentTask.newListr<Context>(
                       [
                         await buildDeployModuleTask<Context>({
+                          taskTitle: "Deploy VPC",
                           context,
                           environment,
                           region,
@@ -427,6 +428,7 @@ export async function setupVPCandECR(
                   },
                 },
                 await buildDeployModuleTask<Context>({
+                  taskTitle: "Deploy ECR Pull Through Cache",
                   context,
                   environment,
                   region,
