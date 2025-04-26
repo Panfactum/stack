@@ -32,11 +32,11 @@ cli.register(AWSProfileListCommand)
 cli.register(EnvironmentInstallCommand)
 cli.register(DomainAddCommand)
 
-const proc = cli.process({input: process.argv.slice(2)}) as PanfactumCommand
+const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
 
 // Parse and run
 cli.runExit(proc, await createPanfactumContext(
-  Cli.defaultContext, 
+  Cli.defaultContext,
   {
     logLevel: proc.logLevel
   }

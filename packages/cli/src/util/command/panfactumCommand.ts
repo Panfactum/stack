@@ -5,27 +5,24 @@ import type { LogLevel } from "@/context/logger";
 
 export abstract class PanfactumCommand extends Command<PanfactumContext> {
 
-    logLevel: LogLevel = Option.String("--log-level,-v", "info", {
-        env: "PF_LOG_LEVEL",
-        description: "The verbosity of logging. Must be one of: debug, info, warn, error.",
-        arity: 1
+    debugEnabled: LogLevel = Option.Boolean("--debug", {
+        description: "Activates debug logging",
     });
 
-    override async catch(error: unknown){
-
-        if(error instanceof Error){
-            this.context.logger.log(`${error.message}`, {level: "error"})
+    override async catch(error: unknown) {
+        if (error instanceof Error) {
+            this.context.logger.error(error.message)
 
             // The detailed error message should always come from the error cause 
             // if there is no `cause` property, that means the `error` IS the cause
             // and not just a wrapper.
-            const cause = error.cause || error 
-            if(cause instanceof CLIError){
-                this.context.logger.log(cause.getDetailedMessage(), {level: "error"})
+            const cause = error.cause || error
+            if (cause instanceof CLIError) {
+                this.context.logger.error(cause.getDetailedMessage())
             }
 
         } else {
-            this.context.logger.log(JSON.stringify(error), {level: "error"})
+            this.context.logger.error(JSON.stringify(error))
         }
         this.context.logger.crashMessage()
         // TODO: @jack Add debug logs

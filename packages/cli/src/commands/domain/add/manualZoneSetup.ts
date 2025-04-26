@@ -1,10 +1,7 @@
 import { join } from "node:path"
-import { confirm } from "@inquirer/prompts"
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
-import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
 import { validateDomainConfig, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
@@ -45,7 +42,7 @@ export async function manualZoneSetup(inputs: {
             region: GLOBAL_REGION,
             module: MODULES.AWS_DNS_ZONES,
             hclIfMissing: await Bun.file(awsDNSZonesModuleHCL).text(),
-            taskTitle: applyColors(`Deploy DNS zone for ${domain}`, { highlights: [domain] }),
+            taskTitle: `Deploy DNS zone for ${domain}`,
             inputUpdates: {
                 domains: defineInputUpdate({
                     schema: z.record(z.string(), z.object({
@@ -94,18 +91,20 @@ export async function manualZoneSetup(inputs: {
     tasks.add({
         title: "Set NS (nameserver) records with registrar",
         task: async (ctx, task) => {
-            task.output = applyColors(
-                `To connect ${domain} to the Panfactum installation, you need to add\n` +
-                `the following NS records to your domain registrar.\n\n` +
-                ctx.nameServers.map(ns => `- ${ns}`).join("\n") + "\n" +
-                `As an example, here are the steps that you would follow if you use Namecheap as the registrar:\n` +
-                `https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/`
-                , { style: "warning" })
-
             let confirmRecordsAdded = false
             while (!confirmRecordsAdded) {
-                confirmRecordsAdded = await task.prompt(ListrInquirerPromptAdapter).run(confirm, {
-                    message: applyColors(`Have you added the NS (nameserver) records?`, { style: "question" }),
+                confirmRecordsAdded = await context.logger.confirm({
+                    task,
+                    explainer: `
+                        To connect ${domain} to the Panfactum installation, you need to add
+                        the following NS records to your domain registrar.
+
+                        ${ctx.nameServers.map(ns => `- ${ns}`).join("\n")}
+
+                        As an example, here are the steps that you would follow if you use Namecheap as the registrar:
+                        https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/
+                    `,
+                    message: `Have you added the NS(nameserver) records ? `,
                     default: true
                 })
             }
@@ -153,13 +152,7 @@ export async function manualZoneSetup(inputs: {
     ///////////////////////////////////////////////////////
     try {
         await tasks.run()
-
-        context.logger.log(
-            applyColors(
-                `${domain} added to ${env.name} successfully!`,
-                { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.success(`${domain} added to ${env.name} successfully!`)
     } catch (e) {
         throw new CLIError(`Failed to setup zone for ${domain}`, e)
     }
@@ -173,8 +166,4 @@ export async function manualZoneSetup(inputs: {
             throw new CLIError("Failed to parse domain config", e)
         }
     }
-}
-
-function join(path: string, arg1: string): string {
-    throw new Error("Function not implemented.");
 }

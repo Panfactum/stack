@@ -1,13 +1,10 @@
 import path from "node:path";
-import { input, password } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import { z } from "zod";
 import { vpcNetworkTest } from "@/commands/aws/vpc-network-test/vpcNetworkTest";
 import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
@@ -121,98 +118,68 @@ export async function setupVPCandECR(
               return;
             }
 
-            if (!ctx.vpcName) {
-              ctx.vpcName = await task
-                .prompt(ListrInquirerPromptAdapter)
-                .run(input, {
-                  message: applyColors("Enter a name for your VPC:", { style: "question" }),
-                  default: `panfactum-${environment}-${region}`,
-                  required: true,
-                  validate: async (value) => {
-                    const { error } = VPC_NAME.safeParse(value);
-                    if (error) {
-                      return error?.issues[0]?.message ?? "Invalid name";
-                    } else {
-                      // FIX: @seth - Use AWS SDK
-                      const vpcListCommand = [
-                        "aws",
-                        "ec2",
-                        "describe-vpcs",
-                        `--region=${region}`,
-                        `--filters=Name=tag:Name,Values=${value}`,
-                        "--output=json",
-                        `--profile=${awsProfile}`,
-                        "--no-cli-pager",
-                      ];
+            ctx.vpcName = await context.logger.input({
+              task,
+              message: "Enter a name for your VPC:",
+              default: `panfactum-${environment}-${region}`,
+              required: true,
+              validate: async (value) => {
+                const { error } = VPC_NAME.safeParse(value);
+                if (error) {
+                  return error?.issues[0]?.message ?? "Invalid name";
+                } else {
+                  // FIX: @seth - Use AWS SDK
+                  const vpcListCommand = [
+                    "aws",
+                    "ec2",
+                    "describe-vpcs",
+                    `--region=${region}`,
+                    `--filters=Name=tag:Name,Values=${value}`,
+                    "--output=json",
+                    `--profile=${awsProfile}`,
+                    "--no-cli-pager",
+                  ];
 
-                      context.logger.log(
-                        "vpc list command: " + vpcListCommand.join(" "),
-                        {
-                          level: "debug",
-                        }
-                      );
+                  const { stdout } = await execute({
+                    command: vpcListCommand,
+                    context: context,
+                    workingDirectory: clusterPath,
+                  });
+                  let vpcList;
+                  try {
+                    const vpc = JSON.parse(stdout);
+                    vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
+                  } catch (error) {
+                    parseErrorHandler({
+                      error,
+                      errorMessage:
+                        "Failed checking if VPC name is already in use.",
+                      command: vpcListCommand.join(" "),
+                    });
+                  }
 
-                      const { stdout, stderr } = await execute({
-                        command: vpcListCommand,
-                        context: context,
-                        workingDirectory: clusterPath,
-                      });
-
-                      context.logger.log(
-                        "aws ec2 describe-vps stdout: " + stdout,
-                        {
-                          level: "debug",
-                        }
-                      );
-                      context.logger.log(
-                        "aws ec2 describe-vps stderr: " + stderr,
-                        {
-                          level: "debug",
-                        }
-                      );
-
-                      let vpcList;
-                      try {
-                        const vpc = JSON.parse(stdout);
-                        vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
-                      } catch (e) {
-                        parseErrorHandler({
-                          error: e,
-                          genericErrorMessage:
-                            "Failed checking if VPC name is already in use.",
-                          zodErrorMessage:
-                            "Failed checking if VPC name is already in use.",
-                          command: vpcListCommand.join(" "),
-                        });
-                      }
-
-                      if (vpcList?.Vpcs.length && vpcList.Vpcs.length > 0) {
-                        return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;
-                      } else {
-                        return true;
-                      }
-                    }
-                  },
-                });
-            }
-
-            if (!ctx.vpcDescription) {
-              ctx.vpcDescription = await task
-                .prompt(ListrInquirerPromptAdapter)
-                .run(input, {
-                  message: applyColors("Enter a description for your VPC:", { style: "question" }),
-                  default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
-                  required: true,
-                  validate: (value) => {
-                    const { error } = VPC_DESCRIPTION.safeParse(value);
-                    if (error) {
-                      return error.issues[0]?.message ?? "Invalid description";
-                    } else {
-                      return true;
-                    }
-                  },
-                });
-            }
+                  if (vpcList?.Vpcs.length && vpcList.Vpcs.length > 0) {
+                    return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;
+                  } else {
+                    return true;
+                  }
+                }
+              },
+            });
+            ctx.vpcDescription = await context.logger.input({
+              task,
+              message: "Enter a description for your VPC:",
+              default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
+              required: true,
+              validate: async (value) => {
+                const { error } = VPC_DESCRIPTION.safeParse(value);
+                if (error) {
+                  return error.issues[0]?.message ?? "Invalid description";
+                } else {
+                  return true;
+                }
+              },
+            });
           },
         },
         {
@@ -274,52 +241,47 @@ export async function setupVPCandECR(
             }
 
             if (!ctx.dockerHubUsername) {
-              ctx.dockerHubUsername = await task
-                .prompt(ListrInquirerPromptAdapter)
-                .run(input, {
-                  message: applyColors("Enter your Docker Hub username:", { style: "question" }),
-                  required: true,
-                  validate: (value) => {
-                    const { error } = DOCKERHUB_USERNAME.safeParse(value);
-                    if (error) {
-                      return error.issues[0]?.message ?? "Invalid username";
-                    } else {
-                      return true;
-                    }
-                  },
-                });
+              ctx.dockerHubUsername = await context.logger.input({
+                task,
+                message: "Enter your Docker Hub username:",
+                required: true,
+                validate: async (value) => {
+                  const { error } = DOCKERHUB_USERNAME.safeParse(value);
+                  if (error) {
+                    return error.issues[0]?.message ?? "Invalid username";
+                  } else {
+                    return true;
+                  }
+                },
+              });
             }
 
             if (!dhPAT) {
-              dhPAT = await task
-                .prompt(ListrInquirerPromptAdapter)
-                .run(password, {
-                  message: applyColors(
-                    `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\n` +
-                    `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n` +
-                    `This will be encrypted and stored securely:`,
-                    { style: "question", highlights: [{ phrase: "This will be encrypted and stored securely", style: "important" }] }
-                  ),
-                  mask: true,
-                  validate: async (value) => {
-                    try {
-                      const response = await globalThis.fetch(
-                        "https://hub.docker.com/v2/repositories/library/nginx/tags",
-                        {
-                          headers: {
-                            Authorization: `Bearer ${value}`,
-                          },
-                        }
-                      );
-                      if (response.status !== 200) {
-                        return "This does not appear to be a valid Docker Hub Access Token or the permissions are not correct";
+              dhPAT = await context.logger.password({
+                task,
+                message:
+                  "Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\n" +
+                  "For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n" +
+                  "This will be encrypted and stored securely:",
+                validate: async (value) => {
+                  try {
+                    const response = await globalThis.fetch(
+                      "https://hub.docker.com/v2/repositories/library/nginx/tags",
+                      {
+                        headers: {
+                          Authorization: `Bearer ${value}`,
+                        },
                       }
-                      return true;
-                    } catch {
-                      return "Error validating Docker Hub Access Token, please try again.";
+                    );
+                    if (response.status !== 200) {
+                      return "This does not appear to be a valid Docker Hub Access Token or the permissions are not correct";
                     }
-                  },
-                });
+                    return true;
+                  } catch {
+                    return "Error validating Docker Hub Access Token, please try again.";
+                  }
+                },
+              });
               await sopsUpsert({
                 values: { docker_hub_access_token: dhPAT },
                 context,
@@ -328,52 +290,46 @@ export async function setupVPCandECR(
             }
 
             if (!ctx.githubUsername) {
-              ctx.githubUsername = await task
-                .prompt(ListrInquirerPromptAdapter)
-                .run(input, {
-                  message: applyColors("Enter your GitHub username:", { style: "question" }),
-                  required: true,
-                  validate: (value) => {
-                    const { error } = GITHUB_USERNAME.safeParse(value);
-                    if (error) {
-                      return error.issues[0]?.message ?? "Invalid username";
-                    } else {
-                      return true;
-                    }
-                  },
-                });
+              ctx.githubUsername = await context.logger.input({
+                task,
+                message: "Enter your GitHub username:",
+                validate: async (value) => {
+                  const { error } = GITHUB_USERNAME.safeParse(value);
+                  if (error) {
+                    return error.issues[0]?.message ?? "Invalid username";
+                  } else {
+                    return true;
+                  }
+                },
+              });
             }
 
             if (!ghPAT) {
-              ghPAT = await task
-                .prompt(ListrInquirerPromptAdapter)
-                .run(password, {
-                  message: applyColors(
-                    `Enter your classic GitHub Personal Access Token with 'read:packages' scope\n` +
-                    `For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n` +
-                    `This will be encrypted and stored securely:`,
-                    { style: "question", highlights: [{ phrase: "This will be encrypted and stored securely", style: "important" }] }
-                  ),
-                  mask: true,
-                  validate: async (value) => {
-                    try {
-                      const response = await globalThis.fetch(
-                        "https://api.github.com/user/packages?package_type=container",
-                        {
-                          headers: {
-                            Authorization: `Bearer ${value}`,
-                          },
-                        }
-                      );
-                      if (response.status !== 200) {
-                        return "This does not appear to be a valid GitHub Personal Access Token or the permissions are not correct";
+              ghPAT = await context.logger.password({
+                task,
+                message:
+                  "Enter your classic GitHub Personal Access Token with 'read:packages' scope\n" +
+                  "For more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n" +
+                  "This will be encrypted and stored securely:",
+                validate: async (value) => {
+                  try {
+                    const response = await globalThis.fetch(
+                      "https://api.github.com/user/packages?package_type=container",
+                      {
+                        headers: {
+                          Authorization: `Bearer ${value}`,
+                        },
                       }
-                      return true;
-                    } catch {
-                      return "Error validating GitHub Personal Access Token, please try again.";
+                    );
+                    if (response.status !== 200) {
+                      return "This does not appear to be a valid GitHub Personal Access Token or the permissions are not correct";
                     }
-                  },
-                });
+                    return true;
+                  } catch {
+                    return "Error validating GitHub Personal Access Token, please try again.";
+                  }
+                },
+              });
               await sopsUpsert({
                 values: { github_access_token: ghPAT },
                 context,

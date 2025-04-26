@@ -7,15 +7,13 @@ import {
     type HostedZone
 } from "@aws-sdk/client-route-53";
 import { ContactType, CountryCode, GetOperationDetailCommand, RegisterDomainCommand, ResendOperationAuthorizationCommand, Route53DomainsClient, type ContactDetail } from "@aws-sdk/client-route-53-domains";
-import { input, search } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
+import { input } from "@inquirer/prompts";
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
-import { COUNTRY_CODES } from "@/commands/env/install/common";
 import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
+import { COUNTRY_CODES } from "@/util/aws/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
@@ -78,15 +76,15 @@ export async function registerDomain(inputs: {
     const price = await getDomainPrice({ context, env, tld })
     const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price)
     context.logger.log(
-        applyColors(`Purchasing ${domain} will charge your AWS account ${formattedPrice}.`, { highlights: [domain, formattedPrice] }),
+        context.logger.applyColors(`Purchasing ${domain} will charge your AWS account ${formattedPrice}.`, { highlights: [domain, formattedPrice] }),
         { trailingNewlines: 1, leadingNewlines: 1 }
     )
     await input(
         {
-            message: applyColors(`Type '${price}' to purchase:`, { style: "question", highlights: [String(price)] }),
+            message: context.logger.applyColors(`Type '${price}' to purchase:`, { style: "question", highlights: [String(price)] }),
             required: true,
             validate: (val) => {
-                return val === String(price) ? true : applyColors(`You must type '${price}' to continue.`, { style: 'error' })
+                return val === String(price) ? true : context.logger.applyColors(`You must type '${price}' to continue.`, { style: 'error' })
             }
         }
     )
@@ -164,21 +162,22 @@ export async function registerDomain(inputs: {
             title: `Get contact info`,
             task: async (ctx, task) => {
                 const contactDefaults = await getPrimaryContactDefaults(profile, context);
-                task.output = applyColors(
+                task.output = context.logger.applyColors(
                     `We need to collect contact information for the domain registration.\n` +
                     `This information will be used to register ${domain} and will be visible to the domain registrar (AWS).`,
-                    { style: "warning", highlights: [domain] }
+                    { style: "warning" }
                 )
                 if (!ctx.contactInfo.first_name) {
-                    ctx.contactInfo.first_name = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('First Name:', { style: "question" }),
+                    ctx.contactInfo.first_name = await context.logger.input({
+                        task,
+                        message: 'First Name:',
                         required: true,
                         default: contactDefaults?.fullName?.split(" ")[0],
                         validate: (value) => {
                             if (value.length < MIN_NAME_LENGTH) {
-                                return applyColors(`Must be at least ${MIN_NAME_LENGTH} characters`, { style: "error" });
+                                return `Must be at least ${MIN_NAME_LENGTH} characters`;
                             } else if (value.length > MAX_LENGTH) {
-                                return applyColors(`Cannot be greater than ${MAX_LENGTH} characters`, { style: "error" });
+                                return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
                                 return true;
                             }
@@ -187,15 +186,16 @@ export async function registerDomain(inputs: {
                 }
 
                 if (!ctx.contactInfo.last_name) {
-                    ctx.contactInfo.last_name = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Last Name:', { style: "question" }),
+                    ctx.contactInfo.last_name = await context.logger.input({
+                        task,
+                        message: 'Last Name:',
                         required: true,
                         default: contactDefaults?.fullName?.split(" ")[1],
                         validate: (value) => {
                             if (value.length < MIN_NAME_LENGTH) {
-                                return applyColors(`Must be at least ${MIN_NAME_LENGTH} characters`, { style: "error" });
+                                return `Must be at least ${MIN_NAME_LENGTH} characters`;
                             } else if (value.length > MAX_LENGTH) {
-                                return applyColors(`Cannot be greater than ${MAX_LENGTH} characters`, { style: "error" });
+                                return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
                                 return true;
                             }
@@ -204,14 +204,15 @@ export async function registerDomain(inputs: {
                 }
 
                 if (!ctx.contactInfo.organization_name) {
-                    ctx.contactInfo.organization_name = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Organization / Company Name (Optional):', { style: "question" }),
+                    ctx.contactInfo.organization_name = await context.logger.input({
+                        task,
+                        message: 'Organization / Company Name (Optional):',
                         default: contactDefaults?.organizationName || "",
                         validate: (value) => {
                             if (value.length < MIN_NAME_LENGTH) {
-                                return applyColors(`Must be at least ${MIN_NAME_LENGTH} characters`, { style: "error" });
+                                return `Must be at least ${MIN_NAME_LENGTH} characters`;
                             } else if (value.length > MAX_LENGTH) {
-                                return applyColors(`Cannot be greater than ${MAX_LENGTH} characters`, { style: "error" });
+                                return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
                                 return true;
                             }
@@ -220,14 +221,15 @@ export async function registerDomain(inputs: {
                 }
 
                 if (!ctx.contactInfo.email_address) {
-                    ctx.contactInfo.email_address = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Email:', { style: "question" }),
+                    ctx.contactInfo.email_address = await context.logger.input({
+                        task,
+                        message: 'Email:',
                         required: true,
                         default: contactDefaults?.email,
                         validate: (value) => {
                             const { error } = z.string().email().safeParse(value);
                             if (error) {
-                                return applyColors(error.issues[0]?.message ?? "Invalid email", { style: "error" });
+                                return error.issues[0]?.message ?? "Invalid email";
                             } else {
                                 return true;
                             }
@@ -236,15 +238,16 @@ export async function registerDomain(inputs: {
                 }
 
                 if (!ctx.contactInfo.phone_number) {
-                    ctx.contactInfo.phone_number = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Phone # (format: +1.1234567890):', { style: "question" }),
+                    ctx.contactInfo.phone_number = await context.logger.input({
+                        task,
+                        message: 'Phone # (format: +1.1234567890):',
                         required: true,
                         default: contactDefaults?.phoneNumber,
                         validate: (value) => {
                             if (!value.match(/^\+\d{1,3}\.\d{1,26}$/)) {
-                                return applyColors("Phone numbers must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890", { style: "error" });
+                                return "Phone numbers must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890";
                             } else if (value.length > 30) {
-                                return applyColors("Phone number cannot be longer than 30 characters", { style: "error" });
+                                return "Phone number cannot be longer than 30 characters";
                             } else {
                                 return true;
                             }
@@ -253,41 +256,43 @@ export async function registerDomain(inputs: {
                 }
 
                 if (!ctx.contactInfo.country_code) {
-                    ctx.contactInfo.country_code = await task.prompt(ListrInquirerPromptAdapter).run(search, {
-                        message: applyColors('Country:', { style: "question" }),
+                    ctx.contactInfo.country_code = await context.logger.search<string>({
+                        task,
+                        message: 'Country:',
                         source: (term) => {
                             return term ? COUNTRY_CODES.filter(({ name }) => name.toLowerCase().includes(term.toLowerCase())) : COUNTRY_CODES
                         }
-                    }) as string;
-
+                    });
                 }
 
-
                 if (!ctx.contactInfo.address_line_1) {
-                    ctx.contactInfo.address_line_1 = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Street Address 1:', { style: "question" }),
+                    ctx.contactInfo.address_line_1 = await context.logger.input({
+                        task,
+                        message: 'Street Address 1:',
                         required: true,
                         default: contactDefaults?.addressLine1,
                         validate: (value) => {
                             if (value.length < MIN_ADDRESS_LENGTH) {
-                                return applyColors(`Must be at least ${MIN_ADDRESS_LENGTH} characters`, { style: "error" });
+                                return `Must be at least ${MIN_ADDRESS_LENGTH} characters`;
                             } else if (value.length > MAX_LENGTH) {
-                                return applyColors(`Cannot be greater than ${MAX_LENGTH} characters`, { style: "error" });
+                                return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
                                 return true;
                             }
                         }
                     });
-                    ctx.contactInfo.address_line_2 = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Street Address 2:', { style: "question" }),
+
+                    ctx.contactInfo.address_line_2 = await context.logger.input({
+                        task,
+                        message: 'Street Address 2:',
                         default: contactDefaults?.addressLine2,
                         validate: (value) => {
                             if (!value) {
                                 return true;
                             } else if (value.length < MIN_ADDRESS_LENGTH) {
-                                return applyColors(`Must be at least ${MIN_ADDRESS_LENGTH} characters`, { style: "error" });
+                                return `Must be at least ${MIN_ADDRESS_LENGTH} characters`;
                             } else if (value.length > MAX_LENGTH) {
-                                return applyColors(`Cannot be greater than ${MAX_LENGTH} characters`, { style: "error" });
+                                return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
                                 return true;
                             }
@@ -299,17 +304,17 @@ export async function registerDomain(inputs: {
                     }
                 }
 
-
                 if (!ctx.contactInfo.city) {
-                    ctx.contactInfo.city = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('City:', { style: "question" }),
+                    ctx.contactInfo.city = await context.logger.input({
+                        task,
+                        message: 'City:',
                         required: true,
                         default: contactDefaults?.city,
                         validate: (value) => {
                             if (value.length < MIN_CITY_LENGTH) {
-                                return applyColors(`Must be at least ${MIN_CITY_LENGTH} characters`, { style: "error" });
+                                return `Must be at least ${MIN_CITY_LENGTH} characters`;
                             } else if (value.length > MAX_LENGTH) {
-                                return applyColors(`Cannot be greater than ${MAX_LENGTH} characters`, { style: "error" });
+                                return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
                                 return true;
                             }
@@ -317,18 +322,18 @@ export async function registerDomain(inputs: {
                     });
                 }
 
-
                 if (!ctx.contactInfo.state) {
-                    ctx.contactInfo.state = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('State/Region:', { style: "question" }),
+                    ctx.contactInfo.state = await context.logger.input({
+                        task,
+                        message: 'State/Region:',
                         required: true,
                         default: contactDefaults?.state,
                         validate: (value) => {
                             const maxLength = ctx.contactInfo.country_code === "US" ? 2 : MAX_LENGTH
                             if (value.length < 2) {
-                                return applyColors(`Must be at least 2 characters`, { style: "error" });
+                                return `Must be at least 2 characters`;
                             } else if (value.length > maxLength) {
-                                return applyColors(`Cannot be greater than ${maxLength} characters`, { style: "error" });
+                                return `Cannot be greater than ${maxLength} characters`;
                             } else {
                                 return true;
                             }
@@ -336,19 +341,19 @@ export async function registerDomain(inputs: {
                     });
                 }
 
-
                 if (!ctx.contactInfo.zip_code) {
-                    ctx.contactInfo.zip_code = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                        message: applyColors('Postal Code:', { style: "question" }),
+                    ctx.contactInfo.zip_code = await context.logger.input({
+                        task,
+                        message: 'Postal Code:',
                         required: true,
                         default: contactDefaults?.zipCode,
                         validate: (value) => {
                             if (!/^[0-9A-Z -]+$/.test(value)) {
-                                return applyColors("Can only contain numbers, uppercase letters, hyphens, and spaces", { style: "error" });
+                                return "Can only contain numbers, uppercase letters, hyphens, and spaces";
                             } else if ((value.match(/[0-9A-Z]/g) || []).length < 2) {
-                                return applyColors("Must contain at least 2 numbers or letters", { style: "error" });
+                                return "Must contain at least 2 numbers or letters";
                             } else if (/^[ -]|[ -]$/.test(value)) {
-                                return applyColors("Cannot start or end with a space or hyphen", { style: "error" });
+                                return "Cannot start or end with a space or hyphen";
                             } else {
                                 return true;
                             }
@@ -408,7 +413,7 @@ export async function registerDomain(inputs: {
                 } catch (error) {
                     if (error instanceof Error) {
                         if (error.message.includes("Account not found") || error.message.includes("not authorized")) {
-                            task.output = applyColors(
+                            task.output = context.logger.applyColors(
                                 `If your AWS account is relatively new, purchasing a domain may fail with a vague error.\n` +
                                 `AWS limits domain purchases for organizations that have not yet paid their first bill, but\n` +
                                 `you can open a ticket requesting access and AWS support will unlock your account within 24 hours.\n\n` +
@@ -433,7 +438,7 @@ export async function registerDomain(inputs: {
         task: async (ctx, task) => {
             const maxAttempts = 100;
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                task.title = applyColors(`Polling registration status ${attempt}/${maxAttempts}`, { highlights: [{ phrase: `${attempt}/${maxAttempts}`, style: "subtle" }] })
+                task.title = context.logger.applyColors(`Polling registration status ${attempt}/${maxAttempts}`, { lowlights: [`${attempt}/${maxAttempts}`] })
                 let status, message, flag;
                 try {
                     const response = await route53DomainsClient.send(
@@ -448,10 +453,10 @@ export async function registerDomain(inputs: {
 
                 // 1) Handle terminal statuses first:
                 if (status === "SUCCESSFUL") {
-                    task.title = applyColors("Got registrtion status Success", { highlights: [{ phrase: "Success", style: "subtle" }] })
+                    task.title = context.logger.applyColors("Got registrtion status Success", { lowlights: ["Success"] })
                     return
                 } else if (status === "FAILED" || status === "ERROR") {
-                    task.title = applyColors("Got registrtion status Failed", { highlights: [{ phrase: "Failed", style: "error" }] })
+                    task.title = context.logger.applyColors("Got registrtion status Failed", { style: "error", highlights: ["Failed"] })
                     throw new CLIError(`Registration failed: ${message || "unknown"}`);
                 }
 
@@ -462,7 +467,7 @@ export async function registerDomain(inputs: {
                             throw new CLIError("Domain transfer pending acceptance by the target AWS account.");
 
                         case "PENDING_CUSTOMER_ACTION":
-                            task.output = applyColors(
+                            task.output = context.logger.applyColors(
                                 "AWS requires email verification to complete the registration. Check your inbox to confirm your email.",
                                 { style: "warning" }
                             );
@@ -475,7 +480,7 @@ export async function registerDomain(inputs: {
                             break;
 
                         case "PENDING_PAYMENT_VERIFICATION":
-                            task.output = applyColors(
+                            task.output = context.logger.applyColors(
                                 "AWS requires payment verification to complete the registration.  Please check your payment method in the AWS console.",
                                 { style: "warning" }
                             );
@@ -492,7 +497,7 @@ export async function registerDomain(inputs: {
                             );
                     }
                 } else {
-                    // Update with status if no flag is provided
+                    // TODO: Update with status if no flag is provided
                 }
 
                 await new Promise((r) => globalThis.setTimeout(r, 15000));
@@ -526,7 +531,7 @@ export async function registerDomain(inputs: {
 
             if (!hostedZones.length ||
                 !hostedZones[0]?.Name?.startsWith(domain)) {
-                task.title = applyColors("Get Route53 hosted zone Not found", { highlights: [{ phrase: "Not found", style: "subtle" }] })
+                task.title = context.logger.applyColors("Get Route53 hosted zone Not found", { lowlights: ["Not found"] })
                 return;
             }
 
@@ -538,7 +543,7 @@ export async function registerDomain(inputs: {
             // Fix the format of the id returned so it can be used in subsequent
             // API calls
             ctx.zoneId = hostedZone.Id.replace(/^\/hostedzone\//, '');
-            task.title = applyColors(`Get Route53 hosted zone ${ctx.zoneId}`, { highlights: [{ phrase: ctx.zoneId, style: "subtle" }] })
+            task.title = context.logger.applyColors(`Get Route53 hosted zone ${ctx.zoneId}`, { lowlights: [ctx.zoneId] })
         }
     })
 
@@ -646,18 +651,9 @@ export async function registerDomain(inputs: {
     //////////////////////////////////////////////////////////
 
     try {
-        context.logger.log(
-            applyColors(`Registering ${domain}...`, { highlights: [domain] }),
-            { trailingNewlines: 1, leadingNewlines: 1 }
-        )
+        context.logger.write(`Registering ${domain}...`)
         await tasks.run();
-
-        context.logger.log(
-            applyColors(
-                `${domain} registered in ${env.name} successfully!`,
-                { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.success(`${domain} registered in ${env.name} successfully!`)
     } catch (e) {
         throw new CLIError(`Failed to register domain ${domain}`, e)
     }
@@ -721,10 +717,8 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
         }
     } catch (error) {
         // If we can't get the contact info, just log and continue
-        context.logger.log(
-            `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`,
-            { level: "debug" }
-        );
+        context.logger.debug(
+            `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     return null;

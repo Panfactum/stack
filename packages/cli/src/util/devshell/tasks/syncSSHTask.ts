@@ -3,7 +3,6 @@ import { Glob } from "bun";
 import { type ListrTask } from "listr2";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
-import { applyColors } from "@/util/colors/applyColors";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
 import { getLastPathSegments } from "@/util/getLastPathSegments";
@@ -45,7 +44,7 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
 
     const EKS_MODULE_OUTPUT_SCHEMA = z.object({
         cluster_name: z.object({ value: z.string() }),
-      })
+    })
 
     return {
         title: "Sync SSH Bastion connection info to DevShell",
@@ -60,9 +59,9 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
             const glob = new Glob(join(environmentsDir, "**", MODULES.KUBE_BASTION, "terragrunt.hcl"));
             const bastionHCLPaths = Array.from(glob.scanSync(environmentsDir));
             if (bastionHCLPaths.length === 0) {
-                parentTask.skip(applyColors("Skipped sync SSH Bastion connection info to DevShell No bastions found", {
-                    highlights: [
-                        { phrase: "No bastions found", style: "subtle" }
+                parentTask.skip(context.logger.applyColors("Skipped sync SSH Bastion connection info to DevShell No bastions found", {
+                    lowlights: [
+                        "No bastions found"
                     ]
                 }))
                 return
@@ -85,7 +84,7 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
                 const moduleDirectory = dirname(bastionHCLPath);
                 const bastionId = getLastPathSegments(moduleDirectory, 3);
                 subtasks.add({
-                    title: applyColors(`Retrieve bastion info ${bastionId}`, { highlights: [{ phrase: bastionId, style: "subtle" }] }),
+                    title: context.logger.applyColors(`Retrieve bastion info ${bastionId}`, { lowlights: [bastionId] }),
                     task: async (ctx, task) => {
                         try {
                             const { environment_dir: envDir, region_dir: regionDir } = await getPanfactumConfig({ context, directory: moduleDirectory })
@@ -112,12 +111,12 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
                                     validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
                                 })
                             ])
-                 
+
                             const domain = bastionModuleOutput.bastion_domains.value[0]!;
                             const publicKey = bastionModuleOutput.bastion_host_public_key.value;
                             const port = bastionModuleOutput.bastion_port.value;
                             const name = eksModuleOutput.cluster_name.value
-    
+
                             ctx.bastionInfo.push({
                                 domain,
                                 publicKey,
@@ -125,11 +124,11 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
                                 name
                             })
                         } catch (e) {
-                            if(exitOnError){
+                            if (exitOnError) {
                                 throw e
                             } else {
-                                task.skip(applyColors(`Failed to retrieve bastion info ${bastionId}`, { style: "error", highlights: [{ phrase: bastionId, style: "subtle" }] }))
-                                parentTask.title = applyColors("Sync SSH Bastion connection info to DevShell Partial Failure", {highlights: [{phrase: "Partial Failure", style: "error"}]})
+                                task.skip(context.logger.applyColors(`Failed to retrieve bastion info ${bastionId}`, { style: "error", lowlights: [bastionId] }))
+                                parentTask.title = context.logger.applyColors("Sync SSH Bastion connection info to DevShell Partial Failure", { badlights: ["Partial Failure"] })
                             }
                         }
                     },
@@ -151,10 +150,10 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
                     await Promise.all([
                         Bun.write(Bun.file(join(sshDir, "known_hosts")), knownHostsLines.join("\n")),
                         Bun.write(
-                          Bun.file(join(sshDir, "connection_info")),
-                          connectionInfoLines.join("\n")
+                            Bun.file(join(sshDir, "connection_info")),
+                            connectionInfoLines.join("\n")
                         ),
-                      ]);
+                    ]);
                 }
             })
 

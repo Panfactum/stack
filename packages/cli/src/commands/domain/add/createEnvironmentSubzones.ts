@@ -1,4 +1,3 @@
-import { applyColors } from "@/util/colors/applyColors";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { createDescendentZones } from "./createDescendentZones";
@@ -26,10 +25,7 @@ export async function createEnvironmentSubzones(inputs: {
         .filter(subdomain => subdomain !== undefined)
     const firstSegment = domain.split(".")[0]
     if (firstSegment && envSubdomains.includes(firstSegment)) {
-        context.logger.log(
-            applyColors(`Skipping environment subzone setup as ${domain} appears to already be an environment subdomain`, { highlights: [domain] }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.info(`Skipping environment subzone setup as ${domain} appears to already be an environment subdomain`)
         return
     }
 
@@ -43,58 +39,33 @@ export async function createEnvironmentSubzones(inputs: {
 
     // If no environments eligible for subdomains, we can skip this.
     if (possibleSubzoneEnvironments.length === 0) {
-        context.logger.log(
-            "Skipping environment subzone setup as no eligible environments.",
-            { trailingNewlines: 1 }
-        )
+        context.logger.info("Skipping environment subzone setup as no eligible environments.")
     }
 
     if (ancestorDomainConfig) {
-        context.logger.log(
-            applyColors(
-                `We recommend setting up environment-specific DNS subzones.\n` +
-                `This would allow you to host workloads in other environments that utilize\n` +
-                `a subdomain of ${domain}. For example: api.dev.${domain}`,
-                {
-                    highlights: [`api.dev.${domain}`, domain]
-                }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.info(`
+            We recommend setting up environment-specific DNS subzones.
+            This would allow you to host workloads in other environments that utilize
+            a subdomain of ${domain}. For example: api.dev.${domain}
+        `)
 
-        context.logger.log(
-            applyColors(
-                `If you skip this step, only workloads deployed in the ${ancestorDomainConfig.env.name} environment would\n` +
-                `be able to utilize ${domain} or its subdomains.`,
-                {
-                    style: "warning",
-                    highlights: [ancestorDomainConfig.env.name, domain]
-                }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.warn(`
+            If you skip this step, only workloads deployed in the ${ancestorDomainConfig.env.name} environment would
+            be able to utilize ${domain} or its subdomains.
+        `)
 
     } else {
-        context.logger.log(
-            applyColors(
-                `Even though you've opted to not add ${domain} to Panfactum,\n` +
-                `you can still set up environment-specific DNS subzones.\n` +
-                `This would allow you to host workloads that utilize\n` +
-                `a subdomain of ${domain}. For example: api.dev.${domain}`,
-                {
-                    highlights: [`api.dev.${domain}`, domain]
-                }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.info(`
+            Even though you've opted to not add ${domain} to Panfactum,
+            you can still set up environment-specific DNS subzones.
+            This would allow you to host workloads that utilize
+            a subdomain of ${domain}. For example: api.dev.${domain}
+        `)
 
-        context.logger.log(
-            applyColors(
-                `If you skip this step, you will not be able to deploy any workloads that\n` +
-                `utilize ${domain} or any of its subdomains.`,
-                {
-                    style: "warning",
-                    highlights: [domain]
-                }),
-            { trailingNewlines: 1 }
-        )
+        context.logger.warn(`
+            If you skip this step, you will not be able to deploy any workloads that
+            utilize ${domain} or any of its subdomains.
+        `)
     }
 
 
@@ -105,29 +76,25 @@ export async function createEnvironmentSubzones(inputs: {
     })
 
     if (environmentsForSubzones.length > 0) {
-        context.logger.log(
-            applyColors(`Deploying subzones for ${domain}...`, { highlights: [domain] }),
-            { trailingNewlines: 1, leadingNewlines: 1 }
+        context.logger.info(`Deploying subzones for ${domain}...`)
+        environmentsForSubzones.forEach(env =>
+            context.logger.addIdentifier(`${env.subdomain}.${domain}`)
         )
-
         if (ancestorDomainConfig) {
             await createDescendentZones({
                 context,
                 ancestorZone: ancestorDomainConfig,
-                descendentZones: Object.fromEntries(environmentsForSubzones.map(env => ([`${env.subdomain}.${domain}`, { env }])))
+                descendentZones: Object.fromEntries(environmentsForSubzones.map(env => ([`${env.subdomain}.${domain} `, { env }])))
             })
-            context.logger.log(
-                environmentsForSubzones.map(env => applyColors(
-                    `${env.subdomain}.${domain} added to ${env.name} successfully!`,
-                    { style: "success", highlights: [`${env.subdomain}.${domain}`, env.name] })),
-                { trailingNewlines: 1, leadingNewlines: 1 }
+            environmentsForSubzones.forEach(env =>
+                context.logger.success(`${env.subdomain}.${domain} added to ${env.name} successfully!`)
             )
         } else {
             for (const env of environmentsForSubzones) {
                 await manualZoneSetup({
                     context,
                     env,
-                    domain: `${env.subdomain}.${domain}`
+                    domain: `${env.subdomain}.${domain} `
                 })
             }
         }

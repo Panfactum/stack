@@ -1,10 +1,11 @@
 import path, { join } from "node:path";
-import { select, input } from "@inquirer/prompts";
 import { Glob } from "bun";
 import { Command } from "clipanion";
+import { Listr } from "listr2";
+import pc from "picocolors";
 import { z } from "zod";
-import { applyColors } from "@/util/colors/applyColors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist";
@@ -26,9 +27,6 @@ import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { InstallClusterStepOptions } from "./common";
-import { Listr } from "listr2";
-import { SUBDOMAIN } from "@/util/config/schemas";
-import pc from "picocolors";
 
 const SETUP_STEPS: Array<{
   label: string;
@@ -137,10 +135,7 @@ export class InstallClusterCommand extends PanfactumCommand {
   });
 
   async execute() {
-    this.context.logger.log("Starting Panfactum cluster installation process", {
-      style: "important",
-      trailingNewlines: 1,
-    });
+    this.context.logger.info("Starting Panfactum cluster installation process")
 
     /*******************************************
      * Config Loading + Checks
@@ -151,11 +146,6 @@ export class InstallClusterCommand extends PanfactumCommand {
       context: this.context,
       directory: process.cwd(),
     });
-
-    this.context.logger.log(
-      `Panfactum Config: ${JSON.stringify(config, null, 2)}`,
-      { level: "debug" }
-    );
 
     const {
       aws_profile: awsProfile,
@@ -198,16 +188,15 @@ export class InstallClusterCommand extends PanfactumCommand {
     });
 
     if (!kubeDomain) {
-      const subdomain: string = await select({
-        message:
-          applyColors(
-            "Select the domain your cluster will live under", { style: "question" }
-          ),
-        choices: Object.keys(domains),
+      const subdomain: string = await this.context.logger.select({
+        message: "Select the domain your cluster will live under:",
+        choices: Object.keys(domains).map(domain => ({ value: domain, name: domain })),
       });
 
-      const kubeDomain = await input({
-        message: applyColors("Enter the subdomain for the cluster where all cluster utilities will be hosted", { style: "question" }),
+      // TODO: already have validation built, use that.
+      // Validate input to not have periods in it.
+      const kubeDomain = await this.context.logger.input({
+        message: "Enter the subdomain for the cluster where all cluster utilities will be hosted",
         default: `${region}.${subdomain}`,
         validate: async (value) => {
           const { error } = SUBDOMAIN.safeParse(value);
@@ -232,7 +221,7 @@ export class InstallClusterCommand extends PanfactumCommand {
               }
             }
           } catch (error) {
-            this.context.logger.log(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`, { level: "debug" });
+            this.context.logger.debug(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`);
             // Continue even if there's an error reading files
           }
 

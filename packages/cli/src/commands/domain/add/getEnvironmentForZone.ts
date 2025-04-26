@@ -1,5 +1,3 @@
-import { confirm, input, search } from "@inquirer/prompts";
-import { applyColors } from "@/util/colors/applyColors";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { CLIError } from "@/util/error/error";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
@@ -11,10 +9,10 @@ export async function getEnvironmentForZone(inputs: {
     shouldBeProduction?: boolean
     environmentMeta?: EnvironmentMeta
 }) {
-    const { context, domain, shouldBeProduction , environmentMeta} = inputs;
+    const { context, domain, shouldBeProduction, environmentMeta } = inputs;
 
-    if(environmentMeta){
-        if(!environmentMeta.name.includes("prod") && shouldBeProduction){
+    if (environmentMeta) {
+        if (!environmentMeta.name.includes("prod") && shouldBeProduction) {
             await confirmIfNotProd(context, environmentMeta.name, domain)
         }
         return environmentMeta
@@ -33,14 +31,11 @@ export async function getEnvironmentForZone(inputs: {
     if (possibleEnvironment.length === 1) {
         const environment = possibleEnvironment[0]?.name!
 
-        context.logger.log(applyColors(`You only have one environment: ${environment}.`, { highlights: [environment] }), { trailingNewlines: 1, leadingNewlines: 1 })
-
-        const confirmEnvironment = await confirm(
-            {
-                message: applyColors(`Would you like to host the DNS zone for ${domain} in ${environment}?`, { style: "question", highlights: [domain, environment] }),
-                default: true
-            }
-        )
+        const confirmEnvironment = await context.logger.confirm({
+            explainer: `You only have one environment: ${environment}.`,
+            message: `Would you like to host the DNS zone for ${domain} in ${environment}?`,
+            default: true
+        })
         if (!confirmEnvironment) {
             throw new CLIError(`Declined to host ${domain} in ${environment}. Create a new environment to host the domain by running \`pf env install\``)
         } else if (!environment.includes("prod") && shouldBeProduction) {
@@ -48,13 +43,10 @@ export async function getEnvironmentForZone(inputs: {
         }
         return possibleEnvironment[0]!
     } else {
-        context.logger.log(
-            applyColors(`In which environment would you like to host the DNS zone for ${domain}?`, { highlights: [domain] }),
-            { trailingNewlines: 1, leadingNewlines: 1 }
-        )
 
-        const chosenEnvironment = await search<{ name: string, path: string }>({
-            message: applyColors("Environment:", { style: "question" }),
+        const chosenEnvironment = await context.logger.search<{ name: string, path: string }>({
+            explainer: `In which environment would you like to host the DNS zone for ${domain}?`,
+            message: "Environment:",
             source: (term) => {
                 const choices = possibleEnvironment
                     .map(({ name, path }) => ({ name, value: { name, path } }))
@@ -78,20 +70,17 @@ export async function getEnvironmentForZone(inputs: {
 }
 
 async function confirmIfNotProd(context: PanfactumContext, environment: string, domain: string) {
-    context.logger.log(
-        applyColors(
-            `WARNING: ${environment} does not look like a production environment.\n` +
-            `We recommend hosting this DNS zone in a production environment for security and to allow production workloads\n` +
-            `to utilize the ${domain} domain. This is NOT easy to change in the future.`,
-            { style: "warning", highlights: [environment, domain] }
-        ), { trailingNewlines: 1, leadingNewlines: 1 }
-    )
-    await input(
+    context.logger.warn(`
+        WARNING: ${environment} does not look like a production environment.
+        We recommend hosting this DNS zone in a production environment for security and to allow production workloads
+        to utilize the ${domain} domain. This is NOT easy to change in the future.
+    `)
+    await context.logger.input(
         {
-            message: applyColors(`Type ${environment} to confirm:`, { style: "question", highlights: [environment] }),
+            message: `Type ${environment} to confirm:`,
             required: true,
             validate: (val) => {
-                return val === environment ? true : applyColors(`You must type '${environment}' to continue.`, { style: 'error' })
+                return val === environment ? true : `You must type '${environment}' to continue.`
             }
         }
     )

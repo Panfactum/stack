@@ -1,8 +1,6 @@
 import { join } from "node:path"
 import { GetRoleCommand, IAMClient, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk/client-iam";
 import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
-import { search, input } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import { stringify, parse } from "yaml";
 import { z } from "zod";
@@ -12,10 +10,9 @@ import tfBootstrapResourcesHCL from "@/templates/tf_bootstrap_resources.hcl" wit
 import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
 import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
+import { AWS_ACCOUNT_ALIAS_SCHEMA, AWS_REGIONS } from "@/util/aws/schemas";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments } from "@/util/config/getEnvironments";
-import { AWS_REGIONS } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
@@ -25,7 +22,6 @@ import { writeFile } from "@/util/fs/writeFile";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import { AWS_ACCOUNT_ALIAS_SCHEMA } from "./common";
 import type { PanfactumContext } from "@/context/context";
 
 
@@ -38,10 +34,7 @@ export async function bootstrapEnvironment(inputs: {
 
     const { context, environmentName, environmentProfile, accountName } = inputs
 
-    context.logger.log(
-        "🛈  Now that account is provisioned, we will configure it for management via infrastructure-as-code.",
-        { trailingNewlines: 1, leadingNewlines: 1 }
-    )
+    context.logger.info("Now that account is provisioned, we will configure it for management via infrastructure-as-code.")
 
     interface TaskCtx {
         version?: string,
@@ -100,7 +93,7 @@ export async function bootstrapEnvironment(inputs: {
                 const flakeContents = await Bun.file(flakeFilePath).text()
                 const match = flakeContents.match(/panfactum\/stack\/([-.0-9a-zA-Z]+)/i);
                 ctx.version = (match && match[1]) ?? "main";
-                task.title = applyColors(`Got Panfactum version to deploy ${ctx.version}`, { highlights: [{ phrase: ctx.version, style: "subtle" }] })
+                task.title = context.logger.applyColors(`Got Panfactum version to deploy ${ctx.version}`, { lowlights: [ctx.version] })
             } catch (e) {
                 throw new CLIError("Was not able to get the framework version from the repo's flake.nix file.", e)
             }
@@ -117,14 +110,13 @@ export async function bootstrapEnvironment(inputs: {
             rendererOptions: { outputBar: 2 },
             task: async (ctx, task) => {
                 const profiles = await getAWSProfiles(context, { throwOnMissingConfig: true })
-
-                task.output = applyColors(
-                    `An AWS profile must be selected which will be used to deploy infrastructure to the new '${environmentName}' environment.\n` +
-                    "The profile should have 'AdministratorAccess' permissions as it needs complete access to the AWS account.",
-                    { style: "warning" }
-                )
-                ctx.profile = await search({
-                    message: applyColors("Select AWS profile:", { style: "question" }),
+                ctx.profile = await context.logger.search({
+                    task,
+                    explainer: `
+                    An AWS profile must be selected which will be used to deploy infrastructure to the new '${environmentName}' environment.
+                    The profile should have 'AdministratorAccess' permissions as it needs complete access to the AWS account.
+                    `,
+                    message: "Select AWS profile:",
                     source: (input) => {
                         const filteredProfiles = input ? profiles.filter(profile => profile.includes(input)) : profiles
                         return filteredProfiles
@@ -134,7 +126,7 @@ export async function bootstrapEnvironment(inputs: {
                                 value: profile
                             }))
                     },
-                    validate: async (profile) => {
+                    validate: async (profile: string) => {
                         if (profile) {
                             let profileIdentityARN;
 
@@ -143,7 +135,7 @@ export async function bootstrapEnvironment(inputs: {
                                 const identity = await getIdentity({ context, profile })
                                 profileIdentityARN = identity.Arn
                             } catch {
-                                return applyColors("Was not able to authenticate with the selected profile. Are you sure you have access to the correct credentials?", { style: "error" })
+                                return "Was not able to authenticate with the selected profile. Are you sure you have access to the correct credentials?"
                             }
 
                             // Step 2: Verify that the profile has AdministratorAccess permissions
@@ -163,10 +155,10 @@ export async function bootstrapEnvironment(inputs: {
                                     );
 
                                     if (!hasAdminAccess) {
-                                        return applyColors(`Profile '${profile}' is linked to IAM role '${roleName}' which does not have the 'AdministratorAccess' policy assigned.`, { style: "error" })
+                                        return `Profile '${profile}' is linked to IAM role '${roleName}' which does not have the 'AdministratorAccess' policy assigned.`
                                     }
                                 } catch {
-                                    return applyColors(`Profile '${profile}' is linked to IAM role '${roleName}' which does not have the 'AdministratorAccess' policy assigned.`, { style: "error" })
+                                    return `Profile '${profile}' is linked to IAM role '${roleName}' which does not have the 'AdministratorAccess' policy assigned.`
                                 }
                             } else {
                                 const userName = profileIdentityARN?.split('/').pop() || "";
@@ -178,10 +170,10 @@ export async function bootstrapEnvironment(inputs: {
                                         (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
                                     );
                                     if (!hasAdminAccess) {
-                                        return applyColors(`Profile '${profile}' is linked to IAM user '${userName}' which does not have the 'AdministratorAccess' policy assigned.`, { style: "error" })
+                                        return `Profile '${profile}' is linked to IAM user '${userName}' which does not have the 'AdministratorAccess' policy assigned.`
                                     }
                                 } catch {
-                                    return applyColors(`Profile '${profile}' is linked to IAM user '${userName}' which does not have the 'AdministratorAccess' policy assigned.`, { style: "error" })
+                                    return `Profile '${profile}' is linked to IAM user '${userName}' which does not have the 'AdministratorAccess' policy assigned.`
 
                                 }
                             }
@@ -191,7 +183,7 @@ export async function bootstrapEnvironment(inputs: {
                         }
                     }
                 })
-                task.title = applyColors(`Selected AWS profile for the environment ${ctx.profile}`, { highlights: [{ phrase: ctx.profile, style: "subtle" }] })
+                task.title = context.logger.applyColors(`Selected AWS profile for the environment ${ctx.profile}`, { lowlights: [ctx.profile] })
             }
         },
     ])
@@ -219,7 +211,7 @@ export async function bootstrapEnvironment(inputs: {
                 }
             }
             ctx.accountId = accountId
-            task.title = applyColors(`Got AWS account ID ${accountId}`, { highlights: [{ phrase: accountId, style: "subtle" }] })
+            task.title = context.logger.applyColors(`Got AWS account ID ${accountId}`, { lowlights: [accountId] })
         }
     })
 
@@ -230,10 +222,10 @@ export async function bootstrapEnvironment(inputs: {
         title: "Select regions",
         task: async (ctx, task) => {
 
-            task.output = applyColors(`Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`, { style: "warning", highlights: ["primary"] })
-
-            ctx.primaryRegion = await task.prompt(ListrInquirerPromptAdapter).run(search, {
-                message: applyColors("Select primary AWS region:", { style: "question" }),
+            ctx.primaryRegion = await context.logger.search({
+                explainer: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`,
+                message: "Select primary AWS region:",
+                task,
                 source: async (input) => {
                     const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
                     return filertedRegions.map(region => ({
@@ -241,13 +233,14 @@ export async function bootstrapEnvironment(inputs: {
                         value: region
                     }))
                 }
-            }) as string
+            })
 
-            task.title = applyColors(`Select regions ${ctx.primaryRegion}`, { highlights: [{ phrase: ctx.primaryRegion, style: "subtle" }] })
+            task.title = context.logger.applyColors(`Select regions ${ctx.primaryRegion}`, { lowlights: [ctx.primaryRegion] })
 
-            task.output = applyColors(`Every environment must have a secondary AWS region where resources like the infrastructure state bucket will live.`, { style: "warning", highlights: ["secondary"] })
-            ctx.secondaryRegion = await task.prompt(ListrInquirerPromptAdapter).run(search, {
-                message: applyColors("Select secondary AWS region:", { style: "question" }),
+            ctx.secondaryRegion = await context.logger.search({
+                explainer: `Every environment must have a secondary AWS region where resources like the infrastructure state bucket will live.`,
+                message: "Select secondary AWS region:",
+                task,
                 source: async (input) => {
                     const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
                     return filertedRegions
@@ -257,12 +250,9 @@ export async function bootstrapEnvironment(inputs: {
                             value: region
                         }))
                 }
-            }) as string
-
-            task.title = applyColors(`Selected regions ${ctx.primaryRegion} | ${ctx.secondaryRegion}`, {
-                highlights: [
-                    { phrase: `${ctx.primaryRegion} | ${ctx.secondaryRegion}`, style: "subtle" }
-                ]
+            })
+            task.title = context.logger.applyColors(`Selected regions ${ctx.primaryRegion} | ${ctx.secondaryRegion}`, {
+                lowlights: [`${ctx.primaryRegion} | ${ctx.secondaryRegion}`]
             })
         }
     })
@@ -312,7 +302,7 @@ export async function bootstrapEnvironment(inputs: {
                     }
                 }
             }
-            task.title = applyColors(`Generated unique state bucket name ${ctx.bucketName}`, { highlights: [{ phrase: ctx.bucketName, style: "subtle" }] })
+            task.title = context.logger.applyColors(`Generated unique state bucket name ${ctx.bucketName}`, { lowlights: [ctx.bucketName] })
         }
     })
 
@@ -339,7 +329,8 @@ export async function bootstrapEnvironment(inputs: {
             });
 
             while (retryCount < maxRetries) {
-                task.title = applyColors(`Activating S3 service attempt ${retryCount + 1}/${maxRetries}`, { highlights: [{ phrase: `attempt ${retryCount + 1}/${maxRetries}`, style: "subtle" }] });
+                const attemptPhrase = `attempt ${retryCount + 1}/${maxRetries}`
+                task.title = context.logger.applyColors(`Activating S3 service ${attemptPhrase}`, { lowlights: [attemptPhrase] });
                 try {
                     await s3Client.send(new CreateBucketCommand({
                         Bucket: dummyBucketName
@@ -367,7 +358,7 @@ export async function bootstrapEnvironment(inputs: {
             }
 
             if (bucketCreated) {
-                task.title = applyColors(`S3 service is active Cleaning up test bucket`, { highlights: [{ phrase: "Cleaning up test bucket", style: "subtle" }] })
+                task.title = context.logger.applyColors(`S3 service is active Cleaning up test bucket`, { lowlights: ["Cleaning up test bucket"] })
                 let deleteRetries = 0;
                 const maxDeleteRetries = 10;
                 while (deleteRetries < maxDeleteRetries) {
@@ -379,9 +370,9 @@ export async function bootstrapEnvironment(inputs: {
                     } catch (e) {
                         deleteRetries++;
                         if (deleteRetries >= maxDeleteRetries) {
-                            context.logger.log(`Failed to delete dummy bucket ${dummyBucketName} after ${maxDeleteRetries} attempts: ${JSON.stringify(e)}`);
+                            context.logger.error(`Failed to delete dummy bucket ${dummyBucketName} after ${maxDeleteRetries} attempts: ${JSON.stringify(e)}`);
                         } else {
-                            context.logger.log(`Retry ${deleteRetries}/${maxDeleteRetries} deleting dummy bucket ${dummyBucketName}`);
+                            context.logger.error(`Retry ${deleteRetries}/${maxDeleteRetries} deleting dummy bucket ${dummyBucketName}`);
                             const delay = Math.min(15000, 1000 * Math.pow(2, deleteRetries)) +
                                 (Math.random() * 1000);
                             await new Promise((resolve) => {
@@ -518,7 +509,7 @@ export async function bootstrapEnvironment(inputs: {
                 aws_profile: ctx.profile!,
                 kms: `${arn.value},${arn2.value}`
             }
-            context.logger.log("New encrpytion config: " + JSON.stringify(newCreationRule), { level: "debug" })
+            context.logger.debug("New encrpytion config: " + JSON.stringify(newCreationRule))
 
             if (await fileExists(sopsFilePath)) {
                 const fileContent = await Bun.file(sopsFilePath).text();
@@ -556,21 +547,21 @@ export async function bootstrapEnvironment(inputs: {
             title: "Set AWS account alias",
             enabled: (ctx) => ctx.accountName === undefined,
             task: async (ctx, task) => {
-                ctx.accountName = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                    message: applyColors('Unique Account Alias:', { style: "question" }),
-                    required: true,
+                ctx.accountName = await context.logger.input({
+                    message: 'Unique Account Alias:',
                     validate: async (value) => {
                         const { error } = AWS_ACCOUNT_ALIAS_SCHEMA.safeParse(value)
                         if (error) {
-                            return applyColors(error.issues[0]?.message ?? "Invalid account name", { style: "error" })
+                            return error.issues[0]?.message ?? "Invalid account name"
                         }
 
                         const response = await globalThis.fetch(`https://${value}.signin.aws.amazon.com`)
                         if (response.status !== 404) {
-                            return applyColors(`Every account must have a globally unique name. Name is already taken.`, { style: "error" })
+                            return `Every account must have a globally unique name. Name is already taken.`
                         }
                         return true
-                    }
+                    },
+                    task
                 })
             }
         }
@@ -619,7 +610,7 @@ export async function bootstrapEnvironment(inputs: {
                                 return false;
                             } else {
                                 // For any other error, swallow it, just in case we can recover
-                                context.logger.log(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`, { level: "debug" })
+                                context.logger.debug(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`)
                                 return false;
                             }
                         }

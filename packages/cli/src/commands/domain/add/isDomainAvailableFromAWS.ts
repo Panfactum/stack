@@ -1,13 +1,12 @@
 import { CheckDomainAvailabilityCommand, Route53DomainsClient, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
 import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 
-export async function isDomainAvailableFromAWS(inputs: {context: PanfactumContext, env:EnvironmentMeta, domain: string, tld: string }){
-    const {context, env, domain, tld} = inputs;
+export async function isDomainAvailableFromAWS(inputs: { context: PanfactumContext, env: EnvironmentMeta, domain: string, tld: string }) {
+    const { context, env, domain, tld } = inputs;
     const { aws_profile: profile } = await getPanfactumConfig({ context, directory: env.path })
     if (!profile) {
         throw new CLIError(`Was not able to find AWS profile for '${env.name}' environment`)
@@ -33,34 +32,22 @@ export async function isDomainAvailableFromAWS(inputs: {context: PanfactumContex
         const availabilityResponse = await route53DomainsClient.send(checkAvailabilityCommand)
 
         if (availabilityResponse.Availability !== 'AVAILABLE') {
-            context.logger.log(
-                applyColors(
-                    `The domain ${domain} is not available for purchase (Status: ${availabilityResponse.Availability})\n\n` +
-                    `For more information on the above status code, see these docs:\n` +
-                    `https://docs.aws.amazon.com/Route53/latest/APIReference/API_domains_CheckDomainAvailability.html`, {
-                    style: "error",
-                    highlights: [
-                        { phrase: domain, style: "important" },
-                        { phrase: availabilityResponse.Availability || 'UNKNOWN', style: "warning" }
-                    ]
-                }),
-                { trailingNewlines: 1, leadingNewlines: 1 }
+            context.logger.error(
+                `The domain ${domain} is not available for purchase (Status: ${availabilityResponse.Availability})\n\n` +
+                `For more information on the above status code, see these docs:\n` +
+                `https://docs.aws.amazon.com/Route53/latest/APIReference/API_domains_CheckDomainAvailability.html`
             );
             return false;
         }
         return true
     } catch (error) {
         if (error instanceof UnsupportedTLD) {
-            context.logger.log(
-                applyColors(
-                    `AWS cannot be used to purchase ${domain} as AWS does not support the TLD .${tld}.\n\n` +
-                    `To see supported TLDs, please see these docs:\n` +
-                    `https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/registrar-tld-list.html\n\n` +
-                    `Purchase the domain using an alternative registrar such as https://www.namecheap.com/ and\n` +
-                    `re-run this command.`,
-                    { style: "error", highlights: [domain, `.${tld}`] }
-                ),
-                {leadingNewlines: 1, trailingNewlines: 1}
+            context.logger.error(
+                `AWS cannot be used to purchase ${domain} as AWS does not support the TLD .${tld}.\n\n` +
+                `To see supported TLDs, please see these docs:\n` +
+                `https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/registrar-tld-list.html\n\n` +
+                `Purchase the domain using an alternative registrar such as https://www.namecheap.com/ and\n` +
+                `re-run this command.`
             )
             return false;
         } else {
