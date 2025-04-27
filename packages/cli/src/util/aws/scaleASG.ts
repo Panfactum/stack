@@ -1,5 +1,4 @@
 import { execute } from "../subprocess/execute";
-import type { PanfactumTaskWrapper } from "../listr/types";
 import type { PanfactumContext } from "@/context/context";
 
 export async function scaleASG({
@@ -7,15 +6,13 @@ export async function scaleASG({
   awsProfile,
   awsRegion,
   context,
-  desiredCapacity,
-  task,
+  desiredCapacity
 }: {
   asgName: string;
   awsProfile: string;
   awsRegion: string;
   context: PanfactumContext;
   desiredCapacity: number;
-  task?: PanfactumTaskWrapper;
 }) {
   await execute({
     command: [
@@ -34,7 +31,6 @@ export async function scaleASG({
     context,
     workingDirectory: process.cwd(),
     errorMessage: `Failed to scale ASG ${asgName}`,
-    task,
   });
   return true;
 }

@@ -275,7 +275,7 @@ export class InstallClusterCommand extends PanfactumCommand {
 
     for (const [_, { setup, label, completed }] of SETUP_STEPS.entries()) {
       tasks.add({
-        title: `${label} ${completed ? `${applyColors("(skipped)", { style: "subtle" })}` : ""}`,
+        title: this.context.logger.applyColors(`${label} ${completed ? "(skipped)" : ""}`, { lowlights: ["(skipped)"] }),
         skip: () => completed,
         task: async () => {
           await setup(options, completed);
@@ -290,21 +290,41 @@ export class InstallClusterCommand extends PanfactumCommand {
       throw new CLIError("Failed to Install Cluster", e);
     }
 
-    this.context.logger.clusterInstallSuccess();
+    // TODO: @seth - interpolate actual cluster name
+    this.context.logger.success("🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉")
+    this.context.logger.info(`
+        The Panfactum devShell ships with a TUI called k9s.
+        To verify what pods are running in the cluster do the following:
+          1. Run ${pc.bold(pc.cyan("k9s"))}
+          2. Type ${pc.bold(pc.cyan("':ctx⏎'"))} to list all your installed clusters and select the one that was just installed.
+          3. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.
+          4. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.
+          5. You should see a minimal list of pods running in the cluster.
+          6. If you don't see any pods, please reach out to us on Discord.
+          7. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.
+    `)
 
-    // TODO: @seth - Use applyColors() for equivalent functionality
-    this.context.logger.log(
-      [
-        pc.bold("NOTE: "),
-        "The recovery keys and root token have been encrypted and saved in the kube_vault folder.",
-        "The root token allows root access to the vault instance.",
-        `These keys ${pc.bold("SHOULD NOT")} be left here.`,
-        "Decide how your organization recommends superusers store these keys.",
-        `This should ${pc.bold("not")} be in a location that is accessible by all superusers (e.g. a company password vault).`,
-      ],
-      {
-        trailingNewlines: 1,
-      }
-    );
+    this.context.logger.warn(`
+      The Vault recovery keys and root token have been encrypted and saved in the kube_vault folder.
+      The root token allows root access to the vault instance and thus all infrastructure.
+      These keys ${pc.bold("SHOULD NOT")} be left here as they will allow for privilege escalation.
+      Decide how your organization recommends superusers store these keys.
+      This should ${pc.bold("NOT")} be in a location that is accessible by all superusers (e.g. a company password vault).
+    `)
+
+
+
+    pc.green(
+      "\n\n\n"
+    ) +
+      pc.blue(
+        "Run: " +
+        pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+        "You should receive a response similar to the following:\n\n"
+      ) +
+      "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n\n" +
+      pc.blue(
+
+      )
   }
 }

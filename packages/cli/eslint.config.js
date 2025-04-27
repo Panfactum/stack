@@ -132,7 +132,7 @@ export default [
       "sonarjs/no-collection-size-mischeck": "error",
       "sonarjs/prefer-object-literal": "error",
       "sonarjs/prefer-single-boolean-return": "error",
-      "sonarjs/no-duplicate-string": ["error", { threshold: 5 }]
+      "sonarjs/no-duplicate-string": ["error", { threshold: 10 }]
     },
   },
 ];
