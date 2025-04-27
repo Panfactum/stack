@@ -40,7 +40,7 @@ export const getRepoVariables = async () => {
       }),
 
       repo_root: z.string().default(repoRootPath),
-      
+
       repo_url: z
         .string({
           required_error: "repo_url must be set in panfactum.yaml",
@@ -135,10 +135,15 @@ export const getRepoVariables = async () => {
         .default(".nats"),
     })
 
-  const validatedValues = panfactumYamlSchema.parse(values);
+  const validatedValues: z.infer<typeof panfactumYamlSchema> & { iac_relative_dir?: string } = panfactumYamlSchema.parse(values);
 
   //####################################################################
-  // Step 4: Resolve directories
+  // Step 4: Save the relative IaC dir (needed for panfactum.hcl)
+  //####################################################################
+  validatedValues["iac_relative_dir"] = validatedValues["iac_dir"]
+
+  //####################################################################
+  // Step 5: Resolve directories
   //####################################################################
   const dirKeys = [
     "environments_dir",
@@ -152,6 +157,7 @@ export const getRepoVariables = async () => {
   for (const key of dirKeys) {
     validatedValues[key] = path.resolve(repoRootPath, validatedValues[key]);
   }
+
 
   return validatedValues;
 };
