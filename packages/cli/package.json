@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "build:binary": "bun build --compile --minify --sourcemap ./src/index.ts ./src/files/**/*.* --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
+    "check": "tsc",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "bun test src/**/*.test.ts",
@@ -29,7 +30,7 @@
     "prettier": "^3.5.3"
   },
   "peerDependencies": {
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@aws-sdk/client-account": "^3.794.0",

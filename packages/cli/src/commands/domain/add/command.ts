@@ -211,6 +211,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 existingDomainConfigs: domainConfigs
             })
 
+            return 0
         }
 
         /////////////////////////////////////////////////////////////////////////
@@ -573,5 +574,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 }
             }
         }
+
+        return 0
     }
 }

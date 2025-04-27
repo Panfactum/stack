@@ -28,10 +28,7 @@ export async function setSLA(inputs: {
   let confirmedSLATarget: NonNullable<SlaTarget> = slaTarget ?? 3;
   let confirmed = false;
   if (slaTarget !== undefined) {
-    context.logger.log(
-      `⚠️ WARNING: This cluster is going to be deployed with SLA target set to ${slaTarget}. This CANNOT easily be changed later.`,
-      { style: "warning", leadingNewlines: 2 }
-    );
+    context.logger.warn(`This cluster is going to be deployed with SLA target set to ${slaTarget}. This CANNOT easily be changed later.`, { highlights: [String(slaTarget)] })
     confirmed = await confirm({
       message: pc.magenta("Do you want to proceed with this SLA target?"),
       default: true,

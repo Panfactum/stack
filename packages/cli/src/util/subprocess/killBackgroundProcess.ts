@@ -12,10 +12,7 @@ export const killBackgroundProcess = ({
   try {
     process.kill(pid);
   } catch {
-    context.logger.log(`Failed to kill background process with pid: ${pid}`, {
-      level: "debug",
-      style: "warning",
-    });
+    context.logger.debug(`Failed to kill background process`, { pid })
   }
 };
 
@@ -25,18 +22,12 @@ export const killAllBackgroundProcesses = ({
   context: PanfactumContext;
 }) => {
   if (BACKGROUND_PROCESS_PIDS.length === 0) {
-    context.logger.log("No background processes to kill", {
-      level: "debug",
-    });
+    context.logger.debug("No background processes to kill")
     return;
   }
 
-  context.logger.log(
-    `Killing ${BACKGROUND_PROCESS_PIDS.length} background processes`,
-    {
-      level: "debug",
-    }
-  );
+  // TODO: @seth - Better logging: what are the background processes?
+  context.logger.debug("Killing ${BACKGROUND_PROCESS_PIDS.length} background processes");
 
   for (const pid of [...BACKGROUND_PROCESS_PIDS]) {
     killBackgroundProcess({ pid, context });

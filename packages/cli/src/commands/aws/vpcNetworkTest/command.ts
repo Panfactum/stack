@@ -1,6 +1,6 @@
 import { Command, Option } from "clipanion";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
-import { vpcNetworkTest } from "./vpcNetworkTest";
+import { CLIError } from "@/util/error/error";
 
 export class VPCNetworkTestCommand extends PanfactumCommand {
   static override paths = [["aws", "vpc-network-test"]];
@@ -24,9 +24,11 @@ export class VPCNetworkTestCommand extends PanfactumCommand {
   });
 
   async execute() {
-    await vpcNetworkTest({
-    context: this.context,
-    modulePath: this.modulePath
-    });
+    throw new CLIError("Command not implemented")
+
+    // await vpcNetworkTest({
+    // context: this.context,
+    // modulePath: this.modulePath
+    // });
   }
 }

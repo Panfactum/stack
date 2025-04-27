@@ -27,6 +27,12 @@ function dedent(text: string) {
 
 type ColorStyle = "default" | "warning" | "important" | "question" | "error" | "success" | "subtle"
 
+type HighlightsConfig = {
+  highlights?: string[],
+  lowlights?: string[],
+  badlights?: string[]
+}
+
 export class Logger {
   private stream: Writable;
   private debugEnabled: boolean;
@@ -82,11 +88,8 @@ export class Logger {
 
   public applyColors(str: string, config?: {
     style?: ColorStyle
-    bold?: boolean,
-    highlights?: string[],
-    lowlights?: string[],
-    badlights?: string[]
-  }) {
+    bold?: boolean
+  } & HighlightsConfig) {
     const {
       style = "default",
       bold,
@@ -232,40 +235,40 @@ export class Logger {
   //    - Iconography
   //////////////////////////////////////////////////////
 
-  public info(str: string) {
+  public info(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("🛈", { style: "important" }),
-      this.applyColors(dedent(str), { style: "default" })
+      this.applyColors(dedent(str), { style: "default", ...config })
     ]], [4, 80]))
     this.stream.write("\n\n")
   }
 
-  public warn(str: string) {
+  public warn(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("⚠", { style: "warning" }),
-      this.applyColors(dedent(str), { style: "default" })
+      this.applyColors(dedent(str), { style: "warning", ...config })
     ]], [4, 80]))
     this.stream.write("\n\n")
   }
 
-  public success(str: string) {
+  public success(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("✓", { style: "success" }),
-      this.applyColors(dedent(str), { style: "default" })
+      this.applyColors(dedent(str), { style: "success", ...config })
     ]], [4, 80]))
     this.stream.write("\n\n")
   }
 
-  public error(str: string) {
+  public error(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
-      this.applyColors(dedent(str), { style: "error" })
+      this.applyColors(dedent(str), { style: "error", ...config })
     ]], [80]))
     this.stream.write("\n\n")
   }
 
-  public write(str: string) {
+  public write(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
-      this.applyColors(dedent(str), { style: "default" })
+      this.applyColors(dedent(str), { style: "default", ...config })
     ]], [80]))
     this.stream.write("\n\n")
   }
@@ -497,6 +500,10 @@ export class Logger {
       confirm(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
+
+  //////////////////////////////////////////////////////
+  // Helpful standard logs
+  /////////////////////////////////////////////////////
 
   public crashMessage() {
     this.error(`

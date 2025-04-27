@@ -1,7 +1,7 @@
 import path from "node:path";
 import { Listr } from "listr2";
 import { z } from "zod";
-import { vpcNetworkTest } from "@/commands/aws/vpc-network-test/vpcNetworkTest";
+import { vpcNetworkTest } from "@/commands/aws/vpcNetworkTest/vpcNetworkTest";
 import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
