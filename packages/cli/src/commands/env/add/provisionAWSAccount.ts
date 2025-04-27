@@ -11,6 +11,7 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { AWS_ACCOUNT_ALIAS_SCHEMA } from "@/util/aws/schemas";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist"
+import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -415,10 +416,5 @@ export async function provisionAWSAccount(inputs: {
         }
     })
 
-    try {
-        await tasks.run()
-    } catch (e) {
-        throw new CLIError("Failed to provision AWS account", e)
-    }
-
+    await runTasks({ context, tasks, errorMessage: "Failed to provision AWS account" })
 }

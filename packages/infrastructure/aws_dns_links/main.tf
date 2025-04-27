@@ -22,13 +22,17 @@ locals {
   subdomains = { for config in local.subdomains_raw : config.id => config }
 }
 ##########################################################################
-## Ancestor Zone Records
+## Zone Fetching
 ##########################################################################
 
 data "aws_route53_zone" "ancestors" {
   for_each = var.links
   name     = each.key
 }
+
+##########################################################################
+## Ancestor Zone Records
+##########################################################################
 
 // Subdomain delegation
 resource "aws_route53_record" "ns" {
@@ -41,14 +45,12 @@ resource "aws_route53_record" "ns" {
 }
 
 // DNSSEC delegation
-# resource "aws_route53_record" "ds" {
-#   provider = aws.secondary
-#   for_each = local.subdomains
-#   name     = split(".", each.value)[0]
-#   type     = "DS"
-#   zone_id  = data.aws_route53_zone.roots[join(".", slice(split(".", each.value), 1, length(split(".", each.value))))].id
-#   ttl      = 60 * 60 * 24 * 2
-#   records  = [module.dnssec.keys[each.key].ds_record]
-
-#   depends_on = [module.dnssec]
-# }
+resource "aws_route53_record" "ds" {
+  provider = aws.secondary
+  for_each = local.subdomains
+  name     = each.value.subdomain
+  type     = "DS"
+  zone_id  = data.aws_route53_zone.ancestors[each.value.ancestor].id
+  ttl      = 60 * 60 * 24 * 2
+  records  = [each.value.ds_record]
+}

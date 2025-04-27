@@ -5,7 +5,9 @@ import { InstallClusterCommand } from "./commands/cluster/install/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { DevShellUpdateCommand } from "./commands/devshell/update/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
-import { EnvironmentInstallCommand } from "./commands/env/install/command.ts";
+import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
+import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";
+import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./context/context.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
@@ -30,7 +32,9 @@ cli.register(DevShellUpdateCommand)
 cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
 cli.register(EnvironmentInstallCommand)
+cli.register(EnvironmentRemoveCommand)
 cli.register(DomainAddCommand)
+cli.register(DomainRemoveCommand)
 
 const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
 

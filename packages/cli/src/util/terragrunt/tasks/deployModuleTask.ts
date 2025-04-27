@@ -182,7 +182,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                         await terragruntInit({
                             ...inputs,
                             onLogLine: (line) => {
-                                task.output = context.logger.applyColors(line, { style: "subtle" });
+                                task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
                             },
                         });
                         task.title = "Initialized module";
@@ -248,7 +248,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                     await terragruntApply({
                         ...inputs,
                         onLogLine: (line) => {
-                            task.output = context.logger.applyColors(line, { style: "subtle" });
+                            task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
 
                             // When running apply, we want to show a progress indicator
                             // To do that, we wait for the plan step to finish and collect the

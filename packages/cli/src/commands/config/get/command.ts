@@ -6,13 +6,17 @@ export class ConfigGetCommand extends PanfactumCommand {
     static override paths = [["config", "get"]];
 
     static override usage = Command.Usage({
-      description: "Gets the Panfactum configuration",
-      details:
-        "Returns the Panfactum configuration",
+        description: "Gets the Panfactum configuration",
+        details:
+            "Returns the Panfactum configuration",
     });
-  
+
     async execute() {
-        this.context.stdout.write(JSON.stringify(await getPanfactumConfig({context: this.context})))
+        const mergedConfig = {
+            ...await getPanfactumConfig({ context: this.context }),
+            ...this.context.repoVariables
+        }
+        this.context.stdout.write(JSON.stringify(mergedConfig, undefined, 4))
         return 0
     }
 }

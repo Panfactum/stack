@@ -13,6 +13,7 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
         [domain: string]: {
             env: EnvironmentMeta,
             zoneId?: string;
+            verifyDNSSEC?: boolean;
         }
     }
 }): Promise<ListrTask<T>> {
@@ -44,6 +45,7 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                         // Generate two random 8 character strings for testing
                         const randomString1 = Math.random().toString(36).substring(2, 10);
                         const randomString2 = Math.random().toString(36).substring(2, 10);
+                        const testDomain = `${randomString1}.${domain}`
 
                         const { aws_profile: profile } = await getPanfactumConfig({ context, directory: config.env.path });
                         if (!profile) {
@@ -55,6 +57,40 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                         } catch (error) {
                             throw new CLIError(`Was not able to authenticate with AWS profile '${profile}'`, error);
                         }
+
+                        const deleteRecord = async () => {
+                            // Create a TXT record in the zone for testing DNS resolution
+                            const route53 = new Route53Client({
+                                profile
+                            });
+
+                            // Delete the test TXT record if it exists
+                            try {
+                                await route53.send(new ChangeResourceRecordSetsCommand({
+                                    HostedZoneId: config.zoneId,
+                                    ChangeBatch: {
+                                        Changes: [
+                                            {
+                                                Action: "DELETE",
+                                                ResourceRecordSet: {
+                                                    Name: `${randomString1}.${domain}`,
+                                                    Type: "TXT",
+                                                    TTL: 300,
+                                                    ResourceRecords: [
+                                                        {
+                                                            Value: `"${randomString2}"`
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }));
+                            } catch {
+                                // Ignore errors (if it doesn't exist)
+                            }
+                        }
+
 
                         /////////////////////////////////////////////
                         // Add the test record
@@ -106,12 +142,10 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                         /////////////////////////////////////////////
                         subsubtasks.add({
                             title: `Verify TXT record resolves`,
-                            rollback: () => {
-                                // TODO: Delete the record
+                            rollback: async () => {
+                                await deleteRecord();
                             },
                             task: async (_, task) => {
-
-                                const testDomain = `${randomString1}.${domain}`
                                 task.output = context.logger.applyColors(
                                     `This can sometimes take up to an hour.\n` +
                                     `To speed up this test, purge cloudflare's DNS cache using\nhttps://one.one.one.one/purge-cache/\n\n` +
@@ -175,43 +209,69 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                         })
 
                         /////////////////////////////////////////////
+                        // Check to see if DNSSEC works
+                        /////////////////////////////////////////////
+                        if (config.verifyDNSSEC) {
+                            subsubtasks.add({
+                                title: `Verify DNSSEC`,
+                                rollback: async () => {
+                                    await deleteRecord();
+                                },
+                                task: async (_, task) => {
+                                    let retries = 0;
+                                    const maxRetries = 25;
+                                    while (true) {
+                                        try {
+                                            // Use dig command to resolve the TXT record
+                                            // Note for some reason the internal bun DNS
+                                            // function don't refresh the DNS results
+                                            // data but calling out to an external process fixes
+                                            // that issue
+                                            const result = await execute({
+                                                command: ["delv", "@1.1.1.1", "txt", testDomain],
+                                                context,
+                                                workingDirectory: process.cwd(),
+                                                errorMessage: "Failed to execute delv command"
+                                            });
+
+                                            // Check if we got a response
+                                            const output = result.stdout.trim()
+                                            if (!output) {
+                                                throw new CLIError(`No response from delv`)
+                                            } else if (!output.includes("; fully validated")) {
+                                                throw new CLIError(`DNSSEC not fully validated yet`)
+                                            }
+                                            break;
+                                        } catch {
+                                            if (retries < maxRetries) {
+                                                const attemptStr = `Attempt ${retries + 1}/${maxRetries}`
+                                                task.title = context.logger.applyColors(`Verify DNSSEC ${attemptStr}`, {
+                                                    lowlights: [attemptStr]
+                                                })
+                                                retries++;
+                                                await new Promise(resolve => globalThis.setTimeout(resolve, 10000));
+                                            } else {
+                                                throw new CLIError(`Failed to resolve DNSSEC record after ${maxRetries} attempts`)
+                                            }
+                                        }
+                                    }
+
+                                    task.title = context.logger.applyColors(`Verify DNSSEC Success`, {
+                                        lowlights: ["Success"]
+                                    })
+                                }
+                            })
+                        }
+
+
+                        /////////////////////////////////////////////
                         // Remove the TXT record
                         /////////////////////////////////////////////
 
                         subsubtasks.add({
                             title: "Cleanup records",
                             task: async () => {
-
-                                // Create a TXT record in the zone for testing DNS resolution
-                                const route53 = new Route53Client({
-                                    profile
-                                });
-
-                                // Delete the test TXT record if it exists
-                                try {
-                                    await route53.send(new ChangeResourceRecordSetsCommand({
-                                        HostedZoneId: config.zoneId,
-                                        ChangeBatch: {
-                                            Changes: [
-                                                {
-                                                    Action: "DELETE",
-                                                    ResourceRecordSet: {
-                                                        Name: `${randomString1}.${domain}`,
-                                                        Type: "TXT",
-                                                        TTL: 300,
-                                                        ResourceRecords: [
-                                                            {
-                                                                Value: `"${randomString2}"`
-                                                            }
-                                                        ]
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }));
-                                } catch {
-                                    // Ignore errors (if it doesn't exist)
-                                }
+                                await deleteRecord()
                             }
                         })
 

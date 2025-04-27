@@ -1,4 +1,5 @@
 import { Command } from "clipanion";
+import pc from "picocolors"
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments } from "@/util/config/getEnvironments";
@@ -13,16 +14,89 @@ import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
 import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
 import { updateIAMIdentityCenter } from "./updateIAMIdentityCenter";
 
-
 const DEFAULT_MANAGEMENT_PROFILE = "management-superuser"
 
 export class EnvironmentInstallCommand extends PanfactumCommand {
-    static override paths = [["env", "install"]];
+    static override paths = [["env", "add"]];
 
     static override usage = Command.Usage({
-        description: "Install a Panfactum environment",
-        details:
-            "Executes a guided installation of a Panfactum environment",
+        description: "Adds an environment to the Panfactum framework installation",
+        details: `
+        Adds an environment to the Panfactum framework installation.
+
+        In Panfactum, ${pc.italic("environments")} are the top-level container for user
+        workloads. 
+        
+        Environments serve as a strict isolation boundary for workloads. Workloads in different
+        environments cannot interact with one another. Nothing that happens in one environment
+        will be able to impact any other environment.
+
+        Environment also serve as the primary target for access control rules. By default,
+        user roles are environment-scoped. In other words, a user with superuser access to
+        an environment will automatically have superuser access to all workloads in the environment
+        such as Kubernetes clusters, databases, obervability platforms, etc.
+
+        Infrastructure-as-Code =========================================================
+
+        In Panfactum, ${pc.italic("every")} piece of infrastructure is controlled
+        by infrastructure-as-code that is completely transparent and accessible to you --
+        there is no magic or blackbox abstraction.
+
+        Panfactum uses OpenTofu (the open-source Terraform fork) to define infrastructure modules
+        and Terragrunt to deploy them.
+
+        Terragrunt provides the necessary configuration tools to make deploying and managing
+        IaC modules easy, and Panfactum does all of the necessary best-practice scaffholding to get you
+        up and running in a matter of minutes.
+
+        Ultimately, this installer will add the infrastructure-as-code for a new environment.
+        To see what that will look like, see the Panfactum reference-infrastructure repository:
+        https://github.com/Panfactum/reference-infrastructure/tree/main/environments
+
+        Recommended Setup ==============================================================
+
+        For those just starting out, we recommend creating a ${pc.blue("production")}
+        environment for hosting your initial workloads.
+
+        As you begin to serve real users, we adding a ${pc.blue("development")}
+        environment. This allows you have one environment for testing
+        changes and another for serving real traffic.
+
+        As your team grows, you can add additional environments as necessary.
+
+        Note that this installer may attempt you to create a special environment: ${pc.blue("management")}.
+        This environment is used to manage organization-wide settings,
+        such as cloud-provider billing information or global access control policies. Workloads cannot
+        be deployed to the management environment.
+
+        Regions ========================================================================
+
+        Environments contain ${pc.italic("regions")} which are the second-level container
+        for user workloads. 
+        
+        Conceptually, regions represent different "datacenters" in your environment. In the
+        Panfactum framework, every region has at most one Panfactum Kubernetes cluster which
+        is the primary system for running your workloads. You can also have regions without
+        live clusters for resources like cold backups.
+
+        For workloads that talk with one another, you will likely want to deploy all these
+        workloads to the same region. All workloads must be deployed to a region.
+
+        Every environment has a special region called ${pc.blue("global")} which is for
+        infrastructure resources that are environment-scoped, but not region-scoped. These
+        include access control policies, domains, etc.
+
+        AWS Installations ==============================================================
+
+        For AWS installations, environments have a one-to-one relationship
+        with AWS accounts. Environments are virtually free and generally fall within the AWS
+        free tier.
+
+        Additionally, Panfactum regions will have a many-to-one correspondence to AWS regions.
+        In other words, every Panfactum region deploys to exactly one AWS region, but you
+        can have multiple Panfactum regions deploying to the same AWS region. This can be
+        helpful if you need to deploy multiple Panfactum clusters to the same AWS region.
+        `
     });
 
     async execute() {
@@ -111,6 +185,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         ////////////////////////////////////////////////////////////////
         const environmentName = await getEnvironmentName({ context });
         const environmentProfile = `${environmentName}-superuser`
+        context.logger.addIdentifier(environmentName)
 
         ////////////////////////////////////////////////////////////////
         // Create the AWS account, setup the environment files in the repo

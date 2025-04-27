@@ -6,6 +6,7 @@ import { DefaultRenderer, ListrTaskWrapper, SimpleRenderer, type ListrTask } fro
 import pc from "picocolors";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { directoryExists } from "@/util/fs/directoryExist";
 import { CLIError } from "../../error/error";
 import { fileExists } from "../../fs/fileExists";
 import { writeFile } from "../../fs/writeFile";
@@ -42,6 +43,14 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
         GLOBAL_REGION,
         MODULES.IAM_IDENTIY_CENTER_PERMISSIONS
     )
+
+    if (! await directoryExists(modulePath)) {
+        return {
+            title: context.logger.applyColors("Skipped AWS Identity Center Sync Not deployed", { lowlights: ["Not deployed"] }),
+            skip: true,
+            task: () => { }
+        }
+    }
 
     const { aws_region: ssoRegion } = await getPanfactumConfig({ context, directory: modulePath })
 

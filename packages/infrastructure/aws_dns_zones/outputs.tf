@@ -8,5 +8,6 @@ output "zones" {
   value = { for domain, config in var.domains : domain => {
     zone_id : aws_route53_zone.zones[domain].id,
     name_servers : aws_route53_delegation_set.zones[domain].name_servers
+    ds_record : length(keys(local.dnssec_zones)) > 0 ? lookup(module.dnssec[0].keys, domain, { ds_record = null }).ds_record : null
   } }
 }

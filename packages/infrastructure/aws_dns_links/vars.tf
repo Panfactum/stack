@@ -3,6 +3,7 @@ variable "links" {
   type = map(list(object({
     subdomain    = string
     name_servers = list(string)
+    ds_record    = string
   })))
 }
 

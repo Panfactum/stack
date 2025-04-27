@@ -47,7 +47,7 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
     })
 
     return {
-        title: "Sync SSH Bastion connection info to DevShell",
+        title: "Sync SSH bastion connection info to DevShell",
         task: async (_, parentTask) => {
 
             const { ssh_dir: sshDir, environments_dir: environmentsDir } = context.repoVariables;
@@ -80,60 +80,68 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
             ///////////////////////////////////////////////////////
             // Add subtasks for fetching the module outputs
             ///////////////////////////////////////////////////////
-            bastionHCLPaths.forEach((bastionHCLPath) => {
-                const moduleDirectory = dirname(bastionHCLPath);
-                const bastionId = getLastPathSegments(moduleDirectory, 3);
-                subtasks.add({
-                    title: context.logger.applyColors(`Retrieve bastion info ${bastionId}`, { lowlights: [bastionId] }),
-                    task: async (ctx, task) => {
-                        try {
-                            const { environment_dir: envDir, region_dir: regionDir } = await getPanfactumConfig({ context, directory: moduleDirectory })
+            subtasks.add({
+                title: "Retrieve bastion info",
+                task: async (_, subtask) => {
+                    const subsubtasks = subtask.newListr([], { concurrent: true })
+                    bastionHCLPaths.forEach((bastionHCLPath) => {
+                        const moduleDirectory = dirname(bastionHCLPath);
+                        const bastionId = getLastPathSegments(moduleDirectory, 3);
+                        subsubtasks.add({
+                            title: context.logger.applyColors(`Retrieve bastion info ${bastionId}`, { lowlights: [bastionId] }),
+                            task: async (ctx, task) => {
+                                try {
+                                    const { environment_dir: envDir, region_dir: regionDir } = await getPanfactumConfig({ context, directory: moduleDirectory })
 
-                            if (!envDir) {
-                                throw new CLIError("Module is not in a valid environment directory.")
-                            } else if (!regionDir) {
-                                throw new CLIError("Module is not in a valid region directory.")
-                            }
+                                    if (!envDir) {
+                                        throw new CLIError("Module is not in a valid environment directory.")
+                                    } else if (!regionDir) {
+                                        throw new CLIError("Module is not in a valid region directory.")
+                                    }
 
-                            const [bastionModuleOutput, eksModuleOutput] = await Promise.all([
-                                terragruntOutput({
-                                    context,
-                                    environment: envDir,
-                                    region: regionDir,
-                                    module: MODULES.KUBE_BASTION,
-                                    validationSchema: BASTION_MODULE_OUTPUT_SCHEMA,
-                                }),
-                                terragruntOutput({
-                                    context,
-                                    environment: envDir,
-                                    region: regionDir,
-                                    module: MODULES.AWS_EKS,
-                                    validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
-                                })
-                            ])
+                                    const [bastionModuleOutput, eksModuleOutput] = await Promise.all([
+                                        terragruntOutput({
+                                            context,
+                                            environment: envDir,
+                                            region: regionDir,
+                                            module: MODULES.KUBE_BASTION,
+                                            validationSchema: BASTION_MODULE_OUTPUT_SCHEMA,
+                                        }),
+                                        terragruntOutput({
+                                            context,
+                                            environment: envDir,
+                                            region: regionDir,
+                                            module: MODULES.AWS_EKS,
+                                            validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
+                                        })
+                                    ])
 
-                            const domain = bastionModuleOutput.bastion_domains.value[0]!;
-                            const publicKey = bastionModuleOutput.bastion_host_public_key.value;
-                            const port = bastionModuleOutput.bastion_port.value;
-                            const name = eksModuleOutput.cluster_name.value
+                                    const domain = bastionModuleOutput.bastion_domains.value[0]!;
+                                    const publicKey = bastionModuleOutput.bastion_host_public_key.value;
+                                    const port = bastionModuleOutput.bastion_port.value;
+                                    const name = eksModuleOutput.cluster_name.value
 
-                            ctx.bastionInfo.push({
-                                domain,
-                                publicKey,
-                                port,
-                                name
-                            })
-                        } catch (e) {
-                            if (exitOnError) {
-                                throw e
-                            } else {
-                                task.skip(context.logger.applyColors(`Failed to retrieve bastion info ${bastionId}`, { style: "error", lowlights: [bastionId] }))
-                                parentTask.title = context.logger.applyColors("Sync SSH Bastion connection info to DevShell Partial Failure", { badlights: ["Partial Failure"] })
-                            }
-                        }
-                    },
-                })
+                                    ctx.bastionInfo.push({
+                                        domain,
+                                        publicKey,
+                                        port,
+                                        name
+                                    })
+                                } catch (e) {
+                                    if (exitOnError) {
+                                        throw e
+                                    } else {
+                                        task.skip(context.logger.applyColors(`Failed to retrieve bastion info ${bastionId}`, { style: "error", lowlights: [bastionId] }))
+                                        parentTask.title = context.logger.applyColors("Sync SSH Bastion connection info to DevShell Partial Failure", { badlights: ["Partial Failure"] })
+                                    }
+                                }
+                            },
+                        })
+                    })
+                    return subsubtasks
+                }
             })
+
 
             ///////////////////////////////////////////////////////
             // Write the configuration files

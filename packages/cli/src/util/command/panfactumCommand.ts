@@ -1,4 +1,5 @@
 import { Command, Option } from "clipanion";
+import pc from "picocolors";
 import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/context/context";
 
@@ -10,6 +11,7 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
 
     override async catch(error: unknown) {
         if (error instanceof Error) {
+            this.context.logger.error(error.constructor.name)
             this.context.logger.error(error.message)
 
             // The detailed error message should always come from the error cause 
@@ -17,12 +19,24 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
             // and not just a wrapper.
             const cause = error.cause || error
             if (cause instanceof CLIError) {
-                this.context.logger.error(cause.getDetailedMessage())
+                const details = cause.getDetailedMessage()
+                if (details) {
+                    this.context.logger.error("Details ==========================================================")
+                    this.context.logger.writeRaw(pc.red(details))
+                }
+
+            }
+
+            const stack = cause instanceof Error ? cause.stack ?? error.stack : error.stack
+            if (stack) {
+                this.context.logger.error("Stack Trace ==========================================================")
+                this.context.logger.writeRaw(pc.red(stack))
             }
 
         } else {
-            this.context.logger.error(JSON.stringify(error))
+            this.context.logger.writeRaw(pc.red(JSON.stringify(error, undefined, 4)))
         }
+
         this.context.logger.crashMessage()
         // TODO: @jack Add debug logs
     }

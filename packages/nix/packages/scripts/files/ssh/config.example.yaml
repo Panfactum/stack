@@ -1,9 +1,0 @@
-# Copy this file to `config.yaml`
-# `config.yaml` file should be committed to version control (automatically setup via .gitignore)
-# More information can be found here: https://panfactum.com/docs/edge/reference/configuration/ssh
-
-# Lists all of your bastion hosts
-bastions:
-  - name: "example-primary" # The name of this bastion host (will be referenced in other commands like pf-tunnel)
-    module: "environment/region/kube_bastion" # Path to the module within your $PF_ENVIRONMENTS_DIR folder
-    vault: "https://vault.prod.example.com" # Address for the Vault that is running in the same Kubernetes cluster as the bastion

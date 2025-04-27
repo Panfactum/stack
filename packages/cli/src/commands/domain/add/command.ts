@@ -8,6 +8,7 @@ import { DOMAIN } from "@/util/config/schemas";
 import { isRegistered } from "@/util/domains/isRegistered";
 import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { runTasks } from "@/util/listr/runTasks";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { createDescendentZones } from "./createDescendentZones";
 import { createEnvironmentSubzones } from "./createEnvironmentSubzones";
@@ -34,8 +35,6 @@ export class DomainAddCommand extends PanfactumCommand {
           * Adding an already-purchased domain from another registrar
 
           * Adding a subdomain of a domain that has already been added
-
-          * Migrating domains from one environment to another (coming soon)
 
         Tip #1
 
@@ -102,7 +101,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 environmentMeta = environments[environmentMetaIndex]!
             }
         }
-        environments.forEach(env => context.logger.addIdentifier(env.name))
+        environments.forEach(env => context.logger.addIdentifier(` ${env.name} `))
 
         /////////////////////////////////////////////////////////////////////////
         // Download valid domain suffices
@@ -178,17 +177,21 @@ export class DomainAddCommand extends PanfactumCommand {
             context.logger.addIdentifier(apexDomain)
         }
 
-        if (tld) {
-            context.logger.addIdentifier(tld)
-        }
-
         /////////////////////////////////////////////////////////////////////////
         // Check if already added
         /////////////////////////////////////////////////////////////////////////
         context.logger.info(`Verifying if ${newDomain} has already been added to this Panfactum installation.`)
 
         const { task, domainConfigs } = await getZonesTask({ context })
-        await new Listr(task).run()
+        await runTasks({
+            context,
+            errorMessage: "Failed to get domain configs",
+            tasks: new Listr(task, {
+                rendererOptions: {
+                    collaseErrors: false
+                }
+            })
+        })
 
         const [_, existingDomainConfig] = Object.entries(domainConfigs)
             .find(([domain]) => {

@@ -6,6 +6,7 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
 import { validateDomainConfig, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -25,7 +26,7 @@ export async function manualZoneSetup(inputs: {
 
     const { context, domain, env } = inputs;
 
-    const tasks = new Listr<TaskContext>([])
+    const tasks = new Listr<TaskContext>([], { rendererOptions: { collapseErrors: false } })
     const domainConfig: Partial<DomainConfig> = {
         env,
         domain,
@@ -151,12 +152,13 @@ export async function manualZoneSetup(inputs: {
     ///////////////////////////////////////////////////////
     // Run Tasks
     ///////////////////////////////////////////////////////
-    try {
-        await tasks.run()
-        context.logger.success(`${domain} added to ${env.name} successfully!`)
-    } catch (e) {
-        throw new CLIError(`Failed to setup zone for ${domain}`, e)
-    }
+
+    await runTasks({
+        context,
+        tasks,
+        errorMessage: `Failed to setup zone for ${domain}`
+    })
+    context.logger.success(`${domain} added to ${env.name} successfully!`)
 
     try {
         return validateDomainConfig(domainConfig)

@@ -1,7 +1,0 @@
-*
-!*.crt
-!state.lock
-!config.user.example.yaml
-!config.example.yaml
-!config.yaml
-!cluster_info

@@ -5,7 +5,11 @@ set -eo pipefail
 # This script is meant to be sourced inside the enterShell
 # parameter of our devenv.nix
 
-REPO_VARIABLES=$(pf config get);
+if ! REPO_VARIABLES=$(pf-get-repo-variables); then
+  echo -e "\033[33mError: You must create a repo configuration variables file at panfactum.yaml to use the devenv! See https://panfactum.com/docs/edge/reference/configuration/repo-variables.\033[0m\n" >&2
+  exit 1
+fi
+
 KUBE_DIR=$(echo "$REPO_VARIABLES" | jq -r '.kube_dir')
 AWS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.aws_dir')
 REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
