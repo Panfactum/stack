@@ -43,7 +43,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
     const { context } = inputs;
 
     return {
-        title: "Sync Kubernetes Clusters credentials to DevShell",
+        title: "Sync Kubernetes clusters credentials to DevShell",
         task: async (_, parentTask) => {
             const { kube_dir: kubeDir, environments_dir: environmentsDir } =
                 context.repoVariables;
@@ -79,50 +79,57 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
             ///////////////////////////////////////////////////////
             // Add subtasks for fetching the module outputs
             ///////////////////////////////////////////////////////
-            eksHCLPaths.forEach((eksHCLPath) => {
-                const moduleDirectory = dirname(eksHCLPath);
-                const clusterId = getLastPathSegments(moduleDirectory, 3);
-                subtasks.add({
-                    title: context.logger.applyColors(`Retrieve cluster info ${clusterId}`, {
-                        lowlights: [clusterId],
-                    }),
-                    task: async (ctx, task) => {
-                        const { environment_dir: envDir, region_dir: regionDir } =
-                            await getPanfactumConfig({ context, directory: moduleDirectory });
+            subtasks.add({
+                title: "Retrive info for clusters",
+                task: (_, subtask) => {
+                    const subsubtasks = subtask.newListr([], { concurrent: true })
+                    eksHCLPaths.forEach((eksHCLPath) => {
+                        const moduleDirectory = dirname(eksHCLPath);
+                        const clusterId = getLastPathSegments(moduleDirectory, 3);
+                        subsubtasks.add({
+                            title: context.logger.applyColors(`Retrieve cluster info ${clusterId}`, {
+                                lowlights: [clusterId],
+                            }),
+                            task: async (ctx, task) => {
+                                const { environment_dir: envDir, region_dir: regionDir } =
+                                    await getPanfactumConfig({ context, directory: moduleDirectory });
 
-                        if (!envDir) {
-                            throw new CLIError(
-                                "Module is not in a valid environment directory."
-                            );
-                        } else if (!regionDir) {
-                            throw new CLIError("Module is not in a valid region directory.");
-                        }
+                                if (!envDir) {
+                                    throw new CLIError(
+                                        "Module is not in a valid environment directory."
+                                    );
+                                } else if (!regionDir) {
+                                    throw new CLIError("Module is not in a valid region directory.");
+                                }
 
-                        const moduleOutput = await terragruntOutput({
-                            context,
-                            environment: envDir,
-                            region: regionDir,
-                            module: MODULES.AWS_EKS,
-                            validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
+                                const moduleOutput = await terragruntOutput({
+                                    context,
+                                    environment: envDir,
+                                    region: regionDir,
+                                    module: MODULES.AWS_EKS,
+                                    validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
+                                });
+                                const name = moduleOutput.cluster_name.value;
+                                ctx.clusterInfo.push({
+                                    caData: globalThis.atob(moduleOutput.cluster_ca_data.value),
+                                    name,
+                                    url: moduleOutput.cluster_url.value,
+                                    regionDir,
+                                    envDir,
+                                });
+                                context.logger.addIdentifier(name)
+                                task.title = context.logger.applyColors(
+                                    `Retrieved ${name} cluster info ${clusterId}`,
+                                    {
+                                        lowlights: [clusterId]
+                                    }
+                                );
+                            },
                         });
-                        const name = moduleOutput.cluster_name.value;
-                        ctx.clusterInfo.push({
-                            caData: globalThis.atob(moduleOutput.cluster_ca_data.value),
-                            name,
-                            url: moduleOutput.cluster_url.value,
-                            regionDir,
-                            envDir,
-                        });
-                        context.logger.addIdentifier(name)
-                        task.title = context.logger.applyColors(
-                            `Retrieved ${name} cluster info ${clusterId}`,
-                            {
-                                lowlights: [clusterId]
-                            }
-                        );
-                    },
-                });
-            });
+                    });
+                    return subsubtasks
+                }
+            })
 
             ///////////////////////////////////////////////////////
             // Write the configuration files

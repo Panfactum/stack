@@ -9,8 +9,9 @@ export const readYAMLFile = async <T extends z.ZodType<object>>(inputs: {
     filePath: string;
     validationSchema: T;
     throwOnMissing?: boolean;
+    throwOnEmpty?: boolean;
 }) => {
-    const { filePath, throwOnMissing, validationSchema, context } = inputs;
+    const { filePath, throwOnMissing, throwOnEmpty, validationSchema, context } = inputs;
 
     if (!(await fileExists(filePath))) {
         if (throwOnMissing) {
@@ -26,8 +27,10 @@ export const readYAMLFile = async <T extends z.ZodType<object>>(inputs: {
         context.logger.debug(`Finised reading yaml file`, { filePath });
         context.logger.debug(`Validating`, { filePath })
         const parsedYaml = parse(fileContent);
-        if (parsedYaml !== undefined) {
+        if (parsedYaml) {
             return validationSchema.parse(parsedYaml) as z.infer<T>;
+        } else if (throwOnEmpty) {
+            throw new CLIError("File is empty")
         }
     } catch (e) {
         if (e instanceof ZodError) {

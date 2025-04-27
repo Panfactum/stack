@@ -17,6 +17,7 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
+import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -646,14 +647,13 @@ export async function registerDomain(inputs: {
     //////////////////////////////////////////////////////////
     // Run the registration
     //////////////////////////////////////////////////////////
-
-    try {
-        context.logger.write(`Registering ${domain}...`)
-        await tasks.run();
-        context.logger.success(`${domain} registered in ${env.name} successfully!`)
-    } catch (e) {
-        throw new CLIError(`Failed to register domain ${domain}`, e)
-    }
+    context.logger.write(`Registering ${domain}...`)
+    await runTasks({
+        context,
+        tasks,
+        errorMessage: `Failed to register domain ${domain}`
+    })
+    context.logger.success(`${domain} registered in ${env.name} successfully!`)
 
     try {
         return validateDomainConfig(domainConfig)

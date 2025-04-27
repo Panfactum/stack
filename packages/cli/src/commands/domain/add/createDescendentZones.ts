@@ -7,6 +7,7 @@ import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "f
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -24,7 +25,7 @@ export async function createDescendentZones(inputs: {
 
     const { context, ancestorZone, descendentZones } = inputs;
 
-    const tasks = new Listr([])
+    const tasks = new Listr([], { rendererOptions: { collapseErrors: false } })
     const domainConfigs: { [domain in keyof DomainConfigs]: Partial<DomainConfig> } = Object.fromEntries(Object.entries(descendentZones).map(([domain, { env }]) => ([domain, {
         env: env,
         module: MODULES.AWS_DNS_ZONES,
@@ -43,7 +44,7 @@ export async function createDescendentZones(inputs: {
         task: async (_, grandParentTask) => {
             const subtasks = grandParentTask.newListr([])
 
-            interface ConnectTask { nameServers?: string[] }
+            interface ConnectTask { nameServers?: string[], dsRecord?: string }
             for (const [domain, config] of Object.entries(descendentZones)) {
                 subtasks.add({
                     title: context.logger.applyColors(
@@ -105,19 +106,28 @@ export async function createDescendentZones(inputs: {
                                 }
 
                                 const domainConfig = domainConfigs[domain]
-                                if (domainConfig) {
-                                    domainConfig.zoneId = zoneInfo.zone_id
-                                    domainConfig.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
+                                if (!domainConfig) {
+                                    throw new CLIError("domainConfig not found. This should never occur.")
+
                                 }
 
+                                const { ds_record: dsRecord } = zoneInfo
+                                if (!dsRecord) {
+                                    throw new CLIError(`DS record not found on nearly created zone for ${domain}`)
+                                }
+                                ctx.dsRecord = dsRecord
                                 ctx.nameServers = zoneInfo.name_servers
+
+                                domainConfig.zoneId = zoneInfo.zone_id
+                                domainConfig.recordManagerRoleARN = moduleOutput.record_manager_role_arn.value
+
+
                             }
                         })
 
                         ///////////////////////////////////////////////
                         // Link to parent
                         ///////////////////////////////////////////////
-                        // TODO: DNSSEC
                         subsubtasks.add(
                             await buildDeployModuleTask<ConnectTask>({
                                 context,
@@ -130,7 +140,8 @@ export async function createDescendentZones(inputs: {
                                     links: defineInputUpdate({
                                         schema: z.record(z.string(), z.array(z.object({
                                             subdomain: z.string(),
-                                            name_servers: z.array(z.string())
+                                            name_servers: z.array(z.string()),
+                                            ds_record: z.string()
                                         }))),
                                         update: (oldLinks = {}, ctx) => {
                                             const subdomain = domain.slice(0, -ancestorZone.domain.length - 1)
@@ -138,7 +149,8 @@ export async function createDescendentZones(inputs: {
                                                 .filter(link => link.subdomain !== subdomain)
                                                 .concat([{
                                                     subdomain,
-                                                    name_servers: ctx.nameServers!
+                                                    name_servers: ctx.nameServers!,
+                                                    ds_record: ctx.dsRecord!
                                                 }])
                                             return {
                                                 ...oldLinks,
@@ -166,7 +178,7 @@ export async function createDescendentZones(inputs: {
 
     tasks.add(await testDNSResolutionTask({
         context,
-        zones: domainConfigs as DomainConfigs
+        zones: { ...domainConfigs, verifyDNSSEC: true } as DomainConfigs & { verifyDNSSEC: boolean }
     }))
 
     ///////////////////////////////////////////////////////
@@ -201,11 +213,12 @@ export async function createDescendentZones(inputs: {
     ///////////////////////////////////////////////////////
     // Run Tasks
     ///////////////////////////////////////////////////////
-    try {
-        await tasks.run()
-    } catch (e) {
-        throw new CLIError("Failed to create descendent DNS zones", e)
-    }
+
+    await runTasks({
+        context,
+        tasks,
+        errorMessage: "Failed to create descendent DNS zones"
+    })
 
     try {
         return validateDomainConfigs(domainConfigs)

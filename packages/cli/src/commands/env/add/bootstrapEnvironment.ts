@@ -19,6 +19,7 @@ import { createDirectory } from "@/util/fs/createDirectory";
 import { fileExists } from "@/util/fs/fileExists";
 import { removeDirectory } from "@/util/fs/removeDirectory";
 import { writeFile } from "@/util/fs/writeFile";
+import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -223,7 +224,7 @@ export async function bootstrapEnvironment(inputs: {
         task: async (ctx, task) => {
 
             ctx.primaryRegion = await context.logger.search({
-                explainer: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`,
+                explainer: { message: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["primary"] },
                 message: "Select primary AWS region:",
                 task,
                 source: async (input) => {
@@ -238,7 +239,7 @@ export async function bootstrapEnvironment(inputs: {
             task.title = context.logger.applyColors(`Select regions ${ctx.primaryRegion}`, { lowlights: [ctx.primaryRegion] })
 
             ctx.secondaryRegion = await context.logger.search({
-                explainer: `Every environment must have a secondary AWS region where resources like the infrastructure state bucket will live.`,
+                explainer: { message: `Every environment must have a secondary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["secondary"] },
                 message: "Select secondary AWS region:",
                 task,
                 source: async (input) => {
@@ -621,11 +622,9 @@ export async function bootstrapEnvironment(inputs: {
         })
     )
 
-
-    try {
-        await tasks.run()
-    } catch (e) {
-        throw new CLIError(`Failed to perform initial setup for environment ${environmentName}`, e)
-    }
-
+    await runTasks({
+        context,
+        tasks,
+        errorMessage: `Failed to perform initial setup for environment ${environmentName}`
+    })
 }

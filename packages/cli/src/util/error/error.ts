@@ -1,6 +1,8 @@
 import { ZodError } from "zod";
 
 export class CLIError extends Error {
+
+
   constructor(message: string | string[], error?: unknown) {
     const formattedMessage =
       typeof message === "string" ? message : message.join("\n");
@@ -49,12 +51,12 @@ export class PanfactumZodError extends CLIError {
   location: string;
   validationError: ZodError;
   constructor(message: string, location: string, error: ZodError) {
-    super(message, error);
+    super(message);
     this.location = location;
     this.validationError = error;
   }
 
-  override getDetailedMessage() {
+  override getDetailedMessage = () => {
     return `Location: ${this.location}\n` +
       `Validation Issues:\n\n` +
       this.validationError.issues.map(issue => `* ${issue.path.join(".")}: ${issue.message}`).join("\n")

@@ -21,7 +21,12 @@ function dedent(text: string) {
     .replace(/^\n+|\n+$/g, ``)   // Remove surrounding newlines, since they got added for JS formatting
     .replace(/\n(\n)?\n*/g, (_, s: string) => s ? s : ` `) // Single newlines are removed; larger than that are collapsed into one
     .split(/\n/).map(paragraph => {
-      return paragraph.match(/(.{1,80})(?: |$)/g)!.join(`\n`);
+      const matches = paragraph.match(/(.{1,80})(?: |$)/g)
+      if (matches !== null) {
+        return matches.join("\n")
+      } else {
+        return paragraph
+      }
     }).join(`\n\n`);
 }
 
@@ -88,7 +93,8 @@ export class Logger {
 
   public applyColors(str: string, config?: {
     style?: ColorStyle
-    bold?: boolean
+    bold?: boolean,
+    highlighterDisabled?: boolean;
   } & HighlightsConfig) {
     const {
       style = "default",
@@ -96,11 +102,16 @@ export class Logger {
       highlights = [],
       lowlights = [],
       badlights = [],
+      highlighterDisabled = false
     } = config || {}
 
     let resultStr = this.getColorFn(style)(str)
     if (bold) {
       resultStr = pc.bold(resultStr)
+    }
+
+    if (highlighterDisabled) {
+      return resultStr;
     }
 
     // Allow the highlights that are passed to this function
@@ -171,14 +182,14 @@ export class Logger {
         let result = "";
         let lastEnd = 0;
 
-        for (const { start, end, style } of mergedPositions) {
+        for (const { start, end, style: highlightStyle } of mergedPositions) {
           // Add text before this highlight with the base style
           if (start > lastEnd) {
             result += this.getColorFn(style)(str.substring(lastEnd, start));
           }
 
           // Add the highlighted text
-          result += this.getColorFn(style)(str.substring(start, end));
+          result += this.getColorFn(highlightStyle, style)(str.substring(start, end));
           lastEnd = end;
         }
 
@@ -197,7 +208,7 @@ export class Logger {
     return resultStr;
   }
 
-  public getColorFn(style: ColorStyle) {
+  public getColorFn(style: ColorStyle, baseStyle?: ColorStyle) {
 
     switch (style) {
       case "error": {
@@ -207,7 +218,14 @@ export class Logger {
         return pc.yellow
       }
       case "important": {
-        return pc.blue
+        switch (baseStyle) {
+          case "warning": {
+            return (str: string) => pc.bold(pc.underline(pc.yellow(str)))
+          }
+          default: {
+            return pc.blue
+          }
+        }
       }
       case "success": {
         return pc.greenBright
@@ -274,6 +292,11 @@ export class Logger {
   }
 
 
+  public writeRaw(str: string) {
+    this.stream.write(str)
+    this.stream.write("\n\n")
+  }
+
   //////////////////////////////////////////////////////
   // Inquirer Prompt Wrappers
   //
@@ -287,29 +310,47 @@ export class Logger {
   //     the question line (and provides Listr integration)
   ///////////////////////////////////////////////////////
 
+  private printExplainer(explainer?: string | { message: string } & HighlightsConfig, task?: PanfactumTaskWrapper) {
+    if (explainer) {
+      if (task) {
+        if (typeof explainer === "string") {
+          task.output = this.applyColors(dedent(explainer), { style: "warning" })
+        } else {
+          task.output = this.applyColors(dedent(explainer.message), { style: "warning", ...explainer })
+        }
+      } else {
+        if (typeof explainer === "string") {
+          this.write(explainer)
+        } else {
+          this.write(explainer.message, explainer)
+        }
+      }
+    }
+  }
+
+  private formatQuestionMessage(message: string | { message: string } & HighlightsConfig) {
+    return typeof message === "string" ?
+      this.applyColors(message, { style: "question" }) :
+      this.applyColors(message.message, { style: "question", ...message })
+  }
+
   public input = (config: {
-    message: string;
+    message: string | { message: string } & HighlightsConfig;
     default?: string;
     required?: boolean;
     transformer?: (value: string, { isFinal }: { isFinal: boolean; }) => string;
     validate?: (value: string) => boolean | string | Promise<string | boolean>;
-    explainer?: string;
+    explainer?: string | { message: string } & HighlightsConfig;
     task?: PanfactumTaskWrapper
   }) => {
     const { validate, message, explainer, task } = config;
 
-    if (explainer) {
-      if (task) {
-        task.output = this.applyColors(dedent(explainer), { style: "warning" })
-      } else {
-        this.write(explainer)
-      }
-    }
+    this.printExplainer(explainer, task)
 
     const wrappedConfig = {
       required: true,
       ...config,
-      message: this.applyColors(message, { style: "question" }),
+      message: this.formatQuestionMessage(message),
       validate: validate ? async (val: string) => {
         const retVal = await validate(val)
         if (typeof retVal === "string") {
@@ -326,29 +367,23 @@ export class Logger {
   }
 
   public password = (config: {
-    message: string;
+    message: string | { message: string } & HighlightsConfig;
     default?: string;
     required?: boolean;
     mask?: boolean | string;
     validate?: (value: string) => boolean | string | Promise<string | boolean>;
-    explainer?: string;
+    explainer?: string | { message: string } & HighlightsConfig;
+
     task?: PanfactumTaskWrapper
   }) => {
     const { validate, message, explainer, task } = config;
 
-    if (explainer) {
-      if (task) {
-        task.output = this.applyColors(dedent(explainer), { style: "warning" })
-      } else {
-        this.write(explainer)
-      }
-    }
-
+    this.printExplainer(explainer, task)
     const wrappedConfig = {
       required: true,
       mask: true,
       ...config,
-      message: this.applyColors(message, { style: "question" }),
+      message: this.formatQuestionMessage(message),
       validate: validate ? async (val: string) => {
         const retVal = await validate(val)
         if (typeof retVal === "string") {
@@ -365,25 +400,20 @@ export class Logger {
   }
 
   public select = <T>(config: {
-    message: string;
+    message: string | { message: string } & HighlightsConfig;
     choices: Array<{ name: string; value: T; disabled?: boolean | string }>;
     default?: T;
-    explainer?: string;
+    explainer?: string | { message: string } & HighlightsConfig;
+
     task?: PanfactumTaskWrapper
   }) => {
     const { message, explainer, task } = config;
 
-    if (explainer) {
-      if (task) {
-        task.output = this.applyColors(dedent(explainer), { style: "warning" })
-      } else {
-        this.write(explainer)
-      }
-    }
+    this.printExplainer(explainer, task)
 
     const wrappedConfig = {
       ...config,
-      message: this.applyColors(message, { style: "question" }),
+      message: this.formatQuestionMessage(message),
       theme: {
         helpMode: "never" as const
       },
@@ -395,27 +425,21 @@ export class Logger {
   }
 
   public checkbox = <T>(config: {
-    message: string;
+    message: string | { message: string } & HighlightsConfig;
     choices: Array<{ name: string; value: T; checked?: boolean; disabled?: boolean | string }>;
     validate?: (choices: readonly { value: T; checked?: boolean }[]) => boolean | string | Promise<string | boolean>;
     instructions?: boolean | string;
-    explainer?: string;
+    explainer?: string | { message: string } & HighlightsConfig;
     task?: PanfactumTaskWrapper
   }) => {
     const { validate, message, explainer, task } = config;
 
-    if (explainer) {
-      if (task) {
-        task.output = this.applyColors(dedent(explainer), { style: "warning" })
-      } else {
-        this.write(explainer)
-      }
-    }
+    this.printExplainer(explainer, task)
 
     const wrappedConfig = {
       instructions: false,
       ...config,
-      message: this.applyColors(message, { style: "question" }),
+      message: this.formatQuestionMessage(message),
       validate: validate ? async (val: readonly { value: T; checked?: boolean }[]) => {
         const retVal = await validate(val)
         if (typeof retVal === "string") {
@@ -435,27 +459,21 @@ export class Logger {
   }
 
   public search = <T>(config: {
-    message: string;
+    message: string | { message: string } & HighlightsConfig;
     source: (term: string | undefined) => Promise<Array<{ name: string; value: T }>> | Array<{ name: string; value: T }>;
     default?: string;
-    explainer?: string;
+    explainer?: string | { message: string } & HighlightsConfig;
+
     validate?: (value: T) => boolean | string | Promise<string | boolean>;
     task?: PanfactumTaskWrapper
   }) => {
-    const { message, explainer, task, source, validate } = config;
+    const { message, explainer, task, validate } = config;
 
-    if (explainer) {
-      if (task) {
-        task.output = this.applyColors(dedent(explainer), { style: "warning" })
-      } else {
-        this.write(explainer)
-      }
-    }
+    this.printExplainer(explainer, task)
 
     const wrappedConfig = {
       ...config,
-      message: this.applyColors(message, { style: "question" }),
-      source,
+      message: this.formatQuestionMessage(message),
       validate: validate ? async (val: T) => {
         const retVal = await validate(val)
         if (typeof retVal === "string") {
@@ -475,24 +493,18 @@ export class Logger {
   }
 
   public confirm = (config: {
-    message: string;
+    message: string | { message: string } & HighlightsConfig;
     default?: boolean;
-    explainer?: string;
+    explainer?: string | { message: string } & HighlightsConfig;
     task?: PanfactumTaskWrapper
   }) => {
     const { message, explainer, task } = config;
 
-    if (explainer) {
-      if (task) {
-        task.output = this.applyColors(dedent(explainer), { style: "warning" })
-      } else {
-        this.write(explainer)
-      }
-    }
+    this.printExplainer(explainer, task)
 
     const wrappedConfig = {
       ...config,
-      message: this.applyColors(message, { style: "question" })
+      message: this.formatQuestionMessage(message),
     }
 
     return task ?
@@ -507,6 +519,8 @@ export class Logger {
 
   public crashMessage() {
     this.error(`
+      Get Help ==================================================
+
       If you need assistance, connect with us on our discord server: https://discord.gg/MJQ3WHktAS
 
       If you think you've found a bug, please submit an issue: https://github.com/panfactum/stack/issues
