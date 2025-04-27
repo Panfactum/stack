@@ -4,9 +4,9 @@ pkgs.stdenv.mkDerivation rec {
   pname = "pf-scripts";
   version = "1.0";
 
-  src = ./.; # This includes the script and source_files directory
+  src = ./.;
 
-  dontBuild = true; # No build phase needed
+  dontBuild = true;
 
   installPhase = ''
     mkdir -p $out/bin
@@ -17,9 +17,5 @@ pkgs.stdenv.mkDerivation rec {
       cp $script $out/bin/$script_name
       chmod +x $out/bin/$script_name
     done
-
-    # Copy the static source files to $out/source_files
-    mkdir -p $out/files
-    cp -r ${src}/files/* $out/files/
   '';
 }
