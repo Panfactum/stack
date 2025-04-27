@@ -22,7 +22,7 @@ export class DevShellUpdateCommand extends PanfactumCommand {
     const tasks = new Listr([])
 
     tasks.add(
-      await buildSyncKubeClustersTask({context}),
+      await buildSyncKubeClustersTask({ context }),
     )
 
     tasks.add(

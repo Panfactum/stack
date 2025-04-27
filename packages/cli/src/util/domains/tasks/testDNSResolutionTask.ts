@@ -1,7 +1,6 @@
 import { ChangeResourceRecordSetsCommand, Route53Client } from "@aws-sdk/client-route-53"
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig"
 import { getIdentity } from "@/util/aws/getIdentity"
-import { applyColors } from "@/util/colors/applyColors"
 import { CLIError } from "@/util/error/error"
 import { execute } from "@/util/subprocess/execute"
 import type { PanfactumContext } from "@/context/context"
@@ -10,12 +9,14 @@ import type { ListrTask } from "listr2"
 
 export async function testDNSResolutionTask<T extends {}>(inputs: {
     context: PanfactumContext,
-    zones: {[domain: string]: {
-        env: EnvironmentMeta,
-        zoneId?: string;
-    }}
-}): Promise<ListrTask<T>>{
-    const {context, zones} = inputs
+    zones: {
+        [domain: string]: {
+            env: EnvironmentMeta,
+            zoneId?: string;
+        }
+    }
+}): Promise<ListrTask<T>> {
+    const { context, zones } = inputs
     return {
         title: "Test DNS resolution",
         task: async (_, parentTask) => {
@@ -23,20 +24,18 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
             interface ConnectTask { nameServers?: string[] }
             for (const [domain, config] of Object.entries(zones)) {
                 subtasks.add({
-                    title: applyColors(
+                    title: context.logger.applyColors(
                         `Test DNS resolution ${domain}`,
                         {
-                            highlights: [
-                                { phrase: domain, style: "subtle" }
-                            ]
+                            lowlights: [domain]
                         },
                     ),
                     task: async (_, parentTask) => {
 
                         // TODO: We should be able to easily find this
                         // given the env
-                        if(!config.zoneId){
-                            parentTask.skip(applyColors(`No Zone ID provided for ${domain}`, {highlights: [domain]}))
+                        if (!config.zoneId) {
+                            parentTask.skip(context.logger.applyColors(`No Zone ID provided for ${domain}`))
                             return
                         }
 
@@ -62,10 +61,8 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                         /////////////////////////////////////////////
 
                         subsubtasks.add({
-                            title: applyColors(`Create test TXT record ${randomString1}=${randomString2}`, {
-                                highlights: [{
-                                    phrase: `${randomString1}=${randomString2}`, style: "subtle"
-                                }]
+                            title: context.logger.applyColors(`Create test TXT record ${randomString1}=${randomString2}`, {
+                                lowlights: [`${randomString1}=${randomString2}`]
                             }),
                             task: async () => {
                                 const zoneId = config.zoneId
@@ -115,11 +112,11 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                             task: async (_, task) => {
 
                                 const testDomain = `${randomString1}.${domain}`
-                                task.output = applyColors(
+                                task.output = context.logger.applyColors(
                                     `This can sometimes take up to an hour.\n` +
                                     `To speed up this test, purge cloudflare's DNS cache using\nhttps://one.one.one.one/purge-cache/\n\n` +
                                     `Use the domain name ${domain} and record type NS.`,
-                                    { style: "warning", highlights: [domain, " NS"] }
+                                    { style: "warning", highlights: [" NS"] }
                                 )
 
                                 let retries = 0;
@@ -154,10 +151,8 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                                     } catch {
                                         if (retries < maxRetries) {
                                             const attemptStr = `Attempt ${retries + 1}/${maxRetries}`
-                                            task.title = applyColors(`Verify TXT record resolves ${attemptStr}`, {
-                                                highlights: [
-                                                    { phrase: attemptStr, style: "subtle" }
-                                                ]
+                                            task.title = context.logger.applyColors(`Verify TXT record resolves ${attemptStr}`, {
+                                                lowlights: [attemptStr]
                                             })
                                             retries++;
                                             await new Promise(resolve => globalThis.setTimeout(resolve, 10000));
@@ -173,10 +168,8 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                                     throw new CLIError(`${testDomain} resolved but did not have expected TXT record ${randomString2}`)
                                 }
 
-                                task.title = applyColors(`Verify TXT record resolves Success`, {
-                                    highlights: [
-                                        { phrase: "Success", style: "subtle" }
-                                    ]
+                                task.title = context.logger.applyColors(`Verify TXT record resolves Success`, {
+                                    lowlights: ["Success"]
                                 })
                             }
                         })

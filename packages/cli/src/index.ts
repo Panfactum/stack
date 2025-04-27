@@ -38,6 +38,6 @@ const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
 cli.runExit(proc, await createPanfactumContext(
   Cli.defaultContext,
   {
-    logLevel: proc.logLevel
+    debugEnabled: proc.debugEnabled ?? false
   }
 ));

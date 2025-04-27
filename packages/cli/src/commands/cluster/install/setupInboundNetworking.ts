@@ -5,7 +5,6 @@ import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" 
 import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
 import kubeNginxIngressTerragruntHcl from "@/templates/kube_ingress_nginx_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
@@ -233,24 +232,26 @@ export async function setupInboundNetworking(
             const maxAttempts = 60;
             const retryDelay = 10000;
 
+            // FIX: @seth - Logging here doesn't make sense
+            // overwrites itself too fast
             while (attempts < maxAttempts) {
               try {
-                task.output = applyColors(`Checking Vault health endpoint (attempt ${attempts + 1}/${maxAttempts})`, { style: "subtle" });
+                task.output = context.logger.applyColors(`Checking Vault health endpoint (attempt ${attempts + 1}/${maxAttempts})`, { style: "subtle" });
                 const response = await Bun.fetch(`https://${data.extra_inputs.vault_domain}/v1/sys/health`);
 
                 if (response.status === 200) {
-                  task.output = applyColors("Vault health check successful", { style: "subtle" });
+                  task.output = context.logger.applyColors("Vault health check successful", { style: "subtle" });
                   break;
                 }
 
-                task.output = applyColors(`Vault health check failed with status: ${response.status}`, { style: "subtle" });
+                task.output = context.logger.applyColors(`Vault health check failed with status: ${response.status}`, { style: "subtle" });
               } catch {
                 // Expected to error while waiting for DNS to propagate
               }
               attempts++;
 
               if (attempts < maxAttempts) {
-                task.output = applyColors(`Retrying in ${retryDelay / 1000} seconds...`, { style: "subtle" });
+                task.output = context.logger.applyColors(`Retrying in ${retryDelay / 1000} seconds...`, { style: "subtle" });
                 await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
               } else {
                 throw new CLIError(`Failed to connect to Vault health endpoint after ${maxAttempts} attempts`);

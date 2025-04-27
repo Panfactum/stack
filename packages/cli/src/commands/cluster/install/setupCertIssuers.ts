@@ -1,8 +1,5 @@
 import path, { join } from "node:path";
-import { input } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
-import pc from "picocolors";
 import { z } from "zod";
 import kubeCertIssuersTerragruntHcl from "@/templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
@@ -95,26 +92,24 @@ export async function setupCertificateIssuers(
               return;
             }
 
-            ctx.alertEmail = await task
-              .prompt(ListrInquirerPromptAdapter)
-              .run(input, {
-                // FIX: @seth - Avoid multine input prompts; use task.output for more info / warnings
-                message: pc.magenta(
-                  "This email will receive notifications if your certificates fail to renew.\n" +
-                  "Enter an email that is actively monitored to prevent unexpected service disruptions.\n" +
-                  "->"
-                ),
-                required: true,
-                validate: (value: string) => {
-                  const { error } = z.string().email().safeParse(value);
-                  if (error) {
-                    return error.issues?.[0]?.message || "Please enter a valid email address";
-                  }
-
-                  return true;
+            // TODO: @seth - Just make this the account contact email
+            // let's us remove another user input
+            ctx.alertEmail = await context.logger.input({
+              explainer: `
+                This email will receive notifications if your certificates fail to renew.
+                Enter an email that is actively monitored to prevent unexpected service disruptions.
+              `,
+              message: "Email:",
+              validate: (value: string) => {
+                const { error } = z.string().email().safeParse(value);
+                if (error) {
+                  return error.issues?.[0]?.message || "Please enter a valid email address";
                 }
-              });
-          },
+
+                return true;
+              }
+            })
+          }
         },
         {
           title: "Start Vault Proxy",
