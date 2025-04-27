@@ -85,8 +85,7 @@ export const vpcNetworkTest = async ({
         awsProfile,
         awsRegion,
         context,
-        desiredCapacity: 1,
-        task,
+        desiredCapacity: 1
       });
 
       // Step 2: Get the instance id

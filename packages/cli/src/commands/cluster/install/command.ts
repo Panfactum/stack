@@ -311,20 +311,5 @@ export class InstallClusterCommand extends PanfactumCommand {
       Decide how your organization recommends superusers store these keys.
       This should ${pc.bold("NOT")} be in a location that is accessible by all superusers (e.g. a company password vault).
     `)
-
-
-
-    pc.green(
-      "\n\n\n"
-    ) +
-      pc.blue(
-        "Run: " +
-        pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
-        "You should receive a response similar to the following:\n\n"
-      ) +
-      "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n\n" +
-      pc.blue(
-
-      )
   }
 }

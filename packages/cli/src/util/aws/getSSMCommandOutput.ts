@@ -1,6 +1,5 @@
 import { CLISubprocessError } from "../error/error";
 import { execute } from "../subprocess/execute";
-import type { PanfactumTaskWrapper } from "../listr/types";
 import type { PanfactumContext } from "@/context/context";
 
 interface Inputs {
@@ -9,7 +8,6 @@ interface Inputs {
   awsProfile: string;
   awsRegion: string;
   context: PanfactumContext;
-  task?: PanfactumTaskWrapper;
 }
 
 export const getSSMCommandOutput = async (inputs: Inputs): Promise<string> => {
@@ -32,8 +30,7 @@ async function getSSMCommandStdOut(
     instanceId,
     commandId,
     context,
-    workingDirectory,
-    task,
+    workingDirectory
   } = inputs;
 
   const { stdout } = await execute({
@@ -56,8 +53,7 @@ async function getSSMCommandStdOut(
     ],
     context,
     workingDirectory,
-    errorMessage: `Failed to get stdout from SSM command ${commandId} on instance ${instanceId}`,
-    task,
+    errorMessage: `Failed to get stdout from SSM command ${commandId} on instance ${instanceId}`
   });
 
   return stdout;
@@ -73,7 +69,6 @@ async function getSSMCommandStdErr(
     commandId,
     context,
     workingDirectory,
-    task,
   } = inputs;
 
   const { stdout } = await execute({
@@ -96,8 +91,7 @@ async function getSSMCommandStdErr(
     ],
     context,
     workingDirectory,
-    errorMessage: `Failed to get stderr from SSM command ${commandId} on instance ${instanceId}`,
-    task,
+    errorMessage: `Failed to get stderr from SSM command ${commandId} on instance ${instanceId}`
   });
 
   throw new CLISubprocessError(`SSM command on remote instance failed`, {
@@ -116,8 +110,7 @@ async function getSSMCommandStatus(
     instanceId,
     commandId,
     context,
-    workingDirectory,
-    task,
+    workingDirectory
   } = inputs;
 
   const { stdout } = await execute({
@@ -143,8 +136,7 @@ async function getSSMCommandStatus(
     errorMessage: `Failed to get SSM command status for command ${commandId} on instance ${instanceId}`,
     retries: 60,
     isSuccess: ({ stdout, exitCode }) =>
-      exitCode === 0 && (stdout === "Success" || stdout === "Failed"),
-    task,
+      exitCode === 0 && (stdout === "Success" || stdout === "Failed")
   });
   return stdout;
 }

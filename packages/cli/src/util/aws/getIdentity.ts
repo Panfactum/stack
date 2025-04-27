@@ -35,7 +35,7 @@ export async function getIdentity(input: { context: PanfactumContext, profile: s
     let retries = 0
     while (retries < 5) {
         try {
-            context.logger.log(`Calling 'sts get-caller-identity' on profile ${profile}`, { level: "debug" })
+            context.logger.debug(`sts get-caller-identity`, { profile })
             return await stsClient.send(new GetCallerIdentityCommand({}));
         } catch (e: unknown) {
 
