@@ -2,23 +2,19 @@ import { join } from "node:path"
 import { CreateUserCommand, AttachUserPolicyCommand, CreateAccessKeyCommand, IAMClient } from "@aws-sdk/client-iam";
 import { ListAccountsCommand, OrganizationsClient } from "@aws-sdk/client-organizations";
 import { STSClient, AssumeRoleCommand } from "@aws-sdk/client-sts";
-import { input } from '@inquirer/prompts';
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
-import pc from "picocolors"
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import orgHCL from "@/templates/aws_organization.hcl" with { type: "file" };
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
+import { AWS_ACCOUNT_ALIAS_SCHEMA } from "@/util/aws/schemas";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist"
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { AWS_ACCOUNT_ALIAS_SCHEMA } from "./common";
 import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
 import type { PanfactumContext } from "@/context/context"
 
@@ -33,9 +29,8 @@ export async function provisionAWSAccount(inputs: {
 
     const { context, environmentName, environmentProfile } = inputs
 
-    context.logger.log(
-        `🛈  Since you are using AWS Organizations, this installer can automate the creation of the AWS account for the ${pc.blue(environmentName)} environment.`,
-        { trailingNewlines: 1, leadingNewlines: 1 }
+    context.logger.info(
+        `Since you are using AWS Organizations, this installer can automate the creation of the AWS account for the ${environmentName} environment.`,
     )
 
     const orgModulePath = join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT, "global", AWS_ORG_MODULE)
@@ -151,32 +146,32 @@ export async function provisionAWSAccount(inputs: {
                             throw new CLIError("Failed to list AWS organization accounts", e);
                         }
 
-                        task.output = applyColors("Even though your environment name only needs to be unique to your organization, AWS requires a globally unique name for the underlying AWS account.", {
+                        task.output = context.logger.applyColors("Even though your environment name only needs to be unique to your organization, AWS requires a globally unique name for the underlying AWS account.", {
                             style: "warning",
                             highlights: ["globally"]
                         })
 
                         const accountKeys = Object.keys(originalInputs?.extra_inputs.accounts ?? {})
                         const existingNames = existingAccounts.map(({ name }) => name)
-                        ctx.newAccountName = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                            message: pc.magenta('Unique Account Name:'),
-                            required: true,
+                        ctx.newAccountName = await context.logger.input({
+                            task,
+                            message: 'Unique Account Name:',
                             default: existingNames.includes(environmentName) ? undefined : environmentName,
                             validate: async (value) => {
                                 const { error } = AWS_ACCOUNT_ALIAS_SCHEMA.safeParse(value)
                                 if (error) {
-                                    return applyColors(error.issues[0]?.message ?? "Invalid account name", {style: "error"})
+                                    return error.issues[0]?.message ?? "Invalid account name"
                                 }
                                 const existingNameIndex = existingAccounts.findIndex(({ name }) => name === value)
                                 if (existingNameIndex !== -1) {
-                                    return applyColors(`Every account must have a unique name. Name is already taken by another account in your organization (${existingAccounts[existingNameIndex]!.id}).`, {style: "error"})
+                                    return `Every account must have a unique name. Name is already taken by another account in your organization (${existingAccounts[existingNameIndex]!.id}).`
                                 }
                                 if (accountKeys.includes(value)) {
-                                    return applyColors(`Every account must have a unique name. Name is already taken.`, {style: "error"})
+                                    return `Every account must have a unique name. Name is already taken.`
                                 }
                                 const response = await globalThis.fetch(`https://${value}.signin.aws.amazon.com`)
                                 if (response.status !== 404) {
-                                    return applyColors(`Every account must have a globally unique name. Name is already take by another organization.`, {style: "error"})
+                                    return `Every account must have a globally unique name. Name is already take by another organization.`
                                 }
                                 return true
                             }
@@ -184,29 +179,30 @@ export async function provisionAWSAccount(inputs: {
                         parentContext.newAccountName = ctx.newAccountName
 
 
-                        task.output = applyColors(`AWS also requires a globally unique email for the account. Hint: consider using a '+' suffix like 'you+${environmentName}@yourdomain.com'.`, {
+                        task.output = context.logger.applyColors(`AWS also requires a globally unique email for the account. Hint: consider using a '+' suffix like 'you+${environmentName}@yourdomain.com'.`, {
                             style: "warning",
                             highlights: ["globally"]
                         })
 
                         // TODO: We should endeavor to provide a sane default here
-                        ctx.newAccountEmail = await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                            message: pc.magenta('Unique Account Email:'),
+                        ctx.newAccountEmail = await context.logger.input({
+                            task,
+                            message: 'Unique Account Email:',
                             required: true,
                             validate: (value) => {
                                 const { error } = z.string().email().safeParse(value)
                                 if (error) {
-                                    return applyColors(error.issues[0]?.message ?? "Invalid email", {style: "error"})
+                                    return error.issues[0]?.message ?? "Invalid email"
                                 }
                                 const existingEmailIndex = existingAccounts.findIndex(({ email }) => email === value)
                                 if (existingEmailIndex !== -1) {
-                                    return applyColors(`Every account must have a unique email. That email is already taken by the ${existingAccounts[existingEmailIndex]!.name} account.`, {style: "error"})
+                                    return `Every account must have a unique email. That email is already taken by the ${existingAccounts[existingEmailIndex]!.name} account.`
                                 }
                                 if (Object.values(originalInputs?.extra_inputs.accounts ?? {}).findIndex(({ email }) => email === value) !== -1) {
-                                    return applyColors(`Every account must have a unique email. That email is already taken.`, {style: "error"})
+                                    return `Every account must have a unique email. That email is already taken.`
                                 }
                                 if (value.length > 64) {
-                                    return applyColors(`Account emails must be 64 characters or less.`, {style: "error"})
+                                    return `Account emails must be 64 characters or less.`
                                 }
                                 return true
                             }
@@ -294,7 +290,7 @@ export async function provisionAWSAccount(inputs: {
                             throw new CLIError('Was not able to find account ID for new account')
                         }
 
-                        task.title = applyColors(`Retrieved new AWS account ID ${ctx.newAccountId}`, { highlights: [{ phrase: ctx.newAccountId, style: "subtle" }] })
+                        task.title = context.logger.applyColors(`Retrieved new AWS account ID ${ctx.newAccountId}`, { lowlights: [ctx.newAccountId] })
                     }
                 },
                 {
@@ -328,7 +324,7 @@ export async function provisionAWSAccount(inputs: {
                     }
                 },
                 {
-                    title: applyColors(`Create new IAM user ${adminUsername}`, { highlights: [{ phrase: adminUsername, style: "subtle" }] }),
+                    title: context.logger.applyColors(`Create new IAM user ${adminUsername}`, { lowlights: [adminUsername] }),
                     task: async (ctx) => {
                         if (!ctx.iamClient) {
                             throw new CLIError('IAMClient does not exist. This should never happen.')
@@ -404,7 +400,7 @@ export async function provisionAWSAccount(inputs: {
                 {
                     title: "Save credentials",
                     task: async (ctx) => {
-                       await addAWSProfileFromStaticCreds({
+                        await addAWSProfileFromStaticCreds({
                             context,
                             creds: {
                                 accessKeyId: ctx.accessKeyId!,
@@ -414,7 +410,7 @@ export async function provisionAWSAccount(inputs: {
                         })
                     }
                 },
- 
+
             ], { ctx: boostrapUserTaskCtx })
         }
     })

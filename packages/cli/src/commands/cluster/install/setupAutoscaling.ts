@@ -20,7 +20,6 @@ import {
 import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
-import { applyColors } from "@/util/colors/applyColors";
 
 export async function setupAutoscaling(
   options: InstallClusterStepOptions,
@@ -236,7 +235,7 @@ export async function setupAutoscaling(
                 VAULT_TOKEN: vaultRootToken,
               },
               onLogLine: (line) => {
-                task.output = applyColors(line, { style: "subtle" });
+                task.output = context.logger.applyColors(line, { style: "subtle" });
               },
             });
           },

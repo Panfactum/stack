@@ -7,7 +7,6 @@ import {
     type HostedZone
 } from "@aws-sdk/client-route-53";
 import { ContactType, CountryCode, GetOperationDetailCommand, RegisterDomainCommand, ResendOperationAuthorizationCommand, Route53DomainsClient, type ContactDetail } from "@aws-sdk/client-route-53-domains";
-import { input } from "@inquirer/prompts";
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
@@ -64,30 +63,27 @@ export async function registerDomain(inputs: {
     }
 
     ////////////////////////////////////////////////////////
-    // Verify the domain is available -- TODO: Make a part of the task list
+    // Verify the domain is available 
     ////////////////////////////////////////////////////////
+    // TODO: @jack - Make a part of the task list
     if (!await isDomainAvailableFromAWS({ context, domain, env, tld })) {
         throw new CLIError('Domain not available from AWS')
     }
 
     ////////////////////////////////////////////////////////
-    // Confirm the price -- TODO: Make a part of the task list
+    // Confirm the price
     ////////////////////////////////////////////////////////
+    // TODO: @jack - Make a part of the task list
     const price = await getDomainPrice({ context, env, tld })
     const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price)
-    context.logger.log(
-        context.logger.applyColors(`Purchasing ${domain} will charge your AWS account ${formattedPrice}.`, { highlights: [domain, formattedPrice] }),
-        { trailingNewlines: 1, leadingNewlines: 1 }
-    )
-    await input(
-        {
-            message: context.logger.applyColors(`Type '${price}' to purchase:`, { style: "question", highlights: [String(price)] }),
-            required: true,
-            validate: (val) => {
-                return val === String(price) ? true : context.logger.applyColors(`You must type '${price}' to continue.`, { style: 'error' })
-            }
+    await context.logger.input({
+        explainer: context.logger.applyColors(`Purchasing ${domain} will charge your AWS account ${formattedPrice}.`, { highlights: [formattedPrice] }),
+        message: context.logger.applyColors(`Type '${price}' to purchase:`, { style: "question", highlights: [String(price)] }),
+        required: true,
+        validate: (val) => {
+            return val === String(price) ? true : context.logger.applyColors(`You must type '${price}' to continue.`, { style: 'error' })
         }
-    )
+    })
 
     ////////////////////////////////////////////////////////
     // Register the domain
@@ -645,6 +641,7 @@ export async function registerDomain(inputs: {
     ///////////////////////////////////////////////////////
     // Update clusters
     ///////////////////////////////////////////////////////
+    // TODO: @jack - Update clusters
 
     //////////////////////////////////////////////////////////
     // Run the registration

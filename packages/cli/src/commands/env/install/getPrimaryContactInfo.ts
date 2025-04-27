@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "./common";
+import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -161,6 +161,6 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
         email,
         orgName: orgName === "" ? undefined : orgName,
         fullName,
-
+        phoneNumber
     }
 }

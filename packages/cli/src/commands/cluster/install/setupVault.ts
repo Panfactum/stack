@@ -138,10 +138,6 @@ export async function setupVault(
                     (pod) => pod.status.phase === "Running"
                   );
                 } catch {
-                  context.logger.log("Failed to parse Vault pods", {
-                    level: "debug",
-                    style: "warning",
-                  });
                   return false;
                 }
               },

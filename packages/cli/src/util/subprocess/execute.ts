@@ -122,7 +122,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       stderrCallbackPromise,
     ]);
 
-    context.logger.log(output, { level: "debug" });
+    context.logger.debug("Ran subproces", { command, exitCode, output: output });
     logsBuffer += output + "\n";
 
     const retValue = {

@@ -2,7 +2,6 @@ import { join, dirname } from "node:path"
 import { Glob } from "bun";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
-import { applyColors } from "@/util/colors/applyColors";
 import { getRegisteredDomainsTask } from "./getRegisteredDomainsTask";
 import { CLIError } from "../../error/error";
 import { MODULES } from "../../terragrunt/constants";
@@ -61,9 +60,11 @@ export async function getZonesTask<T extends {}>(inputs: {
                                 throw new CLIError("Module is not in a valid environment directory.")
                             } else if (!regionDir) {
                                 throw new CLIError("Module is not in a valid region directory.")
+                            } else if (!environment) {
+                                throw new CLIError("Environment is unknown")
                             }
                             subsubtasks.add({
-                                title: applyColors(`Get DNS zones ${environment}`, { highlights: [{ phrase: environment!, style: "subtle" }] }),
+                                title: context.logger.applyColors(`Get DNS zones ${environment}`, { lowlights: [environment] }),
                                 task: async () => {
                                     const moduleOutput = await terragruntOutput({
                                         context,

@@ -1,6 +1,4 @@
-import { join } from "node:path";
 import { z } from "zod";
-import { applyColors } from "@/util/colors/applyColors";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { execute } from "@/util/subprocess/execute";
@@ -19,7 +17,7 @@ export async function clusterReset({
   task,
 }: {
   awsProfile: string;
-  clusterName: string;
+  clusterName: string; // FIX: @seth - You are using this for the kubernetes context name which isn't correct, just happens to work currently
   context: PanfactumContext;
   region: string;
   task: PanfactumTaskWrapper;
@@ -27,22 +25,10 @@ export async function clusterReset({
   // ############################################################
   // ## Step 0: Validation
   // ############################################################
-  const { kube_dir: kubeDir } = context.repoVariables;
-  const userConfigFilePath = join(kubeDir, "config.user.yaml");
-  const clusterInfoFilePath = join(kubeDir, "cluster_info");
 
-  if (!fileExists(userConfigFilePath)) {
-    throw new CLIError(
-      `No configuration file found at ${userConfigFilePath}. Create it first!`
-    );
-  }
-
-  if (!fileExists(clusterInfoFilePath)) {
-    throw new CLIError(
-      `No cluster_info file found at ${clusterInfoFilePath}. Create it with 'pf update-kube --build' first!`
-    );
-  }
-
+  // FIX: @seth - This isn't validating anything?
+  // Needs to check if the user can access the cluster
+  // And the error message here doesn't make sense
   const kubeConfigPath = process.env["KUBE_CONFIG_PATH"];
   if (!kubeConfigPath || !fileExists(kubeConfigPath)) {
     throw new CLIError(
@@ -97,11 +83,11 @@ export async function clusterReset({
         context,
         workingDirectory: process.cwd(),
       });
-      task.output = applyColors(`EKS addon disabled: ${addon}`, {
+      task.output = context.logger.applyColors(`EKS addon disabled: ${addon}`, {
         style: "subtle",
       });
     } else {
-      task.output = applyColors(`EKS addon not enabled: ${addon}`, {
+      task.output = context.logger.applyColors(`EKS addon not enabled: ${addon}`, {
         style: "subtle",
       });
     }
@@ -109,6 +95,8 @@ export async function clusterReset({
   // ############################################################
   // ## Step 6: Delete any lingering resources in the cluster itself
   // ############################################################
+
+  // FIX: @seth - Use Kubernetes SDK
   const kubectlDelete = async ({
     type,
     name,
@@ -195,7 +183,7 @@ export async function clusterReset({
       context,
       workingDirectory: process.cwd(),
     });
-    task.output = applyColors(
+    task.output = context.logger.applyColors(
       "Nodes terminated to reset node-local settings.",
       {
         style: "subtle",

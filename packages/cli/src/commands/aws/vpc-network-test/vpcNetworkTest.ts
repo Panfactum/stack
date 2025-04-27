@@ -1,6 +1,5 @@
 import path from "node:path";
 import { z } from "zod";
-import { applyColors } from "@/util/colors/applyColors";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { execute } from "@/util/subprocess/execute";
@@ -72,7 +71,7 @@ export const vpcNetworkTest = async ({
   try {
     // Run the tests sequentially for all subnets
     for (const subnet of subnets) {
-      task.output = applyColors(
+      task.output = context.logger.applyColors(
         `Running test for subnet: ${subnet.subnet}...`,
         { style: "subtle" }
       );
@@ -91,7 +90,7 @@ export const vpcNetworkTest = async ({
       });
 
       // Step 2: Get the instance id
-      task.output = applyColors("Waiting for instance to be created", {
+      task.output = context.logger.applyColors("Waiting for instance to be created", {
         style: "subtle",
       });
       const { stdout: instanceId } = await execute({
@@ -121,7 +120,7 @@ export const vpcNetworkTest = async ({
       });
 
       // Step 3: Run the network test
-      task.output = applyColors(
+      task.output = context.logger.applyColors(
         `Waiting for instance ${instanceId} to become ready`,
         { style: "subtle" }
       );
@@ -154,7 +153,7 @@ export const vpcNetworkTest = async ({
       });
 
       // Step 4: Get the result of the network test
-      task.output = applyColors("Waiting for test to complete", {
+      task.output = context.logger.applyColors("Waiting for test to complete", {
         style: "subtle",
       });
       const publicIp = await getSSMCommandOutput({
@@ -179,7 +178,7 @@ export const vpcNetworkTest = async ({
         isSuccess: ({ stdout }) => stdout.includes("100% packet loss"),
       });
 
-      task.output = applyColors(
+      task.output = context.logger.applyColors(
         `Test completed successfully for ${subnet.subnet}.`,
         { style: "subtle" }
       );

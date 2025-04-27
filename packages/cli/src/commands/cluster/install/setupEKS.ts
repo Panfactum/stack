@@ -1,12 +1,8 @@
 import path from "node:path";
-import { input } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
-import pc from "picocolors";
 import { z } from "zod";
-import awsEksTemplate from "@/templates/aws_eks_terragrunt.hcl" with { type: "file" };
+import awsEksTemplate from "@/templates/aws_eks.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { applyColors } from "@/util/colors/applyColors";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import {
   buildSyncKubeClustersTask,
@@ -80,14 +76,6 @@ export async function setupEKS(
           {
             title: "Get EKS configuration",
             task: async (ctx, task) => {
-              const prompt = task.prompt(ListrInquirerPromptAdapter);
-
-              // TODO: @seth - It feels like we should only present this warning AFTER they have
-              // already entered all the info
-              task.output = applyColors(
-                "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer a couple questions",
-                { style: "important" }
-              );
 
               // TODO: @seth - It feels like we should have a helper fx
               // for the action of "reading inputs from module.yaml"
@@ -124,11 +112,8 @@ export async function setupEKS(
               }
 
               if (!ctx.clusterName) {
-                ctx.clusterName = await prompt.run(input, {
-                  message: pc.magenta(
-                    "Enter a name for your Kubernetes cluster:"
-                  ),
-                  required: true,
+                ctx.clusterName = await context.logger.input({
+                  message: "Cluster name:",
                   default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
                   transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
                   validate: (value) => {
@@ -145,10 +130,9 @@ export async function setupEKS(
               }
 
               if (!ctx.clusterDescription) {
-                ctx.clusterDescription = await prompt.run(input, {
-                  message: "Enter a description for your Kubernetes cluster:",
-                  required: true,
-                  default: `Panfactum Kubernetes cluster in the ${region} region of the ${environment} environment`,
+                ctx.clusterDescription = await context.logger.input({
+                  message: "Cluster description:",
+                  default: `Panfactum cluster in the ${region} region of the ${environment} environment`,
                   validate: (value) => {
                     const { error } = CLUSTER_DESCRIPTION.safeParse(value);
                     if (error) {
@@ -198,7 +182,7 @@ export async function setupEKS(
           {
             title: "Reset the cluster",
             task: async (ctx, task) => {
-              // TODO: @seth - Would be good if this was isn't own subtask
+              // TODO: @seth - Would be good if this had its own subtask
               await clusterReset({
                 awsProfile,
                 clusterName: ctx.clusterName!,

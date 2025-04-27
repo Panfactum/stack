@@ -83,9 +83,9 @@ export async function setupLinkerd(
         // TODO: @seth - Ensure the kubectx is correct for Linkerd
         {
           title: "Run Linkerd Control Plane Checks",
-          task: async (ctx, task) => {
+          task: async (ctx) => {
+            // TODO: @eth - Logging
             await execute({
-              task,
               command: ["linkerd", "check", "--cni-namespace=linkerd"],
               context,
               workingDirectory: process.cwd(),

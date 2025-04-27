@@ -1,11 +1,10 @@
 import { Command, Option } from "clipanion";
 import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/context/context";
-import type { LogLevel } from "@/context/logger";
 
 export abstract class PanfactumCommand extends Command<PanfactumContext> {
 
-    debugEnabled: LogLevel = Option.Boolean("--debug", {
+    debugEnabled: boolean | undefined = Option.Boolean("--debug", {
         description: "Activates debug logging",
     });
 
