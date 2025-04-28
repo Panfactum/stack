@@ -93,18 +93,21 @@ export async function manualZoneSetup(inputs: {
         task: async (ctx, task) => {
             let confirmRecordsAdded = false
             while (!confirmRecordsAdded) {
+
+                context.logger.warn(`
+                    To connect ${domain} to the Panfactum installation, you need to add
+                    the following NS records to your domain registrar.
+        
+                    As an example, here are the steps that you would
+                    follow if you use Namecheap as the registrar:
+                    https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/          
+                `)
+
+                context.logger.write(ctx.nameServers.map(ns => `- ${ns}`).join("\n\n"), { style: 'warning' })
+
                 confirmRecordsAdded = await context.logger.confirm({
                     task,
-                    explainer: `
-                        To connect ${domain} to the Panfactum installation, you need to add
-                        the following NS records to your domain registrar.
-
-                        ${ctx.nameServers.map(ns => `- ${ns}`).join("\n")}
-
-                        As an example, here are the steps that you would follow if you use Namecheap as the registrar:
-                        https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/
-                    `,
-                    message: `Have you added the NS(nameserver) records ? `,
+                    message: `Have you added the NS (nameserver) records ? `,
                     default: true
                 })
             }

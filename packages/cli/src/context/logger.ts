@@ -5,6 +5,8 @@ import pc from "picocolors";
 import { terminalColumns } from "terminal-columns";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
+const MAX_WIDTH = 128
+
 // This allows use to use multiline JS strings
 // with proper indentation and formatting when primpted to the user.
 // This reduces having to put \n characters all over the codebase
@@ -21,7 +23,7 @@ function dedent(text: string) {
     .replace(/^\n+|\n+$/g, ``)   // Remove surrounding newlines, since they got added for JS formatting
     .replace(/\n(\n)?\n*/g, (_, s: string) => s ? s : ` `) // Single newlines are removed; larger than that are collapsed into one
     .split(/\n/).map(paragraph => {
-      const matches = paragraph.match(/(.{1,80})(?: |$)/g)
+      const matches = paragraph.match(/(.{1,128})(?: |$)/g)
       if (matches !== null) {
         return matches.join("\n")
       } else {
@@ -272,7 +274,7 @@ export class Logger {
     this.stream.write(terminalColumns([[
       this.applyColors("🛈", { style: "important" }),
       this.applyColors(dedent(str), { style: "default", ...config })
-    ]], [4, 80]))
+    ]], [4, MAX_WIDTH]))
     this.stream.write("\n\n")
   }
 
@@ -280,7 +282,7 @@ export class Logger {
     this.stream.write(terminalColumns([[
       this.applyColors(" ❗", { style: "warning" }),
       this.applyColors(dedent(str), { style: "warning", ...config })
-    ]], [4, 80]))
+    ]], [4, MAX_WIDTH]))
     this.stream.write("\n\n")
   }
 
@@ -288,7 +290,7 @@ export class Logger {
     this.stream.write(terminalColumns([[
       this.applyColors("✓", { style: "success" }),
       this.applyColors(dedent(str), { style: "success", ...config })
-    ]], [4, 80]))
+    ]], [4, MAX_WIDTH]))
     this.stream.write("\n\n")
   }
 
@@ -296,15 +298,15 @@ export class Logger {
     this.stream.write(terminalColumns([[
       this.applyColors("🆇", { style: "error" }),
       this.applyColors(dedent(str), { style: "error", ...config })
-    ]], [4, 80]))
+    ]], [4, MAX_WIDTH]))
     this.stream.write("\n\n")
   }
 
-  public write(str: string, config?: HighlightsConfig) {
+  public write(str: string, config?: HighlightsConfig & { style?: ColorStyle }) {
     this.stream.write(terminalColumns([[
       "",
       this.applyColors(dedent(str), { style: "default", ...config })
-    ]], [4, 80]))
+    ]], [4, MAX_WIDTH]))
     this.stream.write("\n\n")
   }
 
