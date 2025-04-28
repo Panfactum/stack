@@ -113,6 +113,7 @@ export async function setupEKS(
 
               if (!ctx.clusterName) {
                 ctx.clusterName = await context.logger.input({
+                  task,
                   message: "Cluster name:",
                   default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
                   transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
@@ -131,6 +132,7 @@ export async function setupEKS(
 
               if (!ctx.clusterDescription) {
                 ctx.clusterDescription = await context.logger.input({
+                  task,
                   message: "Cluster description:",
                   default: `Panfactum cluster in the ${region} region of the ${environment} environment`,
                   validate: (value) => {
