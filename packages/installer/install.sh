@@ -319,7 +319,8 @@ run_pf_update() {
   fi
   set -e
 
-  # Kill the progress indicator
+  # TODO: Investigate a way to hide the kill message which confuses users
+  # Kill the progress indicator ()
   kill $progress_pid 2>/dev/null || true
   trap - EXIT
 
@@ -335,11 +336,11 @@ check_platform
 
 printf "Installing dependencies...\n\n"
 check_git_version
+check_git_repo # Needs to be here b/c if the process exits after installing nix, then the user will get an error that Nix isn't installed (due to sh source issues)
 check_nix_version
 check_direnv
 
 printf "\nSetting up infrastructure repository...\n\n"
-check_git_repo
 create_flake_nix
 create_panfactum_yaml
 

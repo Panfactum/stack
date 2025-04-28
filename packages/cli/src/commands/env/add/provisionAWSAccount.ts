@@ -95,6 +95,7 @@ export async function provisionAWSAccount(inputs: {
                         // Get the account alias
                         ///////////////////////////////////////////////////
                         const orgClient = new OrganizationsClient({
+                            region: "us-east-1",
                             profile: managementProfile
                         });
                         let existingAccounts: Array<{ name: string, email: string, id: string }> = [];
@@ -274,6 +275,7 @@ export async function provisionAWSAccount(inputs: {
                     task: async (ctx) => {
 
                         const stsClient = new STSClient({
+                            region: "us-east-1",
                             profile: managementProfile
                         });
 
