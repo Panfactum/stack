@@ -1,6 +1,4 @@
 import { join } from "node:path";
-import { select, confirm } from "@inquirer/prompts";
-import pc from "picocolors";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import type { PanfactumContext } from "@/context/context";
@@ -28,19 +26,29 @@ export async function setSLA(inputs: {
   let confirmedSLATarget: NonNullable<SlaTarget> = slaTarget ?? 3;
   let confirmed = false;
   if (slaTarget !== undefined) {
-    context.logger.warn(`This cluster is going to be deployed with SLA target set to ${slaTarget}. This CANNOT easily be changed later.`, { highlights: [String(slaTarget)] })
-    confirmed = await confirm({
-      message: pc.magenta("Do you want to proceed with this SLA target?"),
-      default: true,
+    confirmed = await context.logger.confirm({
+      explainer: {
+        message: `
+        This cluster is going to be deployed with SLA target set to ${slaTarget}. This CANNOT easily be changed later.
+      `,
+        highlights: [String(slaTarget)]
+      },
+      message: { message: `Do you want to proceed with SLA ${slaTarget}?`, highlights: [String(slaTarget)] }
     });
   }
 
   if (!confirmed) {
-    confirmedSLATarget = await select({
-      message:
-        pc.magenta(
-          "Select your SLA target (affects high availability configuration). We recommend level 1 for test / development environments and level 2 or above for environments running live workloads.\n"
-        ) + pc.red("Note that this CANNOT easily be changed later."),
+    confirmedSLATarget = await context.logger.select({
+      explainer: {
+        message: `
+          Select your SLA target(affects high availability configuration).
+          We recommend level 1 for test / development environments and level 2 or above for environments running live workloads.
+
+          Note that this CANNOT easily be changed later.
+        `,
+        highlights: ["CANNOT"]
+      },
+      message: "Level:",
       choices: [
         {
           name: "Level 1: 99.9% uptime (< 45 minutes of downtime / month) — Lowest cost",

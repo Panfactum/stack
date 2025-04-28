@@ -188,16 +188,19 @@ export class InstallClusterCommand extends PanfactumCommand {
     });
 
     if (!kubeDomain) {
-      const subdomain: string = await this.context.logger.select({
-        message: "Select the domain your cluster will live under:",
+      const ancestorDomain: string = await this.context.logger.select({
+        explainer: {
+          message: `Every cluster must have a unique domain name. It must be under one of the domains you've already added to the ${environment} environment.`,
+          highlights: [environment]
+        },
+        message: "Environment domain:",
         choices: Object.keys(domains).map(domain => ({ value: domain, name: domain })),
       });
 
-      // TODO: already have validation built, use that.
-      // Validate input to not have periods in it.
-      const kubeDomain = await this.context.logger.input({
-        message: "Enter the subdomain for the cluster where all cluster utilities will be hosted",
-        default: `${region}.${subdomain}`,
+      const subdomain = await this.context.logger.input({
+        explainer: { message: `Choose the subdomain of ${ancestorDomain} the cluster where all cluster utilities will be hosted"`, highlights: [ancestorDomain] },
+        message: "Subdomain:",
+        default: region,
         validate: async (value) => {
           const { error } = SUBDOMAIN.safeParse(value);
           if (error) {
@@ -216,8 +219,8 @@ export class InstallClusterCommand extends PanfactumCommand {
               const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) });
 
               // Check if this region.yaml has a kube_domain that matches our proposed domain
-              if (yamlContent && yamlContent.kube_domain === `${value}.${subdomain}`) {
-                return `Domain ${value}.${subdomain} is already used by another cluster`;
+              if (yamlContent && yamlContent.kube_domain === `${value}.${ancestorDomain}`) {
+                return `Domain ${value}.${ancestorDomain} is already used by another cluster`;
               }
             }
           } catch (error) {
@@ -233,7 +236,7 @@ export class InstallClusterCommand extends PanfactumCommand {
       await upsertConfigValues({
         filePath: join(clusterPath, "region.yaml"),
         values: {
-          kube_domain: `${kubeDomain}.${subdomain}`,
+          kube_domain: `${subdomain}.${ancestorDomain}`,
         },
         context: this.context,
       });
