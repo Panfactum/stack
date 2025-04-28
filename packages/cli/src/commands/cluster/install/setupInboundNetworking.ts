@@ -174,7 +174,7 @@ export async function setupInboundNetworking(
               },
               postDeployInputUpdates: {
                 sla_level: defineInputUpdate({
-                  schema: z.undefined(),
+                  schema: z.number().optional(),
                   update: () => undefined,
                 })
               }
