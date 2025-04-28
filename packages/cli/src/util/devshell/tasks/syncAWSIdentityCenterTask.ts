@@ -59,7 +59,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
     }
 
     return {
-        title: "Sync AWS Identity Center updates to DevShell",
+        title: "Sync AWS Identity Center",
         task: async (_, parentTask) => {
             const subtasks = parentTask.newListr<TaskContext>([], {
                 ctx: {

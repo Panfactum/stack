@@ -220,10 +220,16 @@ export class Logger {
       case "important": {
         switch (baseStyle) {
           case "warning": {
-            return (str: string) => pc.bold(pc.underline(pc.yellow(str)))
+            return (str: string) => pc.bold(pc.yellowBright(str))
+          }
+          case "question": {
+            return (str: string) => pc.bold(pc.magentaBright(str))
+          }
+          case "error": {
+            return (str: string) => pc.bold(pc.redBright(str))
           }
           default: {
-            return pc.blue
+            return (str: string) => pc.bold(pc.whiteBright(str))
           }
         }
       }
@@ -263,7 +269,7 @@ export class Logger {
 
   public warn(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
-      this.applyColors("⚠", { style: "warning" }),
+      this.applyColors(" ❗", { style: "warning" }),
       this.applyColors(dedent(str), { style: "warning", ...config })
     ]], [4, 80]))
     this.stream.write("\n\n")
@@ -279,15 +285,17 @@ export class Logger {
 
   public error(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
+      this.applyColors("🆇", { style: "error" }),
       this.applyColors(dedent(str), { style: "error", ...config })
-    ]], [80]))
+    ]], [4, 80]))
     this.stream.write("\n\n")
   }
 
   public write(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
+      "",
       this.applyColors(dedent(str), { style: "default", ...config })
-    ]], [80]))
+    ]], [4, 80]))
     this.stream.write("\n\n")
   }
 

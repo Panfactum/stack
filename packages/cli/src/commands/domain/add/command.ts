@@ -1,14 +1,12 @@
 import { Command, Option } from "clipanion";
-import { Listr } from "listr2";
 import pc from "picocolors";
 import { ZodError } from "zod";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { DOMAIN } from "@/util/config/schemas";
+import { getDomains } from "@/util/domains/getDomains";
 import { isRegistered } from "@/util/domains/isRegistered";
-import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
-import { runTasks } from "@/util/listr/runTasks";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { createDescendentZones } from "./createDescendentZones";
 import { createEnvironmentSubzones } from "./createEnvironmentSubzones";
@@ -180,19 +178,7 @@ export class DomainAddCommand extends PanfactumCommand {
         /////////////////////////////////////////////////////////////////////////
         // Check if already added
         /////////////////////////////////////////////////////////////////////////
-        context.logger.info(`Verifying if ${newDomain} has already been added to this Panfactum installation.`)
-
-        const { task, domainConfigs } = await getZonesTask({ context })
-        await runTasks({
-            context,
-            errorMessage: "Failed to get domain configs",
-            tasks: new Listr(task, {
-                rendererOptions: {
-                    collaseErrors: false
-                }
-            })
-        })
-
+        const domainConfigs = await getDomains({ context })
         const [_, existingDomainConfig] = Object.entries(domainConfigs)
             .find(([domain]) => {
                 return domain === newDomain
@@ -231,15 +217,14 @@ export class DomainAddCommand extends PanfactumCommand {
                 ////////////////////////////////////////////////////////
                 // Confirm the user is the owner
                 ////////////////////////////////////////////////////////
-
+                context.logger.info(`${newDomain} has already been purchased, but it has not been added yet.`)
                 const ownsDomain = await context.logger.confirm({
-                    explainer: `${newDomain} has been purchased but has not been added to Panfactum yet.`,
                     message: `Are you the owner of ${newDomain}?`,
                     default: true
                 })
 
                 if (!ownsDomain) {
-                    context.logger.error(`You cannot add ${newDomain} to Panfactum unless you own it.`)
+                    context.logger.error(`You cannot add ${newDomain} unless you own it.`)
                     return 1
                 }
 
@@ -311,7 +296,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 ////////////////////////////////////////////////////////
                 // Confirm purchase
                 ////////////////////////////////////////////////////////
-                context.logger.info(`${newDomain} has not been added to Panfactum, and it also has not yet been purchased.`)
+                context.logger.info(`${newDomain} has not been added, and it also has not yet been purchased.`)
 
                 const shouldRegister = await context.logger.confirm({
                     message: `Would you like to use Panfactum to purchase ${newDomain}?`
@@ -381,7 +366,7 @@ export class DomainAddCommand extends PanfactumCommand {
                 ////////////////////////////////////////////////////////
                 context.logger.info(`
                     Confirmed! You've already added its ancestor
-                    ${ancestorDomain} with ${existingAncestorConfig.module} in ${existingAncestorConfig.env.name}.
+                    ${ancestorDomain} in ${existingAncestorConfig.env.name}.
                 `)
                 environmentMeta = await getEnvironmentForZone({ context, domain: newDomain, environmentMeta })
 

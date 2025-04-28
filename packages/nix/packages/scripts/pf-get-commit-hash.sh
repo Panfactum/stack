@@ -114,6 +114,14 @@ elif [[ $GIT_REF =~ ^[0-9a-f]{40}$ ]]; then
 else
 
   if [[ $GIT_REPO == "origin" ]]; then
+
+    # Check if the repo has no commits
+    set +e
+    if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+      echo "local"
+      exit 0
+    fi
+
     git rev-parse "$GIT_REF"
     exit 0
   else

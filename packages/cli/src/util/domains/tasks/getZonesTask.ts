@@ -21,9 +21,10 @@ export async function getZonesTask<T extends {}>(inputs: {
     return {
         domainConfigs,
         task: {
-            title: "Get installed DNS zones",
+            title: "Retrieve DNS zone info",
             task: async (_, parentTask) => {
                 const subtasks = parentTask.newListr([])
+
 
                 ////////////////////////////////////////////////////////
                 // Get Zones from registered domains module
@@ -36,10 +37,10 @@ export async function getZonesTask<T extends {}>(inputs: {
                 ////////////////////////////////////////////////////////
                 const dnsZoneDomainConfigs: DomainConfigs = {}
                 subtasks.add({
-                    title: "Get other DNS zones from all environments",
+                    title: "Get other DNS zones",
                     task: async (_, subtask) => {
 
-                        const subsubtasks = subtask.newListr([])
+                        const subsubtasks = subtask.newListr([], { concurrent: true })
 
                         const DNS_ZONES_MODULE_OUTPUT_SCHEMA = z.object({
                             zones: z.object({
@@ -64,28 +65,32 @@ export async function getZonesTask<T extends {}>(inputs: {
                                 throw new CLIError("Environment is unknown")
                             }
                             subsubtasks.add({
-                                title: context.logger.applyColors(`Get DNS zones ${environment}`, { lowlights: [environment] }),
-                                task: async () => {
-                                    const moduleOutput = await terragruntOutput({
-                                        context,
-                                        environment: envDir,
-                                        region: regionDir,
-                                        module: MODULES.AWS_DNS_ZONES,
-                                        validationSchema: DNS_ZONES_MODULE_OUTPUT_SCHEMA,
-                                    });
+                                title: `Get ${environment} zones`,
+                                task: async (_, task) => {
+                                    try {
+                                        const moduleOutput = await terragruntOutput({
+                                            context,
+                                            environment: envDir,
+                                            region: regionDir,
+                                            module: MODULES.AWS_DNS_ZONES,
+                                            validationSchema: DNS_ZONES_MODULE_OUTPUT_SCHEMA,
+                                        });
 
-                                    Object.entries(moduleOutput.zones.value).forEach(([domain, { zone_id: zoneId }]) => {
-                                        dnsZoneDomainConfigs[domain] = {
-                                            domain,
-                                            zoneId,
-                                            recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
-                                            env: {
-                                                name: environment!,
-                                                path: envDir
-                                            },
-                                            module: MODULES.AWS_DNS_ZONES
-                                        }
-                                    })
+                                        Object.entries(moduleOutput.zones.value).forEach(([domain, { zone_id: zoneId }]) => {
+                                            dnsZoneDomainConfigs[domain] = {
+                                                domain,
+                                                zoneId,
+                                                recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
+                                                env: {
+                                                    name: environment!,
+                                                    path: envDir
+                                                },
+                                            }
+                                        })
+                                    } catch {
+                                        task.skip(context.logger.applyColors(`Get ${environment} zones Failure`, { badlights: ["Failure"] }))
+                                        parentTask.title = context.logger.applyColors(`Retrieve DNS zone info Partial failure`, { badlights: ["Partial failure"] })
+                                    }
                                 }
                             })
                         }

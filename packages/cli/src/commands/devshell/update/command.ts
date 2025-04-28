@@ -2,6 +2,7 @@ import { Command } from "clipanion";
 import { Listr } from "listr2";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
+import { syncDomainsTask } from "@/util/devshell/tasks/syncDomainsTask";
 import { buildSyncKubeClustersTask } from "@/util/devshell/tasks/syncKubeClustersTask";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { syncStandardFilesTask } from "@/util/devshell/tasks/syncStandardFiles";
@@ -24,6 +25,10 @@ export class DevShellUpdateCommand extends PanfactumCommand {
 
     tasks.add(
       await syncStandardFilesTask({ context })
+    )
+
+    tasks.add(
+      await syncDomainsTask({ context })
     )
 
     tasks.add(

@@ -5,7 +5,7 @@ set -eo pipefail
 # This script is meant to be sourced inside the enterShell
 # parameter of our devenv.nix
 
-REPO_VARIABLES=$(pf config get);
+REPO_VARIABLES=$(pf config get)
 KUBE_DIR=$(echo "$REPO_VARIABLES" | jq -r '.kube_dir')
 AWS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.aws_dir')
 REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
