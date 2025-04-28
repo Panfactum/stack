@@ -167,6 +167,10 @@ export async function setupVault(
           "-recovery-threshold=1",
           "-format=json",
         ];
+
+        // FIX: @seth - The recovery keys should be saved immediately
+        // b/c there is no way to recover them should the CLI crash
+        // after this command is executed
         let recoveryKeys: z.infer<typeof RECOVER_KEYS_SCHEMA>;
         try {
           const { stdout } = await execute({
