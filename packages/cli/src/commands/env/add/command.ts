@@ -5,6 +5,7 @@ import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStatic
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { directoryExists } from "@/util/fs/directoryExist";
+import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { getEnvironmentName } from "./getEnvironmentName";
@@ -243,11 +244,11 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             })
         }
 
-
+        const newDirectory = getRelativeFromRoot(context, join(context.repoVariables.environments_dir, environmentName))
         context.logger.success(`
             The ${environmentName} environment has been successfully set up.
             
-            It's infrastructure-as-code lives at ${join(context.repoVariables.environments_dir, environmentName)}.
+            Its infrastructure-as-code lives at ${newDirectory}.
 
             You can access the underlying AWS account through the AWS CLI: 
             
@@ -260,6 +261,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                2. Add a cluster to begin deploying workloads: pf cluster add
         `, {
             highlights: [
+                newDirectory,
                 `pf domain add -e ${environmentName}`,
                 "pf cluster add",
                 `aws --profile ${environmentProfile} sts get-caller-identity`

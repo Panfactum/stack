@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
-import { getLastPathSegments } from "@/util/getLastPathSegments";
+import { getLastPathSegments } from "@/util/fs/getLastPathSegments";
 import { MODULES } from "@/util/terragrunt/constants";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
