@@ -229,7 +229,9 @@ export async function setupInboundNetworking(
         while (attempts < maxAttempts) {
           try {
             task.output = context.logger.applyColors(`Checking Vault health endpoint (attempt ${attempts + 1}/${maxAttempts})`, { style: "subtle" });
-            const response = await Bun.fetch(`https://${data.extra_inputs.vault_domain}/v1/sys/health`);
+            const response = await Bun.fetch(
+              `https://${data.extra_inputs.vault_domain}/v1/sys/health`
+            );
 
             if (response.status === 200) {
               task.output = context.logger.applyColors("Vault health check successful", { style: "subtle" });

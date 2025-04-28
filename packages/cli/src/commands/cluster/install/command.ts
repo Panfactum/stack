@@ -199,8 +199,8 @@ export class InstallClusterCommand extends PanfactumCommand {
       });
 
       const subdomain = await this.context.logger.input({
-        explainer: { message: `Choose the subdomain of ${ancestorDomain} the cluster where all cluster utilities will be hosted"`, highlights: [ancestorDomain] },
-        message: "Subdomain:",
+        explainer: { message: `Choose the subdomain of ${ancestorDomain} for the cluster. All cluster utilities will be hosted under this subdomain.`, highlights: [ancestorDomain] },
+        message: "Cluster subdomain:",
         default: region,
         validate: async (value) => {
           const { error } = SUBDOMAIN.safeParse(value);
@@ -223,6 +223,9 @@ export class InstallClusterCommand extends PanfactumCommand {
               if (yamlContent && yamlContent.kube_domain === `${value}.${ancestorDomain}`) {
                 return `Domain ${value}.${ancestorDomain} is already used by another cluster`;
               }
+
+              // FIX: Need to see if this domain is already taken (even if not by another cluster)
+
             }
           } catch (error) {
             this.context.logger.debug(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`);
