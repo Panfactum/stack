@@ -40,6 +40,7 @@ export async function createEnvironmentSubzones(inputs: {
     // If no environments eligible for subdomains, we can skip this.
     if (possibleSubzoneEnvironments.length === 0) {
         context.logger.info("Skipping environment subzone setup as no eligible environments.")
+        return
     }
 
     if (ancestorDomainConfig) {
