@@ -99,4 +99,6 @@ export async function setupCertManagement(
       ]);
     },
   });
+
+  return tasks;
 }

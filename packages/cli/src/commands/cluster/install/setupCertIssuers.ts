@@ -202,4 +202,6 @@ export async function setupCertificateIssuers(
       ]);
     },
   });
+
+  return tasks;
 }

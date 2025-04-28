@@ -81,4 +81,6 @@ export async function setupPolicyController(
       ]);
     },
   });
+
+  return tasks;
 }

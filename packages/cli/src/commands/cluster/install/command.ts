@@ -36,7 +36,7 @@ const SETUP_STEPS: Array<{
     options: InstallClusterStepOptions,
     completed: boolean,
     mainTask: PanfactumTaskWrapper
-  ) => Promise<void>;
+  ) => Promise<Listr>;
   completed: boolean;
   lastModule: MODULES; // Used to determine if the step has been completed
 }> = [

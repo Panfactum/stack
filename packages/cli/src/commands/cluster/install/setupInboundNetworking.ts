@@ -294,4 +294,6 @@ export async function setupInboundNetworking(
       ]);
     },
   });
+
+  return tasks;
 }

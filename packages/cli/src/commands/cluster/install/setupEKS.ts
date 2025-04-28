@@ -223,4 +223,6 @@ export async function setupEKS(
       );
     },
   });
+
+  return tasks;
 }
