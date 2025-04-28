@@ -44,6 +44,7 @@ resource "aws_iam_organizations_features" "org" {
     "RootCredentialsManagement",
     "RootSessions"
   ]
+  depends_on = [aws_organizations_organization.org]
 }
 
 ###########################################################################

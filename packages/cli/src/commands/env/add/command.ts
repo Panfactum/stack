@@ -1,8 +1,11 @@
+import { join } from "node:path";
 import { Command } from "clipanion";
 import pc from "picocolors"
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments } from "@/util/config/getEnvironments";
+import { directoryExists } from "@/util/fs/directoryExist";
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { getEnvironmentName } from "./getEnvironmentName";
 import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
@@ -232,7 +235,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         // // This allows us to replace their static credentials
         // // with an SSO login flow for improved security and user-ergonomics
         // ////////////////////////////////////////////////////////////////
-        if (hasManagementEnv) {
+        if (await directoryExists(join(context.repoVariables.repo_root, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, MODULES.IAM_IDENTIY_CENTER_PERMISSIONS))) {
             await updateIAMIdentityCenter({
                 context,
                 environmentProfile,

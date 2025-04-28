@@ -3,6 +3,7 @@ import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
+// TODO: We can actually get this from the AWS account
 export async function getPrimaryContactInfo(inputs: { context: PanfactumContext, parentTask: PanfactumTaskWrapper }) {
 
     const { context, parentTask } = inputs;
@@ -28,6 +29,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const orgName = await context.logger.input({
         task: parentTask,
         message: 'Organization / Company Name (Optional):',
+        required: false,
         validate: (value) => {
             if (value === "") {
                 return true
@@ -83,6 +85,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const address2 = await context.logger.input({
         task: parentTask,
         message: 'Street Address 2 (Optional):',
+        required: false,
         validate: (value) => {
             if (value === "") {
                 return true
