@@ -552,10 +552,7 @@ export async function registerDomain(inputs: {
             hclIfMissing: await Bun.file(moduleHCL).text(),
             imports: {
                 [`aws_route53_zone.zones["${domain}"]`]: {
-                    shouldImport: async (ctx) => {
-                        return Boolean(ctx.zoneId)
-                    },
-                    resourceId: (ctx) => ctx.zoneId!
+                    resourceId: async (ctx) => ctx.zoneId
                 }
             },
             inputUpdates: {

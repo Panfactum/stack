@@ -37,8 +37,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
     realModuleName?: string; // if the `module` string is different from the Panfactum module to actually deploy (e.g., `sops` => `aws_kms_encryption_key`)
     imports?: {
         [resourcePath: string]: {
-            shouldImport?: (ctx: T) => Promise<boolean>;
-            resourceId: string | ((ctx: T) => string);
+            resourceId: string | undefined | ((ctx: T) => Promise<string | undefined>);
         };
     };
     inputUpdates?: InputUpdates<T>;
@@ -208,16 +207,19 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             subtasks.add(
                 Object.entries(imports).map(
-                    ([resourcePath, { resourceId, shouldImport }]) => {
-                        const resolvedId =
-                            typeof resourceId === "string" ? resourceId : resourceId(ctx);
+                    ([resourcePath, { resourceId }]) => {
                         return {
-                            title: context.logger.applyColors(`Import ${resourcePath} ${resolvedId}`, {
-                                lowlights: [resolvedId],
-                            }),
-                            enabled: async (ctx) =>
-                                shouldImport ? shouldImport(ctx) : true,
-                            task: async (_, task) => {
+                            title: context.logger.applyColors(`Import ${resourcePath}`),
+                            enabled: async (ctx) => typeof resourceId === "string" || (resourceId !== undefined && await resourceId(ctx) !== undefined),
+                            task: async (ctx, task) => {
+                                const resolvedId =
+                                    typeof resourceId === "string" || resourceId === undefined ? resourceId : await resourceId(ctx);
+
+                                if (!resolvedId) {
+                                    task.skip(context.logger.applyColors(`Import ${resourcePath} Skipped`, { lowlights: ["Skipped"] }))
+                                    return;
+                                }
+
                                 task.title = context.logger.applyColors(
                                     `Importing ${resourcePath} ${resolvedId}`,
                                     { lowlights: [resolvedId] }
