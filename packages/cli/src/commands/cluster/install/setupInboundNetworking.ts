@@ -220,34 +220,36 @@ export async function setupInboundNetworking(
 
         ctx.vaultDomain = data.extra_inputs.vault_domain;
 
+        task.output = context.logger.applyColors(`WARNING: This might take 10-30 minutes to complete while DNS propagates.`, { style: 'warning' })
+
         let attempts = 0;
-        const maxAttempts = 60;
+        const maxAttempts = 180;
         const retryDelay = 10000;
 
-        // FIX: @seth - Logging here doesn't make sense
-        // overwrites itself too fast
         while (attempts < maxAttempts) {
           try {
-            task.output = context.logger.applyColors(`Checking Vault health endpoint (attempt ${attempts + 1}/${maxAttempts})`, { style: "subtle" });
-            const response = await Bun.fetch(
-              `https://${data.extra_inputs.vault_domain}/v1/sys/health`
-            );
+            let statusStr = `${attempts + 1}/${maxAttempts}`
+            task.title = context.logger.applyColors(`Polling Vault health endpoint ${statusStr}`, { lowlights: [statusStr] });
+            const response = await Bun.fetch(`https://${data.extra_inputs.vault_domain}/v1/sys/health`);
 
             if (response.status === 200) {
-              task.output = context.logger.applyColors("Vault health check successful", { style: "subtle" });
+              task.title = context.logger.applyColors("Vault health check successful");
               break;
             }
 
-            task.output = context.logger.applyColors(`Vault health check failed with status: ${response.status}`, { style: "subtle" });
+            statusStr = `- Waiting 10 seconds for Vault to be ready... ${attempts + 1}/${maxAttempts}`
+            task.title = context.logger.applyColors(` Polling Vault health endpoint ${statusStr}`, { lowlights: [statusStr] });
           } catch {
+            const statusStr = `- Waiting 10 seconds for DNS to propagate... ${attempts + 1}/${maxAttempts}`
+            task.title = context.logger.applyColors(` Polling Vault health endpoint ${statusStr}`, { lowlights: [statusStr] });
             // Expected to error while waiting for DNS to propagate
           }
           attempts++;
 
           if (attempts < maxAttempts) {
-            task.output = context.logger.applyColors(`Retrying in ${retryDelay / 1000} seconds...`, { style: "subtle" });
             await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
           } else {
+            task.title = context.logger.applyColors(`Failed to connect to Vault health endpoint after ${maxAttempts} attempts`, { style: "error" });
             throw new CLIError(`Failed to connect to Vault health endpoint after ${maxAttempts} attempts`);
           }
         }
