@@ -49,7 +49,7 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
         with the AdministratorAccess managed policy attached directly. You can do that here:
 
         https://us-east-1.console.aws.amazon.com/iam/home#/users
-    `, { highlights: ["NOT", "AdministratorAccess"] })
+    `, { highlights: ["non-root", "AdministratorAccess"] })
 
     while (true) {
         const ready = await context.logger.confirm({

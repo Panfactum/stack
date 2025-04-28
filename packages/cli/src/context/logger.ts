@@ -331,9 +331,9 @@ export class Logger {
     if (explainer) {
       if (task) {
         if (typeof explainer === "string") {
-          task.output = this.applyColors(dedent(explainer), { style: "warning" })
+          task.output = this.applyColors(dedent(explainer), { style: "warning", dedent: true })
         } else {
-          task.output = this.applyColors(dedent(explainer.message), { style: "warning", ...explainer })
+          task.output = this.applyColors(dedent(explainer.message), { style: "warning", dedent: true, ...explainer })
         }
       } else {
         if (typeof explainer === "string") {
