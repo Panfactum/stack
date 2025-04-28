@@ -31,7 +31,7 @@ variable "cloudflare_api_token" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "sync_policy" {

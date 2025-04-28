@@ -21,7 +21,7 @@ variable "subnets" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "aws_iam_ip_allow_list" {

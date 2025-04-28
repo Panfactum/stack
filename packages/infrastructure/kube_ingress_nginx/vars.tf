@@ -19,7 +19,7 @@ variable "ingress_timeout_seconds" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "tls_1_2_enabled" {
