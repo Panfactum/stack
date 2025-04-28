@@ -308,7 +308,7 @@ run_pf_update() {
   trap 'kill $progress_pid 2>/dev/null || true' EXIT
 
   set +e
-  if ! logs=$(nix develop -c pf-update 2>&1); then
+  if ! logs=$(nix develop -c pf devshell sync 2>&1); then
     # Kill the progress indicator
     kill $progress_pid 2>/dev/null || true
     trap - EXIT
@@ -344,7 +344,10 @@ create_flake_nix
 create_panfactum_yaml
 
 printf "\nBuilding the Panfactum DevShell. This initial build may take up to 30 minutes to complete...\n" >&2
-run_pf_update
+if ! run_pf_update; then
+  printf "\n  \033[31mError: Failed to build Panfactum DevShell. Exiting installation.\033[0m\n" >&2
+  exit 1
+fi
 
 printf "\nInstallation COMPLETE! Booting up the Panfactum DevShell...\n\n" >&2
 repo_root=$(get_repo_root)
