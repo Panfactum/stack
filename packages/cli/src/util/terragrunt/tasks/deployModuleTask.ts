@@ -21,6 +21,10 @@ export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
     return config;
 }
 
+type InputUpdates<T extends {}> = {
+    [inputName: string]: ReturnType<typeof defineInputUpdate<z.ZodType, T>>;
+}
+
 export async function buildDeployModuleTask<T extends {}>(inputs: {
     context: PanfactumContext;
     env?: Record<string, string | undefined>;
@@ -37,9 +41,8 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             resourceId: string | ((ctx: T) => string);
         };
     };
-    inputUpdates?: {
-        [inputName: string]: ReturnType<typeof defineInputUpdate<z.ZodType, T>>;
-    };
+    inputUpdates?: InputUpdates<T>;
+    postDeployInputUpdates?: InputUpdates<T>;
 }): Promise<ListrTask<T>> {
     const {
         hclIfMissing,
@@ -50,9 +53,90 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
         realModuleName,
         imports = {},
         inputUpdates = {},
+        postDeployInputUpdates = {},
         initModule = true,
         taskTitle = "Deploy module",
     } = inputs;
+
+    const moduleDir = join(
+        context.repoVariables.environments_dir,
+        environment,
+        region,
+        module
+    );
+    const moduleHCLPath = join(moduleDir, "terragrunt.hcl");
+    const moduleYAMLPath = join(moduleDir, "module.yaml");
+
+    const updateModuleYAML = async (updates: InputUpdates<T>, ctx: T) => {
+        for (const input of Object.keys(updates)) {
+            if (
+                await fileContains({
+                    filePath: moduleHCLPath,
+                    context,
+                    regex: new RegExp(`${input}\\s*=`),
+                })
+            ) {
+                throw new CLIError(
+                    `Cannot update input '${input}' as you are configuring it via 'terragrunt.hcl' input rather than using 'module.yaml'.`
+                );
+            }
+        }
+
+        if (await fileExists(moduleYAMLPath)) {
+            const inputSchemas = Object.fromEntries(
+                Object.entries(updates).map(([input, { schema }]) => [
+                    input,
+                    schema.optional(),
+                ])
+            );
+            const originalModuleConfig = await readYAMLFile({
+                filePath: moduleYAMLPath,
+                context,
+                validationSchema: z
+                    .object({
+                        extra_inputs: z
+                            .object(inputSchemas)
+                            .passthrough()
+                            .optional()
+                            .default({}),
+                    })
+                    .passthrough(),
+            });
+            const newModuleConfig = {
+                module: realModuleName,
+                ...originalModuleConfig,
+                extra_inputs: {
+                    ...originalModuleConfig?.extra_inputs,
+                    ...Object.fromEntries(
+                        Object.entries(updates).map(([input, { update }]) => [
+                            input,
+                            update(originalModuleConfig?.extra_inputs[input], ctx),
+                        ])
+                    ),
+                },
+            };
+            await writeYAMLFile({
+                context,
+                path: moduleYAMLPath,
+                contents: newModuleConfig,
+                overwrite: true,
+            });
+        } else {
+            await writeYAMLFile({
+                context,
+                path: moduleYAMLPath,
+                contents: {
+                    extra_inputs: Object.fromEntries(
+                        Object.entries(updates).map(([input, { update }]) => {
+                            return [input, update(undefined, ctx)];
+                        })
+                    ),
+                    module: realModuleName,
+                },
+                overwrite: true,
+            });
+        }
+    }
 
     return {
         title: context.logger.applyColors(`${taskTitle} ${module}`, {
@@ -64,13 +148,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             // If the terragrunt.hcl is missing, then add it
             //////////////////////////////////////////////////////////////
-            const moduleDir = join(
-                context.repoVariables.environments_dir,
-                environment,
-                region,
-                module
-            );
-            const moduleHCLPath = join(moduleDir, "terragrunt.hcl");
+
             if (!(await fileExists(moduleHCLPath))) {
                 if (!hclIfMissing) {
                     throw new CLIError(
@@ -93,79 +171,11 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             // If needed, update the module inputs via the module.yaml file
             //////////////////////////////////////////////////////////////
-            const moduleYAMLPath = join(moduleDir, "module.yaml");
             if (Object.keys(inputUpdates).length > 0 || realModuleName) {
                 subtasks.add({
                     title: "Update module inputs",
                     task: async (_, task) => {
-                        for (const input of Object.keys(inputUpdates)) {
-                            if (
-                                await fileContains({
-                                    filePath: moduleHCLPath,
-                                    context,
-                                    regex: new RegExp(`${input}\\s*=`),
-                                })
-                            ) {
-                                throw new CLIError(
-                                    `Cannot update input '${input}' as you are configuring it via 'terragrunt.hcl' input rather than using 'module.yaml'.`
-                                );
-                            }
-                        }
-
-                        if (await fileExists(moduleYAMLPath)) {
-                            const inputSchemas = Object.fromEntries(
-                                Object.entries(inputUpdates).map(([input, { schema }]) => [
-                                    input,
-                                    schema.optional(),
-                                ])
-                            );
-                            const originalModuleConfig = await readYAMLFile({
-                                filePath: moduleYAMLPath,
-                                context,
-                                validationSchema: z
-                                    .object({
-                                        extra_inputs: z
-                                            .object(inputSchemas)
-                                            .passthrough()
-                                            .optional()
-                                            .default({}),
-                                    })
-                                    .passthrough(),
-                            });
-                            const newModuleConfig = {
-                                module: realModuleName,
-                                ...originalModuleConfig,
-                                extra_inputs: {
-                                    ...originalModuleConfig?.extra_inputs,
-                                    ...Object.fromEntries(
-                                        Object.entries(inputUpdates).map(([input, { update }]) => [
-                                            input,
-                                            update(originalModuleConfig?.extra_inputs[input], ctx),
-                                        ])
-                                    ),
-                                },
-                            };
-                            await writeYAMLFile({
-                                context,
-                                path: moduleYAMLPath,
-                                contents: newModuleConfig,
-                                overwrite: true,
-                            });
-                        } else {
-                            await writeYAMLFile({
-                                context,
-                                path: moduleYAMLPath,
-                                contents: {
-                                    extra_inputs: Object.fromEntries(
-                                        Object.entries(inputUpdates).map(([input, { update }]) => {
-                                            return [input, update(undefined, ctx)];
-                                        })
-                                    ),
-                                    module: realModuleName,
-                                },
-                                overwrite: true,
-                            });
-                        }
+                        await updateModuleYAML(inputUpdates, ctx)
                         task.title = "Updated module inputs";
                     },
                 });
@@ -294,6 +304,20 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                     outputBar: 5,
                 },
             });
+
+
+            //////////////////////////////////////////////////////////////
+            // If needed, update the module inputs again
+            //////////////////////////////////////////////////////////////
+            if (Object.keys(postDeployInputUpdates).length > 0) {
+                subtasks.add({
+                    title: "Post-deploy input updates",
+                    task: async () => {
+                        await updateModuleYAML(postDeployInputUpdates, ctx)
+                    },
+                });
+            }
+
             return subtasks;
         },
     };

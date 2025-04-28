@@ -109,6 +109,7 @@ export async function setupInboundNetworking(
                     context,
                     env: {
                       ...process.env,
+                      VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                       VAULT_TOKEN: vaultRootToken,
                     },
                     environment,
@@ -168,9 +169,15 @@ export async function setupInboundNetworking(
                 }),
                 sla_level: defineInputUpdate({
                   schema: z.number(),
-                  update: () => slaTarget,
+                  update: () => 1,
                 }),
               },
+              postDeployInputUpdates: {
+                sla_level: defineInputUpdate({
+                  schema: z.undefined(),
+                  update: () => undefined,
+                })
+              }
             }),
             await buildDeployModuleTask({
               taskTitle: "Update Vault to use Ingress",

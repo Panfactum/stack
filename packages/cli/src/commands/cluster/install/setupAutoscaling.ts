@@ -7,15 +7,11 @@ import kubeSchedulerTerragruntHcl from "@/templates/kube_scheduler_terragrunt.hc
 import kubeVpaTerragruntHcl from "@/templates/kube_vpa_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
-import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
-import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
-import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -26,16 +22,6 @@ export async function setupAutoscaling(
 ) {
   const { awsProfile, context, environment, clusterPath, region, slaTarget } =
     options;
-
-
-  const { root_token: vaultRootToken } = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-    context,
-    validationSchema: z.object({
-      root_token: z.string(),
-    }),
-  });
-
 
   interface Context {
     vaultProxyPid?: number;
@@ -50,31 +36,12 @@ export async function setupAutoscaling(
       },
     },
     {
-      title: "Start Vault Proxy",
-      task: async (ctx) => {
-        const { pid, port } = await startVaultProxy({
-          env: {
-            ...process.env,
-            VAULT_TOKEN: vaultRootToken,
-          },
-          modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
-        });
-        ctx.vaultProxyPid = pid;
-        ctx.vaultProxyPort = port;
-      },
-    },
-    {
       task: async (ctx, task) => {
         return task.newListr<Context>(
           [
             await buildDeployModuleTask({
               taskTitle: "Deploy Metrics Server",
               context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
               environment,
               region,
               module: MODULES.KUBE_METRICS_SERVER,
@@ -86,11 +53,6 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Vertical Pod Autoscaler",
               context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
               environment,
               region,
               module: MODULES.KUBE_VPA,
@@ -123,11 +85,6 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Karpenter",
               context,
-              env: {
-                ...process.env, //TODO: @seth Use context.env
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
               environment,
               region,
               module: MODULES.KUBE_KARPENTER,
@@ -159,11 +116,6 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Karpenter Node Pools",
               context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
               environment,
               region,
               module: MODULES.KUBE_KARPENTER_NODE_POOLS,
@@ -186,11 +138,6 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Scheduler",
               context,
-              env: {
-                ...process.env,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
-              },
               environment,
               region,
               module: MODULES.KUBE_SCHEDULER,
@@ -218,35 +165,27 @@ export async function setupAutoscaling(
         });
       },
     },
-    {
-      title: "Enable Enhanced Autoscaling",
-      task: async (ctx, task) => {
-        await terragruntApplyAll({
-          context,
-          environment,
-          region,
-          env: {
-            ...process.env,
-            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-            VAULT_TOKEN: vaultRootToken,
-          },
-          onLogLine: (line) => {
-            task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
-          },
-        });
-      },
-      rendererOptions: {
-        outputBar: 5,
-      },
-    },
-    {
-      title: "Stop Vault Proxy",
-      task: async (ctx) => {
-        if (ctx.vaultProxyPid) {
-          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
-        }
-      },
-    },
+    // {
+    //   title: "Enable Enhanced Autoscaling",
+    //   task: async (ctx, task) => {
+    //     await terragruntApplyAll({
+    //       context,
+    //       environment,
+    //       region,
+    //       env: {
+    //         ...process.env,
+    //         VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+    //         VAULT_TOKEN: vaultRootToken,
+    //       },
+    //       onLogLine: (line) => {
+    //         task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
+    //       },
+    //     });
+    //   },
+    //   rendererOptions: {
+    //     outputBar: 5,
+    //   },
+    // },
   ])
 
   return tasks;

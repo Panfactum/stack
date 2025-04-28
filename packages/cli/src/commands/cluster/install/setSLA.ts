@@ -67,6 +67,7 @@ export async function setSLA(inputs: {
     });
   }
 
+  // TODO: @seth set in the environment.yaml if not already set there
   await upsertConfigValues({
     filePath: join(clusterPath, "region.yaml"),
     values: {
