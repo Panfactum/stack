@@ -201,11 +201,11 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         //
         //  (b) If not, then we need to take them through the manual setup steps
         ////////////////////////////////////////////////////////////////
-
+        let newAccountName: string | undefined;
         if (hasManagementEnv) {
             // Note that 'provisionAWSAccount' leverages the AWS Organization to create the account.
             // If the AWS Organization is not set up yet, it also takes care of that process.
-            await provisionAWSAccount({ context, environmentName, environmentProfile })
+            newAccountName = await provisionAWSAccount({ context, environmentName, environmentProfile })
         } else {
             // Otherwise, they need to manually create the account, the 'AdministratorAccess'
             // IAM user, and the access credentials to provide the installer
@@ -220,11 +220,11 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             })
         }
 
-        // TODO: Pass through the actual account name
         await bootstrapEnvironment({
             context,
             environmentProfile,
-            environmentName
+            environmentName,
+            newAccountName
         })
 
 

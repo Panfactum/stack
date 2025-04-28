@@ -95,6 +95,7 @@ export class Logger {
     style?: ColorStyle
     bold?: boolean,
     highlighterDisabled?: boolean;
+    dedent?: boolean;
   } & HighlightsConfig) {
     const {
       style = "default",
@@ -102,10 +103,15 @@ export class Logger {
       highlights = [],
       lowlights = [],
       badlights = [],
-      highlighterDisabled = false
+      highlighterDisabled = false,
+      dedent: shouldDedent = false,
     } = config || {}
 
     let resultStr = this.getColorFn(style)(str)
+
+    if (shouldDedent) {
+      resultStr = dedent(resultStr)
+    }
     if (bold) {
       resultStr = pc.bold(resultStr)
     }

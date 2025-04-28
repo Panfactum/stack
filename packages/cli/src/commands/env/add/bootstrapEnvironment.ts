@@ -5,12 +5,13 @@ import { Listr } from "listr2";
 import { stringify, parse } from "yaml";
 import { z } from "zod";
 import awsAccountHCL from "@/templates/aws_account.hcl" with { type: "file" };
+import orgHCL from "@/templates/aws_organization.hcl" with { type: "file" };
 import sopsHCL from "@/templates/sops.hcl" with { type: "file" };
 import tfBootstrapResourcesHCL from "@/templates/tf_bootstrap_resources.hcl" with { type: "file" };
 import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
 import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { AWS_ACCOUNT_ALIAS_SCHEMA, AWS_REGIONS } from "@/util/aws/schemas";
+import { AWS_REGIONS } from "@/util/aws/schemas";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
@@ -20,9 +21,11 @@ import { fileExists } from "@/util/fs/fileExists";
 import { removeDirectory } from "@/util/fs/removeDirectory";
 import { writeFile } from "@/util/fs/writeFile";
 import { runTasks } from "@/util/listr/runTasks";
-import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { getNewAccountAlias } from "./getNewAccountAlias";
+import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
 import type { PanfactumContext } from "@/context/context";
 
 
@@ -30,12 +33,12 @@ export async function bootstrapEnvironment(inputs: {
     context: PanfactumContext,
     environmentName: string;
     environmentProfile?: string
-    accountName?: string;
+    newAccountName?: string;
 }) {
 
-    const { context, environmentName, environmentProfile, accountName } = inputs
+    const { context, environmentName, environmentProfile, newAccountName } = inputs
 
-    context.logger.info("Now that account is provisioned, we will configure it for management via infrastructure-as-code.")
+    context.logger.info(`Now that the AWS account for ${environmentName} is provisioned, this installer will configure it for management via infrastructure-as-code.`)
 
     interface TaskCtx {
         version?: string,
@@ -45,13 +48,13 @@ export async function bootstrapEnvironment(inputs: {
         bucketName?: string,
         locktableName?: string,
         accountId?: string
-        accountName?: string;
+        newAccountName?: string;
     }
 
     const tasks = new Listr<TaskCtx>([], {
         ctx: {
             profile: environmentProfile,
-            accountName
+            newAccountName
         },
         rendererOptions: {
             collapseErrors: false
@@ -74,7 +77,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     const directory = join(context.repoVariables.environments_dir, environmentName)
     tasks.add({
-        title: `Create IaC directory for ${environmentName}`,
+        title: context.logger.applyColors(`Create IaC directory for ${environmentName}`),
         task: async () => {
             await createDirectory(directory)
         }
@@ -106,7 +109,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add([
         {
-            title: "Select AWS profile for the environment",
+            title: context.logger.applyColors(`Select AWS profile for ${environmentName}`),
             enabled: (ctx) => !ctx.profile,
             rendererOptions: { outputBar: 2 },
             task: async (ctx, task) => {
@@ -184,7 +187,7 @@ export async function bootstrapEnvironment(inputs: {
                         }
                     }
                 })
-                task.title = context.logger.applyColors(`Selected AWS profile for the environment ${ctx.profile}`, { lowlights: [ctx.profile] })
+                task.title = context.logger.applyColors(`Selected AWS profile for ${environmentName} ${ctx.profile}`, { lowlights: [ctx.profile] })
             }
         },
     ])
@@ -546,81 +549,152 @@ export async function bootstrapEnvironment(inputs: {
     tasks.add(
         {
             title: "Set AWS account alias",
-            enabled: (ctx) => ctx.accountName === undefined,
+            enabled: (ctx) => ctx.newAccountName === undefined,
             task: async (ctx, task) => {
-                ctx.accountName = await context.logger.input({
-                    message: 'Unique Account Alias:',
-                    validate: async (value) => {
-                        const { error } = AWS_ACCOUNT_ALIAS_SCHEMA.safeParse(value)
-                        if (error) {
-                            return error.issues[0]?.message ?? "Invalid account name"
-                        }
-
-                        const response = await globalThis.fetch(`https://${value}.signin.aws.amazon.com`)
-                        if (response.status !== 404) {
-                            return `Every account must have a globally unique name. Name is already taken.`
-                        }
-                        return true
-                    },
-                    task
-                })
+                ctx.newAccountName = await getNewAccountAlias({ context, task })
             }
         }
     )
 
     //////////////////////////////////////////////////////////////
-    // Deploy the AWS Account module
+    // Deploy the AWS Account module (or the AWS Organization module if the management environment)
     //////////////////////////////////////////////////////////////
-    tasks.add(
-        await buildDeployModuleTask<TaskCtx>({
-            context,
-            environment: environmentName,
-            region: GLOBAL_REGION,
-            module: MODULES.AWS_ACCOUNT,
-            hclIfMissing: await Bun.file(awsAccountHCL).text(),
-            taskTitle: "Setup AWS Account",
-            inputUpdates: {
-                alias: defineInputUpdate({
-                    schema: z.string(),
-                    update: (_, { accountName }) => {
-                        if (accountName === undefined) {
-                            throw new CLIError("accountName is undefined")
-                        }
-                        return accountName
+    if (environmentName === MANAGEMENT_ENVIRONMENT) {
+        tasks.add({
+            title: "Configure AWS Organization",
+            task: async (parentCtx, parentTask) => {
+
+                const { profile } = parentCtx
+                if (!profile) {
+                    throw new CLIError("Cannot create organization if no AWS profile is provided.")
+                }
+
+                interface OrgCreateTaskContext {
+                    primaryContactInfo?: {
+                        fullName: string;
+                        organizationName?: string;
+                        email: string;
+                        phoneNumber: string;
+                        address1: string;
+                        address2?: string;
+                        city: string;
+                        state: string;
+                        countryCode: string;
+                        postalCode: string;
                     }
-                })
-            },
-            imports: {
-                "aws_iam_service_linked_role.spot": {
-                    shouldImport: async (ctx) => {
-                        const credentials = await getCredsFromFile({ context, profile: ctx.profile! });
-                        try {
-                            const iamClient = new IAMClient({
-                                region: GLOBAL_REGION,
-                                credentials
-                            });
-
-                            const getRoleCommand = new GetRoleCommand({
-                                RoleName: 'AWSServiceRoleForEC2Spot'
-                            });
-
-                            await iamClient.send(getRoleCommand);
-                            return true;
-                        } catch (error) {
-                            if (error instanceof NoSuchEntityException) {
-                                return false;
-                            } else {
-                                // For any other error, swallow it, just in case we can recover
-                                context.logger.debug(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`)
-                                return false;
-                            }
+                }
+                return parentTask.newListr<OrgCreateTaskContext>([
+                    {
+                        title: "Collect AWS contact information",
+                        task: async (ctx, task) => {
+                            task.output = context.logger.applyColors(`
+                                AWS requires contact information to ensure you receive important infrastructure notifications.
+                                This will be automatically synced across all your environments.
+                            `, { style: "warning", dedent: true })
+                            ctx.primaryContactInfo = await getPrimaryContactInfo({ context, parentTask, profile })
                         }
                     },
-                    resourceId: (ctx) => `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
-                }
+
+                    // TODO: Ensure that the original organizaiton features are preserved
+                    await buildDeployModuleTask<OrgCreateTaskContext>({
+                        context,
+                        environment: MANAGEMENT_ENVIRONMENT,
+                        region: GLOBAL_REGION,
+                        module: MODULES.AWS_ORGANIZATION,
+                        taskTitle: "Deploy AWS Organization updates",
+                        hclIfMissing: await Bun.file(orgHCL).text(),
+                        inputUpdates: {
+                            primary_contact: defineInputUpdate({
+                                schema: z.object({
+                                    full_name: z.string(),
+                                    phone_number: z.string(),
+                                    address_line_1: z.string(),
+                                    address_line_2: z.string().optional(),
+                                    address_line_3: z.string().optional(),
+                                    city: z.string(),
+                                    company_name: z.string().optional(),
+                                    country_code: z.string(),
+                                    district_or_county: z.string().optional(),
+                                    postal_code: z.string(),
+                                    state_or_region: z.string(),
+                                    website_url: z.string().optional()
+                                }).optional(),
+                                update: (oldInput, ctx) => {
+                                    if (!ctx.primaryContactInfo) {
+                                        throw new CLIError("Primary contact info missing. This should never happen.")
+                                    }
+                                    return {
+                                        ...oldInput,
+                                        full_name: ctx.primaryContactInfo.fullName,
+                                        phone_number: ctx.primaryContactInfo.phoneNumber,
+                                        address_line_1: ctx.primaryContactInfo.address1,
+                                        address_line_2: ctx.primaryContactInfo.address2,
+                                        city: ctx.primaryContactInfo.city,
+                                        company_name: ctx.primaryContactInfo.organizationName,
+                                        country_code: ctx.primaryContactInfo.countryCode,
+                                        postal_code: ctx.primaryContactInfo.postalCode,
+                                        state_or_region: ctx.primaryContactInfo.state,
+                                    }
+                                }
+                            })
+                        }
+                    })
+                ], { ctx: {} })
             }
         })
-    )
+    } else {
+        tasks.add(
+            await buildDeployModuleTask<TaskCtx>({
+                context,
+                environment: environmentName,
+                region: GLOBAL_REGION,
+                module: MODULES.AWS_ACCOUNT,
+                hclIfMissing: await Bun.file(awsAccountHCL).text(),
+                taskTitle: "Deploy AWS Account defaults",
+                inputUpdates: {
+                    alias: defineInputUpdate({
+                        schema: z.string(),
+                        update: (_, { newAccountName }) => {
+                            if (newAccountName === undefined) {
+                                throw new CLIError("newAccountName is undefined")
+                            }
+                            return newAccountName
+                        }
+                    })
+                },
+                imports: {
+                    "aws_iam_service_linked_role.spot": {
+                        shouldImport: async (ctx) => {
+                            const credentials = await getCredsFromFile({ context, profile: ctx.profile! });
+                            try {
+                                const iamClient = new IAMClient({
+                                    region: GLOBAL_REGION,
+                                    credentials
+                                });
+
+                                const getRoleCommand = new GetRoleCommand({
+                                    RoleName: 'AWSServiceRoleForEC2Spot'
+                                });
+
+                                await iamClient.send(getRoleCommand);
+                                return true;
+                            } catch (error) {
+                                if (error instanceof NoSuchEntityException) {
+                                    return false;
+                                } else {
+                                    // For any other error, swallow it, just in case we can recover
+                                    context.logger.debug(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`)
+                                    return false;
+                                }
+                            }
+                        },
+                        resourceId: (ctx) => `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
+                    }
+                }
+            })
+        )
+    }
+
 
     await runTasks({
         context,
