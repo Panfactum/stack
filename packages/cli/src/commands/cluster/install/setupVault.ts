@@ -208,6 +208,7 @@ export async function setupVault(
               "--namespace=vault",
               "--context",
               kubeContext,
+              "--",
               "vault",
               "operator",
               "unseal",
