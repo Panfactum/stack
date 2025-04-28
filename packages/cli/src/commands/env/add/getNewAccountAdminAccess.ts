@@ -45,15 +45,11 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
     }
 
     context.logger.warn(`
-        For the installer to automatically complete the remaining setup, it needs access to an IAM user
-        with the 'AdministratorAccess' managed policy attached directly. You can do that here:
+        For the installer to automatically complete the remaining setup, it needs access to a non-root IAM user
+        with the AdministratorAccess managed policy attached directly. You can do that here:
 
         https://us-east-1.console.aws.amazon.com/iam/home#/users
-
-        This should NOT be the AWS account root user:
-
-        https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html
-    `, { highlights: ["NOT"] })
+    `, { highlights: ["NOT", "AdministratorAccess"] })
 
     while (true) {
         const ready = await context.logger.confirm({
