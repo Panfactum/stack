@@ -273,6 +273,10 @@ export async function setupInboundNetworking(
       region,
       module: MODULES.VAULT_CORE_RESOURCES,
       initModule: false,
+      env: {
+        ...process.env, //TODO: @seth Use context.env
+        VAULT_TOKEN: vaultRootToken,
+      },
     }),
     {
       title: "Stop Vault Proxy",

@@ -265,7 +265,7 @@ export class InstallClusterCommand extends PanfactumCommand {
       SETUP_STEPS[completedModules - 1]!.completed = false;
     }
 
-    const tasks = new Listr([]);
+    const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });
 
     const options: InstallClusterStepOptions = {
       awsProfile,
