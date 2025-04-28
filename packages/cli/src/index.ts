@@ -11,14 +11,10 @@ import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./context/context.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
-// @ts-ignore Bun needs the explicit non-index syntax to overwrite this at build time with the --define flag
-const VERSION = process.env.VERSION ?? "unknown";
-
 // Create a CLI instance
 const cli = new Cli<PanfactumContext | BaseContext>({
   binaryName: "pf",
-  binaryLabel: "Panfactum CLI",
-  binaryVersion: VERSION,
+  binaryLabel: "Panfactum CLI"
 });
 
 // Register commands

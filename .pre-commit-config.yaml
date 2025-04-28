@@ -81,3 +81,21 @@ repos:
         pass_filenames: true
         description: "Runs linting for the website code"
         fail_fast: true
+
+      - id: typecheck-cli
+        name: Typecheck CLI
+        entry: precommit-typecheck-cli
+        language: system
+        files: ^packages/cli/
+        pass_filenames: false
+        description: "Runs a typecheck on the CLI code"
+        fail_fast: true
+
+      - id: lint-cli
+        name: Lint CLI
+        entry: precommit-lint-cli
+        language: system
+        files: ^packages/cli/.*\.ts$
+        pass_filenames: true
+        description: "Runs linting for the CLI code"
+        fail_fast: true
