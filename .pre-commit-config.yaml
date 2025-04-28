@@ -41,7 +41,7 @@ repos:
         name: HCL Format
         entry: terragrunt hclfmt --terragrunt-check --terragrunt-diff --terragrunt-hclfmt-file
         language: system
-        files: ^packages/nix/.*\.hcl$
+        files: ^packages/cli/.*\.hcl$
         pass_filenames: true
         description: "Runs hclfmt on HCL files"
         fail_fast: true
@@ -81,4 +81,3 @@ repos:
         pass_filenames: true
         description: "Runs linting for the website code"
         fail_fast: true
-

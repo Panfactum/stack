@@ -30,7 +30,6 @@ export async function manualZoneSetup(inputs: {
     const domainConfig: Partial<DomainConfig> = {
         env,
         domain,
-        module: MODULES.AWS_DNS_ZONES
     }
 
     ///////////////////////////////////////////////

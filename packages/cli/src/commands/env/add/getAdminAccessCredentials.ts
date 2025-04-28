@@ -34,6 +34,7 @@ export async function getAdminAccessCredentials(context: PanfactumContext): Prom
         // First, check the credentials are valid
         try {
             const stsClient = new STSClient({
+                region: "us-east-1",
                 credentials: {
                     accessKeyId,
                     secretAccessKey
@@ -52,6 +53,7 @@ export async function getAdminAccessCredentials(context: PanfactumContext): Prom
     while (true) {
         try {
             const iamClient = new IAMClient({
+                region: "us-east-1",
                 credentials: {
                     accessKeyId,
                     secretAccessKey

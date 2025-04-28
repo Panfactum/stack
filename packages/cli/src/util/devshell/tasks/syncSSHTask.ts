@@ -47,7 +47,7 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
     })
 
     return {
-        title: "Sync SSH bastion connection info to DevShell",
+        title: "Sync SSH bastion connection info",
         task: async (_, parentTask) => {
 
             const { ssh_dir: sshDir, environments_dir: environmentsDir } = context.repoVariables;

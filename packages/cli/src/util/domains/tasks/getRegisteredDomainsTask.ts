@@ -31,9 +31,9 @@ export async function getRegisteredDomainsTask<T extends {}>(inputs: {
     return {
         domainConfigs,
         task: {
-            title: "Get registered domains from all environments",
+            title: "Get registered domains",
             task: async (_, parentTask) => {
-                const subtasks = parentTask.newListr([])
+                const subtasks = parentTask.newListr([], { concurrent: true })
                 const glob = new Glob(join(environmentsDir, "*", "*", MODULES.AWS_REGISTERED_DOMAINS, "terragrunt.hcl"));
                 const domainModuleHCLPaths = Array.from(glob.scanSync(environmentsDir));
                 for (const hclPath of domainModuleHCLPaths) {
@@ -47,7 +47,7 @@ export async function getRegisteredDomainsTask<T extends {}>(inputs: {
                         throw new CLIError("Environment is unknown")
                     }
                     subtasks.add({
-                        title: context.logger.applyColors(`Get registered domains ${environment}`, { lowlights: [environment] }),
+                        title: `Get ${environment} registered domains`,
                         task: async () => {
                             const moduleOutput = await terragruntOutput({
                                 context,
@@ -63,10 +63,9 @@ export async function getRegisteredDomainsTask<T extends {}>(inputs: {
                                     zoneId,
                                     recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
                                     env: {
-                                        name: environment!,
+                                        name: environment,
                                         path: envDir
                                     },
-                                    module: MODULES.AWS_REGISTERED_DOMAINS
                                 }
                             })
                         }

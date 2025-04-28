@@ -1,4 +1,3 @@
-import { confirm } from "@inquirer/prompts";
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
 import type { PanfactumContext } from "@/context/context";
 
@@ -24,7 +23,7 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
     }
 
     while (true) {
-        const ready = await confirm({
+        const ready = await context.logger.confirm({
             message: `Do you have access to the IAM user credentials for your new account?`,
         });
 

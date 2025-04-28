@@ -43,7 +43,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
     const { context } = inputs;
 
     return {
-        title: "Sync Kubernetes clusters credentials to DevShell",
+        title: "Sync Kubernetes clusters credentials",
         task: async (_, parentTask) => {
             const { kube_dir: kubeDir, environments_dir: environmentsDir } =
                 context.repoVariables;
@@ -80,7 +80,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
             // Add subtasks for fetching the module outputs
             ///////////////////////////////////////////////////////
             subtasks.add({
-                title: "Retrive info for clusters",
+                title: "Retrieve info for clusters",
                 task: (_, subtask) => {
                     const subsubtasks = subtask.newListr([], { concurrent: true })
                     eksHCLPaths.forEach((eksHCLPath) => {

@@ -12,7 +12,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
     const { context } = inputs;
 
     return {
-        title: "Sync Standard Files",
+        title: "Sync standard files",
         task: async (_, parentTask) => {
 
             const subtasks = parentTask.newListr([])

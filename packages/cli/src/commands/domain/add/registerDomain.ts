@@ -60,7 +60,6 @@ export async function registerDomain(inputs: {
     const domainConfig: Partial<DomainConfig> = {
         domain,
         env,
-        module: MODULES.AWS_REGISTERED_DOMAINS,
     }
 
     ////////////////////////////////////////////////////////
