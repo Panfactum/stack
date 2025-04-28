@@ -2,6 +2,7 @@ import path from "node:path";
 import { z } from "zod";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
+import { checkConnection } from "@/util/network/checkConnection";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getSSMCommandOutput } from "../../../util/aws/getSSMCommandOutput";
@@ -169,13 +170,10 @@ export const vpcNetworkTest = async ({
       }
 
       // Step 6: Ensure that the NAT_IP rejects inbound traffic
-      await execute({
-        command: ["ping", "-q", "-w", "3", "-c", "1", natIp],
-        context,
-        workingDirectory: process.cwd(),
-        errorMessage: `Network traffic not blocked to ${natIp}!`,
-        isSuccess: ({ stdout }) => stdout.includes("100% packet loss"),
-      });
+      const isReachable = await checkConnection(natIp);
+      if (isReachable) {
+        throw new CLIError(`${natIp} is NOT blocking inbound traffic!`);
+      }
 
       task.output = context.logger.applyColors(
         `Test completed successfully for ${subnet.subnet}.`,
