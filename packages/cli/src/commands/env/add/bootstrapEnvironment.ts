@@ -1,5 +1,6 @@
 import { join } from "node:path"
 import { GetRoleCommand, IAMClient, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk/client-iam";
+import { AWSOrganizationsNotInUseException, DescribeOrganizationCommand, OrganizationsClient } from "@aws-sdk/client-organizations";
 import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { Listr } from "listr2";
 import { stringify, parse } from "yaml";
@@ -581,7 +582,8 @@ export async function bootstrapEnvironment(inputs: {
                         state: string;
                         countryCode: string;
                         postalCode: string;
-                    }
+                    },
+                    orgId?: string;
                 }
                 return parentTask.newListr<OrgCreateTaskContext>([
                     {
@@ -603,6 +605,39 @@ export async function bootstrapEnvironment(inputs: {
                         module: MODULES.AWS_ORGANIZATION,
                         taskTitle: "Deploy AWS Organization updates",
                         hclIfMissing: await Bun.file(orgHCL).text(),
+                        imports: {
+                            "aws_organizations_organization.org": {
+                                shouldImport: async (ctx) => {
+                                    try {
+                                        const organizationsClient = new OrganizationsClient({
+                                            region: "us-east-1",
+                                            profile
+                                        });
+
+                                        const describeOrgCommand = new DescribeOrganizationCommand({});
+                                        const orgResponse = await organizationsClient.send(describeOrgCommand);
+
+                                        const id = orgResponse.Organization?.Id;
+
+                                        if (id) {
+                                            ctx.orgId = id
+                                            return true;
+                                        } else {
+                                            return false
+                                        }
+                                    } catch (error) {
+                                        // If the error is because organization doesn't exist, return false
+                                        if (error instanceof AWSOrganizationsNotInUseException || (error instanceof Error && error.name === 'AWSOrganizationsNotInUseException')) {
+                                            return false;
+                                        }
+                                        // Log other errors but still return false to create new org
+                                        context.logger.debug(`Failed to check for existing AWS organization: ${JSON.stringify(error)}`);
+                                        return false;
+                                    }
+                                },
+                                resourceId: (ctx) => ctx.orgId!
+                            }
+                        },
                         inputUpdates: {
                             primary_contact: defineInputUpdate({
                                 schema: z.object({
