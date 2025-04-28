@@ -8,6 +8,7 @@ import { DomainAddCommand } from "./commands/domain/add/command.ts";
 import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
 import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";
 import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
+import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./context/context.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
@@ -31,6 +32,7 @@ cli.register(EnvironmentInstallCommand)
 cli.register(EnvironmentRemoveCommand)
 cli.register(DomainAddCommand)
 cli.register(DomainRemoveCommand)
+cli.register(WelcomeCommand)
 
 const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
 

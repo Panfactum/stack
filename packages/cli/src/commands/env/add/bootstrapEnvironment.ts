@@ -456,10 +456,10 @@ export async function bootstrapEnvironment(inputs: {
             taskTitle: "Deploy IaC state bucket",
             imports: {
                 "aws_s3_bucket.state": {
-                    resourceId: (ctx) => ctx.bucketName!
+                    resourceId: async (ctx) => ctx.bucketName
                 },
                 "aws_dynamodb_table.lock": {
-                    resourceId: (ctx) => ctx.locktableName!
+                    resourceId: async (ctx) => ctx.locktableName
                 }
             }
         })
@@ -607,7 +607,7 @@ export async function bootstrapEnvironment(inputs: {
                         hclIfMissing: await Bun.file(orgHCL).text(),
                         imports: {
                             "aws_organizations_organization.org": {
-                                shouldImport: async (ctx) => {
+                                resourceId: async () => {
                                     try {
                                         const organizationsClient = new OrganizationsClient({
                                             region: "us-east-1",
@@ -620,22 +620,20 @@ export async function bootstrapEnvironment(inputs: {
                                         const id = orgResponse.Organization?.Id;
 
                                         if (id) {
-                                            ctx.orgId = id
-                                            return true;
+                                            return id
                                         } else {
-                                            return false
+                                            return undefined
                                         }
                                     } catch (error) {
                                         // If the error is because organization doesn't exist, return false
                                         if (error instanceof AWSOrganizationsNotInUseException || (error instanceof Error && error.name === 'AWSOrganizationsNotInUseException')) {
-                                            return false;
+                                            return undefined;
                                         }
                                         // Log other errors but still return false to create new org
                                         context.logger.debug(`Failed to check for existing AWS organization: ${JSON.stringify(error)}`);
-                                        return false;
+                                        return undefined;
                                     }
-                                },
-                                resourceId: (ctx) => ctx.orgId!
+                                }
                             }
                         },
                         inputUpdates: {
@@ -699,7 +697,7 @@ export async function bootstrapEnvironment(inputs: {
                 },
                 imports: {
                     "aws_iam_service_linked_role.spot": {
-                        shouldImport: async (ctx) => {
+                        resourceId: async (ctx) => {
                             const credentials = await getCredsFromFile({ context, profile: ctx.profile! });
                             try {
                                 const iamClient = new IAMClient({
@@ -712,18 +710,17 @@ export async function bootstrapEnvironment(inputs: {
                                 });
 
                                 await iamClient.send(getRoleCommand);
-                                return true;
+                                return `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`;
                             } catch (error) {
                                 if (error instanceof NoSuchEntityException) {
-                                    return false;
+                                    return undefined;
                                 } else {
                                     // For any other error, swallow it, just in case we can recover
                                     context.logger.debug(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`)
-                                    return false;
+                                    return undefined;
                                 }
                             }
-                        },
-                        resourceId: (ctx) => `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
+                        }
                     }
                 }
             })

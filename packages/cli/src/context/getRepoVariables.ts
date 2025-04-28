@@ -133,6 +133,7 @@ export const getRepoVariables = async () => {
           message: "nats_dir must not contain a trailing /",
         })
         .default(".nats"),
+      installation_id: z.string().uuid().optional()
     })
 
   const validatedValues: z.infer<typeof panfactumYamlSchema> & { iac_relative_dir?: string } = panfactumYamlSchema.parse(values);
