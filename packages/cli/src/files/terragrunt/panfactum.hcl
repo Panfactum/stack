@@ -292,7 +292,7 @@ generate "authentik_provider" {
   disable     = !local.enable_authentik
   if_disabled = "remove"
   contents = templatefile("${local.provider_folder}/authentik.tftpl", {
-    authentik_url = local.vars.authentik_url
+    authentik_url = lookup(local.vars, "authentik_url", "@@TERRAGRUNT_INVALID@@")
   })
 }
 

@@ -11,7 +11,6 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
 
     override async catch(error: unknown) {
         if (error instanceof Error) {
-            this.context.logger.error(error.constructor.name)
             this.context.logger.error(error.message)
 
             // The detailed error message should always come from the error cause 

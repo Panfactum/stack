@@ -116,7 +116,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                             const inputSchemas = Object.fromEntries(
                                 Object.entries(inputUpdates).map(([input, { schema }]) => [
                                     input,
-                                    schema,
+                                    schema.optional(),
                                 ])
                             );
                             const originalModuleConfig = await readYAMLFile({

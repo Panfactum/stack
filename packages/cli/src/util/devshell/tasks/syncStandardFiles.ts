@@ -15,7 +15,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
         title: "Sync standard files",
         task: async (_, parentTask) => {
 
-            const subtasks = parentTask.newListr([])
+            const subtasks = parentTask.newListr([], { concurrent: true })
 
             subtasks.add({
                 title: "Update HCL files",
@@ -23,7 +23,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
                     const environmentsDir = context.repoVariables.environments_dir;
                     await Promise.all(TERRAGRUNT_FILES.map(async ({ path, contentPath }) => {
                         const filePath = join(environmentsDir, path);
-                        await writeFile({ context, path: filePath, contents: await Bun.file(contentPath).text() })
+                        await writeFile({ context, path: filePath, contents: await Bun.file(contentPath).text(), overwrite: true })
                     }))
                 }
             })
@@ -59,18 +59,21 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
                         })
                     ])
                 }
-            }),
-                subtasks.add({
-                    title: "Update .envrc",
-                    task: async () => {
-                        await writeFile({
-                            context,
-                            path: join(context.repoVariables.repo_root, ".envrc"),
-                            contents: await Bun.file(envRCPath).text(),
-                            overwrite: true
-                        })
-                    }
-                })
+            })
+
+            subtasks.add({
+                title: "Update .envrc",
+                task: async () => {
+                    await writeFile({
+                        context,
+                        path: join(context.repoVariables.repo_root, ".envrc"),
+                        contents: await Bun.file(envRCPath).text(),
+                        overwrite: true
+                    })
+                }
+            })
+
+            return subtasks;
         }
     }
 }

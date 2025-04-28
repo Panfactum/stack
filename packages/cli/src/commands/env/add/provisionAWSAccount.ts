@@ -58,10 +58,13 @@ export async function provisionAWSAccount(inputs: {
                     {
                         title: "Collect AWS contact information",
                         task: async (ctx, task) => {
-                            task.output = `It looks like this is the first environment for your organization, so we will need to complete a couple\n` +
-                                `steps to prepare your organization for deploying environments.\n\n` +
-                                `Firstly, AWS requires contact information to ensure you receive important infrastructure notifications.\n` +
-                                `This will be automatically synced across all your environments.\n\n`
+                            task.output = context.logger.applyColors(`
+                                It looks like this is the first environment for your organization, so we will need to complete a couple
+                                steps to prepare your organization for deploying environments.
+
+                                Firstly, AWS requires contact information to ensure you receive important infrastructure notifications.
+                                This will be automatically synced across all your environments.
+                            `, { style: "warning" })
                             ctx.primaryContactInfo = await getPrimaryContactInfo({ context, parentTask: task })
                         }
                     },
@@ -74,13 +77,37 @@ export async function provisionAWSAccount(inputs: {
                         taskTitle: "Deploy AWS Organization updates",
                         hclIfMissing: await Bun.file(orgHCL).text(),
                         inputUpdates: {
-                            account_access_configuration: defineInputUpdate({
-                                schema: z.record(z.string(), z.string().optional()).optional().default({}),
+                            primary_contact: defineInputUpdate({
+                                schema: z.object({
+                                    full_name: z.string(),
+                                    phone_number: z.string(),
+                                    address_line_1: z.string(),
+                                    address_line_2: z.string().optional(),
+                                    address_line_3: z.string().optional(),
+                                    city: z.string(),
+                                    company_name: z.string().optional(),
+                                    country_code: z.string(),
+                                    district_or_county: z.string().optional(),
+                                    postal_code: z.string(),
+                                    state_or_region: z.string(),
+                                    website_url: z.string().optional()
+                                }).optional(),
                                 update: (oldInput, ctx) => {
                                     if (!ctx.primaryContactInfo) {
                                         throw new CLIError("Primary contact info missing. This should never happen.")
                                     }
-                                    return { ...oldInput, ...ctx.primaryContactInfo }
+                                    return {
+                                        ...oldInput,
+                                        full_name: ctx.primaryContactInfo.fullName,
+                                        phone_number: ctx.primaryContactInfo.phoneNumber,
+                                        address_line_1: ctx.primaryContactInfo.address1,
+                                        address_line_2: ctx.primaryContactInfo.address2,
+                                        city: ctx.primaryContactInfo.city,
+                                        company_name: ctx.primaryContactInfo.orgName,
+                                        country_code: ctx.primaryContactInfo.countryCode,
+                                        postal_code: ctx.primaryContactInfo.postalCode,
+                                        state_or_region: ctx.primaryContactInfo.state,
+                                    }
                                 }
                             })
                         }
