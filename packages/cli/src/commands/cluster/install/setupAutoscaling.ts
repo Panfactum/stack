@@ -7,6 +7,7 @@ import kubeSchedulerTerragruntHcl from "@/templates/kube_scheduler_terragrunt.hc
 import kubeVpaTerragruntHcl from "@/templates/kube_vpa_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
+import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
@@ -22,6 +23,16 @@ export async function setupAutoscaling(
 ) {
   const { awsProfile, context, environment, clusterPath, region, slaTarget } =
     options;
+
+
+  const { root_token: vaultRootToken } = await sopsDecrypt({
+    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
+    context,
+    validationSchema: z.object({
+      root_token: z.string(),
+    }),
+  });
+
 
   interface Context {
     vaultProxyPid?: number;
@@ -42,6 +53,10 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Metrics Server",
               context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
               environment,
               region,
               module: MODULES.KUBE_METRICS_SERVER,
@@ -53,6 +68,10 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Vertical Pod Autoscaler",
               context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
               environment,
               region,
               module: MODULES.KUBE_VPA,
@@ -85,6 +104,10 @@ export async function setupAutoscaling(
             await buildDeployModuleTask({
               taskTitle: "Deploy Karpenter",
               context,
+              env: {
+                ...process.env, //TODO: @seth Use context.env
+                VAULT_TOKEN: vaultRootToken,
+              },
               environment,
               region,
               module: MODULES.KUBE_KARPENTER,
@@ -186,6 +209,7 @@ export async function setupAutoscaling(
     //     outputBar: 5,
     //   },
     // },
+
   ])
 
   return tasks;
