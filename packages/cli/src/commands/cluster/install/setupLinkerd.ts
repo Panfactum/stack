@@ -13,12 +13,10 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupLinkerd(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } = options;
 
-  const tasks = mainTask.newListr([]);
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -28,92 +26,88 @@ export async function setupLinkerd(
     }),
   });
 
-  tasks.add({
-    skip: () => completed,
-    title: "Deploy Linkerd Service Mesh",
-    task: async (_, parentTask) => {
-      interface Context {
-        vaultProxyPid?: number;
-        vaultProxyPort?: number;
-      }
-      return parentTask.newListr<Context>([
-        {
-          title: "Verify access",
-          task: async () => {
-            await getIdentity({ context, profile: awsProfile });
+  interface Context {
+    vaultProxyPid?: number;
+    vaultProxyPort?: number;
+  }
+
+  const tasks = mainTask.newListr<Context>([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
+    },
+    {
+      title: "Start Vault Proxy",
+      task: async (ctx) => {
+        const { pid, port } = await startVaultProxy({
+          env: {
+            ...process.env,
+            VAULT_TOKEN: vaultRootToken,
           },
-        },
-        {
-          title: "Start Vault Proxy",
-          task: async (ctx) => {
-            const { pid, port } = await startVaultProxy({
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
-            });
-            ctx.vaultProxyPid = pid;
-            ctx.vaultProxyPort = port;
-          },
-        },
-        {
-          task: async (ctx, task) => {
-            return task.newListr<Context>(
-              [
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Linkerd Service Mesh",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_LINKERD,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(kubeLinkerdTerragruntHcl).text(),
-                }),
-              ],
-              { ctx }
-            );
-          },
-        },
-        // TODO: @seth - Ensure the kubectx is correct for Linkerd
-        {
-          title: "Run Linkerd Control Plane Checks",
-          task: async (ctx) => {
-            // TODO: @eth - Logging
-            await execute({
-              command: ["linkerd", "check", "--cni-namespace=linkerd"],
+          modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
+        });
+        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyPort = port;
+      },
+    },
+    {
+      task: async (ctx, task) => {
+        return task.newListr<Context>(
+          [
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Linkerd Service Mesh",
               context,
-              workingDirectory: process.cwd(),
-              errorMessage: "Linkerd control plane checks failed",
-              isSuccess: ({ exitCode, stdout }) =>
-                exitCode === 0 ||
-                (stdout as string).includes("Status check results are √"),
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                 VAULT_TOKEN: vaultRootToken,
               },
-            });
-          },
-          rendererOptions: {
-            outputBar: 5,
-          },
-        },
-        {
-          title: "Stop Vault Proxy",
-          task: async (ctx) => {
-            if (ctx.vaultProxyPid) {
-              killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
-            }
-          },
-        },
-      ]);
+              environment,
+              region,
+              module: MODULES.KUBE_LINKERD,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeLinkerdTerragruntHcl).text(),
+            }),
+          ],
+          { ctx }
+        );
+      },
     },
-  });
+    // TODO: @seth - Ensure the kubectx is correct for Linkerd
+    {
+      title: "Run Linkerd Control Plane Checks",
+      task: async (ctx) => {
+        // TODO: @eth - Logging
+        await execute({
+          command: ["linkerd", "check", "--cni-namespace=linkerd"],
+          context,
+          workingDirectory: process.cwd(),
+          errorMessage: "Linkerd control plane checks failed",
+          isSuccess: ({ exitCode, stdout }) =>
+            exitCode === 0 ||
+            (stdout as string).includes("Status check results are √"),
+          env: {
+            ...process.env,
+            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+            VAULT_TOKEN: vaultRootToken,
+          },
+        });
+      },
+      rendererOptions: {
+        outputBar: 5,
+      },
+    },
+    {
+      title: "Stop Vault Proxy",
+      task: async (ctx) => {
+        if (ctx.vaultProxyPid) {
+          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+        }
+      },
+    },
+  ]);
+
   return tasks;
 }

@@ -34,7 +34,6 @@ const SETUP_STEPS: Array<{
   id: string;
   setup: (
     options: InstallClusterStepOptions,
-    completed: boolean,
     mainTask: PanfactumTaskWrapper
   ) => Promise<Listr>;
   completed: boolean;
@@ -285,7 +284,7 @@ export class InstallClusterCommand extends PanfactumCommand {
         title: this.context.logger.applyColors(`${label} ${completed ? "(skipped)" : ""}`, { lowlights: ["(skipped)"] }),
         skip: () => completed,
         task: async (_, mainTask) => {
-          return setup(options, completed, mainTask);
+          return setup(options, mainTask);
         }
       });
     }
