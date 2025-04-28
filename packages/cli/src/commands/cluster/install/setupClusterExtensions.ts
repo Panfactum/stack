@@ -22,13 +22,11 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupClusterExtensions(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } =
     options;
 
-  const tasks = mainTask.newListr([])
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -38,207 +36,203 @@ export async function setupClusterExtensions(
     }),
   });
 
-  tasks.add({
-    skip: () => completed,
-    title: "Deploy Cluster Extensions",
-    task: async (_, parentTask) => {
-      interface Context {
-        vaultProxyPid?: number;
-        vaultProxyPort?: number;
-      }
-      return parentTask.newListr<Context>([
-        {
-          title: "Verify access",
-          task: async () => {
-            await getIdentity({ context, profile: awsProfile });
-          },
-        },
-        {
-          task: async (ctx, parentTask) => {
-            return parentTask.newListr(
-              [
-                {
-                  task: async (ctx, parentTask) => {
-                    return parentTask.newListr(
-                      [
-                        await buildDeployModuleTask({
-                          taskTitle: "Deploy Bastion",
-                          context,
-                          env: {
-                            ...process.env,
-                            VAULT_TOKEN: vaultRootToken,
-                          },
-                          environment,
-                          region,
-                          module: MODULES.KUBE_BASTION,
-                          initModule: true,
-                          hclIfMissing: await Bun.file(
-                            kubeBastionTerragruntHcl
-                          ).text(),
-                        }),
-                        {
-                          title: "Configuring Bastion Connectivity",
-                          task: async () => {
-                            await buildSyncSSHTask({
-                              context,
-                            });
-                          },
-                        },
-                      ],
-                      { ctx, concurrent: false }
-                    );
-                  },
-                },
-                {
-                  task: async (ctx, parentTask) => {
-                    return parentTask.newListr(
-                      [
-                        await buildDeployModuleTask({
-                          taskTitle: "Deploy External Snapshotter",
-                          context,
-                          env: {
-                            ...process.env,
-                            VAULT_TOKEN: vaultRootToken,
-                          },
-                          environment,
-                          region,
-                          module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER,
-                          initModule: true,
-                          hclIfMissing: await Bun.file(
-                            kubeExternalSnapshotterTerragruntHcl
-                          ).text(),
-                        }),
-                        await buildDeployModuleTask({
-                          taskTitle: "Deploy Velero",
-                          context,
-                          env: {
-                            ...process.env,
-                            VAULT_TOKEN: vaultRootToken,
-                          },
-                          environment,
-                          region,
-                          module: MODULES.KUBE_VELERO,
-                          initModule: true,
-                          hclIfMissing: await Bun.file(
-                            kubeVeleroTerragruntHcl
-                          ).text(),
-                        }),
-                      ],
-                      { ctx, concurrent: false }
-                    );
-                  },
-                },
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy KEDA",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_KEDA,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(kubeKedaTerragruntHcl).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Reloader",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_RELOADER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeReloaderTerragruntHcl
-                  ).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Node Image Cache Controller",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_NODE_IMAGE_CACHE_CONTROLLER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeNodeImageCacheControllerTerragruntHcl
-                  ).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy PVC Autoresizer",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_PVC_AUTORESIZER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubePvcAutoresizerTerragruntHcl
-                  ).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Descheduler",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_DESCHEDULER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeDeschedulerTerragruntHcl
-                  ).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy PostgreSQL via CloudNativePG",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_CLOUDNATIVE_PG,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(postgresTerragruntHcl).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "EKS NodePools Adjustment",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.AWS_EKS,
-                  inputUpdates: {
-                    bootstrap_mode_enabled: defineInputUpdate({
-                      schema: z.boolean(),
-                      update: () => false,
-                    }),
-                  },
-                }),
-              ],
-              { ctx, concurrent: true }
-            );
-          },
-        },
-      ]);
+
+  interface Context {
+    vaultProxyPid?: number;
+    vaultProxyPort?: number;
+  }
+
+  const tasks = mainTask.newListr<Context>([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
     },
-  });
+    {
+      task: async (ctx, parentTask) => {
+        return parentTask.newListr(
+          [
+            {
+              task: async (ctx, parentTask) => {
+                return parentTask.newListr(
+                  [
+                    await buildDeployModuleTask({
+                      taskTitle: "Deploy Bastion",
+                      context,
+                      env: {
+                        ...process.env,
+                        VAULT_TOKEN: vaultRootToken,
+                      },
+                      environment,
+                      region,
+                      module: MODULES.KUBE_BASTION,
+                      initModule: true,
+                      hclIfMissing: await Bun.file(
+                        kubeBastionTerragruntHcl
+                      ).text(),
+                    }),
+                    {
+                      title: "Configuring Bastion Connectivity",
+                      task: async () => {
+                        await buildSyncSSHTask({
+                          context,
+                        });
+                      },
+                    },
+                  ],
+                  { ctx, concurrent: false }
+                );
+              },
+            },
+            {
+              task: async (ctx, parentTask) => {
+                return parentTask.newListr(
+                  [
+                    await buildDeployModuleTask({
+                      taskTitle: "Deploy External Snapshotter",
+                      context,
+                      env: {
+                        ...process.env,
+                        VAULT_TOKEN: vaultRootToken,
+                      },
+                      environment,
+                      region,
+                      module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER,
+                      initModule: true,
+                      hclIfMissing: await Bun.file(
+                        kubeExternalSnapshotterTerragruntHcl
+                      ).text(),
+                    }),
+                    await buildDeployModuleTask({
+                      taskTitle: "Deploy Velero",
+                      context,
+                      env: {
+                        ...process.env,
+                        VAULT_TOKEN: vaultRootToken,
+                      },
+                      environment,
+                      region,
+                      module: MODULES.KUBE_VELERO,
+                      initModule: true,
+                      hclIfMissing: await Bun.file(
+                        kubeVeleroTerragruntHcl
+                      ).text(),
+                    }),
+                  ],
+                  { ctx, concurrent: false }
+                );
+              },
+            },
+            await buildDeployModuleTask({
+              taskTitle: "Deploy KEDA",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_KEDA,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeKedaTerragruntHcl).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Reloader",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_RELOADER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeReloaderTerragruntHcl
+              ).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Node Image Cache Controller",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_NODE_IMAGE_CACHE_CONTROLLER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeNodeImageCacheControllerTerragruntHcl
+              ).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy PVC Autoresizer",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_PVC_AUTORESIZER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubePvcAutoresizerTerragruntHcl
+              ).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Descheduler",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_DESCHEDULER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeDeschedulerTerragruntHcl
+              ).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy PostgreSQL via CloudNativePG",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_CLOUDNATIVE_PG,
+              initModule: true,
+              hclIfMissing: await Bun.file(postgresTerragruntHcl).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "EKS NodePools Adjustment",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.AWS_EKS,
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+          ],
+          { ctx, concurrent: true }
+        );
+      },
+    },
+  ])
 
   return tasks;
 }

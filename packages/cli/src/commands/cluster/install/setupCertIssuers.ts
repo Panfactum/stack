@@ -16,7 +16,6 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupCertificateIssuers(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, clusterPath, context, domains, environment, region } = options;
@@ -31,177 +30,169 @@ export async function setupCertificateIssuers(
     }),
   });
 
-  const tasks = mainTask.newListr([])
+  interface Context {
+    alertEmail?: string;
+    route53Zones?: string[];
+    productionEnvironment?: boolean;
+    vaultProxyPid?: number;
+    vaultProxyPort?: number;
+  }
 
-  tasks.add({
-    skip: () => completed,
-    title: "Deploy Certificate Issuers",
-    task: async (_, parentTask) => {
-      interface Context {
-        alertEmail?: string;
-        route53Zones?: string[];
-        productionEnvironment?: boolean;
-        vaultProxyPid?: number;
-        vaultProxyPort?: number;
-      }
-
-      return parentTask.newListr<Context>([
-        {
-          title: "Verify access",
-          task: async () => {
-            await getIdentity({ context, profile: awsProfile });
-          },
-        },
-        {
-          title: "Get Certificate Issuers Configuration",
-          task: async (ctx, task) => {
-            const originalInputs = await readYAMLFile({
-              filePath: path.join(
-                clusterPath,
-                MODULES.KUBE_CERT_ISSUERS,
-                "module.yaml"
-              ),
-              context,
-              validationSchema: z
+  const tasks = mainTask.newListr<Context>([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
+    },
+    {
+      title: "Get Certificate Issuers Configuration",
+      task: async (ctx, task) => {
+        const originalInputs = await readYAMLFile({
+          filePath: path.join(
+            clusterPath,
+            MODULES.KUBE_CERT_ISSUERS,
+            "module.yaml"
+          ),
+          context,
+          validationSchema: z
+            .object({
+              extra_inputs: z
                 .object({
-                  extra_inputs: z
-                    .object({
-                      alert_email: z.string().optional(),
-                      route53_zones: z
-                        .record(
-                          z.string(),
-                          z.object({
-                            zone_id: z.string(),
-                            record_manager_role_arn: z.string(),
-                          })
-                        )
-                        .optional(),
-                    })
-                    .passthrough()
-                    .optional()
-                    .default({}),
+                  alert_email: z.string().optional(),
+                  route53_zones: z
+                    .record(
+                      z.string(),
+                      z.object({
+                        zone_id: z.string(),
+                        record_manager_role_arn: z.string(),
+                      })
+                    )
+                    .optional(),
                 })
-                .passthrough(),
-            });
+                .passthrough()
+                .optional()
+                .default({}),
+            })
+            .passthrough(),
+        });
 
-            if (originalInputs?.extra_inputs?.alert_email) {
-              ctx.alertEmail = originalInputs.extra_inputs.alert_email;
-              task.skip(
-                "Already have Certificate Issuers configuration, skipping..."
-              );
-              return;
+        if (originalInputs?.extra_inputs?.alert_email) {
+          ctx.alertEmail = originalInputs.extra_inputs.alert_email;
+          task.skip(
+            "Already have Certificate Issuers configuration, skipping..."
+          );
+          return;
+        }
+
+        // TODO: @seth - Just make this the account contact email
+        // let's us remove another user input
+        ctx.alertEmail = await context.logger.input({
+          explainer: `
+            This email will receive notifications if your certificates fail to renew.
+            Enter an email that is actively monitored to prevent unexpected service disruptions.
+          `,
+          message: "Email:",
+          validate: (value: string) => {
+            const { error } = z.string().email().safeParse(value);
+            if (error) {
+              return error.issues?.[0]?.message || "Please enter a valid email address";
             }
 
-            // TODO: @seth - Just make this the account contact email
-            // let's us remove another user input
-            ctx.alertEmail = await context.logger.input({
-              explainer: `
-                This email will receive notifications if your certificates fail to renew.
-                Enter an email that is actively monitored to prevent unexpected service disruptions.
-              `,
-              message: "Email:",
-              validate: (value: string) => {
-                const { error } = z.string().email().safeParse(value);
-                if (error) {
-                  return error.issues?.[0]?.message || "Please enter a valid email address";
-                }
-
-                return true;
-              }
-            })
+            return true;
           }
-        },
-        {
-          title: "Start Vault Proxy",
-          task: async (ctx) => {
-            const { pid, port } = await startVaultProxy({
+        })
+      }
+    },
+    {
+      title: "Start Vault Proxy",
+      task: async (ctx) => {
+        const { pid, port } = await startVaultProxy({
+          env: {
+            ...process.env,
+            VAULT_TOKEN: vaultRootToken,
+          },
+          modulePath: join(clusterPath, MODULES.KUBE_CERT_ISSUERS),
+        });
+        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyPort = port;
+      },
+    },
+    {
+      task: async (ctx, task) => {
+        return task.newListr<Context>(
+          [
+            await buildDeployModuleTask<Context>({
+              taskTitle: "Deploy Certificate Issuers",
+              context,
               env: {
                 ...process.env,
                 VAULT_TOKEN: vaultRootToken,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
-              modulePath: join(clusterPath, MODULES.KUBE_CERT_ISSUERS),
-            });
-            ctx.vaultProxyPid = pid;
-            ctx.vaultProxyPort = port;
-          },
-        },
-        {
-          task: async (ctx, task) => {
-            return task.newListr<Context>(
-              [
-                await buildDeployModuleTask<Context>({
-                  taskTitle: "Deploy Certificate Issuers",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_CERT_ISSUERS,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(kubeCertIssuersTerragruntHcl).text(),
-                  inputUpdates: {
-                    alert_email: defineInputUpdate({
-                      schema: z.string(),
-                      update: (_, ctx) => ctx.alertEmail!,
-                    }),
-                    route53_zones: defineInputUpdate({
-                      schema: z
-                        .record(
-                          z.string(),
-                          z.object({
-                            zone_id: z.string(),
-                            record_manager_role_arn: z.string(),
-                          })
-                        )
-                        .optional(),
-                      update: () => domains,
-                    }),
-                    kube_domain: defineInputUpdate({
-                      schema: z.string(),
-                      update: () => kubeDomain,
-                    }),
-                  },
+              environment,
+              region,
+              module: MODULES.KUBE_CERT_ISSUERS,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeCertIssuersTerragruntHcl).text(),
+              inputUpdates: {
+                alert_email: defineInputUpdate({
+                  schema: z.string(),
+                  update: (_, ctx) => ctx.alertEmail!,
                 }),
-                // TODO: rollout reset of cert manager every 90 seconds until the above task is completed
-                // check for the certificate to be provisioned
-                await buildDeployModuleTask<Context>({
-                  taskTitle: "Deploy The First Certificate",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_TOKEN: vaultRootToken,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_CERT_MANAGER,
-                  initModule: true,
-                  inputUpdates: {
-                    self_generated_certs_enabled: defineInputUpdate({
-                      schema: z.boolean(),
-                      update: () => false,
-                    }),
-                  },
+                route53_zones: defineInputUpdate({
+                  schema: z
+                    .record(
+                      z.string(),
+                      z.object({
+                        zone_id: z.string(),
+                        record_manager_role_arn: z.string(),
+                      })
+                    )
+                    .optional(),
+                  update: () => domains,
                 }),
-              ],
-              { ctx }
-            );
-          },
-        },
-        {
-          title: "Stop Vault Proxy",
-          task: async (ctx) => {
-            if (ctx.vaultProxyPid) {
-              killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
-            }
-          },
-        },
-      ]);
+                kube_domain: defineInputUpdate({
+                  schema: z.string(),
+                  update: () => kubeDomain,
+                }),
+              },
+            }),
+            // TODO: rollout reset of cert manager every 90 seconds until the above task is completed
+            // check for the certificate to be provisioned
+            await buildDeployModuleTask<Context>({
+              taskTitle: "Deploy The First Certificate",
+              context,
+              env: {
+                ...process.env,
+                VAULT_TOKEN: vaultRootToken,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_CERT_MANAGER,
+              initModule: true,
+              inputUpdates: {
+                self_generated_certs_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+          ],
+          { ctx }
+        );
+      },
     },
-  });
+    {
+      title: "Stop Vault Proxy",
+      task: async (ctx) => {
+        if (ctx.vaultProxyPid) {
+          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+        }
+      },
+    },
+  ])
 
   return tasks;
 }

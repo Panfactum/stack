@@ -8,45 +8,36 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupInternalClusterNetworking(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, region } = options;
 
-  const tasks = mainTask.newListr([])
-
-  tasks.add({
-    skip: () => completed,
-    title: "Deploy Internal Cluster Networking",
-    task: async (_, parentTask) => {
-      return parentTask.newListr([
-        {
-          title: "Verify access",
-          task: async () => {
-            await getIdentity({ context, profile: awsProfile });
-          },
-        },
-        await buildDeployModuleTask({
-          taskTitle: "Deploy Cilium",
-          context,
-          environment,
-          region,
-          module: MODULES.KUBE_CILIUM,
-          initModule: true,
-          hclIfMissing: await Bun.file(kubeCiliumTerragruntHcl).text(),
-        }),
-        await buildDeployModuleTask({
-          taskTitle: "Deploy Core DNS",
-          context,
-          environment,
-          region,
-          module: MODULES.KUBE_CORE_DNS,
-          initModule: true,
-          hclIfMissing: await Bun.file(kubeCoreDnsTerragruntHcl).text(),
-        }),
-      ]);
+  const tasks = mainTask.newListr([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
     },
-  });
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Cilium",
+      context,
+      environment,
+      region,
+      module: MODULES.KUBE_CILIUM,
+      initModule: true,
+      hclIfMissing: await Bun.file(kubeCiliumTerragruntHcl).text(),
+    }),
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Core DNS",
+      context,
+      environment,
+      region,
+      module: MODULES.KUBE_CORE_DNS,
+      initModule: true,
+      hclIfMissing: await Bun.file(kubeCoreDnsTerragruntHcl).text(),
+    }),
+  ]);
 
   return tasks;
 }

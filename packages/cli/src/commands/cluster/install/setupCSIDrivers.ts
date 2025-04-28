@@ -7,36 +7,26 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupCSIDrivers(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, region } = options;
 
-  const tasks = mainTask.newListr([])
-
-  tasks.add({
-    skip: () => completed,
-    title: "Deploy CSI Drivers",
-    task: async (_, parentTask) => {
-      return parentTask.newListr([
-        {
-          title: "Verify access",
-          task: async () => {
-            await getIdentity({ context, profile: awsProfile });
-          },
-        },
-        await buildDeployModuleTask({
-          taskTitle: "Deploy AWS EBS CSI Driver",
-          context,
-          environment,
-          region,
-          module: MODULES.KUBE_AWS_EBS_CSI,
-          initModule: true,
-          hclIfMissing: await Bun.file(awsEbsCsiDriverTerragruntHcl).text(),
-        }),
-      ]);
+  const tasks = mainTask.newListr([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
     },
-  });
-
+    await buildDeployModuleTask({
+      taskTitle: "Deploy AWS EBS CSI Driver",
+      context,
+      environment,
+      region,
+      module: MODULES.KUBE_AWS_EBS_CSI,
+      initModule: true,
+      hclIfMissing: await Bun.file(awsEbsCsiDriverTerragruntHcl).text(),
+    }),
+  ])
   return tasks;
 }

@@ -22,13 +22,11 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupAutoscaling(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region, slaTarget } =
     options;
 
-  const tasks = mainTask.newListr([])
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -38,222 +36,218 @@ export async function setupAutoscaling(
     }),
   });
 
-  tasks.add({
-    skip: () => completed,
-    title: "Deploy Autoscaling",
-    task: async (_, parentTask) => {
-      interface Context {
-        vaultProxyPid?: number;
-        vaultProxyPort?: number;
-      }
-      return parentTask.newListr<Context>([
-        {
-          title: "Verify access",
-          task: async () => {
-            await getIdentity({ context, profile: awsProfile });
+
+  interface Context {
+    vaultProxyPid?: number;
+    vaultProxyPort?: number;
+  }
+
+  const tasks = mainTask.newListr<Context>([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
+    },
+    {
+      title: "Start Vault Proxy",
+      task: async (ctx) => {
+        const { pid, port } = await startVaultProxy({
+          env: {
+            ...process.env,
+            VAULT_TOKEN: vaultRootToken,
           },
-        },
-        {
-          title: "Start Vault Proxy",
-          task: async (ctx) => {
-            const { pid, port } = await startVaultProxy({
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
-            });
-            ctx.vaultProxyPid = pid;
-            ctx.vaultProxyPort = port;
-          },
-        },
-        {
-          task: async (ctx, task) => {
-            return task.newListr<Context>(
-              [
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Metrics Server",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_METRICS_SERVER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeMetricsServerTerragruntHcl
-                  ).text(),
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Vertical Pod Autoscaler",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_VPA,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
-                }),
-              ],
-              { ctx }
-            );
-          },
-        },
-        {
-          title: "Enabling Vertical Pod Autoscaler",
-          task: async () => {
-            await upsertConfigValues({
+          modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
+        });
+        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyPort = port;
+      },
+    },
+    {
+      task: async (ctx, task) => {
+        return task.newListr<Context>(
+          [
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Metrics Server",
               context,
-              filePath: join(clusterPath, "region.yaml"),
-              values: {
-                extra_inputs: {
-                  vpa_enabled: true,
-                },
-              },
-            });
-          },
-        },
-        {
-          task: async (ctx, task) => {
-            return task.newListr<Context>(
-              [
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Karpenter",
-                  context,
-                  env: {
-                    ...process.env, //TODO: @seth Use context.env
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_KARPENTER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeKarpenterTerragruntHcl
-                  ).text(),
-                  inputUpdates: {
-                    wait: defineInputUpdate({
-                      schema: z.boolean(),
-                      update: () => false,
-                    }),
-                  },
-                }),
-                {
-                  title: "Remove Karpenter Bootstrap Variable",
-                  task: async () => {
-                    await updateModuleYAMLFile({
-                      context,
-                      environment,
-                      region,
-                      module: MODULES.KUBE_KARPENTER,
-                      inputUpdates: {
-                        wait: true,
-                      },
-                    });
-                  },
-                },
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Karpenter Node Pools",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_KARPENTER_NODE_POOLS,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeKarpenterNodePoolsTerragruntHcl
-                  ).text(),
-                  // TODO: @jack - This should be pulled from the aws_eks module
-                  // to keep things in sync
-                  inputUpdates: {
-                    node_subnets: defineInputUpdate({
-                      schema: z.array(z.string()),
-                      update: () =>
-                        slaTarget === 1
-                          ? ["PRIVATE_A"]
-                          : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
-                    }),
-                  },
-                }),
-                await buildDeployModuleTask({
-                  taskTitle: "Deploy Scheduler",
-                  context,
-                  env: {
-                    ...process.env,
-                    VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                    VAULT_TOKEN: vaultRootToken,
-                  },
-                  environment,
-                  region,
-                  module: MODULES.KUBE_SCHEDULER,
-                  initModule: true,
-                  hclIfMissing: await Bun.file(
-                    kubeSchedulerTerragruntHcl
-                  ).text(),
-                }),
-              ],
-              { ctx }
-            );
-          },
-        },
-        {
-          title: "Enable Bin Packing Scheduler",
-          task: async () => {
-            await upsertConfigValues({
-              context,
-              filePath: join(clusterPath, "region.yaml"),
-              values: {
-                extra_inputs: {
-                  panfactum_scheduler_enabled: true,
-                },
-              },
-            });
-          },
-        },
-        {
-          title: "Enable Enhanced Autoscaling",
-          task: async (ctx, task) => {
-            await terragruntApplyAll({
-              context,
-              environment,
-              region,
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
                 VAULT_TOKEN: vaultRootToken,
               },
-              onLogLine: (line) => {
-                task.output = context.logger.applyColors(line, { style: "subtle" });
+              environment,
+              region,
+              module: MODULES.KUBE_METRICS_SERVER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeMetricsServerTerragruntHcl
+              ).text(),
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Vertical Pod Autoscaler",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
               },
-            });
-          },
-          rendererOptions: {
-            outputBar: 5,
-          },
-        },
-        {
-          title: "Stop Vault Proxy",
-          task: async (ctx) => {
-            if (ctx.vaultProxyPid) {
-              killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
-            }
-          },
-        },
-      ]);
+              environment,
+              region,
+              module: MODULES.KUBE_VPA,
+              initModule: true,
+              hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
+            }),
+          ],
+          { ctx }
+        );
+      },
     },
-  });
+    {
+      title: "Enabling Vertical Pod Autoscaler",
+      task: async () => {
+        await upsertConfigValues({
+          context,
+          filePath: join(clusterPath, "region.yaml"),
+          values: {
+            extra_inputs: {
+              vpa_enabled: true,
+            },
+          },
+        });
+      },
+    },
+    {
+      task: async (ctx, task) => {
+        return task.newListr<Context>(
+          [
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Karpenter",
+              context,
+              env: {
+                ...process.env, //TODO: @seth Use context.env
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_KARPENTER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeKarpenterTerragruntHcl
+              ).text(),
+              inputUpdates: {
+                wait: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+            {
+              title: "Remove Karpenter Bootstrap Variable",
+              task: async () => {
+                await updateModuleYAMLFile({
+                  context,
+                  environment,
+                  region,
+                  module: MODULES.KUBE_KARPENTER,
+                  inputUpdates: {
+                    wait: true,
+                  },
+                });
+              },
+            },
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Karpenter Node Pools",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_KARPENTER_NODE_POOLS,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeKarpenterNodePoolsTerragruntHcl
+              ).text(),
+              // TODO: @jack - This should be pulled from the aws_eks module
+              // to keep things in sync
+              inputUpdates: {
+                node_subnets: defineInputUpdate({
+                  schema: z.array(z.string()),
+                  update: () =>
+                    slaTarget === 1
+                      ? ["PRIVATE_A"]
+                      : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
+                }),
+              },
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Scheduler",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_SCHEDULER,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeSchedulerTerragruntHcl
+              ).text(),
+            }),
+          ],
+          { ctx }
+        );
+      },
+    },
+    {
+      title: "Enable Bin Packing Scheduler",
+      task: async () => {
+        await upsertConfigValues({
+          context,
+          filePath: join(clusterPath, "region.yaml"),
+          values: {
+            extra_inputs: {
+              panfactum_scheduler_enabled: true,
+            },
+          },
+        });
+      },
+    },
+    {
+      title: "Enable Enhanced Autoscaling",
+      task: async (ctx, task) => {
+        await terragruntApplyAll({
+          context,
+          environment,
+          region,
+          env: {
+            ...process.env,
+            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+            VAULT_TOKEN: vaultRootToken,
+          },
+          onLogLine: (line) => {
+            task.output = context.logger.applyColors(line, { style: "subtle" });
+          },
+        });
+      },
+      rendererOptions: {
+        outputBar: 5,
+      },
+    },
+    {
+      title: "Stop Vault Proxy",
+      task: async (ctx) => {
+        if (ctx.vaultProxyPid) {
+          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+        }
+      },
+    },
+  ])
 
   return tasks;
 }

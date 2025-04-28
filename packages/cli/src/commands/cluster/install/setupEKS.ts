@@ -47,184 +47,172 @@ const clusterNameFormatter = (input: string): string => {
 
 export async function setupEKS(
   options: InstallClusterStepOptions,
-  completed: boolean,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, clusterPath, context, environment, region, slaTarget } =
     options;
 
-  const tasks = mainTask.newListr([]);
+  interface Context {
+    clusterName?: string;
+    clusterDescription?: string;
+  }
 
-  tasks.add({
-    skip: () => completed,
-    title: "Setup EKS Kubernetes cluster",
-    task: async (ctx, parentTask) => {
 
-      interface Context {
-        clusterName?: string;
-        clusterDescription?: string;
-      }
-
-      return parentTask.newListr<Context>(
-        [
-          {
-            title: "Verify access",
-            task: async () => {
-              await getIdentity({ context, profile: awsProfile });
-            },
-          },
-          {
-            title: "Get EKS configuration",
-            task: async (ctx, task) => {
-
-              // TODO: @seth - It feels like we should have a helper fx
-              // for the action of "reading inputs from module.yaml"
-              const originalInputs = await readYAMLFile({
-                filePath: path.join(
-                  clusterPath,
-                  MODULES.AWS_EKS,
-                  "module.yaml"
-                ),
-                context,
-                validationSchema: z
-                  .object({
-                    extra_inputs: z
-                      .object({
-                        cluster_name: z.string().optional(),
-                        cluster_description: z.string().optional(),
-                      })
-                      .passthrough()
-                      .optional()
-                      .default({}),
-                  })
-                  .passthrough(),
-              });
-              ctx.clusterName = originalInputs?.extra_inputs.cluster_name;
-              ctx.clusterDescription =
-                originalInputs?.extra_inputs.cluster_description;
-
-              if (
-                ctx.clusterName &&
-                ctx.clusterDescription
-              ) {
-                task.skip("Already have EKS configuration, skipping...");
-                return;
-              }
-
-              if (!ctx.clusterName) {
-                ctx.clusterName = await context.logger.input({
-                  task,
-                  message: "Cluster name:",
-                  default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
-                  transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
-                  validate: (value) => {
-                    const transformed = clusterNameFormatter(value);
-                    const { error } = CLUSTER_NAME.safeParse(transformed);
-                    if (error) {
-                      return error.issues[0]?.message ?? "Invalid cluster name";
-                    } else {
-                      return true;
-                    }
-                  },
-                });
-                ctx.clusterName = clusterNameFormatter(ctx.clusterName);
-              }
-
-              if (!ctx.clusterDescription) {
-                ctx.clusterDescription = await context.logger.input({
-                  task,
-                  message: "Cluster description:",
-                  default: `Panfactum cluster in the ${region} region of the ${environment} environment`,
-                  validate: (value) => {
-                    const { error } = CLUSTER_DESCRIPTION.safeParse(value);
-                    if (error) {
-                      return (
-                        error.issues[0]?.message ??
-                        "Invalid cluster description"
-                      );
-                    } else {
-                      return true;
-                    }
-                  },
-                });
-              }
-            },
-          },
-          await buildDeployModuleTask<Context>({
-            taskTitle: "Deploy EKS",
-            context,
-            environment,
-            region,
-            module: MODULES.AWS_EKS,
-            initModule: true,
-            hclIfMissing: await Bun.file(awsEksTemplate).text(),
-            inputUpdates: {
-              cluster_name: defineInputUpdate({
-                schema: z.string(),
-                update: (_, ctx) => ctx.clusterName!,
-              }),
-              cluster_description: defineInputUpdate({
-                schema: z.string(),
-                update: (_, ctx) => ctx.clusterDescription!,
-              }),
-              // TODO: @jack - Move to region.yaml
-              bootstrap_mode_enabled: defineInputUpdate({
-                schema: z.boolean(),
-                update: () => true,
-              }),
-              node_subnets: defineInputUpdate({
-                schema: z.array(z.string()),
-                update: () => slaTarget === 1 ? ["PRIVATE_A"] : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
-              }),
-            },
-          }),
-          await buildSyncKubeClustersTask({
-            context,
-          }),
-          {
-            title: "Reset the cluster",
-            task: async (ctx, task) => {
-              // TODO: @seth - Would be good if this had its own subtask
-              await clusterReset({
-                awsProfile,
-                clusterName: ctx.clusterName!,
-                context,
-                region,
-                task,
-              });
-            },
-            rendererOptions: {
-              outputBar: 5,
-            },
-          },
-          {
-            title: "Update Configuration File",
-            task: async (ctx) => {
-              // TODO: @seth - This is unnecessary
-              // as we can read from `.kube/clusters.yaml
-              const moduleOutput = await terragruntOutput({
-                context,
-                environment,
-                region,
-                module: MODULES.AWS_EKS,
-                validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
-              });
-
-              await upsertConfigValues({
-                context,
-                filePath: path.join(clusterPath, "region.yaml"),
-                values: {
-                  kube_config_context: ctx.clusterName!,
-                  kube_api_server: moduleOutput.cluster_url.value,
-                },
-              });
-            },
-          },
-        ],
-        { ctx }
-      );
+  const tasks = mainTask.newListr<Context>([
+    {
+      title: "Verify access",
+      task: async () => {
+        await getIdentity({ context, profile: awsProfile });
+      },
     },
-  });
+    {
+      title: "Get EKS configuration",
+      task: async (ctx, task) => {
+
+        // TODO: @seth - It feels like we should have a helper fx
+        // for the action of "reading inputs from module.yaml"
+        const originalInputs = await readYAMLFile({
+          filePath: path.join(
+            clusterPath,
+            MODULES.AWS_EKS,
+            "module.yaml"
+          ),
+          context,
+          validationSchema: z
+            .object({
+              extra_inputs: z
+                .object({
+                  cluster_name: z.string().optional(),
+                  cluster_description: z.string().optional(),
+                })
+                .passthrough()
+                .optional()
+                .default({}),
+            })
+            .passthrough(),
+        });
+        ctx.clusterName = originalInputs?.extra_inputs.cluster_name;
+        ctx.clusterDescription =
+          originalInputs?.extra_inputs.cluster_description;
+
+        if (
+          ctx.clusterName &&
+          ctx.clusterDescription
+        ) {
+          task.skip("Already have EKS configuration, skipping...");
+          return;
+        }
+
+        if (!ctx.clusterName) {
+          ctx.clusterName = await context.logger.input({
+            task,
+            message: "Cluster name:",
+            default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
+            transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
+            validate: (value) => {
+              const transformed = clusterNameFormatter(value);
+              const { error } = CLUSTER_NAME.safeParse(transformed);
+              if (error) {
+                return error.issues[0]?.message ?? "Invalid cluster name";
+              } else {
+                return true;
+              }
+            },
+          });
+          ctx.clusterName = clusterNameFormatter(ctx.clusterName);
+        }
+
+        if (!ctx.clusterDescription) {
+          ctx.clusterDescription = await context.logger.input({
+            task,
+            message: "Cluster description:",
+            default: `Panfactum cluster in the ${region} region of the ${environment} environment`,
+            validate: (value) => {
+              const { error } = CLUSTER_DESCRIPTION.safeParse(value);
+              if (error) {
+                return (
+                  error.issues[0]?.message ??
+                  "Invalid cluster description"
+                );
+              } else {
+                return true;
+              }
+            },
+          });
+        }
+      },
+    },
+    await buildDeployModuleTask<Context>({
+      taskTitle: "Deploy EKS",
+      context,
+      environment,
+      region,
+      module: MODULES.AWS_EKS,
+      initModule: true,
+      hclIfMissing: await Bun.file(awsEksTemplate).text(),
+      inputUpdates: {
+        cluster_name: defineInputUpdate({
+          schema: z.string(),
+          update: (_, ctx) => ctx.clusterName!,
+        }),
+        cluster_description: defineInputUpdate({
+          schema: z.string(),
+          update: (_, ctx) => ctx.clusterDescription!,
+        }),
+        // TODO: @jack - Move to region.yaml
+        bootstrap_mode_enabled: defineInputUpdate({
+          schema: z.boolean(),
+          update: () => true,
+        }),
+        node_subnets: defineInputUpdate({
+          schema: z.array(z.string()),
+          update: () => slaTarget === 1 ? ["PRIVATE_A"] : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
+        }),
+      },
+    }),
+    await buildSyncKubeClustersTask({
+      context,
+    }),
+    {
+      title: "Reset the cluster",
+      task: async (ctx, task) => {
+        // TODO: @seth - Would be good if this had its own subtask
+        await clusterReset({
+          awsProfile,
+          clusterName: ctx.clusterName!,
+          context,
+          region,
+          task,
+        });
+      },
+      rendererOptions: {
+        outputBar: 5,
+      },
+    },
+    {
+      title: "Update Configuration File",
+      task: async (ctx) => {
+        // TODO: @seth - This is unnecessary
+        // as we can read from `.kube/clusters.yaml
+        const moduleOutput = await terragruntOutput({
+          context,
+          environment,
+          region,
+          module: MODULES.AWS_EKS,
+          validationSchema: EKS_MODULE_OUTPUT_SCHEMA,
+        });
+
+        await upsertConfigValues({
+          context,
+          filePath: path.join(clusterPath, "region.yaml"),
+          values: {
+            kube_config_context: ctx.clusterName!,
+            kube_api_server: moduleOutput.cluster_url.value,
+          },
+        });
+      },
+    },
+  ]);
 
   return tasks;
 }
