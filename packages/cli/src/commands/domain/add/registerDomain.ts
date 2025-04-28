@@ -167,7 +167,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.first_name = await context.logger.input({
                         task,
                         message: 'First Name:',
-                        required: true,
                         default: contactDefaults?.fullName?.split(" ")[0],
                         validate: (value) => {
                             if (value.length < MIN_NAME_LENGTH) {
@@ -185,7 +184,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.last_name = await context.logger.input({
                         task,
                         message: 'Last Name:',
-                        required: true,
                         default: contactDefaults?.fullName?.split(" ")[1],
                         validate: (value) => {
                             if (value.length < MIN_NAME_LENGTH) {
@@ -204,6 +202,7 @@ export async function registerDomain(inputs: {
                         task,
                         message: 'Organization / Company Name (Optional):',
                         default: contactDefaults?.organizationName || "",
+                        required: false,
                         validate: (value) => {
                             if (value.length < MIN_NAME_LENGTH) {
                                 return `Must be at least ${MIN_NAME_LENGTH} characters`;
@@ -220,7 +219,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.email_address = await context.logger.input({
                         task,
                         message: 'Email:',
-                        required: true,
                         default: contactDefaults?.email,
                         validate: (value) => {
                             const { error } = z.string().email().safeParse(value);
@@ -237,7 +235,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.phone_number = await context.logger.input({
                         task,
                         message: 'Phone # (format: +1.1234567890):',
-                        required: true,
                         default: contactDefaults?.phoneNumber,
                         validate: (value) => {
                             if (!value.match(/^\+\d{1,3}\.\d{1,26}$/)) {
@@ -265,7 +262,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.address_line_1 = await context.logger.input({
                         task,
                         message: 'Street Address 1:',
-                        required: true,
                         default: contactDefaults?.addressLine1,
                         validate: (value) => {
                             if (value.length < MIN_ADDRESS_LENGTH) {
@@ -282,6 +278,7 @@ export async function registerDomain(inputs: {
                         task,
                         message: 'Street Address 2:',
                         default: contactDefaults?.addressLine2,
+                        required: false,
                         validate: (value) => {
                             if (!value) {
                                 return true;
@@ -304,7 +301,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.city = await context.logger.input({
                         task,
                         message: 'City:',
-                        required: true,
                         default: contactDefaults?.city,
                         validate: (value) => {
                             if (value.length < MIN_CITY_LENGTH) {
@@ -322,7 +318,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.state = await context.logger.input({
                         task,
                         message: 'State/Region:',
-                        required: true,
                         default: contactDefaults?.state,
                         validate: (value) => {
                             const maxLength = ctx.contactInfo.country_code === "US" ? 2 : MAX_LENGTH
@@ -341,7 +336,6 @@ export async function registerDomain(inputs: {
                     ctx.contactInfo.zip_code = await context.logger.input({
                         task,
                         message: 'Postal Code:',
-                        required: true,
                         default: contactDefaults?.zipCode,
                         validate: (value) => {
                             if (!/^[0-9A-Z -]+$/.test(value)) {
@@ -454,6 +448,7 @@ export async function registerDomain(inputs: {
                     task.title = context.logger.applyColors("Got registrtion status Success", { lowlights: ["Success"] })
                     return
                 } else if (status === "FAILED" || status === "ERROR") {
+                    // TODO: Better logging for users
                     task.title = context.logger.applyColors("Got registrtion status Failed", { style: "error", highlights: ["Failed"] })
                     throw new CLIError(`Registration failed: ${message || "unknown"}`);
                 }

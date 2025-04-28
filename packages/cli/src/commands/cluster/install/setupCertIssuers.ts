@@ -88,6 +88,7 @@ export async function setupCertificateIssuers(
         // TODO: @seth - Just make this the account contact email
         // let's us remove another user input
         ctx.alertEmail = await context.logger.input({
+          task,
           explainer: `
             This email will receive notifications if your certificates fail to renew.
             Enter an email that is actively monitored to prevent unexpected service disruptions.
