@@ -1,5 +1,4 @@
 import path from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import awsEksTemplate from "@/templates/aws_eks.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
@@ -8,7 +7,6 @@ import {
   buildSyncKubeClustersTask,
   EKS_MODULE_OUTPUT_SCHEMA,
 } from "@/util/devshell/tasks/syncKubeClustersTask";
-import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 
 import {
@@ -19,6 +17,7 @@ import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { clusterReset } from "../reset/clusterReset";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const CLUSTER_NAME = z
   .string()
@@ -48,12 +47,13 @@ const clusterNameFormatter = (input: string): string => {
 
 export async function setupEKS(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, clusterPath, context, environment, region, slaTarget } =
     options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([]);
 
   tasks.add({
     skip: () => completed,
@@ -223,10 +223,4 @@ export async function setupEKS(
       );
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to setup EKS", e);
-  }
 }

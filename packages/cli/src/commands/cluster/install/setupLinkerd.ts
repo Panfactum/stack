@@ -1,9 +1,7 @@
 import { join } from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import kubeLinkerdTerragruntHcl from "@/templates/kube_linkerd_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
@@ -11,14 +9,16 @@ import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupLinkerd(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } = options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([]);
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -115,10 +115,4 @@ export async function setupLinkerd(
       ]);
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to deploy Linkerd Service Mesh", e);
-  }
 }

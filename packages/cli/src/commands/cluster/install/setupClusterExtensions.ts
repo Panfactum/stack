@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import kubeBastionTerragruntHcl from "@/templates/kube_bastion_terragrunt.hcl" with { type: "file" };
 import postgresTerragruntHcl from "@/templates/kube_cloudnative_pg_terragrunt.hcl" with { type: "file" };
@@ -12,7 +11,6 @@ import kubeReloaderTerragruntHcl from "@/templates/kube_reloader_terragrunt.hcl"
 import kubeVeleroTerragruntHcl from "@/templates/kube_velero_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
-import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
@@ -20,15 +18,17 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupClusterExtensions(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } =
     options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([])
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -239,10 +239,4 @@ export async function setupClusterExtensions(
       ]);
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to deploy Support Services", e);
-  }
 }

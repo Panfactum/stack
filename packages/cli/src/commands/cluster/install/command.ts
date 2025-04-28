@@ -27,13 +27,15 @@ import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
 import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const SETUP_STEPS: Array<{
   label: string;
   id: string;
   setup: (
     options: InstallClusterStepOptions,
-    completed: boolean
+    completed: boolean,
+    mainTask: PanfactumTaskWrapper
   ) => Promise<void>;
   completed: boolean;
   lastModule: MODULES; // Used to determine if the step has been completed
@@ -248,17 +250,7 @@ export class InstallClusterCommand extends PanfactumCommand {
      * Executes each step in SETUP_STEPS sequentially
      *  and provides checkpointing functionality
      ***********************************************/
-    const options: InstallClusterStepOptions = {
-      awsProfile,
-      context: this.context,
-      environment,
-      domains,
-      environmentPath,
-      kubeConfigContext,
-      region,
-      clusterPath,
-      slaTarget: confirmedSLATarget,
-    };
+
 
     // Check each step and mark as completed if directory exists
     for (const step of SETUP_STEPS) {
@@ -276,12 +268,24 @@ export class InstallClusterCommand extends PanfactumCommand {
 
     const tasks = new Listr([]);
 
+    const options: InstallClusterStepOptions = {
+      awsProfile,
+      context: this.context,
+      environment,
+      domains,
+      environmentPath,
+      kubeConfigContext,
+      region,
+      clusterPath,
+      slaTarget: confirmedSLATarget
+    };
+
     for (const [_, { setup, label, completed }] of SETUP_STEPS.entries()) {
       tasks.add({
         title: this.context.logger.applyColors(`${label} ${completed ? "(skipped)" : ""}`, { lowlights: ["(skipped)"] }),
         skip: () => completed,
-        task: async () => {
-          await setup(options, completed);
+        task: async (_, mainTask) => {
+          return setup(options, completed, mainTask);
         }
       });
     }

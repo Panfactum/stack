@@ -1,9 +1,7 @@
 import path, { join } from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import kubeCertIssuersTerragruntHcl from "@/templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
@@ -14,10 +12,12 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupCertificateIssuers(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, clusterPath, context, domains, environment, region } = options;
 
@@ -31,7 +31,7 @@ export async function setupCertificateIssuers(
     }),
   });
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([])
 
   tasks.add({
     skip: () => completed,
@@ -202,10 +202,4 @@ export async function setupCertificateIssuers(
       ]);
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to deploy Certificate Issuers", e);
-  }
 }

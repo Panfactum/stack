@@ -1,19 +1,19 @@
-import { Listr } from "listr2";
 import kubeCiliumTerragruntHcl from "@/templates/kube_cilium_terragrunt.hcl" with { type: "file" };
 import kubeCoreDnsTerragruntHcl from "@/templates/kube_core_dns_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupInternalClusterNetworking(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, region } = options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([])
 
   tasks.add({
     skip: () => completed,
@@ -47,10 +47,4 @@ export async function setupInternalClusterNetworking(
       ]);
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to deploy internal cluster networking", e);
-  }
 }

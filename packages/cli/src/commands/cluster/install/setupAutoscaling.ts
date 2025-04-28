@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import kubeKarpenterNodePoolsTerragruntHcl from "@/templates/kube_karpenter_node_pools_terragrunt.hcl" with { type: "file" };
 import kubeKarpenterTerragruntHcl from "@/templates/kube_karpenter_terragrunt.hcl" with { type: "file" };
@@ -20,15 +19,17 @@ import {
 import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupAutoscaling(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region, slaTarget } =
     options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([])
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),

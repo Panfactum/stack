@@ -1,5 +1,4 @@
 import { join } from "path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import kubeVaultTemplate from "@/templates/kube_vault_terragrunt.hcl" with { type: "file" };
 import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
@@ -18,6 +17,7 @@ import {
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const RECOVER_KEYS_SCHEMA = z.object({
   unseal_keys_b64: z.array(z.string().base64()),
@@ -57,7 +57,8 @@ const UNSEAL_OUTPUT_SCHEMA = z.object({
 
 export async function setupVault(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, kubeConfigContext, region } =
     options;
@@ -65,7 +66,7 @@ export async function setupVault(
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
   const vaultDomain = `vault.${kubeDomain}`;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([])
 
   tasks.add({
     skip: () => completed,
@@ -322,10 +323,4 @@ export async function setupVault(
       ]);
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to setup Vault", e);
-  }
 }
