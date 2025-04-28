@@ -96,57 +96,46 @@ export async function setupInboundNetworking(
       task: async (ctx, task) => {
         return task.newListr<Context>(
           [
-            {
-              task: async (ctx, parentTask) => {
-                interface Context {
-                  vaultDomain?: string;
-                  vaultProxyPid?: number;
-                  vaultProxyPort?: number;
-                }
-                return parentTask.newListr<Context>([
-                  await buildDeployModuleTask({
-                    taskTitle: "Deploy External DNS",
-                    context,
-                    env: {
-                      ...process.env,
-                      VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                      VAULT_TOKEN: vaultRootToken,
-                    },
-                    environment,
-                    region,
-                    module: MODULES.KUBE_EXTERNAL_DNS,
-                    initModule: true,
-                    hclIfMissing: await Bun.file(
-                      kubeExternalDnsTerragruntHcl
-                    ).text(),
-                  }),
-                  await buildDeployModuleTask({
-                    taskTitle: "Deploy AWS Load Balancer Controller",
-                    context,
-                    env: {
-                      ...process.env,
-                      VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                      VAULT_TOKEN: vaultRootToken,
-                    },
-                    environment,
-                    region,
-                    module: MODULES.KUBE_AWS_LB_CONTROLLER,
-                    initModule: true,
-                    hclIfMissing: await Bun.file(awsLbController).text(),
-                    // TODO: @jack - This should come from the aws_eks module
-                    inputUpdates: {
-                      subnets: defineInputUpdate({
-                        schema: z.array(z.string()),
-                        update: () =>
-                          slaTarget === 1
-                            ? ["PUBLIC_A", "PUBLIC_B"]
-                            : ["PUBLIC_A", "PUBLIC_B", "PUBLIC_C"],
-                      }),
-                    },
-                  }),
-                ], { ctx, concurrent: true })
+            await buildDeployModuleTask({
+              taskTitle: "Deploy AWS Load Balancer Controller",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
               },
-            },
+              environment,
+              region,
+              module: MODULES.KUBE_AWS_LB_CONTROLLER,
+              initModule: true,
+              hclIfMissing: await Bun.file(awsLbController).text(),
+              // TODO: @jack - This should come from the aws_eks module
+              inputUpdates: {
+                subnets: defineInputUpdate({
+                  schema: z.array(z.string()),
+                  update: () =>
+                    slaTarget === 1
+                      ? ["PUBLIC_A", "PUBLIC_B"]
+                      : ["PUBLIC_A", "PUBLIC_B", "PUBLIC_C"],
+                }),
+              },
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Deploy External DNS",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_EXTERNAL_DNS,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeExternalDnsTerragruntHcl
+              ).text(),
+            }),
             await buildDeployModuleTask({
               taskTitle: "Deploy Ingress NGINX",
               context,
