@@ -231,7 +231,7 @@ export async function setupAutoscaling(
             VAULT_TOKEN: vaultRootToken,
           },
           onLogLine: (line) => {
-            task.output = context.logger.applyColors(line, { style: "subtle" });
+            task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
           },
         });
       },
