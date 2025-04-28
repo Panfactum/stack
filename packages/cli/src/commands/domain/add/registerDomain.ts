@@ -433,8 +433,10 @@ export async function registerDomain(inputs: {
         title: "Get registration status",
         task: async (ctx, task) => {
             const maxAttempts = 100;
+            let lastStatus: string | undefined;
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                task.title = context.logger.applyColors(`Polling registration status ${attempt}/${maxAttempts}`, { lowlights: [`${attempt}/${maxAttempts}`] })
+                const statusStr = lastStatus !== "" ? `${attempt}/${maxAttempts} - ${lastStatus}` : `${attempt}/${maxAttempts}`
+                task.title = context.logger.applyColors(`Polling registration status ${statusStr}`, { lowlights: [statusStr] })
                 let status, message, flag;
                 try {
                     const response = await route53DomainsClient.send(
@@ -493,7 +495,7 @@ export async function registerDomain(inputs: {
                             );
                     }
                 } else {
-                    // TODO: Update with status if no flag is provided
+                    lastStatus = status
                 }
 
                 await new Promise((r) => globalThis.setTimeout(r, 15000));
