@@ -91,6 +91,9 @@ export async function provisionAWSAccount(inputs: {
                         })
 
 
+                        //////////////////////////////////////////////////
+                        // Get the account alias
+                        ///////////////////////////////////////////////////
                         const orgClient = new OrganizationsClient({
                             profile: managementProfile
                         });
@@ -117,20 +120,42 @@ export async function provisionAWSAccount(inputs: {
                         parentContext.newAccountName = ctx.newAccountName
 
 
+                        ///////////////////////////////////////////////////
+                        // Get the default account email
+                        ///////////////////////////////////////////////////
+                        const existingEmails = existingAccounts.map(({ email }) => email)
+                            .concat((Object.values(originalInputs?.extra_inputs.accounts ?? {}).map(({ email }) => email)))
                         const managementAccountEmail = await getAccountEmail({ context, profile: managementProfile })
                         let emailDefault: string | undefined;
                         if (managementAccountEmail) {
                             const [user, domain] = managementAccountEmail.split("@")
                             if (user && domain) {
+                                // Defaults to user+envName@domain.com but falls
+                                // back to user+accountAlias@domain.com if needed
                                 if (user.includes("+")) {
                                     const [prePlus] = user.split("+")
-                                    emailDefault = `${prePlus}+${ctx.newAccountName}@${domain}`
+                                    emailDefault = `${prePlus}+${environmentName}@${domain}`
+                                    if (existingEmails.includes(emailDefault)) {
+                                        emailDefault = `${prePlus}+${ctx.newAccountName}@${domain}`
+                                        if (existingEmails.includes(emailDefault)) {
+                                            emailDefault = undefined
+                                        }
+                                    }
                                 } else {
-                                    emailDefault = `${user}+${ctx.newAccountName}@${domain}`
+                                    emailDefault = `${user}+${environmentName}@${domain}`
+                                    if (existingEmails.includes(emailDefault)) {
+                                        emailDefault = `${user}+${ctx.newAccountName}@${domain}`
+                                        if (existingEmails.includes(emailDefault)) {
+                                            emailDefault = undefined
+                                        }
+                                    }
                                 }
                             }
                         }
 
+                        ///////////////////////////////////////////////////
+                        // Get the actual account email
+                        ///////////////////////////////////////////////////
                         ctx.newAccountEmail = await context.logger.input({
                             explainer: {
                                 message: `AWS also requires a globally unique email for the account. Hint: consider using a '+' suffix like '${emailDefault ?? `you+${environmentName}@yourdomain.com`}'.`,

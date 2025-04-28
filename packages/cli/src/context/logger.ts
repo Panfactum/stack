@@ -234,13 +234,16 @@ export class Logger {
           case "error": {
             return (str: string) => pc.bold(pc.redBright(str))
           }
+          case "success": {
+            return (str: string) => pc.bold(pc.greenBright(str))
+          }
           default: {
             return (str: string) => pc.bold(pc.whiteBright(str))
           }
         }
       }
       case "success": {
-        return pc.greenBright
+        return pc.green
       }
       case "default": {
         return pc.white
