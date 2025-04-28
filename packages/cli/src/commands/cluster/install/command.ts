@@ -103,18 +103,18 @@ const SETUP_STEPS: Array<{
       lastModule: MODULES.KUBE_LINKERD,
     },
     {
-      label: "Autoscaling",
-      id: "setupAutoscaling",
-      setup: setupAutoscaling,
-      completed: false,
-      lastModule: MODULES.KUBE_SCHEDULER,
-    },
-    {
       label: "Inbound Networking",
       id: "setupInboundNetworking",
       setup: setupInboundNetworking,
       completed: false,
       lastModule: MODULES.KUBE_INGRESS_NGINX,
+    },
+    {
+      label: "Autoscaling",
+      id: "setupAutoscaling",
+      setup: setupAutoscaling,
+      completed: false,
+      lastModule: MODULES.KUBE_SCHEDULER,
     },
     {
       label: "Cluster Extensions",
