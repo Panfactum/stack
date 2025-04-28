@@ -5,7 +5,7 @@ import pc from "picocolors";
 import { terminalColumns } from "terminal-columns";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-const MAX_WIDTH = 128
+const MAX_WIDTH = 100
 
 // This allows use to use multiline JS strings
 // with proper indentation and formatting when primpted to the user.
@@ -23,7 +23,7 @@ function dedent(text: string) {
     .replace(/^\n+|\n+$/g, ``)   // Remove surrounding newlines, since they got added for JS formatting
     .replace(/\n(\n)?\n*/g, (_, s: string) => s ? s : ` `) // Single newlines are removed; larger than that are collapsed into one
     .split(/\n/).map(paragraph => {
-      const matches = paragraph.match(/(.{1,128})(?: |$)/g)
+      const matches = paragraph.match(/(.{1,100})(?: |$)/g)
       if (matches !== null) {
         return matches.join("\n")
       } else {
@@ -302,11 +302,11 @@ export class Logger {
     this.stream.write("\n\n")
   }
 
-  public write(str: string, config?: HighlightsConfig & { style?: ColorStyle }) {
+  public write(str: string, config?: HighlightsConfig & { style?: ColorStyle, removeIndent?: boolean }) {
     this.stream.write(terminalColumns([[
       "",
       this.applyColors(dedent(str), { style: "default", ...config })
-    ]], [4, MAX_WIDTH]))
+    ]], [config?.removeIndent ? 0 : 4, MAX_WIDTH]))
     this.stream.write("\n\n")
   }
 
@@ -548,12 +548,12 @@ export class Logger {
   public showLogo() {
     this.writeRaw(
       `
-            ██████╗  █████╗ ███╗   ██╗███████╗ █████╗  ██████╗████████╗██╗   ██╗███╗   ███╗
-            ██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔══██╗██╔════╝╚══██╔══╝██║   ██║████╗ ████║
-            ██████╔╝███████║██╔██╗ ██║█████╗  ███████║██║        ██║   ██║   ██║██╔████╔██║
-            ██╔═══╝ ██╔══██║██║╚██╗██║██╔══╝  ██╔══██║██║        ██║   ██║   ██║██║╚██╔╝██║
-            ██║     ██║  ██║██║ ╚████║██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║ ╚═╝ ██║
-            ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝
+          ██████╗  █████╗ ███╗   ██╗███████╗ █████╗  ██████╗████████╗██╗   ██╗███╗   ███╗
+          ██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔══██╗██╔════╝╚══██╔══╝██║   ██║████╗ ████║
+          ██████╔╝███████║██╔██╗ ██║█████╗  ███████║██║        ██║   ██║   ██║██╔████╔██║
+          ██╔═══╝ ██╔══██║██║╚██╗██║██╔══╝  ██╔══██║██║        ██║   ██║   ██║██║╚██╔╝██║
+          ██║     ██║  ██║██║ ╚████║██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║ ╚═╝ ██║
+          ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝
       `,
     );
   }
