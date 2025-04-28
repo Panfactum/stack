@@ -5,7 +5,6 @@ import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_throug
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { fileExists } from "@/util/fs/fileExists";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
@@ -440,9 +439,5 @@ export async function setupVPCandECR(
     },
   });
 
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to setup VPC", e);
-  }
+  return tasks;
 }

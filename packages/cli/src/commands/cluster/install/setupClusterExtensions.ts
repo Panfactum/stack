@@ -239,4 +239,6 @@ export async function setupClusterExtensions(
       ]);
     },
   });
+
+  return tasks;
 }

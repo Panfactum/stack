@@ -7,7 +7,6 @@ import kubeSchedulerTerragruntHcl from "@/templates/kube_scheduler_terragrunt.hc
 import kubeVpaTerragruntHcl from "@/templates/kube_vpa_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
@@ -256,9 +255,5 @@ export async function setupAutoscaling(
     },
   });
 
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to setup Autoscaling", e);
-  }
+  return tasks;
 }

@@ -115,4 +115,5 @@ export async function setupLinkerd(
       ]);
     },
   });
+  return tasks;
 }

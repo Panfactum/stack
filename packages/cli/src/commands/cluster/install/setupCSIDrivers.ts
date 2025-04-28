@@ -37,4 +37,6 @@ export async function setupCSIDrivers(
       ]);
     },
   });
+
+  return tasks;
 }

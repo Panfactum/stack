@@ -323,4 +323,6 @@ export async function setupVault(
       ]);
     },
   });
+
+  return tasks;
 }
