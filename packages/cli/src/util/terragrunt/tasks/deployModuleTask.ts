@@ -217,7 +217,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                                     resourcePath,
                                     resourceId: resolvedId,
                                     onLogLine: (line) => {
-                                        task.output = context.logger.applyColors(line, { style: "subtle" });
+                                        task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
                                     },
                                 });
                                 task.title = context.logger.applyColors(

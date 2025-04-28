@@ -242,6 +242,30 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                 environmentName
             })
         }
+
+
+        context.logger.success(`
+            The ${environmentName} environment has been successfully set up.
+            
+            It's infrastructure-as-code lives at ${join(context.repoVariables.environments_dir, environmentName)}.
+
+            You can access the underlying AWS account through the AWS CLI: 
+            
+               aws --profile ${environmentProfile} sts get-caller-identity
+
+            We recommend the next steps:
+
+               1. Add a domain: pf domain add -e ${environmentName}
+
+               2. Add a cluster to begin deploying workloads: pf cluster add
+        `, {
+            highlights: [
+                `pf domain add -e ${environmentName}`,
+                "pf cluster add",
+                `aws --profile ${environmentProfile} sts get-caller-identity`
+            ]
+        })
+
     }
 }
 
