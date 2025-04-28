@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
@@ -19,10 +18,12 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupInboundNetworking(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const {
     awsProfile,
@@ -30,10 +31,10 @@ export async function setupInboundNetworking(
     environment,
     clusterPath,
     region,
-    slaTarget,
+    slaTarget
   } = options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([]);
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
@@ -293,10 +294,4 @@ export async function setupInboundNetworking(
       ]);
     },
   });
-
-  try {
-    await tasks.run();
-  } catch (e) {
-    throw new CLIError("Failed to deploy Inbound Networking", e);
-  }
 }

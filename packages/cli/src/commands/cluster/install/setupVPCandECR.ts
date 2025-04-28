@@ -1,5 +1,4 @@
 import path from "node:path";
-import { Listr } from "listr2";
 import { z } from "zod";
 import { vpcNetworkTest } from "@/commands/aws/vpcNetworkTest/vpcNetworkTest";
 import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
@@ -19,6 +18,7 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const DESCRIBE_VPCS_SCHEMA = z.object({
   Vpcs: z.array(z.object({})),
@@ -63,11 +63,12 @@ const VPC_NAME = z
 
 export async function setupVPCandECR(
   options: InstallClusterStepOptions,
-  completed: boolean
+  completed: boolean,
+  mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } = options;
 
-  const tasks = new Listr([]);
+  const tasks = mainTask.newListr([])
 
   tasks.add({
     skip: () => completed,

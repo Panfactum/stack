@@ -3,7 +3,7 @@ import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import { InstallClusterCommand } from "./commands/cluster/install/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
-import { DevShellUpdateCommand } from "./commands/devshell/update/command.ts";
+import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
 import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
 import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";

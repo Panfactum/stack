@@ -41,7 +41,7 @@ export async function setSLA(inputs: {
     confirmedSLATarget = await context.logger.select({
       explainer: {
         message: `
-          Select your SLA target(affects high availability configuration).
+          Select your SLA target (affects high availability configuration).
           We recommend level 1 for test / development environments and level 2 or above for environments running live workloads.
 
           Note that this CANNOT easily be changed later.
@@ -51,15 +51,15 @@ export async function setSLA(inputs: {
       message: "Level:",
       choices: [
         {
-          name: "Level 1: 99.9% uptime (< 45 minutes of downtime / month) — Lowest cost",
+          name: context.logger.applyColors("Level 1 99.9% uptime — Lowest cost", { lowlights: ["99.9% uptime — Lowest cost"] }),
           value: 1,
         },
         {
-          name: "Level 2: 99.99% uptime (< 5 minutes of downtime / month) — Roughly 2x the cost of level 1",
+          name: context.logger.applyColors("Level 2 99.99% uptime — Roughly 2x the cost of level 1", { lowlights: ["99.99% uptime — Roughly 2x the cost of level 1"] }),
           value: 2,
         },
         {
-          name: "Level 3: 99.999% uptime (< 30 seconds of downtime / month) — Roughly 1.5x the cost of level 2",
+          name: context.logger.applyColors("Level 3 99.999% uptime — Roughly 1.5x the cost of level 2", { lowlights: ["99.999% uptime — Roughly 1.5x the cost of level 2"] }),
           value: 3,
         },
       ],

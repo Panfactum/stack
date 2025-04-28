@@ -421,7 +421,6 @@ export class Logger {
     choices: Array<{ name: string; value: T; disabled?: boolean | string }>;
     default?: T;
     explainer?: string | { message: string } & HighlightsConfig;
-
     task?: PanfactumTaskWrapper
   }) => {
     const { message, explainer, task } = config;
