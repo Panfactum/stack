@@ -5,10 +5,8 @@ import { STSClient, AssumeRoleCommand } from "@aws-sdk/client-sts";
 import { Listr } from "listr2";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
-import orgHCL from "@/templates/aws_organization.hcl" with { type: "file" };
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { AWS_ACCOUNT_ALIAS_SCHEMA } from "@/util/aws/schemas";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist"
 import { runTasks } from "@/util/listr/runTasks";
@@ -16,7 +14,8 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
+import { getAccountEmail } from "./getAccountEmail";
+import { getNewAccountAlias } from "./getNewAccountAlias";
 import type { PanfactumContext } from "@/context/context"
 
 export const AWS_ORG_MODULE = "aws_organization"
@@ -45,76 +44,10 @@ export async function provisionAWSAccount(inputs: {
     })
 
     ////////////////////////////////////////////////////////////////
-    // If necessary, deploy the aws_organization module
+    // Ensure that AWS Org is installed
     ////////////////////////////////////////////////////////////////
     if (! await directoryExists(orgModulePath)) {
-        interface OrgCreateTaskContext {
-            primaryContactInfo?: Awaited<ReturnType<typeof getPrimaryContactInfo>>
-        }
-        tasks.add({
-            title: "Configure AWS Organization",
-            task: async (_, parentTask) => {
-                return parentTask.newListr<OrgCreateTaskContext>([
-                    {
-                        title: "Collect AWS contact information",
-                        task: async (ctx, task) => {
-                            task.output = context.logger.applyColors(`
-                                It looks like this is the first environment for your organization, so we will need to complete a couple
-                                steps to prepare your organization for deploying environments.
-
-                                Firstly, AWS requires contact information to ensure you receive important infrastructure notifications.
-                                This will be automatically synced across all your environments.
-                            `, { style: "warning" })
-                            ctx.primaryContactInfo = await getPrimaryContactInfo({ context, parentTask: task })
-                        }
-                    },
-                    // TODO: Ensure that the original organizaiton features are preserved
-                    await buildDeployModuleTask<OrgCreateTaskContext>({
-                        context,
-                        environment: MANAGEMENT_ENVIRONMENT,
-                        region: GLOBAL_REGION,
-                        module: MODULES.AWS_ORGANIZATION,
-                        taskTitle: "Deploy AWS Organization updates",
-                        hclIfMissing: await Bun.file(orgHCL).text(),
-                        inputUpdates: {
-                            primary_contact: defineInputUpdate({
-                                schema: z.object({
-                                    full_name: z.string(),
-                                    phone_number: z.string(),
-                                    address_line_1: z.string(),
-                                    address_line_2: z.string().optional(),
-                                    address_line_3: z.string().optional(),
-                                    city: z.string(),
-                                    company_name: z.string().optional(),
-                                    country_code: z.string(),
-                                    district_or_county: z.string().optional(),
-                                    postal_code: z.string(),
-                                    state_or_region: z.string(),
-                                    website_url: z.string().optional()
-                                }).optional(),
-                                update: (oldInput, ctx) => {
-                                    if (!ctx.primaryContactInfo) {
-                                        throw new CLIError("Primary contact info missing. This should never happen.")
-                                    }
-                                    return {
-                                        ...oldInput,
-                                        full_name: ctx.primaryContactInfo.fullName,
-                                        phone_number: ctx.primaryContactInfo.phoneNumber,
-                                        address_line_1: ctx.primaryContactInfo.address1,
-                                        address_line_2: ctx.primaryContactInfo.address2,
-                                        city: ctx.primaryContactInfo.city,
-                                        company_name: ctx.primaryContactInfo.orgName,
-                                        country_code: ctx.primaryContactInfo.countryCode,
-                                        postal_code: ctx.primaryContactInfo.postalCode,
-                                        state_or_region: ctx.primaryContactInfo.state,
-                                    }
-                                }
-                            })
-                        }
-                    })
-                ], { ctx: {} })
-            }
-        })
+        throw new CLIError("This Panfactum installation does not have an AWS Organization deployed. Cannot automatically provision AWS account.")
     }
 
     ////////////////////////////////////////////////////////////////
@@ -174,49 +107,39 @@ export async function provisionAWSAccount(inputs: {
                             throw new CLIError("Failed to list AWS organization accounts", e);
                         }
 
-                        task.output = context.logger.applyColors("Even though your environment name only needs to be unique to your organization, AWS requires a globally unique name for the underlying AWS account.", {
-                            style: "warning",
-                            highlights: ["globally"]
-                        })
-
                         const accountKeys = Object.keys(originalInputs?.extra_inputs.accounts ?? {})
                         const existingNames = existingAccounts.map(({ name }) => name)
-                        ctx.newAccountName = await context.logger.input({
+                        ctx.newAccountName = await getNewAccountAlias({
+                            context,
                             task,
-                            message: 'Unique Account Name:',
-                            default: existingNames.includes(environmentName) ? undefined : environmentName,
-                            validate: async (value) => {
-                                const { error } = AWS_ACCOUNT_ALIAS_SCHEMA.safeParse(value)
-                                if (error) {
-                                    return error.issues[0]?.message ?? "Invalid account name"
-                                }
-                                const existingNameIndex = existingAccounts.findIndex(({ name }) => name === value)
-                                if (existingNameIndex !== -1) {
-                                    return `Every account must have a unique name. Name is already taken by another account in your organization (${existingAccounts[existingNameIndex]!.id}).`
-                                }
-                                if (accountKeys.includes(value)) {
-                                    return `Every account must have a unique name. Name is already taken.`
-                                }
-                                const response = await globalThis.fetch(`https://${value}.signin.aws.amazon.com`)
-                                if (response.status !== 404) {
-                                    return `Every account must have a globally unique name. Name is already take by another organization.`
-                                }
-                                return true
-                            }
-                        });
+                            denylist: accountKeys.concat(existingNames)
+                        })
                         parentContext.newAccountName = ctx.newAccountName
 
 
-                        task.output = context.logger.applyColors(`AWS also requires a globally unique email for the account. Hint: consider using a '+' suffix like 'you+${environmentName}@yourdomain.com'.`, {
-                            style: "warning",
-                            highlights: ["globally"]
-                        })
+                        const managementAccountEmail = await getAccountEmail({ context, profile: managementProfile })
+                        let emailDefault: string | undefined;
+                        if (managementAccountEmail) {
+                            const [user, domain] = managementAccountEmail.split("@")
+                            if (user && domain) {
+                                if (user.includes("+")) {
+                                    const [prePlus] = user.split("+")
+                                    emailDefault = `${prePlus}+${ctx.newAccountName}@${domain}`
+                                } else {
+                                    emailDefault = `${user}+${ctx.newAccountName}@${domain}`
+                                }
+                            }
+                        }
 
-                        // TODO: We should endeavor to provide a sane default here
                         ctx.newAccountEmail = await context.logger.input({
+                            explainer: {
+                                message: `AWS also requires a globally unique email for the account. Hint: consider using a '+' suffix like '${emailDefault ?? `you+${environmentName}@yourdomain.com`}'.`,
+                                highlights: ["globally"]
+                            },
                             task,
                             message: 'Unique Account Email:',
                             required: true,
+                            default: emailDefault,
                             validate: (value) => {
                                 const { error } = z.string().email().safeParse(value)
                                 if (error) {
@@ -443,5 +366,11 @@ export async function provisionAWSAccount(inputs: {
         }
     })
 
-    await runTasks({ context, tasks, errorMessage: "Failed to provision AWS account" })
+    const { newAccountName } = await runTasks({ context, tasks, errorMessage: "Failed to provision AWS account" })
+
+    if (!newAccountName) {
+        throw new CLIError("Failed to get account name from account provision task. This should never happen.")
+    }
+
+    return newAccountName;
 }

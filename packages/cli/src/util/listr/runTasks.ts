@@ -2,16 +2,18 @@ import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/context/context";
 import type { Listr } from "listr2";
 
-export async function runTasks(inputs: {
+export async function runTasks<T>(inputs: {
     context: PanfactumContext,
-    tasks: Listr,
+    tasks: Listr<T>,
     errorMessage: string;
 }) {
 
     const { context, tasks, errorMessage } = inputs;
     try {
-        await tasks.run()
-        context.logger.write("") // Need a newline after tasks for spacing
+        return tasks.run().then((res) => {
+            context.logger.write("") // Need a newline after tasks for spacing
+            return res
+        })
     } catch (e) {
         throw new CLIError(errorMessage, e)
     }

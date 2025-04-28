@@ -1,17 +1,25 @@
+import { AccountClient, GetContactInformationCommand } from "@aws-sdk/client-account";
 import { z } from "zod";
 import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 // TODO: We can actually get this from the AWS account
-export async function getPrimaryContactInfo(inputs: { context: PanfactumContext, parentTask: PanfactumTaskWrapper }) {
+export async function getPrimaryContactInfo(inputs: {
+    context: PanfactumContext,
+    parentTask: PanfactumTaskWrapper
+    profile: string;
+}) {
 
-    const { context, parentTask } = inputs;
+    const { context, parentTask, profile } = inputs;
+
+    const existingInfo = await getExistingContctInfo(profile, context)
 
     const fullName = await context.logger.input({
         task: parentTask,
         message: 'Full Name:',
         required: true,
+        default: existingInfo.fullName,
         validate: (value) => {
             if (value === "") {
                 return true
@@ -26,10 +34,12 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
             }
         }
     });
+
     const orgName = await context.logger.input({
         task: parentTask,
         message: 'Organization / Company Name (Optional):',
         required: false,
+        default: existingInfo.organizationName,
         validate: (value) => {
             if (value === "") {
                 return true
@@ -45,7 +55,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const email = await context.logger.input({
         task: parentTask,
         message: 'Email:',
-        required: true,
+        default: existingInfo.email,
         validate: (value) => {
             const { error } = z.string().email().safeParse(value)
             if (error) {
@@ -58,7 +68,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const phoneNumber = await context.logger.input({
         task: parentTask,
         message: 'Phone #:',
-        required: true,
+        default: existingInfo.phoneNumber,
         validate: (value) => {
             const { error } = AWS_PHONE_NUMBER_SCHEMA.safeParse(value)
             if (error) {
@@ -71,7 +81,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const address1 = await context.logger.input({
         task: parentTask,
         message: 'Street Address 1:',
-        required: true,
+        default: existingInfo.addressLine1,
         validate: (value) => {
             if (value.length < 5) {
                 return "Must be at least 5 characters"
@@ -86,6 +96,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
         task: parentTask,
         message: 'Street Address 2 (Optional):',
         required: false,
+        default: existingInfo.addressLine2,
         validate: (value) => {
             if (value === "") {
                 return true
@@ -101,7 +112,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const city = await context.logger.input({
         task: parentTask,
         message: 'City:',
-        required: true,
+        default: existingInfo.city,
         validate: (value) => {
             if (value === "") {
                 return true
@@ -117,7 +128,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const state = await context.logger.input({
         task: parentTask,
         message: 'State/Region:',
-        required: true,
+        default: existingInfo.state,
         validate: (value) => {
             if (value === "") {
                 return true
@@ -133,7 +144,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const postalCode = await context.logger.input({
         task: parentTask,
         message: 'Postal Code:',
-        required: true,
+        default: existingInfo.zipCode,
         validate: (value) => {
             if (!/^[0-9A-Z -]+$/.test(value)) {
                 return "Can only contain numbers, uppercase letters, hyphens, and spaces"
@@ -149,6 +160,7 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
     const countryCode = await context.logger.search({
         task: parentTask,
         message: 'Country:',
+        default: existingInfo.countryCode,
         source: (term) => {
             return term ? COUNTRY_CODES.filter(({ name }) => name.toLowerCase().includes(term.toLowerCase())) : COUNTRY_CODES
         }
@@ -166,4 +178,58 @@ export async function getPrimaryContactInfo(inputs: { context: PanfactumContext,
         fullName,
         phoneNumber
     }
+}
+
+/**
+ * Retrieves primary contact information from AWS account using the Account API so that 
+ * we can use it as defaults for the account setup
+ */
+async function getExistingContctInfo(profile: string, context: PanfactumContext): Promise<{
+    fullName?: string;
+    organizationName?: string;
+    email?: string;
+    phoneNumber?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    countryCode?: string;
+    zipCode?: string;
+}> {
+    try {
+        // Create an AccountClient - the Account API is only available in us-east-1
+        const accountClient = new AccountClient({
+            profile,
+            region: "us-east-1"
+        });
+
+        // Create command to get contact information
+        const getContactInfoCommand = new GetContactInformationCommand({});
+
+        // Send the command to AWS
+        const response = await accountClient.send(getContactInfoCommand);
+
+        if (response.ContactInformation) {
+            const contactInfo = response.ContactInformation;
+
+            // Convert AWS contact format to our format
+            return {
+                fullName: contactInfo.FullName,
+                organizationName: contactInfo.CompanyName,
+                phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/ /g, '.').replace(/-/g, '') : undefined, // Convert phone format
+                addressLine1: contactInfo.AddressLine1,
+                addressLine2: contactInfo.AddressLine2,
+                city: contactInfo.City,
+                state: contactInfo.StateOrRegion,
+                countryCode: contactInfo.CountryCode,
+                zipCode: contactInfo.PostalCode
+            };
+        }
+    } catch (error) {
+        // If we can't get the contact info, just log and continue
+        context.logger.debug(
+            `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    return {};
 }
