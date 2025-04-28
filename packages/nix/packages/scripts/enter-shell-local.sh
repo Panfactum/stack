@@ -66,3 +66,9 @@ export GIT_CLONE_PROTECTION_ACTIVE=false
 #############################################
 export REGISTRY_AUTH_FILE="$BUILDKIT_DIR/config.json"
 export DOCKER_CONFIG=$BUILDKIT_DIR # Needed for buildkit to work
+
+#############################################
+## Welcome Screen
+#############################################
+
+pf welcome

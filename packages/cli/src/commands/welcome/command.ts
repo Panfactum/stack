@@ -17,21 +17,22 @@ export class WelcomeCommand extends PanfactumCommand {
 
         context.logger.write(`
             Welcome to Panfactum! This is the ${pc.italic("DevShell")}, a local terminal
-            environment that contains all of the utilities necessary to begin deploying
+            environment containing all the utilities necessary to begin deploying
             and managing cloud infrastructure.
 
-            It includes 100s of CLI utilities such as aws, tofu, terragrunt, kubectl, helm,
-            and much more.
+            The DevShell includes 100s of version-pinned CLI tools such as aws,
+            tofu, terragrunt, kubectl, helm, and much more. These are installed in isolation from your
+            main system and automatically load when you open this repository in your terminal.
 
-            Most importantly, it includes the Panfactum CLI (${pc.bold(pc.whiteBright("pf"))}) which will
+            Most importantly, the DevShell includes the Panfactum CLI (${pc.bold(pc.whiteBright("pf"))}) which will
             be used to automate your initial infrastructure setup.
 
             In the Panfactum framework, there are a few key tools
             and concepts to understand before you dive in.
 
-            ${pc.bold("Concepts =========================================================================================")}
+            ${pc.bold(pc.whiteBright("Concepts ========================================================================================="))}
 
-            ${pc.underline("Infrastructure-as-Code (IaC)")}: All infrastructure
+            ${pc.bold(pc.underline("Infrastructure-as-Code (IaC)"))}: All infrastructure
             is managed exclusively through OpenTofu (the OSS Terraform fork) and Terragrunt
             (a configuration manager and deployment tool for IaC). We enable
             you to run workloads on our supercharged Kubernetes clusters with out-of-the-box integrations
@@ -45,7 +46,7 @@ export class WelcomeCommand extends PanfactumCommand {
             to you -- no black-box abstractions. While Panfactum helps you launch quickly with production-ready
             defaults, it is ultimately designed to be hackable so you can make the installation your own.
 
-            ${pc.underline("Environments / Regions / Modules")}: All IaC ${pc.italic("configuration")}
+            ${pc.bold(pc.underline("Environments / Regions / Modules"))}: All IaC ${pc.italic("configuration")}
             (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.environments_dir)}`))}
             directory of this repository. That directory has three levels of nesting: 
             ${pc.blue("environment")}/${pc.yellow("region")}/${pc.green("module")} (e.g., production/us-east-2/aws_eks).
@@ -69,7 +70,7 @@ export class WelcomeCommand extends PanfactumCommand {
             comes with standard CI/CD modules that enable you to keep that configuration synchronized with all of your
             live systems.
 
-            ${pc.underline("Panfactum Kubernetes Clusters")}: At the core of the Panfactum framework is the
+            ${pc.bold(pc.underline("Panfactum Kubernetes Clusters"))}: At the core of the Panfactum framework is the
             Panfactum Kubernetes cluster. All Panfactum workloads and modules are designed to run on these clusters
             which come preconfigured with all of the utilities every serious engineering organization wants:
             vertical/horizontal/node autoscaling, monitoring + alerting, an enterprise identity provider with out-of-the-box RBAC,
@@ -80,7 +81,7 @@ export class WelcomeCommand extends PanfactumCommand {
             Our aim is to ensure that running workloads on Panfactum clusters provides you 10x more functionality and flexibility
             at 10% of the complexity and cost of any other alternative. Learn more at https://panfactum.com.
 
-            ${pc.bold("Getting Started =========================================================================================")}
+            ${pc.bold(pc.whiteBright("Getting Started ========================================================================================="))}
 
             The fastest way to get started:
 
@@ -94,7 +95,7 @@ export class WelcomeCommand extends PanfactumCommand {
 
             5. (Optional) Deploy a demo workload: ${pc.bold(pc.whiteBright("pf demo deploy"))} (Coming soon)
 
-            ${pc.bold("Getting Help =========================================================================================")}
+            ${pc.bold(pc.whiteBright("Getting Help ========================================================================================="))}
 
             If you need assistance, connect with us on our discord server: https://discord.gg/MJQ3WHktAS
 
