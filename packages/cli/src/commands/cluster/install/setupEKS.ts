@@ -55,14 +55,16 @@ export async function setupEKS(
   interface Context {
     clusterName?: string;
     clusterDescription?: string;
+    callerArn?: string;
   }
 
 
   const tasks = mainTask.newListr<Context>([
     {
       title: "Verify access",
-      task: async () => {
-        await getIdentity({ context, profile: awsProfile });
+      task: async (ctx) => {
+        const { Arn: arn } = await getIdentity({ context, profile: awsProfile });
+        ctx.callerArn = arn;
       },
     },
     {
@@ -151,6 +153,10 @@ export async function setupEKS(
       initModule: true,
       hclIfMissing: await Bun.file(awsEksTemplate).text(),
       inputUpdates: {
+        extra_superuser_principal_arns: defineInputUpdate({
+          schema: z.array(z.string()),
+          update: (_, ctx) => [ctx.callerArn!]
+        }),
         cluster_name: defineInputUpdate({
           schema: z.string(),
           update: (_, ctx) => ctx.clusterName!,
