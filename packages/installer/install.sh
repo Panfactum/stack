@@ -344,7 +344,7 @@ printf "\nSetting up infrastructure repository...\n\n"
 create_flake_nix
 create_panfactum_yaml
 
-printf "\nBuilding the Panfactum DevShell. This initial build may take up to 30 minutes to complete...\n" >&2
+printf "\nBuilding the Panfactum DevShell. This initial build may take up to 15 minutes to complete...\n" >&2
 if ! run_pf_update; then
   printf "\n  \033[31mError: Failed to build Panfactum DevShell. Exiting installation.\033[0m\n" >&2
   exit 1
