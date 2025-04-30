@@ -3,8 +3,8 @@ import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig"
 import { getIdentity } from "@/util/aws/getIdentity"
 import { CLIError } from "@/util/error/error"
 import { execute } from "@/util/subprocess/execute"
-import type { PanfactumContext } from "@/context/context"
 import type { EnvironmentMeta } from "@/util/config/getEnvironments"
+import type { PanfactumContext } from "@/util/context/context"
 import type { ListrTask } from "listr2"
 
 export async function testDNSResolutionTask<T extends {}>(inputs: {

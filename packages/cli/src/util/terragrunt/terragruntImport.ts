@@ -1,7 +1,7 @@
-import {join} from "node:path"
+import { join } from "node:path"
 import { CLIError } from "../error/error";
 import { execute } from "../subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function terragruntImport({
   context,
@@ -27,7 +27,7 @@ export async function terragruntImport({
   const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
 
   // Step 1: Check if it already imported
-  const {exitCode} = await execute({
+  const { exitCode } = await execute({
     command: [
       "terragrunt",
       "state",
@@ -35,7 +35,7 @@ export async function terragruntImport({
       "-no-color",
       resourcePath,
       "--terragrunt-non-interactive",
-            "--terragrunt-no-color"
+      "--terragrunt-no-color"
     ],
     context,
     workingDirectory,
@@ -47,8 +47,8 @@ export async function terragruntImport({
 
   // That means the resource already exists in the state
   // so we cannot import
-  if(exitCode === 0){
-    if(throwOnExists){
+  if (exitCode === 0) {
+    if (throwOnExists) {
       throw new CLIError(`Cannot import resource ${resourcePath} because it already exists in the state file`)
     }
     return
@@ -62,7 +62,7 @@ export async function terragruntImport({
       "-no-color",
       resourcePath,
       resourceId,
-          "--terragrunt-no-color"
+      "--terragrunt-no-color"
     ],
     context,
     workingDirectory,

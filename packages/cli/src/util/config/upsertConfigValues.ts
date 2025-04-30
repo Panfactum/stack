@@ -3,7 +3,7 @@ import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { CLIError } from "../error/error";
 import { writeFile } from "../fs/writeFile";
 import type { TGConfigFile } from "./schemas";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 interface UpsertConfigValuesInput {
     context: PanfactumContext;
@@ -21,22 +21,27 @@ export async function upsertConfigValues(input: UpsertConfigValuesInput) {
 
     try {
         if (existingValues) {
-            await Bun.write(filePath, stringify({
-                ...existingValues,
-                ...values,
-                extra_inputs: {
-                    ...existingValues.extra_inputs,
-                    ...values.extra_inputs
-                },
-                extra_tags: {
-                    ...existingValues.extra_tags,
-                    ...values.extra_tags
-                },
-                domains: {
-                    ...existingValues.domains,
-                    ...values.domains
-                }
-            }, yamlOpts))
+            await writeFile({
+                path: filePath,
+                contents: stringify({
+                    ...existingValues,
+                    ...values,
+                    extra_inputs: {
+                        ...existingValues.extra_inputs,
+                        ...values.extra_inputs
+                    },
+                    extra_tags: {
+                        ...existingValues.extra_tags,
+                        ...values.extra_tags
+                    },
+                    domains: {
+                        ...existingValues.domains,
+                        ...values.domains
+                    }
+                }, yamlOpts),
+                context,
+                overwrite: true
+            })
         } else {
             await writeFile({
                 contents: stringify(values, yamlOpts),

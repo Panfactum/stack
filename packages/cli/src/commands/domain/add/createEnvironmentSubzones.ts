@@ -3,7 +3,7 @@ import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { createDescendentZones } from "./createDescendentZones";
 import { getEnvironmentsForSubzones } from "./getEnvironmentsForSubzones";
 import { manualZoneSetup } from "./manualZoneSetup";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { DomainConfigs } from "@/util/domains/tasks/types";
 
 export async function createEnvironmentSubzones(inputs: {

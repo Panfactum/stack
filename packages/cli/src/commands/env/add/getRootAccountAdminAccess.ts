@@ -1,6 +1,6 @@
 import { confirm } from "@inquirer/prompts";
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function getRootAccountAdminAccess(context: PanfactumContext) {
     context.logger.info(

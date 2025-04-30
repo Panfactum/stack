@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { execute } from "@/util/subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 // This script is intended to remove the default resources that AWS installs in an EKS

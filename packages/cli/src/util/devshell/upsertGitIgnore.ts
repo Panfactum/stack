@@ -1,7 +1,7 @@
 import { CLIError } from "../error/error";
 import { fileExists } from "../fs/fileExists";
 import { writeFile } from "../fs/writeFile";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 /**
  * Updates a .gitignore file by adding the specified lines.
@@ -36,7 +36,7 @@ export async function upsertGitIgnore(inputs: { context: PanfactumContext, lines
 
     // Write the file
     context.logger.debug('Updating .gitignore file', { linesToAdd, path });
-    
+
     try {
         await writeFile({
             contents: newContent,

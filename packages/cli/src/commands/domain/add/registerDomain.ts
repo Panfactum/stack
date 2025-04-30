@@ -25,8 +25,8 @@ import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { getDomainPrice } from "./getDomainPrice";
 import { isDomainAvailableFromAWS } from "./isDomainAvailableFromAWS";
 import { REGISTERED_DOMAINS_MODULE_OUTPUT_SCHEMA } from "./types";
-import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { PanfactumContext } from "@/util/context/context";
 
 // Constants for validation
 const MIN_NAME_LENGTH = 2;

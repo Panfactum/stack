@@ -27,7 +27,7 @@ import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/task
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { getNewAccountAlias } from "./getNewAccountAlias";
 import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 
 export async function bootstrapEnvironment(inputs: {

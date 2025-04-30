@@ -1,5 +1,5 @@
 import { AWS_ACCOUNT_ALIAS_SCHEMA } from "@/util/aws/schemas";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function getNewAccountAlias(inputs: {

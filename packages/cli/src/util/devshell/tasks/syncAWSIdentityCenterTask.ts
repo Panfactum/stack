@@ -12,7 +12,7 @@ import { fileExists } from "../../fs/fileExists";
 import { writeFile } from "../../fs/writeFile";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "../../terragrunt/constants";
 import { terragruntOutput } from "../../terragrunt/terragruntOutput";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 const IAM_IDENTIY_CENTER_OUTPUT_SCHEMA = z.object({
     cli_config: z.object({

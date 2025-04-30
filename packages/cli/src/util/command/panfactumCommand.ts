@@ -1,7 +1,7 @@
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import { CLIError } from "../error/error";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export abstract class PanfactumCommand extends Command<PanfactumContext> {
 

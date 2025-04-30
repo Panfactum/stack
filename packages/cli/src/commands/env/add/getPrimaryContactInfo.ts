@@ -1,7 +1,7 @@
 import { AccountClient, GetContactInformationCommand } from "@aws-sdk/client-account";
 import { z } from "zod";
 import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 // TODO: We can actually get this from the AWS account

@@ -1,5 +1,5 @@
 import pc from "picocolors"
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function shouldCreateAWSOrg(context: PanfactumContext): Promise<boolean> {
   return context.logger.select({

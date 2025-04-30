@@ -1,7 +1,7 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
 import { CLISubprocessError } from "../error/error";
 import { concatStreams } from "../streams/concatStreams";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 type IsSuccessFn = (results: {
   stdout: string;

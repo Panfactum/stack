@@ -2,7 +2,7 @@ import { GetCallerIdentityCommand, STSClient } from "@aws-sdk/client-sts";
 import { getCredsFromFile } from "./getCredsFromFile";
 import { CLIError } from "../error/error";
 import { execute } from "../subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 /**
  * Fetches the AWS identity for a given profile.

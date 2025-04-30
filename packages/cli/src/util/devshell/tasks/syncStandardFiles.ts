@@ -4,7 +4,7 @@ import { writeFile } from "@/util/fs/writeFile";
 import { TERRAGRUNT_FILES } from "@/util/terragrunt/constants";
 import { EXPECTED_GITIGNORE_CONTENTS } from "../constants";
 import { upsertGitIgnore } from "../upsertGitIgnore";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
 

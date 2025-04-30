@@ -8,7 +8,7 @@ import { MODULES } from "@/util/terragrunt/constants";
 import { getSSMCommandOutput } from "../../../util/aws/getSSMCommandOutput";
 import { scaleASG } from "../../../util/aws/scaleASG";
 import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
-import type { PanfactumContext } from "../../../context/context";
+import type { PanfactumContext } from "../../../util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const AWS_VPC_MODULE_OUTPUTS = z.object({

@@ -5,7 +5,7 @@ import { CLIError } from "../error/error";
 import { createDirectory } from "../fs/createDirectory";
 import { fileExists } from "../fs/fileExists";
 import { execute } from "../subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 
 interface Input {

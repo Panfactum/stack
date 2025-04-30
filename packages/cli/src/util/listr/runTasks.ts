@@ -1,5 +1,5 @@
 import { CLIError } from "../error/error";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { Listr } from "listr2";
 
 export async function runTasks<T>(inputs: {

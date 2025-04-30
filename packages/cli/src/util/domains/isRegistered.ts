@@ -1,5 +1,5 @@
 import { execute } from "../subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 /**
  * Note that this is more of a heuristic than an absolute truth as there isn't a realtime updated

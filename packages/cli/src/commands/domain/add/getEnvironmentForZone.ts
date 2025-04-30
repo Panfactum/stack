@@ -1,7 +1,7 @@
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { CLIError } from "@/util/error/error";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function getEnvironmentForZone(inputs: {
     context: PanfactumContext,
