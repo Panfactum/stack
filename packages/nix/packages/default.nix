@@ -156,6 +156,7 @@ with pkgs;
   autossh # automatically restart tunnels
   step-cli # working with certificates
   curl # submit network requests from the CLI
+  whois # domain registration details
 
   ####################################
   # Database Tools
