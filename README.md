@@ -11,8 +11,6 @@
 The Panfactum Framework is an integrated set of OpenTofu (Terraform) modules and local tooling aimed at providing
 the best experience for building, deploying, and managing software on AWS and Kubernetes.
 
-Check out our demos [here.](https://panfactum.com/stack/demo/live)
-
 ## Installation
 
 If you'd like to add the Panfactum stack to your organization, see our [deployment guide.](https://panfactum.com/docs/edge/guides/bootstrapping/overview)
