@@ -109,11 +109,8 @@ export class Logger {
       dedent: shouldDedent = false,
     } = config || {}
 
-    let resultStr = this.getColorFn(style)(str)
+    let resultStr = this.getColorFn(style)(shouldDedent ? dedent(str) : str)
 
-    if (shouldDedent) {
-      resultStr = dedent(resultStr)
-    }
     if (bold) {
       resultStr = pc.bold(resultStr)
     }
