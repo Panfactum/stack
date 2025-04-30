@@ -8,7 +8,7 @@
 [![Discord](https://img.shields.io/discord/1230306857604616303?logo=discord&label=Discord)](https://discord.gg/MJQ3WHktAS)
 [![CLA assistant](https://cla-assistant.io/readme/badge/Panfactum/stack)](https://cla-assistant.io/Panfactum/stack)
 
-The Panfactum Stack is an integrated set of OpenTofu (Terraform) modules and local tooling aimed at providing
+The Panfactum Framework is an integrated set of OpenTofu (Terraform) modules and local tooling aimed at providing
 the best experience for building, deploying, and managing software on AWS and Kubernetes.
 
 Check out our demos [here.](https://panfactum.com/stack/demo/live)
