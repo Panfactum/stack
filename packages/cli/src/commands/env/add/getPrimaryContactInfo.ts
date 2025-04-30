@@ -67,7 +67,7 @@ export async function getPrimaryContactInfo(inputs: {
     });
     const phoneNumber = await context.logger.input({
         task: parentTask,
-        message: 'Phone #:',
+        message: 'Phone # (+1 555-555-5555):',
         default: existingInfo.phoneNumber,
         validate: (value) => {
             const { error } = AWS_PHONE_NUMBER_SCHEMA.safeParse(value)
