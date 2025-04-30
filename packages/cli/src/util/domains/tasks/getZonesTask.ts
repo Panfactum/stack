@@ -7,7 +7,7 @@ import { CLIError } from "../../error/error";
 import { MODULES } from "../../terragrunt/constants";
 import { terragruntOutput } from "../../terragrunt/terragruntOutput";
 import type { DomainConfigs } from "./types";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
 export async function getZonesTask<T extends {}>(inputs: {

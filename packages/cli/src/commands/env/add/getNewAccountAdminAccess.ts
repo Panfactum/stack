@@ -1,5 +1,5 @@
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function getNewAccountAdminAccess(inputs: { context: PanfactumContext, type: "management" | "standalone" | "manual-org" }) {
     const { context, type } = inputs

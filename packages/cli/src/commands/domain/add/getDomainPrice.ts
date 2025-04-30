@@ -2,8 +2,8 @@ import { Route53DomainsClient, ListPricesCommand } from "@aws-sdk/client-route-5
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
-import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function getDomainPrice(inputs: {
     context: PanfactumContext;
@@ -39,7 +39,7 @@ export async function getDomainPrice(inputs: {
             const registrationPrice = priceResponse.Prices.find(
                 (price) => price.RegistrationPrice?.Price !== undefined
             )?.RegistrationPrice?.Price;
-            if(registrationPrice !== undefined){
+            if (registrationPrice !== undefined) {
                 return registrationPrice
             }
         }

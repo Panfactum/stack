@@ -3,7 +3,7 @@ import { ZodError, type z } from "zod";
 import { CLIError, PanfactumZodError } from "../error/error";
 import { fileExists } from "../fs/fileExists";
 import { execute } from "../subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export const sopsDecrypt = async <T extends z.ZodType<object>>({
   filePath,

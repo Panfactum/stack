@@ -3,7 +3,7 @@ import { stringify, parse } from 'ini'
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumContext, creds: { secretAccessKey: string, accessKeyId: string }, profile: string }) {
     const {

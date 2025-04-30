@@ -1,9 +1,9 @@
-import {dirname, basename,join} from "node:path";
+import { dirname, basename, join } from "node:path";
 import { Glob } from "bun";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { asyncIterMap } from "../asyncIterMap";
 import { CLIError } from "../error/error";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export interface EnvironmentMeta {
     path: string; // Absolute path to the directory for the environment
@@ -18,7 +18,7 @@ export async function getEnvironments(context: PanfactumContext): Promise<Array<
         const filePath = join(context.repoVariables.environments_dir, path)
         const envPath = dirname(filePath);
         try {
-            const {environment, environment_subdomain: subdomain} = await getConfigValuesFromFile({filePath, context}) || {}
+            const { environment, environment_subdomain: subdomain } = await getConfigValuesFromFile({ filePath, context }) || {}
             return {
                 name: environment ?? basename(envPath),
                 path: envPath,

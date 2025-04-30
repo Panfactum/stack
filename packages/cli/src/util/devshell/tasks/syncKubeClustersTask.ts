@@ -12,7 +12,7 @@ import {
     updateKubeConfig,
     type CLUSTERS_FILE_SCHEMA,
 } from "../updateKubeConfig";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
 interface TaskContext {

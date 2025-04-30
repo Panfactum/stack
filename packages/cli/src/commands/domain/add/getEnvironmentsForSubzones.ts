@@ -2,7 +2,7 @@ import { join } from "node:path"
 import { type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function getEnvironmentsForSubzones(inputs: {
     context: PanfactumContext,

@@ -1,4 +1,4 @@
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function hasExistingAWSInfra(context: PanfactumContext): Promise<boolean> {
   return context.logger.select({

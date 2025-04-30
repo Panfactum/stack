@@ -1,6 +1,6 @@
 import { CLISubprocessError } from "../error/error";
 import { execute } from "../subprocess/execute";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 interface Inputs {
   commandId: string;

@@ -1,5 +1,5 @@
 import { OrganizationsClient, ListAccountsCommand } from "@aws-sdk/client-organizations";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 // Returns and email address associated with an existing AWS account
 // Note this is not guaranteed to be the email of any particular account

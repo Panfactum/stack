@@ -3,7 +3,7 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
 
 
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
 export async function syncDomainsTask<T extends {}>(inputs: {

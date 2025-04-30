@@ -1,4 +1,4 @@
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function hasExistingAWSOrg(context: PanfactumContext): Promise<boolean> {
   return context.logger.select({

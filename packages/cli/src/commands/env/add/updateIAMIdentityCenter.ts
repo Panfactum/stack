@@ -10,7 +10,7 @@ import { directoryExists } from "@/util/fs/directoryExist";
 import { fileContains } from "@/util/fs/fileContains";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 
 interface TaskContext {

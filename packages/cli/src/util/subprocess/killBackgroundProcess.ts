@@ -1,4 +1,4 @@
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export const BACKGROUND_PROCESS_PIDS: number[] = [];
 

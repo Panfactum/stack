@@ -14,8 +14,8 @@ import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
 import { testDNSResolutionTask } from "../../../util/domains/tasks/testDNSResolutionTask";
-import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function createDescendentZones(inputs: {
     context: PanfactumContext,

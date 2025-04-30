@@ -12,7 +12,7 @@ import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { terragruntApply } from "../terragruntApply";
 import { terragruntImport } from "../terragruntImport";
 import { terragruntInit } from "../terragruntInit";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
     schema: T;

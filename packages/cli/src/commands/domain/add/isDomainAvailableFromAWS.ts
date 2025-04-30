@@ -2,8 +2,8 @@ import { CheckDomainAvailabilityCommand, Route53DomainsClient, UnsupportedTLD } 
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
-import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function isDomainAvailableFromAWS(inputs: { context: PanfactumContext, env: EnvironmentMeta, domain: string, tld: string }) {
     const { context, env, domain, tld } = inputs;

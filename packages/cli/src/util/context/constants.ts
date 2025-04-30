@@ -1,0 +1,1 @@
+export const REPO_CONFIG_FILE = "panfactum.yaml"

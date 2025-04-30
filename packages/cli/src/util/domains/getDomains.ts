@@ -4,7 +4,7 @@ import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { asyncIterMap } from "../asyncIterMap";
 import { CLIError } from "../error/error";
 import type { DomainConfigs } from "./tasks/types";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 /**
  * Finds all environment.yaml files in the environments directory, extracts domains data,

@@ -9,7 +9,7 @@ import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
 import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";
 import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
-import { createPanfactumContext, type PanfactumContext } from "./context/context.ts";
+import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
 // Create a CLI instance

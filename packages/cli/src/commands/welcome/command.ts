@@ -1,6 +1,8 @@
+import { randomUUID } from "crypto";
 import { Command } from "clipanion";
 import pc from "picocolors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { upsertRepoVariables } from "@/util/context/upsertRepoVariables";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
 
 export class WelcomeCommand extends PanfactumCommand {
@@ -13,94 +15,105 @@ export class WelcomeCommand extends PanfactumCommand {
     async execute() {
         const { context } = this;
 
-        context.logger.showLogo()
 
-        context.logger.write(`
-            Welcome to Panfactum! This is the ${pc.italic("DevShell")}, a local terminal
-            environment containing all the utilities necessary to begin deploying
-            and managing cloud infrastructure.
+        if (!context.repoVariables.installation_id) {
+            context.logger.showLogo()
 
-            The DevShell includes 100s of version-pinned CLI tools such as aws,
-            tofu, terragrunt, kubectl, helm, and much more. These are installed in isolation from your
-            main system and automatically load when you open this repository in your terminal.
+            context.logger.write(`
+                Welcome to Panfactum! This is the ${pc.italic("DevShell")}, a local terminal
+                environment containing all the utilities necessary to begin deploying
+                and managing cloud infrastructure.
+    
+                The DevShell includes 100s of version-pinned CLI tools such as aws,
+                tofu, terragrunt, kubectl, helm, and much more. These are installed in isolation from your
+                main system and automatically load when you open this repository in your terminal.
+    
+                Most importantly, the DevShell includes the Panfactum CLI (${pc.bold(pc.whiteBright("pf"))}) which will
+                be used to automate your initial infrastructure setup.
+    
+                ${pc.bold(pc.whiteBright("Getting Started ========================================================================================="))}
+    
+                The fastest way to get started:
+    
+                1. Create an environment: ${pc.bold(pc.whiteBright("pf env add"))}
+    
+                2. Add a domain: ${pc.bold(pc.whiteBright("pf domain add"))}
+    
+                3. Add a cluster: ${pc.bold(pc.whiteBright("pf cluster add"))}
+    
+                4. Deploy an IdP to enable SSO: ${pc.bold(pc.whiteBright("pf idp add"))} (Coming soon)
+    
+                5. (Optional) Deploy a demo workload: ${pc.bold(pc.whiteBright("pf demo deploy"))} (Coming soon)
+    
+                ${pc.bold(pc.whiteBright("Concepts ========================================================================================="))}
+    
+                ${pc.bold(pc.underline("Infrastructure-as-Code (IaC)"))}: All infrastructure
+                is managed exclusively through OpenTofu (the OSS Terraform fork) and Terragrunt
+                (a configuration manager and deployment tool for IaC). We enable
+                you to run workloads on our supercharged Kubernetes clusters with out-of-the-box integrations
+                to your infrastructure provider such as AWS.
+    
+                The framework itself contains 100s of IaC modules. Some will be deployed directly
+                (e.g., Kubernetes clusters) and others
+                are submodules that can be used to build your own custom workloads.
+    
+                Every workload and configuration option that Panfactum uses is exposed directly
+                to you -- no black-box abstractions. While Panfactum helps you launch quickly with production-ready
+                defaults, it is ultimately designed to be hackable so you can make the installation your own.
+    
+                ${pc.bold(pc.underline("Environments / Regions / Modules"))}: All IaC ${pc.italic("configuration")}
+                (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.environments_dir)}`))}
+                directory of this repository. That directory has three levels of nesting: 
+                ${pc.blue("environment")}/${pc.yellow("region")}/${pc.green("module")} (e.g., production/us-east-2/aws_eks).
+    
+                An ${pc.blue("environment")} is an isolated deployment of an entire infrastructure system (clusters, workloads, etc).
+                You will likely have several 
+                that you use for different purposes such as testing and serving live traffic
+                (e.g., ${pc.italic("development")}, ${pc.italic("staging")}, and ${pc.italic("production")}).
+    
+                A ${pc.yellow("region")} is analogous to a single geographic datacenter. Regions can have at most one Kubernetes
+                cluster which is what runs all of the workloads deployed by the Panfactum framework.
+    
+                A ${pc.green("module")} is an atomic set of deployable infrastructure. Besides the DevShell, Panfactum
+                provides many turn-key infrastructure modules to make getting started easy. You will likely also want to
+                use our submodules to
+                write your own first-party IaC modules in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.iac_dir)}`))}
+                directoy of this repository.
+    
+                The single source of truth for the configuration of all of your modules, regions, and environments lives
+                on the ${pc.bold(pc.whiteBright(context.repoVariables.repo_primary_branch))} branch of this repository. The framework
+                comes with standard CI/CD modules that enable you to keep that configuration synchronized with all of your
+                live systems.
+    
+                ${pc.bold(pc.underline("Panfactum Kubernetes Clusters"))}: At the core of the Panfactum framework is the
+                Panfactum Kubernetes cluster. All Panfactum workloads and modules are designed to run on these clusters
+                which come preconfigured with all of the utilities every serious engineering organization wants:
+                vertical/horizontal/node autoscaling, monitoring + alerting, an enterprise identity provider with out-of-the-box RBAC,
+                zero-trust networking, a CI/CD system, a service-mesh, a policy engine, a workflow engine, and much, much more.
+                
+                Every tool Panfactum deploys is free, open-source, well-documented, and industry-standard (including Panfactum itself).
+    
+                Our aim is to ensure that running workloads on Panfactum clusters provides you 10x more functionality and flexibility
+                at 10% of the complexity and cost of any other alternative. Learn more at https://panfactum.com.
+    
+                ${pc.bold(pc.whiteBright("Getting Help ========================================================================================="))}
+    
+                If you need assistance, connect with us on our discord server: https://discord.gg/MJQ3WHktAS
+    
+                If you think you've found a bug, please submit an issue: https://github.com/panfactum/stack/issues
+    
+                ${pc.dim("↓ Want to get rid of clutter when loading the DevShell? https://direnv.net/man/direnv.toml.1.html#codehideenvdiffcode")}
+            `, { removeIndent: true })
 
-            Most importantly, the DevShell includes the Panfactum CLI (${pc.bold(pc.whiteBright("pf"))}) which will
-            be used to automate your initial infrastructure setup.
+            await upsertRepoVariables({
+                context,
+                values: {
+                    installation_id: randomUUID(),
+                }
+            })
+        }
 
-            In the Panfactum framework, there are a few key tools
-            and concepts to understand before you dive in.
 
-            ${pc.bold(pc.whiteBright("Concepts ========================================================================================="))}
-
-            ${pc.bold(pc.underline("Infrastructure-as-Code (IaC)"))}: All infrastructure
-            is managed exclusively through OpenTofu (the OSS Terraform fork) and Terragrunt
-            (a configuration manager and deployment tool for IaC). We enable
-            you to run workloads on our supercharged Kubernetes clusters with out-of-the-box integrations
-            to your infrastructure provider such as AWS.
-
-            The framework itself contains 100s of IaC modules. Some will be deployed directly
-            (e.g., Kubernetes clusters) and others
-            are submodules that can be used to build your own custom workloads.
-
-            Every workload and configuration option that Panfactum uses is exposed directly
-            to you -- no black-box abstractions. While Panfactum helps you launch quickly with production-ready
-            defaults, it is ultimately designed to be hackable so you can make the installation your own.
-
-            ${pc.bold(pc.underline("Environments / Regions / Modules"))}: All IaC ${pc.italic("configuration")}
-            (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.environments_dir)}`))}
-            directory of this repository. That directory has three levels of nesting: 
-            ${pc.blue("environment")}/${pc.yellow("region")}/${pc.green("module")} (e.g., production/us-east-2/aws_eks).
-
-            An ${pc.blue("environment")} is an isolated deployment of an entire infrastructure system (clusters, workloads, etc).
-            You will likely have several 
-            that you use for different purposes such as testing and serving live traffic
-            (e.g., ${pc.italic("development")}, ${pc.italic("staging")}, and ${pc.italic("production")}).
-
-            A ${pc.yellow("region")} is analogous to a single geographic datacenter. Regions can have at most one Kubernetes
-            cluster which is what runs all of the workloads deployed by the Panfactum framework.
-
-            A ${pc.green("module")} is an atomic set of deployable infrastructure. Besides the DevShell, Panfactum
-            provides many turn-key infrastructure modules to make getting started easy. You will likely also want to
-            use our submodules to
-            write your own first-party IaC modules in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.iac_dir)}`))}
-            directoy of this repository.
-
-            The single source of truth for the configuration of all of your modules, regions, and environments lives
-            on the ${pc.bold(pc.whiteBright(context.repoVariables.repo_primary_branch))} branch of this repository. The framework
-            comes with standard CI/CD modules that enable you to keep that configuration synchronized with all of your
-            live systems.
-
-            ${pc.bold(pc.underline("Panfactum Kubernetes Clusters"))}: At the core of the Panfactum framework is the
-            Panfactum Kubernetes cluster. All Panfactum workloads and modules are designed to run on these clusters
-            which come preconfigured with all of the utilities every serious engineering organization wants:
-            vertical/horizontal/node autoscaling, monitoring + alerting, an enterprise identity provider with out-of-the-box RBAC,
-            zero-trust networking, a CI/CD system, a service-mesh, a policy engine, a workflow engine, and much, much more.
-            
-            Every tool Panfactum deploys is free, open-source, well-documented, and industry-standard (including Panfactum itself).
-
-            Our aim is to ensure that running workloads on Panfactum clusters provides you 10x more functionality and flexibility
-            at 10% of the complexity and cost of any other alternative. Learn more at https://panfactum.com.
-
-            ${pc.bold(pc.whiteBright("Getting Started ========================================================================================="))}
-
-            The fastest way to get started:
-
-            1. Create an environment: ${pc.bold(pc.whiteBright("pf env add"))}
-
-            2. Add a domain: ${pc.bold(pc.whiteBright("pf domain add"))}
-
-            3. Add a cluster: ${pc.bold(pc.whiteBright("pf cluster add"))}
-
-            4. Deploy an IdP to enable SSO: ${pc.bold(pc.whiteBright("pf idp add"))} (Coming soon)
-
-            5. (Optional) Deploy a demo workload: ${pc.bold(pc.whiteBright("pf demo deploy"))} (Coming soon)
-
-            ${pc.bold(pc.whiteBright("Getting Help ========================================================================================="))}
-
-            If you need assistance, connect with us on our discord server: https://discord.gg/MJQ3WHktAS
-
-            If you think you've found a bug, please submit an issue: https://github.com/panfactum/stack/issues
-        `, { removeIndent: true })
 
     }
 }

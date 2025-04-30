@@ -17,7 +17,7 @@ import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { getAccountEmail } from "./getAccountEmail";
 import { getNewAccountAlias } from "./getNewAccountAlias";
-import type { PanfactumContext } from "@/context/context"
+import type { PanfactumContext } from "@/util/context/context"
 
 export const AWS_ORG_MODULE = "aws_organization"
 

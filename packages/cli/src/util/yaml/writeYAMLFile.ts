@@ -1,9 +1,9 @@
-import {stringify} from "yaml";
+import { stringify } from "yaml";
 import { writeFile } from "../fs/writeFile";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
-export async function writeYAMLFile(inputs: {context: PanfactumContext, contents: unknown, overwrite?: boolean, path: string}){
-    const {context, contents, overwrite, path} = inputs;
+export async function writeYAMLFile(inputs: { context: PanfactumContext, contents: unknown, overwrite?: boolean, path: string }) {
+    const { context, contents, overwrite, path } = inputs;
 
     await writeFile({
         context,

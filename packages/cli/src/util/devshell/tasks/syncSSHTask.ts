@@ -8,7 +8,7 @@ import { createDirectory } from "@/util/fs/createDirectory";
 import { getLastPathSegments } from "@/util/fs/getLastPathSegments";
 import { MODULES } from "@/util/terragrunt/constants";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 interface TaskContext {
     bastionInfo: {

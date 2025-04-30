@@ -3,7 +3,7 @@ import { z } from "zod";
 import { readYAMLFile } from "./readYAMLFile";
 import { writeYAMLFile } from "./writeYAMLFile";
 import { fileExists } from "../fs/fileExists";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 type JSONValue =
   | string

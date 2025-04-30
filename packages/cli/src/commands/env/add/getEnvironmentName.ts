@@ -1,6 +1,6 @@
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { ENVIRONMENT_NAME_SCHEMA } from "./common";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 export async function getEnvironmentName(inputs: { context: PanfactumContext }) {
     const { context } = inputs;

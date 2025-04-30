@@ -4,7 +4,7 @@ import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { CLIError } from "../error/error";
 import { readYAMLFile } from "../yaml/readYAMLFile";
 import { writeYAMLFile } from "../yaml/writeYAMLFile";
-import type { PanfactumContext } from "@/context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 const KUBE_CONFIG_SCHEMA = z.object({
     apiVersion: z.literal("v1"),
@@ -25,7 +25,7 @@ const KUBE_CONFIG_SCHEMA = z.object({
                 apiVersion: z.string(),
                 args: z.array(z.string()).optional(),
                 command: z.string(),
-                env: z.union([z.null(), z.array(z.object({name: z.string(), value: z.string()}))]).default(null),
+                env: z.union([z.null(), z.array(z.object({ name: z.string(), value: z.string() }))]).default(null),
                 interactiveMode: z.string().default("IfAvailable"),
                 provideClusterInfo: z.boolean().default(false)
             }).passthrough()
@@ -75,7 +75,7 @@ export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
         return
     }
 
-    const newClusters = Object.entries(clusterInfo).map(([name, {caData, url}]) => ({
+    const newClusters = Object.entries(clusterInfo).map(([name, { caData, url }]) => ({
         name,
         cluster: {
             "certificate-authority-data": caData,
@@ -83,17 +83,17 @@ export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
         }
     }))
 
-    const newUsers = await Promise.all(Object.entries(clusterInfo).map(async ([name, {regionDir, envDir}]) => {
+    const newUsers = await Promise.all(Object.entries(clusterInfo).map(async ([name, { regionDir, envDir }]) => {
         const { aws_profile: profile, aws_region: region } = await getPanfactumConfig({
             context,
             directory: join(context.repoVariables.environments_dir, envDir, regionDir)
         })
 
-        if(!profile){
+        if (!profile) {
             throw new CLIError(`Could not set up kubeconfig because could not infer AWS profile for ${name} cluster at ${envDir}/${regionDir}.`)
         }
 
-        if(!region){
+        if (!region) {
             throw new CLIError(`Could not set up kubeconfig because could not infer AWS region for ${name} cluster at ${envDir}/${regionDir}.`)
         }
 
@@ -134,9 +134,9 @@ export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
         const mergedClusters = oldConfig
             .clusters.filter(({ name }) => !clusterNamesSet.has(name)).concat(newClusters)
         const mergedUsers = oldConfig
-        .users.filter(({ name }) => !clusterNamesSet.has(name)).concat(newUsers)
+            .users.filter(({ name }) => !clusterNamesSet.has(name)).concat(newUsers)
         const mergedContexts = oldConfig
-        .contexts.filter(({ name }) => !clusterNamesSet.has(name)).concat(newContexts)
+            .contexts.filter(({ name }) => !clusterNamesSet.has(name)).concat(newContexts)
 
         await writeYAMLFile({
             context,

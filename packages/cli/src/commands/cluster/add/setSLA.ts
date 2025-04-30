@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import type { PanfactumContext } from "@/context/context";
 import type { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
+import type { PanfactumContext } from "@/util/context/context";
 import type { z } from "zod";
 
 type SlaTarget = z.infer<typeof PANFACTUM_CONFIG_SCHEMA.shape.sla_target>;

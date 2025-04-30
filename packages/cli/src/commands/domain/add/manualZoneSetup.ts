@@ -11,8 +11,8 @@ import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
-import type { PanfactumContext } from "@/context/context";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { PanfactumContext } from "@/util/context/context";
 
 interface TaskContext {
     nameServers: string[]
