@@ -125,14 +125,14 @@ const SETUP_STEPS: Array<{
     },
   ];
 
-export class InstallClusterCommand extends PanfactumCommand {
-  static override paths = [["cluster", "install"]];
+export class ClusterAddCommand extends PanfactumCommand {
+  static override paths = [["cluster", "add"]];
 
   static override usage = Command.Usage({
     description: "Install a Panfactum cluster",
     details:
       "This command sets up a new Panfactum cluster including collecting configuration options and setting up all standard components.",
-    examples: [["Start cluster installation", "pf cluster install"]],
+    examples: [["Start cluster installation", "pf cluster add"]],
   });
 
   async execute() {
