@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
-import { InstallClusterCommand } from "./commands/cluster/install/command.ts";
+import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
@@ -24,7 +24,7 @@ cli.register(Builtins.HelpCommand);
 cli.register(Builtins.VersionCommand);
 
 // Commands
-cli.register(InstallClusterCommand);
+cli.register(ClusterAddCommand);
 cli.register(DevShellUpdateCommand)
 cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
