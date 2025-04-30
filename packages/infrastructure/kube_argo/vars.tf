@@ -66,6 +66,54 @@ variable "monitoring_enabled" {
   default     = false
 }
 
+variable "metrics_enabled" {
+  description = "Whether to enable Prometheus metrics for Argo Workflows controller"
+  type        = bool
+  default     = false
+}
+
+variable "metrics_service_port" {
+  description = "Service port for the metrics endpoint"
+  type        = number
+  default     = 9090
+}
+
+variable "metrics_service_port_name" {
+  description = "Service port name for the metrics endpoint"
+  type        = string
+  default     = "metrics"
+}
+
+variable "service_monitor_enabled" {
+  description = "Whether to create a ServiceMonitor custom resource for Prometheus Operator"
+  type        = bool
+  default     = false
+}
+
+variable "service_monitor_namespace" {
+  description = "The namespace where the ServiceMonitor should be created"
+  type        = string
+  default     = ""
+}
+
+variable "service_monitor_labels" {
+  description = "Additional labels to add to the ServiceMonitor"
+  type        = map(string)
+  default     = {}
+}
+
+variable "metrics_path" {
+  description = "The path where metrics are exposed"
+  type        = string
+  default     = "/metrics"
+}
+
+variable "metrics_scrape_interval" {
+  description = "How frequently Prometheus should scrape the metrics endpoint"
+  type        = string
+  default     = "30s"
+}
+
 variable "sla_target" {
   description = "The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost"
   type        = number

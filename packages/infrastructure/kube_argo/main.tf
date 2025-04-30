@@ -356,6 +356,21 @@ resource "helm_release" "argo" {
       }
 
       controller = {
+        metricsConfig = {
+          enabled         = var.metrics_enabled
+          path            = var.metrics_path
+          port            = 9090
+          servicePort     = var.metrics_service_port
+          servicePortName = var.metrics_service_port_name
+          honorLabels     = false
+          interval        = var.metrics_scrape_interval
+        }
+
+        serviceMonitor = {
+          enabled          = var.service_monitor_enabled
+          additionalLabels = var.service_monitor_labels
+          namespace        = var.service_monitor_namespace
+        }
         clusterWorkflowTemplates = {
           enabled = false
         }
@@ -668,10 +683,24 @@ resource "helm_release" "argo_events" {
 
   values = [
     yamlencode({
+      # Service-wide configuration
       fullnameOverride     = "argo-events"
       createAggregateRoles = true
 
       controller = {
+        # Controller metrics configuration
+        metrics = {
+          enabled = var.metrics_enabled
+          service = {
+            servicePort = var.metrics_service_port
+          }
+          serviceMonitor = {
+            enabled          = var.service_monitor_enabled
+            interval         = var.metrics_scrape_interval
+            additionalLabels = var.service_monitor_labels
+            namespace        = var.service_monitor_namespace
+          }
+        }
 
         // This is required until the patch is merged upstream
         // https://github.com/argoproj/argo-events/pull/3381
@@ -711,6 +740,19 @@ resource "helm_release" "argo_events" {
         image = {
           repository = "${module.constants.images.argo-events.registry}/${module.constants.images.argo-events.repository}"
           tag        = module.constants.images.argo-events.tag
+        }
+        # Webhook metrics configuration
+        metrics = {
+          enabled = var.metrics_enabled
+          service = {
+            servicePort = var.metrics_service_port
+          }
+          serviceMonitor = {
+            enabled          = var.service_monitor_enabled
+            interval         = var.metrics_scrape_interval
+            additionalLabels = var.service_monitor_labels
+            namespace        = var.service_monitor_namespace
+          }
         }
         podLabels = merge(
           module.util_webhook.labels,
