@@ -238,27 +238,27 @@ export async function setupInboundNetworking(
                               if (isCertReady) {
                                 return;
                               }
-
-                              // Restart cert-manager deployment
-                              await appsApi.patchNamespacedDeployment({
-                                name: 'cert-manager',
-                                namespace: 'cert-manager',
-                                body: {
-                                  spec: {
-                                    template: {
-                                      metadata: {
-                                        annotations: {
-                                          'kubectl.kubernetes.io/restartedAt': new Date().toISOString()
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                              });
-
-                              attempts++;
                             }
                           }
+
+                          // Restart cert-manager deployment
+                          await appsApi.patchNamespacedDeployment({
+                            name: 'cert-manager',
+                            namespace: 'cert-manager',
+                            body: {
+                              spec: {
+                                template: {
+                                  metadata: {
+                                    annotations: {
+                                      'kubectl.kubernetes.io/restartedAt': new Date().toISOString()
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                          });
+
+                          attempts++;
                         } catch (error) {
                           throw new CLIError(`Failed to restart cert-manager`, error);
                         }
