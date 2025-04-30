@@ -196,12 +196,6 @@ export async function setupInboundNetworking(
                       const maxAttempts = 10;
                       const retryDelay = 90000;
 
-                      if (attempts < maxAttempts) {
-                        await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
-                      } else {
-                        throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
-                      }
-
                       const kc = new KubeConfig();
                       kc.loadFromDefault();
                       if (!kubeConfigContext) {
@@ -213,6 +207,13 @@ export async function setupInboundNetworking(
                       const appsApi = kc.makeApiClient(AppsV1Api);
 
                       while (attempts < maxAttempts) {
+                        // Doing this up front to wait the first time
+                        if (attempts < maxAttempts) {
+                          await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+                        } else {
+                          throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
+                        }
+
                         try {
                           // Get Certificate resources
                           const result = await customApi.listClusterCustomObject({
