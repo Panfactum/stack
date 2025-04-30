@@ -4,7 +4,7 @@
 
 ---
 
-# Panfactum Stack
+# Panfactum Framework
 [![Discord](https://img.shields.io/discord/1230306857604616303?logo=discord&label=Discord)](https://discord.gg/MJQ3WHktAS)
 [![CLA assistant](https://cla-assistant.io/readme/badge/Panfactum/stack)](https://cla-assistant.io/Panfactum/stack)
 
