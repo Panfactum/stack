@@ -87,6 +87,7 @@ export class DomainAddCommand extends PanfactumCommand {
         /////////////////////////////////////////////////////////////////////////
         // Validations
         /////////////////////////////////////////////////////////////////////////
+        // FIX: Must have at least one environment
         let environmentMeta: EnvironmentMeta | undefined;
         const environments = await getEnvironments(context)
         if (environment) {

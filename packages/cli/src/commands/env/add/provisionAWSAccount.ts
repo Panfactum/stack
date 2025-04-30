@@ -6,6 +6,7 @@ import { Listr } from "listr2";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist"
@@ -58,6 +59,36 @@ export async function provisionAWSAccount(inputs: {
         throw new CLIError(`Could not find valid AWS profile for the AWS management account`)
     }
 
+    // We have to do this to workaround a bug in the AWS node SDK where credentials
+    // are not automatically loaded from disk if they were created during this
+    // process's execution
+    const credentials = await getCredsFromFile({ context, profile: managementProfile })
+    let orgClient;
+    if (credentials) {
+        orgClient = new OrganizationsClient({
+            credentials,
+            region: "us-east-1"
+        });
+    } else {
+        orgClient = new OrganizationsClient({
+            profile: managementProfile,
+            region: "us-east-1"
+        });
+    }
+
+    let managementSTSClient;
+    if (credentials) {
+        managementSTSClient = new STSClient({
+            credentials,
+            region: "us-east-1"
+        });
+    } else {
+        managementSTSClient = new STSClient({
+            profile: managementProfile,
+            region: "us-east-1"
+        });
+    }
+
     tasks.add({
         title: "Provision new AWS account",
         task: async (parentContext, parentTask) => {
@@ -94,10 +125,7 @@ export async function provisionAWSAccount(inputs: {
                         //////////////////////////////////////////////////
                         // Get the account alias
                         ///////////////////////////////////////////////////
-                        const orgClient = new OrganizationsClient({
-                            region: "us-east-1",
-                            profile: managementProfile
-                        });
+
                         let existingAccounts: Array<{ name: string, email: string, id: string }> = [];
                         try {
                             const listAccountsCommand = new ListAccountsCommand({});
@@ -126,7 +154,7 @@ export async function provisionAWSAccount(inputs: {
                         ///////////////////////////////////////////////////
                         const existingEmails = existingAccounts.map(({ email }) => email)
                             .concat((Object.values(originalInputs?.extra_inputs.accounts ?? {}).map(({ email }) => email)))
-                        const managementAccountEmail = await getAccountEmail({ context, profile: managementProfile })
+                        const managementAccountEmail = await getAccountEmail({ context, orgClient })
                         let emailDefault: string | undefined;
                         if (managementAccountEmail) {
                             const [user, domain] = managementAccountEmail.split("@")
@@ -274,17 +302,12 @@ export async function provisionAWSAccount(inputs: {
                     title: "Login to new account",
                     task: async (ctx) => {
 
-                        const stsClient = new STSClient({
-                            region: "us-east-1",
-                            profile: managementProfile
-                        });
-
                         const assumeRoleCommand = new AssumeRoleCommand({
                             RoleArn: `arn:aws:iam::${ctx.newAccountId}:role/OrganizationAccountAccessRole`,
                             RoleSessionName: "ProvisionAdminUser"
                         });
 
-                        const assumeRoleResponse = await stsClient.send(assumeRoleCommand);
+                        const assumeRoleResponse = await managementSTSClient.send(assumeRoleCommand);
 
                         if (!assumeRoleResponse.Credentials) {
                             throw new CLIError("Failed to assume the OrganizationAccountAccessRole in the new account");
@@ -334,8 +357,6 @@ export async function provisionAWSAccount(inputs: {
                         } catch (e) {
                             throw new CLIError(`Was not able to attach 'AdministratorAccess' policy to the the IAM user ${adminUsername}`, e)
                         }
-
-
                     }
                 },
                 {

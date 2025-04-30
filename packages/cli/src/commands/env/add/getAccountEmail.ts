@@ -5,14 +5,9 @@ import type { PanfactumContext } from "@/context/context";
 // Note this is not guaranteed to be the email of any particular account
 // and this only works when the account is a part of an AWS organization.
 // As a result, DO NOT USE THIS outside of this `env add` command context
-export async function getAccountEmail(inputs: { context: PanfactumContext, profile: string; }) {
+export async function getAccountEmail(inputs: { context: PanfactumContext, orgClient: OrganizationsClient }) {
 
-    const { context, profile } = inputs;
-
-    const orgClient = new OrganizationsClient({
-        profile,
-        region: "us-east-1"
-    });
+    const { context, orgClient } = inputs;
 
     try {
         const listAccountsCommand = new ListAccountsCommand({});
