@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import * as k8s from "@kubernetes/client-node";
+import { AppsV1Api, CustomObjectsApi, KubeConfig } from "@kubernetes/client-node";
 import { z } from "zod";
 import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
@@ -21,6 +21,22 @@ import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
+const CERTIFICATES_SCHEMA = z.object({
+  body: z.object({
+    items: z.array(z.object({
+      metadata: z.object({
+        labels: z.record(z.string(), z.string()),
+      }),
+      status: z.object({
+        conditions: z.array(z.object({
+          type: z.string(),
+          status: z.string()
+        }))
+      })
+    }))
+  })
+})
+
 export async function setupInboundNetworking(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
@@ -30,6 +46,7 @@ export async function setupInboundNetworking(
     context,
     environment,
     clusterPath,
+    kubeConfigContext,
     region,
     slaTarget
   } = options;
@@ -179,11 +196,21 @@ export async function setupInboundNetworking(
                       const maxAttempts = 10;
                       const retryDelay = 90000;
 
-                      const kc = new k8s.KubeConfig();
-                      kc.loadFromDefault();
+                      if (attempts < maxAttempts) {
+                        await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+                      } else {
+                        throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
+                      }
 
-                      const customApi = kc.makeApiClient(k8s.CustomObjectsApi);
-                      const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+                      const kc = new KubeConfig();
+                      kc.loadFromDefault();
+                      if (!kubeConfigContext) {
+                        throw new CLIError("Kube config context not found");
+                      }
+                      kc.setCurrentContext(kubeConfigContext);
+
+                      const customApi = kc.makeApiClient(CustomObjectsApi);
+                      const appsApi = kc.makeApiClient(AppsV1Api);
 
                       while (attempts < maxAttempts) {
                         try {
@@ -194,51 +221,49 @@ export async function setupInboundNetworking(
                             plural: 'certificates'
                           });
 
-                          const certificates = (result?.body as unknown as { items?: unknown[] })?.items || [];
-                          // Check for non-Ready certificates
-                          const hasNonReadyCerts = certificates.some((cert: unknown) => {
-                            const typedCert = cert as { status?: { conditions?: unknown[] } };
-                            const conditions = typedCert?.status?.conditions || [];
-                            return !conditions.some((c: unknown) => {
-                              const condition = c as { type: string; status: string };
-                              return condition.type === 'Ready' && condition.status === 'True';
+                          const parsedResult = CERTIFICATES_SCHEMA.safeParse(result);
+
+                          if (parsedResult.success) {
+                            const certificates = parsedResult.data.body.items || [];
+                            const nginxIngressCertificate = certificates.find((cert) => {
+                              return cert.metadata.labels['panfactum.com/root-module'] === 'kube_ingress_nginx';
                             });
-                          });
 
-                          if (!hasNonReadyCerts) {
-                            return;
-                          }
+                            if (nginxIngressCertificate) {
+                              const isCertReady = nginxIngressCertificate.status.conditions.some((condition) => {
+                                return condition.type === 'Ready' && condition.status === 'True';
+                              });
 
-                          // Restart cert-manager deployment
-                          await appsApi.patchNamespacedDeployment({
-                            name: 'cert-manager',
-                            namespace: 'cert-manager',
-                            body: {
-                              spec: {
-                                template: {
-                                  metadata: {
-                                    annotations: {
-                                      'kubectl.kubernetes.io/restartedAt': new Date().toISOString()
+                              if (isCertReady) {
+                                return;
+                              }
+
+                              // Restart cert-manager deployment
+                              await appsApi.patchNamespacedDeployment({
+                                name: 'cert-manager',
+                                namespace: 'cert-manager',
+                                body: {
+                                  spec: {
+                                    template: {
+                                      metadata: {
+                                        annotations: {
+                                          'kubectl.kubernetes.io/restartedAt': new Date().toISOString()
+                                        }
+                                      }
                                     }
                                   }
-                                }
-                              }
-                            },
-                          });
+                                },
+                              });
 
-                          attempts++;
-
-                          if (attempts < maxAttempts) {
-                            await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
-                          } else {
-                            throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
+                              attempts++;
+                            }
                           }
                         } catch (error) {
                           throw new CLIError(`Failed to restart cert-manager`, error);
                         }
                       }
-                    },
-                  },
+                    }
+                  }
                 ], { ctx, concurrent: true })
               }
             },
