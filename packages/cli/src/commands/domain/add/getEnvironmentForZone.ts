@@ -23,9 +23,9 @@ export async function getEnvironmentForZone(inputs: {
 
     if (possibleEnvironment.length === 0) {
         if (environments.length === 0) {
-            throw new CLIError('Cannot add a domain until you have installed an environment to host the domain. Run `pf env install` to create an environment.')
+            throw new CLIError('Cannot add a domain until you have installed an environment to host the domain. Run `pf env add` to create an environment.')
         } else {
-            throw new CLIError('You only have a management environment which cannot be used to host domains. Run `pf env install` to create an additional environment.')
+            throw new CLIError('You only have a management environment which cannot be used to host domains. Run `pf env add` to create an additional environment.')
         }
     }
     if (possibleEnvironment.length === 1) {
@@ -37,7 +37,7 @@ export async function getEnvironmentForZone(inputs: {
             default: true
         })
         if (!confirmEnvironment) {
-            throw new CLIError(`Declined to host ${domain} in ${environment}. Create a new environment to host the domain by running \`pf env install\``)
+            throw new CLIError(`Declined to host ${domain} in ${environment}. Create a new environment to host the domain by running \`pf env add\``)
         } else if (!environment.includes("prod") && shouldBeProduction) {
             await confirmIfNotProd(context, environment, domain)
         }

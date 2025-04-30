@@ -87,7 +87,6 @@ export class DomainAddCommand extends PanfactumCommand {
         /////////////////////////////////////////////////////////////////////////
         // Validations
         /////////////////////////////////////////////////////////////////////////
-        // FIX: Must have at least one environment
         let environmentMeta: EnvironmentMeta | undefined;
         const environments = await getEnvironments(context)
         if (environment) {
@@ -99,6 +98,8 @@ export class DomainAddCommand extends PanfactumCommand {
             } else {
                 environmentMeta = environments[environmentMetaIndex]!
             }
+        } else if (environments.filter(env => env.name !== MANAGEMENT_ENVIRONMENT).length === 0) {
+            throw new CLIError(`You must have at least one environment to add a domain: \`pf env add\``)
         }
         environments.forEach(env => context.logger.addIdentifier(` ${env.name} `))
 
