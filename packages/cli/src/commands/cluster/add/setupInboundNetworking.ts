@@ -208,11 +208,7 @@ export async function setupInboundNetworking(
 
                       while (attempts < maxAttempts) {
                         // Doing this up front to wait the first time
-                        if (attempts < maxAttempts) {
-                          await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
-                        } else {
-                          throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
-                        }
+                        await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
 
                         try {
                           // Get Certificate resources
@@ -263,6 +259,7 @@ export async function setupInboundNetworking(
                           throw new CLIError(`Failed to restart cert-manager`, error);
                         }
                       }
+                      throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
                     }
                   }
                 ], { ctx, concurrent: true })
