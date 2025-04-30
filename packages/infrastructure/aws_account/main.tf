@@ -78,7 +78,6 @@ resource "aws_account_alternate_contact" "billing" {
 ## Quota Increases
 ###########################################################################
 
-// TODO @jack move to aws_account
 resource "aws_servicequotas_service_quota" "cf_origin_request_policy" {
   provider     = aws.global
   quota_code   = "L-C3659C43"
@@ -100,6 +99,12 @@ resource "aws_servicequotas_service_quota" "cf_cache_policy" {
   value        = 100
 }
 
+resource "aws_servicequotas_service_quota" "ec2_vcpu_quota" {
+  provider     = aws.global
+  quota_code   = "L-1216C47A"
+  service_code = "ec2"
+  value        = 32
+}
 
 ###########################################################################
 ## Create the service linked role for working with spot instances
