@@ -9,6 +9,7 @@ import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -16,7 +17,7 @@ export async function setupLinkerd(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, kubeConfigContext, region } = options;
+  const { awsProfile, context, environment, clusterPath, region } = options;
 
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
@@ -67,6 +68,7 @@ export async function setupLinkerd(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_LINKERD,
               initModule: true,
               hclIfMissing: await Bun.file(kubeLinkerdTerragruntHcl).text(),
@@ -76,26 +78,17 @@ export async function setupLinkerd(
         );
       },
     },
-    {
-      title: "Set Kubernetes Context",
-      task: async () => {
-        if (!kubeConfigContext) {
-          throw new CLIError("Kube config context is not set");
-        }
-        await execute({
-          command: ["kubectl", "config", "use-context", kubeConfigContext],
-          context,
-          workingDirectory: join(clusterPath, MODULES.KUBE_LINKERD),
-          errorMessage: "Failed to set Kubernetes context for Linkerd control plane checks",
-        });
-      },
-    },
     // TODO: @seth - How to resume from here if this fails?
     {
       title: "Run Linkerd Control Plane Checks",
       task: async (ctx, task) => {
+        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
+        const kubeContext = regionConfig?.kube_config_context;
+        if (!kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
         await execute({
-          command: ["linkerd", "check", "--cni-namespace=linkerd"],
+          command: ["linkerd", "check", "--cni-namespace=linkerd", "--context", kubeContext],
           context,
           workingDirectory: join(clusterPath, MODULES.KUBE_LINKERD),
           errorMessage: "Linkerd control plane checks failed",

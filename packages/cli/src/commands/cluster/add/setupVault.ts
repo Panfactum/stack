@@ -16,6 +16,7 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
+import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -59,7 +60,7 @@ export async function setupVault(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, kubeConfigContext, region } =
+  const { awsProfile, context, environment, clusterPath, region } =
     options;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
@@ -67,6 +68,7 @@ export async function setupVault(
 
 
   interface VaultContext {
+    kubeContext?: string;
     vaultToken?: string;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -84,6 +86,7 @@ export async function setupVault(
       context,
       environment,
       region,
+      skipIfAlreadyApplied: true,
       module: MODULES.KUBE_VAULT,
       initModule: true,
       hclIfMissing: await Bun.file(kubeVaultTemplate).text(),
@@ -142,12 +145,9 @@ export async function setupVault(
     {
       title: "Vault Operator Initialization",
       task: async (ctx) => {
-        let kubeContext = kubeConfigContext;
-        if (!kubeContext) {
-          const kubeConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
-          kubeContext = kubeConfig?.kube_config_context;
-        }
-        if (!kubeContext) {
+        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
+        ctx.kubeContext = regionConfig?.kube_config_context;
+        if (!ctx.kubeContext) {
           throw new CLIError("Kube context not found");
         }
         const modulePath = join(clusterPath, MODULES.KUBE_VAULT);
@@ -158,7 +158,7 @@ export async function setupVault(
           "vault-0",
           "--namespace=vault",
           "--context",
-          kubeContext,
+          ctx.kubeContext,
           "--",
           "vault",
           "operator",
@@ -180,6 +180,13 @@ export async function setupVault(
           const data = JSON.parse(stdout.trim());
           recoveryKeys = RECOVER_KEYS_SCHEMA.parse(data);
         } catch (error) {
+          await writeYAMLFile({
+            context,
+            contents: {
+              status: "error",
+            },
+            path: join(modulePath, ".pf.yaml"),
+          });
           parseErrorHandler({
             error,
             errorMessage: "Failed to parse vault operator init",
@@ -202,14 +209,6 @@ export async function setupVault(
 
         let vaultUnsealCommand: string[] = [];
         try {
-          let kubeContext = kubeConfigContext;
-          if (!kubeContext) {
-            const kubeConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
-            kubeContext = kubeConfig?.kube_config_context;
-          }
-          if (!kubeContext) {
-            throw new CLIError("Kube context not found");
-          }
           let sealedStatus = true;
           for (const key of recoveryKeys!.recovery_keys_hex) {
             vaultUnsealCommand = [
@@ -219,7 +218,7 @@ export async function setupVault(
               "vault-0",
               "--namespace=vault",
               "--context",
-              kubeContext,
+              ctx.kubeContext,
               "--",
               "vault",
               "operator",
@@ -243,6 +242,13 @@ export async function setupVault(
           }
 
           if (sealedStatus) {
+            await writeYAMLFile({
+              context,
+              contents: {
+                status: "error",
+              },
+              path: join(modulePath, ".pf.yaml"),
+            });
             throw new CLIError(
               "Failed to unseal Vault after applying all recovery keys"
             );
@@ -258,6 +264,13 @@ export async function setupVault(
 
           ctx.vaultToken = recoveryKeys!.root_token;
         } catch (error) {
+          await writeYAMLFile({
+            context,
+            contents: {
+              status: "error",
+            },
+            path: join(modulePath, ".pf.yaml"),
+          });
           parseErrorHandler({
             error,
             errorMessage: "Failed to unseal Vault",
@@ -292,6 +305,7 @@ export async function setupVault(
               context,
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.VAULT_CORE_RESOURCES,
               initModule: true,
               hclIfMissing: await Bun.file(

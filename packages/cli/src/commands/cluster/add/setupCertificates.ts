@@ -148,6 +148,7 @@ export async function setupCertificates(
           },
           environment,
           region,
+          skipIfAlreadyApplied: true,
           module: MODULES.KUBE_CERT_MANAGER,
           initModule: true,
           hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
@@ -174,6 +175,7 @@ export async function setupCertificates(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_CERT_ISSUERS,
               initModule: true,
               hclIfMissing: await Bun.file(kubeCertIssuersTerragruntHcl).text(),
@@ -281,8 +283,8 @@ export async function setupCertificates(
           },
           environment,
           region,
+          skipIfAlreadyApplied: false,
           module: MODULES.KUBE_CERT_MANAGER,
-          bypassSkip: true,
           initModule: false,
           inputUpdates: {
             self_generated_certs_enabled: defineInputUpdate({

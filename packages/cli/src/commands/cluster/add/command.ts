@@ -10,7 +10,7 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import { MODULES } from "@/util/terragrunt/constants";
-import { readPFYAMLFile } from "@/util/yaml/readPFYAMLFile";
+import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
@@ -247,7 +247,7 @@ export class ClusterAddCommand extends PanfactumCommand {
 
     // Check each step and mark as completed if .pf.yaml status is applied
     for (const step of SETUP_STEPS) {
-      const pfData = await readPFYAMLFile({ environment, region, module: step.lastModule, context: this.context });
+      const pfData = await getLocalModuleStatus({ environment, region, module: step.lastModule, context: this.context });
       if (step.id === "setupCertificates") {
         // Certificates are a special case because the last module is applied twice during the setup process
         const certManagerModuleInfo = await readYAMLFile({

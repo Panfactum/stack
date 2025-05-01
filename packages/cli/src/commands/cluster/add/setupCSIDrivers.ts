@@ -23,6 +23,7 @@ export async function setupCSIDrivers(
       context,
       environment,
       region,
+      skipIfAlreadyApplied: true,
       module: MODULES.KUBE_AWS_EBS_CSI,
       initModule: true,
       hclIfMissing: await Bun.file(awsEbsCsiDriverTerragruntHcl).text(),

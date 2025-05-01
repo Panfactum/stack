@@ -106,6 +106,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_AWS_LB_CONTROLLER,
               initModule: true,
               hclIfMissing: await Bun.file(awsLbController).text(),
@@ -130,6 +131,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_EXTERNAL_DNS,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -146,6 +148,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_INGRESS_NGINX,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -178,6 +181,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: false,
               module: MODULES.KUBE_VAULT,
               inputUpdates: {
                 ingress_enabled: defineInputUpdate({
