@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import kubeLinkerdTerragruntHcl from "@/templates/kube_linkerd_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
@@ -15,7 +16,7 @@ export async function setupLinkerd(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region } = options;
+  const { awsProfile, context, environment, clusterPath, kubeConfigContext, region } = options;
 
 
   const { root_token: vaultRootToken } = await sopsDecrypt({
@@ -75,15 +76,28 @@ export async function setupLinkerd(
         );
       },
     },
-    // TODO: @seth - Ensure the kubectx is correct for Linkerd
+    {
+      title: "Set Kubernetes Context",
+      task: async () => {
+        if (!kubeConfigContext) {
+          throw new CLIError("Kube config context is not set");
+        }
+        await execute({
+          command: ["kubectl", "config", "use-context", kubeConfigContext],
+          context,
+          workingDirectory: join(clusterPath, MODULES.KUBE_LINKERD),
+          errorMessage: "Failed to set Kubernetes context for Linkerd control plane checks",
+        });
+      },
+    },
+    // TODO: @seth - How to resume from here if this fails?
     {
       title: "Run Linkerd Control Plane Checks",
-      task: async (ctx) => {
-        // TODO: @eth - Logging
+      task: async (ctx, task) => {
         await execute({
           command: ["linkerd", "check", "--cni-namespace=linkerd"],
           context,
-          workingDirectory: process.cwd(),
+          workingDirectory: join(clusterPath, MODULES.KUBE_LINKERD),
           errorMessage: "Linkerd control plane checks failed",
           isSuccess: ({ exitCode, stdout }) =>
             exitCode === 0 ||
@@ -92,6 +106,12 @@ export async function setupLinkerd(
             ...process.env,
             VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
             VAULT_TOKEN: vaultRootToken,
+          },
+          onStdOutNewline: (line) => {
+            task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
+          },
+          onStdErrNewline: (line) => {
+            task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
           },
         });
       },

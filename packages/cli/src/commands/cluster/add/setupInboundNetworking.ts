@@ -270,18 +270,6 @@ export async function setupInboundNetworking(
         });
       },
     },
-    await buildDeployModuleTask({
-      taskTitle: "Deploy Vault Core Resources with permanent Vault Address",
-      context,
-      environment,
-      region,
-      module: MODULES.VAULT_CORE_RESOURCES,
-      initModule: false,
-      env: {
-        ...process.env, //TODO: @seth Use context.env
-        VAULT_TOKEN: vaultRootToken,
-      },
-    }),
     {
       title: "Stop Vault Proxy",
       task: async (ctx) => {

@@ -168,9 +168,6 @@ export async function setupVault(
           "-format=json",
         ];
 
-        // FIX: @seth - The recovery keys should be saved immediately
-        // b/c there is no way to recover them should the CLI crash
-        // after this command is executed
         let recoveryKeys: z.infer<typeof RECOVER_KEYS_SCHEMA>;
         try {
           const { stdout } = await execute({
@@ -191,6 +188,17 @@ export async function setupVault(
             command: vaultOperatorInitCommand.join(" "),
           });
         }
+
+        await sopsUpsert({
+          values: {
+            root_token: recoveryKeys!.root_token,
+            recovery_keys: recoveryKeys!.recovery_keys_hex.map(
+              (key) => key
+            ),
+          },
+          context,
+          filePath: join(modulePath, "secrets.yaml"),
+        });
 
         let vaultUnsealCommand: string[] = [];
         try {
@@ -249,17 +257,6 @@ export async function setupVault(
           });
 
           ctx.vaultToken = recoveryKeys!.root_token;
-
-          await sopsUpsert({
-            values: {
-              root_token: recoveryKeys!.root_token,
-              recovery_keys: recoveryKeys!.recovery_keys_hex.map(
-                (key) => key
-              ),
-            },
-            context,
-            filePath: join(modulePath, "secrets.yaml"),
-          });
         } catch (error) {
           parseErrorHandler({
             error,

@@ -1,6 +1,7 @@
 import path, { join } from "node:path";
 import { z } from "zod";
 import kubeCertIssuersTerragruntHcl from "@/templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
+import kubeCertManagerTemplate from "@/templates/kube_cert_manager_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
@@ -30,7 +31,7 @@ const CERTIFICATES_SCHEMA = z.object({
   }))
 })
 
-export async function setupCertificateIssuers(
+export async function setupCertificates(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
@@ -134,6 +135,30 @@ export async function setupCertificateIssuers(
         ctx.vaultProxyPid = pid;
         ctx.vaultProxyPort = port;
       },
+    },
+    {
+      task: async (ctx) => {
+        return buildDeployModuleTask({
+          taskTitle: "Deploy Certificate Manager",
+          context,
+          env: {
+            ...process.env,
+            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+            VAULT_TOKEN: vaultRootToken,
+          },
+          environment,
+          region,
+          module: MODULES.KUBE_CERT_MANAGER,
+          initModule: true,
+          hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
+          inputUpdates: {
+            self_generated_certs_enabled: defineInputUpdate({
+              schema: z.boolean(),
+              update: () => true,
+            }),
+          },
+        })
+      }
     },
     {
       task: async (ctx, task) => {
@@ -257,7 +282,8 @@ export async function setupCertificateIssuers(
           environment,
           region,
           module: MODULES.KUBE_CERT_MANAGER,
-          initModule: true,
+          bypassSkip: true,
+          initModule: false,
           inputUpdates: {
             self_generated_certs_enabled: defineInputUpdate({
               schema: z.boolean(),

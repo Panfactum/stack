@@ -8,14 +8,13 @@ import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
-import { directoryExists } from "@/util/fs/directoryExist";
 import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import { MODULES } from "@/util/terragrunt/constants";
+import { readPFYAMLFile } from "@/util/yaml/readPFYAMLFile";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
-import { setupCertificateIssuers } from "./setupCertIssuers";
-import { setupCertManagement } from "./setupCertManagement";
+import { setupCertificates } from "./setupCertificates";
 import { setupClusterExtensions } from "./setupClusterExtensions";
 import { setupCSIDrivers } from "./setupCSIDrivers";
 import { setupEKS } from "./setupEKS";
@@ -82,18 +81,11 @@ const SETUP_STEPS: Array<{
       lastModule: MODULES.VAULT_CORE_RESOURCES,
     },
     {
-      label: "Certificate Management",
-      id: "setupCertManagement",
-      setup: setupCertManagement,
+      label: "Certificates",
+      id: "setupCertificates",
+      setup: setupCertificates,
       completed: false,
       lastModule: MODULES.KUBE_CERT_MANAGER,
-    },
-    {
-      label: "Certificate Issuers",
-      id: "setupCertificateIssuers",
-      setup: setupCertificateIssuers,
-      completed: false,
-      lastModule: MODULES.KUBE_CERT_ISSUERS,
     },
     {
       label: "Linkerd",
@@ -253,19 +245,25 @@ export class ClusterAddCommand extends PanfactumCommand {
      *  and provides checkpointing functionality
      ***********************************************/
 
-
-    // Check each step and mark as completed if directory exists
+    // Check each step and mark as completed if .pf.yaml status is applied
     for (const step of SETUP_STEPS) {
-      const moduleDir = join(clusterPath, step.lastModule);
-      step.completed = await directoryExists(moduleDir);
-    }
-
-    // Update the last completed module to not completed to re-check it
-    const completedModules = SETUP_STEPS.filter(
-      (step) => step.completed
-    ).length;
-    if (completedModules > 0) {
-      SETUP_STEPS[completedModules - 1]!.completed = false;
+      const pfData = await readPFYAMLFile({ environment, region, module: step.lastModule, context: this.context });
+      if (step.id === "setupCertificates") {
+        // Certificates are a special case because the last module is applied twice during the setup process
+        const certManagerModuleInfo = await readYAMLFile({
+          filePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER, "module.yaml"), context: this.context, validationSchema: z.object({
+            extra_inputs: z.object({
+              self_generated_certs_enabled: z.boolean(),
+            }).optional()
+          })
+        })
+        step.completed = pfData?.status === "applied" && certManagerModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
+      } else if (step.id === "setupClusterExtensions") {
+        // Due to the concurrent nature of this step, we let the step handle it's own completion logic
+        step.completed = false;
+      } else {
+        step.completed = pfData?.status === "applied";
+      }
     }
 
     const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });

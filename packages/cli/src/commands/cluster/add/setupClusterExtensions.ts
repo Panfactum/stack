@@ -17,6 +17,8 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { readPFYAMLFile } from "@/util/yaml/readPFYAMLFile";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -36,6 +38,25 @@ export async function setupClusterExtensions(
     }),
   });
 
+
+  const shouldSkipNodePoolsAdjustment = async () => {
+    const eksModuleInfo = await readYAMLFile({
+      filePath: join(clusterPath, MODULES.AWS_EKS, "module.yaml"),
+      context,
+      validationSchema: z.object({
+        bootstrap_mode_enabled: z.boolean(),
+      }),
+    });
+
+    const eksPfData = await readPFYAMLFile({
+      environment,
+      region,
+      module: MODULES.AWS_EKS,
+      context,
+    });
+
+    return eksPfData?.status === "applied" && eksModuleInfo?.bootstrap_mode_enabled === false;
+  }
 
   interface Context {
     vaultProxyPid?: number;
@@ -210,23 +231,30 @@ export async function setupClusterExtensions(
               initModule: true,
               hclIfMissing: await Bun.file(postgresTerragruntHcl).text(),
             }),
-            await buildDeployModuleTask({
-              taskTitle: "EKS NodePools Adjustment",
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
+            {
+              skip: async () => {
+                return shouldSkipNodePoolsAdjustment();
               },
-              environment,
-              region,
-              module: MODULES.AWS_EKS,
-              inputUpdates: {
-                bootstrap_mode_enabled: defineInputUpdate({
-                  schema: z.boolean(),
-                  update: () => false,
-                }),
-              },
-            }),
+              task: async () => {
+                return buildDeployModuleTask({
+                  taskTitle: "EKS NodePools Adjustment",
+                  context,
+                  env: {
+                    ...process.env,
+                    VAULT_TOKEN: vaultRootToken,
+                  },
+                  environment,
+                  region,
+                  module: MODULES.AWS_EKS,
+                  inputUpdates: {
+                    bootstrap_mode_enabled: defineInputUpdate({
+                      schema: z.boolean(),
+                      update: () => false,
+                    }),
+                  },
+                })
+              }
+            }
           ],
           { ctx, concurrent: true }
         );

@@ -46,6 +46,20 @@ export async function setupAutoscaling(
         await getIdentity({ context, profile: awsProfile });
       },
     },
+    // Moved this here due to edge case in current resumability implementation
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Vault Core Resources with permanent Vault Address",
+      bypassSkip: true,
+      context,
+      environment,
+      region,
+      module: MODULES.VAULT_CORE_RESOURCES,
+      initModule: false,
+      env: {
+        ...process.env, //TODO: @seth Use context.env
+        VAULT_TOKEN: vaultRootToken,
+      },
+    }),
     {
       task: async (ctx, task) => {
         return task.newListr<Context>(
@@ -209,7 +223,6 @@ export async function setupAutoscaling(
     //     outputBar: 5,
     //   },
     // },
-
   ])
 
   return tasks;
