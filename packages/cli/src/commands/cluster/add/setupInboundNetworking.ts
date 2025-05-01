@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { AppsV1Api, CustomObjectsApi, KubeConfig } from "@kubernetes/client-node";
 import { z } from "zod";
 import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
@@ -21,22 +20,6 @@ import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-const CERTIFICATES_SCHEMA = z.object({
-  body: z.object({
-    items: z.array(z.object({
-      metadata: z.object({
-        labels: z.record(z.string(), z.string()),
-      }),
-      status: z.object({
-        conditions: z.array(z.object({
-          type: z.string(),
-          status: z.string()
-        }))
-      })
-    }))
-  })
-})
-
 export async function setupInboundNetworking(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
@@ -46,7 +29,6 @@ export async function setupInboundNetworking(
     context,
     environment,
     clusterPath,
-    kubeConfigContext,
     region,
     slaTarget
   } = options;
@@ -154,117 +136,38 @@ export async function setupInboundNetworking(
                 kubeExternalDnsTerragruntHcl
               ).text(),
             }),
-            {
-              task: async (ctx, task) => {
-                return task.newListr<Context>([
-                  await buildDeployModuleTask({
-                    taskTitle: "Deploy Ingress NGINX",
-                    context,
-                    env: {
-                      ...process.env,
-                      VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                      VAULT_TOKEN: vaultRootToken,
-                    },
-                    environment,
-                    region,
-                    module: MODULES.KUBE_INGRESS_NGINX,
-                    initModule: true,
-                    hclIfMissing: await Bun.file(
-                      kubeNginxIngressTerragruntHcl
-                    ).text(),
-                    inputUpdates: {
-                      ingress_domains: defineInputUpdate({
-                        schema: z.array(z.string()),
-                        update: () => [kubeDomain],
-                      }),
-                      sla_level: defineInputUpdate({
-                        schema: z.number(),
-                        update: () => 1,
-                      }),
-                    },
-                    postDeployInputUpdates: {
-                      sla_level: defineInputUpdate({
-                        schema: z.number().optional(),
-                        update: () => undefined,
-                      })
-                    }
-                  }),
-                  {
-                    title: "Resetting Cert Manager",
-                    task: async () => {
-                      let attempts = 0;
-                      const maxAttempts = 10;
-                      const retryDelay = 90000;
-
-                      const kc = new KubeConfig();
-                      kc.loadFromDefault();
-                      if (!kubeConfigContext) {
-                        throw new CLIError("Kube config context not found");
-                      }
-                      kc.setCurrentContext(kubeConfigContext);
-
-                      const customApi = kc.makeApiClient(CustomObjectsApi);
-                      const appsApi = kc.makeApiClient(AppsV1Api);
-
-                      while (attempts < maxAttempts) {
-                        // Doing this up front to wait the first time
-                        await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
-
-                        try {
-                          // Get Certificate resources
-                          const result = await customApi.listClusterCustomObject({
-                            group: 'cert-manager.io',
-                            version: 'v1',
-                            plural: 'certificates'
-                          });
-
-                          const parsedResult = CERTIFICATES_SCHEMA.safeParse(result);
-
-                          if (parsedResult.success) {
-                            const certificates = parsedResult.data.body.items || [];
-                            const nginxIngressCertificate = certificates.find((cert) => {
-                              return cert.metadata.labels['panfactum.com/root-module'] === 'kube_ingress_nginx';
-                            });
-
-                            if (nginxIngressCertificate) {
-                              const isCertReady = nginxIngressCertificate.status.conditions.some((condition) => {
-                                return condition.type === 'Ready' && condition.status === 'True';
-                              });
-
-                              if (isCertReady) {
-                                return;
-                              }
-                            }
-                          }
-
-                          // Restart cert-manager deployment
-                          await appsApi.patchNamespacedDeployment({
-                            name: 'cert-manager',
-                            namespace: 'cert-manager',
-                            body: {
-                              spec: {
-                                template: {
-                                  metadata: {
-                                    annotations: {
-                                      'kubectl.kubernetes.io/restartedAt': new Date().toISOString()
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                          });
-
-                          attempts++;
-                        } catch (error) {
-                          throw new CLIError(`Failed to restart cert-manager`, error);
-                        }
-                      }
-                      throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
-                    }
-                  }
-                ], { ctx, concurrent: true })
+            await buildDeployModuleTask({
+              taskTitle: "Deploy Ingress NGINX",
+              context,
+              env: {
+                ...process.env,
+                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+                VAULT_TOKEN: vaultRootToken,
+              },
+              environment,
+              region,
+              module: MODULES.KUBE_INGRESS_NGINX,
+              initModule: true,
+              hclIfMissing: await Bun.file(
+                kubeNginxIngressTerragruntHcl
+              ).text(),
+              inputUpdates: {
+                ingress_domains: defineInputUpdate({
+                  schema: z.array(z.string()),
+                  update: () => [kubeDomain],
+                }),
+                sla_level: defineInputUpdate({
+                  schema: z.number(),
+                  update: () => 1,
+                }),
+              },
+              postDeployInputUpdates: {
+                sla_level: defineInputUpdate({
+                  schema: z.number().optional(),
+                  update: () => undefined,
+                })
               }
-            },
+            }),
             await buildDeployModuleTask({
               taskTitle: "Update Vault to use Ingress",
               context,

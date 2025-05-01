@@ -2,7 +2,9 @@ import path, { join } from "node:path";
 import { z } from "zod";
 import kubeCertIssuersTerragruntHcl from "@/templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
+import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -13,6 +15,20 @@ import {
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
+
+const CERTIFICATES_SCHEMA = z.object({
+  items: z.array(z.object({
+    metadata: z.object({
+      labels: z.record(z.string(), z.string()),
+    }),
+    status: z.object({
+      conditions: z.array(z.object({
+        type: z.string(),
+        status: z.string()
+      }))
+    })
+  }))
+})
 
 export async function setupCertificateIssuers(
   options: InstallClusterStepOptions,
@@ -159,30 +175,93 @@ export async function setupCertificateIssuers(
                 }),
               },
             }),
-            // TODO: rollout reset of cert manager every 90 seconds until the above task is completed
-            // check for the certificate to be provisioned
-            await buildDeployModuleTask<Context>({
-              taskTitle: "Deploy The First Certificate",
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+            {
+              title: "Resetting Cert Manager",
+              task: async () => {
+                let attempts = 0;
+                const maxAttempts = 10;
+                const retryDelay = 90000;
+
+                while (attempts < maxAttempts) {
+                  // Doing this up front to wait the first time
+                  await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+
+                  let result;
+                  try {
+                    const { stdout } = await execute({
+                      command: ["kubectl", "get", "certificates", "-n", "cert-manager", "-o", "json"],
+                      context,
+                      workingDirectory: clusterPath,
+                    });
+                    result = JSON.parse(stdout);
+                  } catch (error) {
+                    throw new CLIError(`Failed to get certificates`, error);
+                  }
+
+                  const parsedResult = CERTIFICATES_SCHEMA.safeParse(result);
+
+                  if (parsedResult.error) {
+                    throw new CLIError(`Failed to parse certificates`, parsedResult.error);
+                  }
+
+                  if (parsedResult.success) {
+                    const certificates = parsedResult.data.items;
+                    const ingressCertificate = certificates.find((cert) => {
+                      return cert.metadata.labels['panfactum.com/root-module'] === 'kube_cert_issuers';
+                    });
+
+                    if (ingressCertificate) {
+                      const isCertReady = ingressCertificate.status.conditions.some((condition) => {
+                        return condition.type === 'Ready' && condition.status === 'True';
+                      });
+
+                      if (isCertReady) {
+                        return;
+                      }
+                    }
+                  }
+
+                  try {
+                    await execute({
+                      command: ["kubectl", "rollout", "restart", "deployment", "-n", "cert-manager"],
+                      context,
+                      workingDirectory: clusterPath,
+                    });
+
+                    attempts++;
+                  } catch (error) {
+                    throw new CLIError(`Failed to restart cert-manager deployment`, error);
+                  }
+                }
+                throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
               },
-              environment,
-              region,
-              module: MODULES.KUBE_CERT_MANAGER,
-              initModule: true,
-              inputUpdates: {
-                self_generated_certs_enabled: defineInputUpdate({
-                  schema: z.boolean(),
-                  update: () => false,
-                }),
-              },
-            }),
+            },
           ],
-          { ctx }
+          { ctx, concurrent: true }
         );
+      },
+    },
+    {
+      task: async (ctx) => {
+        return buildDeployModuleTask<Context>({
+          taskTitle: "Deploy The First Certificate",
+          context,
+          env: {
+            ...process.env,
+            VAULT_TOKEN: vaultRootToken,
+            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+          },
+          environment,
+          region,
+          module: MODULES.KUBE_CERT_MANAGER,
+          initModule: true,
+          inputUpdates: {
+            self_generated_certs_enabled: defineInputUpdate({
+              schema: z.boolean(),
+              update: () => false,
+            })
+          }
+        })
       },
     },
     {
