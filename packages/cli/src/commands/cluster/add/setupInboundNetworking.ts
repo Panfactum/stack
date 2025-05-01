@@ -45,6 +45,7 @@ export async function setupInboundNetworking(
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
   interface Context {
+    kubeContext?: string;
     vaultDomain?: string;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -53,8 +54,13 @@ export async function setupInboundNetworking(
   const tasks = mainTask.newListr<Context>([
     {
       title: "Verify access",
-      task: async () => {
+      task: async (ctx) => {
         await getIdentity({ context, profile: awsProfile });
+        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
+        ctx.kubeContext = regionConfig?.kube_config_context;
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
       },
     },
     {
@@ -65,6 +71,7 @@ export async function setupInboundNetworking(
             ...process.env,
             VAULT_TOKEN: vaultRootToken,
           },
+          kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
         });
         ctx.vaultProxyPid = pid;
@@ -106,6 +113,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_AWS_LB_CONTROLLER,
               initModule: true,
               hclIfMissing: await Bun.file(awsLbController).text(),
@@ -130,6 +138,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_EXTERNAL_DNS,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -146,6 +155,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_INGRESS_NGINX,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -178,6 +188,7 @@ export async function setupInboundNetworking(
               },
               environment,
               region,
+              skipIfAlreadyApplied: false,
               module: MODULES.KUBE_VAULT,
               inputUpdates: {
                 ingress_enabled: defineInputUpdate({
@@ -270,18 +281,6 @@ export async function setupInboundNetworking(
         });
       },
     },
-    await buildDeployModuleTask({
-      taskTitle: "Deploy Vault Core Resources with permanent Vault Address",
-      context,
-      environment,
-      region,
-      module: MODULES.VAULT_CORE_RESOURCES,
-      initModule: false,
-      env: {
-        ...process.env, //TODO: @seth Use context.env
-        VAULT_TOKEN: vaultRootToken,
-      },
-    }),
     {
       title: "Stop Vault Proxy",
       task: async (ctx) => {

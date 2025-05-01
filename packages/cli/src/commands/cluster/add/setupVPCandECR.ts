@@ -345,6 +345,7 @@ export async function setupVPCandECR(
                       context,
                       environment,
                       region,
+                      skipIfAlreadyApplied: true,
                       module: MODULES.AWS_VPC,
                       initModule: true,
                       hclIfMissing:
@@ -387,6 +388,7 @@ export async function setupVPCandECR(
               context,
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
               initModule: true,
               hclIfMissing: await Bun.file(
