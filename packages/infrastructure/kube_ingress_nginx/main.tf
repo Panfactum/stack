@@ -72,13 +72,14 @@ module "util" {
   burstable_nodes_enabled     = var.burstable_nodes_enabled
   spot_nodes_enabled          = var.spot_nodes_enabled
   controller_nodes_enabled    = var.controller_nodes_enabled || var.sla_target <= 2
+  host_anti_affinity_required = var.sla_target > 1
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   lifetime_evictions_enabled  = false
 
 
   // This does need to be spread across AZs in order to not end up
-  // withe constant service disruptions
+  // with constant service disruptions
   az_spread_required                   = true
   instance_type_anti_affinity_required = var.sla_target == 3
 
