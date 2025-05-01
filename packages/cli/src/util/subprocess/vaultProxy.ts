@@ -4,9 +4,11 @@ import { BACKGROUND_PROCESS_PIDS } from "./killBackgroundProcess";
 
 export async function startVaultProxy({
   env,
+  kubeContext,
   modulePath,
 }: {
   env?: Record<string, string | undefined>;
+  kubeContext: string;
   modulePath: string;
 }) {
   try {
@@ -18,6 +20,8 @@ export async function startVaultProxy({
       "port-forward",
       "--address",
       "0.0.0.0",
+      "--context",
+      kubeContext,
       "svc/vault-active",
       `${openPort}:8200`,
     ];

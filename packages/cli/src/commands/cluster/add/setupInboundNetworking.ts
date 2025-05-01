@@ -45,6 +45,7 @@ export async function setupInboundNetworking(
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
   interface Context {
+    kubeContext?: string;
     vaultDomain?: string;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -53,8 +54,13 @@ export async function setupInboundNetworking(
   const tasks = mainTask.newListr<Context>([
     {
       title: "Verify access",
-      task: async () => {
+      task: async (ctx) => {
         await getIdentity({ context, profile: awsProfile });
+        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
+        ctx.kubeContext = regionConfig?.kube_config_context;
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
       },
     },
     {
@@ -65,6 +71,7 @@ export async function setupInboundNetworking(
             ...process.env,
             VAULT_TOKEN: vaultRootToken,
           },
+          kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
         });
         ctx.vaultProxyPid = pid;

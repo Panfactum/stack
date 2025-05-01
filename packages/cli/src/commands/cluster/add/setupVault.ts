@@ -336,6 +336,7 @@ export async function setupVault(
         const { pid, port } = await startVaultProxy({
           env,
           modulePath,
+          kubeContext: ctx.kubeContext!,
         });
         ctx.vaultProxyPid = pid;
         ctx.vaultProxyPort = port;
@@ -343,6 +344,8 @@ export async function setupVault(
     },
     {
       task: async (ctx, task) => {
+        context.logger.info(`ctx: ${JSON.stringify(ctx, null, 2)}`)
+        context.logger.info(`vaultRootToken: ${vaultRootToken}`)
         return task.newListr<VaultContext>(
           [
             await buildDeployModuleTask({

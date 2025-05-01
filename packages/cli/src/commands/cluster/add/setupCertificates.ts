@@ -53,13 +53,19 @@ export async function setupCertificates(
     productionEnvironment?: boolean;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
+    kubeContext?: string;
   }
 
   const tasks = mainTask.newListr<Context>([
     {
       title: "Verify access",
-      task: async () => {
+      task: async (ctx) => {
         await getIdentity({ context, profile: awsProfile });
+        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
+        ctx.kubeContext = regionConfig?.kube_config_context;
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
       },
     },
     {
@@ -130,6 +136,7 @@ export async function setupCertificates(
             ...process.env,
             VAULT_TOKEN: vaultRootToken,
           },
+          kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_CERT_ISSUERS),
         });
         ctx.vaultProxyPid = pid;
