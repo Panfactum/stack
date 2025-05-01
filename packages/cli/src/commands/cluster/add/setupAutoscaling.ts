@@ -46,6 +46,20 @@ export async function setupAutoscaling(
         await getIdentity({ context, profile: awsProfile });
       },
     },
+    // Moved this here due to edge case in current resumability implementation
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Vault Core Resources with permanent Vault Address",
+      context,
+      environment,
+      region,
+      skipIfAlreadyApplied: false,
+      module: MODULES.VAULT_CORE_RESOURCES,
+      initModule: false,
+      env: {
+        ...process.env, //TODO: @seth Use context.env
+        VAULT_TOKEN: vaultRootToken,
+      },
+    }),
     {
       task: async (ctx, task) => {
         return task.newListr<Context>(
@@ -59,6 +73,7 @@ export async function setupAutoscaling(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_METRICS_SERVER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -74,6 +89,7 @@ export async function setupAutoscaling(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_VPA,
               initModule: true,
               hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
@@ -110,6 +126,7 @@ export async function setupAutoscaling(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_KARPENTER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -141,6 +158,7 @@ export async function setupAutoscaling(
               context,
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_KARPENTER_NODE_POOLS,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -163,6 +181,7 @@ export async function setupAutoscaling(
               context,
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_SCHEDULER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -209,7 +228,6 @@ export async function setupAutoscaling(
     //     outputBar: 5,
     //   },
     // },
-
   ])
 
   return tasks;

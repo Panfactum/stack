@@ -7,6 +7,7 @@ import { createDirectory } from "@/util/fs/createDirectory";
 import { fileContains } from "@/util/fs/fileContains";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
+import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { terragruntApply } from "../terragruntApply";
@@ -42,6 +43,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
     };
     inputUpdates?: InputUpdates<T>;
     postDeployInputUpdates?: InputUpdates<T>;
+    skipIfAlreadyApplied?: boolean;
 }): Promise<ListrTask<T>> {
     const {
         hclIfMissing,
@@ -55,6 +57,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
         postDeployInputUpdates = {},
         initModule = true,
         taskTitle = "Deploy module",
+        skipIfAlreadyApplied = false,
     } = inputs;
 
     const moduleDir = join(
@@ -141,6 +144,14 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
         title: context.logger.applyColors(`${taskTitle} ${module}`, {
             lowlights: [module],
         }),
+        skip: async () => {
+            if (skipIfAlreadyApplied) {
+                const pfData = await getLocalModuleStatus({ environment, region, module, context });
+                return pfData?.status === "applied";
+            }
+
+            return false;
+        },
         task: async (ctx, parentTask) => {
             const subtasks = parentTask.newListr([], { concurrent: false });
 

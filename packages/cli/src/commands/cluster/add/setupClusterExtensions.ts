@@ -17,6 +17,8 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -36,6 +38,25 @@ export async function setupClusterExtensions(
     }),
   });
 
+
+  const shouldSkipNodePoolsAdjustment = async () => {
+    const eksModuleInfo = await readYAMLFile({
+      filePath: join(clusterPath, MODULES.AWS_EKS, "module.yaml"),
+      context,
+      validationSchema: z.object({
+        bootstrap_mode_enabled: z.boolean(),
+      }),
+    });
+
+    const eksPfData = await getLocalModuleStatus({
+      environment,
+      region,
+      module: MODULES.AWS_EKS,
+      context,
+    });
+
+    return eksPfData?.status === "applied" && eksModuleInfo?.bootstrap_mode_enabled === false;
+  }
 
   interface Context {
     vaultProxyPid?: number;
@@ -66,6 +87,7 @@ export async function setupClusterExtensions(
                       },
                       environment,
                       region,
+                      skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_BASTION,
                       initModule: true,
                       hclIfMissing: await Bun.file(
@@ -98,6 +120,7 @@ export async function setupClusterExtensions(
                       },
                       environment,
                       region,
+                      skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER,
                       initModule: true,
                       hclIfMissing: await Bun.file(
@@ -113,6 +136,7 @@ export async function setupClusterExtensions(
                       },
                       environment,
                       region,
+                      skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_VELERO,
                       initModule: true,
                       hclIfMissing: await Bun.file(
@@ -133,6 +157,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_KEDA,
               initModule: true,
               hclIfMissing: await Bun.file(kubeKedaTerragruntHcl).text(),
@@ -146,6 +171,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_RELOADER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -161,6 +187,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_NODE_IMAGE_CACHE_CONTROLLER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -176,6 +203,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_PVC_AUTORESIZER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -191,6 +219,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_DESCHEDULER,
               initModule: true,
               hclIfMissing: await Bun.file(
@@ -206,6 +235,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: true,
               module: MODULES.KUBE_CLOUDNATIVE_PG,
               initModule: true,
               hclIfMissing: await Bun.file(postgresTerragruntHcl).text(),
@@ -219,6 +249,7 @@ export async function setupClusterExtensions(
               },
               environment,
               region,
+              skipIfAlreadyApplied: await shouldSkipNodePoolsAdjustment(),
               module: MODULES.AWS_EKS,
               inputUpdates: {
                 bootstrap_mode_enabled: defineInputUpdate({
@@ -226,7 +257,7 @@ export async function setupClusterExtensions(
                   update: () => false,
                 }),
               },
-            }),
+            })
           ],
           { ctx, concurrent: true }
         );

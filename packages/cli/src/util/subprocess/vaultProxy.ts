@@ -4,20 +4,24 @@ import { BACKGROUND_PROCESS_PIDS } from "./killBackgroundProcess";
 
 export async function startVaultProxy({
   env,
+  kubeContext,
   modulePath,
 }: {
   env?: Record<string, string | undefined>;
+  kubeContext: string;
   modulePath: string;
 }) {
   try {
     const openPort = await findAvailablePort(8200);
     const command = [
       "kubectl",
-      "-n",
-      "vault",
       "port-forward",
       "--address",
       "0.0.0.0",
+      "-n",
+      "vault",
+      "--context",
+      kubeContext,
       "svc/vault-active",
       `${openPort}:8200`,
     ];

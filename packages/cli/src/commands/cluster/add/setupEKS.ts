@@ -149,6 +149,7 @@ export async function setupEKS(
       context,
       environment,
       region,
+      skipIfAlreadyApplied: true,
       module: MODULES.AWS_EKS,
       initModule: true,
       hclIfMissing: await Bun.file(awsEksTemplate).text(),
