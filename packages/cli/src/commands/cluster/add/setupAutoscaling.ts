@@ -60,45 +60,36 @@ export async function setupAutoscaling(
         VAULT_TOKEN: vaultRootToken,
       },
     }),
-    {
-      task: async (ctx, task) => {
-        return task.newListr<Context>(
-          [
-            await buildDeployModuleTask({
-              taskTitle: "Deploy Metrics Server",
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_METRICS_SERVER,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeMetricsServerTerragruntHcl
-              ).text(),
-            }),
-            await buildDeployModuleTask({
-              taskTitle: "Deploy Vertical Pod Autoscaler",
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_VPA,
-              initModule: true,
-              hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
-            }),
-          ],
-          { ctx }
-        );
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Metrics Server",
+      context,
+      env: {
+        ...process.env,
+        VAULT_TOKEN: vaultRootToken,
       },
-    },
+      environment,
+      region,
+      skipIfAlreadyApplied: true,
+      module: MODULES.KUBE_METRICS_SERVER,
+      initModule: true,
+      hclIfMissing: await Bun.file(
+        kubeMetricsServerTerragruntHcl
+      ).text(),
+    }),
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Vertical Pod Autoscaler",
+      context,
+      env: {
+        ...process.env,
+        VAULT_TOKEN: vaultRootToken,
+      },
+      environment,
+      region,
+      skipIfAlreadyApplied: true,
+      module: MODULES.KUBE_VPA,
+      initModule: true,
+      hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
+    }),
     {
       title: "Enabling Vertical Pod Autoscaler",
       task: async () => {
@@ -113,86 +104,77 @@ export async function setupAutoscaling(
         });
       },
     },
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Karpenter",
+      context,
+      env: {
+        ...process.env, //TODO: @seth Use context.env
+        VAULT_TOKEN: vaultRootToken,
+      },
+      environment,
+      region,
+      skipIfAlreadyApplied: true,
+      module: MODULES.KUBE_KARPENTER,
+      initModule: true,
+      hclIfMissing: await Bun.file(
+        kubeKarpenterTerragruntHcl
+      ).text(),
+      inputUpdates: {
+        wait: defineInputUpdate({
+          schema: z.boolean(),
+          update: () => false,
+        }),
+      },
+    }),
     {
-      task: async (ctx, task) => {
-        return task.newListr<Context>(
-          [
-            await buildDeployModuleTask({
-              taskTitle: "Deploy Karpenter",
-              context,
-              env: {
-                ...process.env, //TODO: @seth Use context.env
-                VAULT_TOKEN: vaultRootToken,
-              },
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_KARPENTER,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeKarpenterTerragruntHcl
-              ).text(),
-              inputUpdates: {
-                wait: defineInputUpdate({
-                  schema: z.boolean(),
-                  update: () => false,
-                }),
-              },
-            }),
-            {
-              title: "Remove Karpenter Bootstrap Variable",
-              task: async () => {
-                await updateModuleYAMLFile({
-                  context,
-                  environment,
-                  region,
-                  module: MODULES.KUBE_KARPENTER,
-                  inputUpdates: {
-                    wait: true,
-                  },
-                });
-              },
-            },
-            await buildDeployModuleTask({
-              taskTitle: "Deploy Karpenter Node Pools",
-              context,
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_KARPENTER_NODE_POOLS,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeKarpenterNodePoolsTerragruntHcl
-              ).text(),
-              // TODO: @jack - This should be pulled from the aws_eks module
-              // to keep things in sync
-              inputUpdates: {
-                node_subnets: defineInputUpdate({
-                  schema: z.array(z.string()),
-                  update: () =>
-                    slaTarget === 1
-                      ? ["PRIVATE_A"]
-                      : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
-                }),
-              },
-            }),
-            await buildDeployModuleTask({
-              taskTitle: "Deploy Scheduler",
-              context,
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_SCHEDULER,
-              initModule: true,
-              hclIfMissing: await Bun.file(
-                kubeSchedulerTerragruntHcl
-              ).text(),
-            }),
-          ],
-          { ctx }
-        );
+      title: "Remove Karpenter Bootstrap Variable",
+      task: async () => {
+        await updateModuleYAMLFile({
+          context,
+          environment,
+          region,
+          module: MODULES.KUBE_KARPENTER,
+          inputUpdates: {
+            wait: true,
+          },
+        });
       },
     },
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Karpenter Node Pools",
+      context,
+      environment,
+      region,
+      skipIfAlreadyApplied: true,
+      module: MODULES.KUBE_KARPENTER_NODE_POOLS,
+      initModule: true,
+      hclIfMissing: await Bun.file(
+        kubeKarpenterNodePoolsTerragruntHcl
+      ).text(),
+      // TODO: @jack - This should be pulled from the aws_eks module
+      // to keep things in sync
+      inputUpdates: {
+        node_subnets: defineInputUpdate({
+          schema: z.array(z.string()),
+          update: () =>
+            slaTarget === 1
+              ? ["PRIVATE_A"]
+              : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
+        }),
+      },
+    }),
+    await buildDeployModuleTask({
+      taskTitle: "Deploy Scheduler",
+      context,
+      environment,
+      region,
+      skipIfAlreadyApplied: true,
+      module: MODULES.KUBE_SCHEDULER,
+      initModule: true,
+      hclIfMissing: await Bun.file(
+        kubeSchedulerTerragruntHcl
+      ).text(),
+    }),
     {
       title: "Enable Bin Packing Scheduler",
       task: async () => {
