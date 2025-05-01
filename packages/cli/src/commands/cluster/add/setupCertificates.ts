@@ -214,7 +214,7 @@ export async function setupCertificates(
             }),
             {
               title: "Resetting Cert Manager",
-              task: async () => {
+              task: async (_, task) => {
                 let attempts = 0;
                 const maxAttempts = 10;
                 const retryDelay = 90000;
@@ -224,7 +224,7 @@ export async function setupCertificates(
                   await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
 
                   const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
-                  parentTask.title = context.logger.applyColors(`Resetting Cert Manager ${statusStr}`, { lowlights: [statusStr] });
+                  task.title = context.logger.applyColors(`Resetting Cert Manager ${statusStr}`, { lowlights: [statusStr] });
 
                   let result;
                   try {
