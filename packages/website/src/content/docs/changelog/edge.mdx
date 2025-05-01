@@ -35,7 +35,7 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 * The inputs to [aws_dns_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) have been consolidated to a single
   `domains` object in order to provide better per-domain granular configuration.
-  
+
 ### Added
 
 * Adds the [kube_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_job) submodule to support running one-off
@@ -65,6 +65,8 @@ mounted files.
 * Adds missing `lifetime_evictions_enabled` input to [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
 
 * Adds additional AAAA record for IPV6 support for [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn).
+
+* Addresses invalided policy document format for the DNSSEC KMS keys in [aws_dnssec](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_dnssec).
 
 ## edge.25-04-03
 
