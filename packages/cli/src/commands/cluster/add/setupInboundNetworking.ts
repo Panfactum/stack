@@ -236,6 +236,9 @@ export async function setupInboundNetworking(
         let attempts = 0;
         const maxAttempts = 180;
         const retryDelay = 10000;
+        // Lower the DNS TTL to 5 seconds to speed up the DNS propagation
+        // https://bun.sh/docs/api/dns#configuring-dns-cache-ttl
+        process.env["BUN_CONFIG_DNS_TIME_TO_LIVE_SECONDS"] = "5";
 
         while (attempts < maxAttempts) {
           try {
