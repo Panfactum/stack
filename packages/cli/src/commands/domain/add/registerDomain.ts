@@ -282,8 +282,8 @@ export async function registerDomain(inputs: {
                         validate: (value) => {
                             if (!value) {
                                 return true;
-                            } else if (value.length < MIN_ADDRESS_LENGTH) {
-                                return `Must be at least ${MIN_ADDRESS_LENGTH} characters`;
+                            } else if (value.length < 2) {
+                                return `Must be at least ${2} characters`;
                             } else if (value.length > MAX_LENGTH) {
                                 return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
