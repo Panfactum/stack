@@ -186,6 +186,9 @@ export async function setupCertificateIssuers(
                   // Doing this up front to wait the first time
                   await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
 
+                  const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
+                  task.title = context.logger.applyColors(`Resetting Cert Manager ${statusStr}`, { lowlights: [statusStr] });
+
                   let result;
                   try {
                     const { stdout } = await execute({
