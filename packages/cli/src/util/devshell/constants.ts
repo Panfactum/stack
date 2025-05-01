@@ -5,7 +5,8 @@ export const EXPECTED_GITIGNORE_CONTENTS = {
         "!.gitignore"
     ],
     environments: [
-        "*.user.yaml"
+        "*.user.yaml",
+        ".pf.yaml"
     ],
     kube: [
         "*",
