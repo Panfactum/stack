@@ -44,7 +44,9 @@ export async function setupClusterExtensions(
       filePath: join(clusterPath, MODULES.AWS_EKS, "module.yaml"),
       context,
       validationSchema: z.object({
-        bootstrap_mode_enabled: z.boolean(),
+        extra_inputs: z.object({
+          bootstrap_mode_enabled: z.boolean(),
+        }),
       }),
     });
 
@@ -55,7 +57,7 @@ export async function setupClusterExtensions(
       context,
     });
 
-    return eksPfData?.status === "applied" && eksModuleInfo?.bootstrap_mode_enabled === false;
+    return eksPfData?.status === "applied" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
   }
 
   interface Context {
