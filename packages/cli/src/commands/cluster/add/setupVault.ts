@@ -5,6 +5,8 @@ import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragr
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
+import { fileExists } from "@/util/fs/fileExists";
+import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
@@ -66,12 +68,28 @@ export async function setupVault(
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
   const vaultDomain = `vault.${kubeDomain}`;
 
+  let vaultRootToken: string | undefined;
+  let vaultRecoveryKeys: string[] | undefined;
+  if (await fileExists(join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"))) {
+    const { recovery_keys: recoveryKeys, root_token: rootToken } = await sopsDecrypt({
+      filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
+      context,
+      validationSchema: z.object({
+        recovery_keys: z.array(z.string()),
+        root_token: z.string(),
+      }),
+    });
+    vaultRootToken = rootToken;
+    vaultRecoveryKeys = recoveryKeys;
+  }
+
 
   interface VaultContext {
     kubeContext?: string;
-    vaultToken?: string;
+    rootToken?: string;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
+    recoveryKeys?: string[];
   }
 
   const tasks = mainTask.newListr<VaultContext>([
@@ -107,6 +125,7 @@ export async function setupVault(
     }),
     {
       title: "Checking status of the Vault pods",
+      skip: () => !!vaultRootToken,
       task: async () => {
         // TODO: @seth Use the kubernetes SDK, not exec
         await execute({
@@ -144,6 +163,7 @@ export async function setupVault(
     },
     {
       title: "Vault Operator Initialization",
+      skip: () => !!vaultRootToken && !!(vaultRecoveryKeys && vaultRecoveryKeys.length > 0),
       task: async (ctx) => {
         const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
         ctx.kubeContext = regionConfig?.kube_config_context;
@@ -207,10 +227,37 @@ export async function setupVault(
           filePath: join(modulePath, "secrets.yaml"),
         });
 
+        ctx.recoveryKeys = recoveryKeys!.recovery_keys_hex.map(
+          (key) => key
+        );
+        ctx.rootToken = recoveryKeys!.root_token;
+      }
+    },
+    {
+      title: "Unseal Vault",
+      skip: async () => {
+        const data = await readYAMLFile({
+          context,
+          filePath: join(clusterPath, MODULES.KUBE_VAULT, "module.yaml"),
+          validationSchema: z.object({
+            extra_inputs: z.object({
+              wait: z.boolean(),
+            })
+          }),
+          throwOnEmpty: false,
+          throwOnMissing: false,
+        })
+        return !!data?.extra_inputs?.wait;
+      },
+      task: async (ctx) => {
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
+        const modulePath = join(clusterPath, MODULES.KUBE_VAULT);
         let vaultUnsealCommand: string[] = [];
         try {
           let sealedStatus = true;
-          for (const key of recoveryKeys!.recovery_keys_hex) {
+          for (const key of vaultRecoveryKeys || ctx.recoveryKeys!) {
             vaultUnsealCommand = [
               "kubectl",
               "exec",
@@ -261,8 +308,6 @@ export async function setupVault(
             module: MODULES.KUBE_VAULT,
             inputUpdates: { wait: true },
           });
-
-          ctx.vaultToken = recoveryKeys!.root_token;
         } catch (error) {
           await writeYAMLFile({
             context,
@@ -286,7 +331,7 @@ export async function setupVault(
         const modulePath = join(clusterPath, MODULES.VAULT_CORE_RESOURCES);
         const env = {
           ...process.env,
-          VAULT_TOKEN: ctx.vaultToken,
+          VAULT_TOKEN: vaultRootToken || ctx.rootToken!,
         };
         const { pid, port } = await startVaultProxy({
           env,
@@ -314,7 +359,7 @@ export async function setupVault(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: ctx.vaultToken,
+                VAULT_TOKEN: vaultRootToken || ctx.rootToken!,
               },
             }),
           ],
