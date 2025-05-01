@@ -33,6 +33,10 @@ export KUBE_CONFIG_PATH=$KUBECONFIG
 export AWS_SHARED_CREDENTIALS_FILE="$AWS_DIR/credentials"
 export AWS_CONFIG_FILE="$AWS_DIR/config"
 
+# Prevent settings from outside the devshell from polluting the system
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+
 #############################################
 ## IaC
 #############################################
