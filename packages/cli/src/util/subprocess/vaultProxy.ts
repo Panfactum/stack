@@ -15,11 +15,11 @@ export async function startVaultProxy({
     const openPort = await findAvailablePort(8200);
     const command = [
       "kubectl",
-      "-n",
-      "vault",
       "port-forward",
       "--address",
       "0.0.0.0",
+      "-n",
+      "vault",
       "--context",
       kubeContext,
       "svc/vault-active",

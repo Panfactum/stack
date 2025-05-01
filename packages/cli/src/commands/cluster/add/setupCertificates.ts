@@ -69,9 +69,10 @@ export async function setupCertificates(
       },
     },
     {
-      title: "Get Certificate Issuers Configuration",
+      title: "Get Certificates Configuration",
       task: async (ctx, task) => {
         const originalInputs = await readYAMLFile({
+          throwOnEmpty: false,
           filePath: path.join(
             clusterPath,
             MODULES.KUBE_CERT_ISSUERS,
@@ -103,7 +104,7 @@ export async function setupCertificates(
         if (originalInputs?.extra_inputs?.alert_email) {
           ctx.alertEmail = originalInputs.extra_inputs.alert_email;
           task.skip(
-            "Already have Certificate Issuers configuration, skipping..."
+            "Already have Certificates configuration, skipping..."
           );
           return;
         }
@@ -144,33 +145,35 @@ export async function setupCertificates(
       },
     },
     {
-      task: async (ctx) => {
-        return buildDeployModuleTask({
-          taskTitle: "Deploy Certificate Manager",
-          context,
-          env: {
-            ...process.env,
-            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-            VAULT_TOKEN: vaultRootToken,
-          },
-          environment,
-          region,
-          skipIfAlreadyApplied: true,
-          module: MODULES.KUBE_CERT_MANAGER,
-          initModule: true,
-          hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
-          inputUpdates: {
-            self_generated_certs_enabled: defineInputUpdate({
-              schema: z.boolean(),
-              update: () => true,
-            }),
-          },
-        })
+      task: async (ctx, parentTask) => {
+        return parentTask.newListr([
+          await buildDeployModuleTask({
+            taskTitle: "Deploy Certificate Manager",
+            context,
+            env: {
+              ...process.env,
+              VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+              VAULT_TOKEN: vaultRootToken,
+            },
+            environment,
+            region,
+            skipIfAlreadyApplied: true,
+            module: MODULES.KUBE_CERT_MANAGER,
+            initModule: true,
+            hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
+            inputUpdates: {
+              self_generated_certs_enabled: defineInputUpdate({
+                schema: z.boolean(),
+                update: () => true,
+              }),
+            },
+          })
+        ])
       }
     },
     {
-      task: async (ctx, task) => {
-        return task.newListr<Context>(
+      task: async (ctx, parentTask) => {
+        return parentTask.newListr<Context>(
           [
             await buildDeployModuleTask<Context>({
               taskTitle: "Deploy Certificate Issuers",
@@ -221,7 +224,7 @@ export async function setupCertificates(
                   await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
 
                   const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
-                  task.title = context.logger.applyColors(`Resetting Cert Manager ${statusStr}`, { lowlights: [statusStr] });
+                  parentTask.title = context.logger.applyColors(`Resetting Cert Manager ${statusStr}`, { lowlights: [statusStr] });
 
                   let result;
                   try {
@@ -279,27 +282,29 @@ export async function setupCertificates(
       },
     },
     {
-      task: async (ctx) => {
-        return buildDeployModuleTask<Context>({
-          taskTitle: "Deploy The First Certificate",
-          context,
-          env: {
-            ...process.env,
-            VAULT_TOKEN: vaultRootToken,
-            VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-          },
-          environment,
-          region,
-          skipIfAlreadyApplied: false,
-          module: MODULES.KUBE_CERT_MANAGER,
-          initModule: false,
-          inputUpdates: {
-            self_generated_certs_enabled: defineInputUpdate({
-              schema: z.boolean(),
-              update: () => false,
-            })
-          }
-        })
+      task: async (ctx, parentTask) => {
+        return parentTask.newListr([
+          await buildDeployModuleTask<Context>({
+            taskTitle: "Deploy The First Certificate",
+            context,
+            env: {
+              ...process.env,
+              VAULT_TOKEN: vaultRootToken,
+              VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
+            },
+            environment,
+            region,
+            skipIfAlreadyApplied: false,
+            module: MODULES.KUBE_CERT_MANAGER,
+            initModule: false,
+            inputUpdates: {
+              self_generated_certs_enabled: defineInputUpdate({
+                schema: z.boolean(),
+                update: () => false,
+              })
+            }
+          })
+        ])
       },
     },
     {
@@ -310,7 +315,7 @@ export async function setupCertificates(
         }
       },
     },
-  ])
+  ], { concurrent: false })
 
   return tasks;
 }

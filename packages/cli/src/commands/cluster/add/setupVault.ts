@@ -95,8 +95,13 @@ export async function setupVault(
   const tasks = mainTask.newListr<VaultContext>([
     {
       title: "Verify access",
-      task: async () => {
+      task: async (ctx) => {
         await getIdentity({ context, profile: awsProfile });
+        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
+        ctx.kubeContext = regionConfig?.kube_config_context;
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
       },
     },
     await buildDeployModuleTask({
@@ -165,8 +170,6 @@ export async function setupVault(
       title: "Vault Operator Initialization",
       skip: () => !!vaultRootToken && !!(vaultRecoveryKeys && vaultRecoveryKeys.length > 0),
       task: async (ctx) => {
-        const regionConfig = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_config_context: z.string() }) });
-        ctx.kubeContext = regionConfig?.kube_config_context;
         if (!ctx.kubeContext) {
           throw new CLIError("Kube context not found");
         }
@@ -328,6 +331,9 @@ export async function setupVault(
     {
       title: "Start Vault Proxy",
       task: async (ctx) => {
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
         const modulePath = join(clusterPath, MODULES.VAULT_CORE_RESOURCES);
         const env = {
           ...process.env,
@@ -336,7 +342,7 @@ export async function setupVault(
         const { pid, port } = await startVaultProxy({
           env,
           modulePath,
-          kubeContext: ctx.kubeContext!,
+          kubeContext: ctx.kubeContext,
         });
         ctx.vaultProxyPid = pid;
         ctx.vaultProxyPort = port;
