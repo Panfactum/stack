@@ -191,6 +191,17 @@ terraform {
       "-input=false",
     ]
   }
+
+  after_hook "status" {
+    commands = ["apply"]
+    execute  = ["bash", "-c", "echo 'status: applied' > '${get_original_terragrunt_dir()}/.pf.yaml'"]
+  }
+
+  error_hook "status" {
+    commands  = ["apply"]
+    execute   = ["bash", "-c", "echo 'status: error' > '${get_original_terragrunt_dir()}/.pf.yaml'"]
+    on_errors = [".*"]
+  }
 }
 
 ################################################################
