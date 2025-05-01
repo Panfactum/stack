@@ -8,6 +8,7 @@ import { findFolder } from "@/util/fs/findFolder";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -175,7 +176,28 @@ export async function setupClusterExtensions(
                     update: (_, ctx) => ctx.authentikAdminEmail!
                 })
             }
-        })
+        }),
+        {
+            title: "Setup your Authentik user", task: async () => {
+                // TODO: Validation schema confirmation
+                const outputs = await terragruntOutput({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.KUBE_AUTHENTIK,
+                    validationSchema: z.record(
+                        z.string(),
+                        z.object({
+                            sensitive: z.boolean(),
+                        })
+                    )
+                })
+
+                if (!outputs["akadmin_bootstrap_token"]) {
+                    throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                }
+            }
+        }
     ])
 
     return tasks;
@@ -693,5 +715,3 @@ export async function setupClusterExtensions(
 //         provisionUser: true,
 //     },
 // });
-// }
-// };
