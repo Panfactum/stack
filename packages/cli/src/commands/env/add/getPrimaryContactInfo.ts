@@ -100,8 +100,8 @@ export async function getPrimaryContactInfo(inputs: {
         validate: (value) => {
             if (value === "") {
                 return true
-            } else if (value.length < 5) {
-                return "Must be at least 5 characters"
+            } else if (value.length < 2) {
+                return "Must be at least 2 characters"
             } else if (value.length > 128) {
                 return "Cannot be greater than 128 characters"
             } else {
