@@ -208,6 +208,7 @@ export async function setupVault(
             contents: {
               status: "error",
             },
+            overwrite: true,
             path: join(modulePath, ".pf.yaml"),
           });
           parseErrorHandler({
@@ -297,6 +298,7 @@ export async function setupVault(
               contents: {
                 status: "error",
               },
+              overwrite: true,
               path: join(modulePath, ".pf.yaml"),
             });
             throw new CLIError(
@@ -317,6 +319,7 @@ export async function setupVault(
             contents: {
               status: "error",
             },
+            overwrite: true,
             path: join(modulePath, ".pf.yaml"),
           });
           parseErrorHandler({

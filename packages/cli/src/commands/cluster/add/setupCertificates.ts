@@ -1,11 +1,9 @@
 import path, { join } from "node:path";
 import { z } from "zod";
-import kubeCertIssuersTerragruntHcl from "@/templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
-import kubeCertManagerTemplate from "@/templates/kube_cert_manager_terragrunt.hcl" with { type: "file" };
+import kubeCertificatesTemplate from "@/templates/kube_certificates.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
-import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -16,20 +14,6 @@ import {
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
-
-const CERTIFICATES_SCHEMA = z.object({
-  items: z.array(z.object({
-    metadata: z.object({
-      labels: z.record(z.string(), z.string()),
-    }),
-    status: z.object({
-      conditions: z.array(z.object({
-        type: z.string(),
-        status: z.string()
-      }))
-    })
-  }))
-})
 
 export async function setupCertificates(
   options: InstallClusterStepOptions,
@@ -75,7 +59,7 @@ export async function setupCertificates(
           throwOnEmpty: false,
           filePath: path.join(
             clusterPath,
-            MODULES.KUBE_CERT_ISSUERS,
+            MODULES.KUBE_CERTIFICATES,
             "module.yaml"
           ),
           context,
@@ -138,7 +122,7 @@ export async function setupCertificates(
             VAULT_TOKEN: vaultRootToken,
           },
           kubeContext: ctx.kubeContext!,
-          modulePath: join(clusterPath, MODULES.KUBE_CERT_ISSUERS),
+          modulePath: join(clusterPath, MODULES.KUBE_CERTIFICATES),
         });
         ctx.vaultProxyPid = pid;
         ctx.vaultProxyPort = port;
@@ -147,8 +131,8 @@ export async function setupCertificates(
     {
       task: async (ctx, parentTask) => {
         return parentTask.newListr([
-          await buildDeployModuleTask({
-            taskTitle: "Deploy Certificate Manager",
+          await buildDeployModuleTask<Context>({
+            taskTitle: "Deploy Certificate Infrastructure",
             context,
             env: {
               ...process.env,
@@ -158,128 +142,38 @@ export async function setupCertificates(
             environment,
             region,
             skipIfAlreadyApplied: true,
-            module: MODULES.KUBE_CERT_MANAGER,
+            module: MODULES.KUBE_CERTIFICATES,
             initModule: true,
-            hclIfMissing: await Bun.file(kubeCertManagerTemplate).text(),
+            hclIfMissing: await Bun.file(kubeCertificatesTemplate).text(),
             inputUpdates: {
               self_generated_certs_enabled: defineInputUpdate({
                 schema: z.boolean(),
                 update: () => true,
               }),
+              alert_email: defineInputUpdate({
+                schema: z.string(),
+                update: (_, ctx) => ctx.alertEmail!,
+              }),
+              route53_zones: defineInputUpdate({
+                schema: z
+                  .record(
+                    z.string(),
+                    z.object({
+                      zone_id: z.string(),
+                      record_manager_role_arn: z.string(),
+                    })
+                  )
+                  .optional(),
+                update: () => domains,
+              }),
+              kube_domain: defineInputUpdate({
+                schema: z.string(),
+                update: () => kubeDomain,
+              }),
             },
           })
         ])
       }
-    },
-    {
-      task: async (ctx, parentTask) => {
-        return parentTask.newListr<Context>(
-          [
-            await buildDeployModuleTask<Context>({
-              taskTitle: "Deploy Certificate Issuers",
-              context,
-              env: {
-                ...process.env,
-                VAULT_TOKEN: vaultRootToken,
-                VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-              },
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_CERT_ISSUERS,
-              initModule: true,
-              hclIfMissing: await Bun.file(kubeCertIssuersTerragruntHcl).text(),
-              inputUpdates: {
-                alert_email: defineInputUpdate({
-                  schema: z.string(),
-                  update: (_, ctx) => ctx.alertEmail!,
-                }),
-                route53_zones: defineInputUpdate({
-                  schema: z
-                    .record(
-                      z.string(),
-                      z.object({
-                        zone_id: z.string(),
-                        record_manager_role_arn: z.string(),
-                      })
-                    )
-                    .optional(),
-                  update: () => domains,
-                }),
-                kube_domain: defineInputUpdate({
-                  schema: z.string(),
-                  update: () => kubeDomain,
-                }),
-              },
-            }),
-            {
-              title: "Resetting Cert Manager",
-              task: async (_, task) => {
-                let attempts = 0;
-                const maxAttempts = 10;
-                const retryDelay = 90000;
-
-                while (attempts < maxAttempts) {
-                  // Doing this up front to wait the first time
-                  await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
-
-                  const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
-                  task.title = context.logger.applyColors(`Resetting Cert Manager ${statusStr}`, { lowlights: [statusStr] });
-
-                  let result;
-                  try {
-                    const { stdout } = await execute({
-                      command: ["kubectl", "get", "certificates", "-n", "cert-manager", "-o", "json"],
-                      context,
-                      workingDirectory: clusterPath,
-                    });
-                    result = JSON.parse(stdout);
-                  } catch (error) {
-                    throw new CLIError(`Failed to get certificates`, error);
-                  }
-
-                  const parsedResult = CERTIFICATES_SCHEMA.safeParse(result);
-
-                  if (parsedResult.error) {
-                    throw new CLIError(`Failed to parse certificates`, parsedResult.error);
-                  }
-
-                  if (parsedResult.success) {
-                    const certificates = parsedResult.data.items;
-                    const ingressCertificate = certificates.find((cert) => {
-                      return cert.metadata.labels['panfactum.com/root-module'] === 'kube_cert_issuers';
-                    });
-
-                    if (ingressCertificate) {
-                      const isCertReady = ingressCertificate.status.conditions.some((condition) => {
-                        return condition.type === 'Ready' && condition.status === 'True';
-                      });
-
-                      if (isCertReady) {
-                        return;
-                      }
-                    }
-                  }
-
-                  try {
-                    await execute({
-                      command: ["kubectl", "rollout", "restart", "deployment", "-n", "cert-manager"],
-                      context,
-                      workingDirectory: clusterPath,
-                    });
-
-                    attempts++;
-                  } catch (error) {
-                    throw new CLIError(`Failed to restart cert-manager deployment`, error);
-                  }
-                }
-                throw new CLIError(`Failed to progress after resetting cert-manager ${maxAttempts} times`);
-              },
-            },
-          ],
-          { ctx, concurrent: true }
-        );
-      },
     },
     {
       task: async (ctx, parentTask) => {
@@ -295,7 +189,7 @@ export async function setupCertificates(
             environment,
             region,
             skipIfAlreadyApplied: false,
-            module: MODULES.KUBE_CERT_MANAGER,
+            module: MODULES.KUBE_CERTIFICATES,
             initModule: false,
             inputUpdates: {
               self_generated_certs_enabled: defineInputUpdate({
