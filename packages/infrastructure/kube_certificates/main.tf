@@ -770,6 +770,8 @@ resource "kubectl_manifest" "internal_ci" {
   })
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [helm_release.cert_manager]
 }
 
 # Make sure this CA data is available in all namespaces for mTLS
@@ -896,6 +898,8 @@ resource "kubectl_manifest" "internal_rsa_ci" {
   })
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [helm_release.cert_manager]
 }
 
 //////////////////////////////////
@@ -1003,6 +1007,8 @@ resource "kubectl_manifest" "internal_ca_ci" {
   })
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [helm_release.cert_manager]
 }
 
 //////////////////////////////////
@@ -1050,5 +1056,5 @@ resource "kubectl_manifest" "ingress_cert" {
     }
   }
 
-  depends_on = [kubectl_manifest.cluster_issuer]
+  depends_on = [kubectl_manifest.cluster_issuer, helm_release.cert_manager]
 }
