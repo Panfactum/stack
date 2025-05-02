@@ -8,12 +8,12 @@ terraform {
 }
 
 dependency "cert_manager" {
-  config_path  = "../kube_cert_manager"
+  config_path  = "../kube_certificates"
   skip_outputs = true
 }
 
 dependency "cert_issuers" {
-  config_path = "../kube_cert_issuers"
+  config_path = "../kube_certificates"
 }
 
 dependency "kyverno" {

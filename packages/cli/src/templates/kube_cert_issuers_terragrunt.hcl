@@ -8,7 +8,7 @@ terraform {
 }
 
 dependency "cert_manager" {
-  config_path  = "../kube_cert_manager"
+  config_path  = "../kube_certificates"
   skip_outputs = true
 }
 
