@@ -85,7 +85,7 @@ const SETUP_STEPS: Array<{
       id: "setupCertificates",
       setup: setupCertificates,
       completed: false,
-      lastModule: MODULES.KUBE_CERT_MANAGER,
+      lastModule: MODULES.KUBE_CERTIFICATES,
     },
     {
       label: "Linkerd",
@@ -250,14 +250,14 @@ export class ClusterAddCommand extends PanfactumCommand {
       const pfData = await getLocalModuleStatus({ environment, region, module: step.lastModule, context: this.context });
       if (step.id === "setupCertificates") {
         // Certificates are a special case because the last module is applied twice during the setup process
-        const certManagerModuleInfo = await readYAMLFile({
-          filePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER, "module.yaml"), context: this.context, validationSchema: z.object({
+        const certificatesModuleInfo = await readYAMLFile({
+          filePath: join(clusterPath, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, validationSchema: z.object({
             extra_inputs: z.object({
               self_generated_certs_enabled: z.boolean(),
             }).optional()
           })
         })
-        step.completed = pfData?.status === "applied" && certManagerModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
+        step.completed = pfData?.status === "applied" && certificatesModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
       } else if (step.id === "setupClusterExtensions") {
         // Due to the concurrent nature of this step, we let the step handle it's own completion logic
         step.completed = false;

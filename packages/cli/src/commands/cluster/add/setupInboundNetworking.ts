@@ -72,7 +72,7 @@ export async function setupInboundNetworking(
             VAULT_TOKEN: vaultRootToken,
           },
           kubeContext: ctx.kubeContext!,
-          modulePath: join(clusterPath, MODULES.KUBE_CERT_MANAGER),
+          modulePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX),
         });
         ctx.vaultProxyPid = pid;
         ctx.vaultProxyPort = port;
