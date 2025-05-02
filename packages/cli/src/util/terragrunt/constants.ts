@@ -36,8 +36,6 @@ export enum MODULES {
     KUBE_AWS_EBS_CSI = "kube_aws_ebs_csi",
     KUBE_VAULT = "kube_vault",
     VAULT_CORE_RESOURCES = "vault_core_resources",
-    KUBE_CERT_MANAGER = "kube_cert_manager",
-    KUBE_CERT_ISSUERS = "kube_cert_issuers",
     KUBE_LINKERD = "kube_linkerd",
     KUBE_METRICS_SERVER = "kube_metrics_server",
     KUBE_VPA = "kube_vpa",
@@ -58,7 +56,8 @@ export enum MODULES {
     AWS_REGISTERED_DOMAINS = "aws_registered_domains",
     AWS_DNS_ZONES = "aws_dns_zones",
     AWS_DNS_RECORDS = "aws_dns_records",
-    AWS_DNS_LINKS = "aws_dns_links"
+    AWS_DNS_LINKS = "aws_dns_links",
+    KUBE_CERTIFICATES = "kube_certificates"
 }
 
 export const TERRAGRUNT_FILES = [
