@@ -1,8 +1,8 @@
 # Kubernetes Certificates
 
-This module provides our standard set up for [cert-manager](https://cert-manager.io/).
+This module provides our standard set up for [cert-manager](https://cert-manager.io/) including cluster issuers.
 
-This module provides our standard cluster issuers for [cert-manager](https://cert-manager.io/). It includes:
+It includes:
 
 - Cluster issuer for public domain names
 
