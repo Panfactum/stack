@@ -116,6 +116,17 @@ resource "kubernetes_secret" "cloudflare_api_token" {
   }
 }
 
+// Ensure cert manager is alive and well
+resource "null_resource" "wait_cert_manager_rollout" {
+  provisioner "local-exec" {
+    command = join(" && ", [
+      "kubectl rollout status deployment cert-manager-webhook -n cert-manager --timeout=2m",
+      "kubectl rollout status deployment cert-manager-cainjector -n cert-manager --timeout=2m"
+    ])
+  }
+}
+
+
 // the default issuer for PUBLIC tls certs in the default DNS zone for the env
 resource "kubectl_manifest" "cluster_issuer" {
   yaml_body = yamlencode({
@@ -138,6 +149,8 @@ resource "kubectl_manifest" "cluster_issuer" {
   })
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [null_resource.wait_cert_manager_rollout]
 }
 
 /***************************************

@@ -164,6 +164,41 @@ resource "kubernetes_role_binding" "extra_permissions" {
   }
 }
 
+// This is required b/c the helm chart does not automatically upgrade the CRDs
+data "kubectl_file_documents" "crds" {
+  content = file("${path.module}/crds.yaml")
+}
+
+resource "kubectl_manifest" "crds" {
+  count             = length(data.kubectl_file_documents.crds.documents)
+  yaml_body         = element(data.kubectl_file_documents.crds.documents, count.index)
+  force_conflicts   = true
+  server_side_apply = true
+}
+
+resource "kubectl_manifest" "crd_readiness" {
+  yaml_body = <<EOF
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wait-crds
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      containers:
+      - name: wait
+        image: bitnami/kubectl:latest
+        command: [
+          "sh","-c",
+          "kubectl wait --for=condition=established --timeout=120s crd/certificaterequests.cert-manager.io crd/certificates.cert-manager.io crd/challenges.acme.cert-manager.io crd/orders.acme.cert-manager.io"
+        ]
+      restartPolicy: Never
+EOF
+
+  depends_on = [kubectl_manifest.crds]
+}
+
 resource "helm_release" "cert_manager" {
   namespace       = local.namespace
   name            = "jetstack"
@@ -182,7 +217,7 @@ resource "helm_release" "cert_manager" {
     yamlencode({
       fullnameOverride = "cert-manager"
 
-      installCRDs = true
+      installCRDs = false
       global = {
         # Bug exists here where the labels are also applied to pods which messes up the postrender
         # commonLabels = module.util_controller.labels
@@ -330,7 +365,7 @@ resource "helm_release" "cert_manager" {
     })
   ]
 
-  depends_on = [module.webhook_cert]
+  depends_on = [kubectl_manifest.crd_readiness, module.webhook_cert]
 }
 
 resource "kubernetes_config_map" "dashboard" {
