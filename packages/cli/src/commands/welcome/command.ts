@@ -17,7 +17,7 @@ export class WelcomeCommand extends PanfactumCommand {
     async execute() {
         const { context } = this;
 
-        if (!fileExists(join(context.repoVariables.repo_root, ".envrc"))) {
+        if (! await fileExists(join(context.repoVariables.repo_root, ".envrc"))) {
             // This occurs in the installer script
 
             context.logger.info("DevShell setup for the first time.")
