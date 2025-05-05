@@ -1,6 +1,6 @@
 import { join } from "node:path";
 
-import { AccountClient, GetContactInformationCommand } from "@aws-sdk/client-account";
+import { GetContactInformationCommand } from "@aws-sdk/client-account";
 import {
     Route53Client,
     ListHostedZonesByNameCommand,
@@ -11,6 +11,7 @@ import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
+import { getAccountClient } from "@/util/aws/clients/getAccountClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { COUNTRY_CODES } from "@/util/aws/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
@@ -677,11 +678,7 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
     zipCode?: string;
 } | null> {
     try {
-        // Create an AccountClient - the Account API is only available in us-east-1
-        const accountClient = new AccountClient({
-            profile,
-            region: "us-east-1"
-        });
+        const accountClient = await getAccountClient({ context, profile })
 
         // Create command to get contact information
         const getContactInfoCommand = new GetContactInformationCommand({});

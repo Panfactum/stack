@@ -1,5 +1,6 @@
-import { Route53DomainsClient, ListPricesCommand } from "@aws-sdk/client-route-53-domains";
+import { ListPricesCommand } from "@aws-sdk/client-route-53-domains";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
@@ -24,11 +25,7 @@ export async function getDomainPrice(inputs: {
     }
 
     try {
-        const route53DomainsClient = new Route53DomainsClient({
-            profile,
-            region: "us-east-1", // Route53 Domains is only available in us-east-1
-        });
-
+        const route53DomainsClient = await getRoute53DomainsClient({ context, profile })
         const listPricesCommand = new ListPricesCommand({
             Tld: tld,
         });

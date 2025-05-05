@@ -1,8 +1,10 @@
 import { randomUUID } from "crypto";
+import { join } from "node:path";
 import { Command } from "clipanion";
 import pc from "picocolors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { upsertRepoVariables } from "@/util/context/upsertRepoVariables";
+import { fileExists } from "@/util/fs/fileExists";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
 
 export class WelcomeCommand extends PanfactumCommand {
@@ -15,8 +17,14 @@ export class WelcomeCommand extends PanfactumCommand {
     async execute() {
         const { context } = this;
 
+        if (!fileExists(join(context.repoVariables.repo_root, ".envrc"))) {
+            // This occurs in the installer script
 
-        if (!context.repoVariables.installation_id) {
+            context.logger.info("DevShell setup for the first time.")
+
+        } else if (!context.repoVariables.installation_id) {
+            // This occurs immediately after the installer script
+
             context.logger.showLogo()
 
             context.logger.write(`
