@@ -154,7 +154,7 @@ module "namespace" {
 }
 
 /***************************************
-* IRSA
+* AWS Permissions
 ***************************************/
 
 module "aws_permissions" {
@@ -162,12 +162,10 @@ module "aws_permissions" {
 
   source = "../kube_sa_auth_aws"
 
-  service_account           = var.service_account
-  service_account_namespace = var.namespace
+  service_account           = kubernetes_service_account.cert_manager.metadata[0].name
+  service_account_namespace = local.namespace
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  depends_on = [kubernetes_service_account.cert_manager]
 }
 
 /***************************************
