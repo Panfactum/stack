@@ -22,16 +22,10 @@ dependency "ses_domain" {
 }
 
 inputs = {
+  ingress_enabled = true
+
   smtp_host          = dependency.ses_domain.outputs.smtp_host
   smtp_user          = dependency.ses_domain.outputs.smtp_user
   smtp_password      = dependency.ses_domain.outputs.smtp_password
   email_from_address = "no-reply@${dependency.ses_domain.outputs.domain}" // The user (e.g., `no-reply`) is arbitrary.
-
-  // Should be a subdomain of one of the domains available in this environment.
-  // Example: authentik.panfactum.com
-  domain = "REPLACE_ME"
-
-  // Should be a real email address that will be used for the initial root authentik user.
-  // Example: it@panfactum.com
-  akadmin_email = "REPLACE_ME"
 }

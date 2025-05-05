@@ -1,5 +1,5 @@
 import { appendFile } from "node:fs/promises";
-import { join } from "node:path";
+import path, { join } from "node:path";
 import { z } from "zod";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
 import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file" };
@@ -12,6 +12,7 @@ import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -25,7 +26,7 @@ const AUTHENTIK_PAGINATION_SCHEMA = z.object({
     end_index: z.number(),
 });
 
-export async function setupClusterExtensions(
+export async function setupAuthentik(
     options: InstallClusterStepOptions,
     mainTask: PanfactumTaskWrapper
 ) {
@@ -45,7 +46,7 @@ export async function setupClusterExtensions(
     interface Context {
         akadminBootstrapToken?: string;
         ancestorDomain?: string;
-        authentikDomain?: string;
+        authentikRootEmail?: string;
         authentikAdminEmail?: string;
         authentikAdminName?: string;
         orgName?: string;
@@ -60,7 +61,7 @@ export async function setupClusterExtensions(
         },
         {
             title: "Get Authentik User Configuration",
-            task: async (ctx) => {
+            task: async (ctx, task) => {
                 // See if kube_authentik/terragrunt.hcl exist somewhere
                 const repoRoot = context.repoVariables.repo_root
                 let kubeAuthentikPath = null;
@@ -70,9 +71,69 @@ export async function setupClusterExtensions(
                     throw new CLIError("Errored while trying to find kube_authentik folder");
                 }
 
+                const originalSESInputs = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.AWS_SES_DOMAIN, "module.yaml"),
+                    context,
+                    validationSchema: z
+                        .object({
+                            extra_inputs: z
+                                .object({
+                                    ancestorDomain: z.string().optional(),
+                                })
+                                .passthrough()
+                                .optional()
+                                .default({}),
+                        }).passthrough(),
+                });
+
+
+
+                const originalAuthentikInputs = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml"),
+                    context,
+                    validationSchema: z
+                        .object({
+                            extra_inputs: z
+                                .object({
+                                    authentikRootEmail: z.string().optional(),
+                                })
+                                .passthrough()
+                                .optional()
+                                .default({}),
+                        })
+                        .passthrough(),
+                });
+
+                const originalAuthentikCoreResourcesInputs = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "module.yaml"),
+                    context,
+                    validationSchema: z
+                        .object({
+                            extra_inputs: z
+                                .object({
+                                    organization_name: z.string().optional(),
+                                })
+                                .passthrough()
+                                .optional()
+                                .default({}),
+                        })
+                        .passthrough(),
+                });
+
+                ctx.ancestorDomain = originalSESInputs?.extra_inputs.ancestorDomain;
+                ctx.authentikRootEmail = originalAuthentikInputs?.extra_inputs.authentikRootEmail;
+                ctx.orgName = originalAuthentikCoreResourcesInputs?.extra_inputs.organization_name;
+
+                if (ctx.ancestorDomain && ctx.authentikAdminEmail && ctx.authentikRootEmail && ctx.authentikAdminName && ctx.orgName) {
+                    task.skip("Already have Authentik configuration, skipping...");
+                    return;
+                }
+
+                // TODO: @seth - Figure out this logic for resumes...
                 if (!kubeAuthentikPath) {
                     const notProd = !environment.includes("prod")
                     const confirmInstall = await context.logger.confirm({
+                        task,
                         message: "Do you want to install Authentik?",
                         default: true,
                         explainer: notProd ? "We recommend installing Authentik in the production environment." : undefined
@@ -81,6 +142,7 @@ export async function setupClusterExtensions(
                     // If they say no, rebuke and confirm
                     if (!confirmInstall) {
                         const confirmExit = await context.logger.confirm({
+                            task,
                             message: "Are you sure you want to exit?",
                             explainer: { message: "We STRONGLY recommend completing this step if possible.", highlights: ["STRONGLY"] },
                             default: false,
@@ -92,51 +154,66 @@ export async function setupClusterExtensions(
                         }
                     }
 
-                    ctx.ancestorDomain = await context.logger.select({
-                        explainer: {
-                            message: `Which domain do you want to use for e-mails from Authentik?`,
-                        },
-                        message: "Environment domain:",
-                        choices: Object.keys(domains).map(domain => ({ value: domain, name: domain })),
-                    });
+                    if (!ctx.ancestorDomain) {
+                        ctx.ancestorDomain = await context.logger.select({
+                            task,
+                            explainer: {
+                                message: `Which domain do you want to use for e-mails from Authentik?`,
+                            },
+                            message: "Environment domain:",
+                            choices: Object.keys(domains).map(domain => ({ value: domain, name: domain })),
+                        });
+                    }
 
-                    ctx.authentikAdminEmail = await context.logger.input({
-                        explainer: "This email will be used for the initial Authentik root user.",
-                        message: "Email:",
-                        validate: (value: string) => {
-                            const { error } = z.string().email().safeParse(value);
-                            if (error) {
-                                return error.issues?.[0]?.message || "Please enter a valid email address";
+                    if (!ctx.authentikRootEmail) {
+                        ctx.authentikRootEmail = await context.logger.input({
+                            task,
+                            explainer: "This email will be used for the initial Authentik root user.",
+                            message: "Email:",
+                            validate: (value: string) => {
+                                const { error } = z.string().email().safeParse(value);
+                                if (error) {
+                                    return error.issues?.[0]?.message || "Please enter a valid email address";
+                                }
+
+                                return true;
                             }
+                        })
+                    }
 
-                            return true;
-                        }
-                    })
+                    if (!ctx.orgName) {
+                        ctx.orgName = await context.logger.input({
+                            task,
+                            explainer: "This will be how your organization is referenced on the Authentik web UI.",
+                            message: "Organization name:",
+                        })
+                    }
 
-                    ctx.orgName = await context.logger.input({
-                        explainer: "This will be how your organization is referenced on the Authentik web UI.",
-                        message: "Organization name:",
-                    })
+                    if (!ctx.authentikAdminEmail) {
+                        ctx.authentikAdminEmail = await context.logger.input({
+                            task,
+                            explainer: "This email will be used for your Authentik user.",
+                            message: "Email:",
+                            validate: (value: string) => {
+                                const { error } = z.string().email().safeParse(value);
+                                if (error) {
+                                    return error.issues?.[0]?.message || "Please enter a valid email address";
+                                }
 
-                    ctx.authentikAdminEmail = await context.logger.input({
-                        explainer: "This email will be used for your Authentik user.",
-                        message: "Email:",
-                        validate: (value: string) => {
-                            const { error } = z.string().email().safeParse(value);
-                            if (error) {
-                                return error.issues?.[0]?.message || "Please enter a valid email address";
-                            }
+                                return true;
+                            },
+                            required: true
+                        })
+                    }
 
-                            return true;
-                        },
-                        required: true
-                    })
-
-                    ctx.authentikAdminName = await context.logger.input({
-                        explainer: "This will be your name in Authentik.",
-                        message: "Name:",
-                        required: true,
-                    })
+                    if (!ctx.authentikAdminName) {
+                        ctx.authentikAdminName = await context.logger.input({
+                            task,
+                            explainer: "This will be your name in Authentik.",
+                            message: "Name:",
+                            required: true,
+                        })
+                    }
                 }
             }
         },
@@ -157,7 +234,8 @@ export async function setupClusterExtensions(
                     schema: z.string(),
                     update: (_, ctx) => ctx.ancestorDomain!
                 })
-            }
+            },
+            skipIfAlreadyApplied: true,
         }),
         await buildDeployModuleTask<Context>({
             taskTitle: "Deploy Authentik",
@@ -180,7 +258,8 @@ export async function setupClusterExtensions(
                     schema: z.string(),
                     update: (_, ctx) => ctx.authentikAdminEmail!
                 })
-            }
+            },
+            skipIfAlreadyApplied: true,
         }),
         {
             title: "Disabling default Authentik resources", task: async (ctx) => {
@@ -194,7 +273,7 @@ export async function setupClusterExtensions(
                         z.string(),
                         z.object({
                             sensitive: z.boolean(),
-                            type: z.any(),
+                            type: z.string(),
                             value: z.string(),
                         })
                     )
@@ -207,7 +286,7 @@ export async function setupClusterExtensions(
                 }
 
                 const authentikBrandsResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/brands/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/brands/`,
                     {
                         headers: {
                             Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
@@ -244,7 +323,7 @@ export async function setupClusterExtensions(
                 );
                 if (authentikDefaultBrand) {
                     await Bun.fetch(
-                        `https://${ctx.authentikDomain}/api/v3/core/brands/${authentikDefaultBrand.brand_uuid}/`,
+                        `https://authentik.${ctx.ancestorDomain}/api/v3/core/brands/${authentikDefaultBrand.brand_uuid}/`,
                         {
                             method: "PUT",
                             headers: {
@@ -282,7 +361,7 @@ export async function setupClusterExtensions(
                     schema: z.string(),
                     update: (_, ctx) => ctx.ancestorDomain!
                 })
-            }
+            },
         }),
         {
             title: "Setting up your Authentik user account",
@@ -290,7 +369,7 @@ export async function setupClusterExtensions(
                 // get superusers group uuid
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-groups-list
                 const groupsResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/groups/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
                     {
                         headers: {
                             Accept: "application/json",
@@ -343,7 +422,7 @@ export async function setupClusterExtensions(
                 // create the user via API
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-create
                 const createUserResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/users/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/`,
                     {
                         method: "POST",
                         headers: {
@@ -371,7 +450,7 @@ export async function setupClusterExtensions(
 
                 // get the password reset link and provide it to the user
                 const passwordResetResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/users/${userId}/recovery/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/${userId}/recovery/`,
                     {
                         method: "POST",
                         headers: {
@@ -390,7 +469,7 @@ export async function setupClusterExtensions(
 
                 // create the API token
                 const createTokenResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/tokens/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/tokens/`,
                     {
                         method: "POST",
                         headers: {
@@ -442,13 +521,13 @@ export async function setupClusterExtensions(
                 const newToken = await context.logger.password({
                     explainer: `
                     We have created a new temporary API token to use                    
-                    Go to https://${ctx.authentikDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
+                    Go to https://authentik.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
                     Look for the token with the identifier 'local-framework-token'`,
                     message: "Copy the token and paste it here:",
                     validate: async (value) => {
                         try {
                             const response = await Bun.fetch(
-                                `https://${ctx.authentikDomain}/api/v3/core/groups/`,
+                                `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
                                 {
                                     headers: {
                                         Authorization: `Bearer ${value}`,
@@ -476,7 +555,7 @@ export async function setupClusterExtensions(
                 // get all the tokens
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-list
                 const tokensResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/tokens/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/tokens/`,
                     {
                         headers: {
                             Accept: "application/json",
@@ -504,7 +583,7 @@ export async function setupClusterExtensions(
                 // delete the bootstrap token
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-destroy
                 const deleteTokenResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/tokens/${bootstrapTokenUuid}/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/tokens/${bootstrapTokenUuid}/`,
                     {
                         method: "DELETE",
                         headers: {
@@ -520,7 +599,7 @@ export async function setupClusterExtensions(
                 // get all the users
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-list
                 const usersResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/users/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/`,
                     {
                         headers: {
                             Accept: "application/json",
@@ -548,7 +627,7 @@ export async function setupClusterExtensions(
                 // disable the bootstrap user
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-update
                 const disableUserResponse = await Bun.fetch(
-                    `https://${ctx.authentikDomain}/api/v3/core/users/${bootstrapUserUuid}/`,
+                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/${bootstrapUserUuid}/`,
                     {
                         method: "PUT",
                         headers: {

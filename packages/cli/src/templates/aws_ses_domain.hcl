@@ -16,6 +16,4 @@ inputs = {
      [dependency.aws_vpc.outputs.vpc_cidr],
      dependency.aws_vpc.outputs.nat_ips
   )
-
-  domain = "REPLACE_ME"
 }
