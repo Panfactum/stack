@@ -21,6 +21,57 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ### Breaking Changes
 
+###  Breaking Changes
+
+* We have consolidates the `kube_cert_manager` and `kube_cert_issuers` modules into a singular `kube_certificates` module. Follow these steps to upgrade:
+  1. Before updating your version:
+	  a. Run `terragrunt state pull > kube_cert_issuers.json` from the `kube_cert_issuers` directory.
+	  b. Run `terragrunt state pull > kube_cert_manager.json` from the `kube_cert_manager` directly.
+	2. Create a `kube_certificates` directly as a sibling to the `kube_cert_manager` and `kube_cert_issuers` directories.
+	3. Create a `terragrunt.hcl` file in the `kube_certificates` directly with the following contents:
+```hcl
+include "panfactum" {
+  path   = find_in_parent_folders("panfactum.hcl")
+  expose = true
+}
+
+terraform {
+  source = include.panfactum.locals.pf_stack_source
+}
+
+dependency "cilium" {
+  config_path  = "../kube_cilium"
+  skip_outputs = true
+}
+
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
+}
+
+dependency "vault_core" {
+  config_path  = "../vault_core_resources"
+  skip_outputs = true
+}
+
+dependency "vault" {
+  config_path = "../kube_vault"
+}
+
+inputs = {
+  vault_internal_url = dependency.vault.outputs.vault_internal_url
+}
+```
+  4. Update the version of the Panfactum framework you are using.
+  5. Run `terragrunt init` in the `kube_certificates` directory.
+  6. Copy the `./kube_cert_issuers/kube_cert_issuers.json` to `./kube_certificates/kube_certificates_state.json`. Make sure to keep the original file as a backup for now.
+  7. Merge the contents from the `./kube_cert_manager/kube_cert_manager.json` outputs key into the `./kube_certificates/kube_certificates_state.json` outputs key.
+  8. Merge the contents from the `./kube_cert_manager/kube_cert_manager.json` resources array into the `./kube_certificates/kube_certificates_state.json` resources array.
+  9. Find the resource object with a type key of `"pf_kube_labels"` and delete it from the resources array. It is a duplicate and will cause an error.
+  10. Run `terragrunt plan` and review the changes. There should be only a few resources that will be replaces as we fixed a typo in the name.
+  11. If everything looks good, run `terragrunt apply`.
+  12. Remove the `kube_cert_issuers` and `kube_cert_manager` directories.
+
 * We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed. 
   See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
 
