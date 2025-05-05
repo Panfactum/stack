@@ -111,12 +111,12 @@ check_direnv() {
       if ! grep -q "direnv hook" "$shell_config"; then
         # shellcheck disable=SC2016
         echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
-        printf "  \033[31mCRITICAL: Restart your shell or run 'source %s' to enable direnv.\033[0m\n" "$shell_config" >&2
-        printf "  \033[31mThen, run this script again to install the rest of the dependencies.\033[0m\n\n" >&2
-        exit 1
+        # shellcheck disable=SC1091
+        # shellcheck disable=SC1090
+        . "$shell_config"
       fi
     else
-      printf "  \033[31mCRITICAL:Please add the direnv hooks to your shell: https://direnv.net/docs/hook.html\033[0m\n" >&2
+      printf "  \033[31mCRITICAL: Please add the direnv hooks to your shell: https://direnv.net/docs/hook.html\033[0m\n" >&2
       printf "  \033[31mThen restart your shell to enable direnv.\033[0m\n" >&2
       printf "  \033[31mFinally, run this script again to install the rest of the dependencies.\033[0m\n\n" >&2
       exit 1
@@ -140,10 +140,9 @@ check_direnv() {
         if ! grep -q "direnv hook" "$shell_config"; then
           # shellcheck disable=SC2016
           echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
-          printf "  \033[31mMissing direnv hook added to %s.\033[0m\n" "$shell_config" >&2
-          printf "  \033[31mPlease restart your shell or run 'source %s' to enable direnv.\033[0m\n" "$shell_config" >&2
-          printf "  \033[31mThen, run this script again to install the rest of the dependencies.\033[0m\n\n" >&2
-          exit 1
+          # shellcheck disable=SC1091
+          # shellcheck disable=SC1090
+          . "$shell_config"
         fi
       fi
     fi
