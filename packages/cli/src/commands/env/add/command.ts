@@ -5,6 +5,7 @@ import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStatic
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { directoryExists } from "@/util/fs/directoryExist";
+import { getLastPathSegments } from "@/util/fs/getLastPathSegments";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { bootstrapEnvironment } from "./bootstrapEnvironment";
@@ -182,6 +183,18 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             })
             hasManagementEnv = true;
             hasAWSOrg = true
+
+            const managementFolder = getLastPathSegments(join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT), 2)
+            context.logger.success(`
+                The AWS Organization has now been configured and its settings are 
+                stored in the ${MANAGEMENT_ENVIRONMENT} environment (${managementFolder}). The management
+                environment is a ${pc.italic("special")} environment used for storing global
+                settings that transcend normal environment boundaries.
+
+                We can now proceed to adding a normal environment. Note that the bootstrapping
+                process will look similar to the ${MANAGEMENT_ENVIRONMENT} environment, but we will be
+                able to automate many steps.
+            `, { highlights: [MANAGEMENT_ENVIRONMENT, managementFolder] })
         }
 
         ////////////////////////////////////////////////////////////////

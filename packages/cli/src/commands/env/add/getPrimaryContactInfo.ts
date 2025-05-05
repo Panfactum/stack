@@ -1,5 +1,6 @@
-import { AccountClient, GetContactInformationCommand } from "@aws-sdk/client-account";
+import { GetContactInformationCommand } from "@aws-sdk/client-account";
 import { z } from "zod";
+import { getAccountClient } from "@/util/aws/clients/getAccountClient";
 import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -197,11 +198,8 @@ async function getExistingContctInfo(profile: string, context: PanfactumContext)
     zipCode?: string;
 }> {
     try {
-        // Create an AccountClient - the Account API is only available in us-east-1
-        const accountClient = new AccountClient({
-            profile,
-            region: "us-east-1"
-        });
+        // Create an AccountClient
+        const accountClient = await getAccountClient({ context, profile })
 
         // Create command to get contact information
         const getContactInfoCommand = new GetContactInformationCommand({});

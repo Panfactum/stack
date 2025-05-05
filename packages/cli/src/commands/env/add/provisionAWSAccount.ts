@@ -1,12 +1,13 @@
 import { join } from "node:path"
 import { CreateUserCommand, AttachUserPolicyCommand, CreateAccessKeyCommand, IAMClient } from "@aws-sdk/client-iam";
-import { ListAccountsCommand, OrganizationsClient } from "@aws-sdk/client-organizations";
-import { STSClient, AssumeRoleCommand } from "@aws-sdk/client-sts";
+import { ListAccountsCommand } from "@aws-sdk/client-organizations";
+import { AssumeRoleCommand } from "@aws-sdk/client-sts";
 import { Listr } from "listr2";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { getOrganizationsClient } from "@/util/aws/clients/getOrganizationsClient";
+import { getSTSClient } from "@/util/aws/clients/getSTSClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist"
@@ -59,35 +60,10 @@ export async function provisionAWSAccount(inputs: {
         throw new CLIError(`Could not find valid AWS profile for the AWS management account`)
     }
 
-    // We have to do this to workaround a bug in the AWS node SDK where credentials
-    // are not automatically loaded from disk if they were created during this
-    // process's execution
-    const credentials = await getCredsFromFile({ context, profile: managementProfile })
-    let orgClient;
-    if (credentials) {
-        orgClient = new OrganizationsClient({
-            credentials,
-            region: "us-east-1"
-        });
-    } else {
-        orgClient = new OrganizationsClient({
-            profile: managementProfile,
-            region: "us-east-1"
-        });
-    }
-
-    let managementSTSClient;
-    if (credentials) {
-        managementSTSClient = new STSClient({
-            credentials,
-            region: "us-east-1"
-        });
-    } else {
-        managementSTSClient = new STSClient({
-            profile: managementProfile,
-            region: "us-east-1"
-        });
-    }
+    const [orgClient, managementSTSClient] = await Promise.all([
+        getOrganizationsClient({ context, profile: managementProfile }),
+        getSTSClient({ context, profile: managementProfile })
+    ])
 
     tasks.add({
         title: "Provision new AWS account",

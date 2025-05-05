@@ -9,7 +9,6 @@ export async function getEnvironmentName(inputs: { context: PanfactumContext }) 
 
     return context.logger.input({
         explainer: `
-        Let's start the environment installation.
         What is the name of the environment you want to create?
         `,
         message: "Environment Name:",

@@ -1,5 +1,6 @@
-import { CheckDomainAvailabilityCommand, Route53DomainsClient, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
+import { CheckDomainAvailabilityCommand, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
 import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
@@ -19,10 +20,7 @@ export async function isDomainAvailableFromAWS(inputs: { context: PanfactumConte
     }
 
     try {
-        const route53DomainsClient = new Route53DomainsClient({
-            profile,
-            region: "us-east-1"
-        });
+        const route53DomainsClient = await getRoute53DomainsClient({ context, profile })
 
         // Check domain availability
         const checkAvailabilityCommand = new CheckDomainAvailabilityCommand({

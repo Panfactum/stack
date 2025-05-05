@@ -1,7 +1,7 @@
 import { join } from "node:path"
-import { GetRoleCommand, IAMClient, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk/client-iam";
-import { AWSOrganizationsNotInUseException, DescribeOrganizationCommand, OrganizationsClient } from "@aws-sdk/client-organizations";
-import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetRoleCommand, ListAttachedRolePoliciesCommand, ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk/client-iam";
+import { AWSOrganizationsNotInUseException, DescribeOrganizationCommand } from "@aws-sdk/client-organizations";
+import { CreateBucketCommand, DeleteBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
 import { Listr } from "listr2";
 import { stringify, parse } from "yaml";
 import { z } from "zod";
@@ -9,8 +9,10 @@ import awsAccountHCL from "@/templates/aws_account.hcl" with { type: "file" };
 import orgHCL from "@/templates/aws_organization.hcl" with { type: "file" };
 import sopsHCL from "@/templates/sops.hcl" with { type: "file" };
 import tfBootstrapResourcesHCL from "@/templates/tf_bootstrap_resources.hcl" with { type: "file" };
+import { getIAMClient } from "@/util/aws/clients/getIAMClient.ts";
+import { getOrganizationsClient } from "@/util/aws/clients/getOrganizationsClient";
+import { getS3Client } from "@/util/aws/clients/getS3Client";
 import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { AWS_REGIONS } from "@/util/aws/schemas";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
@@ -144,9 +146,7 @@ export async function bootstrapEnvironment(inputs: {
                             }
 
                             // Step 2: Verify that the profile has AdministratorAccess permissions
-                            const iamClient = new IAMClient({
-                                profile
-                            });
+                            const iamClient = await getIAMClient({ context, profile })
                             const isRole = profileIdentityARN?.includes(':role/');
                             const isAssumedRole = profileIdentityARN?.includes(':assumed-role/');
                             if (isRole || isAssumedRole) {
@@ -283,15 +283,7 @@ export async function bootstrapEnvironment(inputs: {
 
                 // Check if bucket already exists
                 try {
-
-                    // Required due to https://github.com/aws/aws-sdk-js-v3/issues/6872
-                    const credentials = await getCredsFromFile({ context, profile: ctx.profile! })
-
-                    const s3Client = new S3Client({
-                        region: ctx.primaryRegion!,
-                        profile: ctx.profile!,
-                        credentials
-                    });
+                    const s3Client = await getS3Client({ context, profile: ctx.profile!, region: ctx.primaryRegion! });
                     await s3Client.send(new HeadBucketCommand({
                         Bucket: proposedBucketName
                     }));
@@ -325,14 +317,7 @@ export async function bootstrapEnvironment(inputs: {
             let bucketCreated = false;
             let retryCount = 0;
             const maxRetries = 30;
-            const credentials = await getCredsFromFile({ context, profile: ctx.profile! });
-
-            const s3Client = new S3Client({
-                region: ctx.primaryRegion!,
-                profile: ctx.profile!,
-                credentials
-            });
-
+            const s3Client = await getS3Client({ context, profile: ctx.profile!, region: ctx.primaryRegion! });
             while (retryCount < maxRetries) {
                 const attemptPhrase = `attempt ${retryCount + 1}/${maxRetries}`
                 task.title = context.logger.applyColors(`Activating S3 service ${attemptPhrase}`, { lowlights: [attemptPhrase] });
@@ -609,11 +594,7 @@ export async function bootstrapEnvironment(inputs: {
                             "aws_organizations_organization.org": {
                                 resourceId: async () => {
                                     try {
-                                        const organizationsClient = new OrganizationsClient({
-                                            region: "us-east-1",
-                                            profile
-                                        });
-
+                                        const organizationsClient = await getOrganizationsClient({ context, profile })
                                         const describeOrgCommand = new DescribeOrganizationCommand({});
                                         const orgResponse = await organizationsClient.send(describeOrgCommand);
 
@@ -698,12 +679,8 @@ export async function bootstrapEnvironment(inputs: {
                 imports: {
                     "aws_iam_service_linked_role.spot": {
                         resourceId: async (ctx) => {
-                            const credentials = await getCredsFromFile({ context, profile: ctx.profile! });
                             try {
-                                const iamClient = new IAMClient({
-                                    region: GLOBAL_REGION,
-                                    credentials
-                                });
+                                const iamClient = await getIAMClient({ context, profile: ctx.profile! })
 
                                 const getRoleCommand = new GetRoleCommand({
                                     RoleName: 'AWSServiceRoleForEC2Spot'
@@ -733,4 +710,5 @@ export async function bootstrapEnvironment(inputs: {
         tasks,
         errorMessage: `Failed to perform initial setup for environment ${environmentName}`
     })
+
 }
