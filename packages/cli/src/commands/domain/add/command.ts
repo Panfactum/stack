@@ -245,7 +245,7 @@ export class DomainAddCommand extends PanfactumCommand {
 
                 context.logger.write(`
                     If you choose to skip this step, you can still run workloads under subdomains such
-                    as <your_subdomain>.${domain}, but you should re-run with these arguments:
+                    as <your_subdomain>.${newDomain}, but you should re-run with these arguments:
 
                         pf domain add -d <your_subdomain>.${newDomain}
                 `)
