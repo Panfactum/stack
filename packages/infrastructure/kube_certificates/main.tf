@@ -166,6 +166,8 @@ module "aws_permissions" {
   service_account_namespace = var.namespace
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.aws_iam_ip_allow_list
+
+  depends_on = [kubernetes_service_account.cert_manager]
 }
 
 /***************************************
