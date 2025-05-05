@@ -16,7 +16,7 @@ NO_VERIFY=0
 
 usage() {
   echo "Usage: pf-get-commit-hash [-r <git_repo>] [-c <git_ref>] [-n]" >&2
-  echo "       pf-get-commit-hash [--repo <git_repo>] [--ref <gi_ref>] [--no-verify]" >&2
+  echo "       pf-get-commit-hash [--repo <git_repo>] [--ref <git_ref>] [--no-verify]" >&2
   echo "" >&2
   echo "<git_repo>: The git repo for which the git_ref will be resolved. If not specified, will use the current, local git repo." >&2
   echo "" >&2
