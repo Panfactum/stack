@@ -38,12 +38,21 @@
       @apply border-[2px] border-solid border-gray-light-mode-300 bg-gray-light-mode-500 dark:border-gray-dark-mode-800 dark:bg-gray-dark-mode-600;
       border-radius: 14px;
     }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   @supports not selector(*::-webkit-scrollbar) {
     * {
       scrollbar-gutter: stable;
       @apply [scrollbar-color:theme(colors.gray.dark-mode.500)_theme(colors.gray.dark-mode.300)] dark:[scrollbar-color:theme(colors.gray.dark-mode.600)_theme(colors.gray.dark-mode.800)];
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   }
 
@@ -54,5 +63,9 @@
     .banner {
       display: flex;
     }
+  }
+
+  p {
+    @apply text-pretty;
   }
 }

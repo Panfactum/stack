@@ -1,0 +1,9 @@
+---
+description: 
+globs: packages/website/src/**/*
+alwaysApply: false
+---
+# Rules
+- Primary framework is Astro.
+- CSS is done via Tailwind.
+- UI library is SolidJS.

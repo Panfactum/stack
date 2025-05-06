@@ -1,7 +1,4 @@
 ---
-import {Picture} from "astro:assets";
-
-import FooterMascots from "./FooterMascots.png"
 import DiscordIcon from "../components/icons/discord.svg";
 import GithubIcon from "../components/icons/github.svg";
 import PanfactumLogo from "../components/icons/panfactum-logo.svg";
@@ -31,14 +28,14 @@ import { COPYWRITE, DISCORD_URL, GITHUB_URL } from "../lib/constants";
 
             <p>{COPYWRITE}</p>
         </div>
-        <Picture
+        <!-- <Picture
                 class="h-72 max-w-128 self-end lg:h-96"
                 sizes="(max-width: 64rem) 25rem, 35rem"
                 formats={["avif", "webp"]}
                 breakpoints={[400, 560]}
                 src={FooterMascots}
                 alt="Panfactum Mascots"
-        />
+        /> -->
     </div>
 
 </footer>
