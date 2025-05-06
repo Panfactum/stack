@@ -329,6 +329,14 @@ data "aws_iam_policy_document" "backup" {
     resources = ["${aws_dynamodb_table.lock.arn}/backup/*"]
   }
 
+  statement {
+    effect = "Allow"
+    actions = [
+      "backup:TagResource"
+    ]
+    resources = ["*"] # Or scope to specific backup resources if preferred
+  }
+
   // Note sure why this is required for dynamodb backups
   // but it is listed on
   // https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSBackupServiceRolePolicyForBackup.html
