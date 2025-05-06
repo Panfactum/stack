@@ -1,5 +1,5 @@
 import { IoCloseCircleSharp } from "solid-icons/io";
-import { type Component, onMount } from "solid-js";
+import { type Component, createSignal, Match, onMount, Switch } from "solid-js";
 
 /**************************************************
  * The banner implementation is a little complicated b/c it impacts the overall height
@@ -21,6 +21,8 @@ import { type Component, onMount } from "solid-js";
 const KEY = "banner-open-126";
 
 const HeaderBanner: Component = () => {
+  const [pathname, setPathname] = createSignal("");
+
   const closeBanner = () => {
     window.document
       .getElementsByTagName("html")[0]
@@ -32,32 +34,54 @@ const HeaderBanner: Component = () => {
     if (window.localStorage.getItem(KEY) === "false") {
       closeBanner();
     }
+    setPathname(new URL(window.location.href).pathname);
+
+    // Update pathname when navigation occurs
+    document.addEventListener("astro:page-load", () => {
+      setPathname(new URL(window.location.href).pathname);
+    });
   });
 
   return (
-    <div class="banner bg-accent grow basis-1 items-center justify-between gap-6 px-6 lg:justify-center">
-      <span class="text-sm md:text-base lg:text-lg">
-        <span class="hidden md:inline">
-          Know someone who would benefit from Panfactum?{" "}
-        </span>
-        Earn <b>$10,000</b> per referral
-        <span class="inline md:hidden"> to our support plans</span>.{" "}
-        <a
-          href="/referrals"
-          class="cursor-pointer underline underline-offset-4"
-        >
-          Learn more.
-        </a>
-      </span>
-      <button
-        onClick={() => {
-          closeBanner();
-        }}
-        class="flex justify-center lg:absolute lg:right-12"
-      >
-        <IoCloseCircleSharp size={30} />
-      </button>
-    </div>
+    <Switch>
+      <Match when={pathname() === "/"}>
+        <div class="banner bg-accent grow basis-1 items-center justify-between gap-6 px-6 lg:justify-center">
+          <span class="text-sm md:text-base lg:text-lg">
+            <span class="hidden md:inline">
+              Want Panfactum without the hassle?
+            </span>{" "}
+            <a href="/plus" class="cursor-pointer underline underline-offset-4">
+              Try PanfactumPlus
+            </a>
+          </span>
+        </div>
+      </Match>
+      <Match when={pathname() !== "/"}>
+        <div class="banner bg-accent grow basis-1 items-center justify-between gap-6 px-6 lg:justify-center">
+          <span class="text-sm md:text-base lg:text-lg">
+            <span class="hidden md:inline">
+              Know someone who would benefit from Panfactum?{" "}
+            </span>
+            Earn <b>$10,000</b> per referral
+            <span class="inline md:hidden"> to our support plans</span>.{" "}
+            <a
+              href="/referrals"
+              class="cursor-pointer underline underline-offset-4"
+            >
+              Learn more.
+            </a>
+          </span>
+          <button
+            onClick={() => {
+              closeBanner();
+            }}
+            class="flex justify-center lg:absolute lg:right-12"
+          >
+            <IoCloseCircleSharp size={30} />
+          </button>
+        </div>
+      </Match>
+    </Switch>
   );
 };
 

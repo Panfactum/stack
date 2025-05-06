@@ -1,0 +1,46 @@
+---
+import { Picture } from "astro:assets";
+
+import { HowSectionExpandables } from "./HowSectionExpandables";
+import PersonImageLabel from "../PersonImageLabel.astro";
+import EngineerImg from "../images/engineer-nathan-1.png"
+---
+
+<section class="bg-white dark:bg-gray-dark-mode-950">
+  <div class="m-auto flex max-w-screen-xl flex-col gap-12 p-8 text-black md:gap-24 lg:pt-16 dark:text-white">
+    <div class="flex flex-col items-center gap-2">
+      <div class="font-bold text-brand-700 dark:text-gray-dark-mode-400">
+        How Panfactum Helps
+      </div>
+      <h2 class="text-pretty text-center font-machina text-4xl font-semibold">
+        End-to-end Cloud Management<br/>from Your Dedicated DevOps Engineer
+      </h2>
+      <p class="mt-4 max-w-192 text-center text-lg text-gray-dark-mode-700 dark:text-gray-dark-mode-400">
+        Let us handle your cloud complexity so you and your team can focus on what matters most.
+        One of our cloud experts will serve as the functional CTO for your cloud infrastructure.
+      </p>
+    </div>
+
+    <div class="flex w-full flex-col md:flex-row">
+        <div class="w-full md:w-7/12">
+          <HowSectionExpandables client:idle/>
+        </div>
+        <div class="hidden md:flex md:w-5/12 md:flex-col md:items-center md:justify-center">
+          <div class="mt-8 flex flex-col items-center sm:mt-0">
+            <div class="relative max-h-80 min-h-80 min-w-80 max-w-80 rounded-2xl bg-gold-25 dark:bg-gray-dark-mode-900">
+              <div class="grid-background" style={{"--grid-background-spacing": "30px"}}/>
+              <Picture
+                  class="absolute bottom-0 left-[6%] !w-[90%]"
+                  sizes="(max-width: 64rem) 31rem, 41rem"
+                  formats={["webp", "avif"]}
+                  breakpoints={[496, 656]}
+                  src={EngineerImg}
+                  alt="Panfactum Engineer"
+              />
+            </div>
+            <PersonImageLabel title="Nathan H." subtitle="Sr. Dev Ops Engineer"/>
+          </div>
+        </div>
+    </div>
+  </div>
+</section>

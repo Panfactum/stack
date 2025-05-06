@@ -1,0 +1,26 @@
+---
+
+import ApproachSection from "./_components/ApproachSection.astro";
+import ComparisonSection from "./_components/ComparisonSection.astro";
+import FAQS from "./_components/FAQs.tsx";
+import HeroSection from "./_components/HeroSection.astro";
+import HowSection from "./_components/HowSection/HowSection.astro";
+import PlansSection from "./_components/PlansSection.astro";
+import TalkToAnEngineer from "./_components/TalkToAnEngineer.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  heroClass="bg-secondary"
+  hasBorder={false}
+  title="PanfactumPlus"
+  description="The Power of Panfactum Plus Fractional DevOps"
+>
+  <HeroSection slot="hero"/>
+  <ApproachSection/>
+  <HowSection/>
+  <PlansSection/>
+  <ComparisonSection/>
+  <FAQS client:idle/>
+  <TalkToAnEngineer/>
+</Layout>

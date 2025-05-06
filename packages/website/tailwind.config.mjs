@@ -17,6 +17,20 @@ export default {
       white: "#ececeb",
       transparent: "#ffffff00",
       offWhite: "#dcdcdc",
+      gold: {
+        25: "#fff3e0",
+        50: "#ffe7bf",
+        100: "#ffdb9e",
+        200: "#ffd07d",
+        300: "#ffc65c",
+        400: "#faaf35",
+        500: "#f3950f",
+        600: "#c67510",
+        700: "#985811",
+        800: "#6d3e0f",
+        900: "#44260c",
+        950: "#1d1006"
+      },
       brand: {
         25: "#e9f7ff",
         50: "#e6f4fc",
@@ -183,9 +197,6 @@ export default {
         inter: ["Inter", "sans-serif"],
         machina: ["neue-machina", "sans-serif"],
         montreal: ["neue-montreal-mono", "monospace"],
-      },
-      backgroundImage: {
-        "hero-pattern": "url('/hero-pattern.svg')",
       },
       zIndex: {
         "top-navigation": 400,
