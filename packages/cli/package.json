@@ -41,6 +41,7 @@
     "@aws-sdk/client-route-53-domains": "^3.787.0",
     "@aws-sdk/client-s3": "^3.787.0",
     "@aws-sdk/client-sts": "^3.787.0",
+    "@goauthentik/api": "^2025.4.0-1746018955",
     "@inquirer/prompts": "^7.4.0",
     "@kubernetes/client-node": "^1.1.2",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",

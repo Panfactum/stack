@@ -1013,6 +1013,17 @@ let
         hash = "sha256-WZs/WuqR+6z9sq4Gw9A5eS//6Xq3k1ptaQcBwZBLf8M=";
       };
     };
+    "@goauthentik/api" = {
+      out_path = "@goauthentik/api";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@goauthentik/api@2025.4.0-1746018955";
+        url = "https://registry.npmjs.org/@goauthentik/api/-/api-2025.4.0-1746018955.tgz";
+        hash = "sha256-Z6QvF8LV4H/EKNVMnefusyU7ecm/LISVz4bLgpnaiDA=";
+      };
+    };
     "@humanfs/core" = {
       out_path = "@humanfs/core";
       binaries =

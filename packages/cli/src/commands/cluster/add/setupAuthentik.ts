@@ -1,5 +1,6 @@
 import { appendFile } from "node:fs/promises";
 import path, { join } from "node:path";
+import { CoreApi, Configuration, type PaginatedGroupList, type User, type Link, type Token, IntentEnum, type PaginatedTokenList, type PaginatedUserList, type PaginatedBrandList } from "@goauthentik/api";
 import { z } from "zod";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
 import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file" };
@@ -13,18 +14,10 @@ import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
+import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
-
-const AUTHENTIK_PAGINATION_SCHEMA = z.object({
-    next: z.number(),
-    previous: z.number(),
-    count: z.number(),
-    current: z.number(),
-    total_pages: z.number(),
-    start_index: z.number(),
-    end_index: z.number(),
-});
 
 export async function setupAuthentik(
     options: InstallClusterStepOptions,
@@ -78,7 +71,7 @@ export async function setupAuthentik(
                         .object({
                             extra_inputs: z
                                 .object({
-                                    ancestorDomain: z.string().optional(),
+                                    domain: z.string().optional(),
                                 })
                                 .passthrough()
                                 .optional()
@@ -95,7 +88,7 @@ export async function setupAuthentik(
                         .object({
                             extra_inputs: z
                                 .object({
-                                    authentikRootEmail: z.string().optional(),
+                                    akadmin_email: z.string().optional(),
                                 })
                                 .passthrough()
                                 .optional()
@@ -109,6 +102,7 @@ export async function setupAuthentik(
                     context,
                     validationSchema: z
                         .object({
+                            user_setup_complete: z.boolean().optional(),
                             extra_inputs: z
                                 .object({
                                     organization_name: z.string().optional(),
@@ -120,8 +114,8 @@ export async function setupAuthentik(
                         .passthrough(),
                 });
 
-                ctx.ancestorDomain = originalSESInputs?.extra_inputs.ancestorDomain;
-                ctx.authentikRootEmail = originalAuthentikInputs?.extra_inputs.authentikRootEmail;
+                ctx.ancestorDomain = originalSESInputs?.extra_inputs.domain;
+                ctx.authentikRootEmail = originalAuthentikInputs?.extra_inputs.akadmin_email;
                 ctx.orgName = originalAuthentikCoreResourcesInputs?.extra_inputs.organization_name;
 
                 if (ctx.ancestorDomain && ctx.authentikAdminEmail && ctx.authentikRootEmail && ctx.authentikAdminName && ctx.orgName) {
@@ -130,7 +124,7 @@ export async function setupAuthentik(
                 }
 
                 // TODO: @seth - Figure out this logic for resumes...
-                if (!kubeAuthentikPath) {
+                if (!kubeAuthentikPath || !originalAuthentikCoreResourcesInputs?.user_setup_complete) {
                     const notProd = !environment.includes("prod")
                     const confirmInstall = await context.logger.confirm({
                         task,
@@ -262,8 +256,79 @@ export async function setupAuthentik(
             skipIfAlreadyApplied: true,
         }),
         {
-            title: "Disabling default Authentik resources", task: async (ctx) => {
-                // TODO: Validation schema confirmation
+            title: "Verify the Authentik Ingress",
+            task: async (_, task) => {
+                const moduleDir = join(
+                    context.repoVariables.environments_dir,
+                    environment,
+                    region,
+                    MODULES.KUBE_AUTHENTIK
+                );
+                const moduleYAMLPath = join(moduleDir, "module.yaml");
+                const data = await readYAMLFile({
+                    filePath: moduleYAMLPath,
+                    context,
+                    validationSchema: z.object({
+                        extra_inputs: z.object({
+                            domain: z.string(),
+                        }),
+                    }),
+                    throwOnMissing: true,
+                    throwOnEmpty: true,
+                });
+
+                if (!data?.extra_inputs.domain) {
+                    throw new CLIError("Authentik domain not found in the module.yaml file");
+                }
+
+                task.output = context.logger.applyColors(`WARNING: This might take 10-30 minutes to complete while DNS propagates.`, { style: 'warning' })
+
+                let attempts = 0;
+                const maxAttempts = 60;
+                const retryDelay = 30000;
+                // Lower the DNS TTL to 5 seconds to speed up the DNS propagation
+                // https://bun.sh/docs/api/dns#configuring-dns-cache-ttl
+                process.env["BUN_CONFIG_DNS_TIME_TO_LIVE_SECONDS"] = "5";
+
+                while (attempts < maxAttempts) {
+                    try {
+                        const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
+                        task.title = context.logger.applyColors(`Verifying the Authentik Ingress ${statusStr}`, { lowlights: [statusStr] });
+                        const response = await Bun.fetch(`https://${data.extra_inputs.domain}/-/health/ready/`);
+                        if (response.status === 200) {
+                            task.title = context.logger.applyColors("Authentik ready check successful");
+                            break;
+                        }
+                    } catch {
+                        // Expected to error while waiting for DNS to propagate
+                    }
+                    attempts++;
+
+                    if (attempts < maxAttempts) {
+                        await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+                    } else {
+                        task.title = context.logger.applyColors(`Failed to connect to Authentik ready endpoint after ${maxAttempts} attempts`, { style: "error" });
+                        throw new CLIError(`Failed to connect to Authentik ready endpoint after ${maxAttempts} attempts`);
+                    }
+                }
+            },
+            rendererOptions: {
+                outputBar: 5,
+            },
+        },
+        {
+            skip: async () => {
+                const originalGlobalConfig = await readYAMLFile({
+                    filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                    context,
+                    validationSchema: z.object({
+                        authentik_url: z.string().optional(),
+                    }).passthrough(),
+                })
+                return !!originalGlobalConfig?.authentik_url
+            },
+            title: "Disabling default Authentik resources",
+            task: async (ctx) => {
                 const outputs = await terragruntOutput({
                     context,
                     environment,
@@ -285,133 +350,171 @@ export async function setupAuthentik(
                     throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
                 }
 
-                const authentikBrandsResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/brands/`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
-                            Accept: "application/json",
-                        },
+                const configuration = new Configuration({
+                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    headers: {
+                        Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
                     }
-                );
-                const authentikBrands = await authentikBrandsResponse.json();
-                const brandsSchema = z.object({
-                    pagination: AUTHENTIK_PAGINATION_SCHEMA,
-                    results: z.array(
-                        z.object({
-                            brand_uuid: z.string(),
-                            domain: z.string(),
-                            default: z.boolean(),
-                            branding_title: z.string().optional(),
-                            branding_logo: z.string().optional(),
-                            branding_favicon: z.string().optional(),
-                            flow_authentication: z.string().nullable(),
-                            flow_invalidation: z.string().nullable(),
-                            flow_recovery: z.string().nullable(),
-                            flow_unenrollment: z.string().nullable(),
-                            flow_user_settings: z.string().nullable(),
-                            flow_device_code: z.string().nullable(),
-                            default_application: z.string().nullable(),
-                            web_certificate: z.string().nullable(),
-                            attributes: z.any(),
-                        })
-                    ),
-                });
-                const authentikBrandsValidated = brandsSchema.parse(authentikBrands);
-                const authentikDefaultBrand = authentikBrandsValidated.results.find(
+                })
+
+                const authentikClient = new CoreApi(configuration)
+
+                let brands: PaginatedBrandList
+                try {
+                    brands = await authentikClient.coreBrandsList()
+                } catch (error) {
+                    throw new CLIError("Failed to get brands from Authentik", error);
+                }
+
+                const authentikDefaultBrand = brands.results.find(
                     (brand) => brand.domain === "authentik-default"
                 );
                 if (authentikDefaultBrand) {
-                    await Bun.fetch(
-                        `https://authentik.${ctx.ancestorDomain}/api/v3/core/brands/${authentikDefaultBrand.brand_uuid}/`,
-                        {
-                            method: "PUT",
-                            headers: {
-                                Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
-                            },
-                            body: JSON.stringify({
-                                ...authentikBrandsValidated,
-                                default: false,
-                            }),
-                        }
-                    );
+                    try {
+                        await authentikClient.coreBrandsUpdate({
+                            brandUuid: authentikDefaultBrand.brandUuid,
+                            brandRequest: {
+                                domain: authentikDefaultBrand.domain,
+                                _default: false,
+                            }
+                        })
+                    } catch (error) {
+                        throw new CLIError("Failed to update default brand in Authentik", error);
+                    }
                 }
-                // await replaceYamlValue(
-                //     path.join(repoVariables.environments_dir, "global.yaml"),
-                //     "authentik_url",
-                //     `https://${domain}`
-                // );
+
+                if (await fileExists(path.join(context.repoVariables.environments_dir, "global.yaml"))) {
+                    const originalGlobalConfig = await readYAMLFile({
+                        filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        context,
+                        validationSchema: z.object({
+                            authentik_url: z.string().optional(),
+                        }).passthrough(),
+                    })
+                    const newGlobalConfig = {
+                        ...originalGlobalConfig,
+                        authentik_url: `https://authentik.${ctx.ancestorDomain}`
+                    }
+                    await writeYAMLFile({
+                        context,
+                        path: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        contents: newGlobalConfig,
+                        overwrite: true,
+                    })
+                } else {
+                    await writeYAMLFile({
+                        context,
+                        path: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        contents: {
+                            authentik_url: `https://authentik.${ctx.ancestorDomain}`
+                        }
+                    })
+                }
             }
         },
-        await buildDeployModuleTask<Context>({
-            taskTitle: "Deploy Authentik Core Resources",
-            context,
-            environment,
-            region,
-            skipIfAlreadyApplied: true,
-            module: MODULES.AUTHENTIK_CORE_RESOURCES,
-            initModule: true,
-            hclIfMissing: await Bun.file(authentikCoreResourcesHcl).text(),
-            inputUpdates: {
-                organization_name: defineInputUpdate({
-                    schema: z.string(),
-                    update: (_, ctx) => ctx.orgName!
-                }),
-                organization_domain: defineInputUpdate({
-                    schema: z.string(),
-                    update: (_, ctx) => ctx.ancestorDomain!
-                })
-            },
-        }),
+        {
+            title: "Deploy Authentik Core Resources",
+            task: async (ctx, parentTask) => {
+                if (!ctx.akadminBootstrapToken) {
+                    const outputs = await terragruntOutput({
+                        context,
+                        environment,
+                        region,
+                        module: MODULES.KUBE_AUTHENTIK,
+                        validationSchema: z.record(
+                            z.string(),
+                            z.object({
+                                sensitive: z.boolean(),
+                                type: z.string(),
+                                value: z.string(),
+                            })
+                        )
+                    })
+
+                    ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
+
+                    if (!ctx.akadminBootstrapToken) {
+                        throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                    }
+                }
+                if (!ctx.orgName) {
+                    throw new CLIError("orgName not found in Authentik context")
+                }
+                if (!ctx.ancestorDomain) {
+                    throw new CLIError("ancestorDomain not found in Authentik context")
+                }
+                return parentTask.newListr([
+                    await buildDeployModuleTask<Context>({
+                        taskTitle: "Deploy Authentik Core Resources",
+                        context,
+                        environment,
+                        region,
+                        env: {
+                            ...context.env,
+                            AUTHENTIK_TOKEN: ctx.akadminBootstrapToken,
+                        },
+                        skipIfAlreadyApplied: true,
+                        module: MODULES.AUTHENTIK_CORE_RESOURCES,
+                        initModule: true,
+                        hclIfMissing: await Bun.file(authentikCoreResourcesHcl).text(),
+                        inputUpdates: {
+                            organization_name: defineInputUpdate({
+                                schema: z.string(),
+                                update: (_, ctx) => ctx.orgName!
+                            }),
+                            organization_domain: defineInputUpdate({
+                                schema: z.string(),
+                                update: (_, ctx) => ctx.ancestorDomain!
+                            })
+                        },
+                    }),
+                ], { ctx })
+            }
+        },
         {
             title: "Setting up your Authentik user account",
-            task: async (ctx) => {
+            task: async (ctx, task) => {
+                const outputs = await terragruntOutput({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.KUBE_AUTHENTIK,
+                    validationSchema: z.record(
+                        z.string(),
+                        z.object({
+                            sensitive: z.boolean(),
+                            type: z.string(),
+                            value: z.string(),
+                        })
+                    )
+                })
+
+                ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
+
+                if (!ctx.akadminBootstrapToken) {
+                    throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                }
+
+                if (!ctx.authentikAdminEmail || !ctx.authentikAdminName || !ctx.authentikRootEmail) {
+                    throw new CLIError("Authentik admin email or name not found");
+                }
+
+                const originalAuthentikClient = new CoreApi(new Configuration({
+                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    headers: {
+                        Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
+                    }
+                }))
+
                 // get superusers group uuid
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-groups-list
-                const groupsResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
-                    {
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
-                        },
-                    }
-                );
-                if (groupsResponse.status !== 200) {
-                    throw new Error("Failed to get groups in Authentik");
+                let groups: PaginatedGroupList
+                try {
+                    groups = await originalAuthentikClient.coreGroupsList()
+                } catch (error) {
+                    throw new CLIError("Failed to get groups in Authentik", error);
                 }
-                const groups = await groupsResponse.json();
-                const groupsSchema = z.object({
-                    pagination: AUTHENTIK_PAGINATION_SCHEMA,
-                    results: z.array(
-                        z.object({
-                            pk: z.string(),
-                            num_pk: z.number(),
-                            name: z.string(),
-                            is_superuser: z.boolean(),
-                            parent: z.string().nullable(),
-                            parent_name: z.string().nullable(),
-                            users: z.array(z.number()),
-                            users_obj: z.array(
-                                z.object({
-                                    pk: z.number(),
-                                    username: z.string(),
-                                    name: z.string(),
-                                    is_active: z.boolean(),
-                                    last_login: z.string().nullable(),
-                                    email: z.string(),
-                                    attributes: z.any(),
-                                    uid: z.string(),
-                                })
-                            ),
-                            attributes: z.any(),
-                            roles: z.array(z.string()),
-                            roles_obj: z.array(z.object({ pk: z.string(), name: z.string() })),
-                        })
-                    ),
-                });
-                const groupsValidated = groupsSchema.parse(groups);
-                const superusersGroup = groupsValidated.results.find(
+                const superusersGroup = groups.results.find(
                     (group) => group.name === "superusers"
                 );
                 if (!superusersGroup) {
@@ -421,83 +524,58 @@ export async function setupAuthentik(
 
                 // create the user via API
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-create
-                const createUserResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
-                        },
-                        body: JSON.stringify({
+                let user: User
+                try {
+                    user = await originalAuthentikClient.coreUsersCreate({
+                        userRequest: {
                             username: ctx.authentikAdminEmail,
                             name: ctx.authentikAdminName,
                             email: ctx.authentikAdminEmail,
-                            is_active: true,
+                            isActive: true,
                             groups: [superusersGroupUuid],
                             path: "users",
                             type: "internal",
-                            attributes: {},
-                        }),
-                    }
-                );
-
-                if (createUserResponse.status !== 201) {
-                    throw new Error("Failed to create user in Authentik");
+                        }
+                    })
+                } catch (error) {
+                    throw new CLIError("Failed to create user in Authentik", error);
                 }
-                const user = (await createUserResponse.json()) as { pk: number };
                 const userId = user.pk;
 
                 // get the password reset link and provide it to the user
-                const passwordResetResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/${userId}/recovery/`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
-                        },
-                    }
-                );
-                if (passwordResetResponse.status !== 200) {
-                    throw new Error("Failed to get password reset link in Authentik");
+                let passwordReset: Link
+                try {
+                    passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
+                        id: userId,
+                    })
+                } catch (error) {
+                    throw new CLIError("Failed to get password reset link in Authentik", error);
                 }
-                const passwordReset = (await passwordResetResponse.json()) as {
-                    link: string;
-                };
                 const passwordResetLink = passwordReset.link;
 
                 // create the API token
-                const createTokenResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/tokens/`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
-                        },
-                        body: JSON.stringify({
-                            managed: null,
+                let token: Token
+                try {
+                    token = await originalAuthentikClient.coreTokensCreate({
+                        tokenRequest: {
                             identifier: "local-framework-token",
-                            intent: "api",
+                            intent: IntentEnum.Api,
                             user: userId,
-                            expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
                             expiring: true,
                             description:
                                 "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
-                        }),
-                    }
-                );
-
-                if (createTokenResponse.status !== 201) {
-                    throw new Error("Failed to create API token in Authentik");
+                        }
+                    })
+                } catch (error) {
+                    throw new CLIError("Failed to create API token in Authentik", error);
                 }
-                const token = (await createTokenResponse.json()) as { pk: string };
                 const userTokenPk = token.pk;
 
                 const accountSetupComplete = await context.logger.confirm({
+                    task,
                     explainer: `
-                    Go ahead and setup your account
+                    Go ahead and setup your Authentikaccount
                     When you're done don't exit the web browser
                     We will need some info to continue
                     Use this link to setup your account:
@@ -509,6 +587,7 @@ export async function setupAuthentik(
 
                 if (!accountSetupComplete) {
                     const accountSetupCompleteAgain = await context.logger.confirm({
+                        task,
                         message: "Have you setup your Authentik account?\nYou must complete that before continuing.",
                         default: true,
                     });
@@ -519,6 +598,7 @@ export async function setupAuthentik(
 
                 // replace bootstrap token with API token
                 const newToken = await context.logger.password({
+                    task,
                     explainer: `
                     We have created a new temporary API token to use                    
                     Go to https://authentik.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
@@ -552,27 +632,22 @@ export async function setupAuthentik(
                     await Bun.write(envFilePath, `AUTHENTIK_TOKEN=${newToken}\n`);
                 }
 
+                const newAuthentikClient = new CoreApi(new Configuration({
+                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    headers: {
+                        Authorization: `Bearer ${newToken}`,
+                    }
+                }))
+
                 // get all the tokens
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-list
-                const tokensResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/tokens/`,
-                    {
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${newToken}`,
-                        },
-                    }
-                );
-                if (tokensResponse.status !== 200) {
-                    throw new Error("Failed to get tokens from Authentik");
+                let tokens: PaginatedTokenList
+                try {
+                    tokens = await newAuthentikClient.coreTokensList()
+                } catch (error) {
+                    throw new CLIError("Failed to get tokens from Authentik", error);
                 }
-                const tokens = await tokensResponse.json();
-                const tokensSchema = z.object({
-                    pagination: AUTHENTIK_PAGINATION_SCHEMA,
-                    results: z.array(z.object({ pk: z.string(), identifier: z.string() })),
-                });
-                const tokensValidated = tokensSchema.parse(tokens);
-                const bootstrapToken = tokensValidated.results.filter(
+                const bootstrapToken = tokens.results.filter(
                     (token) => token.pk !== userTokenPk
                 );
                 if (bootstrapToken.length !== 1) {
@@ -582,42 +657,24 @@ export async function setupAuthentik(
 
                 // delete the bootstrap token
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-destroy
-                const deleteTokenResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/tokens/${bootstrapTokenUuid}/`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${newToken}`,
-                        },
-                    }
-                );
-                if (deleteTokenResponse.status !== 204) {
-                    throw new Error("Failed to delete bootstrap token in Authentik");
+                try {
+                    await newAuthentikClient.coreTokensDestroy({
+                        identifier: bootstrapTokenUuid,
+                    })
+                } catch (error) {
+                    throw new CLIError("Failed to delete bootstrap token in Authentik", error);
                 }
 
                 // get all the users
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-list
-                const usersResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/`,
-                    {
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${newToken}`,
-                        },
-                    }
-                );
-                if (usersResponse.status !== 200) {
-                    throw new Error("Failed to get users from Authentik");
+                let users: PaginatedUserList
+                try {
+                    users = await newAuthentikClient.coreUsersList()
+                } catch (error) {
+                    throw new CLIError("Failed to get users from Authentik", error);
                 }
-                const users = await usersResponse.json();
-                const usersSchema = z.object({
-                    pagination: AUTHENTIK_PAGINATION_SCHEMA,
-                    results: z.array(z.object({ pk: z.number(), username: z.string() })),
-                });
-                const usersValidated = usersSchema.parse(users);
-                const bootstrapUser = usersValidated.results.find(
-                    (user) => user.username === ctx.authentikAdminEmail
+                const bootstrapUser = users.results.find(
+                    (user) => user.username === ctx.authentikRootEmail
                 );
                 if (!bootstrapUser) {
                     throw new Error("Bootstrap user not found in Authentik");
@@ -626,20 +683,28 @@ export async function setupAuthentik(
 
                 // disable the bootstrap user
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-update
-                const disableUserResponse = await Bun.fetch(
-                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/users/${bootstrapUserUuid}/`,
-                    {
-                        method: "PUT",
-                        headers: {
-                            Accept: "application/json",
-                            Authorization: `Bearer ${newToken}`,
-                        },
-                        body: JSON.stringify({ ...bootstrapUser, is_active: false }),
-                    }
-                );
-                if (disableUserResponse.status !== 200) {
-                    throw new Error("Failed to disable bootstrap user in Authentik");
+                try {
+                    await newAuthentikClient.coreUsersUpdate({
+                        id: bootstrapUserUuid,
+                        userRequest: {
+                            username: ctx.authentikRootEmail,
+                            name: 'Authentik Root User',
+                            isActive: false,
+                        }
+                    })
+                } catch (error) {
+                    throw new CLIError("Failed to disable bootstrap user in Authentik", error);
                 }
+
+                await updateModuleYAMLFile({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.AUTHENTIK_CORE_RESOURCES,
+                    inputUpdates: {
+                        user_setup_complete: true
+                    }
+                })
             }
         }
     ])

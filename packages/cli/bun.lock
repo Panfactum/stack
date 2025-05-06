@@ -12,6 +12,7 @@
         "@aws-sdk/client-route-53-domains": "^3.787.0",
         "@aws-sdk/client-s3": "^3.787.0",
         "@aws-sdk/client-sts": "^3.787.0",
+        "@goauthentik/api": "^2025.4.0-1746018955",
         "@inquirer/prompts": "^7.4.0",
         "@kubernetes/client-node": "^1.1.2",
         "@listr2/prompt-adapter-inquirer": "^2.0.21",
@@ -176,6 +177,8 @@
     "@eslint/object-schema": ["@eslint/object-schema@2.1.6", "", {}, "sha512-RBMg5FRL0I0gs51M/guSAj5/e14VQ4tpZnQNWwuDT66P14I43ItmPfIZRhO9fUVIPOAQXU47atlywZ/czoqFPA=="],
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.2.8", "", { "dependencies": { "@eslint/core": "^0.13.0", "levn": "^0.4.1" } }, "sha512-ZAoA40rNMPwSm+AeHpCq8STiNAwzWLJuP8Xv4CHIc9wv/PSuExjMrmjfYNj682vW0OOiZ1HKxzvjQr9XZIisQA=="],
+
+    "@goauthentik/api": ["@goauthentik/api@2025.4.0-1746018955", "", {}, "sha512-e+X3L+UYzQtAmBAdxKV9rHO6KsJBJ754IKc1Q9eT0lxS/zbvcNIEb0Fck9Sj/TzjqWlWkXNiCgrT4CdlaTFwxg=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
