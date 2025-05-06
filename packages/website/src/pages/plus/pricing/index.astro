@@ -5,7 +5,6 @@ import FAQS from "./_components/FAQs.tsx";
 import HeroSection from "./_components/HeroSection.astro";
 import PriceCalculator from "./_components/PricingSection/PriceCalculator.tsx";
 import TimelineSection from "./_components/TimelineSection.astro";
-import TalkToAnEngineer from "../_components/TalkToAnEngineer.astro";
 ---
 
 <Layout
@@ -20,6 +19,5 @@ import TalkToAnEngineer from "../_components/TalkToAnEngineer.astro";
     <PriceCalculator client:load />
     <TimelineSection />
     <FAQS client:idle/>
-    <TalkToAnEngineer/>
   </section>
 </Layout>
