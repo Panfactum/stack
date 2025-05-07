@@ -1,6 +1,7 @@
 ---
 import { Picture } from "astro:assets"
 
+import CallButton from "./CallButton.tsx"
 import BambeeLogoDark from "./images/client-logo-bambee-dark.png"
 import HavenLogoDark from "./images/client-logo-haven-dark.png"
 import HudsonLogoDark from "./images/client-logo-hudson-dark.png"
@@ -41,9 +42,7 @@ const plusStyle = {
         >
           See Pricing
         </a>
-        <a class="cursor-pointer text-nowrap rounded-xl bg-gold-300 px-5 py-3 font-bold text-black" href="https://hs.panfactum.com/meetings/jack-langston/intro">
-          Schedule Demo
-        </a>
+        <CallButton>Schedule Demo</CallButton>
       </div>
     </div>
     <div class="relative hidden basis-1/3 overflow-visible md:block">

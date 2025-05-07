@@ -6,6 +6,7 @@ import DiscordIcon from "../components/icons/discord.svg";
 import GithubIcon from "../components/icons/github.svg";
 import PanfactumLogo from "../components/icons/panfactum-logo.svg";
 import PanfactumPlusLogo from "../components/icons/panfactum-plus-logo.svg";
+import Button from "../components/ui/Button.tsx";
 import GetStartedButton from "../components/ui/GetStartedButton.tsx";
 import SearchIconButton from "../components/ui/search/SearchIconButton";
 import SavedLink from "../components/util/SavedLink";
@@ -33,7 +34,6 @@ const isPlus = pathname.startsWith("/plus")
 const links = isPlus ? PLUS_NAV_LINKS : NAV_LINKS
 
 ---
-
 <div
   class:list={[
     "flex flex-col border-b w-screen overflow-hidden h-[--header-height]",
@@ -85,11 +85,20 @@ const links = isPlus ? PLUS_NAV_LINKS : NAV_LINKS
             >
               {isPlus ? <PanfactumLogo/> : <PanfactumPlusLogo/>}
             </a>
-
         </div>
         {isPlus ? (
           <div class="hidden items-center gap-x-8 md:flex"> 
-              <GetStartedButton size="sm" fullPath={pathname} />
+            <Button 
+              data-fillout-id="5Ce2EHxTqnus"
+              data-fillout-embed-type="popup"
+              data-fillout-dynamic-resize
+              data-fillout-inherit-parameters
+              data-fillout-popup-size="medium"
+              size="sm"
+              variant="primary"
+            >
+              Get Started
+            </Button>
           </div>
         ) : (
         <div class="hidden items-center gap-x-8 md:flex">
@@ -110,3 +119,5 @@ const links = isPlus ? PLUS_NAV_LINKS : NAV_LINKS
     </div>
 
 </div>
+
+<script is:inline async src="https://server.fillout.com/embed/v1/"></script>
