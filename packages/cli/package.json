@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "build:binary": "bun build --compile --minify --sourcemap ./src/index.ts ./src/files/**/*.* --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
+    "build:watch": "bun build --watch --compile --minify --sourcemap ./src/index.ts ./src/files/**/*.* --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
     "check": "tsc",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
