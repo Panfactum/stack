@@ -2,11 +2,10 @@
 
 import ApproachSection from "./_components/ApproachSection.astro";
 import ComparisonSection from "./_components/ComparisonSection.astro";
-import FAQS from "./_components/FAQs.tsx";
 import HeroSection from "./_components/HeroSection.astro";
 import HowSection from "./_components/HowSection/HowSection.astro";
 import PlansSection from "./_components/PlansSection.astro";
-import TalkToAnEngineer from "./_components/TalkToAnEngineer.astro";
+import {TalkToEngineer} from "./_components/TalkToEngineer.tsx";
 import Layout from "../../layouts/Layout.astro";
 ---
 
@@ -21,6 +20,5 @@ import Layout from "../../layouts/Layout.astro";
   <HowSection/>
   <PlansSection/>
   <ComparisonSection/>
-  <FAQS client:idle/>
-  <TalkToAnEngineer/>
+  <TalkToEngineer client:idle/>
 </Layout>
