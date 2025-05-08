@@ -35,17 +35,17 @@ locals {
 ## Brand
 ###########################################################################
 
-resource "kubernetes_config_map_v1_data" "media" {
-  metadata {
-    name      = var.media_configmap
-    namespace = var.authentik_namespace
-  }
-  data = {
-    "logo.svg" = var.logo_svg_b64 != null ? base64decode(var.logo_svg_b64) : file("${path.module}/logo.svg")
-  }
-  field_manager = "authentik-core-resources"
-  force         = true
-}
+# resource "kubernetes_config_map_v1_data" "media" {
+#   metadata {
+#     name      = var.media_configmap
+#     namespace = var.authentik_namespace
+#   }
+#   data = {
+#     "logo.svg" = var.logo_svg_b64 != null ? base64decode(var.logo_svg_b64) : file("${path.module}/logo.svg")
+#   }
+#   field_manager = "authentik-core-resources"
+#   force         = true
+# }
 
 // Note: Must first disable the default brand
 resource "authentik_brand" "custom" {
@@ -201,23 +201,23 @@ resource "authentik_policy_expression" "is_superuser" {
 ## Email Templates
 ###########################################################################
 
-resource "kubernetes_config_map_v1_data" "email_templates" {
-  metadata {
-    name      = var.email_templates_configmap
-    namespace = var.authentik_namespace
-  }
-  data = {
-    "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
-  }
-}
+# resource "kubernetes_config_map_v1_data" "email_templates" {
+#   metadata {
+#     name      = var.email_templates_configmap
+#     namespace = var.authentik_namespace
+#   }
+#   data = {
+#     "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
+#   }
+# }
 
-resource "time_sleep" "wait_for_template" {
-  depends_on      = [kubernetes_config_map_v1_data.email_templates]
-  create_duration = "120s"
-  triggers = {
-    "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
-  }
-}
+# resource "time_sleep" "wait_for_template" {
+#   depends_on      = [kubernetes_config_map_v1_data.email_templates]
+#   create_duration = "120s"
+#   triggers = {
+#     "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
+#   }
+# }
 
 ###########################################################################
 ## Recovery / Enrollment
@@ -231,16 +231,16 @@ resource "authentik_flow" "recovery" {
   authentication = "require_unauthenticated"
 }
 
-resource "authentik_stage_email" "email" {
-  name                     = "panfactum-recovery-email"
-  use_global_settings      = true
-  activate_user_on_success = true
-  timeout                  = 60 * 24
-  token_expiry             = 60 * 24
-  template                 = "recovery.html"
-  subject                  = "Reset your ${var.organization_name} account!"
-  depends_on               = [time_sleep.wait_for_template]
-}
+# resource "authentik_stage_email" "email" {
+#   name                     = "panfactum-recovery-email"
+#   use_global_settings      = true
+#   activate_user_on_success = true
+#   timeout                  = 60 * 24
+#   token_expiry             = 60 * 24
+#   template                 = "recovery.html"
+#   subject                  = "Reset your ${var.organization_name} account!"
+#   depends_on               = [time_sleep.wait_for_template]
+# }
 
 resource "authentik_stage_prompt_field" "password" {
   field_key              = "password"
@@ -301,11 +301,11 @@ resource "authentik_policy_binding" "skip_if_restored_id" {
   policy = authentik_policy_expression.skip_if_restored.id
 }
 
-resource "authentik_policy_binding" "skip_if_restored_email" {
-  order  = 0
-  target = authentik_flow_stage_binding.recovery_email.id
-  policy = authentik_policy_expression.skip_if_restored.id
-}
+# resource "authentik_policy_binding" "skip_if_restored_email" {
+#   order  = 0
+#   target = authentik_flow_stage_binding.recovery_email.id
+#   policy = authentik_policy_expression.skip_if_restored.id
+# }
 
 resource "authentik_flow_stage_binding" "recovery_id" {
   target                  = authentik_flow.recovery.uuid
@@ -317,15 +317,15 @@ resource "authentik_flow_stage_binding" "recovery_id" {
   invalid_response_action = "retry"
 }
 
-resource "authentik_flow_stage_binding" "recovery_email" {
-  target                  = authentik_flow.recovery.uuid
-  stage                   = authentik_stage_email.email.id
-  order                   = 20
-  evaluate_on_plan        = true
-  re_evaluate_policies    = true
-  policy_engine_mode      = "any"
-  invalid_response_action = "retry"
-}
+# resource "authentik_flow_stage_binding" "recovery_email" {
+#   target                  = authentik_flow.recovery.uuid
+#   stage                   = authentik_stage_email.email.id
+#   order                   = 20
+#   evaluate_on_plan        = true
+#   re_evaluate_policies    = true
+#   policy_engine_mode      = "any"
+#   invalid_response_action = "retry"
+# }
 
 resource "authentik_flow_stage_binding" "recovery_password" {
   target                  = authentik_flow.recovery.uuid

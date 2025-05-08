@@ -471,6 +471,7 @@ export async function setupAuthentik(
                                 schema: z.string(),
                                 update: (_, ctx) => ctx.orgName!
                             }),
+                            // TODO: this should be the root domain
                             organization_domain: defineInputUpdate({
                                 schema: z.string(),
                                 update: (_, ctx) => ctx.ancestorDomain!
