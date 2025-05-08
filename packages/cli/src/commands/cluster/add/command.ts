@@ -312,8 +312,8 @@ export class ClusterAddCommand extends PanfactumCommand {
     `)
 
     this.context.logger.warn(`
-      The Vault recovery keys and root token have been encrypted and saved in the kube_vault folder.
-      The root token allows root access to the vault instance and thus all infrastructure.
+      The Vault recovery keys have been encrypted and saved in the kube_vault folder in the recovery.yaml file.
+      The recovery keys allow root access to the vault instance and thus all infrastructure.
       These keys ${pc.bold("SHOULD NOT")} be left here as they will allow for privilege escalation.
       Decide how your organization recommends superusers store these keys.
       This should ${pc.bold("NOT")} be in a location that is accessible by all superusers (e.g. a company password vault).

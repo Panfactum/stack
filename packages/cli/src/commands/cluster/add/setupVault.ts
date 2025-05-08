@@ -227,12 +227,19 @@ export async function setupVault(
         await sopsUpsert({
           values: {
             root_token: recoveryKeys!.root_token,
+          },
+          context,
+          filePath: join(modulePath, "secrets.yaml"),
+        });
+
+        await sopsUpsert({
+          values: {
             recovery_keys: recoveryKeys!.recovery_keys_hex.map(
               (key) => key
             ),
           },
           context,
-          filePath: join(modulePath, "secrets.yaml"),
+          filePath: join(modulePath, "recovery.yaml"),
         });
 
         ctx.recoveryKeys = recoveryKeys!.recovery_keys_hex.map(
