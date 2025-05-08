@@ -62,7 +62,7 @@ export async function setupVault(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region } =
+  const { awsProfile, context, environment, clusterPath, region, kubeConfigContext } =
     options;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
@@ -132,9 +132,13 @@ export async function setupVault(
       title: "Checking status of the Vault pods",
       skip: () => !!vaultRootToken,
       task: async () => {
+        if (!kubeConfigContext) {
+          throw new CLIError("Kube config context not found");
+        }
+
         // TODO: @seth Use the kubernetes SDK, not exec
         await execute({
-          command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json"],
+          command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json", "--context", kubeConfigContext],
           context,
           workingDirectory: process.cwd(),
           errorMessage: "Vault pods failed to start",
