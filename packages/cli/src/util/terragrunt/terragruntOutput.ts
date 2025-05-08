@@ -9,6 +9,7 @@ import type { PanfactumContext } from "@/util/context/context";
 export const terragruntOutput = async <T extends z.ZodType<object>>({
   awsProfile,
   context,
+  env,
   environment,
   region,
   module,
@@ -16,6 +17,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
 }: {
   awsProfile?: string;
   context: PanfactumContext;
+  env?: Record<string, string>;
   environment: string;
   region: string;
   module: string;
@@ -40,6 +42,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
       "--json",
       "--terragrunt-non-interactive"
     ],
+    env,
     workingDirectory,
     context,
     errorMessage: "Failed to get outputs from infrastructure module",

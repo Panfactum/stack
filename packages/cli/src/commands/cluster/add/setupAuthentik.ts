@@ -333,6 +333,10 @@ export async function setupAuthentik(
                     context,
                     environment,
                     region,
+                    env: {
+                        ...context.env,
+                        VAULT_TOKEN: vaultRootToken
+                    },
                     module: MODULES.KUBE_AUTHENTIK,
                     validationSchema: z.record(
                         z.string(),
@@ -420,6 +424,10 @@ export async function setupAuthentik(
                         context,
                         environment,
                         region,
+                        env: {
+                            ...context.env,
+                            VAULT_TOKEN: vaultRootToken
+                        },
                         module: MODULES.KUBE_AUTHENTIK,
                         validationSchema: z.record(
                             z.string(),
@@ -452,6 +460,7 @@ export async function setupAuthentik(
                         env: {
                             ...context.env,
                             AUTHENTIK_TOKEN: ctx.akadminBootstrapToken,
+                            VAULT_TOKEN: vaultRootToken,
                         },
                         skipIfAlreadyApplied: true,
                         module: MODULES.AUTHENTIK_CORE_RESOURCES,
@@ -474,25 +483,31 @@ export async function setupAuthentik(
         {
             title: "Setting up your Authentik user account",
             task: async (ctx, task) => {
-                const outputs = await terragruntOutput({
-                    context,
-                    environment,
-                    region,
-                    module: MODULES.KUBE_AUTHENTIK,
-                    validationSchema: z.record(
-                        z.string(),
-                        z.object({
-                            sensitive: z.boolean(),
-                            type: z.string(),
-                            value: z.string(),
-                        })
-                    )
-                })
-
-                ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
-
                 if (!ctx.akadminBootstrapToken) {
-                    throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                    const outputs = await terragruntOutput({
+                        context,
+                        environment,
+                        region,
+                        env: {
+                            ...context.env,
+                            VAULT_TOKEN: vaultRootToken
+                        },
+                        module: MODULES.KUBE_AUTHENTIK,
+                        validationSchema: z.record(
+                            z.string(),
+                            z.object({
+                                sensitive: z.boolean(),
+                                type: z.string(),
+                                value: z.string(),
+                            })
+                        )
+                    })
+
+                    ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
+
+                    if (!ctx.akadminBootstrapToken) {
+                        throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                    }
                 }
 
                 if (!ctx.authentikAdminEmail || !ctx.authentikAdminName || !ctx.authentikRootEmail) {
