@@ -8,6 +8,10 @@ terraform {
       source  = "panfactum/pf"
       version = "0.0.7"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.3"
+    }
   }
 }
 
@@ -175,18 +179,24 @@ resource "aws_dynamodb_table" "lock" {
 ## Backups
 #####################################################
 
+resource "random_id" "terraform" {
+  prefix      = "terraform-${local.environment}-"
+  byte_length = 8
+}
+
 resource "aws_backup_vault" "terraform" {
-  name = "terraform-${local.environment}"
+  name = random_id.terraform.hex
   tags = merge(
     data.pf_aws_tags.tags.tags,
     {
       description = "Backups of the terraform state for ${local.environment}"
     }
   )
+  force_destroy = true
 }
 
 resource "aws_backup_plan" "terraform" {
-  name = "terraform-${local.environment}"
+  name = random_id.terraform.hex
   rule {
     rule_name                = "continuous"
     target_vault_name        = aws_backup_vault.terraform.name
@@ -327,6 +337,14 @@ data "aws_iam_policy_document" "backup" {
       "dynamodb:RestoreTableFromBackup"
     ]
     resources = ["${aws_dynamodb_table.lock.arn}/backup/*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "backup:TagResource"
+    ]
+    resources = ["*"] # Or scope to specific backup resources if preferred
   }
 
   // Note sure why this is required for dynamodb backups

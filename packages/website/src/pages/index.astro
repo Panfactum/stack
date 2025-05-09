@@ -1,21 +1,15 @@
 ---
-import "../styles/global.css";
-
-import ComparisonSection from "./_components/ComparisonSection.astro";
-import FAQS from "./_components/FAQs/FAQs";
 import FrameworkFeaturesSection from "./_components/FrameworkFeaturesSection/FrameworkFeaturesSection.astro";
 import FrameworkSummarySection from "./_components/FrameworkSummarySection.astro";
 import HeroSection from "./_components/HeroSection.astro";
-import PricingSection from "./_components/PricingSection/PricingSection.astro";
+import PanfactumPlusSection from "./_components/PanfactumPlusSection.astro";
 import ReplacedServicesSection from "./_components/ReplacedServicesSection/ReplacedServicesSection.astro";
-import SupportPlanFeatureSection from "./_components/SupportPlanFeatureSection/SupportPlanFeatureSection.astro";
 import Layout from "../layouts/Layout.astro";
 import MainSection from "../layouts/MainSection.astro";
-import SubSection from "../layouts/SubSection.astro";
 ---
 
 <Layout
-  heroClass="bg-secondary bg-hero-pattern bg-[center_top] bg-cover bg-no-repeat"
+  heroClass="bg-secondary"
   hasBorder={false}
   title="Panfactum"
   description="The Open-Source Framework for Cloud Infrastructure"
@@ -30,19 +24,5 @@ import SubSection from "../layouts/SubSection.astro";
       </div>
 
   </MainSection>
-
-  <MainSection
-    background="secondary"
-    title="Hire the Panfactum Experts"
-    subtitle="You focus on shipping software. We handle your cloud infrastructure."
-    id="support"
-  >
-    <div slot="chip" class="mb-6 rounded-lg bg-success-200 px-2 py-1 text-sm font-semibold text-success-800 ring-2 ring-success-800">Fractional Cloud Engineers</div>
-    <SupportPlanFeatureSection />
-    <PricingSection />
-    <ComparisonSection />
-    <SubSection title="Frequently Asked Questions">
-        <FAQS client:idle/>
-    </SubSection>
-  </MainSection>
+  <PanfactumPlusSection />
 </Layout>

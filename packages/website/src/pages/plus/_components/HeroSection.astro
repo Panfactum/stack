@@ -1,0 +1,106 @@
+---
+import { Picture } from "astro:assets"
+
+import CallButton from "./CallButton.tsx"
+import BambeeLogoDark from "./images/client-logo-bambee-dark.png"
+import HavenLogoDark from "./images/client-logo-haven-dark.png"
+import HudsonLogoDark from "./images/client-logo-hudson-dark.png"
+import ImplentioLogoDark from "./images/client-logo-implentio-dark.png"
+import SelflesslyLogoDark from "./images/client-logo-selflessly-dark.png"
+import HeroImg from "./images/hero.png"
+
+const pfStyle = {
+  background: "linear-gradient(45deg, #9AD3F1 80%, #FFFFFF 100%)",
+  backgroundClip: "text",
+  textFillColor: "transparent",
+  "-webkit-text-fill-color": "transparent"
+}
+const plusStyle = {
+  background: "linear-gradient(45deg, #FFFFFF -10%, #ffe0ab 0%, #ffd07d 100%)",
+  backgroundClip: "text",
+  textFillColor: "transparent",
+  "-webkit-text-fill-color": "transparent"
+}
+---
+
+<section class="m-auto flex max-w-screen-xl flex-col gap-12 p-8 md:gap-24 lg:pt-16">
+  <div
+    class="flex justify-between gap-6 "
+  >
+    <div class="flex flex-col gap-6">
+      <h1 class="font-machina text-4xl font-bold !leading-tight sm:text-5xl lg:text-6xl" 
+    >
+        <span style={pfStyle}>The&nbsp;Power&nbsp;of<br/>Panfactum</span>&nbsp;<span style={plusStyle}>Plus<br/>Fractional&nbsp;DevOps</span>
+      </h1>
+      <p class="text-display-sm max-w-[600px]">
+        Build <span class="font-bold text-gold-100">10x faster</span> and <span class="font-bold text-gold-100">save 90%</span><br/>versus hiring a full-time cloud engineer.
+      </p>
+      <div class="flex justify-center gap-4 sm:justify-start">
+        <a 
+          class="cursor-pointer text-nowrap rounded-xl bg-white px-5 py-3 font-bold text-black"
+          href="/plus/pricing"
+        >
+          See Pricing
+        </a>
+        <CallButton>Schedule Demo</CallButton>
+      </div>
+    </div>
+    <div class="relative hidden basis-1/3 overflow-visible md:block">
+        <Picture
+            class="absolute right-[4.5rem] top-[4.5rem] min-w-[31rem] lg:-right-32 lg:-top-32 lg:min-w-[41rem]"
+            sizes="(max-width: 64rem) 31rem, 41rem"
+            formats={["avif", "webp"]}
+            breakpoints={[496, 656]}
+            src={HeroImg}
+            alt="Panfactum Engineers"
+        />
+    </div>
+  </div>
+  <div class="z-10 flex flex-col gap-8">
+    <div class="flex items-center justify-center text-gray-dark-mode-400">
+      Trusted by Engineering Teams At
+    </div>
+    <div class="flex flex-wrap justify-center gap-x-12 gap-y-6">
+      <Picture 
+        src={ImplentioLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Implentio Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={BambeeLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Bambee Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={HavenLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Haven Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={SelflesslyLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Selflessly Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+      <Picture 
+        src={HudsonLogoDark} 
+        formats={["webp", "avif"]} 
+        alt="Hudson Logo" 
+        widths={[150, 200]} 
+        sizes="(max-width: 40rem) 150px, 200px" 
+        class="grayscale" 
+      />
+    </div>
+  </div>
+</section>

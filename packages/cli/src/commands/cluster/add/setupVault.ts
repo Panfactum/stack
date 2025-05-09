@@ -62,7 +62,7 @@ export async function setupVault(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region } =
+  const { awsProfile, context, environment, clusterPath, region, kubeConfigContext } =
     options;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
@@ -71,14 +71,21 @@ export async function setupVault(
   let vaultRootToken: string | undefined;
   let vaultRecoveryKeys: string[] | undefined;
   if (await fileExists(join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"))) {
-    const { recovery_keys: recoveryKeys, root_token: rootToken } = await sopsDecrypt({
+
+    // FIX: @seth - The vault token should be found using getPanfactumConfig
+    const vaultSecrets = await sopsDecrypt({
       filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
       context,
       validationSchema: z.object({
-        recovery_keys: z.array(z.string()),
         root_token: z.string(),
+        recovery_keys: z.array(z.string()),
       }),
     });
+
+    if (!vaultSecrets) {
+      throw new CLIError('Was not able to find vault token.')
+    }
+    const { root_token: rootToken, recovery_keys: recoveryKeys } = vaultSecrets;
     vaultRootToken = rootToken;
     vaultRecoveryKeys = recoveryKeys;
   }
@@ -132,9 +139,13 @@ export async function setupVault(
       title: "Checking status of the Vault pods",
       skip: () => !!vaultRootToken,
       task: async () => {
+        if (!kubeConfigContext) {
+          throw new CLIError("Kube config context not found");
+        }
+
         // TODO: @seth Use the kubernetes SDK, not exec
         await execute({
-          command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json"],
+          command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json", "--context", kubeConfigContext],
           context,
           workingDirectory: process.cwd(),
           errorMessage: "Vault pods failed to start",
@@ -223,12 +234,19 @@ export async function setupVault(
         await sopsUpsert({
           values: {
             root_token: recoveryKeys!.root_token,
+          },
+          context,
+          filePath: join(modulePath, "secrets.yaml"),
+        });
+
+        await sopsUpsert({
+          values: {
             recovery_keys: recoveryKeys!.recovery_keys_hex.map(
               (key) => key
             ),
           },
           context,
-          filePath: join(modulePath, "secrets.yaml"),
+          filePath: join(modulePath, "recovery.yaml"),
         });
 
         ctx.recoveryKeys = recoveryKeys!.recovery_keys_hex.map(

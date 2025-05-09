@@ -56,6 +56,7 @@ export async function setupEKS(
     clusterName?: string;
     clusterDescription?: string;
     callerArn?: string;
+    isSSO?: boolean;
   }
 
 
@@ -65,6 +66,7 @@ export async function setupEKS(
       task: async (ctx) => {
         const { Arn: arn } = await getIdentity({ context, profile: awsProfile });
         ctx.callerArn = arn;
+        ctx.isSSO = arn?.includes("AWSReservedSSO");
       },
     },
     {
@@ -156,7 +158,7 @@ export async function setupEKS(
       inputUpdates: {
         extra_superuser_principal_arns: defineInputUpdate({
           schema: z.array(z.string()),
-          update: (_, ctx) => [ctx.callerArn!]
+          update: (_, ctx) => ctx.isSSO ? [] : [ctx.callerArn!]
         }),
         cluster_name: defineInputUpdate({
           schema: z.string(),

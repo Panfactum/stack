@@ -14,16 +14,19 @@ type OutputValues = InputValues & {
 
 // WARNING: The order here is extremely important
 // DO NOT CHANGE unless you know exactly what you are doing
-// TODO: Is the order here correct?
 const CONFIG_FILES = [
-  "module.user.yaml",
-  "module.yaml",
-  "region.user.yaml",
-  "region.yaml",
-  "environment.user.yaml",
-  "environment.yaml",
-  "global.user.yaml",
   "global.yaml",
+  "global.secrets.yaml",
+  "global.user.yaml",
+  "environment.yaml",
+  "environment.secrets.yaml",
+  "environment.user.yaml",
+  "region.yaml",
+  "region.secrets.yaml",
+  "region.user.yaml",
+  "module.yaml",
+  "module.secrets.yaml",
+  "module.user.yaml",
 ] as const;
 
 export const getPanfactumConfig = async ({
@@ -48,9 +51,11 @@ export const getPanfactumConfig = async ({
     CONFIG_FILES.forEach((fileName) => {
       searchPromises.push(
         (async () => {
+          const filePath = join(currentDir, fileName);
           const values = await getConfigValuesFromFile({
-            filePath: join(currentDir, fileName),
+            filePath,
             context,
+            secret: fileName.includes("secrets")
           });
           if (values) {
             configFileValues[fileName] = values;

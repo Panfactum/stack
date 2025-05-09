@@ -11,6 +11,8 @@ interface Props {
   description: string;
   heroClass?: string;
   hasBorder?: boolean;
+  navBarFixed?: boolean;
+  navBarBackground?: "primary" | "secondary" | "transparent";
 }
 const {
   redirect,
@@ -18,6 +20,8 @@ const {
   description,
   heroClass = "",
   hasBorder = false,
+  navBarFixed = false,
+  navBarBackground = "transparent",
 } = Astro.props;
 ---
 
@@ -33,7 +37,8 @@ const {
       <Header
         transition:persist
         hasBorder={hasBorder}
-        background={"transparent"}
+        background={navBarBackground}
+        isFixed={navBarFixed}
       />
       <slot name="hero" />
     </div>

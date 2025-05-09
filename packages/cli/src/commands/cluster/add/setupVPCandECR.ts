@@ -6,7 +6,6 @@ import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
-import { fileExists } from "@/util/fs/fileExists";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
@@ -184,16 +183,17 @@ export async function setupVPCandECR(
 
         let ghPAT, dhPAT;
 
-        if (await fileExists(secretsPath)) {
-          ({ github_access_token: ghPAT, docker_hub_access_token: dhPAT } =
-            await sopsDecrypt({
-              filePath: secretsPath,
-              context,
-              validationSchema: z.object({
-                github_access_token: z.string().optional(),
-                docker_hub_access_token: z.string().optional(),
-              }),
-            }));
+        const savedSecets = await sopsDecrypt({
+          filePath: secretsPath,
+          context,
+          validationSchema: z.object({
+            github_access_token: z.string().optional(),
+            docker_hub_access_token: z.string().optional(),
+          }),
+        })
+
+        if (savedSecets) {
+          ({ github_access_token: ghPAT, docker_hub_access_token: dhPAT } = savedSecets);
         }
 
         const originalInputs = await readYAMLFile({

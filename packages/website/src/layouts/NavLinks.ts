@@ -12,3 +12,10 @@ export const NAV_LINKS = [
     url: "/docs/changelog/edge",
   },
 ];
+
+export const PLUS_NAV_LINKS = [
+  {
+    title: "Pricing",
+    url: "/plus/pricing",
+  }
+]

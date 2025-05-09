@@ -21,10 +21,11 @@ interface TaskContext {
 export async function manualZoneSetup(inputs: {
     context: PanfactumContext,
     domain: string;
-    env: EnvironmentMeta
+    env: EnvironmentMeta;
+    isApex?: boolean;
 }): Promise<DomainConfig> {
 
-    const { context, domain, env } = inputs;
+    const { context, domain, env, isApex } = inputs;
 
     const tasks = new Listr<TaskContext>([], { rendererOptions: { collapseErrors: false } })
     const domainConfig: Partial<DomainConfig> = {
@@ -89,27 +90,41 @@ export async function manualZoneSetup(inputs: {
     // Set NS Records
     ///////////////////////////////////////////////
     tasks.add({
-        title: "Set NS (nameserver) records with registrar",
+        title: isApex ? "Set nameservers with DNS registrar" : "Add NS (nameserver) records to DNS host",
         task: async (ctx, task) => {
             let confirmRecordsAdded = false
             while (!confirmRecordsAdded) {
-
-                task.output = context.logger.applyColors(
-                    `To connect ${domain} to the Panfactum installation, you need to add\n` +
-                    "the following NS records to your domain registrar.\n\n" +
-                    "As an example, here are the steps that you would\n" +
-                    "follow if you use Namecheap as the registrar:\n" +
-                    "https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/\n\n\n" +
-                    `Record Type: NS\n\n` +
-                    `Record Name: ${domain}\n\n` +
-                    `Record Values:\n\n`
-                    , { style: "warning" }) + context.logger.applyColors(ctx.nameServers.map(ns => `- ${ns}`).join("\n\n"), { style: 'warning' })
-
-                confirmRecordsAdded = await context.logger.confirm({
-                    task,
-                    message: `Have you added the NS (nameserver) records ? `,
-                    default: true
-                })
+                if (isApex) {
+                    task.output = context.logger.applyColors(
+                        `To connect ${domain} to the Panfactum installation, you need to add\n` +
+                        "the following nameservers to your DNS registrar.\n\n" +
+                        "As an example, here are the steps that you would\n" +
+                        "follow if you use Namecheap as the registrar:\n" +
+                        "https://www.namecheap.com/support/knowledgebase/article.aspx/767/10/how-to-change-dns-for-a-domain/\n\n\n" +
+                        `Nameservers:\n\n`
+                        , { style: "warning" }) + context.logger.applyColors(ctx.nameServers.map(ns => `- ${ns}`).join("\n\n"), { style: 'warning' })
+                    confirmRecordsAdded = await context.logger.confirm({
+                        task,
+                        message: `Have you added the nameservers? `,
+                        default: true
+                    })
+                } else {
+                    task.output = context.logger.applyColors(
+                        `To connect ${domain} to the Panfactum installation, you need to add\n` +
+                        "the following NS records to your DNS host.\n\n" +
+                        "As an example, here are the steps that you would\n" +
+                        "follow if you use Namecheap as the DNS host:\n" +
+                        "https://www.namecheap.com/support/knowledgebase/article.aspx/434/2237/how-do-i-set-up-host-records-for-a-domain/\n\n\n" +
+                        `Record Type: NS\n\n` +
+                        `Record Name: ${domain}\n\n` +
+                        `Record Values (Nameservers):\n\n`
+                        , { style: "warning" }) + context.logger.applyColors(ctx.nameServers.map(ns => `- ${ns}`).join("\n\n"), { style: 'warning' })
+                    confirmRecordsAdded = await context.logger.confirm({
+                        task,
+                        message: `Have you added the NS (nameserver) records? `,
+                        default: true
+                    })
+                }
             }
         }
     })

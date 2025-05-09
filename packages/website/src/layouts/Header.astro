@@ -1,11 +1,12 @@
 ---
 import HeaderBanner from "./HeaderBanner";
 import MobileNav from "./MobileNav.tsx";
-import { NAV_LINKS } from "./NavLinks";
+import { NAV_LINKS, PLUS_NAV_LINKS } from "./NavLinks";
 import DiscordIcon from "../components/icons/discord.svg";
 import GithubIcon from "../components/icons/github.svg";
 import PanfactumLogo from "../components/icons/panfactum-logo.svg";
-import PanfactumMark from "../components/icons/panfactum-mark.svg";
+import PanfactumPlusLogo from "../components/icons/panfactum-plus-logo.svg";
+import Button from "../components/ui/Button.tsx";
 import GetStartedButton from "../components/ui/GetStartedButton.tsx";
 import SearchIconButton from "../components/ui/search/SearchIconButton";
 import SavedLink from "../components/util/SavedLink";
@@ -25,13 +26,14 @@ const {
   background = "secondary",
   isFixed = false,
   searchButtonEnabled = false,
-  collapseLogoOnMobile = false,
 } = Astro.props;
 
 const pathname = new URL(Astro.request.url).pathname;
+const isDocs = pathname.startsWith("/docs")
+const isPlus = pathname.startsWith("/plus")
+const links = isPlus ? PLUS_NAV_LINKS : NAV_LINKS
 
 ---
-
 <div
   class:list={[
     "flex flex-col border-b w-screen overflow-hidden h-[--header-height]",
@@ -41,53 +43,65 @@ const pathname = new URL(Astro.request.url).pathname;
       : background === "secondary"
         ? "bg-secondary"
         : "bg-transparent",
-    isFixed ? "md:fixed top-0 z-10" : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
+    isFixed ? "md:fixed top-0 z-20" : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
   ]}
 >
     <HeaderBanner client:load transition:persist />
-    <div class="mx-auto flex size-full max-w-screen-3xl grow basis-1 items-center justify-between px-4">
-        <div class="flex h-full items-center gap-16">
+    <div class:list={["mx-auto flex size-full grow basis-1 items-center justify-between px-4", isDocs ? "max-w-screen-3xl" : "max-w-screen-xl"]}>
+        <div class="flex h-full items-center gap-8">
             <a
-                    href="/"
-                    class="flex h-full max-w-[75%] items-center md:w-[230px]"
-                    aria-label="Homepage"
-                    data-astro-prefetch="viewport"
+                href={!isPlus ? "/" : "/plus"}                     
+                aria-label={!isPlus ? "Panfactum Framework Homepage" : "Panfactum Plus Homepage"}
+                class:list={["flex h-full max-w-[75%] cursor-pointer items-center", isPlus ? "md:w-[280px]" : "md:w-[225px]"]}
+                data-astro-prefetch="viewport"
             >
-              {
-                collapseLogoOnMobile ? (
-                        <>
-            <span class="hidden h-full w-[230px] items-center justify-center md:flex [&>svg]:h-2/3">
-              <PanfactumLogo />
-            </span>
-                            <span class="flex h-full w-[--header-height] items-center justify-center text-brand-500 md:hidden dark:text-white [&>svg]:h-3/4">
-              <PanfactumMark />
-            </span>
-                        </>
-                ) : (
-                        <PanfactumLogo />
-                )
-              }
+              {isPlus ? <PanfactumPlusLogo/> : <PanfactumLogo />}
             </a>
-            <nav class="hidden gap-x-10 md:flex" aria-label="Primary">
-              {NAV_LINKS.map((link) => (
-                      <SavedLink
-                              defaultHref={link.url}
-                              id={link.title}
-                              data-astro-prefetch="viewport"
-                              class:list={[
-                                "bg-transparent font-bold cursor-pointer text-display-xs mt-2",
-                                background === "transparent"
-                                  ? "hover:text-gray-light-mode-400"
-                                  : "hover:text-brand-600 dark:hover:text-secondary",
-                              ]}
-                              saveEnabled={true}
-                              client:idle
-                      >
-                        {link.title}
-                      </SavedLink>
+            <nav class="ml-8 hidden gap-x-10 md:flex" aria-label="Primary">
+              {links.map((link) => (
+                <SavedLink
+                        defaultHref={link.url}
+                        id={link.title}
+                        data-astro-prefetch="viewport"
+                        class:list={[
+                          "bg-transparent font-bold cursor-pointer text-display-xs mt-2",
+                          background === "transparent"
+                            ? "hover:text-gray-light-mode-400"
+                            : "hover:text-brand-600 dark:hover:text-secondary",
+                        ]}
+                        saveEnabled={true}
+                        client:idle
+                >
+                  {link.title}
+                </SavedLink>
               ))}
             </nav>
+            <div class="mt-2 hidden h-1/2 w-[2px] bg-gray-dark-mode-400 md:block"/>
+            <a 
+              href={isPlus ? "/" : "/plus"}                     
+              aria-label={isPlus ? "Panfactum Framework Homepage" : "Panfactum Plus Homepage"}
+              data-astro-prefetch="viewport"
+              class:list={["mt-2 cursor-pointer hidden md:block", isPlus ? "w-[150px]" : "w-[200px]"]}
+            >
+              {isPlus ? <PanfactumLogo/> : <PanfactumPlusLogo/>}
+            </a>
         </div>
+        {isPlus ? (
+          <div class="hidden items-center gap-x-8 md:flex"> 
+            <Button 
+              data-fillout-id="5Ce2EHxTqnus"
+              data-fillout-embed-type="popup"
+              data-fillout-dynamic-resize
+              data-fillout-inherit-parameters
+              data-fillout-popup-size="medium"
+              size="sm"
+              variant="primary"
+              class="z-10"
+            >
+              Get Started
+            </Button>
+          </div>
+        ) : (
         <div class="hidden items-center gap-x-8 md:flex">
             <a aria-label="Github Repository" href={GITHUB_URL} class="hidden lg:inline-flex">
                 <GithubIcon size="24" />
@@ -97,6 +111,8 @@ const pathname = new URL(Astro.request.url).pathname;
             </a>
             <GetStartedButton size="sm" fullPath={pathname} />
         </div>
+        )}
+
         <div class="flex items-center gap-2 md:hidden">
           {searchButtonEnabled && <SearchIconButton client:idle />}
             <MobileNav background={background} fullPath={pathname} client:idle />
@@ -104,3 +120,5 @@ const pathname = new URL(Astro.request.url).pathname;
     </div>
 
 </div>
+
+<script is:inline async src="https://server.fillout.com/embed/v1/"></script>
