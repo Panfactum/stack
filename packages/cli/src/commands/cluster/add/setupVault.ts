@@ -71,14 +71,21 @@ export async function setupVault(
   let vaultRootToken: string | undefined;
   let vaultRecoveryKeys: string[] | undefined;
   if (await fileExists(join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"))) {
-    const { recovery_keys: recoveryKeys, root_token: rootToken } = await sopsDecrypt({
+
+    // FIX: @seth - The vault token should be found using getPanfactumConfig
+    const vaultSecrets = await sopsDecrypt({
       filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
       context,
       validationSchema: z.object({
-        recovery_keys: z.array(z.string()),
         root_token: z.string(),
+        recovery_keys: z.array(z.string()),
       }),
     });
+
+    if (!vaultSecrets) {
+      throw new CLIError('Was not able to find vault token.')
+    }
+    const { root_token: rootToken, recovery_keys: recoveryKeys } = vaultSecrets;
     vaultRootToken = rootToken;
     vaultRecoveryKeys = recoveryKeys;
   }

@@ -20,13 +20,19 @@ export async function setupLinkerd(
   const { awsProfile, context, environment, clusterPath, region } = options;
 
 
-  const { root_token: vaultRootToken } = await sopsDecrypt({
+  // FIX: @seth - The vault token should be found using getPanfactumConfig
+  const vaultSecrets = await sopsDecrypt({
     filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
     context,
     validationSchema: z.object({
       root_token: z.string(),
     }),
   });
+
+  if (!vaultSecrets) {
+    throw new CLIError('Was not able to find vault token.')
+  }
+  const { root_token: vaultRootToken } = vaultSecrets;
 
   interface Context {
     kubeContext?: string;

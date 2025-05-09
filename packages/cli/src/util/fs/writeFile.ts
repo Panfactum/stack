@@ -1,5 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
+import { fileExists } from "./fileExists";
 import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -14,7 +15,7 @@ export async function writeFile({
   contents: string;
   overwrite?: boolean;
 }) {
-  if (await Bun.file(path).exists()) {
+  if (await fileExists(path)) {
     if (!overwrite) {
       throw new CLIError(`File already exists at ${path}. Use overwrite=true if you want to overwrite it without error.`)
     }
