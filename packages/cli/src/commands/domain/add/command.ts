@@ -266,7 +266,7 @@ export class DomainAddCommand extends PanfactumCommand {
                     ////////////////////////////////////////////////////////
 
                     context.logger.info(`Deploying DNS zone for ${newDomain} in ${environmentMeta.name}...`)
-                    const apexConfig = await manualZoneSetup({ context, domain: newDomain, env: environmentMeta })
+                    const apexConfig = await manualZoneSetup({ context, domain: newDomain, env: environmentMeta, isApex: true })
 
                     ////////////////////////////////////////////////////////
                     // Environment subzones - Auto
@@ -449,7 +449,7 @@ export class DomainAddCommand extends PanfactumCommand {
                         ////////////////////////////////////////////////////////
                         // Apex Zone Setup - Manual
                         ////////////////////////////////////////////////////////
-                        const apexConfig = await manualZoneSetup({ context, domain: apexDomain, env: apexEnvironmentMeta })
+                        const apexConfig = await manualZoneSetup({ context, domain: apexDomain, env: apexEnvironmentMeta, isApex: true })
 
                         ////////////////////////////////////////////////////////
                         // User-specified DNS Zone Setup - Auto
