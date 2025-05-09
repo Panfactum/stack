@@ -165,3 +165,8 @@ variable "controller_nodes_enabled" {
   type        = bool
   default     = true
 }
+
+variable "organization_name" {
+  description = "The name of the organization for which Authentik serves as the IdP"
+  type        = string
+}

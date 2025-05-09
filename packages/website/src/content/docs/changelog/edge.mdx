@@ -21,6 +21,9 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ### Breaking Changes
 
+* We now create the Authentik email template in the kube_authentik module. The organization name is now a required input.
+  You can use the new `organization_name` output from the kube_authentik module as an input to the `authentik_core_resources` module.
+
 * We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed. 
   See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
 

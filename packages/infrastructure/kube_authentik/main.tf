@@ -90,7 +90,7 @@ module "database" {
 
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 10
-  pg_instances                         = var.sla_target >= 2 ? 2 : 1
+  pg_instances                         = 2
   pg_smart_shutdown_timeout            = 1
   pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
@@ -142,6 +142,16 @@ resource "kubernetes_config_map" "email_templates" {
   }
   lifecycle {
     ignore_changes = [data]
+  }
+}
+
+resource "kubernetes_config_map_v1_data" "email_templates" {
+  metadata {
+    name      = kubernetes_config_map.email_templates.metadata[0].name
+    namespace = local.namespace
+  }
+  data = {
+    "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
   }
 }
 

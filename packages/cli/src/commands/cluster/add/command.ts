@@ -13,7 +13,6 @@ import { MODULES } from "@/util/terragrunt/constants";
 import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
-import { setupAuthentik } from "./setupAuthentik";
 import { setupAutoscaling } from "./setupAutoscaling";
 import { setupCertificates } from "./setupCertificates";
 import { setupClusterExtensions } from "./setupClusterExtensions";
@@ -115,13 +114,6 @@ const SETUP_STEPS: Array<{
       setup: setupClusterExtensions,
       completed: false,
       lastModule: MODULES.KUBE_RELOADER,
-    },
-    {
-      label: "Authentik",
-      id: "setupAuthentik",
-      setup: setupAuthentik,
-      completed: false,
-      lastModule: MODULES.AUTHENTIK_CORE_RESOURCES,
     },
   ];
 

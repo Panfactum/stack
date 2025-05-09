@@ -2916,6 +2916,17 @@ let
         hash = "sha256-kYHniRENsAWG2lQG7Tj6xPPaiS6Bsa87uRwRvwsSDCY=";
       };
     };
+    "bundle-name" = {
+      out_path = "bundle-name";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "bundle-name@4.1.0";
+        url = "https://registry.npmjs.org/bundle-name/-/bundle-name-4.1.0.tgz";
+        hash = "sha256-NeSdQkDJHL5MopkmE5/uqEgwLp7qMX8x2egblyzpCRE=";
+      };
+    };
     "bytes" = {
       out_path = "bytes";
       binaries =
@@ -3235,6 +3246,28 @@ let
         hash = "sha256-DAOqg8a/aOfCzCxbWi1zLBh553EbCAEbC8SN8Q0Qvzw=";
       };
     };
+    "default-browser" = {
+      out_path = "default-browser";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "default-browser@5.2.1";
+        url = "https://registry.npmjs.org/default-browser/-/default-browser-5.2.1.tgz";
+        hash = "sha256-zpuJjd8K4je3IadkrsY0pvfYtqdnetK9VNTq3idlp2Q=";
+      };
+    };
+    "default-browser-id" = {
+      out_path = "default-browser-id";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "default-browser-id@5.0.0";
+        url = "https://registry.npmjs.org/default-browser-id/-/default-browser-id-5.0.0.tgz";
+        hash = "sha256-X8RSmunv0GcfQBUSWqtSCEeTtZf2HDlU08t8oxPr7U4=";
+      };
+    };
     "define-data-property" = {
       out_path = "define-data-property";
       binaries =
@@ -3244,6 +3277,17 @@ let
         name = "define-data-property@1.1.4";
         url = "https://registry.npmjs.org/define-data-property/-/define-data-property-1.1.4.tgz";
         hash = "sha256-FjBK1z3xNkyoYjwoqJad4BzXGJtPmwVmj621mPEQ5NI=";
+      };
+    };
+    "define-lazy-prop" = {
+      out_path = "define-lazy-prop";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "define-lazy-prop@3.0.0";
+        url = "https://registry.npmjs.org/define-lazy-prop/-/define-lazy-prop-3.0.0.tgz";
+        hash = "sha256-u+n+Z6Ipxk/5uMd6zhInji1EBIoqWvluX8lau8lMSbU=";
       };
     };
     "define-properties" = {
@@ -4423,6 +4467,17 @@ let
         hash = "sha256-f1cGpsYOFqwju6mM5vMLBRKN++B7K8/YI1qZlf4DAlY=";
       };
     };
+    "is-docker" = {
+      out_path = "is-docker";
+      binaries = {
+        "is-docker" = "../is-docker/cli.js";
+      };
+      pkg = fetchurl {
+        name = "is-docker@3.0.0";
+        url = "https://registry.npmjs.org/is-docker/-/is-docker-3.0.0.tgz";
+        hash = "sha256-GiMLCyXIHv8Gve44VqdC/RcmAWmwv5WN6TaMSzzi3e4=";
+      };
+    };
     "is-extglob" = {
       out_path = "is-extglob";
       binaries =
@@ -4476,6 +4531,17 @@ let
         name = "is-glob@4.0.3";
         url = "https://registry.npmjs.org/is-glob/-/is-glob-4.0.3.tgz";
         hash = "sha256-P+RT+xk7tY9vBQXfsRUSMJNTgLW1Xh+YZCYcKq/BvsY=";
+      };
+    };
+    "is-inside-container" = {
+      out_path = "is-inside-container";
+      binaries = {
+        "is-inside-container" = "../is-inside-container/cli.js";
+      };
+      pkg = fetchurl {
+        name = "is-inside-container@1.0.0";
+        url = "https://registry.npmjs.org/is-inside-container/-/is-inside-container-1.0.0.tgz";
+        hash = "sha256-296VuENPxHV2JJdNQTnE8yOR0IxBU1Za6RpfP9dy4Hs=";
       };
     };
     "is-map" = {
@@ -4608,6 +4674,17 @@ let
         name = "is-weakset@2.0.4";
         url = "https://registry.npmjs.org/is-weakset/-/is-weakset-2.0.4.tgz";
         hash = "sha256-7MtA+Tl3OCl8DQr4MfZo+GD5HsKscQd4M4L96RrF50U=";
+      };
+    };
+    "is-wsl" = {
+      out_path = "is-wsl";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "is-wsl@3.1.0";
+        url = "https://registry.npmjs.org/is-wsl/-/is-wsl-3.1.0.tgz";
+        hash = "sha256-3DyuZ7xkGkETKJVNMwaOPcmC5PNrUkECExu34c77ArI=";
       };
     };
     "isarray" = {
@@ -5205,6 +5282,17 @@ let
         hash = "sha256-4zVpdDQkVqYdkJrzO02mvbpGz7g/G6igOe6x+6lFzcQ=";
       };
     };
+    "open" = {
+      out_path = "open";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "open@10.1.2";
+        url = "https://registry.npmjs.org/open/-/open-10.1.2.tgz";
+        hash = "sha256-dnHmLiSQQ57j8PR7mm6cNThHN9keobGAgtYlp32FEq0=";
+      };
+    };
     "openid-client" = {
       out_path = "openid-client";
       binaries =
@@ -5599,6 +5687,17 @@ let
         name = "rfdc@1.4.1";
         url = "https://registry.npmjs.org/rfdc/-/rfdc-1.4.1.tgz";
         hash = "sha256-VZrxhx2SexmN36Ry2jWDm6MbAf30ZFIGquJ5yrkdVmo=";
+      };
+    };
+    "run-applescript" = {
+      out_path = "run-applescript";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "run-applescript@7.0.0";
+        url = "https://registry.npmjs.org/run-applescript/-/run-applescript-7.0.0.tgz";
+        hash = "sha256-Zxa9ro/sNDUpCR1LcQkKDww6qkDjSX1Bu3a4qaq/dek=";
       };
     };
     "run-parallel" = {

@@ -12,7 +12,7 @@ import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { InstallClusterStepOptions } from "./common";
+import type { InstallClusterStepOptions } from "@/commands/cluster/add/common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const MANAGEMENT_ENVIRONMENT_ACCESS = {
