@@ -216,18 +216,18 @@ export async function setupVault(
         } catch (error) {
           await writeYAMLFile({
             context,
-            contents: {
+            values: {
               status: "error",
             },
             overwrite: true,
-            path: join(modulePath, ".pf.yaml"),
+            filePath: join(modulePath, ".pf.yaml"),
           });
           parseErrorHandler({
             error,
             errorMessage: "Failed to parse vault operator init",
             nonZodErrorMessage:
               "Unable to parse outputs from vault operator init",
-            command: vaultOperatorInitCommand.join(" "),
+            location: vaultOperatorInitCommand.join(" "),
           });
         }
 
@@ -313,11 +313,11 @@ export async function setupVault(
           if (sealedStatus) {
             await writeYAMLFile({
               context,
-              contents: {
+              values: {
                 status: "error",
               },
               overwrite: true,
-              path: join(modulePath, ".pf.yaml"),
+              filePath: join(modulePath, ".pf.yaml"),
             });
             throw new CLIError(
               "Failed to unseal Vault after applying all recovery keys"
@@ -334,17 +334,17 @@ export async function setupVault(
         } catch (error) {
           await writeYAMLFile({
             context,
-            contents: {
+            values: {
               status: "error",
             },
             overwrite: true,
-            path: join(modulePath, ".pf.yaml"),
+            filePath: join(modulePath, ".pf.yaml"),
           });
           parseErrorHandler({
             error,
             errorMessage: "Failed to unseal Vault",
             nonZodErrorMessage: "Failed to unseal Vault",
-            command: vaultUnsealCommand.join(" "),
+            location: vaultUnsealCommand.join(" "),
           });
         }
       },

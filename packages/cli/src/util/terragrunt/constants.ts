@@ -87,3 +87,5 @@ export const TERRAGRUNT_FILES = [
     { path: "providers/aws_secondary.tftpl", contentPath: awsSecondaryTftpl },
     { path: "providers/helm.tftpl", contentPath: helmTftpl }
 ] as const
+
+export const MODULE_STATUS_FILE = ".pf.yaml"

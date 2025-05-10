@@ -42,7 +42,7 @@ export async function upsertGitIgnore(inputs: { context: PanfactumContext, lines
             contents: newContent,
             context,
             overwrite: true,
-            path
+            filePath: path
         });
     } catch (e) {
         throw new CLIError("Failed to update .gitignore", e)

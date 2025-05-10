@@ -79,15 +79,15 @@ export async function updateModuleYAMLFile(inputs: {
     };
     await writeYAMLFile({
       context,
-      path: moduleYAMLPath,
-      contents: newModuleConfig,
+      filePath: moduleYAMLPath,
+      values: newModuleConfig,
       overwrite: true,
     });
   } else {
     await writeYAMLFile({
       context,
-      path: moduleYAMLPath,
-      contents: {
+      filePath: moduleYAMLPath,
+      values: {
         ...rootUpdates,
         extra_inputs: inputUpdates,
         module: realModuleName,

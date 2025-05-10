@@ -142,7 +142,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                     }
 
                     try {
-                        await writeFile({ context, path: configFilePath, contents: stringify(config, { newline: false, whitespace: true }), overwrite: true })
+                        await writeFile({ context, filePath: configFilePath, contents: stringify(config, { newline: false, whitespace: true }), overwrite: true })
                     } catch (e) {
                         throw new CLIError(`Failed to write new AWS config file at ${configFilePath}`, e)
                     }
@@ -168,7 +168,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                             throw new CLIError(`Failed to read existing AWS credentials at ${credentialsFilePath}`, e)
                         }
                         try {
-                            await writeFile({ context, path: credentialsFilePath, contents: stringify(credentials, { newline: false, whitespace: true }), overwrite: true })
+                            await writeFile({ context, filePath: credentialsFilePath, contents: stringify(credentials, { newline: false, whitespace: true }), overwrite: true })
                         } catch (e) {
                             throw new CLIError(`Failed to write new AWS credentials file at ${credentialsFilePath}`, e)
                         }

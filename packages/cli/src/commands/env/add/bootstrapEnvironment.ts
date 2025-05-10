@@ -506,7 +506,7 @@ export async function bootstrapEnvironment(inputs: {
                 const existingConfig = parse(fileContent) as { creation_rules?: [] }
                 await writeFile({
                     context,
-                    path: sopsFilePath,
+                    filePath: sopsFilePath,
                     contents: stringify({
                         ...existingConfig,
                         creation_rules: [
@@ -519,7 +519,7 @@ export async function bootstrapEnvironment(inputs: {
             } else {
                 await writeFile({
                     context,
-                    path: sopsFilePath,
+                    filePath: sopsFilePath,
                     contents: stringify({
                         creation_rules: [newCreationRule]
                     }),

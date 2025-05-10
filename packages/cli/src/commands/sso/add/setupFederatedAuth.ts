@@ -43,14 +43,20 @@ export async function setupFederatedAuth(
         options;
 
 
-    const { root_token: vaultRootToken } = await sopsDecrypt({
-        filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
+    const vaultSecretsFile = join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml")
+    const vaultSecrets = await sopsDecrypt({
+        filePath: vaultSecretsFile,
         context,
         validationSchema: z.object({
             root_token: z.string(),
         }),
     });
 
+    if (vaultSecrets === null) {
+        throw new CLIError(`Could not find vault token at ${vaultSecretsFile}`)
+    }
+
+    const { root_token: vaultRootToken } = vaultSecrets
 
     interface Context {
         awsAcsUrl?: string;

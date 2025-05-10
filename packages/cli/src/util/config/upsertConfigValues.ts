@@ -48,7 +48,7 @@ export async function upsertConfigValues(input: UpsertConfigValuesInput) {
             })
         } else {
             await writeFile({
-                path: filePath,
+                filePath: filePath,
                 contents: stringify(newValues, yamlOpts),
                 context,
                 overwrite: true

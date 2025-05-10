@@ -23,7 +23,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
                     const environmentsDir = context.repoVariables.environments_dir;
                     await Promise.all(TERRAGRUNT_FILES.map(async ({ path, contentPath }) => {
                         const filePath = join(environmentsDir, path);
-                        await writeFile({ context, path: filePath, contents: await Bun.file(contentPath).text(), overwrite: true })
+                        await writeFile({ context, filePath: filePath, contents: await Bun.file(contentPath).text(), overwrite: true })
                     }))
                 }
             })
@@ -66,7 +66,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
                 task: async () => {
                     await writeFile({
                         context,
-                        path: join(context.repoVariables.repo_root, ".envrc"),
+                        filePath: join(context.repoVariables.repo_root, ".envrc"),
                         contents: await Bun.file(envRCPath).text(),
                         overwrite: true
                     })

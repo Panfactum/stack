@@ -1,14 +1,14 @@
+import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getNewAccountAdminAccess(inputs: { context: PanfactumContext, type: "management" | "standalone" | "manual-org" }) {
     const { context, type } = inputs
 
-    // TODO: @jack Add documentation for each of these steps
     if (type === "management") {
         context.logger.warn(`
-            To start using AWS Organizations, you will need to create a new AWS account.
-            Once this installer completes, AWS account provisioning can be fully automated. To create an account,
+            To create the ${MANAGEMENT_ENVIRONMENT} environment, you will need to create a new AWS account.
+            Once the AWS Organization is deployed, AWS account provisioning can be fully automated. To create an account,
             go to this link:
 
             https://signin.aws.amazon.com/signup?request_type=register

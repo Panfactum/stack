@@ -6,27 +6,27 @@ import type { PanfactumContext } from "@/util/context/context";
 
 export async function writeFile({
   context,
-  path,
+  filePath,
   contents,
   overwrite = false
 }: {
   context: PanfactumContext;
-  path: string;
+  filePath: string;
   contents: string;
   overwrite?: boolean;
 }) {
-  if (await fileExists(path)) {
+  if (await fileExists(filePath)) {
     if (!overwrite) {
-      throw new CLIError(`File already exists at ${path}. Use overwrite=true if you want to overwrite it without error.`)
+      throw new CLIError(`File already exists at ${filePath}. Use overwrite=true if you want to overwrite it without error.`)
     }
   }
-  context.logger.debug(`Writing file`, { filePath: path });
+  context.logger.debug(`Writing file`, { filePath });
   try {
-    await mkdir(dirname(path), { recursive: true });
-    await Bun.write(path, contents);
+    await mkdir(dirname(filePath), { recursive: true });
+    await Bun.write(filePath, contents);
   } catch (e) {
-    throw new CLIError(`Error writing to ${path}`, e)
+    throw new CLIError(`Error writing to ${filePath}`, e)
   }
-  context.logger.debug(`Finished writing file`, { filePath: path });
+  context.logger.debug(`Finished writing file`, { filePath });
 
 }

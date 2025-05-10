@@ -157,9 +157,9 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
                     }
                     await writeYAMLFile({
                         context,
-                        contents: clusterInfo,
+                        values: clusterInfo,
                         overwrite: true,
-                        path: clustersYAMLPath,
+                        filePath: clustersYAMLPath,
                     });
                 },
             });

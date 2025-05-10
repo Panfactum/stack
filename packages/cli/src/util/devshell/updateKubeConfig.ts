@@ -140,8 +140,8 @@ export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
 
         await writeYAMLFile({
             context,
-            path: kubeConfigFilePath,
-            contents: {
+            filePath: kubeConfigFilePath,
+            values: {
                 ...oldConfig,
                 clusters: mergedClusters,
                 users: mergedUsers,
@@ -152,8 +152,8 @@ export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
     } else {
         await writeYAMLFile({
             context,
-            path: kubeConfigFilePath,
-            contents: {
+            filePath: kubeConfigFilePath,
+            values: {
                 apiVersion: "v1",
                 kind: "Config",
                 preferences: {},

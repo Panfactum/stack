@@ -10,7 +10,7 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import { MODULES } from "@/util/terragrunt/constants";
-import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
+import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
@@ -257,12 +257,12 @@ export class ClusterAddCommand extends PanfactumCommand {
             }).optional()
           })
         })
-        step.completed = pfData?.status === "applied" && certificatesModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
+        step.completed = pfData?.deployStatus === "success" && certificatesModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
       } else if (step.id === "setupClusterExtensions") {
         // Due to the concurrent nature of this step, we let the step handle it's own completion logic
         step.completed = false;
       } else {
-        step.completed = pfData?.status === "applied";
+        step.completed = pfData?.deployStatus === "success";
       }
     }
 

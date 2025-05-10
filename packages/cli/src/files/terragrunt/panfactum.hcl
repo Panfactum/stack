@@ -192,14 +192,66 @@ terraform {
     ]
   }
 
-  after_hook "status" {
+
+  before_hook "deploy_status" {
     commands = ["apply"]
-    execute  = ["bash", "-c", "echo 'status: applied' > '${get_original_terragrunt_dir()}/.pf.yaml'"]
+    execute = [
+      "pf",
+      "update-module-status",
+      "-m", get_original_terragrunt_dir(),
+      "--deploy-status", "running"
+    ]
   }
 
-  error_hook "status" {
-    commands  = ["apply"]
-    execute   = ["bash", "-c", "echo 'status: error' > '${get_original_terragrunt_dir()}/.pf.yaml'"]
+  after_hook "deploy_status" {
+    commands = ["apply"]
+    execute = [
+      "pf",
+      "update-module-status",
+      "-m", get_original_terragrunt_dir(),
+      "--deploy-status", "success"
+    ]
+  }
+
+  error_hook "deploy_status" {
+    commands = ["apply"]
+    execute = [
+      "pf",
+      "update-module-status",
+      "-m", get_original_terragrunt_dir(),
+      "--deploy-status", "error"
+    ]
+    on_errors = [".*"]
+  }
+
+  before_hook "init_status" {
+    commands = ["init"]
+    execute = [
+      "pf",
+      "update-module-status",
+      "-m", get_original_terragrunt_dir(),
+      "--init-status", "running"
+    ]
+  }
+
+  after_hook "init_status" {
+    commands = ["init"]
+    execute = [
+      "pf",
+      "update-module-status",
+      "-m", get_original_terragrunt_dir(),
+      "--init-status", "success"
+    ]
+  }
+
+  error_hook "init_status" {
+    commands = ["init"]
+    execute = [
+      "pf",
+      "update-module-status",
+      "-m", get_original_terragrunt_dir(),
+      "--init-status", "error"
+    ]
     on_errors = [".*"]
   }
 }

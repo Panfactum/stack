@@ -15,9 +15,9 @@ import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
+import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
@@ -69,13 +69,20 @@ export async function setupAuthentik(
     const clusterPath = path.join(environmentPath, region);
 
 
-    const { root_token: vaultRootToken } = await sopsDecrypt({
-        filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
+    const vaultSecretsFile = join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml")
+    const vaultSecrets = await sopsDecrypt({
+        filePath: vaultSecretsFile,
         context,
         validationSchema: z.object({
             root_token: z.string(),
         }),
     });
+
+    if (vaultSecrets === null) {
+        throw new CLIError(`Could not find vault token at ${vaultSecretsFile}`)
+    }
+
+    const { root_token: vaultRootToken } = vaultSecrets
 
 
     interface Context {
@@ -449,15 +456,15 @@ export async function setupAuthentik(
                     }
                     await writeYAMLFile({
                         context,
-                        path: path.join(context.repoVariables.environments_dir, "global.yaml"),
-                        contents: newGlobalConfig,
+                        filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        values: newGlobalConfig,
                         overwrite: true,
                     })
                 } else {
                     await writeYAMLFile({
                         context,
-                        path: path.join(context.repoVariables.environments_dir, "global.yaml"),
-                        contents: {
+                        filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        values: {
                             authentik_url: `https://authentik.${ctx.ancestorDomain}`
                         }
                     })
@@ -468,7 +475,7 @@ export async function setupAuthentik(
             title: "Deploy Authentik Core Resources",
             skip: async () => {
                 const pfData = await getLocalModuleStatus({ environment, region, module: MODULES.AUTHENTIK_CORE_RESOURCES, context });
-                return pfData?.status === "applied";
+                return pfData.deployStatus === "success";
             },
             task: async (ctx, parentTask) => {
                 if (!ctx.akadminBootstrapToken) {
@@ -546,7 +553,7 @@ spec:
       app.kubernetes.io/name: authentik
   minAvailable: "100%"`;
                 const tempFile = `temp-pdb-${Date.now()}.yaml`;
-                await writeFile({ context, path: join(cwd(), tempFile), contents: yaml, overwrite: true })
+                await writeFile({ context, filePath: join(cwd(), tempFile), contents: yaml, overwrite: true })
                 await execute({
                     command: [
                         "kubectl",
@@ -706,16 +713,14 @@ spec:
 
                 // Check if there is an existing token
                 let authentikUserToken: string | undefined
-                let data: { authentikUserToken: string } | undefined
-                if (await fileExists(join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "secrets.yaml"))) {
-                    data = await sopsDecrypt({
-                        filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "secrets.yaml"),
-                        context,
-                        validationSchema: z.object({
-                            authentikUserToken: z.string(),
-                        })
+                const authentikSecretsPath = join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "secrets.yaml")
+                const data = await sopsDecrypt({
+                    filePath: authentikSecretsPath,
+                    context,
+                    validationSchema: z.object({
+                        authentikUserToken: z.string(),
                     })
-                }
+                })
                 if (data?.authentikUserToken) {
                     try {
                         const testAuthentikClient = new CoreApi(new Configuration({

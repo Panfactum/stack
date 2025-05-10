@@ -1,3 +1,5 @@
+import { MODULE_STATUS_FILE } from "../terragrunt/constants";
+
 export const EXPECTED_GITIGNORE_CONTENTS = {
     aws: [
         "*",
@@ -6,7 +8,7 @@ export const EXPECTED_GITIGNORE_CONTENTS = {
     ],
     environments: [
         "*.user.yaml",
-        ".pf.yaml"
+        MODULE_STATUS_FILE
     ],
     kube: [
         "*",

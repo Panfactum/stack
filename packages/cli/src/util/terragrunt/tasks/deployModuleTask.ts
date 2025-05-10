@@ -7,7 +7,7 @@ import { createDirectory } from "@/util/fs/createDirectory";
 import { fileContains } from "@/util/fs/fileContains";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
-import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
+import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { terragruntApply } from "../terragruntApply";
@@ -119,15 +119,15 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             };
             await writeYAMLFile({
                 context,
-                path: moduleYAMLPath,
-                contents: newModuleConfig,
+                filePath: moduleYAMLPath,
+                values: newModuleConfig,
                 overwrite: true,
             });
         } else {
             await writeYAMLFile({
                 context,
-                path: moduleYAMLPath,
-                contents: {
+                filePath: moduleYAMLPath,
+                values: {
                     extra_inputs: Object.fromEntries(
                         Object.entries(updates).map(([input, { update }]) => {
                             return [input, update(undefined, ctx)];
@@ -147,7 +147,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
         skip: async () => {
             if (skipIfAlreadyApplied) {
                 const pfData = await getLocalModuleStatus({ environment, region, module, context });
-                return pfData?.status === "applied";
+                return pfData.deployStatus === "success";
             }
 
             return false;
@@ -171,7 +171,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                         await createDirectory(moduleDir);
                         await writeFile({
                             context,
-                            path: moduleHCLPath,
+                            filePath: moduleHCLPath,
                             contents: hclIfMissing,
                         });
                     },

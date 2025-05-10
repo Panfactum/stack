@@ -33,7 +33,7 @@ export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
             const fileContent = await Bun.file(configFilePath).text();
             const existingValues = parse(fileContent);
             await writeFile({
-                path: configFilePath,
+                filePath: configFilePath,
                 contents: explainer + stringify({
                     ...existingValues,
                     ...OPTIONAL_PANFACTUM_YAML_SCHEMA.parse(values)
@@ -43,7 +43,7 @@ export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
             })
         } else {
             await writeFile({
-                path: configFilePath,
+                filePath: configFilePath,
                 contents: explainer + stringify(OPTIONAL_PANFACTUM_YAML_SCHEMA.parse(values), yamlOpts),
                 context,
                 overwrite: true

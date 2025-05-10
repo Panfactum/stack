@@ -106,10 +106,14 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
 
     async execute() {
         const { context } = this
+        context.logger.addIdentifier(MANAGEMENT_ENVIRONMENT)
 
         const existingEnvs = await getEnvironments(context);
-        let hasManagementEnv = existingEnvs.findIndex(env => env.name === "management") !== -1;
+        let hasManagementEnv = existingEnvs.findIndex(env => env.name === MANAGEMENT_ENVIRONMENT) !== -1;
         let hasAWSOrg = false;
+        let hasExistingStandaloneAccounts = false;
+        //const hasManagementProfile = (await getAWSProfiles(context)).includes(`${MANAGEMENT_ENVIRONMENT}-superuser`)
+
 
         let managementAccountCreds: { secretAccessKey: string, accessKeyId: string } | undefined;
         if (existingEnvs.length === 0) {
@@ -133,16 +137,24 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                         managementAccountCreds = await getRootAccountAdminAccess(context)
                     }
                 } else {
+                    hasExistingStandaloneAccounts = true;
                     context.logger.info(`
-                        Got it! Panfactum uses AWS Organizations to create AWS accounts for your environments.
-                        We will need to set that up first.
+                        Got it! Panfactum uses AWS Organizations to create AWS accounts for your Panfactum environments.
+                        We will need to set that up before creating environments for your workloads.
+
+                        After the AWS Organization is deployed, you can transfer your existing AWS accounts into that organization
+                        to allow for easier access and centralized management.
+                        
+                        The AWS Organization configuration will live in a special environment called ${MANAGEMENT_ENVIRONMENT}. 
                     `)
                     managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
                 }
             } else {
                 context.logger.info(`
-                    Got it! Since you are using Panfactum for the first time, let's create an AWS Organization
-                    to manage the AWS accounts for the environments that you create.
+                    Got it! Panfactum uses AWS Organizations to create AWS accounts for your Panfactum environments.
+                    We will need to set that up before creating environments for your workloads. 
+                    
+                    The AWS Organization configuration will live in a special environment called ${MANAGEMENT_ENVIRONMENT}. 
                 `)
                 managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
             }
@@ -176,6 +188,9 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                 creds: managementAccountCreds,
                 profile: DEFAULT_MANAGEMENT_PROFILE
             })
+        }
+
+        if (managementAccountCreds) {
             await bootstrapEnvironment({
                 context,
                 environmentProfile: DEFAULT_MANAGEMENT_PROFILE,
@@ -184,17 +199,29 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             hasManagementEnv = true;
             hasAWSOrg = true
 
+            // FIX: This does not properly handle the case where the user has existing
+            // environments were created WITHOUT an AWS organization. Those need to be
+            // imported.
+
             const managementFolder = getLastPathSegments(join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT), 2)
             context.logger.success(`
                 The AWS Organization has now been configured and its settings are 
-                stored in the ${MANAGEMENT_ENVIRONMENT} environment (${managementFolder}). The management
+                stored in the ${MANAGEMENT_ENVIRONMENT} environment (${managementFolder}). The ${MANAGEMENT_ENVIRONMENT}
                 environment is a ${pc.italic("special")} environment used for storing global
                 settings that transcend normal environment boundaries.
+
+                ${hasExistingStandaloneAccounts ? `
+                    Your existing AWS accounts can be added to the new AWS Organization
+                    by following this guide:
+                    https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invite-account.html
+
+                    However, this is not required to continue the installer.
+                ` : ""}
 
                 We can now proceed to adding a normal environment. Note that the bootstrapping
                 process will look similar to the ${MANAGEMENT_ENVIRONMENT} environment, but we will be
                 able to automate many steps.
-            `, { highlights: [MANAGEMENT_ENVIRONMENT, managementFolder] })
+            `, { highlights: [managementFolder] })
         }
 
         ////////////////////////////////////////////////////////////////

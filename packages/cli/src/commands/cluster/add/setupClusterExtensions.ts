@@ -14,11 +14,11 @@ import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
+import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
-import { getLocalModuleStatus } from "@/util/yaml/getLocalModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -64,7 +64,7 @@ export async function setupClusterExtensions(
       context,
     });
 
-    return eksPfData?.status === "applied" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
+    return eksPfData.deployStatus === "success" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
   }
 
   interface Context {

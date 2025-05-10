@@ -146,7 +146,7 @@ export async function setupVPCandECR(
                   error,
                   errorMessage:
                     "Failed checking if VPC name is already in use.",
-                  command: vpcListCommand.join(" "),
+                  location: vpcListCommand.join(" "),
                 });
               }
 
