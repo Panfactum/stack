@@ -57,7 +57,14 @@ export enum MODULES {
     AWS_DNS_ZONES = "aws_dns_zones",
     AWS_DNS_RECORDS = "aws_dns_records",
     AWS_DNS_LINKS = "aws_dns_links",
-    KUBE_CERTIFICATES = "kube_certificates"
+    KUBE_CERTIFICATES = "kube_certificates",
+    AWS_SES_DOMAIN = "aws_ses_domain",
+    KUBE_AUTHENTIK = "kube_authentik",
+    AUTHENTIK_CORE_RESOURCES = "authentik_core_resources",
+    AUTHENTIK_AWS_SSO = "authentik_aws_sso",
+    AWS_IAM_IDENTITY_CENTER_PERMISSIONS = "aws_iam_identity_center_permissions",
+    AUTHENTIK_VAULT_SSO = "authentik_vault_sso",
+    VAULT_AUTH_OIDC = "vault_auth_oidc"
 }
 
 export const TERRAGRUNT_FILES = [

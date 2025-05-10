@@ -68,3 +68,8 @@ output "db_backup_directory" {
   description = "The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives"
   value       = module.database.backup_directory
 }
+
+output "organization_name" {
+  description = "The name of the organization for which Authentik serves as the IdP"
+  value       = var.organization_name
+}

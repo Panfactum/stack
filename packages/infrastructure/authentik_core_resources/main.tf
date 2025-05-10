@@ -198,28 +198,6 @@ resource "authentik_policy_expression" "is_superuser" {
 }
 
 ###########################################################################
-## Email Templates
-###########################################################################
-
-resource "kubernetes_config_map_v1_data" "email_templates" {
-  metadata {
-    name      = var.email_templates_configmap
-    namespace = var.authentik_namespace
-  }
-  data = {
-    "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
-  }
-}
-
-resource "time_sleep" "wait_for_template" {
-  depends_on      = [kubernetes_config_map_v1_data.email_templates]
-  create_duration = "120s"
-  triggers = {
-    "recovery.html" = templatefile("${path.module}/email_templates/recovery.html", { organization_name = var.organization_name })
-  }
-}
-
-###########################################################################
 ## Recovery / Enrollment
 ###########################################################################
 
@@ -239,7 +217,6 @@ resource "authentik_stage_email" "email" {
   token_expiry             = 60 * 24
   template                 = "recovery.html"
   subject                  = "Reset your ${var.organization_name} account!"
-  depends_on               = [time_sleep.wait_for_template]
 }
 
 resource "authentik_stage_prompt_field" "password" {

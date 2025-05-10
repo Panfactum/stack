@@ -1,5 +1,6 @@
 import { join } from "path";
 import { z } from "zod";
+import { CLIError } from "@/util/error/error";
 import { readYAMLFile } from "./readYAMLFile";
 import { writeYAMLFile } from "./writeYAMLFile";
 import { fileExists } from "../fs/fileExists";
@@ -19,16 +20,43 @@ export async function updateModuleYAMLFile(inputs: {
   region: string;
   module: string;
   inputUpdates: Record<string, JSONValue>;
+  rootUpdates?: Record<string, JSONValue>;
+  realModuleName?: string;
+}): Promise<void>;
+// eslint-disable-next-line no-redeclare
+export async function updateModuleYAMLFile(inputs: {
+  context: PanfactumContext;
+  environment: string;
+  region: string;
+  module: string;
+  inputUpdates?: Record<string, JSONValue>;
+  rootUpdates: Record<string, JSONValue>;
+  realModuleName?: string;
+}): Promise<void>;
+// eslint-disable-next-line no-redeclare
+export async function updateModuleYAMLFile(inputs: {
+  context: PanfactumContext;
+  environment: string;
+  region: string;
+  module: string;
+  inputUpdates?: Record<string, JSONValue>;
+  rootUpdates?: Record<string, JSONValue>;
   realModuleName?: string;
 }) {
-  const { context, environment, region, module, realModuleName, inputUpdates } =
+  if (!inputs.inputUpdates && !inputs.rootUpdates) {
+    throw new CLIError("Either inputUpdates or rootUpdates must be provided");
+  }
+
+  const { context, environment, region, module, realModuleName, inputUpdates, rootUpdates } =
     inputs;
+
   const moduleDir = join(
     context.repoVariables.environments_dir,
     environment,
     region,
     module
   );
+
   const moduleYAMLPath = join(moduleDir, "module.yaml");
   if (await fileExists(moduleYAMLPath)) {
     const originalModuleConfig = await readYAMLFile({
@@ -43,6 +71,7 @@ export async function updateModuleYAMLFile(inputs: {
     const newModuleConfig = {
       module: realModuleName,
       ...originalModuleConfig,
+      ...rootUpdates,
       extra_inputs: {
         ...originalModuleConfig?.extra_inputs,
         ...inputUpdates,
@@ -59,6 +88,7 @@ export async function updateModuleYAMLFile(inputs: {
       context,
       path: moduleYAMLPath,
       contents: {
+        ...rootUpdates,
         extra_inputs: inputUpdates,
         module: realModuleName,
       },
