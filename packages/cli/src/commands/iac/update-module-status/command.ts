@@ -1,14 +1,8 @@
-import { join } from "node:path";
 import { Command, Option } from "clipanion";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
-import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
-import { directoryExists } from "@/util/fs/directoryExist";
-import { MODULE_STATUS_FILE } from "@/util/terragrunt/constants";
-import { DEPLOY_STATUS_SCHEMA, INIT_STATUS_SCHEMA, MODULE_STATUS_FILE_SCHEMA } from "@/util/terragrunt/schemas";
-import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import type { z } from "zod";
+import { DEPLOY_STATUS_SCHEMA, INIT_STATUS_SCHEMA } from "@/util/terragrunt/schemas";
+import { updateModuleStatus } from "@/util/terragrunt/updateModuleStatus";
 
 export class UpdateModuleStatusCommand extends PanfactumCommand {
   static override paths = [["iac", "update-module-status"]];
@@ -34,36 +28,27 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
   });
 
   async execute() {
-    const { context, directory, initStatus, deployStatus } = this;
+    const { context, directory } = this;
+    const { initStatus, deployStatus } = this;
 
-    const updates: {
-      init_status?: z.infer<typeof INIT_STATUS_SCHEMA>
-      deploy_status?: z.infer<typeof DEPLOY_STATUS_SCHEMA>
-    } = {}
-
+    let validatedInitStatus;
     if (initStatus) {
       try {
-        updates.init_status = INIT_STATUS_SCHEMA.parse(initStatus)
+        validatedInitStatus = INIT_STATUS_SCHEMA.parse(initStatus)
       } catch (error) {
         parseErrorHandler({ error, errorMessage: "Invalid value for --init-status/-i", location: "--init-status/-i" })
       }
     }
 
+    let validatedDeployStatus;
     if (deployStatus) {
       try {
-        updates.deploy_status = DEPLOY_STATUS_SCHEMA.parse(deployStatus)
+        validatedDeployStatus = DEPLOY_STATUS_SCHEMA.parse(deployStatus)
       } catch (error) {
         parseErrorHandler({ error, errorMessage: "Invalid value for --deploy-status/-d", location: "--deploy-status/-d" })
       }
     }
 
-    if (! await directoryExists(directory)) {
-      throw new CLIError(`Cannot update the status of a module with non-existant directory ${directory}`)
-    }
-
-    const filePath = join(directory, MODULE_STATUS_FILE)
-    const existingStatus = await readYAMLFile({ context, filePath, validationSchema: MODULE_STATUS_FILE_SCHEMA })
-    const newStatus = existingStatus ? { existingStatus, ...updates } : updates
-    await writeYAMLFile({ values: newStatus, overwrite: true, filePath, context })
+    await updateModuleStatus({ context, initStatus: validatedInitStatus, deployStatus: validatedDeployStatus, moduleDirectory: directory })
   }
 }
