@@ -24,45 +24,45 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 * We now create the Authentik email template in the kube_authentik module. The organization name is now a required input.
   You can use the new `organization_name` output from the kube_authentik module as an input to the `authentik_core_resources` module.
 
-* We have consolidates the `kube_cert_manager` and `kube_cert_issuers` modules into a singular `kube_certificates` module. Follow these steps to upgrade:
+* `kube_cert_manager` and `kube_cert_issuers` modules have been consolidated into a single `kube_certificates` module. Follow these steps to upgrade:
   1. Before updating your version:
-	  a. Run `terragrunt state pull > kube_cert_issuers.json` from the `kube_cert_issuers` directory.
-	  b. Run `terragrunt state pull > kube_cert_manager.json` from the `kube_cert_manager` directory.
+	  1. Run `terragrunt state pull > kube_cert_issuers.json` from the `kube_cert_issuers` directory.
+	  2. Run `terragrunt state pull > kube_cert_manager.json` from the `kube_cert_manager` directory.
   2. Create a `kube_certificates` directory as a sibling to the `kube_cert_manager` and `kube_cert_issuers` directories.
   3. Create a `terragrunt.hcl` file in the `kube_certificates` directory with the following contents:
-```hcl
-include "panfactum" {
-  path   = find_in_parent_folders("panfactum.hcl")
-  expose = true
-}
+    ```hcl
+    include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+    }
 
-terraform {
-  source = include.panfactum.locals.pf_stack_source
-}
+    terraform {
+      source = include.panfactum.locals.pf_stack_source
+    }
 
-dependency "cilium" {
-  config_path  = "../kube_cilium"
-  skip_outputs = true
-}
+    dependency "cilium" {
+      config_path  = "../kube_cilium"
+      skip_outputs = true
+    }
 
-dependency "kyverno" {
-  config_path  = "../kube_kyverno"
-  skip_outputs = true
-}
+    dependency "kyverno" {
+      config_path  = "../kube_kyverno"
+      skip_outputs = true
+    }
 
-dependency "vault_core" {
-  config_path  = "../vault_core_resources"
-  skip_outputs = true
-}
+    dependency "vault_core" {
+      config_path  = "../vault_core_resources"
+      skip_outputs = true
+    }
 
-dependency "vault" {
-  config_path = "../kube_vault"
-}
+    dependency "vault" {
+      config_path = "../kube_vault"
+    }
 
-inputs = {
-  vault_internal_url = dependency.vault.outputs.vault_internal_url
-}
-```
+    inputs = {
+      vault_internal_url = dependency.vault.outputs.vault_internal_url
+    }
+    ```
   4. Update the version of the Panfactum framework you are using.
   5. Run `terragrunt init` in the `kube_certificates` directory.
   6. Copy the `./kube_cert_issuers/kube_cert_issuers.json` to `./kube_certificates/kube_certificates_state.json`. Make sure to keep the original file as a backup for now.
@@ -94,6 +94,15 @@ inputs = {
   you apply the updated `tf_bootstrap_resources` module. The vault that needs to be deleted will be named: `terraform-<env_name>`. In order
   to delete the vault, you will need to delete all of the recovery points first.
   See the documentation for [AWS Backup](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html) for more information.
+
+* This release adds the new `pf` CLI tool which provides many automations for managing your panfactum framework installation. In order to begin using the the `pf` CLI,
+  you must complete the following steps:
+
+  1. Complete the migration steps for all the breaking changes described above.
+
+  2. Run `pf devshell sync`. This should complete successfully before proceeding.
+
+  3. Run `terragrunt apply` on **all** modules (or `terragrunt run-all apply`).
 
 ### Added
 

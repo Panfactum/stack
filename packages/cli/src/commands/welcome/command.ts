@@ -110,7 +110,7 @@ export class WelcomeCommand extends PanfactumCommand {
     
                 If you think you've found a bug, please submit an issue: https://github.com/panfactum/stack/issues
     
-                ${pc.dim("↓ Want to get rid of clutter when loading the DevShell? https://direnv.net/man/direnv.toml.1.html#codehideenvdiffcode")}
+                ${pc.dim("↓ Want to get rid of direnv clutter when loading the DevShell? https://direnv.net/man/direnv.toml.1.html#codehideenvdiffcode")}
             `, { removeIndent: true })
 
             await upsertRepoVariables({
