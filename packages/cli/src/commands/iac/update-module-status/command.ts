@@ -37,13 +37,13 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
     const { context, directory, initStatus, deployStatus } = this;
 
     const updates: {
-      initStatus?: z.infer<typeof INIT_STATUS_SCHEMA>
-      deployStatus?: z.infer<typeof DEPLOY_STATUS_SCHEMA>
+      init_status?: z.infer<typeof INIT_STATUS_SCHEMA>
+      deploy_status?: z.infer<typeof DEPLOY_STATUS_SCHEMA>
     } = {}
 
     if (initStatus) {
       try {
-        updates.initStatus = INIT_STATUS_SCHEMA.parse(initStatus)
+        updates.init_status = INIT_STATUS_SCHEMA.parse(initStatus)
       } catch (error) {
         parseErrorHandler({ error, errorMessage: "Invalid value for --init-status/-i", location: "--init-status/-i" })
       }
@@ -51,7 +51,7 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
 
     if (deployStatus) {
       try {
-        updates.deployStatus = DEPLOY_STATUS_SCHEMA.parse(deployStatus)
+        updates.deploy_status = DEPLOY_STATUS_SCHEMA.parse(deployStatus)
       } catch (error) {
         parseErrorHandler({ error, errorMessage: "Invalid value for --deploy-status/-d", location: "--deploy-status/-d" })
       }
