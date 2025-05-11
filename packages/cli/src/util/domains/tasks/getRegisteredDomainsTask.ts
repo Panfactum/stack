@@ -2,6 +2,7 @@ import { join, dirname } from "node:path"
 import { Glob } from "bun";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { isEnvironmentDeployed } from "@/util/config/isEnvironmentDeployed";
 import { CLIError } from "../../error/error";
 import { MODULES } from "../../terragrunt/constants";
 import { terragruntOutput } from "../../terragrunt/terragruntOutput";
@@ -49,6 +50,7 @@ export async function getRegisteredDomainsTask<T extends {}>(inputs: {
                     subtasks.add({
                         title: `Get ${environment} registered domains`,
                         task: async () => {
+                            const deployed = await isEnvironmentDeployed({ context, environment })
                             const moduleOutput = await terragruntOutput({
                                 context,
                                 environment: envDir,
@@ -64,7 +66,8 @@ export async function getRegisteredDomainsTask<T extends {}>(inputs: {
                                     recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
                                     env: {
                                         name: environment,
-                                        path: envDir
+                                        path: envDir,
+                                        deployed
                                     },
                                 }
                             })

@@ -18,6 +18,7 @@ import { AWS_ACCOUNT_ALIAS_SCHEMA, AWS_REGIONS } from "@/util/aws/schemas";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { getRegions } from "@/util/config/getRegions";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
@@ -45,7 +46,7 @@ export async function bootstrapEnvironment(inputs: {
     const { context, environmentName, environmentProfile, newAccountName, resuming } = inputs
 
     if (!resuming) {
-        context.logger.info(`Now that the AWS account for ${environmentName} is provisioned, this installer will configure it for management via infrastructure-as-code.`)
+        context.logger.info(`Now that the AWS account for ${environmentName} is provisioned, the installer will prepare it for configuration via infrastructure-as-code.`)
     }
 
     const directory = join(context.repoVariables.environments_dir, environmentName)
@@ -237,13 +238,53 @@ export async function bootstrapEnvironment(inputs: {
         title: "Select regions",
         task: async (ctx, task) => {
 
-            // TODO: Provide the option to source regions from another environment
+            let primaryRegion, secondaryRegion;
 
-            // Get the primary region
-            let primaryRegion;
+            // Try to restore region selections if previously selected
             if (existingConfig.tf_state_region) {
                 primaryRegion = existingConfig.tf_state_region
-            } else {
+                const existingPrimaryRegionConfig = await getPanfactumConfig({ context, directory: join(directory, primaryRegion) })
+                secondaryRegion = existingPrimaryRegionConfig.aws_secondary_region
+            }
+
+            // Provide option to source the regions from another environment
+            if (!primaryRegion && !secondaryRegion) {
+                const environments = (await getEnvironments(context)).filter(env => env.name !== environmentName)
+                if (environments.length > 0) {
+                    const envToUse = environments.find(env => env.name === MANAGEMENT_ENVIRONMENT) ?? environments[0]!
+                    const regions = await getRegions(context, envToUse.path)
+                    const primaryRegionMeta = regions.find(region => region.primary)
+                    if (primaryRegionMeta) {
+                        const primaryRegionOption = primaryRegionMeta.name
+                        const { aws_secondary_region: secondaryRegionOption } = await getPanfactumConfig({ context, directory: primaryRegionMeta.path }) || {}
+                        if (secondaryRegionOption) {
+                            const useEnv = await context.logger.confirm({
+                                task,
+                                explainer: {
+                                    message: `
+                                        Would you like to copy the region configuration from the ${envToUse.name} environment?
+                                        
+                                        Primary: ${primaryRegionOption}
+
+                                        Secondary: ${secondaryRegionOption}
+                                    `,
+                                    highlights: [primaryRegionOption, secondaryRegionOption]
+                                },
+                                message: `Copy region configuration?`,
+                                default: true
+                            })
+                            if (useEnv) {
+                                primaryRegion = primaryRegionOption
+                                secondaryRegion = secondaryRegionOption
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            // Ask user for the primary region
+            if (!primaryRegion) {
                 primaryRegion = await context.logger.search({
                     explainer: { message: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["primary"] },
                     message: "Select primary AWS region:",
@@ -260,12 +301,8 @@ export async function bootstrapEnvironment(inputs: {
             }
             task.title = context.logger.applyColors(`Select regions ${primaryRegion}`, { lowlights: [primaryRegion] })
 
-            // Get the secondary region
-            const existingPrimaryRegionConfig = await getPanfactumConfig({ context, directory: join(directory, primaryRegion) })
-            let secondaryRegion;
-            if (existingPrimaryRegionConfig.aws_secondary_region) {
-                secondaryRegion = existingPrimaryRegionConfig.aws_secondary_region
-            } else {
+            // Ask user for the secondary region
+            if (!secondaryRegion) {
                 secondaryRegion = await context.logger.search({
                     explainer: { message: `Every environment must have a secondary AWS region where resources like backups will live.`, highlights: ["secondary"] },
                     message: "Select secondary AWS region:",
@@ -281,6 +318,7 @@ export async function bootstrapEnvironment(inputs: {
                     }
                 })
             }
+
             task.title = context.logger.applyColors(`Selected regions ${primaryRegion} | ${secondaryRegion}`, {
                 lowlights: [`${primaryRegion} | ${secondaryRegion}`]
             })
@@ -760,7 +798,7 @@ export async function bootstrapEnvironment(inputs: {
                 region: GLOBAL_REGION,
                 module: MODULES.AWS_ACCOUNT,
                 hclIfMissing: await Bun.file(awsAccountHCL).text(),
-                taskTitle: "Deploy AWS Account defaults",
+                taskTitle: "Deploy AWS account defaults",
                 inputUpdates: {
                     alias: defineInputUpdate({
                         schema: z.string(),

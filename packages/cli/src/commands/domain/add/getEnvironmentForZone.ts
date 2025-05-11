@@ -8,7 +8,7 @@ export async function getEnvironmentForZone(inputs: {
     domain: string,
     shouldBeProduction?: boolean
     environmentMeta?: EnvironmentMeta
-}) {
+}): Promise<EnvironmentMeta> {
     const { context, domain, shouldBeProduction, environmentMeta } = inputs;
 
     if (environmentMeta) {
@@ -44,12 +44,12 @@ export async function getEnvironmentForZone(inputs: {
         return possibleEnvironment[0]!
     } else {
 
-        const chosenEnvironment = await context.logger.search<{ name: string, path: string }>({
+        const chosenEnvironment = await context.logger.search<{ name: string, path: string, deployed: boolean }>({
             explainer: `In which environment would you like to host the DNS zone for ${domain}?`,
             message: "Environment:",
             source: (term) => {
                 const choices = possibleEnvironment
-                    .map(({ name, path }) => ({ name, value: { name, path } }))
+                    .map(({ name, path, deployed }) => ({ name, value: { name, path, deployed } }))
                     .sort((a, b) => {
                         const aHasProd = a.name.includes('prod');
                         const bHasProd = b.name.includes('prod');

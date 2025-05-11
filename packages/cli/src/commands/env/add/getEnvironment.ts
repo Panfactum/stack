@@ -2,12 +2,13 @@ import { getEnvironments } from "@/util/config/getEnvironments";
 import { ENVIRONMENT_NAME_SCHEMA } from "./common";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getEnvironmentName(inputs: { context: PanfactumContext }) {
+export async function getEnvironment(inputs: { context: PanfactumContext }) {
     const { context } = inputs;
 
     const environments = await getEnvironments(context)
+    const deployedEnvironments = environments.filter(env => env.deployed)
 
-    return context.logger.input({
+    const name = await context.logger.input({
         explainer: `
         What is the name of the environment you want to create?
         `,
@@ -19,11 +20,16 @@ export async function getEnvironmentName(inputs: { context: PanfactumContext }) 
                 return error.issues[0]?.message ?? "Invalid environment name"
             }
 
-            if (environments.findIndex(({ name }) => name === value) !== -1) {
+            if (deployedEnvironments.findIndex(({ name }) => name === value) !== -1) {
                 return "An environment with that name already exists"
             }
 
             return true
         }
     });
+
+    return {
+        name,
+        partiallyDeployed: environments.some(env => env.name === name)
+    }
 }

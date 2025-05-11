@@ -2,6 +2,7 @@ import { join, dirname } from "node:path"
 import { Glob } from "bun";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { isEnvironmentDeployed } from "@/util/config/isEnvironmentDeployed";
 import { getRegisteredDomainsTask } from "./getRegisteredDomainsTask";
 import { CLIError } from "../../error/error";
 import { MODULES } from "../../terragrunt/constants";
@@ -68,6 +69,7 @@ export async function getZonesTask<T extends {}>(inputs: {
                                 title: `Get ${environment} zones`,
                                 task: async (_, task) => {
                                     try {
+                                        const deployed = await isEnvironmentDeployed({ context, environment })
                                         const moduleOutput = await terragruntOutput({
                                             context,
                                             environment: envDir,
@@ -83,7 +85,8 @@ export async function getZonesTask<T extends {}>(inputs: {
                                                 recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
                                                 env: {
                                                     name: environment!,
-                                                    path: envDir
+                                                    path: envDir,
+                                                    deployed
                                                 },
                                             }
                                         })

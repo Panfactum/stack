@@ -15,6 +15,7 @@ const DOMAIN_CONFIG_SCHEMA = z.object({
     env: z.object({
         name: z.string().min(1),
         path: z.string().min(1),
+        deployed: z.boolean()
     }),
 });
 

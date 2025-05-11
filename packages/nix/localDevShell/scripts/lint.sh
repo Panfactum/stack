@@ -68,3 +68,20 @@ echo >&2 "Starting website linting..."
   lint-website
 )
 echo >&2 "Finished website linting!"
+
+#######################################
+## CLI
+#######################################
+echo >&2 "Starting CLI typecheck..."
+export NODE_OPTIONS=--max-old-space-size=8192
+(
+  cd "$REPO_ROOT/packages/cli"
+  bun check
+)
+echo >&2 "Finished CLI typechecking!"
+echo >&2 "Starting CLI linting..."
+(
+  cd "$REPO_ROOT/packages/cli"
+  bun lint:fix
+)
+echo >&2 "Finished CLI linting!"

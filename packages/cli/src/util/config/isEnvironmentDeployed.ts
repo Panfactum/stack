@@ -2,7 +2,7 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function isEnvironmentSuccessfullyConfigured(inputs: { context: PanfactumContext, environment: string }) {
+export async function isEnvironmentDeployed(inputs: { context: PanfactumContext, environment: string }) {
     const { context, environment } = inputs;
 
     const status = await getModuleStatus({

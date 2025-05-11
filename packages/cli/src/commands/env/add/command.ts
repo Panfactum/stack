@@ -12,15 +12,15 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { checkAdminPermissions } from "./checkAdminPermissions";
-import { getEnvironmentName } from "./getEnvironmentName";
+import { getEnvironment } from "./getEnvironment";
 import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
 import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
 import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
-import { isEnvironmentSuccessfullyConfigured } from "./isEnvironmentSuccessfullyConfigured";
 import { provisionAWSAccount } from "./provisionAWSAccount";
 import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
 import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
 import { updateIAMIdentityCenter } from "./updateIAMIdentityCenter";
+import { isEnvironmentDeployed } from "../../../util/config/isEnvironmentDeployed";
 
 const DEFAULT_MANAGEMENT_PROFILE = "management-superuser"
 
@@ -113,7 +113,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
 
         const existingEnvs = await getEnvironments(context);
         let _hasExistingAWSOrg = false;
-        let _hasDeployedAWSOrg = await isEnvironmentSuccessfullyConfigured({ context, environment: MANAGEMENT_ENVIRONMENT })
+        let _hasDeployedAWSOrg = await isEnvironmentDeployed({ context, environment: MANAGEMENT_ENVIRONMENT })
         let _hasManagementProfile = (await getAWSProfiles(context)).includes(DEFAULT_MANAGEMENT_PROFILE)
         let _resumingManagementSetup = false;
         let managementAccountCreds: { secretAccessKey: string, accessKeyId: string } | undefined;
@@ -263,7 +263,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         ////////////////////////////////////////////////////////////////
         // Get the name of the environment that the user wants to create
         ////////////////////////////////////////////////////////////////
-        const environmentName = await getEnvironmentName({ context });
+        const { name: environmentName, partiallyDeployed } = await getEnvironment({ context });
         const environmentProfile = `${environmentName}-superuser`
         context.logger.addIdentifier(environmentName)
 
@@ -279,29 +279,49 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         //  (b) If not, then we need to take them through the manual setup steps
         ////////////////////////////////////////////////////////////////
         let newAccountName: string | undefined;
+        let alreadyProvisioned = false;
         if (_hasDeployedAWSOrg) {
             // Note that 'provisionAWSAccount' leverages the AWS Organization to create the account.
             // If the AWS Organization is not set up yet, it also takes care of that process.
-            newAccountName = await provisionAWSAccount({ context, environmentName, environmentProfile })
+            ({ newAccountName, alreadyProvisioned } = await provisionAWSAccount({ context, environmentName, environmentProfile }))
         } else {
+
+            // First check if they already completed this step by verifying if the profile
+            // exists with the expected credentials
+            const existingProfiles = await getAWSProfiles(context)
+            if (existingProfiles.includes(environmentProfile)) {
+                const permissionStatus = await checkAdminPermissions({ context, profile: environmentProfile })
+                if (permissionStatus.status === "success") {
+                    context.logger.success(`AWS account for the ${environmentName} environment was already provisioned.`)
+                    alreadyProvisioned = true
+                }
+            }
+
             // Otherwise, they need to manually create the account, the 'AdministratorAccess'
             // IAM user, and the access credentials to provide the installer
-            const newAccountCreds = await getNewAccountAdminAccess({
-                context,
-                type: _hasExistingAWSOrg ? "manual-org" : "standalone"
-            })
-            await addAWSProfileFromStaticCreds({
-                context,
-                creds: newAccountCreds,
-                profile: environmentProfile
-            })
+            if (!alreadyProvisioned) {
+                const newAccountCreds = await getNewAccountAdminAccess({
+                    context,
+                    type: _hasExistingAWSOrg ? "manual-org" : "standalone"
+                })
+                await addAWSProfileFromStaticCreds({
+                    context,
+                    creds: newAccountCreds,
+                    profile: environmentProfile
+                })
+            }
         }
 
+        const resumingBootstrapping = alreadyProvisioned && partiallyDeployed
+        if (resumingBootstrapping) {
+            context.logger.info(`The AWS account for ${environmentName} was partially bootstrapped. Resuming...`)
+        }
         await bootstrapEnvironment({
             context,
             environmentProfile,
             environmentName,
-            newAccountName
+            newAccountName,
+            resuming: resumingBootstrapping
         })
 
 
@@ -330,6 +350,10 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             The ${environmentName} environment has been successfully set up.
             
             Its infrastructure-as-code lives at ${newDirectory}.
+
+            You will receive several automated emails from AWS
+            as this installer has automatically requested many common
+            AWS quota increases. No action is necessary.
 
             You can access the underlying AWS account through the AWS CLI: 
             

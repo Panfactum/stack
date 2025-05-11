@@ -5,7 +5,6 @@ import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-// TODO: We can actually get this from the AWS account
 export async function getPrimaryContactInfo(inputs: {
     context: PanfactumContext,
     parentTask: PanfactumTaskWrapper
@@ -214,7 +213,7 @@ async function getExistingContactInfo(profile: string, context: PanfactumContext
             return {
                 fullName: contactInfo.FullName,
                 organizationName: contactInfo.CompanyName,
-                phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/ /g, '.').replace(/-/g, '') : undefined, // Convert phone format
+                phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3') : undefined,
                 addressLine1: contactInfo.AddressLine1,
                 addressLine2: contactInfo.AddressLine2,
                 city: contactInfo.City,

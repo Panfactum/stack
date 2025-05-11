@@ -2,6 +2,7 @@ import { join, dirname } from "node:path";
 import { Glob } from "bun";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { asyncIterMap } from "../asyncIterMap";
+import { isEnvironmentDeployed } from "../config/isEnvironmentDeployed";
 import { CLIError } from "../error/error";
 import type { DomainConfigs } from "./tasks/types";
 import type { PanfactumContext } from "@/util/context/context";
@@ -44,6 +45,7 @@ export async function getDomains(inputs: { context: PanfactumContext }): Promise
                 if (!envDir) {
                     throw new CLIError("Unknown environment_dir")
                 }
+                const deployed = await isEnvironmentDeployed({ context, environment })
                 Object.entries(domains).forEach(([domain, config]) => {
                     domainConfigs[domain] = {
                         domain,
@@ -52,6 +54,7 @@ export async function getDomains(inputs: { context: PanfactumContext }): Promise
                         env: {
                             name: environment,
                             path: envDir,
+                            deployed
                         }
                     };
                 });

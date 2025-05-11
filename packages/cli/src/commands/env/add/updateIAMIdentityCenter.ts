@@ -6,9 +6,9 @@ import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
 import { CLIError } from "@/util/error/error";
-import { directoryExists } from "@/util/fs/directoryExist";
 import { fileContains } from "@/util/fs/fileContains";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
+import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -43,7 +43,12 @@ export async function updateIAMIdentityCenter(inputs: {
     // Do some validation
     /////////////////////////////////////////////////////////////////////
 
-    if (!await directoryExists(modulePath)) {
+    if ((await getModuleStatus({
+        context,
+        environment: MANAGEMENT_ENVIRONMENT,
+        region: GLOBAL_REGION,
+        module: MODULES.IAM_IDENTIY_CENTER_PERMISSIONS
+    })).deploy_status !== "success") {
         context.logger.debug("Skipping IAM Identity center update as it is not deployed")
     }
 

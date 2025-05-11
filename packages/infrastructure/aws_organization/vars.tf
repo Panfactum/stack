@@ -9,6 +9,7 @@ variable "accounts" {
     name              = string
     email             = string
     close_on_deletion = optional(bool, true)
+    environment       = optional(string)
 
     // Can be used to override the alternate contact information on a per-account basis
     alternate_contacts = optional(object({
