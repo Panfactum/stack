@@ -303,13 +303,16 @@ export class ClusterAddCommand extends PanfactumCommand {
     this.context.logger.info(`
         The Panfactum devShell ships with a TUI called k9s.
         To verify what pods are running in the cluster do the following:
+
           1. Run ${pc.bold(pc.cyan("k9s"))}
+
           2. Type ${pc.bold(pc.cyan("':ctx⏎'"))} to list all your installed clusters and select the one that was just installed.
+
           3. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.
+
           4. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.
-          5. You should see a minimal list of pods running in the cluster.
-          6. If you don't see any pods, please reach out to us on Discord.
-          7. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.
+
+          5. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.
     `)
 
     this.context.logger.warn(`

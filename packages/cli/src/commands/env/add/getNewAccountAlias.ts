@@ -11,7 +11,11 @@ export async function getNewAccountAlias(inputs: {
     const { context, task, defaultAlias, denylist = [] } = inputs;
     return context.logger.input({
         explainer: {
-            message: "Even though your environment name only needs to be unique to your organization, AWS requires a globally unique name for the underlying AWS account.",
+            message: `
+                Even though your environment name only needs to be unique to your organization, AWS requires a globally unique name for the underlying AWS account.
+                The AWS acount name is an internal identifier that will not be used after the initial environment setup. While it can be any value, it is good for it
+                to have some semantic meaning in case you need to debug issues in the
+            `,
             highlights: ["globally"]
         },
         task,
