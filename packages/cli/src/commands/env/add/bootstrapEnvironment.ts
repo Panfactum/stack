@@ -14,7 +14,7 @@ import { getOrganizationsClient } from "@/util/aws/clients/getOrganizationsClien
 import { getS3Client } from "@/util/aws/clients/getS3Client";
 import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
 import { getIdentity } from "@/util/aws/getIdentity";
-import { AWS_REGIONS } from "@/util/aws/schemas";
+import { AWS_ACCOUNT_ALIAS_SCHEMA, AWS_REGIONS } from "@/util/aws/schemas";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
@@ -598,11 +598,33 @@ export async function bootstrapEnvironment(inputs: {
             title: "Set AWS account alias",
             enabled: (ctx) => ctx.newAccountName === undefined,
             task: async (ctx, task) => {
-                ctx.newAccountName = await getNewAccountAlias({
+
+                const existingModuleConfig = await getConfigValuesFromFile({
                     context,
-                    task,
-                    defaultAlias: `${environmentName}-${Math.random().toString(36).substring(2, 10)}`
+                    environment: environmentName,
+                    region: GLOBAL_REGION,
+                    module: environmentName === MANAGEMENT_ENVIRONMENT ? MODULES.AWS_ORGANIZATION : MODULES.AWS_ACCOUNT
                 })
+
+                if (existingModuleConfig) {
+                    const { extra_inputs: inputs } = existingModuleConfig;
+                    if (inputs) {
+                        const { alias } = inputs;
+                        if (alias) {
+                            ctx.newAccountName = alias
+                        }
+                    }
+                }
+
+                if (!ctx.newAccountName) {
+                    ctx.newAccountName = await getNewAccountAlias({
+                        context,
+                        task,
+                        defaultAlias: `${environmentName}-${Math.random().toString(36).substring(2, 10)}`
+                    })
+                }
+
+                task.title = context.logger.applyColors(`Set AWS account alias ${ctx.newAccountName}`, { lowlights: [ctx.newAccountName] })
             }
         }
     )
@@ -683,6 +705,15 @@ export async function bootstrapEnvironment(inputs: {
                             }
                         },
                         inputUpdates: {
+                            alias: defineInputUpdate({
+                                schema: AWS_ACCOUNT_ALIAS_SCHEMA.optional(),
+                                update: () => {
+                                    if (!parentCtx.newAccountName) {
+                                        throw new CLIError("newAccountName missing. This should never happen.")
+                                    }
+                                    return parentCtx.newAccountName
+                                }
+                            }),
                             primary_contact: defineInputUpdate({
                                 schema: z.object({
                                     full_name: z.string(),

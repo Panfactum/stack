@@ -1,3 +1,7 @@
+variable "alias" {
+  type        = string
+  description = "The human-readable string for the AWS account."
+}
 
 variable "accounts" {
   description = "AWS accounts to create in the organization. Keys are arbitrary, but if changed /removed will delete the account."
