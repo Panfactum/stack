@@ -283,7 +283,8 @@ export async function setupInboundNetworking(
       task: async (ctx) => {
         await upsertConfigValues({
           context,
-          filePath: join(clusterPath, "region.yaml"),
+          environment,
+          region,
           values: {
             vault_addr: `https://${ctx.vaultDomain}`,
           },

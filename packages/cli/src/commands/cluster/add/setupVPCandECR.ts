@@ -421,7 +421,8 @@ export async function setupVPCandECR(
       task: async () => {
         await upsertConfigValues({
           context,
-          filePath: path.join(clusterPath, "region.yaml"),
+          environment,
+          region,
           values: {
             extra_inputs: {
               pull_through_cache_enabled: true,

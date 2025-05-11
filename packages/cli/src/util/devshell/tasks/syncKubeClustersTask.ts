@@ -1,7 +1,7 @@
 import { join, dirname } from "node:path";
 import { Glob } from "bun";
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
 import { getLastPathSegments } from "@/util/fs/getLastPathSegments";

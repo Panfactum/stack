@@ -1090,17 +1090,6 @@ let
         hash = "sha256-T+DSFIRgoKK9ReB9BLglWYcY3QVA2c2owVdQnmpPTwA=";
       };
     };
-    "@inquirer/checkbox/@inquirer/type" = {
-      out_path = "@inquirer/checkbox/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/checkbox/ansi-escapes" = {
       out_path = "@inquirer/checkbox/node_modules/ansi-escapes";
       binaries =
@@ -1134,17 +1123,6 @@ let
         hash = "sha256-bIe7TjqhbOTYV099OlDcVCTECZyTn1KAYOYAHmvgETU=";
       };
     };
-    "@inquirer/confirm/@inquirer/type" = {
-      out_path = "@inquirer/confirm/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/core" = {
       out_path = "@inquirer/core";
       binaries =
@@ -1154,17 +1132,6 @@ let
         name = "@inquirer/core@10.1.10";
         url = "https://registry.npmjs.org/@inquirer/core/-/core-10.1.10.tgz";
         hash = "sha256-k7OAIwjPJUKZvXJyeIxcc+z+v3amgTlZEUEvYnIr534=";
-      };
-    };
-    "@inquirer/core/@inquirer/type" = {
-      out_path = "@inquirer/core/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
       };
     };
     "@inquirer/core/ansi-escapes" = {
@@ -1189,17 +1156,6 @@ let
         hash = "sha256-E1zX8buMQ3re1EyevDSTvM96DVUcWNJRcnQusQfp/dE=";
       };
     };
-    "@inquirer/core/mute-stream" = {
-      out_path = "@inquirer/core/node_modules/mute-stream";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "mute-stream@2.0.0";
-        url = "https://registry.npmjs.org/mute-stream/-/mute-stream-2.0.0.tgz";
-        hash = "sha256-Ze2eAICRslbngZzVjFVEBqeAHaBQG6v0XODydAYo3bU=";
-      };
-    };
     "@inquirer/core/wrap-ansi" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi";
       binaries =
@@ -1209,6 +1165,17 @@ let
         name = "wrap-ansi@6.2.0";
         url = "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-6.2.0.tgz";
         hash = "sha256-1G/EEvBNhzcApVe8lobULA1seXnhglzv6/QnnKnWePg=";
+      };
+    };
+    "@inquirer/core/wrap-ansi/ansi-styles" = {
+      out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/ansi-styles";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "ansi-styles@4.3.0";
+        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz";
+        hash = "sha256-LFOaRthatgMxg5l0NNLZpcos7vwStNuQIvVkeEzXmH8=";
       };
     };
     "@inquirer/core/wrap-ansi/string-width" = {
@@ -1277,17 +1244,6 @@ let
         hash = "sha256-ZUIJNHoINYKSoYmTjBunmkVzH3xgoh2OxQBLEd+xTdw=";
       };
     };
-    "@inquirer/editor/@inquirer/type" = {
-      out_path = "@inquirer/editor/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/expand" = {
       out_path = "@inquirer/expand";
       binaries =
@@ -1297,17 +1253,6 @@ let
         name = "@inquirer/expand@4.0.12";
         url = "https://registry.npmjs.org/@inquirer/expand/-/expand-4.0.12.tgz";
         hash = "sha256-E0cIEeCySRcpnMMLv2l77hnxzXexd9On2hd+Tuoxtp4=";
-      };
-    };
-    "@inquirer/expand/@inquirer/type" = {
-      out_path = "@inquirer/expand/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
       };
     };
     "@inquirer/figures" = {
@@ -1332,17 +1277,6 @@ let
         hash = "sha256-Rd6BeZ8BwxKaCot5j2qJ8pUvTYReGHgB8iHHcxsWGXQ=";
       };
     };
-    "@inquirer/input/@inquirer/type" = {
-      out_path = "@inquirer/input/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/number" = {
       out_path = "@inquirer/number";
       binaries =
@@ -1354,17 +1288,6 @@ let
         hash = "sha256-72k60vBEDMovpASmQ8JxX9nMgrIdxZzLLPruXVSDxns=";
       };
     };
-    "@inquirer/number/@inquirer/type" = {
-      out_path = "@inquirer/number/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/password" = {
       out_path = "@inquirer/password";
       binaries =
@@ -1374,17 +1297,6 @@ let
         name = "@inquirer/password@4.0.12";
         url = "https://registry.npmjs.org/@inquirer/password/-/password-4.0.12.tgz";
         hash = "sha256-P3dvRI2KgVKnGI2H1gJCQBEFOlcG5p6B43fnjBuMTME=";
-      };
-    };
-    "@inquirer/password/@inquirer/type" = {
-      out_path = "@inquirer/password/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
       };
     };
     "@inquirer/password/ansi-escapes" = {
@@ -1431,17 +1343,6 @@ let
         hash = "sha256-URasAdH+2eP7TOL+V6mauPBTLrZg3V65gf3c7MEOaUE=";
       };
     };
-    "@inquirer/rawlist/@inquirer/type" = {
-      out_path = "@inquirer/rawlist/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/search" = {
       out_path = "@inquirer/search";
       binaries =
@@ -1453,17 +1354,6 @@ let
         hash = "sha256-HiYhyHWX1x5ycbzm9KZPKyw7GFemKus255UESl5kquM=";
       };
     };
-    "@inquirer/search/@inquirer/type" = {
-      out_path = "@inquirer/search/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
-      };
-    };
     "@inquirer/select" = {
       out_path = "@inquirer/select";
       binaries =
@@ -1473,17 +1363,6 @@ let
         name = "@inquirer/select@4.1.1";
         url = "https://registry.npmjs.org/@inquirer/select/-/select-4.1.1.tgz";
         hash = "sha256-aW6DJzScpxYOydf7Xi//+pGpYtXIFFyjZTNoKnXUd+U=";
-      };
-    };
-    "@inquirer/select/@inquirer/type" = {
-      out_path = "@inquirer/select/node_modules/@inquirer/node_modules/type";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@inquirer/type@3.0.6";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
-        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
       };
     };
     "@inquirer/select/ansi-escapes" = {
@@ -1514,9 +1393,9 @@ let
         {
         };
       pkg = fetchurl {
-        name = "@inquirer/type@1.5.5";
-        url = "https://registry.npmjs.org/@inquirer/type/-/type-1.5.5.tgz";
-        hash = "sha256-idzqxLbC3jj3aS+dBonQyBPymQCiByPomlej2WAbFck=";
+        name = "@inquirer/type@3.0.6";
+        url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
+        hash = "sha256-CRRFFUVkqHLTgjXxougwGn4SOzafahjlvm4CfEqod6A=";
       };
     };
     "@isaacs/fs-minipass" = {
@@ -1572,17 +1451,6 @@ let
         name = "@kubernetes/client-node@1.1.2";
         url = "https://registry.npmjs.org/@kubernetes/client-node/-/client-node-1.1.2.tgz";
         hash = "sha256-IuOTjq9gZwzHdhOjwex32E6gtb16SxYqpWpnR71zCNA=";
-      };
-    };
-    "@listr2/prompt-adapter-inquirer" = {
-      out_path = "@listr2/prompt-adapter-inquirer";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "@listr2/prompt-adapter-inquirer@2.0.21";
-        url = "https://registry.npmjs.org/@listr2/prompt-adapter-inquirer/-/prompt-adapter-inquirer-2.0.21.tgz";
-        hash = "sha256-U4GShrxmuPPIs+ClNZUEFSx01ppm09AOS167nQE+ghE=";
       };
     };
     "@napi-rs/wasm-runtime" = {
@@ -2724,9 +2592,9 @@ let
         {
         };
       pkg = fetchurl {
-        name = "ansi-styles@4.3.0";
-        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz";
-        hash = "sha256-LFOaRthatgMxg5l0NNLZpcos7vwStNuQIvVkeEzXmH8=";
+        name = "ansi-styles@6.2.1";
+        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-6.2.1.tgz";
+        hash = "sha256-aPDnPT8um3lKOI3H9OmhmCcCc6C8pIzWjc+eCM88XRg=";
       };
     };
     "argparse" = {
@@ -3002,6 +2870,17 @@ let
         name = "chalk@4.1.2";
         url = "https://registry.npmjs.org/chalk/-/chalk-4.1.2.tgz";
         hash = "sha256-6ExkOqU+h6zmw9Nos83dokotFDSga23722KK0hB9+Qo=";
+      };
+    };
+    "chalk/ansi-styles" = {
+      out_path = "chalk/node_modules/ansi-styles";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "ansi-styles@4.3.0";
+        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz";
+        hash = "sha256-LFOaRthatgMxg5l0NNLZpcos7vwStNuQIvVkeEzXmH8=";
       };
     };
     "chardet" = {
@@ -4930,17 +4809,6 @@ let
         hash = "sha256-HSG/Y/fNGaSoNV4iBZo/DGJbONf7rTRK6VJwggS3ZBg=";
       };
     };
-    "log-update/slice-ansi/ansi-styles" = {
-      out_path = "log-update/node_modules/slice-ansi/node_modules/ansi-styles";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-styles@6.2.1";
-        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-6.2.1.tgz";
-        hash = "sha256-aPDnPT8um3lKOI3H9OmhmCcCc6C8pIzWjc+eCM88XRg=";
-      };
-    };
     "log-update/slice-ansi/is-fullwidth-code-point" = {
       out_path = "log-update/node_modules/slice-ansi/node_modules/is-fullwidth-code-point";
       binaries =
@@ -5134,9 +5002,9 @@ let
         {
         };
       pkg = fetchurl {
-        name = "mute-stream@1.0.0";
-        url = "https://registry.npmjs.org/mute-stream/-/mute-stream-1.0.0.tgz";
-        hash = "sha256-5SsR20s7RX//c7/cGEpOKs3awQWqn/57EPCcTYPbQ4Q=";
+        name = "mute-stream@2.0.0";
+        url = "https://registry.npmjs.org/mute-stream/-/mute-stream-2.0.0.tgz";
+        hash = "sha256-Ze2eAICRslbngZzVjFVEBqeAHaBQG6v0XODydAYo3bU=";
       };
     };
     "natural-compare" = {
@@ -5898,17 +5766,6 @@ let
         hash = "sha256-6T2HzQYFiXhUiVxi4AmlMIUxmGXc/ECC+c3BHNcSnxY=";
       };
     };
-    "slice-ansi/ansi-styles" = {
-      out_path = "slice-ansi/node_modules/ansi-styles";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-styles@6.2.1";
-        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-6.2.1.tgz";
-        hash = "sha256-aPDnPT8um3lKOI3H9OmhmCcCc6C8pIzWjc+eCM88XRg=";
-      };
-    };
     "smart-buffer" = {
       out_path = "smart-buffer";
       binaries =
@@ -6568,17 +6425,6 @@ let
         name = "wrap-ansi@9.0.0";
         url = "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-9.0.0.tgz";
         hash = "sha256-5DEN+wvv/dQk+KJ1uLxWV7AN9CHgZPewEXHKcdo9kHI=";
-      };
-    };
-    "wrap-ansi/ansi-styles" = {
-      out_path = "wrap-ansi/node_modules/ansi-styles";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-styles@6.2.1";
-        url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-6.2.1.tgz";
-        hash = "sha256-aPDnPT8um3lKOI3H9OmhmCcCc6C8pIzWjc+eCM88XRg=";
       };
     };
     "ws" = {

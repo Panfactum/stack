@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { Command } from "clipanion";
 import { Listr } from "listr2";
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";

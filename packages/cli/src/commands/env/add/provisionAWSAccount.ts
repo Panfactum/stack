@@ -4,11 +4,11 @@ import { ListAccountsCommand } from "@aws-sdk/client-organizations";
 import { AssumeRoleCommand } from "@aws-sdk/client-sts";
 import { Listr } from "listr2";
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
 import { getOrganizationsClient } from "@/util/aws/clients/getOrganizationsClient";
 import { getSTSClient } from "@/util/aws/clients/getSTSClient";
 import { getIdentity } from "@/util/aws/getIdentity";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist"
 import { runTasks } from "@/util/listr/runTasks";
@@ -120,7 +120,8 @@ export async function provisionAWSAccount(inputs: {
                         ctx.newAccountName = await getNewAccountAlias({
                             context,
                             task,
-                            denylist: accountKeys.concat(existingNames)
+                            denylist: accountKeys.concat(existingNames),
+                            defaultAlias: `${environmentName}-${Math.random().toString(36).substring(2, 10)}`
                         })
                         parentContext.newAccountName = ctx.newAccountName
 

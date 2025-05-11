@@ -1,11 +1,14 @@
 import { Writable } from "node:stream";
 import { input, confirm, search, checkbox, select, password } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import pc from "picocolors";
-import { terminalColumns } from "terminal-columns";
+import { ListrInquirerPromptAdapter } from "./listrInquirerPromptAdapter";
+import { breakpoints } from "./teminal-columns/breakpoints";
+import { terminalColumns } from "./teminal-columns/terminalColumns";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const MAX_WIDTH = 100
+
+
 
 // This allows use to use multiline JS strings
 // with proper indentation and formatting when primpted to the user.
@@ -21,16 +24,11 @@ function dedent(text: string) {
     .map(line => line.slice(indent).trimEnd())
     .join(`\n`)
     .replace(/^\n+|\n+$/g, ``)   // Remove surrounding newlines, since they got added for JS formatting
-    .replace(/\n(\n)?\n*/g, (_, s: string) => s ? s : ` `) // Single newlines are removed; larger than that are collapsed into one
-    .split(/\n/).map(paragraph => {
-      const matches = paragraph.match(/(.{1,100})(?: |$)/g)
-      if (matches !== null) {
-        return matches.join("\n")
-      } else {
-        return paragraph
-      }
-    }).join(`\n\n`);
+    .replace(/([^\n])\n([^\n])/g, '$1 $2')
+    .replace(/^\n([^\n])/g, '$1')  // Handle single newline at the start
+    .replace(/([^\n])\n$/g, '$1'); // Handle single newline at the end
 }
+
 
 type ColorStyle = "default" | "warning" | "important" | "question" | "error" | "success" | "subtle"
 
@@ -39,6 +37,11 @@ type HighlightsConfig = {
   lowlights?: string[],
   badlights?: string[]
 }
+
+const DEFAULT_BREAKPOINTS = breakpoints({
+  [`>= ${MAX_WIDTH + 4}`]: [4, MAX_WIDTH],
+  ">= 0": [{ width: 0, preprocess: () => "" }, "auto"]
+})
 
 export class Logger {
   private stream: Writable;
@@ -151,7 +154,7 @@ export class Logger {
         const highlightStyle = typeof highlight === "string" ? "important" : highlight.style;
 
         let pos = 0;
-        while ((pos = str.indexOf(phrase, pos)) !== -1) {
+        while ((pos = resultStr.indexOf(phrase, pos)) !== -1) {
           positions.push({
             start: pos,
             end: pos + phrase.length,
@@ -190,17 +193,17 @@ export class Logger {
         for (const { start, end, style: highlightStyle } of mergedPositions) {
           // Add text before this highlight with the base style
           if (start > lastEnd) {
-            result += this.getColorFn(style)(str.substring(lastEnd, start));
+            result += this.getColorFn(style)(resultStr.substring(lastEnd, start));
           }
 
           // Add the highlighted text
-          result += this.getColorFn(highlightStyle, style)(str.substring(start, end));
+          result += this.getColorFn(highlightStyle, style)(resultStr.substring(start, end));
           lastEnd = end;
         }
 
         // Add any remaining text with the base style
-        if (lastEnd < str.length) {
-          result += this.getColorFn(style)(str.substring(lastEnd));
+        if (lastEnd < resultStr.length) {
+          result += this.getColorFn(style)(resultStr.substring(lastEnd));
         }
 
         resultStr = result;
@@ -270,47 +273,50 @@ export class Logger {
   public info(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("🛈", { style: "important" }),
-      this.applyColors(dedent(str), { style: "default", ...config })
-    ]], [4, MAX_WIDTH]))
+      this.applyColors(str, { style: "default", dedent: true, ...config })
+    ]], DEFAULT_BREAKPOINTS))
     this.stream.write("\n\n")
   }
 
   public warn(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors(" ❗", { style: "warning" }),
-      this.applyColors(dedent(str), { style: "warning", ...config })
-    ]], [4, MAX_WIDTH]))
+      this.applyColors(str, { style: "warning", dedent: true, ...config })
+    ]], DEFAULT_BREAKPOINTS))
     this.stream.write("\n\n")
   }
 
   public success(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("✓", { style: "success" }),
-      this.applyColors(dedent(str), { style: "success", ...config })
-    ]], [4, MAX_WIDTH]))
+      this.applyColors(str, { style: "success", dedent: true, ...config })
+    ]], DEFAULT_BREAKPOINTS))
     this.stream.write("\n\n")
   }
 
   public error(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("🆇", { style: "error" }),
-      this.applyColors(dedent(str), { style: "error", ...config })
-    ]], [4, MAX_WIDTH]))
+      this.applyColors(str, { style: "error", dedent: true, ...config })
+    ]], DEFAULT_BREAKPOINTS))
     this.stream.write("\n\n")
   }
 
   public write(str: string, config?: HighlightsConfig & { style?: ColorStyle, removeIndent?: boolean }) {
     this.stream.write(terminalColumns([[
       "",
-      this.applyColors(dedent(str), { style: "default", ...config })
-    ]], [config?.removeIndent ? 0 : 4, MAX_WIDTH]))
+      this.applyColors(str, { style: "default", dedent: true, ...config })
+    ]], config?.removeIndent ? [0, MAX_WIDTH] : DEFAULT_BREAKPOINTS))
     this.stream.write("\n\n")
   }
-
 
   public writeRaw(str: string) {
     this.stream.write(str)
     this.stream.write("\n\n")
+  }
+
+  public line() {
+    this.stream.write("\n")
   }
 
   //////////////////////////////////////////////////////
@@ -350,6 +356,25 @@ export class Logger {
       this.applyColors(message.message, { style: "question", ...message })
   }
 
+  private getDefaultInquirerTheme(config?: { task?: PanfactumTaskWrapper, answerSameLine?: boolean }) {
+    const { answerSameLine = false, task } = config || {};
+
+    return task ? {
+      helpMode: "never" as const,
+      prefix: { idle: this.applyColors("❓", { style: "question" }), done: this.applyColors("✓ ", { style: "question" }) }
+    } : {
+      helpMode: "never" as const,
+      style: {
+        message: (text: string, status: "idle" | "done" | "loading") => " " + text + (status === "done" || answerSameLine ? "" : "\n"),
+        answer: (text: string) => " " + text,
+        description: (text: string) => (process.stdout.columns >= MAX_WIDTH + 4 ? "\n    " : "\n ") + pc.italic(text)
+      },
+      prefix: process.stdout.columns >= MAX_WIDTH + 4 ?
+        { idle: this.applyColors("❓", { style: "question" }), done: this.applyColors("✓ ", { style: "question" }) } :
+        { idle: "", done: "" }
+    }
+  }
+
   public input = (config: {
     message: string | { message: string } & HighlightsConfig;
     default?: string;
@@ -374,7 +399,8 @@ export class Logger {
         } else {
           return retVal
         }
-      } : undefined
+      } : undefined,
+      theme: this.getDefaultInquirerTheme({ task, answerSameLine: true })
     }
 
     return task ?
@@ -407,7 +433,8 @@ export class Logger {
         } else {
           return retVal
         }
-      } : undefined
+      } : undefined,
+      theme: this.getDefaultInquirerTheme({ task, answerSameLine: true })
     }
 
     return task ?
@@ -417,7 +444,7 @@ export class Logger {
 
   public select = <T>(config: {
     message: string | { message: string } & HighlightsConfig;
-    choices: Array<{ name: string; value: T; disabled?: boolean | string }>;
+    choices: Array<{ name: string; value: T; description?: string, disabled?: boolean | string }>;
     default?: T;
     explainer?: string | { message: string } & HighlightsConfig;
     task?: PanfactumTaskWrapper
@@ -429,9 +456,7 @@ export class Logger {
     const wrappedConfig = {
       ...config,
       message: this.formatQuestionMessage(message),
-      theme: {
-        helpMode: "never" as const
-      },
+      theme: this.getDefaultInquirerTheme({ task })
     }
 
     return task ?
@@ -463,9 +488,7 @@ export class Logger {
           return retVal
         }
       } : undefined,
-      theme: {
-        helpMode: "never" as const
-      },
+      theme: this.getDefaultInquirerTheme({ task })
     }
 
     return task ?
@@ -497,9 +520,7 @@ export class Logger {
           return retVal
         }
       } : undefined,
-      theme: {
-        helpMode: "never" as const
-      },
+      theme: this.getDefaultInquirerTheme({ task })
     }
 
     return task ?
@@ -520,6 +541,7 @@ export class Logger {
     const wrappedConfig = {
       ...config,
       message: this.formatQuestionMessage(message),
+      theme: this.getDefaultInquirerTheme({ task, answerSameLine: true })
     }
 
     return task ?

@@ -14,7 +14,7 @@ export async function getPrimaryContactInfo(inputs: {
 
     const { context, parentTask, profile } = inputs;
 
-    const existingInfo = await getExistingContctInfo(profile, context)
+    const existingInfo = await getExistingContactInfo(profile, context)
 
     const fullName = await context.logger.input({
         task: parentTask,
@@ -185,7 +185,7 @@ export async function getPrimaryContactInfo(inputs: {
  * Retrieves primary contact information from AWS account using the Account API so that 
  * we can use it as defaults for the account setup
  */
-async function getExistingContctInfo(profile: string, context: PanfactumContext): Promise<{
+async function getExistingContactInfo(profile: string, context: PanfactumContext): Promise<{
     fullName?: string;
     organizationName?: string;
     email?: string;

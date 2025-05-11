@@ -1,11 +1,9 @@
 import { join } from "node:path"
-import { input } from "@inquirer/prompts";
-import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { stringify, parse } from "ini";
 import { DefaultRenderer, ListrTaskWrapper, SimpleRenderer, type ListrTask } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { directoryExists } from "@/util/fs/directoryExist";
 import { CLIError } from "../../error/error";
 import { fileExists } from "../../fs/fileExists";
@@ -129,7 +127,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                                 ...configUpdate
                             }
                             if (!originalAWSConfig["sso-session sso"]) {
-                                config["sso-session sso"] = await getSSOConfig(ssoRegion, task)
+                                config["sso-session sso"] = await getSSOConfig(ssoRegion, context, task)
                             }
                         } catch (e) {
                             throw new CLIError(`Failed to read existing AWS config at ${configFilePath}`, e)
@@ -137,7 +135,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                     } else {
                         config = {
                             ...configUpdate,
-                            ["sso-session sso"]: await getSSOConfig(ssoRegion, task)
+                            ["sso-session sso"]: await getSSOConfig(ssoRegion, context, task)
                         }
                     }
 
@@ -182,13 +180,14 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
     }
 }
 
-async function getSSOConfig(ssoRegion: string, task: ListrTaskWrapper<TaskContext, typeof DefaultRenderer, typeof SimpleRenderer>) {
+async function getSSOConfig(ssoRegion: string, context: PanfactumContext, task: ListrTaskWrapper<TaskContext, typeof DefaultRenderer, typeof SimpleRenderer>) {
     task.stdout().write("It looks like this is your first time setting up AWS SSO.\n" +
         "We need to collect your AWS Access Portal URL.\n" +
         "You can set/find it by following these instructions: https://docs.aws.amazon.com/singlesignon/latest/userguide/howtochangeURL.html\n" +
         `It should be of the format: ${pc.blue("https://your-subdomain.awsapps.com/start")}`)
 
-    const startURL = await task.prompt(ListrInquirerPromptAdapter).run(input, {
+    const startURL = await context.logger.input({
+        task,
         message: pc.magenta('Access Portal URL:'),
         required: true,
         validate: async (value) => {

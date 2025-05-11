@@ -88,4 +88,4 @@ export const TERRAGRUNT_FILES = [
     { path: "providers/helm.tftpl", contentPath: helmTftpl }
 ] as const
 
-export const MODULE_STATUS_FILE = ".pf.yaml"
+export const MODULE_STATUS_FILE = "module.status.yaml"

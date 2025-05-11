@@ -3,6 +3,7 @@ import { z } from "zod";
 import kubeVaultTemplate from "@/templates/kube_vault_terragrunt.hcl" with { type: "file" };
 import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { fileExists } from "@/util/fs/fileExists";
@@ -17,7 +18,6 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -275,7 +275,6 @@ export async function setupVault(
         if (!ctx.kubeContext) {
           throw new CLIError("Kube context not found");
         }
-        const modulePath = join(clusterPath, MODULES.KUBE_VAULT);
         let vaultUnsealCommand: string[] = [];
         try {
           let sealedStatus = true;
@@ -311,35 +310,41 @@ export async function setupVault(
           }
 
           if (sealedStatus) {
-            await writeYAMLFile({
-              context,
-              values: {
-                status: "error",
-              },
-              overwrite: true,
-              filePath: join(modulePath, ".pf.yaml"),
-            });
+            // FIX: @seth this logic doesn't make sense????
+            // await writeYAMLFile({
+            //   context,
+            //   values: {
+            //     status: "error",
+            //   },
+            //   overwrite: true,
+            //   filePath: join(modulePath, ".pf.yaml"),
+            // });
             throw new CLIError(
               "Failed to unseal Vault after applying all recovery keys"
             );
           }
 
-          await updateModuleYAMLFile({
+          await upsertConfigValues({
             context,
             environment,
             region,
             module: MODULES.KUBE_VAULT,
-            inputUpdates: { wait: true },
+            values: {
+              extra_inputs: {
+                wait: undefined
+              }
+            }
           });
         } catch (error) {
-          await writeYAMLFile({
-            context,
-            values: {
-              status: "error",
-            },
-            overwrite: true,
-            filePath: join(modulePath, ".pf.yaml"),
-          });
+          // FIX: @seth this logic doesn't make sense????
+          // await writeYAMLFile({
+          //   context,
+          //   values: {
+          //     status: "error",
+          //   },
+          //   overwrite: true,
+          //   filePath: join(modulePath, ".pf.yaml"),
+          // });
           parseErrorHandler({
             error,
             errorMessage: "Failed to unseal Vault",

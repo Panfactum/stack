@@ -14,7 +14,7 @@ import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
-import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
+import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
@@ -57,14 +57,14 @@ export async function setupClusterExtensions(
       }),
     });
 
-    const eksPfData = await getLocalModuleStatus({
+    const eksPfData = await getModuleStatus({
       environment,
       region,
       module: MODULES.AWS_EKS,
       context,
     });
 
-    return eksPfData.deployStatus === "success" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
+    return eksPfData.deploy_status === "success" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
   }
 
   interface Context {

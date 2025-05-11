@@ -17,9 +17,11 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { AWS_REGIONS } from "@/util/aws/schemas";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments } from "@/util/config/getEnvironments";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
+import { directoryExists } from "@/util/fs/directoryExist";
 import { fileExists } from "@/util/fs/fileExists";
 import { removeDirectory } from "@/util/fs/removeDirectory";
 import { writeFile } from "@/util/fs/writeFile";
@@ -37,11 +39,17 @@ export async function bootstrapEnvironment(inputs: {
     environmentName: string;
     environmentProfile?: string
     newAccountName?: string;
+    resuming?: boolean;
 }) {
 
-    const { context, environmentName, environmentProfile, newAccountName } = inputs
+    const { context, environmentName, environmentProfile, newAccountName, resuming } = inputs
 
-    context.logger.info(`Now that the AWS account for ${environmentName} is provisioned, this installer will configure it for management via infrastructure-as-code.`)
+    if (!resuming) {
+        context.logger.info(`Now that the AWS account for ${environmentName} is provisioned, this installer will configure it for management via infrastructure-as-code.`)
+    }
+
+    const directory = join(context.repoVariables.environments_dir, environmentName)
+    const existingConfig = await getPanfactumConfig({ context, directory })
 
     interface TaskCtx {
         version?: string,
@@ -56,7 +64,7 @@ export async function bootstrapEnvironment(inputs: {
 
     const tasks = new Listr<TaskCtx>([], {
         ctx: {
-            profile: environmentProfile,
+            profile: environmentProfile ?? existingConfig.aws_profile,
             newAccountName
         },
         rendererOptions: {
@@ -78,9 +86,9 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     // Create the environment directory
     //////////////////////////////////////////////////////////////
-    const directory = join(context.repoVariables.environments_dir, environmentName)
     tasks.add({
         title: context.logger.applyColors(`Create IaC directory for ${environmentName}`),
+        skip: await directoryExists(directory),
         task: async () => {
             await createDirectory(directory)
         }
@@ -91,6 +99,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: `Getting Panfactum version to deploy`,
+        skip: existingConfig.pf_stack_version !== undefined,
         task: async (ctx, task) => {
             const flakeFilePath = join(context.repoVariables.repo_root, "flake.nix")
             if (!await fileExists(flakeFilePath)) {
@@ -197,6 +206,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: "Get AWS account ID",
+        skip: existingConfig.aws_account_id !== undefined,
         task: async (ctx, task) => {
             const { Account: accountId } = await getIdentity({ context, profile: ctx.profile! })
             if (!accountId) {
@@ -205,7 +215,7 @@ export async function bootstrapEnvironment(inputs: {
             const environments = await getEnvironments(context)
             for (const environment of environments) {
                 const { aws_account_id: otherEnvAccountId } = await getConfigValuesFromFile({
-                    filePath: join(environment.path, "environment.yaml"),
+                    environment: environment.name,
                     context
                 }) || {}
                 if (otherEnvAccountId && otherEnvAccountId === accountId) {
@@ -227,38 +237,58 @@ export async function bootstrapEnvironment(inputs: {
         title: "Select regions",
         task: async (ctx, task) => {
 
-            ctx.primaryRegion = await context.logger.search({
-                explainer: { message: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["primary"] },
-                message: "Select primary AWS region:",
-                task,
-                source: async (input) => {
-                    const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
-                    return filertedRegions.map(region => ({
-                        name: region,
-                        value: region
-                    }))
-                }
-            })
+            // TODO: Provide the option to source regions from another environment
 
-            task.title = context.logger.applyColors(`Select regions ${ctx.primaryRegion}`, { lowlights: [ctx.primaryRegion] })
-
-            ctx.secondaryRegion = await context.logger.search({
-                explainer: { message: `Every environment must have a secondary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["secondary"] },
-                message: "Select secondary AWS region:",
-                task,
-                source: async (input) => {
-                    const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
-                    return filertedRegions
-                        .filter(region => region !== ctx.primaryRegion)
-                        .map(region => ({
+            // Get the primary region
+            let primaryRegion;
+            if (existingConfig.tf_state_region) {
+                primaryRegion = existingConfig.tf_state_region
+            } else {
+                primaryRegion = await context.logger.search({
+                    explainer: { message: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["primary"] },
+                    message: "Select primary AWS region:",
+                    task,
+                    source: async (input) => {
+                        const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
+                        return filertedRegions.map(region => ({
                             name: region,
                             value: region
                         }))
-                }
+                    }
+                })
+
+            }
+            task.title = context.logger.applyColors(`Select regions ${primaryRegion}`, { lowlights: [primaryRegion] })
+
+            // Get the secondary region
+            const existingPrimaryRegionConfig = await getPanfactumConfig({ context, directory: join(directory, primaryRegion) })
+            let secondaryRegion;
+            if (existingPrimaryRegionConfig.aws_secondary_region) {
+                secondaryRegion = existingPrimaryRegionConfig.aws_secondary_region
+            } else {
+                secondaryRegion = await context.logger.search({
+                    explainer: { message: `Every environment must have a secondary AWS region where resources like backups will live.`, highlights: ["secondary"] },
+                    message: "Select secondary AWS region:",
+                    task,
+                    source: async (input) => {
+                        const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
+                        return filertedRegions
+                            .filter(region => region !== primaryRegion)
+                            .map(region => ({
+                                name: region,
+                                value: region
+                            }))
+                    }
+                })
+            }
+            task.title = context.logger.applyColors(`Selected regions ${primaryRegion} | ${secondaryRegion}`, {
+                lowlights: [`${primaryRegion} | ${secondaryRegion}`]
             })
-            task.title = context.logger.applyColors(`Selected regions ${ctx.primaryRegion} | ${ctx.secondaryRegion}`, {
-                lowlights: [`${ctx.primaryRegion} | ${ctx.secondaryRegion}`]
-            })
+
+            // Set the ctx
+            ctx.primaryRegion = primaryRegion
+            ctx.secondaryRegion = secondaryRegion
+
         }
     })
 
@@ -268,6 +298,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: "Generate unique state bucket name",
+        skip: existingConfig.tf_state_bucket !== undefined,
         task: async (ctx, task) => {
             while (!ctx.bucketName || !ctx.locktableName) {
                 const randomString = [...new Array(8)]
@@ -308,6 +339,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: "Activate S3 service",
+        skip: existingConfig.tf_state_bucket !== undefined,
         task: async (ctx, task) => {
             // Try to create and delete a dummy S3 bucket to ensure S3 service is active
             // This helps avoid the "Your account is not signed up for the S3 service" error
@@ -379,47 +411,57 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     // Generate the relevant config files
     //////////////////////////////////////////////////////////////
-    const globalRegionDir = join(directory, GLOBAL_REGION)
-
     tasks.add({
         title: "Generate IaC config files",
         task: async (ctx) => {
+
+            const { primaryRegion, secondaryRegion } = ctx;
+
+            if (!primaryRegion) {
+                throw new CLIError("No primary region selected. This should never happen.")
+            } else if (!secondaryRegion) {
+                throw new CLIError("No secondary region selected. This should never happen.")
+            }
+
             await Promise.all([
                 upsertConfigValues({
                     context,
-                    filePath: join(directory, "environment.yaml"),
+                    environment: environmentName,
                     values: {
-                        environment: environmentName,
-                        aws_account_id: ctx.accountId,
-                        aws_profile: ctx.profile!,
-                        pf_stack_version: ctx.version!,
-                        tf_state_bucket: ctx.bucketName!,
-                        tf_state_lock_table: ctx.locktableName!,
-                        tf_state_region: ctx.primaryRegion!
+                        environment: environmentName ?? existingConfig.environment,
+                        aws_account_id: ctx.accountId ?? existingConfig.aws_account_id,
+                        aws_profile: ctx.profile ?? existingConfig.aws_profile,
+                        pf_stack_version: ctx.version ?? existingConfig.pf_stack_version,
+                        tf_state_bucket: ctx.bucketName ?? existingConfig.tf_state_bucket,
+                        tf_state_lock_table: ctx.locktableName ?? existingConfig.tf_state_lock_table,
+                        tf_state_region: primaryRegion
                     }
                 }),
                 upsertConfigValues({
                     context,
-                    filePath: join(directory, ctx.primaryRegion!, "region.yaml"),
+                    environment: environmentName,
+                    region: primaryRegion,
                     values: {
-                        aws_region: ctx.primaryRegion!,
-                        aws_secondary_region: ctx.secondaryRegion!
+                        aws_region: primaryRegion,
+                        aws_secondary_region: secondaryRegion
                     }
                 }),
                 upsertConfigValues({
                     context,
-                    filePath: join(directory, ctx.secondaryRegion!, "region.yaml"),
+                    environment: environmentName,
+                    region: secondaryRegion,
                     values: {
-                        aws_region: ctx.secondaryRegion!,
-                        aws_secondary_region: ctx.primaryRegion!
+                        aws_region: secondaryRegion,
+                        aws_secondary_region: primaryRegion
                     }
                 }),
                 upsertConfigValues({
                     context,
-                    filePath: join(globalRegionDir, "region.yaml"),
+                    environment: environmentName,
+                    region: GLOBAL_REGION,
                     values: {
-                        aws_region: ctx.primaryRegion!,
-                        aws_secondary_region: ctx.secondaryRegion!
+                        aws_region: primaryRegion,
+                        aws_secondary_region: secondaryRegion
                     }
                 })
             ])
@@ -439,6 +481,7 @@ export async function bootstrapEnvironment(inputs: {
             module: MODULES.TF_BOOTSTRAP_RESOURCES,
             hclIfMissing: await Bun.file(tfBootstrapResourcesHCL).text(),
             taskTitle: "Deploy IaC state bucket",
+            skipIfAlreadyApplied: true,
             imports: {
                 "aws_s3_bucket.state": {
                     resourceId: async (ctx) => ctx.bucketName
@@ -463,6 +506,7 @@ export async function bootstrapEnvironment(inputs: {
             hclIfMissing: await Bun.file(sopsHCL).text(),
             realModuleName: MODULES.AWS_KMS_ENCRYPT_KEY,
             taskTitle: "Deploy encryptions keys",
+            skipIfAlreadyApplied: true,
             inputUpdates: {
                 name: defineInputUpdate({
                     schema: z.string(),
@@ -477,6 +521,17 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: "Add encryption keys to DevShell",
+        skip: async (ctx) => {
+            const sopsFilePath = join(context.repoVariables.repo_root, ".sops.yaml")
+            if (await fileExists(sopsFilePath)) {
+                const fileContent = await Bun.file(sopsFilePath).text();
+                const { creation_rules: rules } = parse(fileContent) as { creation_rules?: Array<{ aws_profile?: string }> }
+                if (rules) {
+                    return rules.some(rule => rule.aws_profile === ctx.profile!)
+                }
+            }
+            return false;
+        },
         task: async (ctx) => {
             const { arn, arn2 } = await terragruntOutput({
                 context,
@@ -537,7 +592,11 @@ export async function bootstrapEnvironment(inputs: {
             title: "Set AWS account alias",
             enabled: (ctx) => ctx.newAccountName === undefined,
             task: async (ctx, task) => {
-                ctx.newAccountName = await getNewAccountAlias({ context, task })
+                ctx.newAccountName = await getNewAccountAlias({
+                    context,
+                    task,
+                    defaultAlias: `${environmentName}-${Math.random().toString(36).substring(2, 10)}`
+                })
             }
         }
     )

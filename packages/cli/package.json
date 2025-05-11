@@ -44,7 +44,6 @@
     "@goauthentik/api": "^2025.4.0-1746018955",
     "@inquirer/prompts": "^7.4.0",
     "@kubernetes/client-node": "^1.1.2",
-    "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@types/ini": "^4.1.1",
     "clipanion": "^4.0.0-rc.4",
     "eslint-plugin-unused-imports": "^4.1.4",
@@ -53,9 +52,11 @@
     "listr2": "^8.3.2",
     "open": "^10.1.2",
     "picocolors": "^1.1.1",
+    "string-width": "^7.2.0",
     "terminal-columns": "^2.0.0",
     "terminal-link": "^4.0.0",
     "typanion": "^3.14.0",
+    "wrap-ansi": "^9.0.0",
     "yaml": "^2.7.0",
     "zod": "^3.24.2"
   }

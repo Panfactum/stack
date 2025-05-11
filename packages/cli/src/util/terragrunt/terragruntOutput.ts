@@ -1,6 +1,6 @@
 import { join } from "node:path"
 import { z, ZodError } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { getIdentity } from "../aws/getIdentity";
 import { CLIError, PanfactumZodError } from "../error/error";
 import { execute } from "../subprocess/execute";

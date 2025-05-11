@@ -10,7 +10,7 @@ import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import { MODULES } from "@/util/terragrunt/constants";
-import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
+import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
@@ -24,7 +24,7 @@ import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
-import { getPanfactumConfig } from "../../config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "../../../util/config/getPanfactumConfig";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -175,7 +175,8 @@ export class ClusterAddCommand extends PanfactumCommand {
      * Confirms the SLA target for the cluster
      ***********************************************/
     const confirmedSLATarget = await setSLA({
-      clusterPath,
+      environment,
+      region,
       context: this.context,
       slaTarget,
     });
@@ -247,7 +248,7 @@ export class ClusterAddCommand extends PanfactumCommand {
 
     // Check each step and mark as completed if .pf.yaml status is applied
     for (const step of SETUP_STEPS) {
-      const pfData = await getLocalModuleStatus({ environment, region, module: step.lastModule, context: this.context });
+      const pfData = await getModuleStatus({ environment, region, module: step.lastModule, context: this.context });
       if (step.id === "setupCertificates") {
         // Certificates are a special case because the last module is applied twice during the setup process
         const certificatesModuleInfo = await readYAMLFile({
@@ -257,12 +258,12 @@ export class ClusterAddCommand extends PanfactumCommand {
             }).optional()
           })
         })
-        step.completed = pfData?.deployStatus === "success" && certificatesModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
+        step.completed = pfData.deploy_status === "success" && certificatesModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
       } else if (step.id === "setupClusterExtensions") {
         // Due to the concurrent nature of this step, we let the step handle it's own completion logic
         step.completed = false;
       } else {
-        step.completed = pfData?.deployStatus === "success";
+        step.completed = pfData.deploy_status === "success";
       }
     }
 

@@ -9,11 +9,11 @@ import {
 import { ContactType, CountryCode, GetOperationDetailCommand, RegisterDomainCommand, ResendOperationAuthorizationCommand, Route53DomainsClient, type ContactDetail } from "@aws-sdk/client-route-53-domains";
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
 import { getAccountClient } from "@/util/aws/clients/getAccountClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { COUNTRY_CODES } from "@/util/aws/schemas";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
@@ -620,7 +620,7 @@ export async function registerDomain(inputs: {
             const validatedDomainConfig = validateDomainConfig(domainConfig);
             await upsertConfigValues({
                 context,
-                filePath: join(env.path, "environment.yaml"),
+                environment: env.name,
                 values: {
                     domains: {
                         [domain]: {

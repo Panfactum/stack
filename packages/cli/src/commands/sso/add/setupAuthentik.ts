@@ -3,11 +3,11 @@ import { cwd } from "node:process";
 import { CoreApi, Configuration, type PaginatedGroupList, type User, type Link, type Token, IntentEnum, type PaginatedUserList, type PaginatedBrandList } from "@goauthentik/api";
 import open from "open";
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
 import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file" };
 import kubeAuthentikHcl from "@/templates/kube_authentik.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
@@ -15,11 +15,10 @@ import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
-import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
+import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -104,6 +103,8 @@ export async function setupAuthentik(
         {
             title: "Get Authentik User Configuration",
             task: async (ctx, task) => {
+
+                // FIX: @seth - You should NEVER read the module.yaml files directly.
                 const originalSESInputs = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AWS_SES_DOMAIN, "module.yaml"),
                     context,
@@ -119,6 +120,7 @@ export async function setupAuthentik(
                         }).passthrough(),
                 });
 
+                // FIX: @seth - You should NEVER read the module.yaml files directly.
                 const originalAuthentikInputs = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml"),
                     context,
@@ -138,6 +140,7 @@ export async function setupAuthentik(
                         .passthrough(),
                 });
 
+                // FIX: @seth - You should NEVER read the module.yaml files directly.
                 const originalAuthentikCoreResourcesInputs = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "module.yaml"),
                     context,
@@ -231,15 +234,16 @@ export async function setupAuthentik(
                             },
                             required: true
                         })
-                        await updateModuleYAMLFile({
-                            context,
-                            environment,
-                            region,
-                            module: MODULES.KUBE_AUTHENTIK,
-                            rootUpdates: {
-                                adminEmail: ctx.authentikAdminEmail
-                            }
-                        })
+                        // FIX: @seth - ??? adminEmail does NOT exist on the panfactum config schema
+                        // await updateModuleYAMLFile({
+                        //     context,
+                        //     environment,
+                        //     region,
+                        //     module: MODULES.KUBE_AUTHENTIK,
+                        //     rootUpdates: {
+                        //         adminEmail: ctx.authentikAdminEmail
+                        //     }
+                        // })
                     }
 
                     if (!ctx.authentikAdminName) {
@@ -249,15 +253,16 @@ export async function setupAuthentik(
                             message: "Name:",
                             required: true,
                         })
-                        await updateModuleYAMLFile({
-                            context,
-                            environment,
-                            region,
-                            module: MODULES.KUBE_AUTHENTIK,
-                            rootUpdates: {
-                                adminName: ctx.authentikAdminName
-                            }
-                        })
+                        // FIX: @seth - ??? adminName does NOT exist on the panfactum config schema
+                        // await updateModuleYAMLFile({
+                        //     context,
+                        //     environment,
+                        //     region,
+                        //     module: MODULES.KUBE_AUTHENTIK,
+                        //     rootUpdates: {
+                        //         adminName: ctx.authentikAdminName
+                        //     }
+                        // })
                     }
                 }
             }
@@ -373,6 +378,7 @@ export async function setupAuthentik(
         },
         {
             skip: async () => {
+                // FIX: @seth - NEVER read to the config files directly
                 const originalGlobalConfig = await readYAMLFile({
                     filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
                     context,
@@ -442,7 +448,9 @@ export async function setupAuthentik(
                     }
                 }
 
+                // FIX: @seth - NEVER read to the config files directly
                 if (await fileExists(path.join(context.repoVariables.environments_dir, "global.yaml"))) {
+                    // FIX: @seth - NEVER read to the config files directly
                     const originalGlobalConfig = await readYAMLFile({
                         filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
                         context,
@@ -454,6 +462,7 @@ export async function setupAuthentik(
                         ...originalGlobalConfig,
                         authentik_url: `https://authentik.${ctx.ancestorDomain}`
                     }
+                    // FIX: @seth - NEVER write to the config files directly
                     await writeYAMLFile({
                         context,
                         filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
@@ -461,6 +470,7 @@ export async function setupAuthentik(
                         overwrite: true,
                     })
                 } else {
+                    // FIX: @seth - NEVER write to the config files directly
                     await writeYAMLFile({
                         context,
                         filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
@@ -474,8 +484,8 @@ export async function setupAuthentik(
         {
             title: "Deploy Authentik Core Resources",
             skip: async () => {
-                const pfData = await getLocalModuleStatus({ environment, region, module: MODULES.AUTHENTIK_CORE_RESOURCES, context });
-                return pfData.deployStatus === "success";
+                const pfData = await getModuleStatus({ environment, region, module: MODULES.AUTHENTIK_CORE_RESOURCES, context });
+                return pfData.deploy_status === "success";
             },
             task: async (ctx, parentTask) => {
                 if (!ctx.akadminBootstrapToken) {
@@ -527,6 +537,8 @@ export async function setupAuthentik(
                     workingDirectory: cwd(),
                 })
 
+                // FIX: @seth - We have a yaml stringifier??? Don't use raw string manipulation
+
                 // Disable pod disruption on the Authentik cnpg cluster & Authentik server deployment
                 const yaml = `apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -552,8 +564,11 @@ spec:
       app.kubernetes.io/instance: authentik
       app.kubernetes.io/name: authentik
   minAvailable: "100%"`;
+
+                // FIX: @seth - Use the stdin interface, don't write a temp file
                 const tempFile = `temp-pdb-${Date.now()}.yaml`;
                 await writeFile({ context, filePath: join(cwd(), tempFile), contents: yaml, overwrite: true })
+
                 await execute({
                     command: [
                         "kubectl",
@@ -899,15 +914,16 @@ spec:
                     throw new CLIError("Failed to disable bootstrap user in Authentik", error);
                 }
 
-                await updateModuleYAMLFile({
-                    context,
-                    environment,
-                    region,
-                    module: MODULES.AUTHENTIK_CORE_RESOURCES,
-                    rootUpdates: {
-                        user_setup_complete: true
-                    }
-                })
+                // FIX: @seth - ??? user_setup_complete is not a part of the panfactum schema????
+                // await updateModuleYAMLFile({
+                //     context,
+                //     environment,
+                //     region,
+                //     module: MODULES.AUTHENTIK_CORE_RESOURCES,
+                //     rootUpdates: {
+                //         user_setup_complete: true
+                //     }
+                // })
             }
         }
     ])

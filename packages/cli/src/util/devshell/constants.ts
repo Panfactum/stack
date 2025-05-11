@@ -1,4 +1,3 @@
-import { MODULE_STATUS_FILE } from "../terragrunt/constants";
 
 export const EXPECTED_GITIGNORE_CONTENTS = {
     aws: [
@@ -7,8 +6,7 @@ export const EXPECTED_GITIGNORE_CONTENTS = {
         "!.gitignore"
     ],
     environments: [
-        "*.user.yaml",
-        MODULE_STATUS_FILE
+        "*.user.yaml"
     ],
     kube: [
         "*",

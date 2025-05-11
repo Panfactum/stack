@@ -1,6 +1,6 @@
 import { ChangeResourceRecordSetsCommand, Route53Client } from "@aws-sdk/client-route-53"
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig"
 import { getIdentity } from "@/util/aws/getIdentity"
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig"
 import { CLIError } from "@/util/error/error"
 import { execute } from "@/util/subprocess/execute"
 import type { EnvironmentMeta } from "@/util/config/getEnvironments"

@@ -1,6 +1,6 @@
 import { join } from "node:path"
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "../error/error";
 import { readYAMLFile } from "../yaml/readYAMLFile";
 import { writeYAMLFile } from "../yaml/writeYAMLFile";

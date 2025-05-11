@@ -213,7 +213,8 @@ export async function setupEKS(
 
         await upsertConfigValues({
           context,
-          filePath: path.join(clusterPath, "region.yaml"),
+          environment,
+          region,
           values: {
             kube_config_context: ctx.clusterName!,
             kube_api_server: moduleOutput.cluster_url.value,

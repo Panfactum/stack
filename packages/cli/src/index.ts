@@ -4,7 +4,7 @@ import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
-import { UpdateModuleStatusCommand } from "./commands/devshell/update-module-status/command.ts";
+import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
 import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
 import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";

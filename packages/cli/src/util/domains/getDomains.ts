@@ -1,6 +1,6 @@
 import { join, dirname } from "node:path";
 import { Glob } from "bun";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { asyncIterMap } from "../asyncIterMap";
 import { CLIError } from "../error/error";
 import type { DomainConfigs } from "./tasks/types";

@@ -1,7 +1,7 @@
 import { CheckDomainAvailabilityCommand, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
 import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsClient";
 import { getIdentity } from "@/util/aws/getIdentity";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";

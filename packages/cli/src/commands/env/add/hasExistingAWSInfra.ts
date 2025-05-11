@@ -2,7 +2,7 @@ import type { PanfactumContext } from "@/util/context/context";
 
 export async function hasExistingAWSInfra(context: PanfactumContext): Promise<boolean> {
   return context.logger.select({
-    message: "Do you have existing AWS infrastructure?",
+    message: "Do you have existing AWS accounts?",
     choices: [
 
       {

@@ -1,7 +1,7 @@
 import { join, dirname } from "node:path"
 import { Glob } from "bun";
 import { z } from "zod";
-import { getPanfactumConfig } from "@/commands/config/get/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { getRegisteredDomainsTask } from "./getRegisteredDomainsTask";
 import { CLIError } from "../../error/error";
 import { MODULES } from "../../terragrunt/constants";

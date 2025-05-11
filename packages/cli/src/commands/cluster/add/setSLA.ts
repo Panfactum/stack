@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import type { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
@@ -10,13 +9,15 @@ type SlaTarget = z.infer<typeof PANFACTUM_CONFIG_SCHEMA.shape.sla_target>;
 export async function setSLA(inputs: {
   slaTarget: SlaTarget;
   context: PanfactumContext;
-  clusterPath: string;
+  environment: string;
+  region: string;
 }): Promise<NonNullable<SlaTarget>> {
-  const { slaTarget, context, clusterPath } = inputs;
+  const { slaTarget, context, environment, region } = inputs;
 
   const regionConfig = await getConfigValuesFromFile({
-    filePath: join(clusterPath, "region.yaml"),
-    context,
+    environment,
+    region,
+    context
   });
 
   if (regionConfig?.sla_target) {
@@ -69,7 +70,8 @@ export async function setSLA(inputs: {
 
   // TODO: @seth set in the environment.yaml if not already set there
   await upsertConfigValues({
-    filePath: join(clusterPath, "region.yaml"),
+    environment,
+    region,
     values: {
       sla_target: confirmedSLATarget,
     },

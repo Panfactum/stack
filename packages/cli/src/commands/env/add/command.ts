@@ -2,18 +2,21 @@ import { join } from "node:path";
 import { Command } from "clipanion";
 import pc from "picocolors"
 import { addAWSProfileFromStaticCreds } from "@/util/aws/addAWSProfileFromStaticCreds";
+import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments } from "@/util/config/getEnvironments";
-import { directoryExists } from "@/util/fs/directoryExist";
+import { CLIError } from "@/util/error/error";
 import { getLastPathSegments } from "@/util/fs/getLastPathSegments";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
+import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { bootstrapEnvironment } from "./bootstrapEnvironment";
+import { checkAdminPermissions } from "./checkAdminPermissions";
 import { getEnvironmentName } from "./getEnvironmentName";
 import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
 import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
-import { hasExistingAWSInfra } from "./hasExistingAWSInfra";
 import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
+import { isEnvironmentSuccessfullyConfigured } from "./isEnvironmentSuccessfullyConfigured";
 import { provisionAWSAccount } from "./provisionAWSAccount";
 import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
 import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
@@ -109,14 +112,24 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         context.logger.addIdentifier(MANAGEMENT_ENVIRONMENT)
 
         const existingEnvs = await getEnvironments(context);
-        let hasManagementEnv = existingEnvs.findIndex(env => env.name === MANAGEMENT_ENVIRONMENT) !== -1;
-        let hasAWSOrg = false;
-        let hasExistingStandaloneAccounts = false;
-        //const hasManagementProfile = (await getAWSProfiles(context)).includes(`${MANAGEMENT_ENVIRONMENT}-superuser`)
-
-
+        let _hasExistingAWSOrg = false;
+        let _hasDeployedAWSOrg = await isEnvironmentSuccessfullyConfigured({ context, environment: MANAGEMENT_ENVIRONMENT })
+        let _hasManagementProfile = (await getAWSProfiles(context)).includes(DEFAULT_MANAGEMENT_PROFILE)
+        let _resumingManagementSetup = false;
         let managementAccountCreds: { secretAccessKey: string, accessKeyId: string } | undefined;
-        if (existingEnvs.length === 0) {
+        context.logger.line()
+
+        if (_hasManagementProfile && !_hasDeployedAWSOrg) {
+            //////////////////////////////////////////////////////////////////////////////////////////
+            // If the user has an AWS profile set for the management environment, but the
+            // AWS organizaiton wasn't deployed, then we need to resume the management environment setup
+            //////////////////////////////////////////////////////////////////////////////////////////
+            context.logger.info(`
+                It looks like you were in the middle of deploying your AWS Organization in the
+                ${MANAGEMENT_ENVIRONMENT} environment. Resuming the deployment...
+            `)
+            _resumingManagementSetup = true
+        } else if (existingEnvs.length === 0) {
 
             //////////////////////////////////////////////////////////////////////////////////////////
             // If the user does not have existing environments, then we can assume this is their first time
@@ -130,35 +143,24 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                It looks like you are installing your first Panfactum environment!
                There will be a few preliminary questions to ensure that setup goes smoothly...
             `)
-            if (await hasExistingAWSInfra(context)) {
-                if (await hasExistingAWSOrg(context)) {
-                    hasAWSOrg = true
-                    if (await shouldPanfactumManageAWSOrg(context)) {
-                        managementAccountCreds = await getRootAccountAdminAccess(context)
-                    }
-                } else {
-                    hasExistingStandaloneAccounts = true;
-                    context.logger.info(`
-                        Got it! Panfactum uses AWS Organizations to create AWS accounts for your Panfactum environments.
-                        We will need to set that up before creating environments for your workloads.
-
-                        After the AWS Organization is deployed, you can transfer your existing AWS accounts into that organization
-                        to allow for easier access and centralized management.
-                        
-                        The AWS Organization configuration will live in a special environment called ${MANAGEMENT_ENVIRONMENT}. 
-                    `)
-                    managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
+            if (await hasExistingAWSOrg(context)) {
+                _hasExistingAWSOrg = true
+                if (await shouldPanfactumManageAWSOrg(context)) {
+                    managementAccountCreds = await getRootAccountAdminAccess(context)
                 }
             } else {
                 context.logger.info(`
                     Got it! Panfactum uses AWS Organizations to create AWS accounts for your Panfactum environments.
-                    We will need to set that up before creating environments for your workloads. 
+                    We will need to set that up before creating environments for your workloads.
+
+                    After the AWS Organization is deployed, you can transfer any existing AWS accounts into that Organization
+                    to allow for easier access and centralized configuration.
                     
-                    The AWS Organization configuration will live in a special environment called ${MANAGEMENT_ENVIRONMENT}. 
+                    The AWS Organization will live in a special Panfactum environment called ${MANAGEMENT_ENVIRONMENT}. 
                 `)
                 managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
             }
-        } else if (!hasManagementEnv) {
+        } else if (!_hasDeployedAWSOrg) {
 
             //////////////////////////////////////////////////////////////////////////////////////////
             // If the user has environments, but not a management environment, we should continue
@@ -168,7 +170,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             // However, we still let them opt-out of this.
             //////////////////////////////////////////////////////////////////////////////////////////
             if (await hasExistingAWSOrg(context)) {
-                hasAWSOrg = true
+                _hasExistingAWSOrg = true
                 if (await shouldPanfactumManageAWSOrg(context)) {
                     managementAccountCreds = await getRootAccountAdminAccess(context)
                 }
@@ -188,16 +190,53 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                 creds: managementAccountCreds,
                 profile: DEFAULT_MANAGEMENT_PROFILE
             })
+            _hasManagementProfile = true
         }
 
-        if (managementAccountCreds) {
+        if (_hasManagementProfile && !_hasDeployedAWSOrg) {
+
+            // If the user is resuming the installation of the management environment,
+            // then it is possible that they messed with the AWS profile or credentials
+            // and broke them, so we need to validate that they work
+            const checkStatus = await checkAdminPermissions({ context, profile: DEFAULT_MANAGEMENT_PROFILE })
+            const awsConfigFile = join(context.repoVariables.aws_dir, "config")
+            if (checkStatus.status === "missingAdministratorAccess") {
+                context.logger.error(`
+                    The AWS profile ${DEFAULT_MANAGEMENT_PROFILE} in ${awsConfigFile}
+                    does not have access the AdministratorAccess policy directly attached.
+
+                    Please attach the AdministratorAccess policy to the ${checkStatus.username}
+                    IAM user in the AWS account ${checkStatus.accountId} and re-run this command.
+                `, { highlights: [DEFAULT_MANAGEMENT_PROFILE, awsConfigFile, checkStatus.username ?? "", checkStatus.accountId ?? "", "AdministratorAccess"] })
+                throw new CLIError(`The ${DEFAULT_MANAGEMENT_PROFILE} AWS profile does not have the AdministratorAccess policy.`)
+            } else if (checkStatus.status === "invalidCredentials") {
+                const credentialsFile = join(context.repoVariables.aws_dir, "credentials")
+                context.logger.error(`
+                    The AWS profile ${DEFAULT_MANAGEMENT_PROFILE} in ${awsConfigFile}
+                    does not have valid credentials.
+
+                    Please provide a valid AWS access key ID and secret access key in the credentials file
+                    at ${credentialsFile} and re-run this command.
+                `, { highlights: [DEFAULT_MANAGEMENT_PROFILE, awsConfigFile, credentialsFile] })
+                throw new CLIError(`The ${DEFAULT_MANAGEMENT_PROFILE} AWS profile does not have valid credentials.`)
+            } else if (checkStatus.status === "invalidUsername") {
+                context.logger.error(`
+                    The AWS profile ${DEFAULT_MANAGEMENT_PROFILE} in ${awsConfigFile}
+                    does not appear to be associated with a real IAM user.
+
+                    Please connect the profile to an IAM user with the AdministratorAccess policy directly attached.
+                `, { highlights: [DEFAULT_MANAGEMENT_PROFILE, awsConfigFile] })
+                throw new CLIError(`The ${DEFAULT_MANAGEMENT_PROFILE} AWS profile is not associated with a valid IAM user.`)
+            }
+
+            // Create the environment (which also creates the AWS organization)
             await bootstrapEnvironment({
                 context,
                 environmentProfile: DEFAULT_MANAGEMENT_PROFILE,
-                environmentName: "management"
+                environmentName: MANAGEMENT_ENVIRONMENT,
+                resuming: _resumingManagementSetup
             })
-            hasManagementEnv = true;
-            hasAWSOrg = true
+            _hasDeployedAWSOrg = true
 
             // FIX: This does not properly handle the case where the user has existing
             // environments were created WITHOUT an AWS organization. Those need to be
@@ -210,15 +249,12 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                 environment is a ${pc.italic("special")} environment used for storing global
                 settings that transcend normal environment boundaries.
 
-                ${hasExistingStandaloneAccounts ? `
-                    Your existing AWS accounts can be added to the new AWS Organization
-                    by following this guide:
-                    https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invite-account.html
+                Any existing AWS accounts can be added to the new AWS Organizationby following this guide:
+                https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invite-account.html
 
-                    However, this is not required to continue the installer.
-                ` : ""}
+                However, this is not required to continue adding a new environment.
 
-                We can now proceed to adding a normal environment. Note that the bootstrapping
+                We can now proceed to adding a new standard Panfactum environment. Note that the bootstrapping
                 process will look similar to the ${MANAGEMENT_ENVIRONMENT} environment, but we will be
                 able to automate many steps.
             `, { highlights: [managementFolder] })
@@ -243,7 +279,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         //  (b) If not, then we need to take them through the manual setup steps
         ////////////////////////////////////////////////////////////////
         let newAccountName: string | undefined;
-        if (hasManagementEnv) {
+        if (_hasDeployedAWSOrg) {
             // Note that 'provisionAWSAccount' leverages the AWS Organization to create the account.
             // If the AWS Organization is not set up yet, it also takes care of that process.
             newAccountName = await provisionAWSAccount({ context, environmentName, environmentProfile })
@@ -252,7 +288,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             // IAM user, and the access credentials to provide the installer
             const newAccountCreds = await getNewAccountAdminAccess({
                 context,
-                type: hasAWSOrg ? "manual-org" : "standalone"
+                type: _hasExistingAWSOrg ? "manual-org" : "standalone"
             })
             await addAWSProfileFromStaticCreds({
                 context,
@@ -276,7 +312,12 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         // // This allows us to replace their static credentials
         // // with an SSO login flow for improved security and user-ergonomics
         // ////////////////////////////////////////////////////////////////
-        if (await directoryExists(join(context.repoVariables.repo_root, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, MODULES.IAM_IDENTIY_CENTER_PERMISSIONS))) {
+        if ((await getModuleStatus({
+            context,
+            environment: MANAGEMENT_ENVIRONMENT,
+            region: GLOBAL_REGION,
+            module: MODULES.AWS_IAM_IDENTITY_CENTER_PERMISSIONS
+        })).deploy_status === "success") {
             await updateIAMIdentityCenter({
                 context,
                 environmentProfile,

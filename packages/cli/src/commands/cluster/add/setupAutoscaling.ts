@@ -14,7 +14,6 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
-import { updateModuleYAMLFile } from "@/util/yaml/updateModuleYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -100,7 +99,8 @@ export async function setupAutoscaling(
       task: async () => {
         await upsertConfigValues({
           context,
-          filePath: join(clusterPath, "region.yaml"),
+          environment,
+          region,
           values: {
             extra_inputs: {
               vpa_enabled: true,
@@ -134,14 +134,16 @@ export async function setupAutoscaling(
     {
       title: "Remove Karpenter Bootstrap Variable",
       task: async () => {
-        await updateModuleYAMLFile({
+        await upsertConfigValues({
           context,
           environment,
           region,
           module: MODULES.KUBE_KARPENTER,
-          inputUpdates: {
-            wait: true,
-          },
+          values: {
+            extra_inputs: {
+              wait: undefined,
+            }
+          }
         });
       },
     },
@@ -185,7 +187,8 @@ export async function setupAutoscaling(
       task: async () => {
         await upsertConfigValues({
           context,
-          filePath: join(clusterPath, "region.yaml"),
+          environment,
+          region,
           values: {
             extra_inputs: {
               panfactum_scheduler_enabled: true,

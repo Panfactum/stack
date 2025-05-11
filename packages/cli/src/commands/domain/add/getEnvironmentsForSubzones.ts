@@ -1,4 +1,3 @@
-import { join } from "node:path"
 import { type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
@@ -54,10 +53,10 @@ export async function getEnvironmentsForSubzones(inputs: {
             env.subdomain = envSubdomain
             await upsertConfigValues({
                 context,
+                environment: env.name,
                 values: {
                     environment_subdomain: envSubdomain
-                },
-                filePath: join(env.path, "environment.yaml")
+                }
             })
         }
     }

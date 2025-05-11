@@ -197,7 +197,7 @@ terraform {
     commands = ["apply"]
     execute = [
       "pf",
-      "update-module-status",
+      "iac", "update-module-status",
       "-m", get_original_terragrunt_dir(),
       "--deploy-status", "running"
     ]
@@ -207,7 +207,7 @@ terraform {
     commands = ["apply"]
     execute = [
       "pf",
-      "update-module-status",
+      "iac", "update-module-status",
       "-m", get_original_terragrunt_dir(),
       "--deploy-status", "success"
     ]
@@ -217,7 +217,7 @@ terraform {
     commands = ["apply"]
     execute = [
       "pf",
-      "update-module-status",
+      "iac", "update-module-status",
       "-m", get_original_terragrunt_dir(),
       "--deploy-status", "error"
     ]
@@ -228,7 +228,7 @@ terraform {
     commands = ["init"]
     execute = [
       "pf",
-      "update-module-status",
+      "iac", "update-module-status",
       "-m", get_original_terragrunt_dir(),
       "--init-status", "running"
     ]
@@ -238,7 +238,7 @@ terraform {
     commands = ["init"]
     execute = [
       "pf",
-      "update-module-status",
+      "iac", "update-module-status",
       "-m", get_original_terragrunt_dir(),
       "--init-status", "success"
     ]
@@ -248,7 +248,7 @@ terraform {
     commands = ["init"]
     execute = [
       "pf",
-      "update-module-status",
+      "iac", "update-module-status",
       "-m", get_original_terragrunt_dir(),
       "--init-status", "error"
     ]

@@ -1,9 +1,9 @@
 import { dirname, join } from "node:path";
 import { z } from "zod";
-import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import { CLIError } from "@/util/error/error";
-import type { PanfactumContext } from "../../../util/context/context";
+import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
+import type { PanfactumContext } from "../context/context";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
 type OutputValues = InputValues & {
@@ -52,11 +52,7 @@ export const getPanfactumConfig = async ({
       searchPromises.push(
         (async () => {
           const filePath = join(currentDir, fileName);
-          const values = await getConfigValuesFromFile({
-            filePath,
-            context,
-            secret: fileName.includes("secrets")
-          });
+          const values = await getConfigValuesFromFile({ context, filePath, secret: fileName.includes("secret") })
           if (values) {
             configFileValues[fileName] = values;
           }

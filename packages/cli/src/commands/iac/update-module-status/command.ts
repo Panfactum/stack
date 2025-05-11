@@ -11,7 +11,7 @@ import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { z } from "zod";
 
 export class UpdateModuleStatusCommand extends PanfactumCommand {
-  static override paths = [["devshell", "update-module-status"]];
+  static override paths = [["iac", "update-module-status"]];
 
   static override usage = Command.Usage({
     description: "Updates the local status file for a particular IaC module"

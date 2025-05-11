@@ -1,4 +1,3 @@
-import { join } from "node:path"
 import { Listr } from "listr2";
 import { z, ZodError } from "zod";
 
@@ -191,7 +190,7 @@ export async function createDescendentZones(inputs: {
                 const validatedDomainConfig = validateDomainConfig(domainConfig)
                 await upsertConfigValues({
                     context,
-                    filePath: join(validatedDomainConfig.env.path, "environment.yaml"),
+                    environment: validatedDomainConfig.env.name,
                     values: {
                         domains: {
                             [domain]: {

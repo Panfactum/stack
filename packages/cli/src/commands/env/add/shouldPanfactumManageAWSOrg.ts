@@ -10,12 +10,14 @@ export async function shouldPanfactumManageAWSOrg(context: PanfactumContext): Pr
     message: `Would you like to allow Panfactum to configure your AWS Organization?`,
     choices: [
       {
-        name: "Yes:  Use Panfactum to automate AWS account management.",
+        name: "Yes",
         value: true,
+        description: "Use Panfactum to simplify AWS account management."
       },
       {
-        name: `No:   I am an expert. ${pc.yellow("(WARNING: may not be fully compatible with automated installers)")}`,
+        name: `No`,
         value: false,
+        description: `For experts only. ${pc.yellow("(WARNING: may not be fully compatible with automated installers)")}`
       }
     ],
     default: true,

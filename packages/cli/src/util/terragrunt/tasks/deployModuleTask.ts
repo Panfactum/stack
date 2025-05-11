@@ -7,7 +7,7 @@ import { createDirectory } from "@/util/fs/createDirectory";
 import { fileContains } from "@/util/fs/fileContains";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
-import { getLocalModuleStatus } from "@/util/terragrunt/getLocalModuleStatus";
+import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { terragruntApply } from "../terragruntApply";
@@ -146,8 +146,8 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
         }),
         skip: async () => {
             if (skipIfAlreadyApplied) {
-                const pfData = await getLocalModuleStatus({ environment, region, module, context });
-                return pfData.deployStatus === "success";
+                const pfData = await getModuleStatus({ environment, region, module, context });
+                return pfData.deploy_status === "success";
             }
 
             return false;
