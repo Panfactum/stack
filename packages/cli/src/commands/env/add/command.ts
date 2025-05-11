@@ -158,7 +158,11 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                     
                     The AWS Organization will live in a special Panfactum environment called ${MANAGEMENT_ENVIRONMENT}. 
                 `)
-                managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
+                managementAccountCreds = await getNewAccountAdminAccess({
+                    context,
+                    type: "management",
+                    environment: MANAGEMENT_ENVIRONMENT
+                })
             }
         } else if (!_hasDeployedAWSOrg) {
 
@@ -175,7 +179,11 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                     managementAccountCreds = await getRootAccountAdminAccess(context)
                 }
             } else if (await shouldCreateAWSOrg(context)) {
-                managementAccountCreds = await getNewAccountAdminAccess({ context, type: "management" })
+                managementAccountCreds = await getNewAccountAdminAccess({
+                    context,
+                    type: "management",
+                    environment: MANAGEMENT_ENVIRONMENT
+                })
             }
         }
 
@@ -302,7 +310,8 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             if (!alreadyProvisioned) {
                 const newAccountCreds = await getNewAccountAdminAccess({
                     context,
-                    type: _hasExistingAWSOrg ? "manual-org" : "standalone"
+                    type: _hasExistingAWSOrg ? "manual-org" : "standalone",
+                    environment: environmentName
                 })
                 await addAWSProfileFromStaticCreds({
                     context,

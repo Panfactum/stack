@@ -87,6 +87,11 @@ export async function getAdminAccessCredentials(context: PanfactumContext): Prom
                     return { accessKeyId, secretAccessKey };
                 }
 
+                context.logger.error(`
+                    The provided credentials do not have the AdministratorAccess policy attached 
+                    to the IAM user '${username}'. Please attach the AdministratorAccess policy to the IAM user.
+                `, { highlights: [username, "AdministratorAccess"] });
+
             } catch (e) {
                 context.logger.error(`
                     An unknown error occurred when validating the provided credentials. This is either
@@ -97,23 +102,16 @@ export async function getAdminAccessCredentials(context: PanfactumContext): Prom
                     Please try again.
                 `);
                 context.logger.debug('Failed with error ' + JSON.stringify(e))
-                break;
             }
-
-            context.logger.error(`
-                The provided credentials do not have the AdministratorAccess policy attached 
-                to the IAM user '${username}'. Please attach the AdministratorAccess policy to the IAM user.
-            `, { highlights: [username, "AdministratorAccess"] });
-
 
             const tryAgain = await context.logger.confirm({
                 message: "Try again with the same credentials?",
             });
 
             if (!tryAgain) {
+                context.logger.info("Removing existing credentials and requesting new ones:")
                 break;
             }
         }
     }
-
 }

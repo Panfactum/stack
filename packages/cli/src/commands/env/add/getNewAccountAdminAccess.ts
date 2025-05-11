@@ -2,8 +2,12 @@ import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getNewAccountAdminAccess(inputs: { context: PanfactumContext, type: "management" | "standalone" | "manual-org" }) {
-    const { context, type } = inputs
+export async function getNewAccountAdminAccess(inputs: {
+    context: PanfactumContext,
+    type: "management" | "standalone" | "manual-org",
+    environment: string;
+}) {
+    const { context, type, environment } = inputs
 
     if (type === "management") {
         context.logger.warn(`
@@ -63,7 +67,7 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
             "Ok. Wait until you receive this email before proceeding."
         )
     }
-
+    const username = `${environment}-superuser`
     context.logger.info(`
         For the installer to automatically complete the remaining setup, it needs access to an IAM user
         with the AdministratorAccess policy directly attached.
@@ -73,7 +77,7 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
 
         Use the following settings:
 
-          * User name: pf-bootstrap-user
+          * User name: ${username}
 
           * Provide user access to the AWS Management Console: unchecked
 
@@ -88,7 +92,7 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
             -- Click Create user --
     `, {
         highlights: [
-            "pf-bootstrap-user",
+            username,
             "unchecked",
             "Attach policies directly",
             "Next",
@@ -115,7 +119,7 @@ export async function getNewAccountAdminAccess(inputs: { context: PanfactumConte
         For the installer to proceed, it needs access to credentials for this new user.
         Click the following link to create those credentials:
 
-        https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/users/details/pf-bootstrap-user/create-access-key
+        https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/users/details/${username}/create-access-key
 
         Use the following settings:
 
