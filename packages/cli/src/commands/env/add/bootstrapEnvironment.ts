@@ -298,8 +298,13 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: "Generate unique state bucket name",
-        skip: existingConfig.tf_state_bucket !== undefined,
         task: async (ctx, task) => {
+
+            if (existingConfig.tf_state_bucket !== undefined) {
+                ctx.bucketName = existingConfig.tf_state_bucket
+                ctx.locktableName = existingConfig.tf_state_bucket
+            }
+
             while (!ctx.bucketName || !ctx.locktableName) {
                 const randomString = [...new Array(8)]
                     .map(() => Math.floor(Math.random() * 36).toString(36))
@@ -330,6 +335,7 @@ export async function bootstrapEnvironment(inputs: {
                     }
                 }
             }
+
             task.title = context.logger.applyColors(`Generated unique state bucket name ${ctx.bucketName}`, { lowlights: [ctx.bucketName] })
         }
     })
