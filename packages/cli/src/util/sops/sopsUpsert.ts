@@ -28,6 +28,7 @@ export const sopsUpsert = async (input: Input) => {
       values: { ...existingData, ...values },
       filePath,
       context,
+      overwrite: true
     });
   }
 };
