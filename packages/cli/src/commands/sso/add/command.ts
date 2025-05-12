@@ -8,6 +8,7 @@ import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setupAuthentik } from "./setupAuthentik";
+import { setupFederatedAuth } from "./setupFederatedAuth";
 
 export class SSOAddCommand extends PanfactumCommand {
     static override paths = [["sso", "add"]];
@@ -63,6 +64,13 @@ export class SSOAddCommand extends PanfactumCommand {
             },
             task: async (_, mainTask) => {
                 return setupAuthentik(this.context, mainTask);
+            }
+        });
+
+        tasks.add({
+            title: this.context.logger.applyColors("Setup Federated Auth"),
+            task: async (_, mainTask) => {
+                return setupFederatedAuth(this.context, mainTask);
             }
         });
 

@@ -1,18 +1,19 @@
 import { unlinkSync, existsSync } from "fs";
-import { join } from "path";
+import path, { join } from "path";
 import { z } from "zod";
 import authentikAwsSSO from "@/templates/authentik_aws_sso.hcl";
 import authentikAwsSSOWithSCIM from "@/templates/authentik_aws_sso_with_scim.hcl";
 import awsIamIdentityCenterPermissions from "@/templates/aws_iam_identity_center_permissions.hcl";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { InstallClusterStepOptions } from "@/commands/cluster/add/common";
+import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const MANAGEMENT_ENVIRONMENT_ACCESS = {
@@ -36,11 +37,40 @@ const DEVELOPMENT_ENVIRONMENT_ACCESS = {
 }
 
 export async function setupFederatedAuth(
-    options: InstallClusterStepOptions,
+    context: PanfactumContext,
     mainTask: PanfactumTaskWrapper
 ) {
-    const { awsProfile, context, environment, clusterPath, region } =
-        options;
+    const config = await getPanfactumConfig({
+        context,
+        directory: process.cwd(),
+    });
+
+    const {
+        aws_profile: awsProfile,
+        environment,
+        kube_config_context: kubeConfigContext,
+        region,
+    } = config;
+
+    if (!environment || !region || !awsProfile) {
+        throw new CLIError([
+            "Cluster installation must be run from within a valid region-specific directory.",
+            "If you do not have this file structure please ensure you've completed the initial setup steps here:",
+            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
+        ]);
+    }
+
+    if (!kubeConfigContext) {
+        throw new CLIError([
+            "Kubernetes config context must be set in the configuration.",
+        ]);
+    }
+
+    const environmentPath = path.join(
+        context.repoVariables.environments_dir,
+        environment
+    );
+    const clusterPath = path.join(environmentPath, region);
 
 
     const vaultSecretsFile = join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml")
