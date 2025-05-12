@@ -201,6 +201,16 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_cert_issuers",
+      "type": "",
+      "group": ""
+    },
+    {
+      "module": "kube_cert_manager",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_cilium",
       "type": "direct",
       "group": "kubernetes"
