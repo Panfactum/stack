@@ -270,19 +270,33 @@ export async function setupVault(
     },
     {
       title: "Unseal Vault",
-      skip: async () => {
-        const data = await readYAMLFile({
+      skip: async (ctx) => {
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
+
+        const { stdout } = await execute({
+          command: [
+            "kubectl",
+            "exec",
+            "-i",
+            "vault-0",
+            "--namespace=vault",
+            "--context",
+            ctx.kubeContext,
+            "--",
+            "vault",
+            "status",
+            "-format=json",
+          ],
           context,
-          filePath: join(clusterPath, MODULES.KUBE_VAULT, "module.yaml"),
-          validationSchema: z.object({
-            extra_inputs: z.object({
-              wait: z.boolean(),
-            })
-          }),
-          throwOnEmpty: false,
-          throwOnMissing: false,
-        })
-        return !!data?.extra_inputs?.wait;
+          workingDirectory: process.cwd(),
+          errorMessage: "Failed to check Vault status",
+        });
+
+        const statusData = JSON.parse(stdout.trim());
+
+        return !statusData.sealed
       },
       task: async (ctx) => {
         if (!ctx.kubeContext) {
