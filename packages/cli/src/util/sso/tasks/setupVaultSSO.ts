@@ -1,22 +1,42 @@
 import { join } from "node:path";
 import { z } from "zod";
 import authentikVaultSSO from "@/templates/authentik_vault_sso.hcl";
+import vaultAuthOIDC from "@/templates/vault_auth_oidc.hcl";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
-import type { InstallClusterStepOptions } from "@/commands/cluster/add/common";
+import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-export async function deployVaultSSO(
-    options: InstallClusterStepOptions,
+export async function setupVaultSSO(
+    context: PanfactumContext,
     mainTask: PanfactumTaskWrapper
 ) {
-    const { awsProfile, config, context, environment, region } =
-        options;
+
+    const config = await getPanfactumConfig({
+        context,
+        directory: process.cwd(),
+    });
+
+    const {
+        aws_profile: awsProfile,
+        environment,
+        region,
+    } = config;
+
+    if (!environment || !region || !awsProfile) {
+        throw new CLIError([
+            "Cluster installation must be run from within a valid region-specific directory.",
+            "If you do not have this file structure please ensure you've completed the initial setup steps here:",
+            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
+        ]);
+    }
 
     const vaultRootToken = config.vault_token
 
@@ -110,6 +130,47 @@ export async function deployVaultSSO(
                 })
             },
         },
+        await buildDeployModuleTask<Context>({
+            taskTitle: "Deploy Vault OIDC",
+            context,
+            environment,
+            region,
+            module: MODULES.VAULT_AUTH_OIDC,
+            skipIfAlreadyApplied: true,
+            hclIfMissing: await Bun.file(vaultAuthOIDC).text(),
+            inputUpdates: {
+                client_id: defineInputUpdate({
+                    schema: z.string(),
+                    update: (_, ctx) => ctx.client_id!,
+                }),
+                oidc_discovery_url: defineInputUpdate({
+                    schema: z.string(),
+                    update: (_, ctx) => ctx.oidc_discovery_url!,
+                }),
+                oidc_redirect_uris: defineInputUpdate({
+                    schema: z.array(z.string()),
+                    update: (_, ctx) => ctx.oidc_redirect_uris,
+                }),
+                oidc_issuer: defineInputUpdate({
+                    schema: z.string(),
+                    update: (_, ctx) => ctx.oidc_issuer!,
+                }),
+            },
+        }),
+        {
+            title: "Removing static Vault credentials",
+            task: async () => {
+                await upsertConfigValues({
+                    context,
+                    environment,
+                    region,
+                    values: {
+                        vault_addr: undefined
+
+                    }
+                });
+            },
+        }
     ])
 
     return tasks
