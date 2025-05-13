@@ -24,7 +24,7 @@ import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
 import { setupVPCandECR } from "./setupVPCandECR";
-import { getPanfactumConfig } from "../../../util/config/getPanfactumConfig";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -237,6 +237,8 @@ export class ClusterAddCommand extends PanfactumCommand {
         },
         context: this.context,
       });
+
+      config.kube_domain = `${subdomain}.${ancestorDomain}`;
     }
 
     /***********************************************
@@ -278,6 +280,7 @@ export class ClusterAddCommand extends PanfactumCommand {
       kubeConfigContext,
       region,
       clusterPath,
+      config,
       slaTarget: confirmedSLATarget
     };
 

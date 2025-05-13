@@ -19,7 +19,7 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import type { InstallClusterStepOptions } from "./common";
+import { type InstallClusterStepOptions, refreshConfig } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const RECOVER_KEYS_SCHEMA = z.object({
@@ -62,26 +62,23 @@ export async function setupVault(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region, kubeConfigContext } =
+  const { awsProfile, context, environment, clusterPath, region, kubeConfigContext, config } =
     options;
 
-  const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
+  const kubeDomain = config.kube_domain;
+
+  if (!kubeDomain) {
+    throw new CLIError("Kube domain not found in config");
+  }
+
   const vaultDomain = `vault.${kubeDomain}`;
 
   let vaultRootToken: string | undefined;
   let vaultRecoveryKeys: string[] | undefined;
+
   if (await fileExists(join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"))) {
 
-    // FIX: @seth - The vault token should be found using getPanfactumConfig
-    const vaultSecrets = await sopsDecrypt({
-      filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-      context,
-      validationSchema: z.object({
-        root_token: z.string(),
-      }),
-    });
-
-    if (!vaultSecrets) {
+    if (!config.vault_token) {
       throw new CLIError('Was not able to find vault token.')
     }
 
@@ -97,10 +94,9 @@ export async function setupVault(
       throw new CLIError('Was not able to find vault recovery keys.')
     }
 
-    const { root_token: rootToken } = vaultSecrets;
     const { recovery_keys: recoveryKeys } = vaultRecovery;
 
-    vaultRootToken = rootToken;
+    vaultRootToken = config.vault_token;
     vaultRecoveryKeys = recoveryKeys;
   }
 
@@ -246,11 +242,13 @@ export async function setupVault(
 
         await sopsUpsert({
           values: {
-            root_token: recoveryKeys!.root_token,
+            vault_token: recoveryKeys!.root_token,
           },
           context,
-          filePath: join(modulePath, "secrets.yaml"),
+          filePath: join(clusterPath, "region.secrets.yaml"),
         });
+
+        await refreshConfig(options)
 
         await sopsUpsert({
           values: {

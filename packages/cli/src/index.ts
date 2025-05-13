@@ -2,6 +2,7 @@
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
+import { TestAddCommand } from "./commands/cluster/test/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
@@ -25,7 +26,9 @@ const cli = new Cli<PanfactumContext | BaseContext>({
 cli.register(Builtins.HelpCommand);
 cli.register(Builtins.VersionCommand);
 
+
 // Commands
+cli.register(TestAddCommand);
 cli.register(ClusterAddCommand);
 cli.register(DevShellUpdateCommand)
 cli.register(UpdateModuleStatusCommand)

@@ -6,7 +6,6 @@ import kubeNginxIngressTerragruntHcl from "@/templates/kube_ingress_nginx_terrag
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
@@ -30,23 +29,17 @@ export async function setupInboundNetworking(
     environment,
     clusterPath,
     region,
-    slaTarget
+    slaTarget,
+    config
   } = options;
 
+  const vaultRootToken = config.vault_token
 
-  // FIX: @seth - The vault token should be found using getPanfactumConfig
-  const vaultSecrets = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-    context,
-    validationSchema: z.object({
-      root_token: z.string(),
-    }),
-  });
-
-  if (!vaultSecrets) {
-    throw new CLIError('Was not able to find vault token.')
+  if (!vaultRootToken) {
+    throw new CLIError(
+      "Vault root token not found in config."
+    );
   }
-  const { root_token: vaultRootToken } = vaultSecrets;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
