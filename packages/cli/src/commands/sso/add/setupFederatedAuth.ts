@@ -1,4 +1,3 @@
-import { unlinkSync, existsSync } from "fs";
 import path, { join } from "path";
 import { z } from "zod";
 import authentikAwsSSO from "@/templates/authentik_aws_sso.hcl";
@@ -8,6 +7,7 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
+import { removeFile } from "@/util/fs/removeFile";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
@@ -113,70 +113,86 @@ export async function setupFederatedAuth(
         {
             title: "Get Federated Auth User Configuration",
             task: async (ctx, task) => {
-                const data = await readYAMLFile({
-                    filePath: join(context.repoVariables.environments_dir, "management", "region.yaml"),
+                const globalRegionYAMLData = await readYAMLFile({
+                    filePath: join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, "region.yaml"),
                     context,
                     validationSchema: z.object({
-                        region: z.string(),
+                        aws_region: z.string(),
                     }).passthrough(),
                 })
 
-                if (!data?.region) {
+                if (!globalRegionYAMLData?.aws_region) {
                     throw new CLIError("No region found in management/region.yaml")
                 }
 
-                // TODO: resumability
+                const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
 
-                const identityCenterURLChanged = await context.logger.confirm({
-                    task,
-                    explainer: `
-                    We need to setup IAM Identity Center in the ${data.region} region.
-                    Follow these instruction to change the portal URL:
-                    https://docs.aws.amazon.com/singlesignon/latest/userguide/howtochangeURL.html
-                    Keep the page open when you're done.
-                    `,
-                    message: "Have you changed your portal URL?",
-                    default: true,
-                })
+                ctx.awsAcsUrl = originalInputs?.aws_acs_url
+                ctx.awsSignInUrl = originalInputs?.aws_sign_in_url
+                ctx.awsIssuer = originalInputs?.aws_issuer
+                ctx.awsScimUrl = originalInputs?.aws_scim_url
 
-                if (!identityCenterURLChanged) {
-                    throw new CLIError("You must change your portal URL before continuing.")
+                if (ctx.awsScimUrl) {
+                    task.skip("Already have Federated Auth configuration, skipping...");
+                    return
                 }
 
-                const navigatedToExternIdPPage = await context.logger.confirm({
-                    task,
-                    explainer: `
-                    We need some additional information from the IAM Identity Center page.
-                    1. Select "Settings' from the side panel.
-                    2. Under the "Identity Source" tab, select "Change Identity Source" from the "Actions" dropdown.
-                    3. Select "External Identity Provider" and click "Next".
-                    Keep this page open as we will need to copy some information from it now.
-                    `,
-                    message: "Do you have the External Identity Provider page open?",
-                    default: true,
-                })
+                if (!ctx.awsAcsUrl || !ctx.awsSignInUrl || !ctx.awsIssuer) {
+                    if (!ctx.awsSignInUrl) {
+                        const identityCenterURLChanged = await context.logger.confirm({
+                            task,
+                            explainer: "We need to setup IAM Identity Center in the ${globalRegionYAMLData.aws_region} region.\n\n" +
+                                "Follow these instruction to change the portal URL:\n\n" +
+                                "https://docs.aws.amazon.com/singlesignon/latest/userguide/howtochangeURL.html\n\n" +
+                                "Keep the page open when you're done.",
+                            message: "Have you changed your portal URL?",
+                            default: true,
+                        })
 
-                if (!navigatedToExternIdPPage) {
-                    throw new CLIError("You must have the External Identity Provider page open before continuing.")
+                        if (!identityCenterURLChanged) {
+                            throw new CLIError("You must change your portal URL before continuing.")
+                        }
+                    }
+
+                    const navigatedToExternIdPPage = await context.logger.confirm({
+                        task,
+                        explainer: "We need some additional information from the IAM Identity Center page.\n\n" +
+                            "1. Select \"Settings\" from the side panel.\n\n" +
+                            "2. Under the 'Identity Source' tab, select \"Change Identity Source\" from the \"Actions\" dropdown.\n\n" +
+                            "3. Select \"External Identity Provider\" and click \"Next\".\n\n" +
+                            "Keep this page open as we will need to copy some information from it now.",
+                        message: "Do you have the External Identity Provider page open?",
+                        default: true,
+                    })
+
+                    if (!navigatedToExternIdPPage) {
+                        throw new CLIError("You must have the External Identity Provider page open before continuing.")
+                    }
+
+                    if (!ctx.awsSignInUrl) {
+                        ctx.awsSignInUrl = await context.logger.input({
+                            task,
+                            message: "Enter the AWS access portal sign-in URL",
+                            required: true,
+                        })
+                    }
+
+                    if (!ctx.awsAcsUrl) {
+                        ctx.awsAcsUrl = await context.logger.input({
+                            task,
+                            message: "Enter the IAM Identity Center Assertion Consumer Service (ACS) URL",
+                            required: true,
+                        })
+                    }
+
+                    if (!ctx.awsIssuer) {
+                        ctx.awsIssuer = await context.logger.input({
+                            task,
+                            message: "Enter the IAM Identity Center issuer URL",
+                            required: true,
+                        })
+                    }
                 }
-
-                ctx.awsAcsUrl = await context.logger.input({
-                    task,
-                    message: "Enter the IAM Identity Center Assertion Consumer Service (ACS) URL",
-                    required: true,
-                })
-
-                ctx.awsSignInUrl = await context.logger.input({
-                    task,
-                    message: "Enter the AWS access portal sign-in URL",
-                    required: true,
-                })
-
-                ctx.awsIssuer = await context.logger.input({
-                    task,
-                    message: "Enter the IAM Identity Center issuer URL",
-                    required: true,
-                })
             }
         },
         await buildDeployModuleTask<Context>({
@@ -226,13 +242,11 @@ export async function setupFederatedAuth(
 
                 const identityCenterURLChanged = await context.logger.confirm({
                     task,
-                    explainer: `
-                    Next we will setup user synchronization from Authentik to AWS IAM Identity Center.
-                    1. Login to the Authentik dashboard at https://${data.extra_inputs.domain}
-                    2. Click the "Admin interface" button in the top right.
-                    3. Navigate to "Applications" > "Providers" and select the "aws" provider.
-                    4. Under "Related objects" click the "Download" button for the Metadata object.
-                    `,
+                    explainer: "Next we will setup user synchronization from Authentik to AWS IAM Identity Center.\n\n" +
+                        `1. Login to the Authentik dashboard at https://${data.extra_inputs.domain}\n\n` +
+                        "2. Click the \"Admin interface\" button in the top right.\n\n" +
+                        "3. Navigate to \"Applications\" > \"Providers\" and select the \"aws\" provider.\n\n" +
+                        "4. Under \"Related objects\" click the \"Download\" button for the Metadata object.",
                     message: "Have you downloaded the metadata from Authentik?",
                     default: true,
                 })
@@ -243,14 +257,12 @@ export async function setupFederatedAuth(
 
                 const uploadedMetadataToAWS = await context.logger.confirm({
                     task,
-                    explainer: `
-                    Next we will upload the metadata to AWS IAM Identity Center.
-                    1. Go back to AWS Identity Center which you opened earlier.
-                    2. Under "IdP SAML metadata," use the "Choose file" button to upload the metadata you just downloaded.
-                    3. When that is done click "Next".
-                    4. Type "ACCEPT" and click "Change identity source."
-                    5. You should now see a pop-up titled "Automatic provisioning". Click the "Enable" button.
-                    `,
+                    explainer: "Next we will upload the metadata to AWS IAM Identity Center.\n\n" +
+                        "1. Go back to AWS Identity Center which you opened earlier.\n\n" +
+                        "2. Under \"IdP SAML metadata,\" use the \"Choose file\" button to upload the metadata you just downloaded.\n\n" +
+                        "3. When that is done click \"Next\".\n\n" +
+                        "4. Type \"ACCEPT\" and click \"Change identity source.\"\n\n" +
+                        "5. You should now see a pop-up titled \"Automatic provisioning\". Click the \"Enable\" button.",
                     message: "Have you completed the steps above?",
                     default: true,
                 })
@@ -276,20 +288,18 @@ export async function setupFederatedAuth(
                 });
 
                 // Delete the terragrunt.hcl file for the Authentik AWS SSO module
-                // We do this to 
+                // We do this to write a new updated one in the next step
                 const terragruntFilePath = join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "terragrunt.hcl");
-                if (existsSync(terragruntFilePath)) {
-                    unlinkSync(terragruntFilePath);
-                }
+                await removeFile(terragruntFilePath)
             }
         },
         await buildDeployModuleTask<Context>({
-            taskTitle: "Deploy Authentik AWS SSO",
+            taskTitle: "Update Authentik AWS SSO with SCIM",
             context,
             environment,
             region,
             env: { ...context.env, VAULT_TOKEN: vaultRootToken },
-            skipIfAlreadyApplied: true,
+            skipIfAlreadyApplied: false,
             module: MODULES.AUTHENTIK_AWS_SSO,
             hclIfMissing: await Bun.file(authentikAwsSSOWithSCIM).text(),
             inputUpdates: {
@@ -308,12 +318,10 @@ export async function setupFederatedAuth(
             task: async (_, task) => {
                 const reRanSync = await context.logger.confirm({
                     task,
-                    explainer: `
-                    Next we will sync the users for the first time.
-                    1. Login to the Authentik dashboard.
-                    2. Navigate to "Applications" > "Providers" and select the "aws-scim" provider.
-                    3. Under "Sync status" click "Run sync again".
-                    `,
+                    explainer: "Next we will sync the users for the first time.\n\n" +
+                        "1. Login to the Authentik dashboard.\n\n" +
+                        "2. Navigate to \"Applications\" > \"Providers\" and select the \"aws-scim\" provider.\n\n" +
+                        "3. Under \"Sync status\" click \"Run sync again\".",
                     message: "Have you run the sync?",
                     default: true,
                 })
@@ -409,4 +417,21 @@ export async function setupFederatedAuth(
     ])
 
     return tasks;
+}
+
+async function getInputsFromAuthentikAWSSSOModule(context: PanfactumContext, orgModuleYAMLPath: string) {
+    const originalInputs = await readYAMLFile({
+        filePath: orgModuleYAMLPath,
+        context,
+        validationSchema: z.object({
+            extra_inputs: z.object({
+                aws_acs_url: z.string().optional(),
+                aws_sign_in_url: z.string().optional(),
+                aws_issuer: z.string().optional(),
+                aws_scim_enabled: z.boolean().optional(),
+                aws_scim_url: z.string().optional()
+            }).passthrough().optional().default({})
+        }).passthrough()
+    })
+    return originalInputs?.extra_inputs ?? {}
 }
