@@ -83,7 +83,6 @@ export async function setupLinkerd(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_LINKERD,
-              initModule: true,
               hclIfMissing: await Bun.file(kubeLinkerdTerragruntHcl).text(),
             }),
           ],

@@ -121,7 +121,6 @@ export async function setupInboundNetworking(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_AWS_LB_CONTROLLER,
-              initModule: true,
               hclIfMissing: await Bun.file(awsLbController).text(),
               // TODO: @jack - This should come from the aws_eks module
               inputUpdates: {
@@ -146,7 +145,6 @@ export async function setupInboundNetworking(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_EXTERNAL_DNS,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 kubeExternalDnsTerragruntHcl
               ).text(),
@@ -163,7 +161,6 @@ export async function setupInboundNetworking(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_INGRESS_NGINX,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 kubeNginxIngressTerragruntHcl
               ).text(),

@@ -32,7 +32,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
     environment: string;
     region: string;
     module: string;
-    initModule?: boolean; // should init be run
+    forceInitModule?: boolean; // should init force run (even if it looks unnecessary)
     hclIfMissing?: string; // contents of the HCL file to create if the module doesn't already exist
     taskTitle?: string;
     realModuleName?: string; // if the `module` string is different from the Panfactum module to actually deploy (e.g., `sops` => `aws_kms_encryption_key`)
@@ -55,7 +55,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
         imports = {},
         inputUpdates = {},
         postDeployInputUpdates = {},
-        initModule = true,
+        forceInitModule = false,
         taskTitle = "Deploy module",
         skipIfAlreadyApplied = false,
     } = inputs;
@@ -68,6 +68,8 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
     );
     const moduleHCLPath = join(moduleDir, "terragrunt.hcl");
     const moduleYAMLPath = join(moduleDir, "module.yaml");
+
+    const status = await getModuleStatus({ context, environment, region, module })
 
     const updateModuleYAML = async (updates: InputUpdates<T>, ctx: T) => {
         for (const input of Object.keys(updates)) {
@@ -194,7 +196,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             // If needed, init the module
             //////////////////////////////////////////////////////////////
-            if (initModule) {
+            if ((status.init_status !== "success" && status.init_status !== "running") || forceInitModule) {
                 subtasks.add({
                     title: "Initialize module",
                     task: async (_, task) => {

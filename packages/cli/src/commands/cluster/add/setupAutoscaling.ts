@@ -58,7 +58,6 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: false,
       module: MODULES.VAULT_CORE_RESOURCES,
-      initModule: false,
       env: {
         ...process.env, //TODO: @seth Use context.env
         VAULT_TOKEN: vaultRootToken,
@@ -75,7 +74,6 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_METRICS_SERVER,
-      initModule: true,
       hclIfMissing: await Bun.file(
         kubeMetricsServerTerragruntHcl
       ).text(),
@@ -91,7 +89,6 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_VPA,
-      initModule: true,
       hclIfMissing: await Bun.file(kubeVpaTerragruntHcl).text(),
     }),
     {
@@ -120,7 +117,6 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_KARPENTER,
-      initModule: true,
       hclIfMissing: await Bun.file(
         kubeKarpenterTerragruntHcl
       ).text(),
@@ -154,7 +150,6 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_KARPENTER_NODE_POOLS,
-      initModule: true,
       hclIfMissing: await Bun.file(
         kubeKarpenterNodePoolsTerragruntHcl
       ).text(),
@@ -177,7 +172,6 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_SCHEDULER,
-      initModule: true,
       hclIfMissing: await Bun.file(
         kubeSchedulerTerragruntHcl
       ).text(),

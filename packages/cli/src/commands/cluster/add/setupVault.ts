@@ -132,7 +132,6 @@ export async function setupVault(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_VAULT,
-      initModule: true,
       hclIfMissing: await Bun.file(kubeVaultTemplate).text(),
       inputUpdates: {
         vault_domain: defineInputUpdate({
@@ -399,7 +398,6 @@ export async function setupVault(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.VAULT_CORE_RESOURCES,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 vaultCoreResourcesTemplate
               ).text(),

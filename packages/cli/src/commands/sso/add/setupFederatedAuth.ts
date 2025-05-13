@@ -157,7 +157,6 @@ export async function setupFederatedAuth(
             env: { ...context.env, VAULT_TOKEN: vaultRootToken },
             skipIfAlreadyApplied: true,
             module: MODULES.AUTHENTIK_AWS_SSO,
-            initModule: true,
             hclIfMissing: await Bun.file(authentikAwsSSO).text(),
             inputUpdates: {
                 aws_acs_url: defineInputUpdate({
@@ -262,7 +261,6 @@ export async function setupFederatedAuth(
             env: { ...context.env, VAULT_TOKEN: vaultRootToken },
             skipIfAlreadyApplied: true,
             module: MODULES.AUTHENTIK_AWS_SSO,
-            initModule: false,
             hclIfMissing: await Bun.file(authentikAwsSSOWithSCIM).text(),
             inputUpdates: {
                 aws_scim_url: defineInputUpdate({
@@ -356,7 +354,6 @@ export async function setupFederatedAuth(
             environment: MANAGEMENT_ENVIRONMENT,
             region: GLOBAL_REGION,
             module: MODULES.AWS_IAM_IDENTITY_CENTER_PERMISSIONS,
-            initModule: true,
             hclIfMissing: await Bun.file(awsIamIdentityCenterPermissions).text(),
             inputUpdates: {
                 account_access_configuration: defineInputUpdate({

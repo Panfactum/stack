@@ -26,7 +26,6 @@ export async function setupPolicyController(
       skipIfAlreadyApplied: true,
       taskTitle: "Deploy controller",
       module: MODULES.KUBE_KYVERNO,
-      initModule: true,
       hclIfMissing: await Bun.file(kyvernoTerragruntHcl).text(),
     }),
     await buildDeployModuleTask({
@@ -36,7 +35,6 @@ export async function setupPolicyController(
       skipIfAlreadyApplied: true,
       taskTitle: "Deploy default policies",
       module: MODULES.KUBE_POLICIES,
-      initModule: true,
       hclIfMissing: await Bun.file(kubePoliciesTerragruntHcl).text(),
     }),
     {

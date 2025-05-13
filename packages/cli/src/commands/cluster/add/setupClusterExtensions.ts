@@ -98,7 +98,6 @@ export async function setupClusterExtensions(
                       region,
                       skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_BASTION,
-                      initModule: true,
                       hclIfMissing: await Bun.file(
                         kubeBastionTerragruntHcl
                       ).text(),
@@ -131,7 +130,6 @@ export async function setupClusterExtensions(
                       region,
                       skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER,
-                      initModule: true,
                       hclIfMissing: await Bun.file(
                         kubeExternalSnapshotterTerragruntHcl
                       ).text(),
@@ -147,7 +145,6 @@ export async function setupClusterExtensions(
                       region,
                       skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_VELERO,
-                      initModule: true,
                       hclIfMissing: await Bun.file(
                         kubeVeleroTerragruntHcl
                       ).text(),
@@ -168,7 +165,6 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_KEDA,
-              initModule: true,
               hclIfMissing: await Bun.file(kubeKedaTerragruntHcl).text(),
             }),
             await buildDeployModuleTask({
@@ -182,7 +178,6 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_RELOADER,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 kubeReloaderTerragruntHcl
               ).text(),
@@ -198,7 +193,6 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_NODE_IMAGE_CACHE_CONTROLLER,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 kubeNodeImageCacheControllerTerragruntHcl
               ).text(),
@@ -214,7 +208,6 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_PVC_AUTORESIZER,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 kubePvcAutoresizerTerragruntHcl
               ).text(),
@@ -230,7 +223,6 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_DESCHEDULER,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 kubeDeschedulerTerragruntHcl
               ).text(),
@@ -246,7 +238,6 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_CLOUDNATIVE_PG,
-              initModule: true,
               hclIfMissing: await Bun.file(postgresTerragruntHcl).text(),
             }),
             await buildDeployModuleTask({

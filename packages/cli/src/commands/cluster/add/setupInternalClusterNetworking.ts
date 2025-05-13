@@ -26,7 +26,6 @@ export async function setupInternalClusterNetworking(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_CILIUM,
-      initModule: true,
       hclIfMissing: await Bun.file(kubeCiliumTerragruntHcl).text(),
     }),
     await buildDeployModuleTask({
@@ -36,7 +35,6 @@ export async function setupInternalClusterNetworking(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.KUBE_CORE_DNS,
-      initModule: true,
       hclIfMissing: await Bun.file(kubeCoreDnsTerragruntHcl).text(),
     }),
   ]);

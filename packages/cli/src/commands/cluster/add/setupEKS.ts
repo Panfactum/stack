@@ -153,7 +153,6 @@ export async function setupEKS(
       region,
       skipIfAlreadyApplied: true,
       module: MODULES.AWS_EKS,
-      initModule: true,
       hclIfMissing: await Bun.file(awsEksTemplate).text(),
       inputUpdates: {
         extra_superuser_principal_arns: defineInputUpdate({

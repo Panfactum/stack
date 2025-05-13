@@ -277,7 +277,6 @@ export async function setupAuthentik(
             environment,
             region,
             module: MODULES.AWS_SES_DOMAIN,
-            initModule: true,
             hclIfMissing: await Bun.file(kubeSESDomainHcl).text(),
             inputUpdates: {
                 domain: defineInputUpdate({
@@ -297,7 +296,6 @@ export async function setupAuthentik(
             environment,
             region,
             module: MODULES.KUBE_AUTHENTIK,
-            initModule: true,
             hclIfMissing: await Bun.file(kubeAuthentikHcl).text(),
             inputUpdates: {
                 domain: defineInputUpdate({
@@ -596,7 +594,6 @@ spec:
                         },
                         skipIfAlreadyApplied: true,
                         module: MODULES.AUTHENTIK_CORE_RESOURCES,
-                        initModule: true,
                         hclIfMissing: await Bun.file(authentikCoreResourcesHcl).text(),
                         inputUpdates: {
                             // TODO: this should be the root domain

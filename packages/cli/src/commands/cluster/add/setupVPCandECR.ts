@@ -347,7 +347,6 @@ export async function setupVPCandECR(
                       region,
                       skipIfAlreadyApplied: true,
                       module: MODULES.AWS_VPC,
-                      initModule: true,
                       hclIfMissing:
                         await Bun.file(awsVpcTerragruntHcl).text(),
                       inputUpdates: {
@@ -390,7 +389,6 @@ export async function setupVPCandECR(
               region,
               skipIfAlreadyApplied: true,
               module: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
-              initModule: true,
               hclIfMissing: await Bun.file(
                 awsEcrPullThroughCacheTerragruntHcl
               ).text(),
