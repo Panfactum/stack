@@ -442,6 +442,7 @@ export async function setupFederatedAuth(
             region: GLOBAL_REGION,
             module: MODULES.AWS_IAM_IDENTITY_CENTER_PERMISSIONS,
             hclIfMissing: await Bun.file(awsIamIdentityCenterPermissions).text(),
+            skipIfAlreadyApplied: true,
             inputUpdates: {
                 account_access_configuration: defineInputUpdate({
                     schema: z.record(z.string(), z.object({
