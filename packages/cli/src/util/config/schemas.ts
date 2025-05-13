@@ -81,6 +81,7 @@ export const PANFACTUM_CONFIG_SCHEMA = z.object({
 
   // Vault Provider
   vault_addr: z.string().optional(),
+  vault_token: z.string().optional(),
 
   // Authentik Provider
   authentik_url: z.string().optional(),

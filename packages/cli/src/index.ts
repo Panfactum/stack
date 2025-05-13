@@ -25,6 +25,7 @@ const cli = new Cli<PanfactumContext | BaseContext>({
 cli.register(Builtins.HelpCommand);
 cli.register(Builtins.VersionCommand);
 
+
 // Commands
 cli.register(ClusterAddCommand);
 cli.register(DevShellUpdateCommand)

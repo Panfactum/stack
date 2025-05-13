@@ -12,7 +12,6 @@ import kubeVeleroTerragruntHcl from "@/templates/kube_velero_terragrunt.hcl" wit
 import { getIdentity } from "@/util/aws/getIdentity";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { CLIError } from "@/util/error/error";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import {
@@ -27,23 +26,16 @@ export async function setupClusterExtensions(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region } =
+  const { awsProfile, context, environment, clusterPath, region, config } =
     options;
 
+  const vaultRootToken = config.vault_token
 
-  // FIX: @seth - The vault token should be found using getPanfactumConfig
-  const vaultSecrets = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-    context,
-    validationSchema: z.object({
-      root_token: z.string(),
-    }),
-  });
-
-  if (!vaultSecrets) {
-    throw new CLIError('Was not able to find vault token.')
+  if (!vaultRootToken) {
+    throw new CLIError(
+      "Vault root token not found in config."
+    );
   }
-  const { root_token: vaultRootToken } = vaultSecrets;
 
 
   const shouldSkipNodePoolsAdjustment = async () => {

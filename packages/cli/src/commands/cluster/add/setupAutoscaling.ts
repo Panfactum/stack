@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { z } from "zod";
 import kubeKarpenterNodePoolsTerragruntHcl from "@/templates/kube_karpenter_node_pools_terragrunt.hcl" with { type: "file" };
 import kubeKarpenterTerragruntHcl from "@/templates/kube_karpenter_terragrunt.hcl" with { type: "file" };
@@ -8,7 +7,6 @@ import kubeVpaTerragruntHcl from "@/templates/kube_vpa_terragrunt.hcl" with { ty
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
@@ -21,22 +19,16 @@ export async function setupAutoscaling(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region, slaTarget } =
+  const { awsProfile, context, environment, region, slaTarget, config } =
     options;
 
-  // FIX: @seth - The vault token should be found using getPanfactumConfig
-  const vaultSecrets = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-    context,
-    validationSchema: z.object({
-      root_token: z.string(),
-    }),
-  });
+  const vaultRootToken = config.vault_token
 
-  if (!vaultSecrets) {
-    throw new CLIError('Was not able to find vault token.')
+  if (!vaultRootToken) {
+    throw new CLIError(
+      "Vault root token not found in config."
+    );
   }
-  const { root_token: vaultRootToken } = vaultSecrets;
 
   interface Context {
     vaultProxyPid?: number;

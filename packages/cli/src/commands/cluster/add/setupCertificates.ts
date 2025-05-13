@@ -3,7 +3,6 @@ import { z } from "zod";
 import kubeCertificatesTemplate from "@/templates/kube_certificates.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -19,23 +18,17 @@ export async function setupCertificates(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, clusterPath, context, domains, environment, region } = options;
+  const { awsProfile, clusterPath, context, domains, environment, region, config } = options;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
-  // FIX: @seth - The vault token should be found using getPanfactumConfig
-  const vaultSecrets = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-    context,
-    validationSchema: z.object({
-      root_token: z.string(),
-    }),
-  });
+  const vaultRootToken = config.vault_token
 
-  if (!vaultSecrets) {
-    throw new CLIError('Was not able to find vault token.')
+  if (!vaultRootToken) {
+    throw new CLIError(
+      "Vault root token not found in config."
+    );
   }
-  const { root_token: vaultRootToken } = vaultSecrets;
 
   interface Context {
     alertEmail?: string;

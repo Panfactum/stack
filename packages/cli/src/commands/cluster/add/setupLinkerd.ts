@@ -3,7 +3,6 @@ import { z } from "zod";
 import kubeLinkerdTerragruntHcl from "@/templates/kube_linkerd_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
@@ -17,22 +16,15 @@ export async function setupLinkerd(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region } = options;
+  const { awsProfile, context, environment, clusterPath, region, config } = options;
 
+  const vaultRootToken = config.vault_token
 
-  // FIX: @seth - The vault token should be found using getPanfactumConfig
-  const vaultSecrets = await sopsDecrypt({
-    filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"),
-    context,
-    validationSchema: z.object({
-      root_token: z.string(),
-    }),
-  });
-
-  if (!vaultSecrets) {
-    throw new CLIError('Was not able to find vault token.')
+  if (!vaultRootToken) {
+    throw new CLIError(
+      "Vault root token not found in config."
+    );
   }
-  const { root_token: vaultRootToken } = vaultSecrets;
 
   interface Context {
     kubeContext?: string;
