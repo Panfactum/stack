@@ -4,6 +4,7 @@ import authentikAwsSSO from "@/templates/authentik_aws_sso.hcl";
 import authentikAwsSSOWithSCIM from "@/templates/authentik_aws_sso_with_scim.hcl";
 import awsIamIdentityCenterPermissions from "@/templates/aws_iam_identity_center_permissions.hcl";
 import { getIdentity } from "@/util/aws/getIdentity";
+import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
@@ -13,6 +14,7 @@ import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { upsertPFYAMLFile } from "@/util/yaml/upsertPFYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -26,7 +28,7 @@ const PRODUCTION_ENVIRONMENT_ACCESS = {
     superuser_groups: ["superusers"],
     admin_groups: ["privileged_engineers"],
     reader_groups: ["engineers"],
-    restricted_reader_groups: ["restricted_engineers", "demo_users"],
+    restricted_reader_groups: ["restricted_engineers"],
     billing_admin_groups: ["billing_admins"]
 }
 
@@ -113,15 +115,13 @@ export async function setupFederatedAuth(
         {
             title: "Get Federated Auth User Configuration",
             task: async (ctx, task) => {
-                const globalRegionYAMLData = await readYAMLFile({
-                    filePath: join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, "region.yaml"),
+                const globalRegionData = await getConfigValuesFromFile({
                     context,
-                    validationSchema: z.object({
-                        aws_region: z.string(),
-                    }).passthrough(),
+                    environment: MANAGEMENT_ENVIRONMENT,
+                    region: GLOBAL_REGION
                 })
 
-                if (!globalRegionYAMLData?.aws_region) {
+                if (!globalRegionData?.aws_region) {
                     throw new CLIError("No region found in management/region.yaml")
                 }
 
@@ -172,7 +172,7 @@ export async function setupFederatedAuth(
                     if (!ctx.awsSignInUrl) {
                         ctx.awsSignInUrl = await context.logger.input({
                             task,
-                            message: "Enter the AWS access portal sign-in URL",
+                            message: "Enter the AWS access portal sign-in URL:",
                             required: true,
                         })
                     }
@@ -180,7 +180,7 @@ export async function setupFederatedAuth(
                     if (!ctx.awsAcsUrl) {
                         ctx.awsAcsUrl = await context.logger.input({
                             task,
-                            message: "Enter the IAM Identity Center Assertion Consumer Service (ACS) URL",
+                            message: "Enter the IAM Identity Center Assertion Consumer Service (ACS) URL:",
                             required: true,
                         })
                     }
@@ -188,7 +188,7 @@ export async function setupFederatedAuth(
                     if (!ctx.awsIssuer) {
                         ctx.awsIssuer = await context.logger.input({
                             task,
-                            message: "Enter the IAM Identity Center issuer URL",
+                            message: "Enter the IAM Identity Center issuer URL:",
                             required: true,
                         })
                     }
@@ -225,25 +225,28 @@ export async function setupFederatedAuth(
         }),
         {
             title: "Get SCIM User Configuration",
-            task: async (ctx, task) => {
-                const data = await readYAMLFile({
-                    filePath: join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml"),
+            skip: async (ctx) => {
+                const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
+                ctx.awsScimUrl = originalInputs?.aws_scim_url
+
+                const secrets = await sopsDecrypt({
                     context,
+                    filePath: join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "secrets.yaml"),
                     validationSchema: z.object({
-                        extra_inputs: z.object({
-                            domain: z.string(),
-                        }).passthrough(),
-                    }).passthrough(),
+                        aws_skim_token: z.string().optional()
+                    })
                 })
 
-                if (!data?.extra_inputs?.domain) {
-                    throw new CLIError(`No domain found for Authentik in ${MODULES.KUBE_AUTHENTIK} module`)
-                }
+                return !secrets?.aws_skim_token || !ctx.awsScimUrl
+            },
+            task: async (ctx, task) => {
+                const authentikModuleFilePath = join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml")
+                const domain = await getAuthentikDomainFromModule(context, authentikModuleFilePath)
 
                 const identityCenterURLChanged = await context.logger.confirm({
                     task,
                     explainer: "Next we will setup user synchronization from Authentik to AWS IAM Identity Center.\n\n" +
-                        `1. Login to the Authentik dashboard at https://${data.extra_inputs.domain}\n\n` +
+                        `1. Login to the Authentik dashboard at https://${domain}\n\n` +
                         "2. Click the \"Admin interface\" button in the top right.\n\n" +
                         "3. Navigate to \"Applications\" > \"Providers\" and select the \"aws\" provider.\n\n" +
                         "4. Under \"Related objects\" click the \"Download\" button for the Metadata object.",
@@ -262,7 +265,8 @@ export async function setupFederatedAuth(
                         "2. Under \"IdP SAML metadata,\" use the \"Choose file\" button to upload the metadata you just downloaded.\n\n" +
                         "3. When that is done click \"Next\".\n\n" +
                         "4. Type \"ACCEPT\" and click \"Change identity source.\"\n\n" +
-                        "5. You should now see a pop-up titled \"Automatic provisioning\". Click the \"Enable\" button.",
+                        "5. You should now see a notification in the middle of the screen titled \"Automatic provisioning\".\n\n" +
+                        "Click the \"Enable\" button and keep the modal open.",
                     message: "Have you completed the steps above?",
                     default: true,
                 })
@@ -271,24 +275,39 @@ export async function setupFederatedAuth(
                     throw new CLIError("You must upload the metadata to AWS before continuing.")
                 }
 
-                ctx.awsScimUrl = await context.logger.input({
-                    task,
-                    message: "Enter the IAM Identity Center SCIM URL",
-                    required: true,
-                })
+                const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
+                ctx.awsScimUrl = originalInputs?.aws_scim_url
 
-                const awsSCIMToken = await context.logger.password({
-                    task,
-                    message: "Enter the AWS SCIM token:",
-                });
-                await sopsUpsert({
-                    values: { aws_scim_token: awsSCIMToken },
+                const skimToken = await sopsDecrypt({
                     context,
                     filePath: join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "secrets.yaml"),
-                });
+                    validationSchema: z.object({
+                        aws_skim_token: z.string().optional()
+                    })
+                })
+
+                if (!ctx.awsScimUrl) {
+                    ctx.awsScimUrl = await context.logger.input({
+                        task,
+                        message: "Enter the SCIM encpoint from the modal:",
+                        required: true,
+                    })
+                }
+
+                if (!skimToken?.aws_skim_token) {
+                    const awsSCIMToken = await context.logger.password({
+                        task,
+                        message: "Enter the Access token from the modal:",
+                    });
+                    await sopsUpsert({
+                        values: { aws_scim_token: awsSCIMToken },
+                        context,
+                        filePath: join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "secrets.yaml"),
+                    });
+                }
 
                 // Delete the terragrunt.hcl file for the Authentik AWS SSO module
-                // We do this to write a new updated one in the next step
+                // We do this to write a new one with the local from secrets.yaml in the next step
                 const terragruntFilePath = join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "terragrunt.hcl");
                 await removeFile(terragruntFilePath)
             }
@@ -315,6 +334,19 @@ export async function setupFederatedAuth(
         }),
         {
             title: "Sync Users and Groups",
+            skip: async () => {
+                const authentikAWSSSOPfFileData = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, ".pf.yaml"),
+                    context,
+                    validationSchema: z
+                        .object({
+                            userSyncComplete: z.boolean().optional(),
+                        })
+                        .passthrough(),
+                });
+
+                return !authentikAWSSSOPfFileData?.userSyncComplete
+            },
             task: async (_, task) => {
                 const reRanSync = await context.logger.confirm({
                     task,
@@ -329,6 +361,16 @@ export async function setupFederatedAuth(
                 if (!reRanSync) {
                     throw new CLIError("You must re-run the sync before continuing.")
                 }
+
+                await upsertPFYAMLFile({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.AUTHENTIK_AWS_SSO,
+                    updates: {
+                        userSyncComplete: true
+                    }
+                })
             }
         },
         {
@@ -336,9 +378,9 @@ export async function setupFederatedAuth(
             task: async (ctx, task) => {
                 const environments = await getEnvironments(context);
                 const environmentsWithAWSAccountId: Array<EnvironmentMeta & { aws_account_id: string }> = [];
-                environments.forEach(async (env) => {
+                for (const environment of environments) {
                     const data = await readYAMLFile({
-                        filePath: join(env.path, "environment.yaml"),
+                        filePath: join(environment.path, "environment.yaml"),
                         context,
                         validationSchema: z.object({
                             aws_account_id: z.string(),
@@ -346,24 +388,31 @@ export async function setupFederatedAuth(
                     })
 
                     if (!data?.aws_account_id) {
-                        throw new CLIError(`No AWS account ID found for environment ${env.name}`)
+                        throw new CLIError(`No AWS account ID found for environment ${environment.name}`)
                     }
 
                     environmentsWithAWSAccountId.push({
-                        ...env,
+                        ...environment,
                         aws_account_id: data.aws_account_id,
                     })
-                })
+                }
                 const productionEnvironments = await context.logger.checkbox({
                     task,
                     message: "Select your production environment(s)",
-                    choices: environmentsWithAWSAccountId.map((env) => ({ name: env.name, value: env })),
+                    choices: environmentsWithAWSAccountId.map((env) => ({ name: env.name, value: env })).filter((env) => env.name !== MANAGEMENT_ENVIRONMENT),
+                    validate: (choices) => {
+                        if (choices.length === 0) {
+                            return 'You must choose at least one production environment.'
+                        }
+
+                        return true
+                    }
                 })
-                const managementEnvironment = environmentsWithAWSAccountId.find(env => env.name === "management");
+                const managementEnvironment = environmentsWithAWSAccountId.find(env => env.name === MANAGEMENT_ENVIRONMENT);
                 if (!managementEnvironment) {
                     throw new CLIError("Management environment not found")
                 }
-                const developmentEnvironments = environmentsWithAWSAccountId.filter(env => env.name !== "management" && !productionEnvironments.map(env => env.name).includes(env.name));
+                const developmentEnvironments = environmentsWithAWSAccountId.filter(env => env.name !== MANAGEMENT_ENVIRONMENT && !productionEnvironments.map(env => env.name).includes(env.name));
                 ctx.accountAccessConfiguration = {
                     management: {
                         account_id: managementEnvironment.aws_account_id,
@@ -434,4 +483,17 @@ async function getInputsFromAuthentikAWSSSOModule(context: PanfactumContext, org
         }).passthrough()
     })
     return originalInputs?.extra_inputs ?? {}
+}
+
+async function getAuthentikDomainFromModule(context: PanfactumContext, orgModuleYAMLPath: string) {
+    const data = await readYAMLFile({
+        filePath: orgModuleYAMLPath,
+        context,
+        validationSchema: z.object({
+            extra_inputs: z.object({
+                domain: z.string(),
+            }).passthrough(),
+        }).passthrough(),
+    })
+    return data?.extra_inputs.domain
 }

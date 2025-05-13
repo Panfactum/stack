@@ -52,15 +52,16 @@ export class SSOAddCommand extends PanfactumCommand {
         tasks.add({
             title: this.context.logger.applyColors("Setup Authentik"),
             skip: async () => {
-                const authentikCoreResourcesConfig = await readYAMLFile({
-                    filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "module.yaml"),
+                const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
+                    filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context: this.context,
                     validationSchema: z
                         .object({
-                            user_setup_complete: z.boolean().optional()
-                        }).passthrough(),
-                });
-                return !!authentikCoreResourcesConfig?.user_setup_complete;
+                            user_setup_complete: z.boolean().optional(),
+                        })
+                        .passthrough(),
+                })
+                return !!authentikCoreResourcesPfYAMLFileData?.user_setup_complete;
             },
             task: async (_, mainTask) => {
                 return setupAuthentik(this.context, mainTask);

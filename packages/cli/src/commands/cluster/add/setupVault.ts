@@ -18,7 +18,6 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -227,14 +226,14 @@ export async function setupVault(
           const data = JSON.parse(stdout.trim());
           recoveryKeys = RECOVER_KEYS_SCHEMA.parse(data);
         } catch (error) {
-          await writeYAMLFile({
-            context,
-            values: {
-              status: "error",
-            },
-            overwrite: true,
-            filePath: join(modulePath, ".pf.yaml"),
-          });
+          // await writeYAMLFile({
+          //   context,
+          //   values: {
+          //     status: "error",
+          //   },
+          //   overwrite: true,
+          //   filePath: join(modulePath, ".pf.yaml"),
+          // });
           parseErrorHandler({
             error,
             errorMessage: "Failed to parse vault operator init",

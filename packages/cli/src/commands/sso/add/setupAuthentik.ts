@@ -19,6 +19,7 @@ import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { upsertPFYAMLFile } from "@/util/yaml/upsertPFYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -126,8 +127,6 @@ export async function setupAuthentik(
                     context,
                     validationSchema: z
                         .object({
-                            adminEmail: z.string().optional(),
-                            adminName: z.string().optional(),
                             extra_inputs: z
                                 .object({
                                     akadmin_email: z.string().optional(),
@@ -140,28 +139,32 @@ export async function setupAuthentik(
                         .passthrough(),
                 });
 
-                // FIX: @seth - You should NEVER read the module.yaml files directly.
-                const originalAuthentikCoreResourcesInputs = await readYAMLFile({
-                    filePath: path.join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "module.yaml"),
+                const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context,
                     validationSchema: z
                         .object({
                             user_setup_complete: z.boolean().optional(),
-                            extra_inputs: z
-                                .object({
-                                    organization_name: z.string().optional(),
-                                })
-                                .passthrough()
-                                .optional()
-                                .default({}),
+                        })
+                        .passthrough(),
+                })
+
+                const kubeAuthentikPfYAMLFileData = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.KUBE_AUTHENTIK, ".pf.yaml"),
+                    context,
+                    validationSchema: z
+                        .object({
+                            adminEmail: z.string().optional(),
+                            adminName: z.string().optional(),
                         })
                         .passthrough(),
                 });
 
+
                 ctx.ancestorDomain = originalSESInputs?.extra_inputs.domain;
                 ctx.authentikRootEmail = originalAuthentikInputs?.extra_inputs.akadmin_email;
-                ctx.authentikAdminEmail = originalAuthentikInputs?.adminEmail;
-                ctx.authentikAdminName = originalAuthentikInputs?.adminName;
+                ctx.authentikAdminEmail = kubeAuthentikPfYAMLFileData?.adminEmail;
+                ctx.authentikAdminName = kubeAuthentikPfYAMLFileData?.adminName;
                 ctx.orgName = originalAuthentikInputs?.extra_inputs.organization_name;
 
                 if (ctx.ancestorDomain && ctx.authentikAdminEmail && ctx.authentikRootEmail && ctx.authentikAdminName && ctx.orgName) {
@@ -169,7 +172,7 @@ export async function setupAuthentik(
                     return;
                 }
 
-                if (!originalAuthentikCoreResourcesInputs?.user_setup_complete) {
+                if (!authentikCoreResourcesPfYAMLFileData?.user_setup_complete) {
                     const notProd = !environment.includes("prod")
                     if (notProd) {
                         const confirmInstall = await context.logger.confirm({
@@ -234,16 +237,16 @@ export async function setupAuthentik(
                             },
                             required: true
                         })
-                        // FIX: @seth - ??? adminEmail does NOT exist on the panfactum config schema
-                        // await updateModuleYAMLFile({
-                        //     context,
-                        //     environment,
-                        //     region,
-                        //     module: MODULES.KUBE_AUTHENTIK,
-                        //     rootUpdates: {
-                        //         adminEmail: ctx.authentikAdminEmail
-                        //     }
-                        // })
+
+                        await upsertPFYAMLFile({
+                            context,
+                            environment,
+                            region,
+                            module: MODULES.KUBE_AUTHENTIK,
+                            updates: {
+                                adminEmail: ctx.authentikAdminEmail
+                            }
+                        })
                     }
 
                     if (!ctx.authentikAdminName) {
@@ -253,16 +256,16 @@ export async function setupAuthentik(
                             message: "Name:",
                             required: true,
                         })
-                        // FIX: @seth - ??? adminName does NOT exist on the panfactum config schema
-                        // await updateModuleYAMLFile({
-                        //     context,
-                        //     environment,
-                        //     region,
-                        //     module: MODULES.KUBE_AUTHENTIK,
-                        //     rootUpdates: {
-                        //         adminName: ctx.authentikAdminName
-                        //     }
-                        // })
+
+                        await upsertPFYAMLFile({
+                            context,
+                            environment,
+                            region,
+                            module: MODULES.KUBE_AUTHENTIK,
+                            updates: {
+                                adminName: ctx.authentikAdminName
+                            }
+                        })
                     }
                 }
             }
@@ -725,26 +728,26 @@ spec:
 
                 // Check if there is an existing token
                 let authentikUserToken: string | undefined
-                const authentikSecretsPath = join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "secrets.yaml")
+                const authentikSecretsPath = join(environmentPath, "environment.secrets.yaml")
                 const data = await sopsDecrypt({
                     filePath: authentikSecretsPath,
                     context,
                     validationSchema: z.object({
-                        authentikUserToken: z.string(),
+                        authentik_token: z.string(),
                     })
                 })
-                if (data?.authentikUserToken) {
+                if (data?.authentik_token) {
                     try {
                         const testAuthentikClient = new CoreApi(new Configuration({
                             basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
                             headers: {
-                                Authorization: `Bearer ${data.authentikUserToken}`,
+                                Authorization: `Bearer ${data.authentik_token}`,
                             }
                         }))
                         await testAuthentikClient.coreGroupsList()
 
                         // If the request succeeds we use the existing token
-                        authentikUserToken = data.authentikUserToken
+                        authentikUserToken = data.authentik_token
                     } catch {
                         // Do nothing we assume the token is invalid or expired
                     }
@@ -754,7 +757,8 @@ spec:
                 if (!authentikUserToken) {
                     // create the API token
                     let token: Token | undefined
-                    const tokenIdentifier = "local-framework-token-" + Date.now()
+                    // If they manually disable the token we will run into identifier collisions
+                    const tokenIdentifier = "local-framework-token" + Date.now()
                     try {
                         token = await originalAuthentikClient.coreTokensRetrieve({
                             identifier: tokenIdentifier,
@@ -769,8 +773,7 @@ spec:
                                     identifier: tokenIdentifier,
                                     intent: IntentEnum.Api,
                                     user: userId,
-                                    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-                                    expiring: true,
+                                    expiring: false,
                                     description:
                                         "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
                                 }
@@ -781,8 +784,7 @@ spec:
                     }
 
                     // We only need to get this the first time they run this command
-                    if (!data?.authentikUserToken) {
-
+                    if (!data?.authentik_token) {
                         let passwordReset: Link
                         try {
                             passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
@@ -792,7 +794,6 @@ spec:
                             throw new CLIError("Failed to get password reset link in Authentik", error);
                         }
                         const passwordResetLink = passwordReset.link;
-
 
                         const openBrowser = await context.logger.confirm({
                             task,
@@ -854,10 +855,10 @@ spec:
                     });
 
                     await sopsUpsert({
-                        filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "secrets.yaml"),
+                        filePath: join(environmentPath, "environment.secrets.yaml"),
                         context,
                         values: {
-                            authentikUserToken,
+                            authentik_token: authentikUserToken,
                             tokenIdentifier
                         }
                     })
@@ -911,16 +912,15 @@ spec:
                     throw new CLIError("Failed to disable bootstrap user in Authentik", error);
                 }
 
-                // FIX: @seth - ??? user_setup_complete is not a part of the panfactum schema????
-                // await updateModuleYAMLFile({
-                //     context,
-                //     environment,
-                //     region,
-                //     module: MODULES.AUTHENTIK_CORE_RESOURCES,
-                //     rootUpdates: {
-                //         user_setup_complete: true
-                //     }
-                // })
+                await upsertPFYAMLFile({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.AUTHENTIK_CORE_RESOURCES,
+                    updates: {
+                        user_setup_complete: true
+                    }
+                })
             }
         }
     ])
