@@ -85,6 +85,7 @@ export const PANFACTUM_CONFIG_SCHEMA = z.object({
 
   // Authentik Provider
   authentik_url: z.string().optional(),
+  authentik_token: z.string().optional()
 }).strict();
 
 export type TGConfigFile = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;

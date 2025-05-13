@@ -8,6 +8,7 @@ import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setupAuthentik } from "./setupAuthentik";
+import { setupFederatedAuth } from "./setupFederatedAuth";
 
 export class SSOAddCommand extends PanfactumCommand {
     static override paths = [["sso", "add"]];
@@ -51,18 +52,26 @@ export class SSOAddCommand extends PanfactumCommand {
         tasks.add({
             title: this.context.logger.applyColors("Setup Authentik"),
             skip: async () => {
-                const authentikCoreResourcesConfig = await readYAMLFile({
-                    filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, "module.yaml"),
+                const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
+                    filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context: this.context,
                     validationSchema: z
                         .object({
-                            user_setup_complete: z.boolean().optional()
-                        }).passthrough(),
-                });
-                return !!authentikCoreResourcesConfig?.user_setup_complete;
+                            user_setup_complete: z.boolean().optional(),
+                        })
+                        .passthrough(),
+                })
+                return !!authentikCoreResourcesPfYAMLFileData?.user_setup_complete;
             },
             task: async (_, mainTask) => {
                 return setupAuthentik(this.context, mainTask);
+            }
+        });
+
+        tasks.add({
+            title: this.context.logger.applyColors("Setup Federated Auth"),
+            task: async (_, mainTask) => {
+                return setupFederatedAuth(this.context, mainTask);
             }
         });
 
