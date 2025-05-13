@@ -501,5 +501,7 @@ inputs = merge(
     pf_module_source = local.use_local_pf_modules ? (local.pf_stack_local_use_relative ? "${local.pf_stack_local_relative_path_from_working_dir}/packages/infrastructure//" : "${local.pf_stack_local_absolute_path}/packages/infrastructure//") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//"
     pf_module_ref    = local.use_local_pf_modules ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : ""
     sla_target       = local.sla_target
+    route53_zones    = local.vars.domains
+    kube_domain      = local.vars.kube_domain
   }
 )

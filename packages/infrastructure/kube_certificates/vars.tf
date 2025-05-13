@@ -123,6 +123,7 @@ variable "alert_email" {
 variable "vault_internal_url" {
   description = "The url to the vault instance for internal cert issuance"
   type        = string
+  default     = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
 variable "aws_iam_ip_allow_list" {

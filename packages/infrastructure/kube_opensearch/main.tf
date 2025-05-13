@@ -182,14 +182,135 @@ locals {
 
   })
 
+  opensearch_yml = yamlencode(merge({
+    "cluster.name" = local.cluster_name
+    "network.host" = "0.0.0.0"
+
+
+    // See https://opster.com/guides/opensearch/opensearch-data-architecture/how-to-configure-opensearch-node-roles/
+    // and https://docs.opensearch.org/docs/latest/tuning-your-cluster/
+    // TODO: In the future, we should provide extra configuration knobs
+    // to allow several different node groups in the cluster, each with specific
+    // roles.
+    "node.roles" = ["cluster_manager", "ingest", "data", "remote_cluster_client"]
+
+    // Bootstrapping
+    "discovery.seed_hosts"                  = ["${local.cluster_name}-headless"]
+    "cluster.initial_cluster_manager_nodes" = [for i in range(var.replica_count) : "${local.cluster_name}-${i}"]
+    "bootstrap.memory_lock"                 = true // prevents swapping
+
+
+    // TLS setup
+    "plugins.security.ssl.certificates_hot_reload.enabled"  = true
+    "plugins.security.ssl.transport.pemkey_filepath"        = "./node-certs/tls.key"
+    "plugins.security.ssl.transport.pemcert_filepath"       = "./node-certs/tls.crt"
+    "plugins.security.ssl.transport.pemtrustedcas_filepath" = "./node-certs/ca.crt"
+    "plugins.security.ssl.transport.enabled_protocols"      = ["TLSv1.3"]
+    "plugins.security.ssl.http.enabled"                     = true
+    "plugins.security.ssl.http.pemkey_filepath"             = "./node-certs/tls.key"
+    "plugins.security.ssl.http.pemcert_filepath"            = "./node-certs/tls.crt"
+    "plugins.security.ssl.http.pemtrustedcas_filepath"      = "./node-certs/ca.crt"
+    "plugins.security.ssl.http.enabled_protocols"           = ["TLSv1.3"]
+
+
+    // Enabble client cert auth
+    "plugins.security.ssl.http.clientauth_mode" = "OPTIONAL"
+
+    // Disable unsave settings
+    "plugins.security.allow_unsafe_democertificates"     = false
+    "plugins.security.system_indices.permission.enabled" = false // only admins can do this
+    "plugins.security.allow_default_init_securityindex"  = false
+
+    // Enable roles
+    "plugins.security.restapi.roles_enabled" = [
+      "all_access",
+      "security_rest_api_access"
+    ]
+
+    // Remote state bucket config
+    "node.attr.remote_store.repository.s3.type"            = "s3"
+    "node.attr.remote_store.repository.s3.settings.bucket" = module.s3_bucket.bucket_name
+    "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.name
+    "s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
+    "s3.client.default.region"                             = data.aws_region.region.name
+    "s3.client.default.endpoint"                           = "s3.${data.aws_region.region.name}.amazonaws.com"
+
+    // Segment Replication
+    // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/segment-replication/index/
+    "cluster.indices.replication.strategy"              = "SEGMENT"
+    "cluster.routing.allocation.balance.prefer_primary" = true
+    "segrep.pressure.enabled"                           = true
+    "node.attr.remote_store.segment.repository"         = "s3"
+    "node.attr.remote_store.translog.repository"        = "s3"
+
+    // Cluster state backups
+    // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/remote-store/remote-cluster-state/
+    "node.attr.remote_store.state.repository"         = "s3"
+    "node.attr.remote_store.routing_table.repository" = "s3"
+    "cluster.remote_store.state.path.prefix"          = "state/"
+    "cluster.remote_store.routing_table.path.prefix"  = "routing/"
+    "cluster.remote_store.publication.enabled"        = true
+    "cluster.remote_store.state.enabled"              = true
+
+    // Security indices
+    "plugins.security.system_indices.enabled" = true
+    "plugins.security.system_indices.indices" = [
+      ".opendistro-alerting-config",
+      ".opendistro-alerting-alert*",
+      ".opendistro-anomaly-results*",
+      ".opendistro-anomaly-detector*",
+      ".opendistro-anomaly-checkpoints",
+      ".opendistro-anomaly-detection-state",
+      ".opendistro-reports-*",
+      ".opendistro-notifications-*",
+      ".opendistro-notebooks",
+      ".opendistro-asynchronous-search-response*"
+    ]
+
+    // Authorize node certs
+    "plugins.security.nodes_dn" = [
+      "CN=${local.cluster_name}.${var.namespace}"
+    ]
+
+    // Authorize admin certs
+    "plugins.security.authcz.admin_dn" = [
+      "CN=superuser.${local.cluster_name}.${var.namespace}"
+    ]
+
+    // Shard management
+    "cluster.allocator.existing_shards_allocator.batch_enabled" = true            // Improved allocator algorithm which improves recovery times (technically experimental, but should be safe)
+    "cluster.routing.allocation.shard_movement_strategy"        = "PRIMARY_FIRST" // Should help prevent a red cluster status if shard movement fails
+    "indices.recovery.max_bytes_per_sec"                        = "0mb"           // Disable recovery rate limiting
+
+    // Disk management
+    "cluster.routing.allocation.disk.watermark.high" = "${min(100 - (var.storage_increase_threshold_percent - 10), 90)}%"
+
+    // Logging adjustments
+    "logger._root"                                                                             = var.log_level
+    "logger.org.opensearch.alerting.util.destinationmigration.DestinationMigrationCoordinator" = "WARN" // See https://github.com/opensearch-project/alerting/issues/1183
+
+    // Slow logs
+    "cluster.search.request.slowlog.threshold.trace" = var.slow_request_log_thresholds.trace
+    "cluster.search.request.slowlog.threshold.debug" = var.slow_request_log_thresholds.debug
+    "cluster.search.request.slowlog.threshold.warn"  = var.slow_request_log_thresholds.warn
+    "cluster.search.request.slowlog.threshold.info"  = var.slow_request_log_thresholds.info
+    "cluster.search.request.slowlog.level"           = var.log_level
+  }, var.extra_cluster_settings))
+
   security_hash = md5("${local.role_mappings}${local.security_config}")
 
-  cluster_name = random_id.id.hex
+  cluster_name    = random_id.id.hex
+  dashboards_name = random_id.dashboards_id.hex
 }
 
 resource "random_id" "id" {
   byte_length = 2
   prefix      = "opensearch-"
+}
+
+resource "random_id" "dashboards_id" {
+  byte_length = 2
+  prefix      = "opensearch-dashboards-"
 }
 
 data "pf_kube_labels" "labels" {
@@ -198,23 +319,6 @@ data "pf_kube_labels" "labels" {
 
 data "pf_metadata" "metadata" {}
 
-module "util" {
-  source = "../kube_workload_utility"
-
-  workload_name                        = local.cluster_name
-  controller_nodes_enabled             = var.controller_nodes_enabled
-  burstable_nodes_enabled              = var.burstable_nodes_enabled
-  spot_nodes_enabled                   = var.spot_nodes_enabled
-  arm_nodes_enabled                    = var.arm_nodes_enabled
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required != null ? var.instance_type_anti_affinity_required : local.sla_target == 3
-  host_anti_affinity_required          = local.sla_target >= 2
-  az_spread_required                   = true // stateful
-  az_spread_preferred                  = true // stateful
-  lifetime_evictions_enabled           = false
-  extra_labels                         = data.pf_kube_labels.labels.labels
-}
 
 module "constants" {
   source = "../kube_constants"
@@ -456,7 +560,7 @@ resource "kubernetes_secret" "security_config" {
   metadata {
     name      = "${local.cluster_name}-security-config"
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   data = {
     "config.yml"        = local.security_config
@@ -504,105 +608,10 @@ resource "kubernetes_config_map" "config" {
   metadata {
     name      = "${local.cluster_name}-config"
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   data = {
-    "opensearch.yml" = yamlencode({
-      "cluster.name" = local.cluster_name
-      "network.host" = "0.0.0.0"
-
-
-      // See https://opster.com/guides/opensearch/opensearch-data-architecture/how-to-configure-opensearch-node-roles/
-      "node.roles" = ["cluster_manager", "ingest", "data", "remote_cluster_client"]
-
-      // Bootstrapping
-      "discovery.seed_hosts"                  = ["${local.cluster_name}-headless"]
-      "cluster.initial_cluster_manager_nodes" = [for i in range(var.replica_count) : "${local.cluster_name}-${i}"]
-      "bootstrap.memory_lock"                 = true // prevents swapping
-
-
-      // TLS setup
-      "plugins.security.ssl.certificates_hot_reload.enabled"  = true
-      "plugins.security.ssl.transport.pemkey_filepath"        = "./node-certs/tls.key"
-      "plugins.security.ssl.transport.pemcert_filepath"       = "./node-certs/tls.crt"
-      "plugins.security.ssl.transport.pemtrustedcas_filepath" = "./node-certs/ca.crt"
-      "plugins.security.ssl.transport.enabled_protocols"      = ["TLSv1.3"]
-      "plugins.security.ssl.http.enabled"                     = true
-      "plugins.security.ssl.http.pemkey_filepath"             = "./node-certs/tls.key"
-      "plugins.security.ssl.http.pemcert_filepath"            = "./node-certs/tls.crt"
-      "plugins.security.ssl.http.pemtrustedcas_filepath"      = "./node-certs/ca.crt"
-      "plugins.security.ssl.http.enabled_protocols"           = ["TLSv1.3"]
-
-
-      // Enabble client cert auth
-      "plugins.security.ssl.http.clientauth_mode" = "OPTIONAL"
-
-      // Disable unsave settings
-      "plugins.security.allow_unsafe_democertificates"     = false
-      "plugins.security.system_indices.permission.enabled" = false // only admins can do this
-      "plugins.security.allow_default_init_securityindex"  = false
-
-
-      // Enable roles
-      "plugins.security.restapi.roles_enabled" = [
-        "all_access",
-        "security_rest_api_access"
-      ]
-
-
-      // Remote state bucket config
-      "node.attr.remote_store.repository.s3.type"            = "s3"
-      "node.attr.remote_store.repository.s3.settings.bucket" = module.s3_bucket.bucket_name
-      "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.name
-      "s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
-      "s3.client.default.region"                             = data.aws_region.region.name
-      "s3.client.default.endpoint"                           = "s3.${data.aws_region.region.name}.amazonaws.com"
-
-      // Segment Replication
-      // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/segment-replication/index/
-      "cluster.indices.replication.strategy"              = "SEGMENT"
-      "cluster.routing.allocation.balance.prefer_primary" = true
-      "segrep.pressure.enabled"                           = true
-
-      // Broken due to https://github.com/opensearch-project/OpenSearch/issues/15902
-      // TODO: Fix
-      # "node.attr.remote_store.segment.repository" = "s3"
-      # "node.attr.remote_store.translog.repository" = "s3"
-
-      // Cluster state backups
-      // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/remote-store/remote-cluster-state/
-      "node.attr.remote_store.state.repository"         = "s3"
-      "node.attr.remote_store.routing_table.repository" = "s3"
-      "cluster.remote_store.state.path.prefix"          = "state/"
-      "cluster.remote_store.routing_table.path.prefix"  = "routing/"
-      "cluster.remote_store.publication.enabled"        = true
-      "cluster.remote_store.state.enabled"              = true
-
-      // Security indices
-      "plugins.security.system_indices.enabled" = true
-      "plugins.security.system_indices.indices" = [
-        ".opendistro-alerting-config",
-        ".opendistro-alerting-alert*",
-        ".opendistro-anomaly-results*",
-        ".opendistro-anomaly-detector*",
-        ".opendistro-anomaly-checkpoints",
-        ".opendistro-anomaly-detection-state",
-        ".opendistro-reports-*",
-        ".opendistro-notifications-*",
-        ".opendistro-notebooks",
-        ".opendistro-asynchronous-search-response*"
-      ]
-
-      // Authorize node certs
-      "plugins.security.nodes_dn" = [
-        "CN=${local.cluster_name}.${var.namespace}"
-      ]
-
-      // Authorize admin certs
-      "plugins.security.authcz.admin_dn" = [
-        "CN=superuser.${local.cluster_name}.${var.namespace}"
-      ]
-    })
+    "opensearch.yml" = local.opensearch_yml
   }
 }
 
@@ -626,7 +635,7 @@ module "opensearch" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.instance_type_anti_affinity_required != null ? var.instance_type_anti_affinity_required : local.sla_target == 3
-  host_anti_affinity_required          = local.sla_target >= 2
+  host_anti_affinity_required          = true
   az_spread_required                   = true
   az_spread_preferred                  = true
   lifetime_evictions_enabled           = false
@@ -671,12 +680,13 @@ module "opensearch" {
   ]
   volume_mounts = {
     "data" = {
-      storage_class   = var.storage_class
-      initial_size_gb = var.storage_initial_gb
-      size_limit_gb   = var.storage_limit_gb
-      increase_gb     = var.storage_increase_gb
-      mount_path      = "/usr/share/opensearch/data"
-      backups_enabled = false
+      storage_class              = var.storage_class
+      initial_size_gb            = var.storage_initial_gb
+      size_limit_gb              = var.storage_limit_gb
+      increase_gb                = var.storage_increase_gb
+      increase_threshold_percent = var.storage_increase_threshold_percent
+      mount_path                 = "/usr/share/opensearch/data"
+      backups_enabled            = false
     }
   }
 
@@ -697,7 +707,7 @@ module "opensearch" {
   }
 
   common_env = {
-    OPENSEARCH_JAVA_OPTS        = "-Xmx512M -Xms512M" // TODO: Dynamic JVM memory sizing
+    OPENSEARCH_JAVA_OPTS        = "-Xmx512M -Xms512M --enable-native-access=ALL-UNNAMED" // TODO: Dynamic JVM memory sizing
     OPENSEARCH_PATH_CONF        = "/usr/share/opensearch/config"
     DISABLE_INSTALL_DEMO_CONFIG = "true" // Needed if using the default entrypoint
   }
@@ -761,4 +771,80 @@ module "security_update_job" {
   }
 
   depends_on = [module.opensearch]
+}
+
+/***************************************
+* OpenSearch Dashboards
+***************************************/
+module "dashboards_util" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = local.dashboards_name
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required != null ? var.instance_type_anti_affinity_required : local.sla_target == 3
+  host_anti_affinity_required          = true
+  az_spread_required                   = local.sla_target >= 2
+  lifetime_evictions_enabled           = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
+resource "helm_release" "opensearch_dashboards" {
+  namespace       = var.namespace
+  name            = random_id.id.hex
+  repository      = "https://opensearch-project.github.io/helm-charts"
+  chart           = "opensearch-dashboards"
+  version         = var.opensearch_version
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
+  recreate_pods   = false
+  wait_for_jobs   = true
+  timeout         = 60 * 15
+  max_history     = 5
+
+  values = [
+    yamlencode({
+      fullnameOverride = local.dashboards_name
+      replicaCount     = 2
+      config = {
+        "opensearch.yml" = local.opensearch_yml
+      }
+
+      affinity                  = module.dashboards_util.affinity
+      topologySpreadConstraints = module.dashboards_util.topology_spread_constraints
+      tolerations               = module.dashboards_util.tolerations
+
+      labels = module.dashboards_util.labels
+    })
+  ]
+  depends_on = [module.opensearch]
+}
+
+
+module "ingress" {
+  source = "../kube_ingress"
+
+  namespace = var.namespace
+  name      = local.dashboards_name
+  domains   = ["opensearch.prod.panfactum.com"]
+  ingress_configs = [
+    {
+      service      = local.dashboards_name
+      service_port = 5601
+    }
+  ]
+  cdn_mode_enabled               = false
+  rate_limiting_enabled          = true
+  cross_origin_isolation_enabled = false
+  cross_origin_opener_policy     = "same-origin-allow-popups" // Required for SSO logins
+  permissions_policy_enabled     = true
+  csp_enabled                    = false
+  cors_enabled                   = false
+
+  depends_on = [helm_release.opensearch_dashboards]
 }

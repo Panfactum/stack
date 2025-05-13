@@ -51,12 +51,6 @@ Description: The domain under which cluster utilities have subdomains registered
 
 Type: `string`
 
-### vault\_internal\_url
-
-Description: The url to the vault instance for internal cert issuance
-
-Type: `string`
-
 ## Optional Inputs
 
 The following input variables are optional (have default values):
@@ -203,6 +197,14 @@ Description: Whether to allow pods to schedule on spot nodes
 Type: `bool`
 
 Default: `true`
+
+### vault\_internal\_url
+
+Description: The url to the vault instance for internal cert issuance
+
+Type: `string`
+
+Default: `"http://vault-active.vault.svc.cluster.local:8200"`
 
 ### vpa\_enabled
 

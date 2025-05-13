@@ -194,6 +194,14 @@ Type: `bool`
 
 Default: `false`
 
+### extra\_cluster\_settings
+
+Description: Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to override existing configuration values. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/).
+
+Type: `map(any)`
+
+Default: `{}`
+
 ### instance\_type\_anti\_affinity\_required
 
 Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
@@ -201,6 +209,14 @@ Description: Whether to enable anti-affinity to prevent pods from being schedule
 Type: `bool`
 
 Default: `null`
+
+### log\_level
+
+Description: The log level for the opensearch pods
+
+Type: `string`
+
+Default: `"WARN"`
 
 ### minimum\_memory\_mb
 
@@ -232,7 +248,7 @@ Description: The version of OpenSearch to deploy. Note that we only test this mo
 
 Type: `string`
 
-Default: `"2.19.1"`
+Default: `"3.0.0"`
 
 ### panfactum\_scheduler\_enabled
 
@@ -273,6 +289,23 @@ Description: Additional [AWS access policy]( https://registry.terraform.io/provi
 Type: `string`
 
 Default: `null`
+
+### slow\_request\_log\_thresholds
+
+Description: The thresholds for which slow requests are logged. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs).
+
+Type:
+
+```hcl
+object({
+    trace = optional(string, "10m")
+    debug = optional(string, "2m")
+    warn  = optional(string, "30s")
+    info  = optional(string, "-1")
+  })
+```
+
+Default: `{}`
 
 ### spot\_nodes\_enabled
 

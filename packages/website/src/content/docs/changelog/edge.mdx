@@ -21,58 +21,76 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ### Breaking Changes
 
+* To simplify cluster administration, every cluster will have a dedicated DNS zone for hosting control-plane utilities specific to that cluster (e.g., Vault, etc.).
+  `kube_domain` is now a required configuration value and should be set in the `region.yaml` for every region that houses a Kubernetes cluster. The value
+  must be a subdomain of a domain available to the environment.
+
 * We now create the Authentik email template in the kube_authentik module. The organization name is now a required input.
   You can use the new `organization_name` output from the kube_authentik module as an input to the `authentik_core_resources` module.
 
-* `kube_cert_manager` and `kube_cert_issuers` modules have been consolidated into a single `kube_certificates` module. Follow these steps to upgrade:
-  1. Before updating your version:
-	  1. Run `terragrunt state pull > kube_cert_issuers.json` from the `kube_cert_issuers` directory.
-	  2. Run `terragrunt state pull > kube_cert_manager.json` from the `kube_cert_manager` directory.
-  2. Create a `kube_certificates` directory as a sibling to the `kube_cert_manager` and `kube_cert_issuers` directories.
-  3. Create a `terragrunt.hcl` file in the `kube_certificates` directory with the following contents:
-    ```hcl
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+* `kube_cert_manager` and `kube_cert_issuers` modules have been consolidated into a single `kube_certificates` module in order to address various race conditions
+   that could occur on cluster installation. Follow these steps to migrate:
+  
+  1. Create a `kube_certificates` directory as a sibling to the `kube_cert_manager` and `kube_cert_issuers` directories.
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+  1. Create a `terragrunt.hcl` file in the `kube_certificates` directory with the following contents:
 
-    dependency "cilium" {
-      config_path  = "../kube_cilium"
-      skip_outputs = true
-    }
+      ```hcl
+      include "panfactum" {
+        path   = find_in_parent_folders("panfactum.hcl")
+        expose = true
+      }
 
-    dependency "kyverno" {
-      config_path  = "../kube_kyverno"
-      skip_outputs = true
-    }
+      terraform {
+        source = include.panfactum.locals.pf_stack_source
+      }
 
-    dependency "vault_core" {
-      config_path  = "../vault_core_resources"
-      skip_outputs = true
-    }
+      dependency "vault_core" {
+        config_path  = "../vault_core_resources"
+        skip_outputs = true
+      }
 
-    dependency "vault" {
-      config_path = "../kube_vault"
-    }
+      inputs = {
+        alert_email = "..." # Copy from kube_cert_issuers
+      }
+      ```
 
-    inputs = {
-      vault_internal_url = dependency.vault.outputs.vault_internal_url
-    }
-    ```
-  4. Update the version of the Panfactum framework you are using.
-  5. Run `terragrunt init` in the `kube_certificates` directory.
-  6. Copy the `./kube_cert_issuers/kube_cert_issuers.json` to `./kube_certificates/kube_certificates_state.json`. Make sure to keep the original file as a backup for now.
-  7. Merge the contents from the `./kube_cert_manager/kube_cert_manager.json` outputs key into the `./kube_certificates/kube_certificates_state.json` outputs key.
-  8. Merge the contents from the `./kube_cert_manager/kube_cert_manager.json` resources array into the `./kube_certificates/kube_certificates_state.json` resources array.
-  9. Find the resource object with a type key of `"pf_kube_labels"` and delete it from the resources array. It is a duplicate and will cause an error.
-  10. Run `terragrunt plan` and review the changes. There should be only a few resources that will be replaced as we fixed a typo in the name.
-  11. If everything looks good, run `terragrunt apply`.
-  12. Remove the `kube_cert_issuers` and `kube_cert_manager` directories.
-  13. Replace any references to `kube_cert_issuers` and `kube_cert_manager` with `kube_certificates` in your code.
+  1. From the **region** directory, run the following:
+
+      ```bash
+      (cd kube_cert_issuers; terragrunt state pull > state.json);
+      (cd kube_cert_manager; terragrunt state pull > state.json);
+      jq -s '
+        .[0] as $f1
+        | .[1] as $f2
+        | $f1
+          | .outputs = ($f1.outputs + $f2.outputs)
+          | .resources = ($f1.resources + $f2.resources)
+      ' kube_cert_issuers/state.json kube_cert_manager/state.json > kube_certificates/state.json;
+      jq 'del(
+        .resources[]
+        | select(
+          .type == "pf_kube_labels"
+          and (has("module") | not)
+        )
+      )' kube_certificates/state.json > tmp && mv tmp kube_certificates/state.json;
+      rm kube_cert_issuers/state.json;
+      rm kube_cert_manager/state.json;
+      ```
+
+  1. Update the version of the Panfactum framework you are using.
+
+  1. Navigate to the `kube_certificates` directory.
+
+      1. Run `terragrunt init`.
+
+      1. Run `terragrunt state push state.json && rm state.json`.
+
+      1. Run `terragrunt apply` and review the changes. There should be only a few resources that will be replaced as we fixed a typo in the name.
+
+  1. Remove the `kube_cert_issuers` and `kube_cert_manager` directories.
+
+  1. Replace any references to `kube_cert_issuers` and `kube_cert_manager` with `kube_certificates` in your code.
 
 * We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed. 
   See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).

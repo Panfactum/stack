@@ -1,7 +1,7 @@
 variable "opensearch_version" {
   description = "The version of OpenSearch to deploy. Note that we only test this module with the default version."
   type        = string
-  default     = "2.19.1"
+  default     = "3.0.0"
 }
 
 variable "pull_through_cache_enabled" {
@@ -190,4 +190,32 @@ variable "vault_internal_url" {
   description = "The url to the vault instance for internal cert issuance"
   type        = string
   default     = "http://vault-active.vault.svc.cluster.local:8200"
+}
+
+variable "log_level" {
+  description = "The log level for the opensearch pods"
+  type        = string
+  default     = "WARN"
+  validation {
+    condition     = contains(["ERROR", "WARN", "INFO", "TRACE", "DEBUG"], var.log_level)
+    error_message = "log_level must be one of: ERROR, WARN, INFO, TRACE, DEBUG"
+  }
+}
+
+
+variable "slow_request_log_thresholds" {
+  description = "The thresholds for which slow requests are logged. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs)."
+  type = object({
+    trace = optional(string, "10m")
+    debug = optional(string, "2m")
+    warn  = optional(string, "30s")
+    info  = optional(string, "-1")
+  })
+  default = {}
+}
+
+variable "extra_cluster_settings" {
+  description = "Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to override existing configuration values. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/)."
+  type        = map(any)
+  default     = {}
 }
