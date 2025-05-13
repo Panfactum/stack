@@ -233,11 +233,11 @@ export async function setupFederatedAuth(
                     context,
                     filePath: join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "secrets.yaml"),
                     validationSchema: z.object({
-                        aws_skim_token: z.string().optional()
+                        aws_scim_token: z.string().optional()
                     })
                 })
 
-                return !secrets?.aws_skim_token || !ctx.awsScimUrl
+                return !secrets?.aws_scim_token || !ctx.awsScimUrl
             },
             task: async (ctx, task) => {
                 const authentikModuleFilePath = join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml")
@@ -282,19 +282,19 @@ export async function setupFederatedAuth(
                     context,
                     filePath: join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "secrets.yaml"),
                     validationSchema: z.object({
-                        aws_skim_token: z.string().optional()
+                        aws_scim_token: z.string().optional()
                     })
                 })
 
                 if (!ctx.awsScimUrl) {
                     ctx.awsScimUrl = await context.logger.input({
                         task,
-                        message: "Enter the SCIM encpoint from the modal:",
+                        message: "Enter the SCIM endpoint from the modal:",
                         required: true,
                     })
                 }
 
-                if (!skimToken?.aws_skim_token) {
+                if (!skimToken?.aws_scim_token) {
                     const awsSCIMToken = await context.logger.password({
                         task,
                         message: "Enter the Access token from the modal:",
