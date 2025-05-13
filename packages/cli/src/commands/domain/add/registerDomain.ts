@@ -430,7 +430,7 @@ export async function registerDomain(inputs: {
             const maxAttempts = 100;
             let lastStatus: string | undefined;
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                const statusStr = lastStatus !== "" ? `${attempt}/${maxAttempts} - ${lastStatus}` : `${attempt}/${maxAttempts}`
+                const statusStr = lastStatus ? `${attempt}/${maxAttempts} - ${lastStatus}` : `${attempt}/${maxAttempts}`
                 task.title = context.logger.applyColors(`Polling registration status ${statusStr}`, { lowlights: [statusStr] })
                 let status, message, flag;
                 try {

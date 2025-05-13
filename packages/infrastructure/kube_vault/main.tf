@@ -284,7 +284,7 @@ resource "helm_release" "vault" {
   ]
 
   timeout    = 60 * 10
-  depends_on = [module.aws_permissions]
+  depends_on = [module.aws_permissions, module.unseal_key]
 }
 
 resource "kubernetes_config_map" "dashboard" {
