@@ -141,7 +141,7 @@ export async function setupFederatedAuth(
                     if (!ctx.awsSignInUrl) {
                         const identityCenterURLChanged = await context.logger.confirm({
                             task,
-                            explainer: "We need to setup IAM Identity Center in the ${globalRegionYAMLData.aws_region} region.\n\n" +
+                            explainer: `We need to setup IAM Identity Center in the ${globalRegionData.aws_region} region.\n\n` +
                                 "Follow these instruction to change the portal URL:\n\n" +
                                 "https://docs.aws.amazon.com/singlesignon/latest/userguide/howtochangeURL.html\n\n" +
                                 "Keep the page open when you're done.",
