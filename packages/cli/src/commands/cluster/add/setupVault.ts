@@ -78,14 +78,28 @@ export async function setupVault(
       context,
       validationSchema: z.object({
         root_token: z.string(),
-        recovery_keys: z.array(z.string()),
       }),
     });
 
     if (!vaultSecrets) {
       throw new CLIError('Was not able to find vault token.')
     }
-    const { root_token: rootToken, recovery_keys: recoveryKeys } = vaultSecrets;
+
+    const vaultRecovery = await sopsDecrypt({
+      filePath: join(clusterPath, MODULES.KUBE_VAULT, "recovery.yaml"),
+      context,
+      validationSchema: z.object({
+        recovery_keys: z.array(z.string()),
+      }),
+    });
+
+    if (!vaultRecovery) {
+      throw new CLIError('Was not able to find vault recovery keys.')
+    }
+
+    const { root_token: rootToken } = vaultSecrets;
+    const { recovery_keys: recoveryKeys } = vaultRecovery;
+
     vaultRootToken = rootToken;
     vaultRecoveryKeys = recoveryKeys;
   }
