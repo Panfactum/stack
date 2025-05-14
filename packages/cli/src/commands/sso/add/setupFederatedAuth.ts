@@ -250,7 +250,7 @@ export async function setupFederatedAuth(
                         "3. When that is done click \"Next\".\n\n" +
                         "4. Type \"ACCEPT\" and click \"Change identity source.\"\n\n" +
                         "5. You should now see a notification in the middle of the screen titled \"Automatic provisioning\".\n\n" +
-                        "Click the \"Enable\" button and keep the modal open.",
+                        "6. Click the \"Enable\" button and keep the modal open.",
                     message: "Have you completed the steps above?",
                     default: true,
                 })
@@ -382,7 +382,7 @@ export async function setupFederatedAuth(
                 }
                 const productionEnvironments = await context.logger.checkbox({
                     task,
-                    explainer: "All other environments will grant users full access. This can be changed later.",
+                    explainer: "Users will have full access to all non-selected environments. This can be changed later.",
                     message: "Select the environment(s) you want to security harden:",
                     choices: environmentsWithAWSAccountId.map((env) => ({ name: env.name, value: env })).filter((env) => env.name !== MANAGEMENT_ENVIRONMENT),
                     validate: (choices) => {
@@ -448,7 +448,7 @@ export async function setupFederatedAuth(
             environment,
             region,
             module: MODULES.AWS_EKS,
-        })
+        }),
     ])
 
     return tasks;

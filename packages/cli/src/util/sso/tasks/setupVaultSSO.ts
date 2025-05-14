@@ -5,7 +5,7 @@ import vaultAuthOIDC from "@/templates/vault_auth_oidc.hcl";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { upsertConfigValues } from "@/util/config/upsertConfigValues";
+import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
 import { CLIError } from "@/util/error/error";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -162,18 +162,9 @@ export async function setupVaultSSO(
         {
             title: "Removing static Vault credentials",
             task: async () => {
-                await upsertConfigValues({
-                    context,
-                    environment,
-                    region,
-                    values: {
-                        vault_addr: undefined
-                    }
-                });
-
                 const environmentPath = join(
-                  context.repoVariables.environments_dir,
-                  environment
+                    context.repoVariables.environments_dir,
+                    environment
                 );
 
                 const clusterPath = join(environmentPath, region);
@@ -186,7 +177,8 @@ export async function setupVaultSSO(
                     filePath: join(clusterPath, "region.secrets.yaml"),
                 });
             },
-        }
+        },
+        await buildSyncAWSIdentityCenterTask({ context })
     ])
 
     return tasks

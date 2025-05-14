@@ -287,7 +287,7 @@ export async function setupAuthentik(
                 }),
                 akadmin_email: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.authentikAdminEmail!
+                    update: (_, ctx) => ctx.authentikRootEmail!
                 }),
                 organization_name: defineInputUpdate({
                     schema: z.string(),
@@ -309,12 +309,12 @@ export async function setupAuthentik(
                         },
                         module: MODULES.KUBE_AUTHENTIK,
                         validationSchema: z.record(
-                          z.string(),
-                          z.object({
-                              sensitive: z.boolean(),
-                              type: z.string(),
-                              value: z.string(),
-                          })
+                            z.string(),
+                            z.object({
+                                sensitive: z.boolean(),
+                                type: z.string(),
+                                value: z.string(),
+                            })
                         )
                     })
 
@@ -727,7 +727,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authen
                             user: userId,
                             expiring: false,
                             description:
-                              "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
+                                "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
                         }
                     })
                 } catch (error) {
@@ -745,12 +745,12 @@ You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authen
                     validate: async (value) => {
                         try {
                             const response = await Bun.fetch(
-                              `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
-                              {
-                                  headers: {
-                                      Authorization: `Bearer ${value}`,
-                                  },
-                              }
+                                `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${value}`,
+                                    },
+                                }
                             );
                             if (response.status !== 200) {
                                 return "This does not appear to be a valid Authentik Access Token. Please try again.";

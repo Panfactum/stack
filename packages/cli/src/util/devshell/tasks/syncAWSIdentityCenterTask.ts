@@ -30,10 +30,10 @@ interface TaskContext {
 }
 
 export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
-    context: PanfactumContext
+    context: PanfactumContext,
+    startURL?: string
 }): Promise<ListrTask<T>> {
-    const { context } = inputs;
-
+    const { context, startURL } = inputs;
 
     const modulePath = join(
         context.repoVariables.environments_dir,
@@ -116,6 +116,14 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
 
                     const configFilePath = join(context.repoVariables.aws_dir, "config")
 
+                    let ssoSessionSSO;
+                    if (startURL) {
+                        ssoSessionSSO = {
+                            sso_start_url: startURL,
+                            sso_region: ssoRegion,
+                            sso_registration_scopes: "sso:account:access"
+                        }
+                    }
 
                     let config;
                     if (await fileExists(configFilePath)) {
@@ -127,7 +135,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                                 ...configUpdate
                             }
                             if (!originalAWSConfig["sso-session sso"]) {
-                                config["sso-session sso"] = await getSSOConfig(ssoRegion, context, task)
+                                config["sso-session sso"] = ssoSessionSSO ?? await getSSOConfig(ssoRegion, context, task)
                             }
                         } catch (e) {
                             throw new CLIError(`Failed to read existing AWS config at ${configFilePath}`, e)
@@ -135,7 +143,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                     } else {
                         config = {
                             ...configUpdate,
-                            ["sso-session sso"]: await getSSOConfig(ssoRegion, context, task)
+                            ["sso-session sso"]: ssoSessionSSO ?? await getSSOConfig(ssoRegion, context, task)
                         }
                     }
 
