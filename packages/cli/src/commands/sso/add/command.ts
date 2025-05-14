@@ -5,6 +5,7 @@ import { z } from "zod";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
+import { setupVaultSSO } from "@/util/sso/tasks/setupVaultSSO";
 import { MODULES } from "@/util/terragrunt/constants";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setupAuthentik } from "./setupAuthentik";
@@ -74,6 +75,13 @@ export class SSOAddCommand extends PanfactumCommand {
                 return setupFederatedAuth(this.context, mainTask);
             }
         });
+
+        tasks.add({
+            title: this.context.logger.applyColors("Setup Vault SSO"),
+            task: async (_, mainTask) => {
+                return setupVaultSSO(this.context, mainTask);
+            }
+        })
 
         try {
             await tasks.run();
