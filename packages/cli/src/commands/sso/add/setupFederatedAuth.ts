@@ -74,22 +74,6 @@ export async function setupFederatedAuth(
     );
     const clusterPath = path.join(environmentPath, region);
 
-
-    const vaultSecretsFile = join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml")
-    const vaultSecrets = await sopsDecrypt({
-        filePath: vaultSecretsFile,
-        context,
-        validationSchema: z.object({
-            root_token: z.string(),
-        }),
-    });
-
-    if (vaultSecrets === null) {
-        throw new CLIError(`Could not find vault token at ${vaultSecretsFile}`)
-    }
-
-    const { root_token: vaultRootToken } = vaultSecrets
-
     interface Context {
         awsAcsUrl?: string;
         awsSignInUrl?: string;
@@ -200,7 +184,7 @@ export async function setupFederatedAuth(
             context,
             environment,
             region,
-            env: { ...context.env, VAULT_TOKEN: vaultRootToken },
+            env: { ...context.env },
             skipIfAlreadyApplied: true,
             module: MODULES.AUTHENTIK_AWS_SSO,
             hclIfMissing: await Bun.file(authentikAwsSSO).text(),
@@ -317,7 +301,7 @@ export async function setupFederatedAuth(
             context,
             environment,
             region,
-            env: { ...context.env, VAULT_TOKEN: vaultRootToken },
+            env: { ...context.env },
             skipIfAlreadyApplied: false,
             module: MODULES.AUTHENTIK_AWS_SSO,
             hclIfMissing: await Bun.file(authentikAwsSSOWithSCIM).text(),

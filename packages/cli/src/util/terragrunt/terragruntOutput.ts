@@ -17,7 +17,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
 }: {
   awsProfile?: string;
   context: PanfactumContext;
-  env?: Record<string, string>;
+  env?: Record<string, string | undefined>;
   environment: string;
   region: string;
   module: string;

@@ -7,7 +7,7 @@ import { fileExists } from "../fs/fileExists";
 import type { PanfactumContext } from "@/util/context/context";
 
 interface Input {
-  values: { [key: string]: string | string[] };
+  values: { [key: string]: string | string[] | undefined };
   filePath: string;
   context: PanfactumContext;
 }

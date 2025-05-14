@@ -38,14 +38,6 @@ export async function setupVaultSSO(
         ]);
     }
 
-    const vaultRootToken = config.vault_token
-
-    if (!vaultRootToken) {
-        throw new CLIError(
-            "Vault root token not found in config."
-        );
-    }
-
     const regionConfig = await getConfigValuesFromFile({
         environment,
         context,
@@ -166,8 +158,22 @@ export async function setupVaultSSO(
                     region,
                     values: {
                         vault_addr: undefined
-
                     }
+                });
+
+                const environmentPath = join(
+                  context.repoVariables.environments_dir,
+                  environment
+                );
+
+                const clusterPath = join(environmentPath, region);
+
+                await sopsUpsert({
+                    values: {
+                        vault_token: undefined
+                    },
+                    context,
+                    filePath: join(clusterPath, "region.secrets.yaml"),
                 });
             },
         }

@@ -1,6 +1,6 @@
 import path, { join } from "node:path";
 import { cwd } from "node:process";
-import { CoreApi, Configuration, type PaginatedGroupList, type User, type Link, type Token, IntentEnum, type PaginatedUserList, type PaginatedBrandList } from "@goauthentik/api";
+import { CoreApi, Configuration, type PaginatedGroupList, type User, type Link, IntentEnum, type PaginatedUserList, type PaginatedBrandList } from "@goauthentik/api";
 import open from "open";
 import { z } from "zod";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
@@ -11,7 +11,6 @@ import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -67,26 +66,9 @@ export async function setupAuthentik(
         environment
     );
     const clusterPath = path.join(environmentPath, region);
-
-
-    const vaultSecretsFile = join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml")
-    const vaultSecrets = await sopsDecrypt({
-        filePath: vaultSecretsFile,
-        context,
-        validationSchema: z.object({
-            root_token: z.string(),
-        }),
-    });
-
-    if (vaultSecrets === null) {
-        throw new CLIError(`Could not find vault token at ${vaultSecretsFile}`)
-    }
-
-    const { root_token: vaultRootToken } = vaultSecrets
-
+    const authentikSecretsPath = join(clusterPath, "region.secrets.yaml")
 
     interface Context {
-        akadminBootstrapToken?: string;
         ancestorDomain?: string;
         authentikRootEmail?: string;
         authentikAdminEmail?: string;
@@ -275,7 +257,6 @@ export async function setupAuthentik(
             context,
             env: {
                 ...context.env,
-                VAULT_TOKEN: vaultRootToken
             },
             environment,
             region,
@@ -294,7 +275,6 @@ export async function setupAuthentik(
             context,
             env: {
                 ...context.env,
-                VAULT_TOKEN: vaultRootToken
             },
             environment,
             region,
@@ -319,6 +299,43 @@ export async function setupAuthentik(
         {
             title: "Verify the Authentik Ingress",
             task: async (_, task) => {
+                if (!config.authentik_token) {
+                    const outputs = await terragruntOutput({
+                        context,
+                        environment,
+                        region,
+                        env: {
+                            ...context.env,
+                        },
+                        module: MODULES.KUBE_AUTHENTIK,
+                        validationSchema: z.record(
+                          z.string(),
+                          z.object({
+                              sensitive: z.boolean(),
+                              type: z.string(),
+                              value: z.string(),
+                          })
+                        )
+                    })
+
+                    const authentikBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
+
+                    if (!authentikBootstrapToken) {
+                        throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                    }
+
+                    await sopsUpsert({
+                        filePath: authentikSecretsPath,
+                        context,
+                        values: {
+                            authentik_token: authentikBootstrapToken
+                        }
+                    })
+
+                    config.authentik_token = authentikBootstrapToken
+                }
+
+
                 const moduleDir = join(
                     context.repoVariables.environments_dir,
                     environment,
@@ -391,35 +408,14 @@ export async function setupAuthentik(
             },
             title: "Disabling default Authentik resources",
             task: async (ctx) => {
-                const outputs = await terragruntOutput({
-                    context,
-                    environment,
-                    region,
-                    env: {
-                        ...context.env,
-                        VAULT_TOKEN: vaultRootToken
-                    },
-                    module: MODULES.KUBE_AUTHENTIK,
-                    validationSchema: z.record(
-                        z.string(),
-                        z.object({
-                            sensitive: z.boolean(),
-                            type: z.string(),
-                            value: z.string(),
-                        })
-                    )
-                })
-
-                ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
-
-                if (!ctx.akadminBootstrapToken) {
-                    throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
+                if (!config.authentik_token) {
+                    throw new CLIError("authentik boostrap token not found in config variables")
                 }
 
                 const configuration = new Configuration({
                     basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
                     headers: {
-                        Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
+                        Authorization: `Bearer ${config.authentik_token}`,
                     }
                 })
 
@@ -489,31 +485,8 @@ export async function setupAuthentik(
                 return pfData.deploy_status === "success";
             },
             task: async (ctx, parentTask) => {
-                if (!ctx.akadminBootstrapToken) {
-                    const outputs = await terragruntOutput({
-                        context,
-                        environment,
-                        region,
-                        env: {
-                            ...context.env,
-                            VAULT_TOKEN: vaultRootToken
-                        },
-                        module: MODULES.KUBE_AUTHENTIK,
-                        validationSchema: z.record(
-                            z.string(),
-                            z.object({
-                                sensitive: z.boolean(),
-                                type: z.string(),
-                                value: z.string(),
-                            })
-                        )
-                    })
-
-                    ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
-
-                    if (!ctx.akadminBootstrapToken) {
-                        throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
-                    }
+                if (!config.authentik_token) {
+                    throw new CLIError("authentik boostrap token not found in config variables")
                 }
                 if (!ctx.orgName) {
                     throw new CLIError("orgName not found in Authentik context")
@@ -592,8 +565,6 @@ spec:
                         region,
                         env: {
                             ...context.env,
-                            AUTHENTIK_TOKEN: ctx.akadminBootstrapToken,
-                            VAULT_TOKEN: vaultRootToken,
                         },
                         skipIfAlreadyApplied: true,
                         module: MODULES.AUTHENTIK_CORE_RESOURCES,
@@ -642,31 +613,8 @@ spec:
         {
             title: "Setting up your Authentik user account",
             task: async (ctx, task) => {
-                if (!ctx.akadminBootstrapToken) {
-                    const outputs = await terragruntOutput({
-                        context,
-                        environment,
-                        region,
-                        env: {
-                            ...context.env,
-                            VAULT_TOKEN: vaultRootToken
-                        },
-                        module: MODULES.KUBE_AUTHENTIK,
-                        validationSchema: z.record(
-                            z.string(),
-                            z.object({
-                                sensitive: z.boolean(),
-                                type: z.string(),
-                                value: z.string(),
-                            })
-                        )
-                    })
-
-                    ctx.akadminBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
-
-                    if (!ctx.akadminBootstrapToken) {
-                        throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
-                    }
+                if (!config.authentik_token) {
+                    throw new CLIError("authentik boostrap token not found in config variables")
                 }
 
                 if (!ctx.authentikAdminEmail || !ctx.authentikAdminName || !ctx.authentikRootEmail) {
@@ -676,7 +624,7 @@ spec:
                 const originalAuthentikClient = new CoreApi(new Configuration({
                     basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
                     headers: {
-                        Authorization: `Bearer ${ctx.akadminBootstrapToken}`,
+                        Authorization: `Bearer ${config.authentik_token}`,
                     }
                 }))
 
@@ -707,6 +655,7 @@ spec:
                 } catch (error) {
                     throw new CLIError("Failed to get users from Authentik", error);
                 }
+
                 if (!user) {
                     try {
                         user = await originalAuthentikClient.coreUsersCreate({
@@ -726,143 +675,100 @@ spec:
                 }
                 const userId = user.pk;
 
-                // Check if there is an existing token
-                let authentikUserToken: string | undefined
-                const authentikSecretsPath = join(environmentPath, "environment.secrets.yaml")
-                const data = await sopsDecrypt({
-                    filePath: authentikSecretsPath,
-                    context,
-                    validationSchema: z.object({
-                        authentik_token: z.string(),
+                let passwordReset: Link
+                try {
+                    passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
+                        id: userId,
                     })
-                })
-                if (data?.authentik_token) {
-                    try {
-                        const testAuthentikClient = new CoreApi(new Configuration({
-                            basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
-                            headers: {
-                                Authorization: `Bearer ${data.authentik_token}`,
-                            }
-                        }))
-                        await testAuthentikClient.coreGroupsList()
+                } catch (error) {
+                    throw new CLIError("Failed to get password reset link in Authentik", error);
+                }
+                const passwordResetLink = passwordReset.link;
 
-                        // If the request succeeds we use the existing token
-                        authentikUserToken = data.authentik_token
-                    } catch {
-                        // Do nothing we assume the token is invalid or expired
+                const openBrowser = await context.logger.confirm({
+                    task,
+                    explainer: `We will now open your browser so you can finish setting up your Authentik account.
+You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authentikAdminName}) in the browser that opens.`,
+                    message: "Ready?",
+                    default: true,
+                })
+
+                if (openBrowser) {
+                    await open(passwordResetLink)
+                } else {
+                    throw new CLIError("You must complete the account setup before continuing.")
+                }
+
+                const accountSetupComplete = await context.logger.confirm({
+                    task,
+                    message: "Have you setup your Authentik account?",
+                    default: true,
+                })
+
+                if (!accountSetupComplete) {
+                    const accountSetupCompleteAgain = await context.logger.confirm({
+                        task,
+                        message: "Have you setup your Authentik account? You must complete that before continuing.",
+                        default: true,
+                    });
+                    if (!accountSetupCompleteAgain) {
+                        throw new CLIError("You must complete the account setup before continuing.")
                     }
                 }
 
                 // Get a new token
-                if (!authentikUserToken) {
-                    // create the API token
-                    let token: Token | undefined
-                    // If they manually disable the token we will run into identifier collisions
-                    const tokenIdentifier = "local-framework-token" + Date.now()
-                    try {
-                        token = await originalAuthentikClient.coreTokensRetrieve({
+                // If they manually disable the token we will run into identifier collisions
+                const tokenIdentifier = "local-framework-token" + Date.now()
+                try {
+                    await originalAuthentikClient.coreTokensCreate({
+                        tokenRequest: {
                             identifier: tokenIdentifier,
-                        })
-                    } catch (error) {
-                        throw new CLIError("Failed to get API token in Authentik", error);
-                    }
-                    if (!token) {
-                        try {
-                            token = await originalAuthentikClient.coreTokensCreate({
-                                tokenRequest: {
-                                    identifier: tokenIdentifier,
-                                    intent: IntentEnum.Api,
-                                    user: userId,
-                                    expiring: false,
-                                    description:
-                                        "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
-                                }
-                            })
-                        } catch (error) {
-                            throw new CLIError("Failed to create API token in Authentik", error);
+                            intent: IntentEnum.Api,
+                            user: userId,
+                            expiring: false,
+                            description:
+                              "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
                         }
-                    }
+                    })
+                } catch (error) {
+                    throw new CLIError("Failed to create API token in Authentik", error);
+                }
 
-                    // We only need to get this the first time they run this command
-                    if (!data?.authentik_token) {
-                        let passwordReset: Link
-                        try {
-                            passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
-                                id: userId,
-                            })
-                        } catch (error) {
-                            throw new CLIError("Failed to get password reset link in Authentik", error);
-                        }
-                        const passwordResetLink = passwordReset.link;
-
-                        const openBrowser = await context.logger.confirm({
-                            task,
-                            explainer: "We will now open your browser so you can finish setting up your Authentik account.\nYou will need to enter your user email in the browser that opens.",
-                            message: "Ready?",
-                            default: true,
-                        })
-
-                        if (openBrowser) {
-                            await open(passwordResetLink)
-                        } else {
-                            throw new CLIError("You must complete the account setup before continuing.")
-                        }
-
-                        const accountSetupComplete = await context.logger.confirm({
-                            task,
-                            message: "Have you setup your Authentik account?",
-                            default: true,
-                        })
-
-                        if (!accountSetupComplete) {
-                            const accountSetupCompleteAgain = await context.logger.confirm({
-                                task,
-                                message: "Have you setup your Authentik account? You must complete that before continuing.",
-                                default: true,
-                            });
-                            if (!accountSetupCompleteAgain) {
-                                throw new CLIError("You must complete the account setup before continuing.")
-                            }
-                        }
-                    }
-
-                    // replace bootstrap token with API token
-                    authentikUserToken = await context.logger.password({
-                        task,
-                        explainer: `
+                // replace bootstrap token with API token
+                const authentikUserToken = await context.logger.password({
+                    task,
+                    explainer: `
                     We have created a new temporary API token to use                    
                     Go to https://authentik.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
                     Look for the token with the identifier '${tokenIdentifier}'`,
-                        message: "Copy the token and paste it here:",
-                        validate: async (value) => {
-                            try {
-                                const response = await Bun.fetch(
-                                    `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${value}`,
-                                        },
-                                    }
-                                );
-                                if (response.status !== 200) {
-                                    return "This does not appear to be a valid Authentik Access Token. Please try again.";
-                                }
-                                return true;
-                            } catch {
-                                return "Error validating Authentik Access Token, please try again.";
+                    message: "Copy the token and paste it here:",
+                    validate: async (value) => {
+                        try {
+                            const response = await Bun.fetch(
+                              `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
+                              {
+                                  headers: {
+                                      Authorization: `Bearer ${value}`,
+                                  },
+                              }
+                            );
+                            if (response.status !== 200) {
+                                return "This does not appear to be a valid Authentik Access Token. Please try again.";
                             }
-                        },
-                    });
-
-                    await sopsUpsert({
-                        filePath: join(environmentPath, "environment.secrets.yaml"),
-                        context,
-                        values: {
-                            authentik_token: authentikUserToken,
-                            tokenIdentifier
+                            return true;
+                        } catch {
+                            return "Error validating Authentik Access Token, please try again.";
                         }
-                    })
-                }
+                    },
+                });
+
+                await sopsUpsert({
+                    filePath: authentikSecretsPath,
+                    context,
+                    values: {
+                        authentik_token: authentikUserToken
+                    }
+                })
 
                 const newAuthentikClient = new CoreApi(new Configuration({
                     basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,

@@ -132,7 +132,7 @@ locals {
   # We have customized the retrieval of the Vault token in order to handle all the various scenarios for how modules
   # can be applied
   vault_address         = local.is_ci ? get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
-  use_local_vault_token = local.vars.vault_token != null && local.vars.vault_token != ""
+  use_local_vault_token = try(local.vars.vault_token != null && local.vars.vault_token != "", false)
   vault_token = local.use_local_vault_token ? local.vars.vault_token : (
     run_cmd(
       "--terragrunt-global-cache", "--terragrunt-quiet",
