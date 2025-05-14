@@ -194,6 +194,22 @@ Type: `bool`
 
 Default: `false`
 
+### dashboard\_domain
+
+Description: The domain for hosting the opensearch dashboard
+
+Type: `string`
+
+Default: `null`
+
+### dashboard\_enabled
+
+Description: Whether the opensearch dashboard is enabled
+
+Type: `bool`
+
+Default: `false`
+
 ### extra\_cluster\_settings
 
 Description: Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to override existing configuration values. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/).
@@ -430,6 +446,14 @@ Description: The name of the Kubernetes Secret holding certificate credentials f
 ### client\_port
 
 Description: The port that OpenSearch clients should connect to.
+
+### dashboard\_superuser\_password
+
+Description: The password for superuser access to the opensearch dashboard
+
+### dashboard\_superuser\_username
+
+Description: The username for superuser access to the opensearch dashboard
 
 ### host
 

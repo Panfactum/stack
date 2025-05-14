@@ -1,4 +1,3 @@
-
 locals {
   common_env_context = [
     {
@@ -209,25 +208,56 @@ locals {
         ]
       }
       mutate = {
-        foreach = [for env in local.common_env :
-          {
-            list = "request.object.spec.containers"
-            preconditions = {
-              any = [{
-                key      = "{{ length(element.env[?(@.name=='${env.name}')]) }}"
-                operator = "Equals"
-                value    = 0
-              }]
-            }
-            patchesJson6902 = yamlencode([
-              {
-                op    = "add"
-                path  = "/spec/containers/{{elementIndex}}/env/0"
-                value = env
+        foreach = concat(
+          [for env in local.common_env :
+            {
+              list = "request.object.spec.containers"
+              preconditions = {
+                any = [{
+                  key      = "{{ length(element.env[?(@.name=='${env.name}')]) }}"
+                  operator = "Equals"
+                  value    = 0
+                }]
               }
-            ])
-          }
-        ]
+              patchesJson6902 = yamlencode([
+                {
+                  op    = "add"
+                  path  = "/spec/containers/{{elementIndex}}/env/0"
+                  value = env
+                }
+              ])
+            }
+            ], [
+            // Note: This has to be a patchStrategicMerge because of the 
+            // fact that the VPA mutation happens AFTER the first kyverno mutate
+            // due to webhook ordering, so this actually gets applied twice.
+            // The default patchesJson6902 logic has protection against
+            // overriding variables if they already exist
+            {
+              list = "request.object.spec.containers"
+              context = [
+                {
+                  name = "memoryRequestMb"
+                  variable = {
+                    value    = "{{ element.resources.requests.memory || '0' }}"
+                    jmesPath = "floor(divide(@, '1000000'))"
+                  }
+                }
+              ]
+              patchStrategicMerge = {
+                spec = {
+                  containers = [{
+                    name = "{{ element.name }}"
+                    env = [{
+                      name  = "NODE_OPTIONS"
+                      value = "--max-old-space-size={{ memoryRequestMb }}"
+                    }]
+                  }]
+                }
+              }
+            }
+          ]
+        )
       }
     },
     {
@@ -255,25 +285,57 @@ locals {
         }]
       }
       mutate = {
-        foreach = [for env in local.common_env :
-          {
-            list = "request.object.spec.initContainers"
-            preconditions = {
-              any = [{
-                key      = "{{ length(element.env[?(@.name=='${env.name}')]) }}"
-                operator = "Equals"
-                value    = 0
-              }]
-            }
-            patchesJson6902 = yamlencode([
-              {
-                op    = "add"
-                path  = "/spec/initContainers/{{elementIndex}}/env/0"
-                value = env
+        foreach = concat(
+          [for env in local.common_env :
+            {
+              list = "request.object.spec.initContainers"
+              preconditions = {
+                any = [{
+                  key      = "{{ length(element.env[?(@.name=='${env.name}')]) }}"
+                  operator = "Equals"
+                  value    = 0
+                }]
               }
-            ])
-          }
-        ]
+              //context = local.common_for_each_context
+              patchesJson6902 = yamlencode([
+                {
+                  op    = "add"
+                  path  = "/spec/initContainers/{{elementIndex}}/env/0"
+                  value = env
+                }
+              ])
+            }
+            ], [
+            // Note: This has to be a patchStrategicMerge because of the 
+            // fact that the VPA mutation happens AFTER the first kyverno mutate
+            // due to webhook ordering, so this actually gets applied twice.
+            // The default patchesJson6902 logic has protection against
+            // overriding variables if they already exist
+            {
+              list = "request.object.spec.containers"
+              context = [
+                {
+                  name = "memoryRequestMb"
+                  variable = {
+                    value    = "{{ element.resources.requests.memory || '0' }}"
+                    jmesPath = "floor(divide(@, '1000000'))"
+                  }
+                }
+              ]
+              patchStrategicMerge = {
+                spec = {
+                  initContainers = [{
+                    name = "{{ element.name }}"
+                    env = [{
+                      name  = "NODE_OPTIONS"
+                      value = "--max-old-space-size={{ memoryRequestMb }}"
+                    }]
+                  }]
+                }
+              }
+            }
+          ]
+        )
       }
     },
   ] : [null, null, null, null]

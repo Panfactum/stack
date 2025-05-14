@@ -42,10 +42,22 @@ locals {
           anonymous_auth_enabled = false
         }
         authc = {
-          clientcert_auth_domain = {
+          basic_internal_auth_domain = {
             http_enabled      = true
             transport_enabled = true
             order             = 1
+            http_authenticator = {
+              type      = "basic"
+              challenge = "true"
+            }
+            authentication_backend = {
+              type = "internal"
+            }
+          }
+          clientcert_auth_domain = {
+            http_enabled      = true
+            transport_enabled = true
+            order             = 2
             http_authenticator = {
               type = "clientcert"
               config = {
@@ -71,7 +83,7 @@ locals {
     // Superuser perms
     all_access = {
       reserved = true
-      users    = ["superuser.${local.cluster_name}.${var.namespace}"]
+      users    = ["superuser.${local.cluster_name}.${var.namespace}", "superuser"]
     }
     security_manager = {
       reserved = true
@@ -213,7 +225,7 @@ locals {
     "plugins.security.ssl.http.enabled_protocols"           = ["TLSv1.3"]
 
 
-    // Enabble client cert auth
+    // Enable client cert auth
     "plugins.security.ssl.http.clientauth_mode" = "OPTIONAL"
 
     // Disable unsave settings
@@ -227,13 +239,17 @@ locals {
       "security_rest_api_access"
     ]
 
+    // For compatibility with tf's bcrypt algorithm
+    "plugins.security.password.hashing.bcrypt.minor"  = "A"
+    "plugins.security.password.hashing.bcrypt.rounds" = 10
+
     // Remote state bucket config
     "node.attr.remote_store.repository.s3.type"            = "s3"
     "node.attr.remote_store.repository.s3.settings.bucket" = module.s3_bucket.bucket_name
     "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.name
-    "s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
-    "s3.client.default.region"                             = data.aws_region.region.name
-    "s3.client.default.endpoint"                           = "s3.${data.aws_region.region.name}.amazonaws.com"
+    //"s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
+    "s3.client.default.region"   = data.aws_region.region.name
+    "s3.client.default.endpoint" = "s3.${data.aws_region.region.name}.amazonaws.com"
 
     // Segment Replication
     // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/segment-replication/index/
@@ -538,15 +554,13 @@ data "aws_iam_policy_document" "s3_access" {
 
 data "aws_region" "region" {}
 
-module "irsa" {
-  source = "../kube_sa_auth_aws"
-
-  service_account           = module.opensearch.service_account_name
-  service_account_namespace = var.namespace
+# We don't use IRSA b/c of https://github.com/opensearch-project/OpenSearch/issues/16523
+module "aws_creds" {
+  source                    = "../kube_aws_creds"
+  namespace                 = var.namespace
   iam_policy_json           = data.aws_iam_policy_document.s3_access.json
-  ip_allow_list             = var.aws_iam_ip_allow_list
+  credential_lifetime_hours = 24 * 14
 }
-
 
 /***************************************
 * OpenSearch Configs
@@ -575,6 +589,12 @@ resource "kubernetes_secret" "security_config" {
       _meta = {
         type           = "internalusers"
         config_version = 2
+      }
+
+      superuser = {
+        hash          = bcrypt(random_password.dashboard_superuser.result) #"$2y$12$bMHd6ImdI91C3qT3dH8GLezdFmet6MbBOEyHyobA83bI5K1LxJiTe" "$2y$12$IEe4BHM4WoEX/W2MX8YQOeNkEwWTwSkQ9fvcGIT81Ft9KyV2K9VO."
+        reserved      = false
+        backend_roles = ["kibana_user"]
       }
     })
     "action_groups.yml" = yamlencode({
@@ -707,7 +727,6 @@ module "opensearch" {
   }
 
   common_env = {
-    OPENSEARCH_JAVA_OPTS        = "-Xmx512M -Xms512M --enable-native-access=ALL-UNNAMED" // TODO: Dynamic JVM memory sizing
     OPENSEARCH_PATH_CONF        = "/usr/share/opensearch/config"
     DISABLE_INSTALL_DEMO_CONFIG = "true" // Needed if using the default entrypoint
   }
@@ -716,14 +735,27 @@ module "opensearch" {
     OPENSEARCH_MASTER_KEY = random_id.encryption_key.hex
   }
 
+  common_env_from_secrets = {
+    AWS_ACCESS_KEY_ID = {
+      secret_name = module.aws_creds.creds_secret
+      key         = "AWS_ACCESS_KEY_ID"
+    }
+    AWS_SECRET_ACCESS_KEY = {
+      secret_name = module.aws_creds.creds_secret
+      key         = "AWS_SECRET_ACCESS_KEY"
+    }
+  }
+
   termination_grace_period_seconds = 120
   volume_retention_policy = {
     when_scaled  = "Delete"
     when_deleted = "Delete"
   }
 
-
-  depends_on = [module.node_certs, module.client_certs]
+  depends_on = [
+    module.node_certs,
+    module.client_certs
+  ]
 }
 
 // This is required to enable RBAC in the cluster. For whatever reason, the opensearch team has decided that this
@@ -776,6 +808,24 @@ module "security_update_job" {
 /***************************************
 * OpenSearch Dashboards
 ***************************************/
+
+resource "random_password" "dashboard_superuser" {
+  length = 32
+}
+
+resource "kubernetes_secret" "dashboard_superuser" {
+  metadata {
+    name      = "${local.dashboards_name}-creds"
+    namespace = var.namespace
+    labels    = module.dashboards_util.labels
+  }
+
+  data = {
+    OPENSEARCH_USERNAME = "superuser"
+    OPENSEARCH_PASSWORD = random_password.dashboard_superuser.result
+  }
+}
+
 module "dashboards_util" {
   source = "../kube_workload_utility"
 
@@ -794,6 +844,7 @@ module "dashboards_util" {
 }
 
 resource "helm_release" "opensearch_dashboards" {
+  count           = var.dashboard_enabled ? 1 : 0
   namespace       = var.namespace
   name            = random_id.id.hex
   repository      = "https://opensearch-project.github.io/helm-charts"
@@ -811,9 +862,68 @@ resource "helm_release" "opensearch_dashboards" {
     yamlencode({
       fullnameOverride = local.dashboards_name
       replicaCount     = 2
+
+      opensearchHosts = "https://${local.cluster_name}.${var.namespace}.svc.cluster.local:9200"
       config = {
-        "opensearch.yml" = local.opensearch_yml
+        "opensearch_dashboards.yml" = yamlencode({
+
+          "server.host" = "0.0.0.0"
+
+          "opensearch_security.auth.type"                  = ["basicauth"]
+          "opensearch_security.auth.multiple_auth_enabled" = false
+
+          "opensearch.ssl.certificate"            = "/usr/share/opensearch/config/superuser-certs/tls.crt",
+          "opensearch.ssl.key"                    = "/usr/share/opensearch/config/superuser-certs/tls.key",
+          "opensearch.ssl.certificateAuthorities" = ["/usr/share/opensearch/config/superuser-certs/ca.crt"],
+          "opensearch.ssl.verificationMode"       = "full"
+        })
       }
+
+      resources = {
+        requests = {
+          cpu    = "100m"
+          memory = "200M"
+        }
+        limits = {
+          cpu    = "1000m"
+          memory = "260M"
+        }
+      }
+
+      envFrom = [
+        {
+          secretRef = {
+            name = kubernetes_secret.dashboard_superuser.metadata[0].name
+          }
+        }
+      ]
+
+      updateStrategy = {
+        type = "RollingUpdate"
+        rollingUpdate = {
+          maxSurge       = 0
+          maxUnavailable = 1
+        }
+      }
+
+      extraVolumeMounts = [
+        {
+          mountPath = "/usr/share/opensearch/config/superuser-certs"
+          readOnly  = true
+          name      = "superuser-certs"
+        }
+      ]
+
+      extraVolumes = [
+        {
+          name = "superuser-certs"
+          secret = {
+            defaultMode = 511
+            optional    = false
+            secretName  = module.client_certs.superuser.secret_name
+          }
+        }
+      ]
 
       affinity                  = module.dashboards_util.affinity
       topologySpreadConstraints = module.dashboards_util.topology_spread_constraints
@@ -823,15 +933,78 @@ resource "helm_release" "opensearch_dashboards" {
     })
   ]
   depends_on = [module.opensearch]
+
+  lifecycle {
+    precondition {
+      condition     = !var.dashboard_enabled || var.dashboard_domain != null
+      error_message = "If dashboard_enabled is true, then dashboard_domain must be set."
+    }
+  }
+}
+
+resource "kubectl_manifest" "pdb" {
+  count = var.dashboard_enabled ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = local.dashboards_name
+      namespace = var.namespace
+      labels    = module.dashboards_util.labels,
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.dashboards_util.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.opensearch_dashboards[0]]
+}
+
+resource "kubectl_manifest" "vpa" {
+  count = var.dashboard_enabled && var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = local.dashboards_name
+      namespace = var.namespace
+      labels    = module.dashboards_util.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = local.dashboards_name
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.opensearch_dashboards[0]]
 }
 
 
 module "ingress" {
+  count = var.dashboard_enabled ? 1 : 0
+
   source = "../kube_ingress"
 
   namespace = var.namespace
   name      = local.dashboards_name
-  domains   = ["opensearch.prod.panfactum.com"]
+  domains   = [var.dashboard_domain]
   ingress_configs = [
     {
       service      = local.dashboards_name
@@ -846,5 +1019,5 @@ module "ingress" {
   csp_enabled                    = false
   cors_enabled                   = false
 
-  depends_on = [helm_release.opensearch_dashboards]
+  depends_on = [helm_release.opensearch_dashboards[0]]
 }

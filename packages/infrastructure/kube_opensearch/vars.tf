@@ -202,7 +202,6 @@ variable "log_level" {
   }
 }
 
-
 variable "slow_request_log_thresholds" {
   description = "The thresholds for which slow requests are logged. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs)."
   type = object({
@@ -218,4 +217,16 @@ variable "extra_cluster_settings" {
   description = "Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to override existing configuration values. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/)."
   type        = map(any)
   default     = {}
+}
+
+variable "dashboard_enabled" {
+  description = "Whether the opensearch dashboard is enabled"
+  type        = bool
+  default     = false
+}
+
+variable "dashboard_domain" {
+  description = "The domain for hosting the opensearch dashboard"
+  type        = string
+  default     = null
 }

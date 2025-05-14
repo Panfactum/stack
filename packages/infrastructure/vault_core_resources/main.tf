@@ -129,6 +129,7 @@ resource "aws_iam_access_key" "vault" {
   user = aws_iam_user.vault.name
 }
 
+// TODO: Add a cronjob for AWS credential rotation
 resource "vault_aws_secret_backend" "aws" {
   path                      = "aws"
   region                    = data.aws_region.current.name
