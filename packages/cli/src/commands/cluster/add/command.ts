@@ -1,4 +1,5 @@
 import path, { join } from "node:path";
+import { GetServiceQuotaCommand, ServiceQuotasClient } from "@aws-sdk/client-service-quotas";
 import { Glob } from "bun";
 import { Command } from "clipanion";
 import { Listr } from "listr2";
@@ -165,15 +166,36 @@ export class ClusterAddCommand extends PanfactumCommand {
       ]);
     }
 
+    /***********************************************
+     * Confirms the vCPU quota is high enough
+     ***********************************************/
+    const serviceQuotasClient = new ServiceQuotasClient({ region, profile: awsProfile })
+    const command = new GetServiceQuotaCommand({
+      QuotaCode: "L-1216C47A",
+      ServiceCode: "ec2",
+    })
+    try {
+      const quota = await serviceQuotasClient.send(command)
+      if (quota.Quota?.Value && quota.Quota.Value < 32) {
+        this.context.logger.warn("The EC2 vCPU quota is too low to install a cluster right now\n\n" +
+          "If you set this environment up with pf env add then the quota increase has already been requested.\n\n" +
+          "Check your e-mail for status updates on the request and try again when it has been approved.")
+        return
+      }
+    } catch (error) {
+      throw new CLIError("Error retrieving EC2 vCPU quota.", error)
+    }
+
+
+    /***********************************************
+     * Confirms the SLA target for the cluster
+     ***********************************************/
     const environmentPath = path.join(
       this.context.repoVariables.environments_dir,
       environment
     );
     const clusterPath = path.join(environmentPath, region);
 
-    /***********************************************
-     * Confirms the SLA target for the cluster
-     ***********************************************/
     const confirmedSLATarget = await setSLA({
       environment,
       region,
