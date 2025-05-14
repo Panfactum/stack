@@ -161,21 +161,9 @@ export async function setupVaultSSO(
         }),
         {
             title: "Removing static Vault credentials",
+            enabled: () => false,
             task: async () => {
-                const environmentPath = join(
-                    context.repoVariables.environments_dir,
-                    environment
-                );
-
-                const clusterPath = join(environmentPath, region);
-
-                await sopsUpsert({
-                    values: {
-                        vault_token: undefined
-                    },
-                    context,
-                    filePath: join(clusterPath, "region.secrets.yaml"),
-                });
+                // TODO: Remove static Vault credentials
             },
         },
         await buildSyncAWSIdentityCenterTask({ context })
