@@ -20,6 +20,7 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
+import { parseJson } from "@/util/zod/parseJson";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -290,7 +291,11 @@ export async function setupVault(
           errorMessage: "Failed to check Vault status",
         });
 
-        const statusData = JSON.parse(stdout.trim());
+        const statusSchema = z.object({
+          sealed: z.boolean(),
+        });
+
+        const statusData = parseJson(statusSchema, stdout.trim());
 
         return !statusData.sealed
       },
