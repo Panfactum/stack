@@ -98,24 +98,34 @@ export async function setupVaultSSO(
                     context,
                     environment,
                     region,
-                    module: MODULES.VAULT_AUTH_OIDC,
+                    module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig?.kube_config_context,
                     validationSchema: z.object({
-                        client_id: z.string(),
-                        client_secret: z.string(),
-                        oidc_discovery_url: z.string(),
-                        oidc_redirect_uris: z.array(z.string()),
-                        oidc_issuer: z.string(),
+                        client_id: z.object({
+                            value: z.string(),
+                        }),
+                        client_secret: z.object({
+                            value: z.string(),
+                        }),
+                        oidc_discovery_url: z.object({
+                            value: z.string(),
+                        }),
+                        oidc_redirect_uris: z.object({
+                            value: z.array(z.string()),
+                        }),
+                        oidc_issuer: z.object({
+                            value: z.string(),
+                        }),
                     }),
                 })
 
-                ctx.client_id = outputs.client_id
-                ctx.oidc_discovery_url = outputs.oidc_discovery_url
-                ctx.oidc_redirect_uris = outputs.oidc_redirect_uris
-                ctx.oidc_issuer = outputs.oidc_issuer
+                ctx.client_id = outputs.client_id.value
+                ctx.oidc_discovery_url = outputs.oidc_discovery_url.value
+                ctx.oidc_redirect_uris = outputs.oidc_redirect_uris.value
+                ctx.oidc_issuer = outputs.oidc_issuer.value
 
                 await sopsUpsert({
                     values: {
-                        client_secret: outputs.client_secret,
+                        client_secret: outputs.client_secret.value,
                     },
                     filePath: join(context.repoVariables.environments_dir, environment, region, MODULES.VAULT_AUTH_OIDC, "secrets.yaml"),
                     context,

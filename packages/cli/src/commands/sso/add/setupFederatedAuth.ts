@@ -221,7 +221,7 @@ export async function setupFederatedAuth(
                     })
                 })
 
-                return !secrets?.aws_scim_token || !ctx.awsScimUrl
+                return !!secrets?.aws_scim_token && !!ctx.awsScimUrl
             },
             task: async (ctx, task) => {
                 const authentikModuleFilePath = join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml")
@@ -329,7 +329,7 @@ export async function setupFederatedAuth(
                         .passthrough(),
                 });
 
-                return !authentikAWSSSOPfFileData?.userSyncComplete
+                return !!authentikAWSSSOPfFileData?.userSyncComplete
             },
             task: async (_, task) => {
                 const reRanSync = await context.logger.confirm({
