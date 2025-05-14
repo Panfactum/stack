@@ -3,6 +3,7 @@ import { z } from "zod";
 import kubeVaultTemplate from "@/templates/kube_vault_terragrunt.hcl" with { type: "file" };
 import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
@@ -19,7 +20,7 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import { type InstallClusterStepOptions, refreshConfig } from "./common";
+import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const RECOVER_KEYS_SCHEMA = z.object({
@@ -62,8 +63,13 @@ export async function setupVault(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region, kubeConfigContext, config } =
+  const { awsProfile, context, environment, clusterPath, region, kubeConfigContext } =
     options;
+
+  const config = await getPanfactumConfig({
+    context,
+    directory: clusterPath,
+  });
 
   const kubeDomain = config.kube_domain;
 
@@ -77,11 +83,6 @@ export async function setupVault(
   let vaultRecoveryKeys: string[] | undefined;
 
   if (await fileExists(join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"))) {
-
-    if (!config.vault_token) {
-      throw new CLIError('Was not able to find vault token.')
-    }
-
     const vaultRecovery = await sopsDecrypt({
       filePath: join(clusterPath, MODULES.KUBE_VAULT, "recovery.yaml"),
       context,
@@ -96,7 +97,6 @@ export async function setupVault(
 
     const { recovery_keys: recoveryKeys } = vaultRecovery;
 
-    vaultRootToken = config.vault_token;
     vaultRecoveryKeys = recoveryKeys;
   }
 
@@ -248,8 +248,6 @@ export async function setupVault(
           filePath: join(clusterPath, "region.secrets.yaml"),
         });
 
-        await refreshConfig(options)
-
         await sopsUpsert({
           values: {
             recovery_keys: recoveryKeys!.recovery_keys_hex.map(
@@ -388,7 +386,6 @@ export async function setupVault(
         const modulePath = join(clusterPath, MODULES.VAULT_CORE_RESOURCES);
         const env = {
           ...process.env,
-          VAULT_TOKEN: vaultRootToken || ctx.rootToken!,
         };
         const { pid, port } = await startVaultProxy({
           env,
@@ -416,7 +413,6 @@ export async function setupVault(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken || ctx.rootToken!,
               },
             }),
           ],

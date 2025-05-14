@@ -6,7 +6,6 @@ import kubeSchedulerTerragruntHcl from "@/templates/kube_scheduler_terragrunt.hc
 import kubeVpaTerragruntHcl from "@/templates/kube_vpa_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
@@ -19,16 +18,8 @@ export async function setupAutoscaling(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, region, slaTarget, config } =
+  const { awsProfile, context, environment, region, slaTarget } =
     options;
-
-  const vaultRootToken = config.vault_token
-
-  if (!vaultRootToken) {
-    throw new CLIError(
-      "Vault root token not found in config."
-    );
-  }
 
   interface Context {
     vaultProxyPid?: number;
@@ -52,7 +43,6 @@ export async function setupAutoscaling(
       module: MODULES.VAULT_CORE_RESOURCES,
       env: {
         ...process.env, //TODO: @seth Use context.env
-        VAULT_TOKEN: vaultRootToken,
       },
     }),
     await buildDeployModuleTask({
@@ -60,7 +50,6 @@ export async function setupAutoscaling(
       context,
       env: {
         ...process.env,
-        VAULT_TOKEN: vaultRootToken,
       },
       environment,
       region,
@@ -75,7 +64,6 @@ export async function setupAutoscaling(
       context,
       env: {
         ...process.env,
-        VAULT_TOKEN: vaultRootToken,
       },
       environment,
       region,
@@ -103,7 +91,6 @@ export async function setupAutoscaling(
       context,
       env: {
         ...process.env, //TODO: @seth Use context.env
-        VAULT_TOKEN: vaultRootToken,
       },
       environment,
       region,

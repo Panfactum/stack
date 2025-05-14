@@ -16,15 +16,7 @@ export async function setupLinkerd(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region, config } = options;
-
-  const vaultRootToken = config.vault_token
-
-  if (!vaultRootToken) {
-    throw new CLIError(
-      "Vault root token not found in config."
-    );
-  }
+  const { awsProfile, context, environment, clusterPath, region } = options;
 
   interface Context {
     kubeContext?: string;
@@ -50,7 +42,6 @@ export async function setupLinkerd(
         const { pid, port } = await startVaultProxy({
           env: {
             ...process.env,
-            VAULT_TOKEN: vaultRootToken,
           },
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
@@ -69,7 +60,6 @@ export async function setupLinkerd(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -102,7 +92,6 @@ export async function setupLinkerd(
           env: {
             ...process.env,
             VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-            VAULT_TOKEN: vaultRootToken,
           },
           onStdOutNewline: (line) => {
             task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });

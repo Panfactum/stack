@@ -18,17 +18,9 @@ export async function setupCertificates(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, clusterPath, context, domains, environment, region, config } = options;
+  const { awsProfile, clusterPath, context, domains, environment, region } = options;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
-
-  const vaultRootToken = config.vault_token
-
-  if (!vaultRootToken) {
-    throw new CLIError(
-      "Vault root token not found in config."
-    );
-  }
 
   interface Context {
     alertEmail?: string;
@@ -118,7 +110,6 @@ export async function setupCertificates(
         const { pid, port } = await startVaultProxy({
           env: {
             ...process.env,
-            VAULT_TOKEN: vaultRootToken,
           },
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_CERTIFICATES),
@@ -136,7 +127,6 @@ export async function setupCertificates(
             env: {
               ...process.env,
               VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-              VAULT_TOKEN: vaultRootToken,
             },
             environment,
             region,
@@ -181,7 +171,6 @@ export async function setupCertificates(
             context,
             env: {
               ...process.env,
-              VAULT_TOKEN: vaultRootToken,
               VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
             },
             environment,

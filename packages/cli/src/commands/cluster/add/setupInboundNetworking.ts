@@ -30,16 +30,7 @@ export async function setupInboundNetworking(
     clusterPath,
     region,
     slaTarget,
-    config
   } = options;
-
-  const vaultRootToken = config.vault_token
-
-  if (!vaultRootToken) {
-    throw new CLIError(
-      "Vault root token not found in config."
-    );
-  }
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
@@ -68,7 +59,6 @@ export async function setupInboundNetworking(
         const { pid, port } = await startVaultProxy({
           env: {
             ...process.env,
-            VAULT_TOKEN: vaultRootToken,
           },
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX),
@@ -108,7 +98,6 @@ export async function setupInboundNetworking(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -132,7 +121,6 @@ export async function setupInboundNetworking(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -148,7 +136,6 @@ export async function setupInboundNetworking(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -180,7 +167,6 @@ export async function setupInboundNetworking(
               env: {
                 ...process.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,

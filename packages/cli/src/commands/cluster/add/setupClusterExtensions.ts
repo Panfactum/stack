@@ -11,7 +11,6 @@ import kubeReloaderTerragruntHcl from "@/templates/kube_reloader_terragrunt.hcl"
 import kubeVeleroTerragruntHcl from "@/templates/kube_velero_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
-import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import {
@@ -26,16 +25,8 @@ export async function setupClusterExtensions(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region, config } =
+  const { awsProfile, context, environment, clusterPath, region } =
     options;
-
-  const vaultRootToken = config.vault_token
-
-  if (!vaultRootToken) {
-    throw new CLIError(
-      "Vault root token not found in config."
-    );
-  }
 
 
   const shouldSkipNodePoolsAdjustment = async () => {
@@ -84,7 +75,6 @@ export async function setupClusterExtensions(
                       context,
                       env: {
                         ...process.env,
-                        VAULT_TOKEN: vaultRootToken,
                       },
                       environment,
                       region,
@@ -116,7 +106,6 @@ export async function setupClusterExtensions(
                       context,
                       env: {
                         ...process.env,
-                        VAULT_TOKEN: vaultRootToken,
                       },
                       environment,
                       region,
@@ -131,7 +120,6 @@ export async function setupClusterExtensions(
                       context,
                       env: {
                         ...process.env,
-                        VAULT_TOKEN: vaultRootToken,
                       },
                       environment,
                       region,
@@ -151,7 +139,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -164,7 +151,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -179,7 +165,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -194,7 +179,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -209,7 +193,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -224,7 +207,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
@@ -237,7 +219,6 @@ export async function setupClusterExtensions(
               context,
               env: {
                 ...process.env,
-                VAULT_TOKEN: vaultRootToken,
               },
               environment,
               region,
