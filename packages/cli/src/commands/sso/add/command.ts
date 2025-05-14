@@ -71,6 +71,18 @@ export class SSOAddCommand extends PanfactumCommand {
 
         tasks.add({
             title: this.context.logger.applyColors("Setup AWS Federated SSO"),
+            skip: async () => {
+                const awsEKSPfYAMLFileData = await readYAMLFile({
+                    filePath: join(clusterPath, MODULES.AWS_EKS, ".pf.yaml"),
+                    context: this.context,
+                    validationSchema: z
+                        .object({
+                            federated_auth_enabled: z.boolean().optional(),
+                        })
+                        .passthrough(),
+                })
+                return !!awsEKSPfYAMLFileData?.federated_auth_enabled;
+            },
             task: async (_, mainTask) => {
                 return setupFederatedAuth(this.context, mainTask);
             }

@@ -449,6 +449,19 @@ export async function setupFederatedAuth(
             region,
             module: MODULES.AWS_EKS,
         }),
+        {
+            task: async () => {
+                await upsertPFYAMLFile({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.AWS_EKS,
+                    updates: {
+                        federatedAuthEnabled: true
+                    }
+                })
+            }
+        }
     ])
 
     return tasks;

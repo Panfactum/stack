@@ -8,6 +8,7 @@ import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
 import { CLIError } from "@/util/error/error";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
+import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -28,15 +29,23 @@ export async function setupVaultSSO(
         aws_profile: awsProfile,
         environment,
         region,
+        kube_config_context: kubeContext,
+        vault_token: vaultToken,
     } = config;
 
-    if (!environment || !region || !awsProfile) {
+    if (!environment || !region || !awsProfile || !kubeContext) {
         throw new CLIError([
             "Cluster installation must be run from within a valid region-specific directory.",
             "If you do not have this file structure please ensure you've completed the initial setup steps here:",
             "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
         ]);
     }
+
+    const environmentPath = join(
+        context.repoVariables.environments_dir,
+        environment
+    );
+    const clusterPath = join(environmentPath, region);
 
     const regionConfig = await getConfigValuesFromFile({
         environment,
@@ -55,6 +64,20 @@ export async function setupVaultSSO(
             "Vault address not found in region config."
         );
     }
+
+    const authentikAWSSSOConfig = await getConfigValuesFromFile({
+        environment,
+        context,
+        region,
+        module: MODULES.AUTHENTIK_AWS_SSO,
+    })
+
+    if (!authentikAWSSSOConfig?.extra_inputs?.["aws_sign_in_url"]) {
+        throw new CLIError(
+            `AWS SSO sign in URL not found in ${MODULES.AUTHENTIK_AWS_SSO} config.`
+        );
+    }
+
 
     interface Context {
         client_id: string;
@@ -161,12 +184,40 @@ export async function setupVaultSSO(
         }),
         {
             title: "Removing static Vault credentials",
-            enabled: () => false,
+            skip: () => vaultToken === undefined,
             task: async () => {
-                // TODO: Remove static Vault credentials
+                const vaultTokenRevokeCommand = [
+                    "kubectl",
+                    "exec",
+                    "-i",
+                    "vault-0",
+                    "--namespace=vault",
+                    "--context",
+                    kubeContext,
+                    "--",
+                    "vault",
+                    "token",
+                    "revoke",
+                    vaultToken!,
+                ];
+
+                await execute({
+                    command: vaultTokenRevokeCommand,
+                    context,
+                    workingDirectory: process.cwd(),
+                    errorMessage: "Failed to revoke vault token",
+                });
+
+                await sopsUpsert({
+                    values: {
+                        vault_token: undefined
+                    },
+                    context,
+                    filePath: join(clusterPath, "region.secrets.yaml"),
+                });
             },
         },
-        await buildSyncAWSIdentityCenterTask({ context })
+        await buildSyncAWSIdentityCenterTask({ context, startURL: authentikAWSSSOConfig.extra_inputs["aws_sign_in_url"] })
     ])
 
     return tasks
