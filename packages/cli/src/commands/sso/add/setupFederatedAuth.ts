@@ -382,7 +382,8 @@ export async function setupFederatedAuth(
                 }
                 const productionEnvironments = await context.logger.checkbox({
                     task,
-                    message: "Select your production environment(s)",
+                    explainer: "All other environments will grant users full access. This can be changed later.",
+                    message: "Select the environment(s) you want to security harden:",
                     choices: environmentsWithAWSAccountId.map((env) => ({ name: env.name, value: env })).filter((env) => env.name !== MANAGEMENT_ENVIRONMENT),
                     validate: (choices) => {
                         if (choices.length === 0) {
