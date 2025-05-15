@@ -81,18 +81,6 @@ variable "controller_nodes_enabled" {
   default     = true
 }
 
-variable "service_account" {
-  description = "The name of the cert-manager service account."
-  type        = string
-  default     = "cert-manager"
-}
-
-variable "namespace" {
-  description = "The name of the cert-manager namespace."
-  type        = string
-  default     = "cert-manager"
-}
-
 variable "route53_zones" {
   description = "A mapping of public DNS domains managed by AWS to their configuration; cert-manager uses this to issue public-facing certificates."
   type = map(object({
