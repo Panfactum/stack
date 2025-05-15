@@ -594,7 +594,7 @@ data "aws_iam_policy_document" "permissions" {
 resource "kubernetes_secret" "cloudflare_api_token" {
   metadata {
     name      = "cloudflare-api-token"
-    namespace = var.namespace
+    namespace = local.namespace
   }
 
   type = "Opaque"
@@ -672,7 +672,7 @@ resource "vault_pki_secret_backend_config_urls" "pki_internal" {
 resource "kubernetes_service_account" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
 }
@@ -680,7 +680,7 @@ resource "kubernetes_service_account" "vault_issuer" {
 resource "kubernetes_role" "vault_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_issuer.metadata[0].name
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
   rule {
@@ -694,13 +694,13 @@ resource "kubernetes_role" "vault_issuer" {
 resource "kubernetes_role_binding" "vault_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_issuer.metadata[0].name
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
   subject {
     kind      = "ServiceAccount"
     name      = "cert-manager"
-    namespace = var.namespace
+    namespace = local.namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -720,7 +720,7 @@ module "vault_role" {
   source = "../kube_sa_auth_vault"
 
   service_account           = kubernetes_service_account.vault_issuer.metadata[0].name
-  service_account_namespace = var.namespace
+  service_account_namespace = local.namespace
   vault_policy_hcl          = data.vault_policy_document.vault_issuer.hcl
   audience                  = "vault://${local.ci_internal_name}"
   token_ttl_seconds         = 120
@@ -779,7 +779,7 @@ resource "kubernetes_config_map" "ca_bundle" {
   metadata {
     name      = "internal-ca"
     labels    = data.pf_kube_labels.labels.labels
-    namespace = var.namespace
+    namespace = local.namespace
   }
   data = {
     "ca.crt" = vault_pki_secret_backend_root_cert.pki_internal.issuing_ca
@@ -800,7 +800,7 @@ module "sync_ca_bundle" {
 resource "kubernetes_service_account" "vault_rsa_issuer" {
   metadata {
     name      = "vault-issuer-rsa"
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
 }
@@ -808,7 +808,7 @@ resource "kubernetes_service_account" "vault_rsa_issuer" {
 resource "kubernetes_role" "vault_rsa_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
   rule {
@@ -822,13 +822,13 @@ resource "kubernetes_role" "vault_rsa_issuer" {
 resource "kubernetes_role_binding" "vault_rsa_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
   subject {
     kind      = "ServiceAccount"
     name      = "cert-manager"
-    namespace = var.namespace
+    namespace = local.namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -848,7 +848,7 @@ module "vault_rsa_role" {
   source = "../kube_sa_auth_vault"
 
   service_account           = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
-  service_account_namespace = var.namespace
+  service_account_namespace = local.namespace
   vault_policy_hcl          = data.vault_policy_document.vault_rsa_issuer.hcl
   audience                  = "vault://${local.ci_internal_rsa_name}"
   token_ttl_seconds         = 120
@@ -909,7 +909,7 @@ resource "kubectl_manifest" "internal_rsa_ci" {
 resource "kubernetes_service_account" "vault_ca_issuer" {
   metadata {
     name      = "vault-ca-issuer"
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
 }
@@ -917,7 +917,7 @@ resource "kubernetes_service_account" "vault_ca_issuer" {
 resource "kubernetes_role" "vault_ca_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
   rule {
@@ -931,13 +931,13 @@ resource "kubernetes_role" "vault_ca_issuer" {
 resource "kubernetes_role_binding" "vault_ca_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
-    namespace = var.namespace
+    namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
   subject {
     kind      = "ServiceAccount"
     name      = "cert-manager"
-    namespace = var.namespace
+    namespace = local.namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -957,7 +957,7 @@ module "vault_ca_role" {
   source = "../kube_sa_auth_vault"
 
   service_account           = kubernetes_service_account.vault_ca_issuer.metadata[0].name
-  service_account_namespace = var.namespace
+  service_account_namespace = local.namespace
   vault_policy_hcl          = data.vault_policy_document.vault_ca_issuer.hcl
   audience                  = "vault://${local.ci_internal_ca_name}"
   token_ttl_seconds         = 120
@@ -1021,7 +1021,7 @@ resource "kubectl_manifest" "ingress_cert" {
     kind       = "Certificate"
     metadata = {
       name      = "ingress-tls"
-      namespace = var.namespace
+      namespace = local.namespace
       labels    = data.pf_kube_labels.labels.labels
     }
     spec = {

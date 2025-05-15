@@ -179,34 +179,68 @@ export async function setupFederatedAuth(
                 }
             }
         },
-        await buildDeployModuleTask<Context>({
-            taskTitle: "Deploy Authentik AWS SSO",
-            context,
-            environment,
-            region,
-            env: { ...context.env },
-            skipIfAlreadyApplied: true,
-            module: MODULES.AUTHENTIK_AWS_SSO,
-            hclIfMissing: await Bun.file(authentikAwsSSO).text(),
-            inputUpdates: {
-                aws_acs_url: defineInputUpdate({
-                    schema: z.string(),
-                    update: (_, ctx) => ctx.awsAcsUrl!,
-                }),
-                aws_sign_in_url: defineInputUpdate({
-                    schema: z.string(),
-                    update: (_, ctx) => ctx.awsSignInUrl!,
-                }),
-                aws_issuer: defineInputUpdate({
-                    schema: z.string(),
-                    update: (_, ctx) => ctx.awsIssuer!,
-                }),
-                aws_scim_enabled: defineInputUpdate({
-                    schema: z.boolean(),
-                    update: () => false,
-                }),
+        {
+            title: "Deploy Authentik AWS SSO",
+            skip: async (_) => {
+                const authentikAwsSSOPfYAMLFileData = await readYAMLFile({
+                    filePath: path.join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, ".pf.yaml"),
+                    context,
+                    validationSchema: z
+                      .object({
+                          first_applied: z.boolean().optional(),
+                      })
+                      .passthrough(),
+                })
+
+                return !!authentikAwsSSOPfYAMLFileData?.first_applied
             },
-        }),
+            task: async (_, task) => {
+                return task.newListr<Context>([
+                    await buildDeployModuleTask<Context>({
+                        taskTitle: "Deploy Authentik AWS SSO",
+                        context,
+                        environment,
+                        region,
+                        env: {...context.env},
+                        skipIfAlreadyApplied: true,
+                        module: MODULES.AUTHENTIK_AWS_SSO,
+                        hclIfMissing: await Bun.file(authentikAwsSSO).text(),
+                        inputUpdates: {
+                            aws_acs_url: defineInputUpdate({
+                                schema: z.string(),
+                                update: (_, ctx) => ctx.awsAcsUrl!,
+                            }),
+                            aws_sign_in_url: defineInputUpdate({
+                                schema: z.string(),
+                                update: (_, ctx) => ctx.awsSignInUrl!,
+                            }),
+                            aws_issuer: defineInputUpdate({
+                                schema: z.string(),
+                                update: (_, ctx) => ctx.awsIssuer!,
+                            }),
+                            aws_scim_enabled: defineInputUpdate({
+                                schema: z.boolean(),
+                                update: () => false,
+                            }),
+                        },
+                    }),
+                    {
+                        task: async () => {
+                            await upsertPFYAMLFile({
+                                context,
+                                environment,
+                                region,
+                                module: MODULES.AUTHENTIK_AWS_SSO,
+                                updates: {
+                                    first_applied: true
+                                }
+                            })
+                        }
+                    }
+                ])
+            }
+        },
+
         {
             title: "Get SCIM User Configuration",
             skip: async (ctx) => {
@@ -359,6 +393,7 @@ export async function setupFederatedAuth(
         },
         {
             title: "Setup IAM Identity Center Permissions",
+            // todo: @seth needs skip logic
             task: async (ctx, task) => {
                 const environments = await getEnvironments(context);
                 const environmentsWithAWSAccountId: Array<EnvironmentMeta & { aws_account_id: string }> = [];

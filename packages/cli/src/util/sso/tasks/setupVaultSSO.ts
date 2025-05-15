@@ -105,7 +105,7 @@ export async function setupVaultSSO(
             inputUpdates: {
                 vault_name: defineInputUpdate({
                     schema: z.string(),
-                    update: () => regionConfig.kube_config_context!,
+                    update: () => `vault-${regionConfig.kube_config_context!}`,
                 }),
                 vault_domain: defineInputUpdate({
                     schema: z.string(),
@@ -194,10 +194,9 @@ export async function setupVaultSSO(
                     "--context",
                     kubeContext,
                     "--",
-                    "vault",
-                    "token",
-                    "revoke",
-                    vaultToken!,
+                    "sh",
+                    "-c",
+                    `VAULT_TOKEN=${vaultToken} vault token revoke -self`,
                 ];
 
                 await execute({
