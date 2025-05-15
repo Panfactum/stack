@@ -106,7 +106,7 @@ export async function setupVaultSSO(
             inputUpdates: {
                 vault_name: defineInputUpdate({
                     schema: z.string(),
-                    update: () => regionConfig.kube_config_context!,
+                    update: () => `vault-${regionConfig.kube_config_context!}`,
                 }),
                 vault_domain: defineInputUpdate({
                     schema: z.string(),
