@@ -195,10 +195,11 @@ export async function setupVaultSSO(
                     "--context",
                     kubeContext,
                     "--",
+                    `VAULT_TOKEN=${vaultToken}`,
                     "vault",
                     "token",
                     "revoke",
-                    vaultToken!,
+                    "-self",
                 ];
 
                 await execute({
