@@ -19,7 +19,6 @@ export async function setupVaultSSO(
     context: PanfactumContext,
     mainTask: PanfactumTaskWrapper
 ) {
-
     const config = await getPanfactumConfig({
         context,
         directory: process.cwd(),

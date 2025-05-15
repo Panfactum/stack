@@ -10,6 +10,7 @@ import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { fileExists } from "@/util/fs/fileExists";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
+import { setupVaultSSO } from "@/util/sso/tasks/setupVaultSSO";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
@@ -424,6 +425,12 @@ export async function setupVault(
           { ctx }
         );
       },
+    },
+    {
+      title: context.logger.applyColors("Setup Vault Federated SSO"),
+      task: async (_, mainTask) => {
+        return setupVaultSSO(context, mainTask);
+      }
     },
     {
       title: "Stop Vault Proxy",
