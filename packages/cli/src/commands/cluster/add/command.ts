@@ -176,10 +176,10 @@ export class ClusterAddCommand extends PanfactumCommand {
     })
     try {
       const quota = await serviceQuotasClient.send(command)
-      if (quota.Quota?.Value && quota.Quota.Value < 32) {
-        this.context.logger.warn("The EC2 vCPU quota is too low to install a cluster right now\n\n" +
-          "If you set this environment up with pf env add then the quota increase has already been requested.\n\n" +
-          "Check your e-mail for status updates on the request and try again when it has been approved.")
+      if (quota.Quota?.Value && quota.Quota.Value < 16) {
+        this.context.logger.warn(`The EC2 vCPU quota is too low to install a cluster right now
+          If you set this environment up with pf env add then the quota increase has already been requested.
+          Check your e-mail for status updates on the request and try again when it has been approved.`)
         return
       }
     } catch (error) {
