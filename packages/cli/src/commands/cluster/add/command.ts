@@ -1,4 +1,5 @@
 import path, { join } from "node:path";
+import { GetServiceQuotaCommand, ServiceQuotasClient } from "@aws-sdk/client-service-quotas";
 import { Glob } from "bun";
 import { Command } from "clipanion";
 import { Listr } from "listr2";
@@ -24,7 +25,7 @@ import { setupInternalClusterNetworking } from "./setupInternalClusterNetworking
 import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
-import { setupVPCandECR } from "./setupVPCandECR";
+import { setupVPC } from "./setupVPC.ts";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -39,11 +40,11 @@ const SETUP_STEPS: Array<{
   lastModule: MODULES; // Used to determine if the step has been completed
 }> = [
     {
-      label: "AWS VPC and ECR",
-      id: "setupVPCandECR",
-      setup: setupVPCandECR,
+      label: "AWS VPC",
+      id: "setupVPC",
+      setup: setupVPC,
       completed: false,
-      lastModule: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
+      lastModule: MODULES.AWS_VPC,
     },
     {
       label: "Base EKS Cluster",
@@ -165,15 +166,36 @@ export class ClusterAddCommand extends PanfactumCommand {
       ]);
     }
 
+    /***********************************************
+     * Confirms the vCPU quota is high enough
+     ***********************************************/
+    const serviceQuotasClient = new ServiceQuotasClient({ region, profile: awsProfile })
+    const command = new GetServiceQuotaCommand({
+      QuotaCode: "L-1216C47A",
+      ServiceCode: "ec2",
+    })
+    try {
+      const quota = await serviceQuotasClient.send(command)
+      if (quota.Quota?.Value && quota.Quota.Value < 16) {
+        this.context.logger.warn(`The EC2 vCPU quota is too low to install a cluster right now
+          If you set this environment up with pf env add then the quota increase has already been requested.
+          Check your e-mail for status updates on the request and try again when it has been approved.`)
+        return
+      }
+    } catch (error) {
+      throw new CLIError("Error retrieving EC2 vCPU quota.", error)
+    }
+
+
+    /***********************************************
+     * Confirms the SLA target for the cluster
+     ***********************************************/
     const environmentPath = path.join(
       this.context.repoVariables.environments_dir,
       environment
     );
     const clusterPath = path.join(environmentPath, region);
 
-    /***********************************************
-     * Confirms the SLA target for the cluster
-     ***********************************************/
     const confirmedSLATarget = await setSLA({
       environment,
       region,
