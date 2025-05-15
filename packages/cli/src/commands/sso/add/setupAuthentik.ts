@@ -688,7 +688,7 @@ spec:
                 const openBrowser = await context.logger.confirm({
                     task,
                     explainer: `We will now open your browser so you can finish setting up your Authentik account.
-You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authentikAdminName}) in the browser that opens.`,
+You will need to enter your user email(${ctx.authentikAdminEmail}) in the browser that opens. ${passwordResetLink}`,
                     message: "Ready?",
                     default: true,
                 })
