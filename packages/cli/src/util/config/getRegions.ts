@@ -4,6 +4,7 @@ import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { asyncIterMap } from "../asyncIterMap";
 import { getPanfactumConfig } from "./getPanfactumConfig";
 import { CLIError } from "../error/error";
+import { GLOBAL_REGION } from "../terragrunt/constants";
 import type { PanfactumContext } from "@/util/context/context";
 
 export interface RegionMeta {
@@ -23,7 +24,7 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
             return {
                 name: region ?? basename(regionPath),
                 path: regionPath,
-                primary: primaryRegion === awsRegion
+                primary: primaryRegion === awsRegion && region !== GLOBAL_REGION
             }
         } catch (e) {
             throw new CLIError("Unable to get regions", e)
