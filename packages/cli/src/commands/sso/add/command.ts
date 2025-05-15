@@ -77,11 +77,11 @@ export class SSOAddCommand extends PanfactumCommand {
                     context: this.context,
                     validationSchema: z
                         .object({
-                            federated_auth_enabled: z.boolean().optional(),
+                            federatedAuthEnabled: z.boolean().optional(),
                         })
                         .passthrough(),
                 })
-                return !!awsEKSPfYAMLFileData?.federated_auth_enabled;
+                return !!awsEKSPfYAMLFileData?.federatedAuthEnabled;
             },
             task: async (_, mainTask) => {
                 return setupFederatedAuth(this.context, mainTask);
