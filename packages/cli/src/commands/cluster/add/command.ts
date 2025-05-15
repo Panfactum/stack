@@ -25,7 +25,7 @@ import { setupInternalClusterNetworking } from "./setupInternalClusterNetworking
 import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
-import { setupVPCandECR } from "./setupVPCandECR";
+import { setupVPC } from "./setupVPC.ts";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -40,11 +40,11 @@ const SETUP_STEPS: Array<{
   lastModule: MODULES; // Used to determine if the step has been completed
 }> = [
     {
-      label: "AWS VPC and ECR",
-      id: "setupVPCandECR",
-      setup: setupVPCandECR,
+      label: "AWS VPC",
+      id: "setupVPC",
+      setup: setupVPC,
       completed: false,
-      lastModule: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
+      lastModule: MODULES.AWS_VPC,
     },
     {
       label: "Base EKS Cluster",

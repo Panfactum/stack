@@ -312,7 +312,7 @@ locals {
             // The default patchesJson6902 logic has protection against
             // overriding variables if they already exist
             {
-              list = "request.object.spec.containers"
+              list = "request.object.spec.initContainers"
               context = [
                 {
                   name = "memoryRequestMb"
