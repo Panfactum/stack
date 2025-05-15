@@ -96,7 +96,6 @@ export async function clusterReset({
   // ## Step 6: Delete any lingering resources in the cluster itself
   // ############################################################
 
-  // FIX: @seth - Use Kubernetes SDK
   const kubectlDelete = async ({
     type,
     name,

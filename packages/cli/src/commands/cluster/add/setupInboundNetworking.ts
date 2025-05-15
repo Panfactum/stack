@@ -57,9 +57,6 @@ export async function setupInboundNetworking(
       title: "Start Vault Proxy",
       task: async (ctx) => {
         const { pid, port } = await startVaultProxy({
-          env: {
-            ...process.env,
-          },
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX),
         });
@@ -96,7 +93,7 @@ export async function setupInboundNetworking(
               taskTitle: "Deploy AWS Load Balancer Controller",
               context,
               env: {
-                ...process.env,
+                ...context.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
               environment,
@@ -119,7 +116,7 @@ export async function setupInboundNetworking(
               taskTitle: "Deploy External DNS",
               context,
               env: {
-                ...process.env,
+                ...context.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
               environment,
@@ -134,7 +131,7 @@ export async function setupInboundNetworking(
               taskTitle: "Deploy Ingress NGINX",
               context,
               env: {
-                ...process.env,
+                ...context.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
               environment,
@@ -165,7 +162,7 @@ export async function setupInboundNetworking(
               taskTitle: "Update Vault to use Ingress",
               context,
               env: {
-                ...process.env,
+                ...context.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
               environment,

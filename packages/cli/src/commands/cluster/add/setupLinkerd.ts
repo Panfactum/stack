@@ -40,9 +40,6 @@ export async function setupLinkerd(
       title: "Start Vault Proxy",
       task: async (ctx) => {
         const { pid, port } = await startVaultProxy({
-          env: {
-            ...process.env,
-          },
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
         });
@@ -58,7 +55,7 @@ export async function setupLinkerd(
               taskTitle: "Deploy Linkerd Service Mesh",
               context,
               env: {
-                ...process.env,
+                ...context.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
               environment,
@@ -90,7 +87,7 @@ export async function setupLinkerd(
             exitCode === 0 ||
             (stdout as string).includes("Status check results are √"),
           env: {
-            ...process.env,
+            ...context.env,
             VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
           },
           onStdOutNewline: (line) => {

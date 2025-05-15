@@ -389,11 +389,7 @@ export async function setupVault(
           throw new CLIError("Kube context not found");
         }
         const modulePath = join(clusterPath, MODULES.VAULT_CORE_RESOURCES);
-        const env = {
-          ...process.env,
-        };
         const { pid, port } = await startVaultProxy({
-          env,
           modulePath,
           kubeContext: ctx.kubeContext,
         });
@@ -416,7 +412,7 @@ export async function setupVault(
                 vaultCoreResourcesTemplate
               ).text(),
               env: {
-                ...process.env,
+                ...context.env,
                 VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
               },
             }),

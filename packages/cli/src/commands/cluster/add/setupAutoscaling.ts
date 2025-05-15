@@ -41,16 +41,10 @@ export async function setupAutoscaling(
       region,
       skipIfAlreadyApplied: false,
       module: MODULES.VAULT_CORE_RESOURCES,
-      env: {
-        ...process.env, //TODO: @seth Use context.env
-      },
     }),
     await buildDeployModuleTask({
       taskTitle: "Deploy Metrics Server",
       context,
-      env: {
-        ...process.env,
-      },
       environment,
       region,
       skipIfAlreadyApplied: true,
@@ -62,9 +56,6 @@ export async function setupAutoscaling(
     await buildDeployModuleTask({
       taskTitle: "Deploy Vertical Pod Autoscaler",
       context,
-      env: {
-        ...process.env,
-      },
       environment,
       region,
       skipIfAlreadyApplied: true,
@@ -89,9 +80,6 @@ export async function setupAutoscaling(
     await buildDeployModuleTask({
       taskTitle: "Deploy Karpenter",
       context,
-      env: {
-        ...process.env, //TODO: @seth Use context.env
-      },
       environment,
       region,
       skipIfAlreadyApplied: true,
@@ -177,11 +165,6 @@ export async function setupAutoscaling(
     //       context,
     //       environment,
     //       region,
-    //       env: {
-    //         ...process.env,
-    //         VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-    //         VAULT_TOKEN: vaultRootToken,
-    //       },
     //       onLogLine: (line) => {
     //         task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
     //       },
