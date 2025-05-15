@@ -9,6 +9,10 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
         description: "Activates debug logging",
     });
 
+    cwd: string | undefined = Option.String("--cwd", {
+        description: "Set the current working directory for the command",
+    });
+
     override async catch(error: unknown) {
         if (error instanceof Error) {
             this.context.logger.error(error.message)
