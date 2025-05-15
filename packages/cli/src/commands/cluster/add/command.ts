@@ -323,24 +323,26 @@ export class ClusterAddCommand extends PanfactumCommand {
     // TODO: @seth - interpolate actual cluster name
     this.context.logger.success("🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉")
     this.context.logger.info(`
-        The Panfactum devShell ships with a TUI called k9s.\n
-        To verify what pods are running in the cluster do the following:\n\n
+        The Panfactum devShell ships with a TUI called k9s.
+        To verify what pods are running in the cluster do the following:
 
-          1. Run ${pc.bold(pc.cyan("k9s"))}\n\n
+          1. Run ${pc.bold(pc.cyan("k9s"))}
 
-          2. Type ${pc.bold(pc.cyan("':ctx⏎'"))} to list all your installed clusters and select the one that was just installed.\n\n
+          2. Type ${pc.bold(pc.cyan("':ctx⏎'"))} to list all your installed clusters and select the one that was just installed.
 
-          3. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n\n
+          3. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.
 
-          4. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n\n
+          4. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.
 
           5. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.
     `)
 
-    this.context.logger.warn("The Vault recovery keys have been encrypted and saved in the kube_vault folder in the recovery.yaml file.")
-    this.context.logger.warn("The recovery keys allow root access to the vault instance and thus all infrastructure.")
-    this.context.logger.warn(`These keys ${pc.bold("SHOULD NOT")} be left here as they will allow for privilege escalation.`)
-    this.context.logger.warn("Decide how your organization recommends superusers store these keys.")
-    this.context.logger.warn(`This should ${pc.bold("NOT")} be in a location that is accessible by all superusers (e.g. a company password vault).`)
+    this.context.logger.warn(`
+      The Vault recovery keys have been encrypted and saved in the kube_vault folder in the recovery.yaml file.
+      The recovery keys allow root access to the vault instance and thus all infrastructure.
+      These keys ${pc.bold("SHOULD NOT")} be left here as they will allow for privilege escalation.
+      Decide how your organization recommends superusers store these keys.
+      This should ${pc.bold("NOT")} be in a location that is accessible by all superusers (e.g. a company password vault).
+    `)
   }
 }
