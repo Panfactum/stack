@@ -21,10 +21,11 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
         const regionPath = dirname(filePath);
         try {
             const { region, aws_region: awsRegion } = await getConfigValuesFromFile({ filePath, context }) || {}
+            const name = region ?? basename(regionPath)
             return {
-                name: region ?? basename(regionPath),
+                name,
                 path: regionPath,
-                primary: primaryRegion === awsRegion && region !== GLOBAL_REGION
+                primary: primaryRegion === awsRegion && name !== GLOBAL_REGION
             }
         } catch (e) {
             throw new CLIError("Unable to get regions", e)
