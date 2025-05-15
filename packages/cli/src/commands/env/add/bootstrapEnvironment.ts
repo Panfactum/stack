@@ -330,54 +330,6 @@ export async function bootstrapEnvironment(inputs: {
         }
     })
 
-
-    //////////////////////////////////////////////////////////////
-    // Generate the bucket and lock table names
-    //////////////////////////////////////////////////////////////
-    tasks.add({
-        title: "Generate unique state bucket name",
-        task: async (ctx, task) => {
-
-            if (existingConfig.tf_state_bucket !== undefined) {
-                ctx.bucketName = existingConfig.tf_state_bucket
-                ctx.locktableName = existingConfig.tf_state_bucket
-            }
-
-            while (!ctx.bucketName || !ctx.locktableName) {
-                const randomString = [...new Array(8)]
-                    .map(() => Math.floor(Math.random() * 36).toString(36))
-                    .join('')
-                    .toLowerCase();
-
-                // Truncate environment name to ensure total bucket name is under 63 chars
-                // Format: tf-{envName}-{8chars} = 3 + 1 + envName + 1 + 8 chars
-                const maxEnvLength = 50; // 63 - 3 - 1 - 1 - 8 = 50
-                const truncatedEnvName = environmentName.slice(0, maxEnvLength);
-                const proposedBucketName = `tf-${truncatedEnvName}-${randomString}`;
-
-                // Check if bucket already exists
-                try {
-                    const s3Client = await getS3Client({ context, profile: ctx.profile!, region: ctx.primaryRegion! });
-                    await s3Client.send(new HeadBucketCommand({
-                        Bucket: proposedBucketName
-                    }));
-                    continue;
-                } catch (error) {
-                    if (error instanceof Error && error.name === 'NotFound') {
-                        ctx.bucketName = proposedBucketName;
-                        ctx.locktableName = proposedBucketName;
-
-                        // TODO @jack - retry loop - fails in af-south-1 for some reason? 
-                    } else {
-                        throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
-                    }
-                }
-            }
-
-            task.title = context.logger.applyColors(`Generated unique state bucket name ${ctx.bucketName}`, { lowlights: [ctx.bucketName] })
-        }
-    })
-
     //////////////////////////////////////////////////////////////
     // Verify that S3 service is active
     //////////////////////////////////////////////////////////////
@@ -451,6 +403,73 @@ export async function bootstrapEnvironment(inputs: {
             task.title = "S3 service is active"
         }
     })
+
+
+
+    //////////////////////////////////////////////////////////////
+    // Generate the bucket and lock table names
+    //////////////////////////////////////////////////////////////
+    tasks.add({
+        title: "Generate unique state bucket name",
+        task: async (ctx, task) => {
+
+            if (existingConfig.tf_state_bucket !== undefined) {
+                ctx.bucketName = existingConfig.tf_state_bucket
+                ctx.locktableName = existingConfig.tf_state_bucket
+            }
+
+            while (!ctx.bucketName || !ctx.locktableName) {
+                const randomString = [...new Array(8)]
+                    .map(() => Math.floor(Math.random() * 36).toString(36))
+                    .join('')
+                    .toLowerCase();
+
+                // Truncate environment name to ensure total bucket name is under 63 chars
+                // Format: tf-{envName}-{8chars} = 3 + 1 + envName + 1 + 8 chars
+                const maxEnvLength = 50; // 63 - 3 - 1 - 1 - 8 = 50
+                const truncatedEnvName = environmentName.slice(0, maxEnvLength);
+                const proposedBucketName = `tf-${truncatedEnvName}-${randomString}`;
+
+                // Check if bucket already exists
+                try {
+                    const s3Client = await getS3Client({ context, profile: ctx.profile!, region: ctx.primaryRegion! });
+
+                    // Retries a couple times b/c communication with s3
+                    // tends to be a bit flakey on initial account creation
+                    let headBucketRetries = 0;
+                    const maxHeadBucketRetries = 3;
+                    while (true) {
+                        try {
+                            await s3Client.send(new HeadBucketCommand({
+                                Bucket: proposedBucketName
+                            }));
+                            break;
+                        } catch (e) {
+                            headBucketRetries++;
+                            if (headBucketRetries >= maxHeadBucketRetries) {
+                                throw e;
+                            }
+                            await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
+                        }
+                    }
+
+                    continue;
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'NotFound') {
+                        ctx.bucketName = proposedBucketName;
+                        ctx.locktableName = proposedBucketName;
+
+                        // TODO @jack - retry loop - fails in af-south-1 for some reason? 
+                    } else {
+                        throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
+                    }
+                }
+            }
+
+            task.title = context.logger.applyColors(`Generated unique state bucket name ${ctx.bucketName}`, { lowlights: [ctx.bucketName] })
+        }
+    })
+
 
     //////////////////////////////////////////////////////////////
     // Generate the relevant config files
