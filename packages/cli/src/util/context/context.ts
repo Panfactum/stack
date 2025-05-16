@@ -11,13 +11,8 @@ export const createPanfactumContext = async (
   context: BaseContext,
   opts: {
     debugEnabled: boolean;
-    cwd?: string;
   }
 ): Promise<PanfactumContext> => {
-  if (opts.cwd) {
-    process.chdir(opts.cwd);
-  }
-  
   return {
     ...context,
     repoVariables: await getRepoVariables(),
