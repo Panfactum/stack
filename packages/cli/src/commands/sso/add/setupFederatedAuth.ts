@@ -40,11 +40,12 @@ const DEVELOPMENT_ENVIRONMENT_ACCESS = {
 
 export async function setupFederatedAuth(
     context: PanfactumContext,
-    mainTask: PanfactumTaskWrapper
+    mainTask: PanfactumTaskWrapper,
+    regionPath: string
 ) {
     const config = await getPanfactumConfig({
         context,
-        directory: process.cwd(),
+        directory: regionPath,
     });
 
     const {

@@ -3,7 +3,9 @@ import { Command } from "clipanion";
 import { Listr } from "listr2";
 import { z } from "zod";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import {getEnvironments} from "@/util/config/getEnvironments.ts";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import {getRegions} from "@/util/config/getRegions.ts";
 import { CLIError } from "@/util/error/error";
 import { setupVaultSSO } from "@/util/sso/tasks/setupVaultSSO";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -24,11 +26,44 @@ export class SSOAddCommand extends PanfactumCommand {
     async execute() {
         this.context.logger.info("Starting Authentik installation process")
 
-        const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });
+        /*******************************************
+         * Select Environment and Region
+         *******************************************/
+        const environments = (await getEnvironments(this.context)).filter(env => env.name !== "management");
+
+        if (environments.length === 0) {
+            throw new CLIError([
+                "No environments found. Please run `pf env add` to create an environment first.",
+            ]);
+        }
+
+        const selectedEnvironment = await this.context.logger.select({
+            message: "Select the environment for where SSO will be deployed:",
+            choices: environments.map(env => ({
+                value: env,
+                name: `${env.name}${env.deployed ? '' : ' (not deployed)'}`
+            })),
+        });
+
+        const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== "global" && region.clusterDeployed);
+
+        if (regions.length === 0) {
+            throw new CLIError([
+                `No available regions with clusters installed found in environment ${selectedEnvironment.name}.`,
+            ]);
+        }
+
+        const selectedRegion = await this.context.logger.select({
+            message: "Select the region for the SSO deployment:",
+            choices: regions.map(region => ({
+                value: region,
+                name: `${region.name}${region.primary ? ' (primary)' : ''}`
+            })),
+        });
 
         const config = await getPanfactumConfig({
             context: this.context,
-            directory: process.cwd(),
+            directory: selectedRegion.path,
         });
 
         const {
@@ -44,17 +79,13 @@ export class SSOAddCommand extends PanfactumCommand {
             ]);
         }
 
-        const environmentPath = join(
-            this.context.repoVariables.environments_dir,
-            environment
-        );
-        const clusterPath = join(environmentPath, region);
+        const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });
 
         tasks.add({
             title: this.context.logger.applyColors("Setup Authentik"),
             skip: async () => {
                 const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
-                    filePath: join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
+                    filePath: join(selectedRegion.path, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context: this.context,
                     validationSchema: z
                         .object({
@@ -65,7 +96,7 @@ export class SSOAddCommand extends PanfactumCommand {
                 return !!authentikCoreResourcesPfYAMLFileData?.user_setup_complete;
             },
             task: async (_, mainTask) => {
-                return setupAuthentik(this.context, mainTask);
+                return setupAuthentik(this.context, mainTask, selectedRegion.path);
             }
         });
 
@@ -73,7 +104,7 @@ export class SSOAddCommand extends PanfactumCommand {
             title: this.context.logger.applyColors("Setup AWS Federated SSO"),
             skip: async () => {
                 const awsEKSPfYAMLFileData = await readYAMLFile({
-                    filePath: join(clusterPath, MODULES.AWS_EKS, ".pf.yaml"),
+                    filePath: join(selectedRegion.path, MODULES.AWS_EKS, ".pf.yaml"),
                     context: this.context,
                     validationSchema: z
                         .object({
@@ -84,7 +115,7 @@ export class SSOAddCommand extends PanfactumCommand {
                 return !!awsEKSPfYAMLFileData?.federatedAuthEnabled;
             },
             task: async (_, mainTask) => {
-                return setupFederatedAuth(this.context, mainTask);
+                return setupFederatedAuth(this.context, mainTask, selectedRegion.path);
             }
         });
 

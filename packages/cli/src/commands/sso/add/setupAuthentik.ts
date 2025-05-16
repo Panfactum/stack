@@ -25,11 +25,12 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupAuthentik(
     context: PanfactumContext,
-    mainTask: PanfactumTaskWrapper
+    mainTask: PanfactumTaskWrapper,
+    regionPath: string
 ) {
     const config = await getPanfactumConfig({
         context,
-        directory: process.cwd(),
+        directory: regionPath,
     });
 
     const {

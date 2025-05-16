@@ -1,4 +1,4 @@
-import path, { join } from "node:path";
+import { join } from "node:path";
 import { GetServiceQuotaCommand } from "@aws-sdk/client-service-quotas";
 import { Glob } from "bun";
 import { Command } from "clipanion";
@@ -7,7 +7,9 @@ import pc from "picocolors";
 import { z } from "zod";
 import { getServiceQuotasClient } from "@/util/aws/clients/getServiceQuotasClient";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { getEnvironments } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
+import { getRegions } from "@/util/config/getRegions";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
@@ -133,13 +135,48 @@ export class ClusterAddCommand extends PanfactumCommand {
     this.context.logger.info("Starting Panfactum cluster installation process")
 
     /*******************************************
+     * Select Environment and Region
+     *******************************************/
+    const environments = (await getEnvironments(this.context)).filter(env => env.name !== "management");
+    
+    if (environments.length === 0) {
+      throw new CLIError([
+        "No environments found. Please run `pf env add` to create an environment first.",
+      ]);
+    }
+
+    const selectedEnvironment = await this.context.logger.select({
+      message: "Select the environment for the cluster:",
+      choices: environments.map(env => ({
+        value: env,
+        name: `${env.name}${env.deployed ? '' : ' (not deployed)'}`
+      })),
+    });
+
+    const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== "global" && !region.clusterDeployed);
+    
+    if (regions.length === 0) {
+      throw new CLIError([
+        `No available regions found in environment ${selectedEnvironment.name}.`,
+      ]);
+    }
+
+    const selectedRegion = await this.context.logger.select({
+      message: "Select the region for the cluster:",
+      choices: regions.map(region => ({
+        value: region,
+        name: `${region.name}${region.primary ? ' (primary)' : ''}`
+      })),
+    });
+
+    /*******************************************
      * Config Loading + Checks
      *
      * Loads the configuration necessary for the installation process
      *******************************************/
     const config = await getPanfactumConfig({
       context: this.context,
-      directory: process.cwd(),
+      directory: selectedRegion.path,
     });
 
     const {
@@ -191,11 +228,6 @@ export class ClusterAddCommand extends PanfactumCommand {
     /***********************************************
      * Confirms the SLA target for the cluster
      ***********************************************/
-    const environmentPath = path.join(
-      this.context.repoVariables.environments_dir,
-      environment
-    );
-    const clusterPath = path.join(environmentPath, region);
 
     const confirmedSLATarget = await setSLA({
       environment,
@@ -226,11 +258,11 @@ export class ClusterAddCommand extends PanfactumCommand {
           try {
             const glob = new Glob('**/region.yaml')
             // Find all region.yaml files across all environments
-            const regionFiles = Array.from(glob.scanSync(environmentPath));
+            const regionFiles = Array.from(glob.scanSync(selectedEnvironment.path));
 
             for (const regionFile of regionFiles) {
               // Skip checking the current cluster's region.yaml
-              if (regionFile === join(clusterPath, "region.yaml")) continue;
+              if (regionFile === join(selectedRegion.path, "region.yaml")) continue;
 
               // Read and parse the region.yaml file
               const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) });
@@ -254,7 +286,7 @@ export class ClusterAddCommand extends PanfactumCommand {
       })
 
       await upsertConfigValues({
-        filePath: join(clusterPath, "region.yaml"),
+        filePath: join(selectedRegion.path, "region.yaml"),
         values: {
           kube_domain: `${subdomain}.${ancestorDomain}`,
         },
@@ -275,7 +307,7 @@ export class ClusterAddCommand extends PanfactumCommand {
       if (step.id === "setupCertificates") {
         // Certificates are a special case because the last module is applied twice during the setup process
         const certificatesModuleInfo = await readYAMLFile({
-          filePath: join(clusterPath, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, validationSchema: z.object({
+          filePath: join(selectedRegion.path, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, validationSchema: z.object({
             extra_inputs: z.object({
               self_generated_certs_enabled: z.boolean(),
             }).optional()
@@ -297,10 +329,10 @@ export class ClusterAddCommand extends PanfactumCommand {
       context: this.context,
       environment,
       domains,
-      environmentPath,
+      environmentPath: selectedEnvironment.path,
       kubeConfigContext,
       region,
-      clusterPath,
+      clusterPath: selectedRegion.path,
       slaTarget: confirmedSLATarget
     };
 

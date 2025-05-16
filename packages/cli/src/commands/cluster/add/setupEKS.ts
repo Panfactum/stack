@@ -191,6 +191,7 @@ export async function setupEKS(
           context,
           region,
           task,
+          clusterPath
         });
       },
       rendererOptions: {

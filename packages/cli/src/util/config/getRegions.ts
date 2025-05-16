@@ -11,6 +11,7 @@ export interface RegionMeta {
     path: string; // Absolute path to the directory for the region
     name: string; // Name of the region
     primary: boolean; // Whether the region has the state bucket
+    clusterDeployed: boolean; // Whether the region has a cluster deployed
 }
 
 export async function getRegions(context: PanfactumContext, envPath: string): Promise<Array<RegionMeta>> {
@@ -20,12 +21,13 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
         const filePath = join(envPath, path)
         const regionPath = dirname(filePath);
         try {
-            const { region, aws_region: awsRegion } = await getConfigValuesFromFile({ filePath, context }) || {}
+            const { region, aws_region: awsRegion, kube_domain: kubeDomain } = await getConfigValuesFromFile({ filePath, context }) || {}
             const name = region ?? basename(regionPath)
             return {
                 name,
                 path: regionPath,
-                primary: primaryRegion === awsRegion && name !== GLOBAL_REGION
+                primary: primaryRegion === awsRegion && name !== GLOBAL_REGION,
+                clusterDeployed: !!kubeDomain
             }
         } catch (e) {
             throw new CLIError("Unable to get regions", e)
