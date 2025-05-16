@@ -21,13 +21,13 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
         const filePath = join(envPath, path)
         const regionPath = dirname(filePath);
         try {
-            const { region, aws_region: awsRegion, kube_domain: kubeDomain } = await getConfigValuesFromFile({ filePath, context }) || {}
+            const { region, aws_region: awsRegion, kube_api_server: kubeApiServer } = await getConfigValuesFromFile({ filePath, context }) || {}
             const name = region ?? basename(regionPath)
             return {
                 name,
                 path: regionPath,
                 primary: primaryRegion === awsRegion && name !== GLOBAL_REGION,
-                clusterDeployed: !!kubeDomain
+                clusterDeployed: !!kubeApiServer,
             }
         } catch (e) {
             throw new CLIError("Unable to get regions", e)
