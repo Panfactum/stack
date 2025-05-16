@@ -7,13 +7,15 @@ import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
+import { directoryExists } from "@/util/fs/directoryExist";
 import { fileExists } from "@/util/fs/fileExists";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
+import { setupVaultSSO } from "@/util/sso/tasks/setupVaultSSO";
 import { execute } from "@/util/subprocess/execute";
 import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import { startVaultProxy } from "@/util/subprocess/vaultProxy";
-import { MODULES } from "@/util/terragrunt/constants";
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
@@ -424,6 +426,22 @@ export async function setupVault(
           { ctx }
         );
       },
+    },
+    {
+      title: context.logger.applyColors("Setup Vault Federated SSO"),
+      skip: async () => {
+        const modulePath = join(
+          context.repoVariables.environments_dir,
+          MANAGEMENT_ENVIRONMENT,
+          GLOBAL_REGION,
+          MODULES.IAM_IDENTIY_CENTER_PERMISSIONS
+        )
+
+        return !await directoryExists(modulePath)
+      },
+      task: async (_, mainTask) => {
+        return setupVaultSSO(context, mainTask);
+      }
     },
     {
       title: "Stop Vault Proxy",
