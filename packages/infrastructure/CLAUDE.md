@@ -18,3 +18,21 @@ Each infrastructure module follows consistent structure:
 - `config.yaml` - Module configuration
 - `README.md` - Module documentation
 - `FOOTER.md` - Additional documentation
+
+## Module Types
+
+Modules are categorized in `config.yaml`:
+
+**Type:**
+- `direct` - Can be deployed directly via Terragrunt
+- `submodule` - Utility module called by other modules, not deployed directly
+
+**Status:**
+- `stable` - Production-ready
+- `beta` - Feature complete but may have issues
+- `alpha` - Under active development
+
+**Group:**
+- `aws` - AWS resource modules (VPC, EKS, S3, etc.)
+- `kubernetes` - Kubernetes resource modules (Deployments, Services, etc.)
+- `authentication` - Auth-related modules (Authentik, Vault, SSO)
