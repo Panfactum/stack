@@ -8,7 +8,7 @@ import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import {getRegions} from "@/util/config/getRegions.ts";
 import { CLIError } from "@/util/error/error";
 import { setupVaultSSO } from "@/util/sso/tasks/setupVaultSSO";
-import { MODULES } from "@/util/terragrunt/constants";
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setupAuthentik } from "./setupAuthentik";
 import { setupFederatedAuth } from "./setupFederatedAuth";
@@ -29,7 +29,7 @@ export class SSOAddCommand extends PanfactumCommand {
         /*******************************************
          * Select Environment and Region
          *******************************************/
-        const environments = (await getEnvironments(this.context)).filter(env => env.name !== "management");
+        const environments = (await getEnvironments(this.context)).filter(env => env.name !== MANAGEMENT_ENVIRONMENT && env.deployed);
 
         if (environments.length === 0) {
             throw new CLIError([
@@ -41,11 +41,11 @@ export class SSOAddCommand extends PanfactumCommand {
             message: "Select the environment for where SSO will be deployed:",
             choices: environments.map(env => ({
                 value: env,
-                name: `${env.name}${env.deployed ? '' : ' (not deployed)'}`
+                name: `${env.name}`
             })),
         });
 
-        const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== "global" && region.clusterDeployed);
+        const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== GLOBAL_REGION && region.clusterDeployed);
 
         if (regions.length === 0) {
             throw new CLIError([
@@ -57,7 +57,7 @@ export class SSOAddCommand extends PanfactumCommand {
             message: "Select the region for the SSO deployment:",
             choices: regions.map(region => ({
                 value: region,
-                name: `${region.name}${region.primary ? ' (primary)' : ''}`
+                name: `${region.name}`
             })),
         });
 
