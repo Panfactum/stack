@@ -14,7 +14,9 @@ import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { checkAdminPermissions } from "./checkAdminPermissions";
 import { getEnvironment } from "./getEnvironment";
 import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
+import { getNewIAMUserCredentials } from "./getNewIAMUserCredentials";
 import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
+import { hasAccessToManagementAccount } from "./hasAccessToManagementAccount";
 import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
 import { provisionAWSAccount } from "./provisionAWSAccount";
 import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
@@ -146,7 +148,8 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             if (await hasExistingAWSOrg(context)) {
                 _hasExistingAWSOrg = true
                 if (await shouldPanfactumManageAWSOrg(context)) {
-                    managementAccountCreds = await getRootAccountAdminAccess(context)
+                    await hasAccessToManagementAccount(context);
+                    managementAccountCreds = await getNewIAMUserCredentials({ environment: MANAGEMENT_ENVIRONMENT, context })
                 }
             } else {
                 context.logger.info(`
