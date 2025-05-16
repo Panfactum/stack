@@ -216,7 +216,8 @@ words: [
   "PersistentVolumes",
   "Airbyte",
   "workflowtemplate",
-  "opensearch"
+  "opensearch",
+  "nixfmt"
 ]
 languageSettings:
   - languageId: markdown,mdx

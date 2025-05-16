@@ -82,3 +82,51 @@ Use the following rules when making changes to `.sh` files:
 Use the following rules when making changes to `.ts` or `.tsx` files:
 
 - **NEVER use the `non-null assertion operator`**
+
+## Architecture
+
+### Repository Structure
+```
+/
+├── packages/
+│   ├── cli/           # Panfactum CLI (pf command)
+│   ├── infrastructure/# Terraform/OpenTofu modules
+│   ├── website/       # Documentation website
+│   ├── nix/          # Nix configurations and scripts
+│   ├── scraper/      # Web scraper utilities
+│   ├── bastion/      # Bastion host configuration
+│   └── reference/    # Reference architecture
+├── flake.nix         # Nix flake configuration
+├── pnpm-workspace.yaml
+└── .pre-commit-config.yaml
+```
+
+### CLI Architecture (packages/cli)
+- Built with Bun and TypeScript using Clipanion framework
+- All commands extend `PanfactumCommand` for consistent error handling
+- Uses Listr2 for complex multi-step operations
+- Integrates with Terragrunt for infrastructure deployment
+- AWS SDK for cloud operations
+- Configuration managed via YAML files with SOPS encryption
+
+### Infrastructure Modules (packages/infrastructure)
+- Each module is self-contained with standardized structure
+- Categories: AWS resources, Kubernetes resources, authentication
+- Modules follow naming convention: `<provider>_<resource>`
+- Uses Terragrunt for deployment automation
+- Documentation generated via terraform-docs
+
+### Website (packages/website)
+- Astro-based static site with MDX support
+- Solid.js for interactive components
+- Tailwind CSS for styling
+- Deployed documentation and guides
+
+### Development Environment
+- Nix flakes provide reproducible development environments
+- Enter shell via `nix develop` or direnv
+- Pre-configured with all necessary tools:
+    - Language runtimes: Node.js, Bun, Go
+    - IaC tools: Terraform, Terragrunt, terraform-docs
+    - Linters: shellcheck, shfmt, cspell, nixfmt
+    - Version control: git, git-lfs, pre-commit
