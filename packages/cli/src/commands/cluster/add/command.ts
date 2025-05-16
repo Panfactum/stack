@@ -1,10 +1,11 @@
 import path, { join } from "node:path";
-import { GetServiceQuotaCommand, ServiceQuotasClient } from "@aws-sdk/client-service-quotas";
+import { GetServiceQuotaCommand } from "@aws-sdk/client-service-quotas";
 import { Glob } from "bun";
 import { Command } from "clipanion";
 import { Listr } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
+import { getServiceQuotasClient } from "@/util/aws/clients/getServiceQuotasClient";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { SUBDOMAIN } from "@/util/config/schemas";
@@ -169,7 +170,7 @@ export class ClusterAddCommand extends PanfactumCommand {
     /***********************************************
      * Confirms the vCPU quota is high enough
      ***********************************************/
-    const serviceQuotasClient = new ServiceQuotasClient({ region, profile: awsProfile })
+    const serviceQuotasClient = await getServiceQuotasClient({ context: this.context, profile: awsProfile, region })
     const command = new GetServiceQuotaCommand({
       QuotaCode: "L-1216C47A",
       ServiceCode: "ec2",
@@ -177,10 +178,10 @@ export class ClusterAddCommand extends PanfactumCommand {
     try {
       const quota = await serviceQuotasClient.send(command)
       if (quota.Quota?.Value && quota.Quota.Value < 16) {
-        this.context.logger.warn(`The EC2 vCPU quota is too low to install a cluster right now
+        this.context.logger.warn(`The EC2 vCPU quota is too low (${quota.Quota.Value}) to install a cluster right now
           If you set this environment up with pf env add then the quota increase has already been requested.
           Check your e-mail for status updates on the request and try again when it has been approved.`)
-        return
+        // return
       }
     } catch (error) {
       throw new CLIError("Error retrieving EC2 vCPU quota.", error)
