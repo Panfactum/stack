@@ -8,6 +8,7 @@ import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file
 import kubeAuthentikHcl from "@/templates/kube_authentik.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { SSO_SUBDOMAIN } from "@/util/domains/consts";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
@@ -174,10 +175,10 @@ export async function setupAuthentik(
                         ctx.ancestorDomain = await context.logger.select({
                             task,
                             explainer: {
-                                message: `Which domain do you want to use for e-mails from Authentik?`,
+                                message: `Which domain would you like to use for SSO?`,
                             },
                             message: "Environment domain:",
-                            choices: Object.keys(domains).map(domain => ({ value: domain, name: domain })),
+                            choices: Object.keys(domains).map(domain => ({ value: domain, name: `${SSO_SUBDOMAIN}.${domain}` })),
                         });
                     }
 
@@ -284,7 +285,7 @@ export async function setupAuthentik(
             inputUpdates: {
                 domain: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => `authentik.${ctx.ancestorDomain!}`
+                    update: (_, ctx) => `${SSO_SUBDOMAIN}.${ctx.ancestorDomain!}`
                 }),
                 akadmin_email: defineInputUpdate({
                     schema: z.string(),
@@ -414,7 +415,7 @@ export async function setupAuthentik(
                 }
 
                 const configuration = new Configuration({
-                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
                         Authorization: `Bearer ${config.authentik_token}`,
                     }
@@ -458,7 +459,7 @@ export async function setupAuthentik(
                     })
                     const newGlobalConfig = {
                         ...originalGlobalConfig,
-                        authentik_url: `https://authentik.${ctx.ancestorDomain}`
+                        authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                     }
                     // FIX: @seth - NEVER write to the config files directly
                     await writeYAMLFile({
@@ -473,7 +474,7 @@ export async function setupAuthentik(
                         context,
                         filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
                         values: {
-                            authentik_url: `https://authentik.${ctx.ancestorDomain}`
+                            authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                         }
                     })
                 }
@@ -623,7 +624,7 @@ spec:
                 }
 
                 const originalAuthentikClient = new CoreApi(new Configuration({
-                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
                         Authorization: `Bearer ${config.authentik_token}`,
                     }
@@ -740,13 +741,13 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                     task,
                     explainer: `
                     We have created a new temporary API token to use                    
-                    Go to https://authentik.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
+                    Go to https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
                     Look for the token with the identifier '${tokenIdentifier}'`,
                     message: "Copy the token and paste it here:",
                     validate: async (value) => {
                         try {
                             const response = await Bun.fetch(
-                                `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
+                                `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3/core/groups/`,
                                 {
                                     headers: {
                                         Authorization: `Bearer ${value}`,
@@ -772,7 +773,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                 })
 
                 const newAuthentikClient = new CoreApi(new Configuration({
-                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
                         Authorization: `Bearer ${authentikUserToken}`,
                     }

@@ -1,0 +1,1 @@
+export const SSO_SUBDOMAIN = "sso"
