@@ -679,7 +679,7 @@ module "opensearch" {
       ]
 
       minimum_cpu    = 500
-      minimum_memory = 1000
+      minimum_memory = var.minimum_memory_mb
 
       read_only = false // TODO: Fix
 
