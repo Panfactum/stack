@@ -49,7 +49,7 @@ export async function setupEKS(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, clusterPath, context, environment, region, slaTarget } =
+  const { awsProfile, clusterPath, context, environment, region, awsRegion, slaTarget } =
     options;
 
   interface Context {
@@ -189,7 +189,7 @@ export async function setupEKS(
           awsProfile,
           clusterName: ctx.clusterName!,
           context,
-          region,
+          awsRegion,
           task,
           clusterPath
         });

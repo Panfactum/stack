@@ -3,7 +3,6 @@ import { z } from "zod";
 import { vpcNetworkTest } from "@/commands/aws/vpcNetworkTest/vpcNetworkTest";
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -41,7 +40,7 @@ export async function setupVPC(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, context, environment, clusterPath, region } = options;
+  const { awsProfile, context, environment, clusterPath, region, awsRegion } = options;
 
   interface Context {
     vpcName?: string;
@@ -103,7 +102,7 @@ export async function setupVPC(
                 "aws",
                 "ec2",
                 "describe-vpcs",
-                `--region=${region}`,
+                `--region=${awsRegion}`,
                 `--filters=Name=tag:Name,Values=${value}`,
                 "--output=json",
                 `--profile=${awsProfile}`,
@@ -207,21 +206,6 @@ export async function setupVPC(
           ],
           { ctx, concurrent: true }
         );
-      },
-    },
-    {
-      title: "Update Configuration File",
-      task: async () => {
-        await upsertConfigValues({
-          context,
-          environment,
-          region,
-          values: {
-            extra_inputs: {
-              pull_through_cache_enabled: false,
-            },
-          },
-        });
       },
     },
   ])

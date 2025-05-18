@@ -13,14 +13,14 @@ export async function clusterReset({
   awsProfile,
   clusterName,
   context,
-  region,
+  awsRegion,
   task,
   clusterPath,
 }: {
   awsProfile: string;
   clusterName: string; // FIX: @seth - You are using this for the kubernetes context name which isn't correct, just happens to work currently
   context: PanfactumContext;
-  region: string;
+  awsRegion: string;
   task: PanfactumTaskWrapper;
   clusterPath: string;
 }) {
@@ -51,7 +51,7 @@ export async function clusterReset({
       "--cluster-name",
       clusterName,
       "--region",
-      region,
+      awsRegion,
       "--output",
       "json",
     ],
@@ -73,7 +73,7 @@ export async function clusterReset({
           "--profile",
           awsProfile,
           "--region",
-          region,
+          awsRegion,
           "eks",
           "delete-addon",
           "--cluster-name",
@@ -155,7 +155,7 @@ export async function clusterReset({
       "--profile",
       awsProfile,
       "--region",
-      region,
+      awsRegion,
       "ec2",
       "describe-instances",
       "--filters",
@@ -176,7 +176,7 @@ export async function clusterReset({
         "--profile",
         awsProfile,
         "--region",
-        region,
+        awsRegion,
         "ec2",
         "terminate-instances",
         "--instance-ids",

@@ -13,6 +13,8 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import {getPanfactumConfig} from "@/util/config/getPanfactumConfig.ts";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { BASTION_SUBDOMAIN } from "@/util/domains/consts";
+import {findAuthentikLocation} from "@/util/sso/getAuthenticPath.ts";
+import {setupVaultSSO} from "@/util/sso/tasks/setupVaultSSO.ts";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import {
@@ -250,11 +252,22 @@ export async function setupClusterExtensions(
                   update: () => false,
                 }),
               },
-            })
+            }),
           ],
           { ctx, concurrent: true }
         );
       },
+    },
+    {
+      title: "Setup Vault Federated SSO",
+      task: async (_, mainTask) => {
+        return setupVaultSSO(context, mainTask, clusterPath);
+      },
+      skip: async (_) => {
+        const authentikLocation = await findAuthentikLocation(context)
+
+        return !authentikLocation;
+      }
     },
   ])
 

@@ -187,9 +187,10 @@ export class ClusterAddCommand extends PanfactumCommand {
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
+      aws_region: awsRegion,
     } = config;
 
-    if (!environment || !region || !awsProfile) {
+    if (!environment || !region || !awsProfile || !awsRegion) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
@@ -207,7 +208,7 @@ export class ClusterAddCommand extends PanfactumCommand {
     /***********************************************
      * Confirms the vCPU quota is high enough
      ***********************************************/
-    const serviceQuotasClient = await getServiceQuotasClient({ context: this.context, profile: awsProfile, region })
+    const serviceQuotasClient = await getServiceQuotasClient({ context: this.context, profile: awsProfile, region: awsRegion })
     const command = new GetServiceQuotaCommand({
       QuotaCode: "L-1216C47A",
       ServiceCode: "ec2",
@@ -289,6 +290,9 @@ export class ClusterAddCommand extends PanfactumCommand {
         filePath: join(selectedRegion.path, "region.yaml"),
         values: {
           kube_domain: `${subdomain}.${ancestorDomain}`,
+          extra_inputs: {
+            pull_through_cache_enabled: false,
+          },
         },
         context: this.context,
       });
@@ -332,6 +336,7 @@ export class ClusterAddCommand extends PanfactumCommand {
       environmentPath: selectedEnvironment.path,
       kubeConfigContext,
       region,
+      awsRegion,
       clusterPath: selectedRegion.path,
       slaTarget: confirmedSLATarget
     };

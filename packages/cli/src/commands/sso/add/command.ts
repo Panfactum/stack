@@ -122,7 +122,7 @@ export class SSOAddCommand extends PanfactumCommand {
         tasks.add({
             title: this.context.logger.applyColors("Setup Vault Federated SSO"),
             task: async (_, mainTask) => {
-                return setupVaultSSO(this.context, mainTask);
+                return setupVaultSSO(this.context, mainTask, selectedRegion.path);
             }
         })
 

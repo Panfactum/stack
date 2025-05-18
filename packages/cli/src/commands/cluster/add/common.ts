@@ -8,6 +8,7 @@ export interface InstallClusterStepOptions {
   kubeConfigContext?: string;
   domains: Record<string, { zone_id: string; record_manager_role_arn: string; }>;
   region: string;
+  awsRegion: string;
   context: PanfactumContext;
   slaTarget: 1 | 2 | 3;
 }

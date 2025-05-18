@@ -12,17 +12,19 @@ import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { findAuthentikLocation } from "../getAuthenticPath";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupVaultSSO(
     context: PanfactumContext,
-    mainTask: PanfactumTaskWrapper
+    mainTask: PanfactumTaskWrapper,
+    regionPath: string
 ) {
 
     const config = await getPanfactumConfig({
         context,
-        directory: process.cwd(),
+        directory: regionPath,
     });
 
     const {
@@ -65,10 +67,18 @@ export async function setupVaultSSO(
         );
     }
 
+    const authentikLocation = await findAuthentikLocation(context);
+
+    if (!authentikLocation) {
+        throw new CLIError(
+            "kube_authentik module not found in any environment/region. Please ensure it has been deployed."
+        );
+    }
+
     const authentikAWSSSOConfig = await getConfigValuesFromFile({
-        environment,
         context,
-        region,
+        environment: authentikLocation.environmentName,
+        region: authentikLocation.regionName,
         module: MODULES.AUTHENTIK_AWS_SSO,
     })
 
@@ -92,13 +102,15 @@ export async function setupVaultSSO(
             title: "Verify access",
             task: async () => {
                 await getIdentity({ context, profile: awsProfile });
+
+
             },
         },
         await buildDeployModuleTask({
             taskTitle: "Deploy Vault SSO",
             context,
-            environment,
-            region,
+            environment: authentikLocation.environmentName,
+            region: authentikLocation.regionName,
             module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig?.kube_config_context,
             skipIfAlreadyApplied: true,
             realModuleName: MODULES.AUTHENTIK_VAULT_SSO,
@@ -119,8 +131,8 @@ export async function setupVaultSSO(
             task: async (ctx) => {
                 const outputs = await terragruntOutput({
                     context,
-                    environment,
-                    region,
+                    environment: authentikLocation.environmentName,
+                    region: authentikLocation.regionName,
                     module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig?.kube_config_context,
                     validationSchema: z.object({
                         client_id: z.object({
