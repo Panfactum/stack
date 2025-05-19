@@ -183,8 +183,10 @@ export async function setupAuthentik(
                     }
 
                     if (!ctx.authentikRootEmail) {
+                        const defaultRootEmail = `authentik-root@${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                         ctx.authentikRootEmail = await context.logger.input({
                             task,
+                            default: defaultRootEmail,
                             explainer: "This email will be used for the initial Authentik root user.",
                             message: "Email:",
                             validate: (value: string) => {
@@ -209,7 +211,7 @@ export async function setupAuthentik(
                     if (!ctx.authentikAdminEmail) {
                         ctx.authentikAdminEmail = await context.logger.input({
                             task,
-                            explainer: "This email will be used for your Authentik user.",
+                            explainer: "This email will be used for your Authentik user. This email must be unique and not be the AWS root email address.",
                             message: "Email:",
                             validate: (value: string) => {
                                 const { error } = z.string().email().safeParse(value);
