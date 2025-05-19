@@ -12,13 +12,13 @@ export async function terragruntApplyAll({
   context: PanfactumContext;
   env?: Record<string, string | undefined>;
   environment: string;
-  region?: string;
+  region: string;
   onLogLine?: (line: string) => void;
 }) {
   const workingDirectory = join(
     context.repoVariables.environments_dir,
     environment,
-    region ?? ""
+    region
   );
   await execute({
     command: [

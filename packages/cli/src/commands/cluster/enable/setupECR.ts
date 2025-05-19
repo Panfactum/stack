@@ -7,6 +7,7 @@ import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { FeatureEnableOptions } from "./command";
 
@@ -238,14 +239,23 @@ export async function setupECR({context, clusterPath, region, environment}: Feat
         });
       }
     },
-    await buildDeployModuleTask<Context>({
-      taskTitle: "Re-deploy Kube Policies",
-      context,
-      environment,
-      region,
-      skipIfAlreadyApplied: false,
-      module: MODULES.KUBE_POLICIES,
-    }),
+    {
+      title: "Apply all",
+      task: async (_, task) => {
+        await terragruntApplyAll({
+          context,
+          environment,
+          region,
+          onLogLine: (line) => {
+            task.output = context.logger.applyColors(line, {style: "subtle", highlighterDisabled: true});
+          },
+        })
+      },
+      rendererOptions: {
+        outputBar: 5,
+      }
+    }
+
   ], { rendererOptions: { collapseErrors: false } });
 
   return tasks;
