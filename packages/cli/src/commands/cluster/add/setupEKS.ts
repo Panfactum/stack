@@ -144,6 +144,7 @@ export async function setupEKS(
             },
           });
         }
+
       },
     },
     await buildDeployModuleTask<Context>({
@@ -177,6 +178,7 @@ export async function setupEKS(
           update: () => slaTarget === 1 ? ["PRIVATE_A"] : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
         }),
       },
+      etaWarningMessage: 'This may take up to 15 minutes.',
     }),
     await buildSyncKubeClustersTask({
       context,
