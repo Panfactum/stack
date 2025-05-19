@@ -736,12 +736,15 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                     throw new CLIError("Failed to create API token in Authentik", error);
                 }
 
+                const tokenLink = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D`
+                await open(tokenLink)
+
                 // replace bootstrap token with API token
                 const authentikUserToken = await context.logger.password({
                     task,
                     explainer: `
                     We have created a new temporary API token to use                    
-                    Go to https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
+                    Go to ${tokenLink}
                     Look for the token with the identifier '${tokenIdentifier}'`,
                     message: "Copy the token and paste it here:",
                     validate: async (value) => {
