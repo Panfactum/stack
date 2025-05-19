@@ -1,8 +1,14 @@
-/*import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
-import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
-import { sopsUpsert } from "@/util/sops/sopsUpsert";*/
-/*
+import path from "node:path";
+import {Listr} from "listr2";
 import {z} from "zod";
+import awsEcrPullThroughCacheTerragruntHcl from "@/templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
+import {upsertConfigValues} from "@/util/config/upsertConfigValues.ts";
+import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
+import { sopsUpsert } from "@/util/sops/sopsUpsert";
+import { MODULES } from "@/util/terragrunt/constants";
+import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import type { FeatureEnableOptions } from "./command";
 
 const DOCKERHUB_USERNAME = z
   .string()
@@ -22,11 +28,18 @@ const GITHUB_USERNAME = z
     /^[a-zA-Z0-9_-]+$/,
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
   );
-*/
 
 
-export async function setupECR() {
-  /*{
+
+export async function setupECR({context, clusterPath, region, environment}: FeatureEnableOptions) {
+
+  interface Context {
+    dockerHubUsername?: string;
+    githubUsername?: string;
+  }
+
+  const tasks = new Listr<Context>([
+    {
       title: "Get ECR configuration",
       task: async (ctx, task) => {
         const moduleName = "aws_ecr_pull_through_cache";
@@ -181,34 +194,59 @@ export async function setupECR() {
             filePath: secretsPath,
           });
         }
+      }
+    },
+    await buildDeployModuleTask<Context>({
+      taskTitle: "Deploy ECR Pull Through Cache",
+      context,
+      environment,
+      region,
+      skipIfAlreadyApplied: true,
+      module: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
+      hclIfMissing: await Bun.file(
+        awsEcrPullThroughCacheTerragruntHcl
+      ).text(),
+      // TODO: @seth - Interested in your opinion
+      // I don't like `ctx.dockerHubUsername!` even though I've been using it
+      // I think we may want to incorporate some sort of runtime validation here.
+      // as I believe we should be doing EXTREMELY defensive coding
+      // b/c of how annoying it would be for users if something messed up
+      // with a vague error (e.g., dockerHubUsername being undefined accidentally)
+      inputUpdates: {
+        docker_hub_username: defineInputUpdate({
+          schema: z.string(),
+          update: (_, ctx) => ctx.dockerHubUsername!,
+        }),
+        github_username: defineInputUpdate({
+          schema: z.string(),
+          update: (_, ctx) => ctx.githubUsername!,
+        }),
       },
-    },*/
+    }),
+    {
+      title: "Enable ECR Pull Through Cache",
+      task: async() => {
+        await upsertConfigValues({
+          context,
+          environment,
+          region,
+          values: {
+            extra_inputs: {
+              pull_through_cache_enabled: true
+            }
+          }
+        });
+      }
+    },
+    await buildDeployModuleTask<Context>({
+      taskTitle: "Re-deploy Kube Policies",
+      context,
+      environment,
+      region,
+      skipIfAlreadyApplied: false,
+      module: MODULES.KUBE_POLICIES,
+    }),
+  ], { rendererOptions: { collapseErrors: false } });
 
-  /*await buildDeployModuleTask<Context>({
-            taskTitle: "Deploy ECR Pull Through Cache",
-            context,
-            environment,
-            region,
-            skipIfAlreadyApplied: true,
-            module: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
-            hclIfMissing: await Bun.file(
-              awsEcrPullThroughCacheTerragruntHcl
-            ).text(),
-            // TODO: @seth - Interested in your opinion
-            // I don't like `ctx.dockerHubUsername!` even though I've been using it
-            // I think we may want to incorporate some sort of runtime validation here.
-            // as I believe we should be doing EXTREMELY defensive coding
-            // b/c of how annoying it would be for users if something messed up
-            // with a vague error (e.g., dockerHubUsername being undefined accidentally)
-            inputUpdates: {
-              docker_hub_username: defineInputUpdate({
-                schema: z.string(),
-                update: (_, ctx) => ctx.dockerHubUsername!,
-              }),
-              github_username: defineInputUpdate({
-                schema: z.string(),
-                update: (_, ctx) => ctx.githubUsername!,
-              }),
-            },
-          }),*/
+  return tasks;
 }

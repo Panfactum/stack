@@ -11,11 +11,12 @@ export const createPanfactumContext = async (
   context: BaseContext,
   opts: {
     debugEnabled: boolean;
+    cwd: string;
   }
 ): Promise<PanfactumContext> => {
   return {
     ...context,
-    repoVariables: await getRepoVariables(),
+    repoVariables: await getRepoVariables(opts.cwd),
     logger: new Logger(context.stderr, opts.debugEnabled),
   };
 };

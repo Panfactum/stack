@@ -14,8 +14,8 @@ import { PANFACTUM_YAML_SCHEMA } from "./schemas";
 // - adds the repo_root variable
 // - adds the iac_dir_from_root variable which is the original value of iac_dir before being resolved to an absolute path
 type RepoVariables = z.infer<typeof PANFACTUM_YAML_SCHEMA> & { iac_relative_dir?: string, repo_root: string }
-export const getRepoVariables = async (): Promise<RepoVariables> => {
-  const repoRootPath = await getRoot();
+export const getRepoVariables = async (cwd: string): Promise<RepoVariables> => {
+  const repoRootPath = await getRoot(cwd);
 
   //####################################################################
   // Step 2: Read in the panfactum.yaml

@@ -2,6 +2,7 @@
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
+import { ClusterEnableCommand } from "./commands/cluster/enable/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
@@ -28,6 +29,7 @@ cli.register(Builtins.VersionCommand);
 
 // Commands
 cli.register(ClusterAddCommand);
+cli.register(ClusterEnableCommand);
 cli.register(DevShellUpdateCommand)
 cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)
@@ -39,12 +41,20 @@ cli.register(DomainRemoveCommand)
 cli.register(WelcomeCommand)
 cli.register(SSOAddCommand)
 
-const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
+try {
+  const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
 
-// Parse and run
-cli.runExit(proc, await createPanfactumContext(
-  Cli.defaultContext,
-  {
-    debugEnabled: proc.debugEnabled ?? false
+  cli.runExit(proc, await createPanfactumContext(
+    Cli.defaultContext,
+    {
+      debugEnabled: proc.debugEnabled ?? false,
+      cwd: process.env["CWD"] || process.cwd()
+    }
+  ));
+} catch(error: unknown) {
+  if (error instanceof Error) {
+    throw error.message;
+  } else {
+    throw error;
   }
-));
+}
