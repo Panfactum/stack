@@ -1,7 +1,7 @@
 import { join, resolve } from "node:path";
 import yaml from "yaml";
 import { z } from "zod";
-import { REPO_CONFIG_FILE } from "./constants";
+import { REPO_CONFIG_FILE, REPO_USER_CONFIG_FILE } from "./constants";
 import { getRoot } from "./getRoot";
 import { PANFACTUM_YAML_SCHEMA } from "./schemas";
 
@@ -25,8 +25,15 @@ export const getRepoVariables = async (cwd: string): Promise<RepoVariables> => {
     throw new Error(`Repo configuration file does not exist at ${configFile}`);
   }
 
+  const userConfigFile = join(repoRootPath, REPO_USER_CONFIG_FILE);
+
   const fileContent = await Bun.file(configFile).text();
-  const values = yaml.parse(fileContent);
+  let values = yaml.parse(fileContent);
+
+  if ((await Bun.file(userConfigFile).exists())) {
+    const userFileContent = await Bun.file(userConfigFile).text();
+    values = { ...values, ...yaml.parse(userFileContent) };
+  }
 
   //####################################################################
   // Step 3: Validate required variables & set defaults

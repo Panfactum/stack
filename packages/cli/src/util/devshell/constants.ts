@@ -27,6 +27,7 @@ export const EXPECTED_GITIGNORE_CONTENTS = {
         ".direnv",
         ".terraformrc",
         ".terraformrc.dev",
-        ".nats"
+        ".nats",
+        "*.user.yaml",
     ]
 }

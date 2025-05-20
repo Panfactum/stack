@@ -53,6 +53,7 @@
     "listr2": "^8.3.2",
     "open": "^10.1.2",
     "picocolors": "^1.1.1",
+    "posthog-node": "^4.17.1",
     "string-width": "^7.2.0",
     "terminal-columns": "^2.0.0",
     "terminal-link": "^4.0.0",

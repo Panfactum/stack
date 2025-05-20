@@ -3136,6 +3136,17 @@ let
         hash = "sha256-ixQOD6P+3j2B0d/8xADJdV1ziOikrdIoSH9eIMnPeGM=";
       };
     };
+    "axios" = {
+      out_path = "axios";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "axios@1.9.0";
+        url = "https://registry.npmjs.org/axios/-/axios-1.9.0.tgz";
+        hash = "sha256-Z1hij3SFBrlh/1iNy1ckczQvM++xDun5FNK2j1pz10U=";
+      };
+    };
     "balanced-match" = {
       out_path = "balanced-match";
       binaries =
@@ -4256,6 +4267,17 @@ let
         name = "flatted@3.3.3";
         url = "https://registry.npmjs.org/flatted/-/flatted-3.3.3.tgz";
         hash = "sha256-jKxTJlMxhOferquo7wiNMKNMekJf84H7dQK6LFtNWBk=";
+      };
+    };
+    "follow-redirects" = {
+      out_path = "follow-redirects";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "follow-redirects@1.15.9";
+        url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz";
+        hash = "sha256-CMuLQiGDMXjhHVeFLFZW8oUwli7zC7Qe0FMwXmisi48=";
       };
     };
     "for-each" = {
@@ -5755,6 +5777,17 @@ let
         hash = "sha256-wpeRIRuOLxgcBJJHIUhDKSOA5BNMFAxRBTdrfGrj48c=";
       };
     };
+    "posthog-node" = {
+      out_path = "posthog-node";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "posthog-node@4.17.1";
+        url = "https://registry.npmjs.org/posthog-node/-/posthog-node-4.17.1.tgz";
+        hash = "sha256-WfoXdwwLrc1FTAF/HhhHO5USNe7z3vS3oDhLQd92F5o=";
+      };
+    };
     "prelude-ls" = {
       out_path = "prelude-ls";
       binaries =
@@ -5786,6 +5819,17 @@ let
         name = "prettier-linter-helpers@1.0.0";
         url = "https://registry.npmjs.org/prettier-linter-helpers/-/prettier-linter-helpers-1.0.0.tgz";
         hash = "sha256-9aI1GzUb9H/5rTArifbHCO+LixfWH2xPPOYSapDrt2w=";
+      };
+    };
+    "proxy-from-env" = {
+      out_path = "proxy-from-env";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "proxy-from-env@1.1.0";
+        url = "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz";
+        hash = "sha256-lAgkVPBdPKyT6XCTBsK/8XXaDLiQzrpHD6gMkGoX3g8=";
       };
     };
     "punycode" = {

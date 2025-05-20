@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { stringify, parse } from "yaml";
 import { ZodError, type z } from "zod";
-import { REPO_CONFIG_FILE } from "./constants";
+import { REPO_CONFIG_FILE, REPO_USER_CONFIG_FILE } from "./constants";
 import { PANFACTUM_YAML_SCHEMA } from "./schemas";
 import { CLIError, PanfactumZodError } from "../error/error";
 import { writeFile } from "../fs/writeFile";
@@ -12,10 +12,11 @@ const OPTIONAL_PANFACTUM_YAML_SCHEMA = PANFACTUM_YAML_SCHEMA.partial();
 interface UpsertRepoVariablesInput {
     context: PanfactumContext;
     values: z.infer<typeof OPTIONAL_PANFACTUM_YAML_SCHEMA>;
+    user?: boolean;
 }
 
 export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
-    const { values, context } = input;
+    const { values, context, user } = input;
 
     /////////////////////////////////////////////
     // Update panfactum.yaml
@@ -23,7 +24,7 @@ export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
     const yamlOpts = {
         doubleQuotedAsJSON: true,
     }
-    const configFilePath = join(context.repoVariables.repo_root, REPO_CONFIG_FILE)
+    const configFilePath = join(context.repoVariables.repo_root, user ? REPO_USER_CONFIG_FILE : REPO_CONFIG_FILE)
 
     const explainer = "# These are the standard repo variables required by\n" +
         "# https://panfactum.com/docs/reference/repo-variables\n\n"
