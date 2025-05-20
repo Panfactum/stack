@@ -18,13 +18,6 @@ export const createPanfactumContext = async (
 ): Promise<PanfactumContext> => {
   const repoVariables = await getRepoVariables(opts.cwd);
 
-  if (repoVariables.user_id) {
-    phClient.captureImmediate({
-      event: 'cli-start',
-      distinctId: repoVariables.user_id
-    })
-  }
-
   return {
     ...context,
     repoVariables,

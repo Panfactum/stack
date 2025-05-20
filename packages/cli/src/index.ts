@@ -44,7 +44,6 @@ cli.register(SSOAddCommand)
 
 try {
   const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
-
   const panfactumContext = await createPanfactumContext(
     Cli.defaultContext,
     {
@@ -52,6 +51,20 @@ try {
       cwd: process.env["CWD"] || process.cwd()
     }
   )
+
+  const { repoVariables } = panfactumContext
+  if (repoVariables.user_id) {
+    phClient.captureImmediate({
+      event: 'cli-start',
+      distinctId: repoVariables.user_id,
+      properties: {
+        path: proc.path.join(" "),
+        help: proc.help,
+        debugEnabled: proc.debugEnabled,
+        cwd: proc.cwd,
+      }
+    })
+  }
 
   await cli.runExit(proc, panfactumContext);
 
