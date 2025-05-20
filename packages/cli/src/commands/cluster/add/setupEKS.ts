@@ -111,8 +111,8 @@ export async function setupEKS(
           ctx.clusterName = await context.logger.input({
             task,
             message: "Cluster name:",
-            default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
-            transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
+            default: clusterNameFormatter(`${environment}-${region}`),
+            transformer: (value) => clusterNameFormatter(value),
             validate: (value) => {
               const transformed = clusterNameFormatter(value);
               const { error } = CLUSTER_NAME.safeParse(transformed);
