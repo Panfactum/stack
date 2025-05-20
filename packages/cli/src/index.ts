@@ -13,6 +13,7 @@ import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/c
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
+import { phClient } from "./util/posthog/tracking.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
 // Create a CLI instance
@@ -44,14 +45,19 @@ cli.register(SSOAddCommand)
 try {
   const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
 
-  cli.runExit(proc, await createPanfactumContext(
+  const panfactumContext = await createPanfactumContext(
     Cli.defaultContext,
     {
       debugEnabled: proc.debugEnabled ?? false,
       cwd: process.env["CWD"] || process.cwd()
     }
-  ));
+  )
+
+  await cli.runExit(proc, panfactumContext);
+
+  await phClient.shutdown()
 } catch(error: unknown) {
+  await phClient.shutdown()
   if (error instanceof Error) {
     throw error.message;
   } else {
