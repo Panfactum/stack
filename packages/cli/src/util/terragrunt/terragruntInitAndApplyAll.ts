@@ -6,7 +6,7 @@ import type { PanfactumContext } from "@/util/context/context";
 export async function terragruntInitAndApplyAll(inputs: {
   context: PanfactumContext;
   environment: string;
-  region?: string;
+  region: string;
 }): Promise<void | CLIError> {
 
   await terragruntInitAll(inputs);

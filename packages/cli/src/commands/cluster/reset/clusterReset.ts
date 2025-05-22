@@ -13,14 +13,16 @@ export async function clusterReset({
   awsProfile,
   clusterName,
   context,
-  region,
+  awsRegion,
   task,
+  clusterPath,
 }: {
   awsProfile: string;
   clusterName: string; // FIX: @seth - You are using this for the kubernetes context name which isn't correct, just happens to work currently
   context: PanfactumContext;
-  region: string;
+  awsRegion: string;
   task: PanfactumTaskWrapper;
+  clusterPath: string;
 }) {
   // ############################################################
   // ## Step 0: Validation
@@ -49,12 +51,12 @@ export async function clusterReset({
       "--cluster-name",
       clusterName,
       "--region",
-      region,
+      awsRegion,
       "--output",
       "json",
     ],
     context,
-    workingDirectory: process.cwd(),
+    workingDirectory: clusterPath,
   });
   const addonsToDisable = ["coredns", "kube-proxy", "vpc-cni"];
   const addons = JSON.parse(awsAddons);
@@ -71,7 +73,7 @@ export async function clusterReset({
           "--profile",
           awsProfile,
           "--region",
-          region,
+          awsRegion,
           "eks",
           "delete-addon",
           "--cluster-name",
@@ -81,7 +83,7 @@ export async function clusterReset({
           "--no-preserve",
         ],
         context,
-        workingDirectory: process.cwd(),
+        workingDirectory: clusterPath,
       });
       task.output = context.logger.applyColors(`EKS addon disabled: ${addon}`, {
         style: "subtle",
@@ -116,7 +118,7 @@ export async function clusterReset({
         "--ignore-not-found",
       ],
       context,
-      workingDirectory: process.cwd(),
+      workingDirectory: clusterPath,
     });
 
   await kubectlDelete({ type: "deployment", name: "coredns" });
@@ -139,7 +141,7 @@ export async function clusterReset({
       "--ignore-not-found",
     ],
     context,
-    workingDirectory: process.cwd(),
+    workingDirectory: clusterPath,
   });
   // ############################################################
   // ## Step 7: Terminate all nodes so old node-local configuration settings are wiped
@@ -152,7 +154,7 @@ export async function clusterReset({
       "--profile",
       awsProfile,
       "--region",
-      region,
+      awsRegion,
       "ec2",
       "describe-instances",
       "--filters",
@@ -164,7 +166,7 @@ export async function clusterReset({
       "text",
     ],
     context,
-    workingDirectory: process.cwd(),
+    workingDirectory: clusterPath,
   });
   if (instanceIds.length !== 0) {
     await execute({
@@ -173,14 +175,14 @@ export async function clusterReset({
         "--profile",
         awsProfile,
         "--region",
-        region,
+        awsRegion,
         "ec2",
         "terminate-instances",
         "--instance-ids",
         ...instanceIds.trim().split(/\s+/),
       ],
       context,
-      workingDirectory: process.cwd(),
+      workingDirectory: clusterPath,
     });
     task.output = context.logger.applyColors(
       "Nodes terminated to reset node-local settings.",

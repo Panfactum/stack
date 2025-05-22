@@ -105,13 +105,13 @@ variable "vpa_enabled" {
 }
 
 variable "minimum_memory_mb" {
-  description = "The minimum memory in Mb to use for the redis nodes"
+  description = "The minimum memory in MB to allocate to each OpenSearch node"
   type        = number
-  default     = 25
+  default     = 1000
 
   validation {
-    condition     = var.minimum_memory_mb >= 25
-    error_message = "Must specify at least 25Mb of memory"
+    condition     = var.minimum_memory_mb >= 1000
+    error_message = "Must specify at least 1000MB of memory"
   }
 }
 

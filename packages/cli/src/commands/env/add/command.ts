@@ -14,7 +14,9 @@ import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { checkAdminPermissions } from "./checkAdminPermissions";
 import { getEnvironment } from "./getEnvironment";
 import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
+import { getNewIAMUserCredentials } from "./getNewIAMUserCredentials";
 import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
+import { hasAccessToManagementAccount } from "./hasAccessToManagementAccount";
 import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
 import { provisionAWSAccount } from "./provisionAWSAccount";
 import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
@@ -146,7 +148,8 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             if (await hasExistingAWSOrg(context)) {
                 _hasExistingAWSOrg = true
                 if (await shouldPanfactumManageAWSOrg(context)) {
-                    managementAccountCreds = await getRootAccountAdminAccess(context)
+                    await hasAccessToManagementAccount(context);
+                    managementAccountCreds = await getNewIAMUserCredentials({ environment: MANAGEMENT_ENVIRONMENT, context })
                 }
             } else {
                 context.logger.info(`
@@ -257,13 +260,17 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                 environment is a ${pc.italic("special")} environment used for storing global
                 settings that transcend normal environment boundaries.
 
-                Any existing AWS accounts can be added to the new AWS Organizationby following this guide:
+                (Optional) To enable billing visibility for your users, you must complete the manual steps under
+                "Grant access to the billing console" in this guide:
+                https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-account-iam.html
+
+                (Optional) Any existing AWS accounts can be added to the new AWS Organizationby following this guide:
                 https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invite-account.html
 
-                However, this is not required to continue adding a new environment.
+                Neither of these steps are required to continue adding a new environment.
 
                 We can now proceed to adding a new standard Panfactum environment. Note that the bootstrapping
-                process will look similar to the ${MANAGEMENT_ENVIRONMENT} environment, but we will be
+                process will look similar to the ${MANAGEMENT_ENVIRONMENT} environment, but we will now be
                 able to automate many steps.
             `, { highlights: [managementFolder] })
         }

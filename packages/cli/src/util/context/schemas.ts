@@ -103,5 +103,6 @@ export const PANFACTUM_YAML_SCHEMA = z
                 message: "nats_dir must not contain a trailing /",
             })
             .default(".nats"),
-        installation_id: z.string().uuid().optional()
+        installation_id: z.string().uuid().optional(),
+        user_id: z.string().uuid().optional()
     })

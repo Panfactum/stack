@@ -23,7 +23,6 @@ dependency "kyverno" {
 }
 
 inputs = {
-  bastion_domains = []
   ssh_cert_lifetime_seconds = 60 * 60 * 8
 }
 

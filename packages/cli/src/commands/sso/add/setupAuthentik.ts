@@ -8,6 +8,7 @@ import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file
 import kubeAuthentikHcl from "@/templates/kube_authentik.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { SSO_SUBDOMAIN } from "@/util/domains/consts";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
@@ -25,11 +26,12 @@ import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupAuthentik(
     context: PanfactumContext,
-    mainTask: PanfactumTaskWrapper
+    mainTask: PanfactumTaskWrapper,
+    regionPath: string
 ) {
     const config = await getPanfactumConfig({
         context,
-        directory: process.cwd(),
+        directory: regionPath,
     });
 
     const {
@@ -173,16 +175,18 @@ export async function setupAuthentik(
                         ctx.ancestorDomain = await context.logger.select({
                             task,
                             explainer: {
-                                message: `Which domain do you want to use for e-mails from Authentik?`,
+                                message: `Which domain would you like to use for SSO?`,
                             },
                             message: "Environment domain:",
-                            choices: Object.keys(domains).map(domain => ({ value: domain, name: domain })),
+                            choices: Object.keys(domains).map(domain => ({ value: domain, name: `${SSO_SUBDOMAIN}.${domain}` })),
                         });
                     }
 
                     if (!ctx.authentikRootEmail) {
+                        const defaultRootEmail = `authentik-root@${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                         ctx.authentikRootEmail = await context.logger.input({
                             task,
+                            default: defaultRootEmail,
                             explainer: "This email will be used for the initial Authentik root user.",
                             message: "Email:",
                             validate: (value: string) => {
@@ -207,7 +211,7 @@ export async function setupAuthentik(
                     if (!ctx.authentikAdminEmail) {
                         ctx.authentikAdminEmail = await context.logger.input({
                             task,
-                            explainer: "This email will be used for your Authentik user.",
+                            explainer: "This email will be used for your Authentik user. This email must be unique and not be the AWS root email address.",
                             message: "Email:",
                             validate: (value: string) => {
                                 const { error } = z.string().email().safeParse(value);
@@ -283,7 +287,7 @@ export async function setupAuthentik(
             inputUpdates: {
                 domain: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => `authentik.${ctx.ancestorDomain!}`
+                    update: (_, ctx) => `${SSO_SUBDOMAIN}.${ctx.ancestorDomain!}`
                 }),
                 akadmin_email: defineInputUpdate({
                     schema: z.string(),
@@ -413,7 +417,7 @@ export async function setupAuthentik(
                 }
 
                 const configuration = new Configuration({
-                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
                         Authorization: `Bearer ${config.authentik_token}`,
                     }
@@ -457,7 +461,7 @@ export async function setupAuthentik(
                     })
                     const newGlobalConfig = {
                         ...originalGlobalConfig,
-                        authentik_url: `https://authentik.${ctx.ancestorDomain}`
+                        authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                     }
                     // FIX: @seth - NEVER write to the config files directly
                     await writeYAMLFile({
@@ -472,7 +476,7 @@ export async function setupAuthentik(
                         context,
                         filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
                         values: {
-                            authentik_url: `https://authentik.${ctx.ancestorDomain}`
+                            authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                         }
                     })
                 }
@@ -622,7 +626,7 @@ spec:
                 }
 
                 const originalAuthentikClient = new CoreApi(new Configuration({
-                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
                         Authorization: `Bearer ${config.authentik_token}`,
                     }
@@ -688,7 +692,7 @@ spec:
                 const openBrowser = await context.logger.confirm({
                     task,
                     explainer: `We will now open your browser so you can finish setting up your Authentik account.
-You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authentikAdminName}) in the browser that opens.`,
+You will need to enter your user email(${ctx.authentikAdminEmail}) in the browser that opens. ${passwordResetLink}`,
                     message: "Ready?",
                     default: true,
                 })
@@ -734,18 +738,21 @@ You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authen
                     throw new CLIError("Failed to create API token in Authentik", error);
                 }
 
+                const tokenLink = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D`
+                await open(tokenLink)
+
                 // replace bootstrap token with API token
                 const authentikUserToken = await context.logger.password({
                     task,
                     explainer: `
                     We have created a new temporary API token to use                    
-                    Go to https://authentik.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D
+                    Go to ${tokenLink}
                     Look for the token with the identifier '${tokenIdentifier}'`,
                     message: "Copy the token and paste it here:",
                     validate: async (value) => {
                         try {
                             const response = await Bun.fetch(
-                                `https://authentik.${ctx.ancestorDomain}/api/v3/core/groups/`,
+                                `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3/core/groups/`,
                                 {
                                     headers: {
                                         Authorization: `Bearer ${value}`,
@@ -771,7 +778,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail} - ${ctx.authen
                 })
 
                 const newAuthentikClient = new CoreApi(new Configuration({
-                    basePath: `https://authentik.${ctx.ancestorDomain}/api/v3`,
+                    basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
                         Authorization: `Bearer ${authentikUserToken}`,
                     }

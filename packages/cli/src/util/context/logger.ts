@@ -367,6 +367,7 @@ export class Logger {
       style: {
         message: (text: string, status: "idle" | "done" | "loading") => " " + text + (status === "done" || answerSameLine ? "" : "\n"),
         answer: (text: string) => " " + text,
+        defaultAnswer: (text: string) => pc.italic(pc.gray(text)),
         description: (text: string) => (process.stdout.columns >= MAX_WIDTH + 4 ? "\n    " : "\n ") + pc.italic(text)
       },
       prefix: process.stdout.columns >= MAX_WIDTH + 4 ?

@@ -10,7 +10,11 @@ import kubePvcAutoresizerTerragruntHcl from "@/templates/kube_pvc_autoresizer_te
 import kubeReloaderTerragruntHcl from "@/templates/kube_reloader_terragrunt.hcl" with { type: "file" };
 import kubeVeleroTerragruntHcl from "@/templates/kube_velero_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import {getPanfactumConfig} from "@/util/config/getPanfactumConfig.ts";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
+import { BASTION_SUBDOMAIN } from "@/util/domains/consts";
+import {findAuthentikLocation} from "@/util/sso/getAuthenticPath.ts";
+import {setupVaultSSO} from "@/util/sso/tasks/setupVaultSSO.ts";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import {
@@ -28,6 +32,16 @@ export async function setupClusterExtensions(
   const { awsProfile, context, environment, clusterPath, region } =
     options;
 
+  const config = await getPanfactumConfig({
+    context,
+    directory: options.clusterPath,
+  });
+
+  if (config.kube_domain === undefined) {
+    throw new Error("Kube domain is not set in the config.");
+  }
+
+  const bastionDomain = `${BASTION_SUBDOMAIN}.${config.kube_domain}`;
 
   const shouldSkipNodePoolsAdjustment = async () => {
     const eksModuleInfo = await readYAMLFile({
@@ -77,6 +91,14 @@ export async function setupClusterExtensions(
                       region,
                       skipIfAlreadyApplied: true,
                       module: MODULES.KUBE_BASTION,
+                      inputUpdates: {
+                        bastion_domains: defineInputUpdate({
+                          schema: z.array(z.string()),
+                          update: (_) => {
+                            return [bastionDomain];
+                          },
+                        })
+                      },
                       hclIfMissing: await Bun.file(
                         kubeBastionTerragruntHcl
                       ).text(),
@@ -200,11 +222,22 @@ export async function setupClusterExtensions(
                   update: () => false,
                 }),
               },
-            })
+            }),
           ],
           { ctx, concurrent: true }
         );
       },
+    },
+    {
+      title: "Setup Vault Federated SSO",
+      task: async (_, mainTask) => {
+        return setupVaultSSO(context, mainTask, clusterPath);
+      },
+      skip: async (_) => {
+        const authentikLocation = await findAuthentikLocation(context)
+
+        return !authentikLocation;
+      }
     },
   ])
 

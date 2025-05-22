@@ -113,15 +113,55 @@ export class WelcomeCommand extends PanfactumCommand {
                 ${pc.dim("↓ Want to get rid of direnv clutter when loading the DevShell? https://direnv.net/man/direnv.toml.1.html#codehideenvdiffcode")}
             `, { removeIndent: true })
 
+            const installationId = randomUUID()
+            const userId = randomUUID()
+
             await upsertRepoVariables({
                 context,
                 values: {
-                    installation_id: randomUUID(),
+                    installation_id: installationId,
                 }
             })
+
+            await upsertRepoVariables({
+                context,
+                values: {
+                    user_id: userId,
+                },
+                user: true
+            })
+
+            const groupProperties = {
+                name: this.context.repoVariables.repo_name,
+                repo_url: this.context.repoVariables.repo_url,
+                date_installed: new Date().toISOString(),
+            }
+
+            // ensure group fires before the capture
+            this.context.track.groupIdentify({
+                distinctId: installationId,
+                groupType: "repo",
+                groupKey: installationId,
+                properties: groupProperties,
+            })
+
+            this.context.track.capture({
+                event: "cli-welcome",
+                distinctId: userId,
+                groups: {
+                    repo: installationId,
+                }
+            })
+
+            // delay and double flush required to ensure the group is created before the capture
+            await this.context.track.flush()
+            await Bun.sleep(1000);
+            await this.context.track.flush()
         }
-
-
-
     }
 }
+
+/**
+ * installation_id: dcec12e2-ad13-4757-9ca6-d6f162163370
+ * user_id: 28f0d25b-7988-47a9-82a4-94c3f7b6fdf8
+ */

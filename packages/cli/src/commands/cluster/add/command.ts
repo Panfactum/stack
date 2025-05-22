@@ -1,16 +1,20 @@
-import path, { join } from "node:path";
+import { join } from "node:path";
+import { GetServiceQuotaCommand } from "@aws-sdk/client-service-quotas";
 import { Glob } from "bun";
 import { Command } from "clipanion";
 import { Listr } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
+import { getServiceQuotasClient } from "@/util/aws/clients/getServiceQuotasClient";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { getEnvironments } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
+import { getRegions } from "@/util/config/getRegions";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
-import { MODULES } from "@/util/terragrunt/constants";
+import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setSLA } from "./setSLA";
@@ -24,7 +28,7 @@ import { setupInternalClusterNetworking } from "./setupInternalClusterNetworking
 import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
-import { setupVPCandECR } from "./setupVPCandECR";
+import { setupVPC } from "./setupVPC.ts";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -39,11 +43,11 @@ const SETUP_STEPS: Array<{
   lastModule: MODULES; // Used to determine if the step has been completed
 }> = [
     {
-      label: "AWS VPC and ECR",
-      id: "setupVPCandECR",
-      setup: setupVPCandECR,
+      label: "AWS VPC",
+      id: "setupVPC",
+      setup: setupVPC,
       completed: false,
-      lastModule: MODULES.AWS_ECR_PULL_THROUGH_CACHE,
+      lastModule: MODULES.AWS_VPC,
     },
     {
       label: "Base EKS Cluster",
@@ -131,13 +135,48 @@ export class ClusterAddCommand extends PanfactumCommand {
     this.context.logger.info("Starting Panfactum cluster installation process")
 
     /*******************************************
+     * Select Environment and Region
+     *******************************************/
+    const environments = (await getEnvironments(this.context)).filter(env => env.name !== MANAGEMENT_ENVIRONMENT && env.deployed);
+    
+    if (environments.length === 0) {
+      throw new CLIError([
+        "No environments found. Please run `pf env add` to create an environment first.",
+      ]);
+    }
+
+    const selectedEnvironment = await this.context.logger.select({
+      message: "Select the environment for the cluster:",
+      choices: environments.map(env => ({
+        value: env,
+        name: `${env.name}`
+      })),
+    });
+
+    const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== GLOBAL_REGION && !region.clusterDeployed);
+    
+    if (regions.length === 0) {
+      throw new CLIError([
+        `No available regions found in environment ${selectedEnvironment.name}.`,
+      ]);
+    }
+
+    const selectedRegion = await this.context.logger.select({
+      message: "Select the region for the cluster:",
+      choices: regions.map(region => ({
+        value: region,
+        name: `${region.name}`
+      })),
+    });
+
+    /*******************************************
      * Config Loading + Checks
      *
      * Loads the configuration necessary for the installation process
      *******************************************/
     const config = await getPanfactumConfig({
       context: this.context,
-      directory: process.cwd(),
+      directory: selectedRegion.path,
     });
 
     const {
@@ -148,9 +187,10 @@ export class ClusterAddCommand extends PanfactumCommand {
       kube_domain: kubeDomain,
       region,
       sla_target: slaTarget,
+      aws_region: awsRegion,
     } = config;
 
-    if (!environment || !region || !awsProfile) {
+    if (!environment || !region || !awsProfile || !awsRegion) {
       throw new CLIError([
         "Cluster installation must be run from within a valid region-specific directory.",
         "If you do not have this file structure please ensure you've completed the initial setup steps here:",
@@ -165,15 +205,31 @@ export class ClusterAddCommand extends PanfactumCommand {
       ]);
     }
 
-    const environmentPath = path.join(
-      this.context.repoVariables.environments_dir,
-      environment
-    );
-    const clusterPath = path.join(environmentPath, region);
+    /***********************************************
+     * Confirms the vCPU quota is high enough
+     ***********************************************/
+    const serviceQuotasClient = await getServiceQuotasClient({ context: this.context, profile: awsProfile, region: awsRegion })
+    const command = new GetServiceQuotaCommand({
+      QuotaCode: "L-1216C47A",
+      ServiceCode: "ec2",
+    })
+    try {
+      const quota = await serviceQuotasClient.send(command)
+      if (quota.Quota?.Value && quota.Quota.Value < 16) {
+        this.context.logger.warn(`The EC2 vCPU quota is too low (${quota.Quota.Value}) to install a cluster right now
+          If you set this environment up with pf env add then the quota increase has already been requested.
+          Check your e-mail for status updates on the request and try again when it has been approved.`)
+        // return
+      }
+    } catch (error) {
+      throw new CLIError("Error retrieving EC2 vCPU quota.", error)
+    }
+
 
     /***********************************************
      * Confirms the SLA target for the cluster
      ***********************************************/
+
     const confirmedSLATarget = await setSLA({
       environment,
       region,
@@ -203,11 +259,11 @@ export class ClusterAddCommand extends PanfactumCommand {
           try {
             const glob = new Glob('**/region.yaml')
             // Find all region.yaml files across all environments
-            const regionFiles = Array.from(glob.scanSync(environmentPath));
+            const regionFiles = Array.from(glob.scanSync(selectedEnvironment.path));
 
             for (const regionFile of regionFiles) {
               // Skip checking the current cluster's region.yaml
-              if (regionFile === join(clusterPath, "region.yaml")) continue;
+              if (regionFile === join(selectedRegion.path, "region.yaml")) continue;
 
               // Read and parse the region.yaml file
               const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) });
@@ -231,9 +287,12 @@ export class ClusterAddCommand extends PanfactumCommand {
       })
 
       await upsertConfigValues({
-        filePath: join(clusterPath, "region.yaml"),
+        filePath: join(selectedRegion.path, "region.yaml"),
         values: {
           kube_domain: `${subdomain}.${ancestorDomain}`,
+          extra_inputs: {
+            pull_through_cache_enabled: false,
+          },
         },
         context: this.context,
       });
@@ -252,7 +311,7 @@ export class ClusterAddCommand extends PanfactumCommand {
       if (step.id === "setupCertificates") {
         // Certificates are a special case because the last module is applied twice during the setup process
         const certificatesModuleInfo = await readYAMLFile({
-          filePath: join(clusterPath, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, validationSchema: z.object({
+          filePath: join(selectedRegion.path, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, validationSchema: z.object({
             extra_inputs: z.object({
               self_generated_certs_enabled: z.boolean(),
             }).optional()
@@ -274,10 +333,11 @@ export class ClusterAddCommand extends PanfactumCommand {
       context: this.context,
       environment,
       domains,
-      environmentPath,
+      environmentPath: selectedEnvironment.path,
       kubeConfigContext,
       region,
-      clusterPath,
+      awsRegion,
+      clusterPath: selectedRegion.path,
       slaTarget: confirmedSLATarget
     };
 

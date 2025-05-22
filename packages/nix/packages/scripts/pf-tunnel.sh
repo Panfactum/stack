@@ -6,13 +6,6 @@
 set -eo pipefail
 
 ####################################################################
-# Step 0: Pull in ssh vars
-####################################################################
-
-# shellcheck disable=SC1091
-source pf-check-ssh
-
-####################################################################
 # Step 1: Variable parsing
 ####################################################################
 
@@ -87,9 +80,10 @@ fi
 # Step 2: Find the bastion address and port number
 ####################################################################
 
+CONNECTION_INFO_FILE="$SSH_DIR/connection_info"
 read -r BASTION_DOMAIN BASTION_PORT <<<"$(grep -m 1 "$BASTION " "$CONNECTION_INFO_FILE" | awk '{print $2, $3}')"
 
-if [[ -z $BASTION_DOMAIN || -z $BASTION_PORT ]]; then
+if [[ -z "$BASTION_DOMAIN" || -z "$BASTION_PORT" ]]; then
   echo "Error: $BASTION not found in $CONNECTION_INFO_FILE. Ensure this name is correct or run pf-update-ssh to regenerate this file." >&2
 fi
 
@@ -109,9 +103,10 @@ fi
 ####################################################################
 # Step 4: Get a vault token for signing
 ####################################################################
+CONFIG_FILE="$SSH_DIR/config.yaml"
 VAULT_ADDR=$(yq -r ".bastions[] | select(.name == \"$BASTION\") | .vault" "$CONFIG_FILE")
 
-if [[ -z $VAULT_ADDR ]]; then
+if [[ -z "$VAULT_ADDR" ]]; then
   echo "No bastion named $BASTION found in $CONFIG_FILE!" >&2
   exit 1
 fi
@@ -166,6 +161,7 @@ fi
 #   simply for network tunneling
 
 # Allows autossh to retry even if the first connection fails
+KNOWN_HOSTS_FILE="$SSH_DIR/known_hosts"
 export AUTOSSH_GATETIME=0
 autossh \
   -M 0 \

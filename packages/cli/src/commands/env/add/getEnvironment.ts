@@ -7,6 +7,9 @@ export async function getEnvironment(inputs: { context: PanfactumContext }) {
 
     const environments = await getEnvironments(context)
     const deployedEnvironments = environments.filter(env => env.deployed)
+    const partiallyDeployedEnv = environments.find(env => !env.deployed)?.name
+    const hasProd = environments.some(env => env.name.includes("prod"))
+    const hasDev = environments.some(env => env.name.includes("dev"))
 
     const name = await context.logger.input({
         explainer: `
@@ -14,6 +17,7 @@ export async function getEnvironment(inputs: { context: PanfactumContext }) {
         `,
         message: "Environment Name:",
         required: true,
+        default: partiallyDeployedEnv ?? (!hasProd ? "production" : (!hasDev ? "development" : undefined)),
         validate: (value) => {
             const { error } = ENVIRONMENT_NAME_SCHEMA.safeParse(value)
             if (error) {

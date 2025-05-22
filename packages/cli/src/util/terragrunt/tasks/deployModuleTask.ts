@@ -44,6 +44,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
     inputUpdates?: InputUpdates<T>;
     postDeployInputUpdates?: InputUpdates<T>;
     skipIfAlreadyApplied?: boolean;
+    etaWarningMessage?: string;
 }): Promise<ListrTask<T>> {
     const {
         hclIfMissing,
@@ -264,7 +265,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             subtasks.add({
                 title: "Apply module",
                 task: async (_, task) => {
-                    task.title = "Applying - Planning changes";
+                    task.title = `Applying - Planning changes${inputs.etaWarningMessage ? ` (${inputs.etaWarningMessage})` : ""}`;
                     let deltas = 0;
                     let deltaCounter = 0;
                     let changeCounter = 0;

@@ -38,7 +38,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: { context: Pan
                             lines: EXPECTED_GITIGNORE_CONTENTS.environments
                         }),
                         upsertGitIgnore({
-                            path: join(context.repoVariables.aws_dir, ".aws"),
+                            path: join(context.repoVariables.aws_dir, ".gitignore"),
                             context,
                             lines: EXPECTED_GITIGNORE_CONTENTS.aws
                         }),

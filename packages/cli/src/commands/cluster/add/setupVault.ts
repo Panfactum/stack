@@ -157,7 +157,7 @@ export async function setupVault(
         await execute({
           command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json", "--context", kubeConfigContext],
           context,
-          workingDirectory: process.cwd(),
+          workingDirectory: clusterPath,
           errorMessage: "Vault pods failed to start",
           retries: 60,
           isSuccess: (result) => {
@@ -217,7 +217,7 @@ export async function setupVault(
           const { stdout } = await execute({
             command: vaultOperatorInitCommand,
             context,
-            workingDirectory: process.cwd(),
+            workingDirectory: clusterPath,
             errorMessage: "Failed to initialize vault",
           });
 
@@ -287,7 +287,7 @@ export async function setupVault(
             "-format=json",
           ],
           context,
-          workingDirectory: process.cwd(),
+          workingDirectory: clusterPath,
           errorMessage: "Failed to check Vault status",
         });
 
@@ -325,7 +325,7 @@ export async function setupVault(
             const { stdout } = await execute({
               command: vaultUnsealCommand,
               context,
-              workingDirectory: process.cwd(),
+              workingDirectory: clusterPath,
               errorMessage: "Failed to unseal Vault",
             });
 

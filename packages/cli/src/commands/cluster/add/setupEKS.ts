@@ -49,7 +49,7 @@ export async function setupEKS(
   options: InstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
-  const { awsProfile, clusterPath, context, environment, region, slaTarget } =
+  const { awsProfile, clusterPath, context, environment, region, awsRegion, slaTarget } =
     options;
 
   interface Context {
@@ -111,8 +111,8 @@ export async function setupEKS(
           ctx.clusterName = await context.logger.input({
             task,
             message: "Cluster name:",
-            default: `${environment}-${region}`, // FIX: @seth - Need to validate whether this default is ok
-            transformer: (value) => clusterNameFormatter(value), // TODO: @seth - Do we want to do this?
+            default: clusterNameFormatter(`${environment}-${region}`),
+            transformer: (value) => clusterNameFormatter(value),
             validate: (value) => {
               const transformed = clusterNameFormatter(value);
               const { error } = CLUSTER_NAME.safeParse(transformed);
@@ -144,6 +144,7 @@ export async function setupEKS(
             },
           });
         }
+
       },
     },
     await buildDeployModuleTask<Context>({
@@ -177,6 +178,7 @@ export async function setupEKS(
           update: () => slaTarget === 1 ? ["PRIVATE_A"] : ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"],
         }),
       },
+      etaWarningMessage: 'This may take up to 15 minutes.',
     }),
     await buildSyncKubeClustersTask({
       context,
@@ -189,8 +191,9 @@ export async function setupEKS(
           awsProfile,
           clusterName: ctx.clusterName!,
           context,
-          region,
+          awsRegion,
           task,
+          clusterPath
         });
       },
       rendererOptions: {
