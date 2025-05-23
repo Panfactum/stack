@@ -810,7 +810,8 @@ module "security_update_job" {
 ***************************************/
 
 resource "random_password" "dashboard_superuser" {
-  length = 32
+  length  = 32
+  special = false
 }
 
 resource "kubernetes_secret" "dashboard_superuser" {
