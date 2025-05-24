@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
+import ProfileForContextCommand from "./commands/aws/profile-for-context/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
 import { ClusterEnableCommand } from "./commands/cluster/enable/command.ts";
@@ -45,6 +46,7 @@ cli.register(DevshellEnterCommand)
 cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
+cli.register(ProfileForContextCommand)
 cli.register(AwsEcrWaitOnImageCommand)
 cli.register(EnvironmentInstallCommand)
 cli.register(EnvironmentRemoveCommand)

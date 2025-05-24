@@ -49,7 +49,7 @@ and marks the start time of the disruption window.`,
         workingDirectory: process.cwd(),
       });
       
-      return JSON.parse(result.stdout || '{}');
+      return JSON.parse(result.stdout || '{}') as Record<string, string>;
     };
 
     const enablePDB = async (pdb: string, maxUnavailable: number): Promise<void> => {
