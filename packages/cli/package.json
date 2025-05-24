@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-account": "^3.794.0",
+    "@aws-sdk/client-dynamodb": "^3.787.0",
     "@aws-sdk/client-ec2": "^3.796.0",
     "@aws-sdk/client-iam": "^3.787.0",
     "@aws-sdk/client-organizations": "^3.787.0",
@@ -47,6 +48,7 @@
     "@kubernetes/client-node": "^1.1.2",
     "@types/ini": "^4.1.1",
     "clipanion": "^4.0.0-rc.4",
+    "enquirer": "^2.4.1",
     "eslint-plugin-unused-imports": "^4.1.4",
     "ini": "^5.0.0",
     "init": "^0.1.2",

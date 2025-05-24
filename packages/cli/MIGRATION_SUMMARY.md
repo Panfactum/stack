@@ -50,5 +50,20 @@ pf aws profile-for-context production-primary
 - `/src/util/vault/README.md` - Vault utilities documentation
 - `/src/commands/aws/profile-for-context/command.ts` - AWS profile lookup command
 
+### Phase 3: Infrastructure Management
+
+#### 3.1 Terraform/Infrastructure Commands
+- ✅ `pf-tf-delete-locks.sh` → `pf terraform delete-locks`
+  - Releases stuck Terraform state locks from DynamoDB
+  - Supports filtering by user, AWS profile, table, and region
+  - Maintains same functionality as shell script
+
+#### 3.2 Network & Tunneling Commands
+- ✅ `pf-tunnel.sh` → `pf tunnel <bastion> <remote-address>`
+  - Establishes SSH tunnels through bastion hosts
+  - Interactive port selection when not specified
+  - Automatic SSH key generation and Vault signing
+  - Uses autossh for persistent connections
+
 ## Next Steps
-Continue with Phase 3 migrations as outlined in MIGRATION_PLAN.md
+Continue with Phase 4 migrations as outlined in MIGRATION_PLAN.md

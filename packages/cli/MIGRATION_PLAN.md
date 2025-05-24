@@ -62,8 +62,8 @@ Build on core utilities to provide authentication services.
 #### 2.1 Shared Authentication Services
 ```typescript
 // Convert to shared utilities
-pf-get-vault-token.sh → src/util/vault/getToken.ts
-pf-get-db-creds.sh    → src/util/vault/getDbCreds.ts
+pf-get-vault-token.sh → src/util/vault/getToken.ts (✅ exists)
+pf-get-db-creds.sh    → src/util/vault/getDbCreds.ts (✅ exists)
 ```
 
 #### 2.2 CLI Commands
