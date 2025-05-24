@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
-
-# This script is intended to support
-# local development by invalidating the terraform module cache whenever
-# the code in any of our Panfactum modules changes
-
-module_folder=$1
-
-if [[ -z $module_folder ]]; then
-  echo ""
-else
-  find "$(realpath "$module_folder")" -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d' ' -f1
-fi
+# DEPRECATED: This script is now implemented in the Panfactum CLI
+# This wrapper is maintained for backward compatibility
+exec pf util get-module-hash "$@"
