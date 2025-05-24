@@ -47,13 +47,13 @@ pf-get-commit-hash.sh       → src/util/git/getCommitHash.ts (✅ exists)
 #### 1.2 Independent CLI Commands
 ```typescript
 // Direct CLI command mappings
-pf-tf-init.sh                          → pf terraform init
-pf-sops-set-profile.sh                 → pf sops set-profile <directory> <profile>
-wait-on-image.sh                       → pf aws ecr wait-on-image <image>
-pf-velero-snapshot-gc.sh               → pf k8s velero snapshot-gc
-pf-voluntary-disruptions-disable.sh    → pf k8s disruptions disable
-pf-voluntary-disruptions-enable.sh     → pf k8s disruptions enable
-enter-shell-local.sh                   → pf devshell enter (or integrate into existing sync)
+pf-tf-init.sh                          → pf terraform init (✅ exists)
+pf-sops-set-profile.sh                 → pf sops set-profile <directory> <profile> (✅ exists)
+wait-on-image.sh                       → pf aws ecr wait-on-image <image> (✅ exists)
+pf-velero-snapshot-gc.sh               → pf k8s velero snapshot-gc (✅ exists)
+pf-voluntary-disruptions-disable.sh    → pf k8s disruptions disable (✅ exists)
+pf-voluntary-disruptions-enable.sh     → pf k8s disruptions enable (✅ exists)
+enter-shell-local.sh                   → pf devshell enter (or integrate into existing sync) (✅ exists)
 ```
 
 ### Phase 2: Authentication & Secrets

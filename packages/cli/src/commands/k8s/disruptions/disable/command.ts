@@ -49,7 +49,7 @@ have passed their disruption window time, preventing pods from being evicted.`,
         workingDirectory: process.cwd(),
       });
       
-      return JSON.parse(result.stdout || '{}');
+      return JSON.parse(result.stdout || '{}') as Record<string, string>;
     };
 
     const disablePDB = async (pdb: string): Promise<void> => {
