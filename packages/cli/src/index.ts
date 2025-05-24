@@ -18,7 +18,9 @@ import { K8sDisruptionsEnableCommand } from "./commands/k8s/disruptions/enable/c
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
 import { SopsSetProfileCommand } from "./commands/sops/set-profile/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
+import DeleteLocksCommand from "./commands/terraform/delete-locks/command.ts";
 import { TerraformInitCommand } from "./commands/terraform/init/command.ts";
+import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
 import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
@@ -61,6 +63,8 @@ cli.register(K8sDisruptionsEnableCommand)
 cli.register(K8sVeleroSnapshotGcCommand)
 cli.register(SopsSetProfileCommand)
 cli.register(TerraformInitCommand)
+cli.register(DeleteLocksCommand)
+cli.register(TunnelCommand)
 
 try {
   const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand

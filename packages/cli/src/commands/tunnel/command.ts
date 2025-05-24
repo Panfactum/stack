@@ -1,0 +1,223 @@
+import { spawn } from 'child_process';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { Option } from 'clipanion';
+import { prompt } from 'enquirer';
+import { parse as parseYaml } from 'yaml';
+import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { CLIError } from '@/util/error/error';
+import { execute } from '@/util/subprocess/execute';
+import { getVaultTokenString } from '@/util/vault';
+
+interface BastionConfig {
+  name: string;
+  vault: string;
+}
+
+export default class TunnelCommand extends PanfactumCommand {
+  static override paths = [['tunnel']];
+
+  static override usage = PanfactumCommand.Usage({
+    description: 'Establish SSH tunnel to internal network services through a bastion host',
+    details: `
+      This command starts a tunnel to an internal network service to allow network connectivity 
+      during local development. It uses SSH to tunnel through a bastion host configured in your 
+      ssh/config.yaml file.
+    `,
+    examples: [
+      ['Tunnel to a database', '$0 tunnel prod db.internal:5432'],
+      ['Specify local port', '$0 tunnel prod api.internal:443 --local-port 8443'],
+    ],
+  });
+
+  bastion = Option.String({ required: true });
+  remoteAddress = Option.String({ required: true });
+  localPort = Option.String('--local-port', '-l', {
+    description: 'Local port to bind to (optional, will prompt if not provided)',
+  });
+
+  override async execute(): Promise<number> {
+    try {
+      const { repoVariables } = this.context;
+      const sshDir = repoVariables.ssh_dir;
+      
+      // Validate remote address format
+      if (!this.remoteAddress.includes(':')) {
+        throw new CLIError('Remote address must include both hostname and port (e.g., example.com:443)');
+      }
+
+      // Read bastion configuration
+      const configFile = join(sshDir, 'config.yaml');
+      if (!existsSync(configFile)) {
+        throw new CLIError(`SSH config file not found at ${configFile}`);
+      }
+
+      const configContent = readFileSync(configFile, 'utf8');
+      const config = parseYaml(configContent) as { bastions: BastionConfig[] };
+      const bastionConfig = config.bastions?.find(b => b.name === this.bastion);
+
+      if (!bastionConfig) {
+        throw new CLIError(`No bastion named '${this.bastion}' found in ${configFile}`);
+      }
+
+      // Read connection info
+      const connectionInfoFile = join(sshDir, 'connection_info');
+      if (!existsSync(connectionInfoFile)) {
+        throw new CLIError(
+          `Connection info file not found at ${connectionInfoFile}. Run pf-update-ssh to generate it.`
+        );
+      }
+
+      const connectionInfo = readFileSync(connectionInfoFile, 'utf8');
+      const bastionLine = connectionInfo.split('\n').find(line => line.startsWith(`${this.bastion} `));
+      
+      if (!bastionLine) {
+        throw new CLIError(
+          `${this.bastion} not found in ${connectionInfoFile}. Ensure this name is correct or run pf-update-ssh to regenerate this file.`
+        );
+      }
+
+      const [, bastionDomain, bastionPort] = bastionLine.split(' ');
+      if (!bastionDomain || !bastionPort) {
+        throw new CLIError(`Invalid connection info format for ${this.bastion}`);
+      }
+
+      // Setup SSH keys
+      const keyFile = join(sshDir, `id_ed25519_${this.bastion}`);
+      const publicKeyFile = `${keyFile}.pub`;
+      const signedPublicKeyFile = `${keyFile}_signed.pub`;
+
+      // Generate keys if they don't exist
+      if (!existsSync(keyFile) || !existsSync(publicKeyFile) || !existsSync(signedPublicKeyFile)) {
+        this.context.logger.info('Generating SSH keys...');
+        
+        // Clean up any partial keys
+        for (const file of [keyFile, publicKeyFile, signedPublicKeyFile]) {
+          if (existsSync(file)) {
+            await execute({
+              command: ['rm', '-f', file],
+              context: this.context,
+              workingDirectory: process.cwd(),
+            });
+          }
+        }
+
+        // Generate new keys
+        await execute({
+          command: [
+            'ssh-keygen',
+            '-q',
+            '-t', 'ed25519',
+            '-N', '',
+            '-C', this.bastion,
+            '-f', keyFile
+          ],
+          context: this.context,
+          workingDirectory: process.cwd(),
+        });
+      }
+
+      // Sign SSH key with Vault
+      this.context.logger.info('Signing SSH key with Vault...');
+      const vaultToken = await getVaultTokenString({ address: bastionConfig.vault });
+      
+      const { stdout: signedKey } = await execute({
+        command: [
+          'vault',
+          'write',
+          '-field=signed_key',
+          'ssh/sign/default',
+          `public_key=@${publicKeyFile}`
+        ],
+        env: {
+          VAULT_ADDR: bastionConfig.vault,
+          VAULT_TOKEN: vaultToken
+        },
+        context: this.context,
+        workingDirectory: process.cwd(),
+      });
+
+      writeFileSync(signedPublicKeyFile, signedKey);
+
+      // Determine local port
+      let localPortNumber: number;
+      if (this.localPort) {
+        localPortNumber = parseInt(this.localPort);
+        if (isNaN(localPortNumber) || localPortNumber < 1024 || localPortNumber > 65535) {
+          throw new CLIError('Local port must be a number between 1024 and 65535');
+        }
+      } else {
+        // Prompt for port
+        const response = await prompt<{ port: string }>({
+          type: 'input',
+          name: 'port',
+          message: 'Enter a local port for the tunnel (1024-65535):',
+          validate: (value) => {
+            const port = parseInt(value);
+            if (isNaN(port)) return 'Not a number!';
+            if (port < 1024 || port > 65535) return 'Port out of range (1024-65535)';
+            return true;
+          }
+        });
+        localPortNumber = parseInt(response.port);
+      }
+
+      // Establish tunnel
+      this.context.logger.info(
+        `Establishing tunnel: localhost:${localPortNumber} → ${this.remoteAddress} via ${this.bastion}`
+      );
+
+      const knownHostsFile = join(sshDir, 'known_hosts');
+      
+      // Use spawn to run autossh in the foreground
+      const autossh = spawn('autossh', [
+        '-M', '0',
+        '-o', `UserKnownHostsFile=${knownHostsFile}`,
+        '-o', 'IdentitiesOnly=yes',
+        '-o', 'IdentityAgent=none',
+        '-o', 'ServerAliveInterval=2',
+        '-o', 'ServerAliveCountMax=3',
+        '-o', 'ConnectTimeout=1',
+        '-N',
+        '-i', keyFile,
+        '-i', signedPublicKeyFile,
+        '-L', `127.0.0.1:${localPortNumber}:${this.remoteAddress}`,
+        '-p', bastionPort,
+        `panfactum@${bastionDomain}`
+      ], {
+        env: {
+          ...process.env,
+          AUTOSSH_GATETIME: '0'
+        },
+        stdio: 'inherit'
+      });
+
+      // Handle process termination
+      process.on('SIGINT', () => {
+        this.context.logger.info('Closing tunnel...');
+        autossh.kill('SIGTERM');
+        process.exit(0);
+      });
+
+      process.on('SIGTERM', () => {
+        autossh.kill('SIGTERM');
+        process.exit(0);
+      });
+
+      // Wait for autossh to exit
+      return new Promise((resolve) => {
+        autossh.on('exit', (code) => {
+          resolve(code || 0);
+        });
+      });
+
+    } catch (error) {
+      if (error instanceof CLIError) {
+        throw error;
+      }
+      throw new CLIError(
+        `Failed to establish tunnel: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+}
