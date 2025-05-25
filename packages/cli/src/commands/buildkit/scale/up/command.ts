@@ -1,0 +1,150 @@
+import { Option } from 'clipanion'
+import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
+import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
+import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { execute } from '@/util/subprocess/execute.js'
+
+export default class BuildkitScaleUpCommand extends PanfactumCommand {
+  static override paths = [['buildkit', 'scale', 'up']]
+
+  static override usage = PanfactumCommand.Usage({
+    description: 'Scales up BuildKit from 0. Helper to be used prior to a build.'
+  })
+
+  only = Option.String('--only', {
+    description: 'If provided, will only scale up the BuildKit instance for the provided architecture. Otherwise, will scale up all architectures.'
+  })
+
+  wait = Option.Boolean('--wait', false, {
+    description: 'If provided, will wait up to 10 minutes for the scale-up to complete before exiting.'
+  })
+
+  kubectlContext = Option.String('--context', {
+    description: 'The kubectl context to use for interacting with Kubernetes'
+  })
+
+  async execute(): Promise<number> {
+    // Validate architecture if provided
+    if (this.only && !architectures.includes(this.only as Architecture)) {
+      this.context.logger.error(`--only must be one of: ${architectures.join(', ')}`)
+      return 1
+    }
+
+    // Validate context if provided
+    if (this.kubectlContext) {
+      try {
+        await execute({
+          command: ['kubectl', 'config', 'get-contexts', this.kubectlContext],
+          context: this.context,
+          workingDirectory: process.cwd()
+        })
+      } catch {
+        this.context.logger.error(`'${this.kubectlContext}' not found in kubeconfig.`)
+        return 1
+      }
+    }
+
+    const archsToScale = this.only ? [this.only as Architecture] : architectures
+
+    // Scale up each architecture
+    for (const arch of archsToScale) {
+      await this.scaleUp(arch)
+    }
+
+    // Wait for scale-up if requested
+    if (this.wait) {
+      const timeout = 600 // 10 minutes
+      const startTime = Date.now()
+
+      for (const arch of archsToScale) {
+        await this.waitForScaleUp(arch, startTime, timeout)
+      }
+    }
+
+    return 0
+  }
+
+  private async scaleUp(arch: Architecture): Promise<void> {
+    const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
+    const contextArgs = this.kubectlContext ? ['--context', this.kubectlContext] : []
+
+    // Get current replicas
+    const result = await execute({
+      command: [
+        'kubectl',
+        ...contextArgs,
+        'get',
+        'statefulset',
+        statefulsetName,
+        '--namespace',
+        BUILDKIT_NAMESPACE,
+        '-o=jsonpath={.spec.replicas}'
+      ],
+      context: this.context,
+      workingDirectory: process.cwd()
+    })
+
+    const currentReplicas = parseInt(result.stdout.trim(), 10)
+
+    if (currentReplicas === 0) {
+      // Scale up
+      await execute({
+        command: [
+          'kubectl',
+          ...contextArgs,
+          'scale',
+          'statefulset',
+          statefulsetName,
+          '--namespace',
+          BUILDKIT_NAMESPACE,
+          '--replicas=1'
+        ],
+        context: this.context,
+        workingDirectory: process.cwd()
+      })
+    }
+
+    // Record a "build" to prevent immediate scale-down
+    await recordBuildKitBuild({ arch, kubectlContext: this.kubectlContext, context: this.context })
+  }
+
+  private async waitForScaleUp(arch: Architecture, startTime: number, timeoutSeconds: number): Promise<void> {
+    const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
+    const contextArgs = this.kubectlContext ? ['--context', this.kubectlContext] : []
+
+    while (true) {
+      const result = await execute({
+        command: [
+          'kubectl',
+          ...contextArgs,
+          'get',
+          'statefulset',
+          statefulsetName,
+          '--namespace',
+          BUILDKIT_NAMESPACE,
+          '-o=jsonpath={.status.availableReplicas}'
+        ],
+        context: this.context,
+        workingDirectory: process.cwd()
+      })
+
+      const availableReplicas = parseInt(result.stdout.trim() || '0', 10)
+
+      if (availableReplicas >= 1) {
+        break
+      }
+
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000)
+      const remainingSeconds = timeoutSeconds - elapsedSeconds
+
+      if (elapsedSeconds >= timeoutSeconds) {
+        throw new Error(`Timeout reached while waiting for StatefulSet ${statefulsetName} to scale up.`)
+      }
+
+      this.context.logger.info(`${arch}: Waiting ${remainingSeconds} seconds for at least one BuildKit replica to become available...`)
+      
+      // Sleep for 10 seconds
+      await new Promise(resolve => globalThis.setTimeout(resolve, 10000))
+    }
+  }
+}

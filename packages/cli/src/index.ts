@@ -3,6 +3,11 @@ import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
 import ProfileForContextCommand from "./commands/aws/profile-for-context/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
+import BuildkitBuildCommand from "./commands/buildkit/build/command.ts";
+import BuildkitClearCacheCommand from "./commands/buildkit/cache/clear/command.ts";
+import BuildkitScaleDownCommand from "./commands/buildkit/scale/down/command.ts";
+import BuildkitScaleUpCommand from "./commands/buildkit/scale/up/command.ts";
+import BuildkitTunnelCommand from "./commands/buildkit/tunnel/command.ts";
 import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
 import { ClusterEnableCommand } from "./commands/cluster/enable/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
@@ -50,6 +55,11 @@ cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
 cli.register(ProfileForContextCommand)
 cli.register(AwsEcrWaitOnImageCommand)
+cli.register(BuildkitBuildCommand)
+cli.register(BuildkitClearCacheCommand)
+cli.register(BuildkitScaleDownCommand)
+cli.register(BuildkitScaleUpCommand)
+cli.register(BuildkitTunnelCommand)
 cli.register(EnvironmentInstallCommand)
 cli.register(EnvironmentRemoveCommand)
 cli.register(DomainAddCommand)

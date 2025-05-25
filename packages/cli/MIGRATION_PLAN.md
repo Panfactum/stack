@@ -68,7 +68,7 @@ pf-get-db-creds.sh    → src/util/vault/getDbCreds.ts (✅ exists)
 
 #### 2.2 CLI Commands
 ```typescript
-pf-get-aws-profile-for-kube-context.sh → pf aws profile-for-context <context>
+pf-get-aws-profile-for-kube-context.sh → pf aws profile-for-context <context> (✅ exists)
 ```
 
 ### Phase 3: Infrastructure Management
@@ -76,12 +76,12 @@ Commands that depend on authentication and core utilities.
 
 #### 3.1 Terraform/Infrastructure
 ```typescript
-pf-tf-delete-locks.sh → pf terraform delete-locks [--profile] [--table] [--region]
+pf-tf-delete-locks.sh → pf terraform delete-locks [--profile] [--table] [--region] (✅ exists)
 ```
 
 #### 3.2 Network & Tunneling
 ```typescript
-pf-tunnel.sh        → pf tunnel <service> <port> [--namespace]
+pf-tunnel.sh        → pf tunnel <service> <port> [--namespace] (✅ exists)
 pf-vpc-network-test.sh → pf aws vpc-network-test --module-path <path> (✅ placeholder exists)
 ```
 
