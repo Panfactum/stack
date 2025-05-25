@@ -1,0 +1,27 @@
+---
+summary: Changes TLS certificate provisioning architecture to avoid rate limits on large clusters, adds backwards compatibility for EKS cluster creator privileges, and improves Authentik stability during PostgreSQL failovers.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * This release changes the way that public ingress TLS certificates are provisioned in order to avoid
+      hitting rate limits on large clusters. **This architectural update requires that the modules
+      be upgraded in the following order:**
+
+    * [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+
+    * [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx). **To avoid service disruptions,
+      you MUST wait until all the old NGINX pods have been fully terminated before proceeding.**
+
+    * The remainder of the modules may be updated in any order.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Adds `bootstrap_cluster_creator_admin_privileges` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to provide
+      backwards compatibility with clusters that were created with this field set to `true`.
+
+    * Temporary Authentik disruptions caused by PostgreSQL database failovers have been mitigated.
+  </Fragment>
+</ChangelogEntry>

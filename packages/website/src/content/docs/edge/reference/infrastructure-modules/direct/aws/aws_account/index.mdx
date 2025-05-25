@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_account" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_account" status="stable" type="direct"/>
+
+<ModuleHeader name="aws_account" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_account" status="stable" type="direct" />
 
 # AWS Account
 
@@ -15,9 +16,9 @@ Completes top-level configuration for each AWS account:
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -29,153 +30,82 @@ Description: The human-readable string for the AWS account.
 
 Type: `string`
 
-### billing\_email\_address
-
-Description: The email address where you want to receive invoices for your organization
-
-Type: `string`
-
-### billing\_full\_name
-
-Description: The full name of the person who receives invoices for your organization
-
-Type: `string`
-
-### billing\_phone\_number
-
-Description: The phone number of the person who receives invoices for your organization
-
-Type: `string`
-
-### billing\_title
-
-Description: The title of the person who receives invoices for your organization
-
-Type: `string`
-
-### contact\_address\_line\_1
-
-Description: The street address for your organization (line 1)
-
-Type: `string`
-
-### contact\_city
-
-Description: The city for your organization
-
-Type: `string`
-
-### contact\_company\_name
-
-Description: The name of your organization
-
-Type: `string`
-
-### contact\_country\_code
-
-Description: The ISO-3166 two-letter country code for your organization
-
-Type: `string`
-
-### contact\_full\_name
-
-Description: The full name of the primary contact who manages your organization's AWS account
-
-Type: `string`
-
-### contact\_phone\_number
-
-Description: The phone number of the primary contact who manages your organization's AWS account
-
-Type: `string`
-
-### contact\_postal\_code
-
-Description: The postal code for your organization
-
-Type: `string`
-
-### operations\_email\_address
-
-Description: The email address for the person who leads operations for your organization
-
-Type: `string`
-
-### operations\_full\_name
-
-Description: The full name of the person who leads operations for your organization
-
-Type: `string`
-
-### operations\_phone\_number
-
-Description: The phone number of the person who leads operations for your organization
-
-Type: `string`
-
-### operations\_title
-
-Description: The title of the person who leads operations for your organization
-
-Type: `string`
-
-### security\_email\_address
-
-Description: The email address for the person who leads security for your organization
-
-Type: `string`
-
-### security\_full\_name
-
-Description: The full name of the person who leads security for your organization
-
-Type: `string`
-
-### security\_phone\_number
-
-Description: The phone number of the person who leads security for your organization
-
-Type: `string`
-
-### security\_title
-
-Description: The title of the person who leads security for your organization
-
-Type: `string`
-
 ## Optional Inputs
 
 The following input variables are optional (have default values):
 
-### contact\_address\_line\_2
+### billing\_contact
 
-Description: The street address for your organization (line 2)
+Description: Billing contact information for the AWS account
 
-Type: `string`
+Type:
 
-Default: `null`
-
-### contact\_district\_or\_county
-
-Description: The district or county of your organization
-
-Type: `string`
-
-Default: `null`
-
-### contact\_state\_or\_region
-
-Description: The state or region for your organization
-
-Type: `string`
+```hcl
+object({
+    email_address = string // The email address where you want to receive invoices for your organization
+    full_name     = string // The full name of the person who receives invoices for your organization
+    phone_number  = string // The phone number of the person who receives invoices for your organization
+    title         = string // The title of the person who receives invoices for your organization
+  })
+```
 
 Default: `null`
 
-### contact\_website\_url
+### operations\_contact
 
-Description: The website your organization
+Description: Operations contact information for the AWS account
 
-Type: `string`
+Type:
+
+```hcl
+object({
+    email_address = string // The email address for the person who leads operations for your organization
+    full_name     = string // The full name of the person who leads operations for your organization
+    phone_number  = string // The phone number of the person who leads operations for your organization
+    title         = string // The title of the person who leads operations for your organization
+  })
+```
+
+Default: `null`
+
+### primary\_contact
+
+Description: Primary contact information for the AWS account
+
+Type:
+
+```hcl
+object({
+    full_name          = string           // The full name of the primary contact who manages your organization's AWS account
+    address_line_1     = string           // The street address for your organization (line 1)
+    address_line_2     = optional(string) // The street address for your organization (line 2)
+    city               = string           // The city for your organization
+    company_name       = string           // The name of your organization
+    country_code       = string           // The ISO-3166 two-letter country code for your organization
+    district_or_county = optional(string) // The district or county of your organization
+    phone_number       = string           // The phone number of the primary contact who manages your organization's AWS account
+    postal_code        = string           // The postal code for your organization
+    state_or_region    = optional(string) // The state or region for your organization
+    website_url        = optional(string) // The website of your organization
+  })
+```
+
+Default: `null`
+
+### security\_contact
+
+Description: Security contact information for the AWS account
+
+Type:
+
+```hcl
+object({
+    email_address = string // The email address for the person who leads security for your organization
+    full_name     = string // The full name of the person who leads security for your organization
+    phone_number  = string // The phone number of the person who leads security for your organization
+    title         = string // The title of the person who leads security for your organization
+  })
+```
 
 Default: `null`
 

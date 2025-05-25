@@ -13,26 +13,26 @@ Kubernetes Ingresses.
 It works as follows:
 
 1. For all domains in `domains`, ensure that a DNS record is configured to point to the domain to this cluster's NGINX
-  ingress controller (via [kube_external_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns))
+  ingress controller (via [kube_external_dns](/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns))
   and provide the ingress controller a TLS certificate for the domains
-  (via [kube_cert_manager](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)).
+  (via [kube_cert_manager](/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)).
 
-2. When the ingress controller receives a request to a domain in `domains`, first apply the rate limits and redirect rules.
+1. When the ingress controller receives a request to a domain in `domains`, first apply the rate limits and redirect rules.
 
-3. Next, the request's path is compared to the `path_prefix` in every config of `ingress_configs`.
+1. Next, the request's path is compared to the `path_prefix` in every config of `ingress_configs`.
   If the request path is prefixed with `path_prefix`, use the settings in that config object. [^90]
 
-4. Apply CORS handling, rewrite rules, and any other request modification before forwarding the request to the Kubernetes
+1. Apply CORS handling, rewrite rules, and any other request modification before forwarding the request to the Kubernetes
   service indicated by the config's `service` and `service_port` values.
 
-5. When receiving a response form the upstream, perform any response modifications before forwarding the response to the
+1. When receiving a response form the upstream, perform any response modifications before forwarding the response to the
 initiating client.
 
 [^90]: If multiple path prefixes match, the longest `path_prefix` value wins.
 
 ### TLS Certificates
 
-[kube_cert_issuers](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
+[kube_cert_issuers](/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
 default cert for all covered domains and first-level subdomains (via [wildcard SANs](https://sectigostore.com/page/wildcard-san-certificates/)).
 This is stored at `cert-manager/ingress-tls`.
 
@@ -46,12 +46,12 @@ you can [submit a rate limits adjustment request](https://isrg.formstack.com/for
 ### CDN
 
 If you want to provide a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network) in front of the created Ingresses
-for performance and security improvements, see the [kube_aws_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
+for performance and security improvements, see the [kube_aws_cdn](/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
 
 **Additionally, this module must be deployed with `cdn_mode_enabled` set to `true`.**
 
 CDN configuration can be supplied via the `cdn` configuration field on each element of `ingress_configs`. The individual
-settings are described in more detail [here](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
+settings are described in more detail [here](/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
 
 ### Redirect Rules
 
@@ -85,13 +85,13 @@ Rewrite rules work as follows:
 
 1. The appropriate configuration from `ingress_configs` is chosen based on its `path_prefix`.
 
-2. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
+1. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
 that regex matches, then the ***path after the `path_prefix`*** is transformed to `rewrite`. [^91] [^92] Regex capture groups are allowed in `match`
 and can be used in `rewrite`.
 
-3. Iff `remove_prefix` is `true`, prefix is removed from the request.
+1. Iff `remove_prefix` is `true`, prefix is removed from the request.
 
-4. The request is then forwarded to the upstream service.
+1. The request is then forwarded to the upstream service.
 
 [^91]: If multiple rewrite rules match, the one with the longest `match` regex applies.
 

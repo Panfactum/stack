@@ -1,0 +1,33 @@
+---
+summary: Adds wait options to speed up deployments, fixes VPA CRD management issues, ensures bastion high availability with two replicas, and resolves policy deployment conflicts during bootstrapping.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * This update requires that you apply the [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) before
+      any other module. If you run into any issues, set `vpa_enabled` to `false` before you apply the module and re-enable once the
+      module is deployed.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Most Kubernetes modules now have a `wait` input that can be set to `false` if you do not wish to wait for the resources
+      to reach a ready state before proceeding with the deployment. This will significantly improve the speed of deploying
+      updates but will disable automatic rollback in case something goes wrong. Manual intervention may be required if
+      deployment fails.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) now always uses two replicas
+      to ensure tunnels can immediately reconnect if one bastion gets restarted.
+
+    * Due to a bug in how Helm manages CRDs, CRDs included in [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa)
+      were not appropriately updated in the previous release. This release resolves the issue.
+
+    * Adjusts the bootstrapping steps for Karpenter to include instructions for managing the `wait` input.
+
+    * Fixes an issue that prevented [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) from being
+      deployed in the bootstrapping guide to non-existent `node-image-cache` namespace.
+  </Fragment>
+</ChangelogEntry>

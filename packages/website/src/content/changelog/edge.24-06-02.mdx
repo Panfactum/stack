@@ -1,0 +1,127 @@
+---
+summary: Replaces EKS CoreDNS with a custom module, adds monitoring stack with Prometheus and Grafana, introduces Argo Workflow engine, and makes significant improvements to cluster resource utilization and stability.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * We have removed the EKS CoreDNS addon and replaced it with the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+      module in order to provide better guarantees about the behavior of DNS in the Panfactum stack. In order to migrate:
+
+      1. Add the `dns_service_ip` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) deployments
+         by following [this guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr). Double check that the `dns_service_ip` is the
+         same IP as defined by `kube-system/kube-dns`.
+
+      2. Additionally, set `core_dns_addon_enabled` to `true`.
+
+      3. Apply the updated module `aws_eks` module.
+
+      4. Add the `cluster_dns_service_ip` input to your [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+         module like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl),
+         and re-apply the module. Ensure that all of your nodes have been replaced with the new configuration.
+
+      5. Deploy `kube_core_dns` by following [this guide](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns).
+         Note that this deployment will fail as the original addon service is still running and the IP is already taken.
+
+      6. Delete `kube-system/kube-dns` and re-apply `kube_core_dns`. Note that while the service is deleted, DNS will be
+         temporarily unavailable in your cluster.
+
+      7. Once you've validated that DNS is working in the cluster, remove the `core_dns_addon_enabled` input
+         from the `aws_eks` module and re-apply.
+
+    * We have stabilized the label selectors in [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod) but
+      this requires one final label update for already-deployed Deployments. This will cause re-applies
+      of [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) to fail (and any first-party modules that rely on [kube\_deployment](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_deployment)).
+      To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_deployment)).
+
+    * [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has two
+      new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`), which will enable
+      the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
+      to have idle resources. This is a *breaking* change as `pgbouncer_read_only_enabled` is set to `false` by default.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * (Alpha) We've added a monitoring stack [kube\_monitoring](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring)
+      which includes HA [Prometheus](https://prometheus.io/docs/introduction/overview/), the
+      [Prometheus Operator](https://prometheus-operator.dev/), [Thanos](https://thanos.io/) metrics storage on
+      S3 (with deduplication, caching, and down-sampling), the [Node Exporter](https://github.com/prometheus/node_exporter),
+      [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics), [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/),
+      and [Grafana](https://grafana.com/) (with SSO enabled and 20+ custom dashboards).
+
+    Additionally, most modules
+    now have an additional `monitoring_enabled` (default `false`) flag that can be turned on to being shipping data
+    to Prometheus for viewing and querying via Grafana.
+
+    * (Alpha) [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) now has a new debugging
+      mode, `hubble_enabled` (default `false`), that will capture extensive TCP-level metrics about the cluster
+      as well as expose a debugging UI via HTTPS.
+
+    * (Alpha) [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) now deploys [Linkerd Viz](https://linkerd.io/2.15/features/dashboard/)
+      when `monitoring_enabled = true`. This provides a service mesh dashboard and the ability to capture and introspect
+      raw HTTP requests sent in realtime.
+
+    * (Alpha) We've added the [Argo Workflow](https://argoproj.github.io/workflows/) engine to the stack
+      via the [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) module. This will
+      serve as the basis for the future, integrated CI / CD systems and can also be used to process
+      arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](https://github.com/jlevydev))
+
+    * A new module, [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy), that
+      can be used to add SSO to web assets that do not have integrated SSO. The module SSO is configured out-of-the-box
+      to work with the cluster's Vault instance.
+
+    * We've included a new Kubernetes provider, [kubectl](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/kubectl_manifest),
+      to augment the original [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) provider.
+      The `kubectl` provider allows more flexibility in deploying raw Kubernetes manifests which is required by our templating
+      system. This provider will automatically be enabled the `kubernetes` provider is enabled, so no additional changes
+      are required from end users.
+
+    * [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) has a new flag,
+      `lfu_cache_enabled`, that will configure the Redis cluster automatically evict records under memory pressure
+      based on an approximated Least Frequently Used algorithm.
+
+    * [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) now takes an `extra_configuration_snippet`
+      variable which allows for additional commands in the [NGINX configuration snippet](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#configuration-snippet).
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Added the standard [Restricted Reader](/docs/edge/reference/rbac) role to Vault instances (`rbac-restricted-reader`)
+      and updated [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to take `restricted_reader_groups`. Since cluster resources authenticate with SSO
+      via Vault, this allows restricted readers to access additional cluster resources such as Grafana and Argo Workflows
+      (albeit, in a locked-down read-only mode).
+
+    * Disabled evictions of database pods based on max lifetimes. This improves
+      the stability of databases deployed by Panfactum modules.
+
+    * After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
+      modules to have `controller_node_count` set to `1` and `controller_node_instance_types` set to `["t3a.medium"]`.
+      This will decrease the costs of the base cluster by about 40% without impacting cluster availability or resiliency.
+      The single remaining node is used primarily as a place for Karpenter to run (Karpenter cannot run on instances that it itself
+      provisions).
+
+    * [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) now only deploys
+      a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall
+      resource utilization of this fairly heavyweight controller.
+
+    * Kubernetes labels applied via the `extra_tags` terragrunt input are now sanitized for valid characters automatically (invalid characters
+      are replaced with `.`). ([@mschnee](https://github.com/mschnee))
+
+    * Added scheduling constraints to prevent critical workloads from scheduling all pods on the same
+      instance type in order to minimize the possibility of disruption on events that only affect one
+      instance type (e.g., spot node preemption).
+
+    * Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
+      in order to reduce resource utilization in the Stack.
+
+    * Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
+      deployment strategy to improve timing and efficiency of applying Panfactum upgrades.
+
+    * [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) has a new `history_length_hours` (default `24`)
+      that will control how far back it will analyze metrics for computing its recommendations.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has no functional impact,
+      but confused monitoring systems. This has been fixed, but the fix will not retroactively adjust existing PVCs as they are immutable.
+  </Fragment>
+</ChangelogEntry>

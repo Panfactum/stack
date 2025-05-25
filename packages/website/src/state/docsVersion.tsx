@@ -9,8 +9,7 @@ import {
 } from "solid-js";
 import { isServer } from "solid-js/web";
 
-import { DOCS_BASE_PATH } from "@/pages/docs/_components/constants.ts";
-import { getDocsPathComponents } from "@/pages/docs/_components/util/getDocsPathComponents.ts";
+import { getDocsPathComponents } from "@/components/layouts/primary/util/getDocsPathComponents";
 
 /*
   The active docs version is determined by the following (in order of precendence):
@@ -42,12 +41,10 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
   const setDocsVersion = (newVersion: string) => {
     if (!isServer) {
       const pathname = window.location.pathname;
-      if (pathname.startsWith(`${DOCS_BASE_PATH}/${_docsVersion()}`)) {
-        const suffix = pathname.substring(
-          `${DOCS_BASE_PATH}/${_docsVersion()}`.length,
-        );
+      if (pathname.startsWith(`/${_docsVersion()}`)) {
+        const suffix = pathname.substring(`/${_docsVersion()}`.length);
         /* eslint-disable-next-line @typescript-eslint/no-unsafe-call */
-        void navigate(`${DOCS_BASE_PATH}/${newVersion}${suffix}`);
+        void navigate(`/${newVersion}${suffix}`);
       }
       setTimeout(() => {
         window.localStorage.setItem(STATE_KEY, newVersion);

@@ -9,8 +9,8 @@ This module only deploys the core Airbyte engine components required for the pla
 To install connectors:
 
 1. After deployment, log in to the Airbyte UI using the credentials provided
-2. Navigate to the "Sources" or "Destinations" section
-3. Search for and install the required connectors from the catalog
+1. Navigate to the "Sources" or "Destinations" section
+1. Search for and install the required connectors from the catalog
 
 For custom connector development, this module includes the Connector Builder Server component, which provides a development environment for creating and testing custom connectors to meet specialized integration needs.
 
@@ -19,7 +19,7 @@ If you need to pre-install specific connectors or automate connector configurati
 ## Usage
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_airbyte`.
-2. Add a `terragrunt.hcl` file to the directory that looks like this:
+1. Add a `terragrunt.hcl` file to the directory that looks like this:
 
     ::: code-group labels=[kube_airbyte/terragrunt.hcl]
     ```hcl collapse={1-9} "REPLACE_ME"
@@ -51,8 +51,8 @@ If you need to pre-install specific connectors or automate connector configurati
     ```
     :::  
 
-3. Run `pf-tf-init` to enable the required providers
-4. Run `terragrunt apply`.
+1. Run `pf-tf-init` to enable the required providers
+1. Run `terragrunt apply`.
 
 ## Authentication
 

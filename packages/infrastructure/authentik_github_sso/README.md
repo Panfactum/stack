@@ -28,18 +28,18 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 
 1. Log in to GitHub and navigate to your enterprise's dashboard. For example, Panfactum's enterprise url is https://github.com/enterprises/Panfactum.
   1. Click on your profile picture in the top right corner.
-  2. Select `Your enterprises`.
-  3. Click on `settings` for your enterprise name. 
-2. Go to Authentication security.
-3. Toggle on `Require SAML authentication`.
-4. Note the `assertion consumer service URL`. We will use this in the following step.
+  1. Select `Your enterprises`.
+  1. Click on `settings` for your enterprise name. 
+1. Go to Authentication security.
+1. Toggle on `Require SAML authentication`.
+1. Note the `assertion consumer service URL`. We will use this in the following step.
    ![GitHub ACS URL](doc_images/github-acs-url.png)
    
 
 ### Deploy GitHub Provider & Application in Authentik
 
 1. Add a new `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
-2. Add a new `terragrunt.hcl` file that looks like this:
+1. Add a new `terragrunt.hcl` file that looks like this:
 
     ::: code-group labels=[authentik_github_sso/terragrunt.hcl]
     ```hcl collapse={1-9} "REPLACE_ME"
@@ -71,25 +71,25 @@ This module configures Authentik for integration with GitHub SAML single sign-on
     ```
     :::  
 
-3. Run `pf-tf-init`.
-4. Run `terragrunt apply`.
-5. Note the output as you'll use it in the following steps.
+1. Run `pf-tf-init`.
+1. Run `terragrunt apply`.
+1. Note the output as you'll use it in the following steps.
 
 ### Complete GitHub SAML single sign-on
 
 1. Resume the Authentication security page
-2. Go to Security -> Authentication security.
-3. Set `Sign on URL` with the `sso_post_url` output value from above.
-4. Set `Issuer` with the `issuer_url` output value from above.
-5. Set `Public certificate` from the `certificate` output value from above.
+1. Go to Security -> Authentication security.
+1. Set `Sign on URL` with the `sso_post_url` output value from above.
+1. Set `Issuer` with the `issuer_url` output value from above.
+1. Set `Public certificate` from the `certificate` output value from above.
    ![SAML Form](doc_images/github-saml-form.png)
-6. Click on `Test SAML configuration`.
-7. Save the `recovery codes` that you are prompted with.
-8. Click on `Save`.
+1. Click on `Test SAML configuration`.
+1. Save the `recovery codes` that you are prompted with.
+1. Click on `Save`.
 
 ### Test and Validate the Integration
 
 1. Go to your Authentik instance.
-2. Find the GitHub application. Ensure you are in the user dashboard, not the admin dashboard.
+1. Find the GitHub application. Ensure you are in the user dashboard, not the admin dashboard.
    ![GitHub Application](doc_images/github-application.png)
-3. Click and confirm that you are able to login.
+1. Click and confirm that you are able to login.

@@ -1,0 +1,12 @@
+---
+summary: Prevents unnecessary MongoDB provider generation and fixes certificate issuers to properly use Cloudflare zones when creating TLS certificates.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="fixes">
+    * Mongodb provider is no longer generated when not utilized
+    * [kube\_cert\_issuer](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) module now correctly uses [cloudflare\_zones](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers#cloudflare_zones) input when generating certs
+  </Fragment>
+</ChangelogEntry>

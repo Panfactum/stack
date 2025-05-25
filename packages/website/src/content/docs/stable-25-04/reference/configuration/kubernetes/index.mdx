@@ -1,5 +1,7 @@
 # Kubernetes Configuration Files
 
+{/* lint disable no-duplicate-headings */}
+
 ## config.yaml
 
 This file instructs the `pf-update-kube --build` command how to generate the cluster connection info file (`cluster_info`).
@@ -23,16 +25,19 @@ The `clusters` key contains an array of objects:
 | -------- | ---------------------------------------------------------------------------------------- | -------------------- |
 | `module` | The path to the `aws_eks` module deployment relative to the `environments_dir` directory | `env/region/aws_eks` |
 
-
 ### Example
-<div class="h-4"/>
-::: code-group labels=[.kube/config.user.yaml]
+
+<div class="h-4" />
+
+::: code-group labels=\[.kube/config.user.yaml]
+
 ```yaml
 clusters:
   - module: production/us-east-2/aws_eks
   - module: development/us-east-1/aws_eks
   - module: development/us-east-2/aws_eks
 ```
+
 :::
 
 ## config.user.yaml
@@ -61,13 +66,17 @@ The `clusters` key contains an array of objects:
 | `aws_profile` | The AWS profile to use to authenticate with the cluster. Must be a valid profile in `<aws_dir>/config`.      | `production-superuser` |
 
 ### Example
-<div class="h-4"/>
-::: code-group labels=[.kube/config.user.yaml]
+
+<div class="h-4" />
+
+::: code-group labels=\[.kube/config.user.yaml]
+
 ```yaml
 clusters:
   - name: "production-primary"
     aws_profile: "production-superuser"
 ```
+
 :::
 
 ## cluster\_info
@@ -80,12 +89,14 @@ This is a space-delimited file with each line representing metadata for a partic
 * md5 hash of the CA cert data for the API server
 
 ### Example
-<div class="h-4"/>
-::: code-group labels=[.kube/cluster_info]
+
+<div class="h-4" />
+
+::: code-group labels=\[.kube/cluster\_info]
+
 ```yaml
 production-primary us-east-2 https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com 44f5cb46f1d07e4f3806f26cc4424d97
 development-primary us-east-2 https://6B4CCB112AD882D9331473BA90CB8F80.yl4.us-east-2.eks.amazonaws.com b56614e34b012836c761ac2c1b816ada
 ```
+
 :::
-
-

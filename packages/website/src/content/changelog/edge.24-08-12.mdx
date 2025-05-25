@@ -1,0 +1,44 @@
+---
+summary: Moves repository variables to panfactum.yaml for improved CI/CD integration, introduces Workflow Engine and Event Bus addons, and upgrades Argo-related modules to Beta status.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * [Repository variables](/docs/edge/reference/configuration/repo-variables) must now be defined in a `panfactum.yaml`
+      file located at the root of your repository instead of in your `devenv.nix`. Additionally, the variables names are no longer
+      prefixed with `PF_` and are lowercase.
+
+    For example, `env.PF_REPO_NAME` in `devenv.nix` should now be defined at `repo_name` in `panfactum.yaml`.
+
+    This change was made to make it easier to reference these values outside of local development contexts such as within
+    CI pipelines where `devenv.nix` isn't loaded.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * We have provided two new addons, a [Workflow Engine](/docs/edge/guides/addons/workflow-engine/installing) (Argo Workflows)
+      and an [Event Bus](/docs/edge/guides/addons/event-bus/installing) (Argo Events).
+
+    * We have created a [guide and best practices](/docs/edge/guides/cicd/getting-started) for setting up CI / CD in the Panfactum Stack.
+
+    * To support the new addons, we are upgrading the following infrastructure modules to Beta status:
+
+    * [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo): For deploying the Argo controllers
+
+    * [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus): For deploying an Argo EventBus
+
+    * [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source): For deploying an Argo EventSource
+
+    * [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor): For deploying an Argo Sensor
+
+    * [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/wf_spec): For creating an Argo Workflow specification
+
+    * [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/wf_tf_deploy): For creating an Argo WorkflowTemplate that deploys IaC modules
+
+    * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build): For creating an Argo WorkflowTemplate that builds container images from Dockerfiles
+
+    * Adds `pf-get-repo-variables` which prints a JSON payload of all repository configuration variables with the appropriate
+      defaults set.
+  </Fragment>
+</ChangelogEntry>

@@ -3,14 +3,14 @@
 This controller has two different components:
 
 1. Pinner: A DaemonSet that creates a pod on each node filled with sleep containers that use the images that you wish to cache.
-2. Prepuller: A set of "prepull" pods (one per cached imaged) that get launched on every new node added to the cluster. Each pod
+1. Prepuller: A set of "prepull" pods (one per cached imaged) that get launched on every new node added to the cluster. Each pod
 has a noop container that does nothing except immediately exit. This serves to "seed" the node with images as soon as it is created
 and augments the pinner as the prepuller downloads all images in parallel while the pinner must download images serially (i.e., slowly). [^1]
 
 [^1]: Multiple images in the same pod are [downloaded serially.](https://kubernetes.io/docs/concepts/containers/images/#serial-and-parallel-image-pulls)
 
 Many of the Panfactum modules have built-in integrations with this controller, and you can add additional
-images to the cache by leveraging the [kube_node_image_cache](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
+images to the cache by leveraging the [kube_node_image_cache](/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
 
 ## Debugging
 

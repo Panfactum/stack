@@ -102,7 +102,7 @@ inside the cluster (this also includes the cluster's public NAT IPs).
 This limits the usefulness of tokens that are extracted from the cluster by an attacker.
 
 The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
-assigned in the [aws\_vpc](/docs/main/reference/infrastructure-modules/aws/aws\_vpc) and [aws\_eks](/docs/main/reference/infrastructure-modules/aws/aws\_eks)
+assigned in the [aws\_vpc](/main/reference/infrastructure-modules/aws/aws\_vpc) and [aws\_eks](/main/reference/infrastructure-modules/aws/aws\_eks)
 modules. If you need additional IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
 
 {/* eslint-enable import/order */}

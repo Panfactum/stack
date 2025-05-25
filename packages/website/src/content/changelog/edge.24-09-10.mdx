@@ -1,0 +1,55 @@
+---
+summary: Updates Karpenter CRD specification requiring manual intervention during upgrade, restructures ports configuration in workload modules, adds Kubernetes Service submodule, and fixes PostgreSQL credential access issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * Karpenter has updated its CRD specification which unfortunately requires manual intervention during the upgrade process.
+      **After** updating the `pf_stack_version` for any deployments of the `kube_karpenter_node_pools` module,
+      run the following commands in the `kube_karpenter_node_pools` folder:
+
+      ```bash
+      pf-providers-enable
+      terragrunt state rm kubernetes_manifest.default_node_class \
+        kubernetes_manifest.spot_node_class \
+        kubernetes_manifest.burstable_node_class \
+        kubernetes_manifest.burstable_node_pool \
+        kubernetes_manifest.burstable_arm_node_pool \
+        kubernetes_manifest.spot_node_pool \
+        kubernetes_manifest.spot_arm_node_pool \
+        kubernetes_manifest.on_demand_arm_node_pool \
+        kubernetes_manifest.on_demand_node_pool
+      terragrunt apply --auto-approve
+      kubectl delete nodepools burstable burstable-arm on-demand on-demand-arm spot spot-arm
+      kubectl delete ec2nc spot burstable on-demand
+      ```
+
+      The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
+      nodes created using the old CRDs to nodes created using the new CRDs.
+
+    * The `ports` input on [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+      and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been moved
+      to a container-level field rather than a top-level field to better align with the Kubernetes API.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds a new submodule, [kube\_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for
+      defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-networking/service/) that are optimized for the Panfactum Stack.
+      Additionally, integrates `kube_service` into [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+      and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
+
+    * Adds `extra_storage_classes` input to the [kube\_aws\_ebs\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi)
+      module.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addressed issue in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
+
+    * Addressed issue where our Terragrunt configuration would cause the version pinning for the `goauthentik/authentik` and
+      `alekc/kubectl` infrastructure providers would be removed. This would cause issues to occur when users ran `terragrunt init -upgrade`
+      to update their lockfiles.
+  </Fragment>
+</ChangelogEntry>

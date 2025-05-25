@@ -52,14 +52,14 @@ module "external_dns" {
 To use Cloudflare with this module, you need to create an API token with the correct permissions. Follow these steps to create the token:
 
 1. Log in to the Cloudflare dashboard.
-2. Navigate to User Profile > API Tokens.
-3. Click "Create Token".
-4. Choose "Create Custom Token".
-5. Set the following permissions:
+1. Navigate to User Profile > API Tokens.
+1. Click "Create Token".
+1. Choose "Create Custom Token".
+1. Set the following permissions:
   - Zone - Zone - Read
   - Zone - DNS - Edit
-6. Under "Zone Resources", select "Include - All Zones".
-7. Expiration: recommended to not set an expiration.
-8. Create the token and securely store the generated values through SOPS.
+1. Under "Zone Resources", select "Include - All Zones".
+1. Expiration: recommended to not set an expiration.
+1. Create the token and securely store the generated values through SOPS.
 
 For detailed instructions, refer to the [official Cloudflare guide on creating API tokens](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/).

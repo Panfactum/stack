@@ -15,7 +15,7 @@ from first-principles, see this [guide.](https://depot.dev/blog/docker-build-ima
 
 <MarkdownAlert severity="info">
   As you review the best ways to construct your images and build processes, it may be helpful to review the overall
-  BuildKit [architecture documentation](/docs/stable-25-04/concepts/buildkit#architecture) to gain a better understanding
+  BuildKit [architecture documentation](/stable-25-04/concepts/buildkit#architecture) to gain a better understanding
   of the major moving parts.
 </MarkdownAlert>
 
@@ -182,7 +182,7 @@ If an attacker gains access to a container, they will be able to exploit all the
 there should be no extra utilities to aid in furthering an exploit. This includes utilities like Bash interpreters that
 can be used to create interactive shells.
 
-We recommend using the [Google's hardned "Distroless" images](https://github.com/GoogleContainerTools/distroless) as base
+We recommend using the [Google's hardened "Distroless" images](https://github.com/GoogleContainerTools/distroless) as base
 images whenever possible.
 
 ### Layer Ordering

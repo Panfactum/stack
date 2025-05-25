@@ -1,0 +1,35 @@
+---
+summary: Updates minimum Nix version requirement, dramatically improves module download efficiency, adds S3 public website hosting capabilities, enhances CloudFront CDN functionality, and fixes ECR Helm chart authentication.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * The required Nix version to use the Panfactum Stack has been updated to `>= 2.23` (up from `>= 2.18`). The latest Nix versions
+      include performance improvements required to make local development ergonomic on all operating systems. Additionally, we have
+      added a check to the loading script (`.envrc`) to ensure that users have a compatible Nix version installed.
+
+      If you installed Nix using the Determinate Systems installer, see [these upgrade docs.](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#upgrading-nix)
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Panfactum modules are now downloaded as gzipped tarballs from an HTTPS server rather than requiring a full git clone of the Panfactum Stack repository. This should
+      dramatically improve initialization speed of modules and reduces network bandwidth by over 90%. This is an internal refactor that should not have any impact on how you
+      use Panfactum modules.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Added a new module, [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website), to enable users to serve files directly from an S3 bucket via CloudFront.
+    * [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) can now handle CORS headers on behalf of the origin servers
+    * [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) now uses 10x more efficient [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)
+      for request / response mutations.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Deploying modules that use Helm charts hosted in ECR (e.g., [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter))
+      will now use the appropriate credentials.
+
+    * Upgraded Argo Workflows to fix some issues related to workflow timeouts being ignored.
+  </Fragment>
+</ChangelogEntry>

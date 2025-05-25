@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="authentik_github_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/authentik_github_sso" status="stable" type="direct"/>
+
+<ModuleHeader name="authentik_github_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/authentik_github_sso" status="stable" type="direct" />
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
@@ -11,75 +12,81 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module configures Authentik for integration with GitHub SAML single sign-on.
 
-***Note:*** The [GitHub Enterprise plan](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/configuring-saml-single-sign-on-for-your-enterprise) is required for SSO.   
+***Note:*** The [GitHub Enterprise plan](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/configuring-saml-single-sign-on-for-your-enterprise) is required for SSO.
 
 <MarkdownAlert severity="warning">
   Due to limitations with GitHub, this module only handles authentication and does not support user provisioning or de-provisioning at this time. As a result, users will not be automatically created or removed from GitHub when they are added or removed from Authentik.
 
   When a user is removed from Authentik, they will lose access to the organization. However, be aware of the following caveats:
-  - Any active session tokens that the user has with the GitHub web UI and PATs the user may have generated will not be automatically revoked. Until these tokens expire, the user may still interact with the web UI / API unless they are manually removed from the GitHub organization.
+
+  * Any active session tokens that the user has with the GitHub web UI and PATs the user may have generated will not be automatically revoked. Until these tokens expire, the user may still interact with the web UI / API unless they are manually removed from the GitHub organization.
 </MarkdownAlert>
-    
+
 ## Guide
 
 <MarkdownAlert severity="warning">
   This guide sets up SAML SSO at the enterprise level, not the organization level. This is important because:
-  - An enterprise-level integration provides SSO coverage for all organizations within your GitHub Enterprise
-  - This eliminates the need to configure separate SSO integrations for each organization
-  - All authentication will be managed through a single integration point
+
+  * An enterprise-level integration provides SSO coverage for all organizations within your GitHub Enterprise
+  * This eliminates the need to configure separate SSO integrations for each organization
+  * All authentication will be managed through a single integration point
 
   While this guide focuses on enterprise-level setup, the same steps can be followed for organization-level SSO by selecting the organization settings instead of enterprise settings in GitHub.
 </MarkdownAlert>
 
 ### Start the GitHub SAML SSO Setup
 
-1. Log in to GitHub and navigate to your enterprise's dashboard. For example, Panfactum's enterprise url is https://github.com/enterprises/Panfactum.
-  1. Click on your profile picture in the top right corner.
-  2. Select `Your enterprises`.
-  3. Click on `settings` for your enterprise name.
-2. Go to Authentication security.
-3. Toggle on `Require SAML authentication`.
-4. Note the `assertion consumer service URL`. We will use this in the following step.
-   ![GitHub ACS URL](doc\_images/github-acs-url.png)
-   
+1. Log in to GitHub and navigate to your enterprise's dashboard. For example, Panfactum's enterprise url is [https://github.com/enterprises/Panfactum](https://github.com/enterprises/Panfactum).
+2. Click on your profile picture in the top right corner.
+3. Select `Your enterprises`.
+4. Click on `settings` for your enterprise name.
+5. Go to Authentication security.
+6. Toggle on `Require SAML authentication`.
+7. Note the `assertion consumer service URL`. We will use this in the following step.
+   ![GitHub ACS URL](doc_images/github-acs-url.png)
 
 ### Deploy GitHub Provider & Application in Authentik
 
 1. Add a new `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
+
 2. Add a new `terragrunt.hcl` file that looks like this:
 
-    ::: code-group labels=[authentik\_github\_sso/terragrunt.hcl]
-    ```hcl collapse={1-9} "REPLACE_ME"
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[authentik\_github\_sso/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "authentik_core" {
-      config_path = "../authentik_core_resources"
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    dependency "kube_authentik" {
-      config_path = "../kube_authentik"
-    }
+   dependency "authentik_core" {
+     config_path = "../authentik_core_resources"
+   }
 
-    inputs = {
-      organization_name = dependency.authentik_core.outputs.organization_name
-      authentik_domain  = dependency.kube_authentik.outputs.domain
+   dependency "kube_authentik" {
+     config_path = "../kube_authentik"
+   }
 
-      // Set to the `assertion consumer service URL` from above.
-      // Example: https://github.com/enterprises/Panfactum/saml/consume
-      acs_url = "REPLACE_ME"
-    }
-    ```
-    :::  
+   inputs = {
+     organization_name = dependency.authentik_core.outputs.organization_name
+     authentik_domain  = dependency.kube_authentik.outputs.domain
+
+     // Set to the `assertion consumer service URL` from above.
+     // Example: https://github.com/enterprises/Panfactum/saml/consume
+     acs_url = "REPLACE_ME"
+   }
+   ```
+
+   :::
 
 3. Run `pf-tf-init`.
+
 4. Run `terragrunt apply`.
+
 5. Note the output as you'll use it in the following steps.
 
 ### Complete GitHub SAML single sign-on
@@ -89,7 +96,7 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 3. Set `Sign on URL` with the `sso_post_url` output value from above.
 4. Set `Issuer` with the `issuer_url` output value from above.
 5. Set `Public certificate` from the `certificate` output value from above.
-   ![SAML Form](doc\_images/github-saml-form.png)
+   ![SAML Form](doc_images/github-saml-form.png)
 6. Click on `Test SAML configuration`.
 7. Save the `recovery codes` that you are prompted with.
 8. Click on `Save`.
@@ -98,22 +105,22 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 
 1. Go to your Authentik instance.
 2. Find the GitHub application. Ensure you are in the user dashboard, not the admin dashboard.
-   ![GitHub Application](doc\_images/github-application.png)
+   ![GitHub Application](doc_images/github-application.png)
 3. Click and confirm that you are able to login.
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
+* [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
 
 ## Required Inputs
 
@@ -187,7 +194,7 @@ Description: The Authentik issuer URL for the GitHub provider
 
 ### saml\_metadata
 
-Description: The SAML metadata for the GitHub provider. https://en.wikipedia.org/wiki/SAML_metadata
+Description: The SAML metadata for the GitHub provider. [https://en.wikipedia.org/wiki/SAML\_metadata](https://en.wikipedia.org/wiki/SAML_metadata)
 
 ### sso\_post\_url
 

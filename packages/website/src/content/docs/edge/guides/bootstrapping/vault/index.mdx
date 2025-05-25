@@ -23,7 +23,7 @@ Vault serves several important purposes in the Panfactum stack:
 
 ## Deploy Vault
 
-We will use the [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) infrastructure module to deploy
+We will use the [kube\_vault](/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) infrastructure module to deploy
 Vault in a highly available manner using
 [it's integrated Raft storage backend](https://developer.hashicorp.com/vault/docs/configuration/storage/raft).
 
@@ -33,41 +33,43 @@ Let's do this now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_vault/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_vault/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "ebs_csi" {
-         config_path  = "../kube_aws_ebs_csi"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
+   dependency "ebs_csi" {
+      config_path  = "../kube_aws_ebs_csi"
+      skip_outputs = true
+   }
 
-         // Must be a subdomain of the environment.
-         // Example: vault.prod.panfactum.com
-         vault_domain    = "REPLACE_ME"
+   inputs = {
 
-         // This allows the Vault installation to continue even though
-         // there will be errors since it hasn't been manually
-         // initilaized yet. We will do that in subsequent steps.
-         wait            = false
-      }
-      ```
-      :::
+      // Must be a subdomain of the environment.
+      // Example: vault.prod.panfactum.com
+      vault_domain    = "REPLACE_ME"
 
-5. Run `pf-tf-init` to enable the required providers.
+      // This allows the Vault installation to continue even though
+      // there will be errors since it hasn't been manually
+      // initilaized yet. We will do that in subsequent steps.
+      wait            = false
+   }
+   ```
 
-6. Run `terragrunt apply`.
+   :::
 
-7. Note that this deployment **will not succeed,** and you should see three vault instances which are in the unready state:
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+5. Note that this deployment **will not succeed,** and you should see three vault instances which are in the unready state:
 
    <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
 
@@ -228,7 +230,7 @@ a remote terminal session to perform the initialization:
 One of the major benefits of Vault is that it can be [configured directly with OpenTofu (Terraform)](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
 alongside our other infrastructure components. The Panfactum stack includes several
 modules for working with Vault. In this section we will deploy some foundational configuration
-via the [vault\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources) module.
+via the [vault\_core\_resources](/edge/reference/infrastructure-modules/direct/vault/vault_core_resources) module.
 
 ### Connect to Vault
 
@@ -245,19 +247,23 @@ Here is how we will work around this issue:
 
 2. Set the `VAULT_ADDR` in your `.env` file as follows:
 
-   ::: code-group labels=[.env]
+   ::: code-group labels=\[.env]
+
    ```dotenv ins={1}
    VAULT_ADDR=http://127.0.0.1:8200
    ```
+
    :::
 
 3. Use the root token you received in the previous section to set the `VAULT_TOKEN` in your `.env` file as follows:
 
-   ::: code-group labels=[.env]
+   ::: code-group labels=\[.env]
+
    ```dotenv ins={2}
    VAULT_ADDR=http://127.0.0.1:8200
    VAULT_TOKEN=hvs.xxxxxxxxxxxxxxxxxxxxxxx
    ```
+
    :::
 
 4. Run `vault status` to verify you are able to connect to the cluster. You should receive an output that looks
@@ -293,63 +299,67 @@ Here is how we will work around this issue:
 
 ### Deploy Configuration Module
 
-Let's now deploy [vault\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources):
+Let's now deploy [vault\_core\_resources](/edge/reference/infrastructure-modules/direct/vault/vault_core_resources):
 
 1. Before proceeding, remove `wait = false` from the `kube_vault` module. It is now expected that future `kube_vault` deployments should succeed.
 
-      ::: code-group labels=[kube_vault/terragrunt.hcl]
-      ```hcl collapse={1-14,16-17} del={18} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_vault/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14,16-17} del={18} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "ebs_csi" {
-         config_path  = "../kube_aws_ebs_csi"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         vault_domain    = "REPLACE_ME"
+   dependency "ebs_csi" {
+      config_path  = "../kube_aws_ebs_csi"
+      skip_outputs = true
+   }
 
-         wait            = false
-      }
-      ```
-      :::
+   inputs = {
+      vault_domain    = "REPLACE_ME"
+
+      wait            = false
+   }
+   ```
+
+   :::
 
 2. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
 
 3. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[vault_core_resources/terragrunt.hcl]
-      ```hcl collapse={1-9}  "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[vault\_core\_resources/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9}  "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "cluster" {
-         config_path = "../aws_eks"
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      dependency "vault" {
-         config_path = "../kube_vault"
-      }
+   dependency "cluster" {
+      config_path = "../aws_eks"
+   }
 
-      inputs = {
-         vault_internal_url = dependency.vault.outputs.vault_internal_url
-         kubernetes_url     = dependency.cluster.outputs.cluster_url
-      }
-      ```
-      :::
+   dependency "vault" {
+      config_path = "../kube_vault"
+   }
+
+   inputs = {
+      vault_internal_url = dependency.vault.outputs.vault_internal_url
+      kubernetes_url     = dependency.cluster.outputs.cluster_url
+   }
+   ```
+
+   :::
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -380,7 +390,7 @@ automatic unsealing and automatic updating of the active service address.
 ### Verify Storage
 
 Each Vault node stores its data on EBS volumes provisioned by the AWS EBS CSI driver. Recall setting that up
-in the [prior section](/docs/edge/guides/bootstrapping/storage-interfaces).
+in the [prior section](/edge/guides/bootstrapping/storage-interfaces).
 
 Let's verify the volumes were provisioned:
 

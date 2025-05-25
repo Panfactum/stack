@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_ses_domain" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ses_domain" status="stable" type="direct"/>
+
+<ModuleHeader name="aws_ses_domain" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ses_domain" status="stable" type="direct" />
 
 # AWS SES Domain
 
@@ -13,13 +14,13 @@ Sets up a domain with [AWS SES](https://aws.amazon.com/ses/) for email sending
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
@@ -84,9 +85,9 @@ it only removes them from the terraform state.
 
 There are three different domain contacts:
 
-- Registrant: The owner of the domain
-- Admin: The person responsible for administrative decisions about the domain
-- Tech: The person responsible for executing changes for the domain
+* Registrant: The owner of the domain
+* Admin: The person responsible for administrative decisions about the domain
+* Tech: The person responsible for executing changes for the domain
 
 It is possible for the same person to serve multiple roles.
 

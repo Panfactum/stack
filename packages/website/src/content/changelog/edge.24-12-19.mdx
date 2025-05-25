@@ -1,0 +1,58 @@
+---
+summary: Introduces SLA Target Levels for cost-to-availability tradeoffs, adds advanced path rewriting capabilities for ingress and CDN modules, improves support for private ECR repositories, and fixes several Redis and environment variable issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * Introduces the concept of [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels).
+      This makes it easier to (a) know what uptime you can expect from Panfactum deployments, and (b) make it easier to adjust the cost-to-availability
+      tradeoff for entire subsections of the deployment.
+
+    This features comes with the following changes:
+
+    * Provides a new [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#metadata), `sla_target`, that can be used to set the target level for a particular scope (e.g., environment, region, module).
+      It defaults to `3`.
+
+    * The default behavior for Panfactum modules will now automatically adjust to the provided `sla_target`.
+
+    * The `enhanced_ha_enabled` input has been removed from all modules. The previous behavior
+      when `enhanced_ha_enabled` was set to `true` (the default) is now equivalent to setting `sla_target` to `3` (the default).
+
+    * This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
+
+    * `pf`: 0.0.5 -> 0.0.7
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds support for arbitrary path rewriting in [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
+      [kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
+      [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn), and
+      [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website).
+
+    * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) now supports
+      sourcing base images from private ECR repositories.
+
+    * Adds `not_found_path` to [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) to facilitate
+      specifying the asset to load when no object exists at the requested path.
+
+    * Adds `custom_error_responses` to [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) which can be used to overwrite error
+      responses from the upstream origin.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addressed conflicting PDB issue with the [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+      module that prevented vertical autoscaling from working.
+
+    * Standard Panfactum environment variables for Kubernetes workloads are now injected *before* user-defined environment variables to make them
+      available for use in [dependent variables.](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/)
+
+    * Standard Panfactum environment variables for Kubernetes workloads will no longer override user-defined environment variables.
+
+    * Addressed issue where the CRDS in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
+      were not automatically upgraded.
+
+    * Fixed incorrect AWS permissions in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+  </Fragment>
+</ChangelogEntry>

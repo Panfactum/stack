@@ -1,0 +1,477 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_opensearch" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_opensearch" status="alpha" type="submodule" />
+
+# OpenSearch
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+This module deploys a highly-available install of [OpenSearch](https://opensearch.org/).
+
+## Usage
+
+### Credentials
+
+For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
+
+* `superuser_creds_secret`: Full access to the cluster, including the ability to manage sensitive settings like replication and permissions
+* `admin_creds_secret`: Read and write access to all indices including the ability to configure index settings
+* `reader_creds_secret`: Read-only access to all indices
+
+Authenticating with OpenSearch is done via [x.509 authentication.](https://docs.opensearch.org/docs/latest/security/authentication-backends/client-auth/)
+Each of the above named Secrets contains the following values:
+
+* `ca.crt`: The CA certificate used to verify the server-provided certificate.
+* `tls.crt`: The certificate that the OpenSearch client should provide to the server for authentication.
+* `tls.key`: The TLS key that the OpenSearch client will use for securing communications with the server.
+
+The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
+Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
+
+The credential lifetime is configured by the `vault_credential_lifetime_hours` input (defaults
+to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thus, in the worst-case,
+credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
+
+### Connecting
+
+The below example show how to connect to the OpenSearch cluster
+using dynamically rotated admin credentials by mounting the client certificates
+in our [kube\_deployment](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+
+```hcl
+module "opensearch" {
+  source = "${var.pf_module_source}kube_opensearch${var.pf_module_ref}"
+  ...
+}
+
+module "deployment" {
+  source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
+  ...
+  secret_mounts = {
+    "${module.opensearch.admin_creds_secret}" = {
+      mount_path = "/etc/opensearch-certs"
+    }
+  }
+  common_env = {
+    OPENSEARCH_HOST = module.opensearch.host
+    OPENSEARCH_PORT = module.opensearch.client_port
+  }
+}
+```
+
+Note that you also must configure the client to use the certificates. For example, if using the [opensearch NPM package](https://www.npmjs.com/package/@opensearch-project/opensearch):
+
+```typescript
+import { Client } from "@opensearch-project/opensearch";
+import { readFileSync } from "fs";
+
+const client = new Client({
+  node:`http://${process.env.OPENSEARCH_HOST}:${process.env.OPENSEARCH_PORT}`,
+  ssl: {
+    ca: readFileSync("/etc/opensearch-certs/ca.crt"),
+    cert: readFileSync("/etc/opensearch-certs/tls.crt"),
+    key: readFileSync("/etc/opensearch-certs/tls.key")
+  },
+});
+```
+
+### Persistence
+
+TODO once upstream issue is merged
+
+### Disruptions
+
+TODO: adjust once the flexible topology is enabled
+
+#### Disruption Windows
+
+Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if this is needed
+to meet your stability goals. You can enable this feature by setting `voluntary_disruption_window_enabled` to `true`.
+
+The disruption windows are scheduled via `voluntary_disruption_window_cron_schedule` and the length of time of each
+window via `voluntary_disruption_window_seconds`.
+
+If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
+
+For more information on how this works, see the
+[kube\_disruption\_window\_controller](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+submodule.
+
+#### Completely Disabling Voluntary Disruptions
+
+Allowing the cluster to periodically initiate restarts of OpenSearch nodes is critical to maintaining system health. However,
+there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any OpenSearch
+pod in this module.
+
+This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
+
+* Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+* Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+
+Note that the above configuration will significantly increase the costs of running the OpenSearch cluster (2.5-5x) versus more
+flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
+
+<MarkdownAlert severity="warning">
+  Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+  disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+  and limited by the use of PDBs.
+
+  An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+  you should still implement defensive coding practices in your client code to account for potential disruptions.
+</MarkdownAlert>
+
+## Providers
+
+The following providers are needed by this module:
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### namespace
+
+Description: The namespace to deploy to the opensearch instances into
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### arm\_nodes\_enabled
+
+Description: Whether the opensearch pods can be scheduled on arm64 nodes
+
+Type: `bool`
+
+Default: `true`
+
+### aws\_iam\_ip\_allow\_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### backups\_force\_delete
+
+Description: Whether to delete backups on destroy
+
+Type: `bool`
+
+Default: `false`
+
+### burstable\_nodes\_enabled
+
+Description: Whether the opensearch pods can be scheduled on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
+
+### dashboard\_domain
+
+Description: The domain for hosting the opensearch dashboard
+
+Type: `string`
+
+Default: `null`
+
+### dashboard\_enabled
+
+Description: Whether the opensearch dashboard is enabled
+
+Type: `bool`
+
+Default: `false`
+
+### extra\_cluster\_settings
+
+Description: Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to override existing configuration values. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/).
+
+Type: `map(any)`
+
+Default: `{}`
+
+### instance\_type\_anti\_affinity\_required
+
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
+
+Type: `bool`
+
+Default: `null`
+
+### log\_level
+
+Description: The log level for the opensearch pods
+
+Type: `string`
+
+Default: `"WARN"`
+
+### minimum\_memory\_mb
+
+Description: The minimum memory in MB to allocate to each OpenSearch node
+
+Type: `number`
+
+Default: `1000`
+
+### monitoring\_enabled
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `false`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
+
+### opensearch\_version
+
+Description: The version of OpenSearch to deploy. Note that we only test this module with the default version.
+
+Type: `string`
+
+Default: `"3.0.0"`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### persistence\_backups\_enabled
+
+Description: Whether to enable backups of the persistent storage.
+
+Type: `bool`
+
+Default: `true`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### replica\_count
+
+Description: The number of OpenSearch replicas to deploy
+
+Type: `number`
+
+Default: `3`
+
+### s3\_bucket\_access\_policy
+
+Description: Additional [AWS access policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the remote-storage S3 bucket.
+
+Type: `string`
+
+Default: `null`
+
+### slow\_request\_log\_thresholds
+
+Description: The thresholds for which slow requests are logged. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs).
+
+Type:
+
+```hcl
+object({
+    trace = optional(string, "10m")
+    debug = optional(string, "2m")
+    warn  = optional(string, "30s")
+    info  = optional(string, "-1")
+  })
+```
+
+Default: `{}`
+
+### spot\_nodes\_enabled
+
+Description: Whether the opensearch pods can be scheduled on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
+### storage\_class
+
+Description: The StorageClass to use for the disk storage. Cannot be changed after
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
+### storage\_increase\_gb
+
+Description: The amount of GB to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `5`
+
+### storage\_increase\_threshold\_percent
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### storage\_initial\_gb
+
+Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after installation.
+
+Type: `number`
+
+Default: `10`
+
+### storage\_limit\_gb
+
+Description: The maximum number of GB of storage to provision for each opensearch node
+
+Type: `number`
+
+Default: `null`
+
+### vault\_credential\_lifetime\_hours
+
+Description: The lifetime of database credentials generated by Vault
+
+Type: `number`
+
+Default: `16`
+
+### vault\_internal\_url
+
+Description: The url to the vault instance for internal cert issuance
+
+Type: `string`
+
+Default: `"http://vault-active.vault.svc.cluster.local:8200"`
+
+### voluntary\_disruption\_window\_cron\_schedule
+
+Description: The times when disruption windows should start
+
+Type: `string`
+
+Default: `"0 4 * * *"`
+
+### voluntary\_disruption\_window\_enabled
+
+Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
+
+Type: `bool`
+
+Default: `false`
+
+### voluntary\_disruption\_window\_seconds
+
+Description: The length of the disruption window in seconds
+
+Type: `number`
+
+Default: `3600`
+
+### voluntary\_disruptions\_enabled
+
+Description: Whether to enable voluntary disruptions of pods in this module.
+
+Type: `bool`
+
+Default: `true`
+
+### vpa\_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+### wait
+
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### admin\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding certificate credentials for the admin role in the OpenSearch cluster
+
+### client\_port
+
+Description: The port that OpenSearch clients should connect to.
+
+### dashboard\_superuser\_password
+
+Description: The password for superuser access to the opensearch dashboard
+
+### dashboard\_superuser\_username
+
+Description: The username for superuser access to the opensearch dashboard
+
+### host
+
+Description: The OpenSearch cluster hostname to connect to,
+
+### reader\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding certificate credentials for the reader role in the OpenSearch cluster
+
+### superuser\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the OpenSearch cluster
+
+## Maintainer Notes
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

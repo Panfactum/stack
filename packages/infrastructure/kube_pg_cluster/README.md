@@ -46,7 +46,7 @@ credentials that a pod receives are valid for `vault_credential_lifetime_hours` 
 
 The below example show how to connect to the PostgreSQL cluster through 
 the read-write PgBouncer using dynamically rotated admin credentials by setting various
-environment variables in our [kube_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+environment variables in our [kube_deployment](/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
 module "database" {
@@ -81,7 +81,7 @@ You must provide an initial storage amount for the database with `pg_initial_sto
 of the underlying EBS volumes.
 
 Once the database is running, the PVC autoresizer
-(provided by [kube_pvc_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
+(provided by [kube_pvc_autoresizer](/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
 will automatically expand the EBS volumes once the free space
 drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
@@ -220,11 +220,11 @@ Recoverability".
     are not available. You will need to restore from the hourly EBS snapshots 
     created by Velero instead.
 
-2. Retrieve the `backup_directory` output from this module by running `terragrunt output`.
+1. Retrieve the `backup_directory` output from this module by running `terragrunt output`.
 
-3. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
+1. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
 
-4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `backup_directory` output you retrieved in step 2.
+1. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `backup_directory` output you retrieved in step 2.
 
     Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
     timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
@@ -233,18 +233,18 @@ Recoverability".
     If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
     should be within 5 seconds of the last database write.
 
-5. Set the `pg_backup_directory` module input to anything **other than** the `backup_directory` output you retrieved in step 2. This ensures
+1. Set the `pg_backup_directory` module input to anything **other than** the `backup_directory` output you retrieved in step 2. This ensures
 that the new cluster will not use overwrite the existing backup directory and instead create a new one.
 
-6. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
+1. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
 come back online.
 
-7. When the recovered database is back online, an initial backup of the new database will be performed. You can monitor it's progress
+1. When the recovered database is back online, an initial backup of the new database will be performed. You can monitor it's progress
 from the `:backups.postgresql.cnpg.io` in k9s. When this complete, you should see a "First Point of
 Recoverability" when running `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. If an initial backup cannot be created,
 something has gone wrong, and you should restart the recovery process.
 
-8. After the initial backup for the recovered database is created, you can optionally delete the `pg_recovery_directory` directory from the S3 bucket
+1. After the initial backup for the recovered database is created, you can optionally delete the `pg_recovery_directory` directory from the S3 bucket
 provided by the `backup_bucket_name` output. This can save space as that old backup is no longer needed.
 
 <MarkdownAlert severity="info">
@@ -281,7 +281,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the 
-[kube_disruption_window_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) 
+[kube_disruption_window_controller](/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) 
 submodule.
 
 #### Custom PDBs

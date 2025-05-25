@@ -2,7 +2,14 @@
 
 ## Edge Releases
 
-You can find all the releases [here](/changelog/edge).
+These releases do not contain any SLA or semantic versioning guarantees, but we will announce breaking changes in the
+[Changelog](/changelog/edge).
+
+While these releases will get the latest features, they will also have an increased rate of bugs and other problems.
+As a result, we do not recommend using edge releases in production environments without using PanfactumPlus.
+
+This framework maintains a strictly linear history. Bug fixes and
+new features will be added in new releases only (i.e., they will never be back-ported).
 
 ### Edge Release Format
 
@@ -10,39 +17,42 @@ Edge releases will be of the format:
 
 `edge.<YY>-<MM>-<DD>`
 
-These releases do not contain any SLA or semantic versioning guarantees, but we will announce breaking changes in the
-[changelog](/changelog/edge).
-
-This project maintains a strictly
-linear history. Bug fixes and
-new features will be added in new releases only (i.e., they will never be back-ported).
-
 ### Edge Release Cadence
 
-We have no set cadence for the community stack, but generally we will release changes 2-5 times per month.
-
-### Edge Release Support
-
-We only offer extended support and enhanced resolution SLAs for our stable releases (see below).
+We have no set cadence for the edge releases, but we generally release 2-5 times per month.
 
 ## Stable Releases
 
-**Stable releases are available only to [stack subscribers.](/stack/pricing)**
+Stable releases will receive patches for significant bugs or security vulnerabilities for six (6) months
+following its initial release.
 
-You can find all the supported releases [here](/changelog/edge).
+For example, version `stable.25-04.X` will receive support until the end of October 2025. If you need support for a longer
+period, you should consider signing up for PanfactumPlus.
+
+"Significant" will be determined by a combination of the following criteria:
+
+* Does it impact the recommended way to utilize the framework?
+
+* Does it create a clear impairment of intended functionality or a clear security vulnerability for users of the framework?
+
+If the answer to both of these questions is "yes," then it is likely that we will:
+
+* We will attempt to resolve the issue within 30 days
+
+* We will patch supported releases
 
 ### Stable Release Format
 
 Each release will be of the format:
 
-`<YY>-<MM>`.`<patch_number>`
+`stable`.`<YY>-<MM>`.`<patch_number>`
 
-For example, `24-01.5` represents the fifth patch to the major version released in January 2024.
+For example, `stable.25-04.5` represents the fifth patch to the stable version released in April 2025.
 
 While this deviates from the normal practice of many open source projects which tend to use [semantic versioning](https://semver.org/),
 we do this for good reasons:
 
-* The stack is not a standalone utility, but rather a packaging of 100s of utilities that all work together.
+* The framework is not a standalone utility, but rather a packaging of 100s of utilities that all work together.
   Regardless of whether new functionality is added, we MUST update our component systems regularly
   to keep up with the ecosystems that we target (e.g., Kubernetes). In many
   ways, it resembles a package registry like [nixpkgs](https://github.com/NixOS/nixpkgs). We take inspiration from these
@@ -69,31 +79,13 @@ we do this for good reasons:
 
 ### Stable Release Cadence
 
-We aim to create a new major stable release of the Panfactum stack **twice per year.**
+We aim to align the creation of new stable release channels with new releases of Kubernetes as that is the central component in the Panfactum framework.
+That means new stable releases roughly **three times per year.**
 
-We **strongly recommend** that users of the Panfactum stack update **at least once a year**.
+We **strongly recommend** that users of the Panfactum framework update to new stable release channels **within three months**.
 
 We **strongly recommend** that patch versions of the Panfactum stack are **applied immediately.** We only create new patches
 if there are significant fixes for bugs or security vulnerabilities.
 
 We endeavor to never introduce breaking changes in patches. If a fix requires breaking functionality, we will
-cut a new major release.
-
-### Stable Release Support
-
-Major releases will receive patches for significant bugs or security vulnerabilities for twelve (12) months
-following its initial release.
-
-For example, version `24-01.X` will receive support until the end of January 2025.
-
-"Significant" will be determined by a combination of the following criteria:
-
-* Does it impact the recommended way to utilize the stack?
-
-* Does it create a clear impairment of intended functionality or a clear security vulnerability for users of the stack?
-
-If the answer to both of these questions is "yes," then it is likely:
-
-* We will attempt to resolve the issue within 30 days
-
-* We will patch supported releases
+cut a new stable release channel.

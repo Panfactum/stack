@@ -1,0 +1,34 @@
+---
+summary: Improves PostgreSQL failover speed with enhanced shutdown logic, adds workflow composition capabilities with template references, and fixes repository working directory issues in CI/CD workflows.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * `pg_shutdown_timeout` has been renamed to `pg_smart_shutdown_timeout` to better indicate its purpose
+      in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). Additionally,
+      the shutdown and failover logic has been overhauled. The new default will immediately terminate running queries when
+      a database pod is killed, but this serves to reduce the downtime from 60-120 seconds to \< 5 seconds in the failover scenario.
+      Please see the module documentation for more information.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds the concept of passthrough parameters to [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+
+    * Makes `tf_apply_dir` a Workflow parameter in [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+      so that you only need a single instance of this module per cluster.
+
+    * Adds the ability to use `templateRef` to [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
+      in [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixed the working directory in
+      [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+      and [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+      to be inside the cloned repository.
+
+    * Addressed OOM errors when using resource templates with [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+  </Fragment>
+</ChangelogEntry>

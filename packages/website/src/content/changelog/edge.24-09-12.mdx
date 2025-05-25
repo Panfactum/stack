@@ -1,0 +1,52 @@
+---
+summary: Replaces Secrets CSI with Vault Secrets Operator for better security and performance, renames credential outputs for clarity, improves Terragrunt provider management, and adds support for sourcing environment variables from ConfigMaps and Secrets.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * [kube\_secrets\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) has been deprecated
+      and should be removed from your clusters. It was primarily used for managing dynamically generated Vault secrets such as
+      database credentials, but we have switched to a new paradigm that uses the [Vault Secrets Operator](https://github.com/hashicorp/vault-secrets-operator).
+
+      This saves approximately 150MB of memory per node in the cluster, improves security by removing pods that needed elevated
+      host-level permissions, and provides better ergonomics for managing dynamically
+      generated secrets in our modules.
+
+    * [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)'s and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)'s  `superuser_username`
+      and `superuser_password` outputs have been renamed to `root_username` and `root_password`, respectively. We made this change
+      because "superuser" implies Vault-generated credentials, which these are not.
+
+    * `pf-providers-enable` has been renamed to `pf-tf-init` as it now has expanded functionality:
+
+      * Now influences every module in the directory tree where it is run rather than just the module in the CWD.
+      * Now runs `init -upgrade` on every module to update provider versions and download internal submodules when performing Panfactum version upgrades.
+      * The runtime speed has been improved in order to accommodate running against many modules at once.
+
+      We have updated the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) to reflect that `pf-tf-init` should
+      be run every time you upgrade the Panfactum version in an environment.
+
+    * You now no longer need to manually enable providers via the `providers` array in each `module.yaml`. Our Terragrunt configuration now automatically
+      detects which providers need to be included at runtime.
+
+      No changes are required to take advantage of this new functionality.
+      However, the `providers` Terragrunt input no longer has any functionality and the `providers` array can be removed
+      from all `module.yaml` files. If this leaves a `module.yaml` empty, the entire `module.yaml` file can be deleted.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds `common_env_from_config_maps` and `common_env_from_secrets` inputs to all standard workload submodules to provide the
+      capability to source environment variables from existing ConfigMaps and Secrets, respectively.
+
+    * [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
+      [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) now support
+      using Vault-generated credentials to authenticate from other workloads. See the module documentation for more information.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Adds a controller node preference to pods with `controller_nodes_enabled` set to `true`. This optimizes resource
+      efficiency in the cluster as we should prefer to fill controller (EKS) nodes before Karpenter nodes as controller
+      nodes are not automatically scaled.
+  </Fragment>
+</ChangelogEntry>

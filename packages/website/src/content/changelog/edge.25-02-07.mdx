@@ -1,0 +1,40 @@
+---
+summary: Contains a VPA CRD bug that affects upgrades - skip this release. Improves VPA pod eviction policies, adds PostgreSQL CPU update thresholds to prevent autoscaling thrash, and fixes several deployment issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="alerts">
+    <MarkdownAlert severity="warning">
+      This release contains a VPA CRD bug that will make it difficult to upgrade to the following release without
+      manual intervention. Please skip this release and proceed directly to the next.
+    </MarkdownAlert>
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Enables the [Access Token](https://argo-workflows.readthedocs.io/en/stable/access-token/) auth method for
+      the Argo Workflows server to allow direct access to its API programmatically.
+
+    * When using a Panfactum module, the vertical pod autoscaler will only evict pods when resources need to be scaled
+      *up* not *down*. This should reduce some unnecessary resource thrash and improve overall cluster stability. As pod lifetimes
+      are generally capped at four hours, downscaling will still occur (just not as frequently).
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds ability to pass in extra service annotations through kube\_deployment module
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Added `pg_minimum_cpu_update_millicores` input to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      in order to reduce autoscaling thrash caused by frequent small updates in the VPA's CPU recommendations. Before this was
+      introduced, setting `vpa_enabled` to `true` would occasionally cause significant instability.
+
+    * Applied fix for [argo-events write hole issue](https://github.com/argoproj/argo-events/pull/3449) in [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo).
+
+    * Fixes bug that prevented [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) from being deployed when `self_generated_certs_enabled` was set to `true`.
+
+    * Fixes `aws_eks` subnet validation check that prevented module deployment in some valid scenarios
+  </Fragment>
+</ChangelogEntry>

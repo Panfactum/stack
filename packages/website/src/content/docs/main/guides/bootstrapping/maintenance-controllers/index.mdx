@@ -22,7 +22,7 @@ The [Reloader](https://github.com/stakater/Reloader) controller was developed by
 to address this gap. With this controller deployed in the cluster, changes to ConfigMaps or Secrets will trigger
 rolling upgrades on the resources that reference them.
 
-We provide a module to deploy this controller: [kube\_reloader](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_reloader).
+We provide a module to deploy this controller: [kube\_reloader](/main/reference/infrastructure-modules/direct/kubernetes/kube_reloader).
 
 Let's deploy the Reloader now:
 
@@ -30,25 +30,27 @@ Let's deploy the Reloader now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_reloader/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_reloader/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "linkerd" {
-         config_path  = "../kube_linkerd"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "linkerd" {
+      config_path  = "../kube_linkerd"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -62,7 +64,7 @@ began a rolling upgrade.
 
 ## Node Image Caches
 
-While the pull-through image cache deployed in [earlier in this guide](/docs/main/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
+While the pull-through image cache deployed in [earlier in this guide](/main/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
 will ensure that images are always available to your cluster, images must still be loaded from ECR onto a node before
 they can be used by a container. Typically, this happens just-in-time; when a pod is created, the node will attempt
 to pull the images used by the pod's containers.
@@ -71,12 +73,12 @@ This can add a noticeable delay to pod startup times as everything is blocked un
 are fully transferred, decompressed, and mounted. For most workloads, the extra 10-60 seconds does not matter, but
 for more critical workloads, we might want to minimize startup delays as much as possible.
 
-Fortunately, we can provide a solution to this problem, the [kube_node_image_cache_controller](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller).
+Fortunately, we can provide a solution to this problem, the [kube\_node\_image\_cache\_controller](/main/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller).
 This controller will automatically ensure specified images are pre-pulled to every node, so that they will already be available if a pod needs the image in the future. [^22]
 
 [^22]: While many of our modules automatically specify images for the cache, you can specify additional images
-via the  [kube_node_image_cache](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule. This
-is a *submodule* so you can use it many times inside [your own first-party infrastructure modules.](/docs/main/guides/iac/first-party-modules)
+    via the  [kube\_node\_image\_cache](/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule. This
+    is a *submodule* so you can use it many times inside [your own first-party infrastructure modules.](/main/guides/iac/first-party-modules)
 
 Let's deploy the node image cache controller now:
 
@@ -84,25 +86,27 @@ Let's deploy the node image cache controller now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_node_image_cache_controller/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_node\_image\_cache\_controller/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "kyverno" {
-         config_path  = "../kube_kyverno"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "kyverno" {
+      config_path  = "../kube_kyverno"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -110,7 +114,7 @@ Let's deploy the node image cache controller now:
 
 Once this is deployed, you should see a pod running on each node that is working to pull and pin images to the node.
 
-<MarkdownImage src={nodeImageCacheImg} alt={"Caching pods running on each node"}/>
+<MarkdownImage src={nodeImageCacheImg} alt={"Caching pods running on each node"} />
 
 ## PVC Autoresizer
 
@@ -125,7 +129,7 @@ your storage volumes and call the volume expansion API as they near maximum capa
 [^6]: On AWS, volumes can only be expanded *once* every six hours, so you still must choose
     initial storage capacities and growth rates that reflect your predicted workload usage. This isn't completely hands-off.
 
-We provide a module to deploy it: [kube\_pvc\_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer).
+We provide a module to deploy it: [kube\_pvc\_autoresizer](/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer).
 
 Let's deploy it now:
 
@@ -133,25 +137,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_pvc_autoresizer/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_pvc\_autoresizer/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "metrics-server" {
-         config_path  = "../kube_metrics_server"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "metrics-server" {
+      config_path  = "../kube_metrics_server"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -182,7 +188,7 @@ the Descheduler respects
 [PodDisruptionBudgets](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) which we provide for
 all Panfactum modules.
 
-We provide a module for the Descheduler: [kube\_descheduler](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_descheduler).
+We provide a module for the Descheduler: [kube\_descheduler](/main/reference/infrastructure-modules/direct/kubernetes/kube_descheduler).
 
 Let's deploy it now:
 
@@ -190,25 +196,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_descheduler/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_descheduler/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "linkerd" {
-         config_path  = "../kube_linkerd"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "linkerd" {
+      config_path  = "../kube_linkerd"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -230,8 +238,8 @@ In this section, we will add these capabilities.
 
 By default, the cluster's persistent data is stored on [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 backed by [AWS EBS volumes](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes.html). This is managed
-via the [kube\_aws\_ebs\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module we installed in
-[a prior section](/docs/main/guides/bootstrapping/storage-interfaces).
+via the [kube\_aws\_ebs\_csi](/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module we installed in
+[a prior section](/main/guides/bootstrapping/storage-interfaces).
 
 EBS volumes support point-in-time snapshots that can be used to rollback data to a particular moment. We
 can enable the ability to create those snapshots
@@ -239,7 +247,7 @@ via the [external-snapshotter](https://github.com/kubernetes-csi/external-snapsh
 us to create [VolumeSnapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/)
 in Kubernetes that will in turn create EBS snapshots in AWS.
 
-We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_snapshotter).
+We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](/main/reference/infrastructure-modules/direct/kubernetes/kube_external_snapshotter).
 
 Let's deploy it now:
 
@@ -247,25 +255,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_external_snapshotter/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_external\_snapshotter/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "aws_ebs_csi" {
-         config_path  = "../kube_aws_ebs_csi"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "aws_ebs_csi" {
+      config_path  = "../kube_aws_ebs_csi"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -281,7 +291,7 @@ custom resource to the cluster. A Backup enables the following functionality:
 * The ability to restore the cluster and its data from the Backup by creating a [Restore](https://velero.io/docs/v1.13/api-types/restore/)
 * The ability to regularly schedule (and garbage collect) Backups via a [Schedule](https://velero.io/docs/v1.13/api-types/schedule/)
 
-We provide a module to deploy this functionality: [kube\_velero](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_velero).
+We provide a module to deploy this functionality: [kube\_velero](/main/reference/infrastructure-modules/direct/kubernetes/kube_velero).
 
 This will create hourly backups of the cluster and its data that will allow you to rollback your entire
 cluster in the case of an emergency. [^4]
@@ -297,25 +307,27 @@ Let's deploy the Velero controller now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_velero/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_velero/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "snapshotter" {
-         config_path  = "../kube_external_snapshotter"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "snapshotter" {
+      config_path  = "../kube_external_snapshotter"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 

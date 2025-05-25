@@ -64,8 +64,8 @@ in the hands of a third-party leaves you vulnerable to outages and security inci
 Fortunately, there are also many production-ready self-hosted IdPs that contain all the same functionality. In our analysis,
 the most robust and well-integrated tool is [Authentik](https://goauthentik.io/).
 
-We provide both a module to deploy Authentik ([kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)) and
-many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso)).
+We provide both a module to deploy Authentik ([kube\_authentik](/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)) and
+many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso)).
 
 ### Configure AWS SES
 
@@ -76,7 +76,7 @@ AWS provides a service called [Simple Email Service (SES)](https://aws.amazon.co
 (the standard protocol for sending email).
 
 Before using it, you must first configure SES to use the domain you want to use send email from (e.g., `panfactum.com`).
-We provide a module to do this: [aws\_ses\_domain](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain).
+We provide a module to do this: [aws\_ses\_domain](/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain).
 
 Let's deploy the module now:
 
@@ -87,33 +87,35 @@ Let's deploy the module now:
 
 3. Add a new `terragrunt.hcl` file that looks like this:
 
-      ::: code-group labels=[aws_ses_domain/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[aws\_ses\_domain/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "aws_vpc" {
-         config_path = "../aws_vpc"
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         smtp_allowed_cidrs = concat(
-            [dependency.aws_vpc.outputs.vpc_cidr],
-            dependency.aws_vpc.outputs.nat_ips
-         )
+   dependency "aws_vpc" {
+      config_path = "../aws_vpc"
+   }
 
-         // Replace with your sending domain. 
-         //MUST be a domain that has its Route53 zone in the environment.
-         domain = "REPLACE_ME" 
-      }
-      ```
-      :::
+   inputs = {
+      smtp_allowed_cidrs = concat(
+         [dependency.aws_vpc.outputs.vpc_cidr],
+         dependency.aws_vpc.outputs.nat_ips
+      )
+
+      // Replace with your sending domain. 
+      //MUST be a domain that has its Route53 zone in the environment.
+      domain = "REPLACE_ME" 
+   }
+   ```
+
+   :::
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -129,7 +131,7 @@ Let's deploy the module now:
 
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
-   to set this up. You can use the [aws\_dns\_records](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) module to
+   to set this up. You can use the [aws\_dns\_records](/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) module to
    deploy the record.
 
 ### Deploy Authentik
@@ -140,47 +142,49 @@ We are now ready to deploy Authentik:
 
 2. Add a new `terragrunt.hcl` file that looks like this:
 
-      ::: code-group labels=[kube_authentik/terragrunt.hcl]
-      ```hcl collapse={1-19} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_authentik/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-19} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "cnpg" {
-         config_path  = "../kube_cloudnative_pg"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      dependency "kyverno" {
-         config_path  = "../kube_kyverno"
-         skip_outputs = true
-      }
+   dependency "cnpg" {
+      config_path  = "../kube_cloudnative_pg"
+      skip_outputs = true
+   }
 
-      dependency "ses_domain" {
-         config_path = "../aws_ses_domain"
-      }
+   dependency "kyverno" {
+      config_path  = "../kube_kyverno"
+      skip_outputs = true
+   }
 
-      inputs = {
-         smtp_host          = dependency.ses_domain.outputs.smtp_host
-         smtp_user          = dependency.ses_domain.outputs.smtp_user
-         smtp_password      = dependency.ses_domain.outputs.smtp_password
-         email_from_address = "no-reply@${dependency.ses_domain.outputs.domain}" // The user (e.g., `no-reply`) is arbitrary.
+   dependency "ses_domain" {
+      config_path = "../aws_ses_domain"
+   }
 
-         // Should be a subdomain of one of the domains available in this environment.
-         // Example: authentik.panfactum.com
-         domain = "REPLACE_ME"
+   inputs = {
+      smtp_host          = dependency.ses_domain.outputs.smtp_host
+      smtp_user          = dependency.ses_domain.outputs.smtp_user
+      smtp_password      = dependency.ses_domain.outputs.smtp_password
+      email_from_address = "no-reply@${dependency.ses_domain.outputs.domain}" // The user (e.g., `no-reply`) is arbitrary.
 
-         // Should be a real email address that will be used for the initial root authentik user.
-         // Example: it@panfactum.com
-         akadmin_email = "REPLACE_ME"
-      }
-      ```
-      :::
+      // Should be a subdomain of one of the domains available in this environment.
+      // Example: authentik.panfactum.com
+      domain = "REPLACE_ME"
+
+      // Should be a real email address that will be used for the initial root authentik user.
+      // Example: it@panfactum.com
+      akadmin_email = "REPLACE_ME"
+   }
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -195,14 +199,17 @@ We are now ready to deploy Authentik:
    OpenTofu (Terraform) provider](https://registry.terraform.io/providers/goauthentik/authentik/latest/docs) in subsequent steps
    to configure Authentik.
 
-      ::: code-group labels=[.env, environments/global.yaml]
-      ```dotenv "REPLACE_ME" ins={1}
-      AUTHENTIK_TOKEN=REPLACE_ME
-      ```
-      ```yaml "REPLACE_ME" ins={1}
-      authentik_url: REPLACE_ME
-      ```
-      :::
+   ::: code-group labels=\[.env, environments/global.yaml]
+
+   ```dotenv "REPLACE_ME" ins={1}
+   AUTHENTIK_TOKEN=REPLACE_ME
+   ```
+
+   ```yaml "REPLACE_ME" ins={1}
+   authentik_url: REPLACE_ME
+   ```
+
+   :::
 
 8. Navigate to the `domain` you configured in step 2 in a web browser. You should receive a login prompt like this (may have different branding):
 
@@ -225,11 +232,11 @@ We are now ready to deploy Authentik:
 
 Out-of-the box, Authentik provides a nearly blank slate with only enough to facilitate the initial admin login. We
 provide a module that augments this initial setup with more secure authentication flows, recovery flows, and
-branding: [authentik\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
+branding: [authentik\_core\_resources](/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
 
 This module also allows you to define user groups. Groups in Authentik will be assigned to roles in
 service providers as the foundational mechanism for implementing RBAC across your ecosystem. See the [Panfactum
-RBAC reference](/docs/edge/reference/rbac) for more information.
+RBAC reference](/edge/reference/rbac) for more information.
 
 Of particular note is the `superusers` group which will receive root access to every system deployed by a Panfactum
 module.
@@ -240,43 +247,44 @@ Let's deploy this configuration now:
 
 2. Add a new `terragrunt.hcl` file that looks like this:
 
+   ::: code-group labels=\[authentik\_core\_resources/terragrunt.hcl]
 
-      ::: code-group labels=[authentik_core_resources/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      dependency "kube_authentik" {
-         config_path = "../kube_authentik"
-      }
+   dependency "kube_authentik" {
+      config_path = "../kube_authentik"
+   }
 
-      inputs = {
-         authentik_namespace       = dependency.kube_authentik.outputs.namespace
-         email_templates_configmap = dependency.kube_authentik.outputs.email_templates_configmap
-         media_configmap           = dependency.kube_authentik.outputs.media_configmap
+   inputs = {
+      authentik_namespace       = dependency.kube_authentik.outputs.namespace
+      email_templates_configmap = dependency.kube_authentik.outputs.email_templates_configmap
+      media_configmap           = dependency.kube_authentik.outputs.media_configmap
 
-         // How you want your organization to be referenced on the Authentik web UI.
-         organization_name   = "REPLACE_ME"
+      // How you want your organization to be referenced on the Authentik web UI.
+      organization_name   = "REPLACE_ME"
 
-         // Should be the root domain on which the Authentik subdomain is hosted.
-         // Example: "panfactum.com" if Authentik is hosted at "authentik.panfactum.com"
-         organization_domain = "REPLACE_ME"
+      // Should be the root domain on which the Authentik subdomain is hosted.
+      // Example: "panfactum.com" if Authentik is hosted at "authentik.panfactum.com"
+      organization_domain = "REPLACE_ME"
 
-         // Optional: logo_svg_b64 = filebase64("${get_terragrunt_dir()}/logo.svg")
+      // Optional: logo_svg_b64 = filebase64("${get_terragrunt_dir()}/logo.svg")
 
 
-         // Controls whether members of the `superusers` group require hardware tokens such as Yubikeys (https://www.yubico.com/)
-         // to authenticate. We *strongly* recommend setting this to `true`.
-         superusers_require_webauthn = true
-      }
-      ```
-      :::
+      // Controls whether members of the `superusers` group require hardware tokens such as Yubikeys (https://www.yubico.com/)
+      // to authenticate. We *strongly* recommend setting this to `true`.
+      superusers_require_webauthn = true
+   }
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -367,11 +375,13 @@ user account.
 
    9. Set it as the `AUTHENTIK_TOKEN` in your `.env`, replacing the bootstrap token.
 
-         ::: code-group labels=[.env]
-         ```dotenv "REPLACE_ME" {1}
-         AUTHENTIK_TOKEN=REPLACE_ME
-         ```
-         :::
+      ::: code-group labels=\[.env]
+
+      ```dotenv "REPLACE_ME" {1}
+      AUTHENTIK_TOKEN=REPLACE_ME
+      ```
+
+      :::
 
    10. Run `terragrunt apply` on the `authentik_core_resources` module to ensure that it is working correctly.
 

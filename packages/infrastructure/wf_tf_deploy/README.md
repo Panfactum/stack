@@ -7,7 +7,7 @@ that will deploy Tofu code from an indicated repository that follows the Panfact
 
 In particular, generated Workflows will perform the following actions:
 
-- Check out the source code indicated by `repo` using our [standard process](/docs/main/guides/cicd/checking-out-code).
+- Check out the source code indicated by `repo` using our [standard process](/main/guides/cicd/checking-out-code).
 - Automatically configure authentication for the following providers: AWS, Kubernetes, Vault
 - Update SOPS-encrypted files to use the CI's AWS profile
 - Configure the [Terragrunt provider cache](https://terragrunt.gruntwork.io/docs/features/provider-cache/).
@@ -62,7 +62,7 @@ The critical configuration values are:
 
 ### Authenticating with Private Repositories
 
-`git_username` and `git_password` can be used for authenticating with a private `repo`. See our [documentation](/docs/main/guides/cicd/checking-out-code)
+`git_username` and `git_password` can be used for authenticating with a private `repo`. See our [documentation](/main/guides/cicd/checking-out-code)
 for what values to provide. These correspond to the `username` and `password` arguments to the `pf-wf-git-checkout` command
 which is used internally to this module. The only permissions needed by this Workflow is read access to the source code.
 

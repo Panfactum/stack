@@ -10,7 +10,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 <p class="subtitle">Deploy the core AWS networking infrastructure such as the [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
 that will contain all of your deployed resources.</p>
 
-If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/stable-25-04/concepts/networking/aws-primitives) before proceeding.
+If you are new to cloud networking, we recommend that your review the [concept documentation](/stable-25-04/concepts/networking/aws-primitives) before proceeding.
 
 <MarkdownAlert severity="info">
   Up to now, we have focused on setting up **all** environments in each section. Moving forward,
@@ -23,7 +23,7 @@ If you are new to cloud networking, we recommend that your review the [concept d
 
 ## Choose Your SLA Target
 
-When using Panfactum, you will need to choose an [SLA target level](/docs/stable-25-04/guides/deploying-workloads/high-availability#sla-levels) when deploying each environment. The configured SLA
+When using Panfactum, you will need to choose an [SLA target level](/stable-25-04/guides/deploying-workloads/high-availability#sla-levels) when deploying each environment. The configured SLA
 target changes how Panfactum modules behave. Higher targets will improve uptime but also increase your infrastructure
 costs.
 
@@ -36,7 +36,7 @@ We provide three different SLA targets:
 We recommend level 1 for test / development environments and level 2 or above for environments running live workloads. The
 default value is level 3.
 
-To choose a level, set the [Terragrunt variable](/docs/stable-25-04/reference/configuration/terragrunt-variables#metadata)
+To choose a level, set the [Terragrunt variable](/stable-25-04/reference/configuration/terragrunt-variables#metadata)
 `sla_target` in your environment's `environment.yaml`. 
 
   ::: code-group labels=[environments/development/environment.yaml]
@@ -66,17 +66,17 @@ This overrides the default SLA level for all modules
 deployed in that environment. [^91]
 
 [^91]: The `sla_target` can still be overwritten at more specific scopes such as regions or even on a per-module basis. For
-    more information on setting Terragrunt variables, see [the reference docs](/docs/stable-25-04/reference/configuration/terragrunt-variables#metadata).
+    more information on setting Terragrunt variables, see [the reference docs](/stable-25-04/reference/configuration/terragrunt-variables#metadata).
 
 ## Create your VPC
 
-We provide an [aws\_vpc](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
+We provide an [aws\_vpc](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
 
 ### Deploy the AWS VPC Module
 
-We will now deploy the [aws\_vpc](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
+We will now deploy the [aws\_vpc](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
 
 1. Create a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
@@ -108,7 +108,7 @@ We will now deploy the [aws\_vpc](/docs/stable-25-04/reference/infrastructure-mo
 
    <MarkdownImage src={vpcImg} alt="VPC viewed from the AWS web console" />
 
-6. Ensure that your [NAT nodes](/docs/stable-25-04/concepts/networking/nat) are running and healthy:
+6. Ensure that your [NAT nodes](/stable-25-04/concepts/networking/nat) are running and healthy:
 
    <MarkdownImage src={natImg} alt="NAT nodes viewed from the AWS web console" />
 
@@ -116,7 +116,7 @@ We will now deploy the [aws\_vpc](/docs/stable-25-04/reference/infrastructure-mo
    All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
 
 <MarkdownAlert severity="warning">
-  If you deviate from the default settings for the [aws\_vpc](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_vpc) module,
+  If you deviate from the default settings for the [aws\_vpc](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_vpc) module,
   you will need to follow the instructions inside the module documentation for further instructions on how to configure
   AWS networking to support Panfactum infrastructure.
 </MarkdownAlert>

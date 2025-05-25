@@ -1,0 +1,12 @@
+---
+summary: Fixes PgBouncer permission issues when creating new PostgreSQL clusters.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="fixes">
+    * Correctly sets PgBouncer permissions on new PostgreSQL cluster creation in
+      [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+  </Fragment>
+</ChangelogEntry>

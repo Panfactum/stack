@@ -1,0 +1,52 @@
+---
+summary: Adds PgBouncer configuration options, introduces cost-saving opportunities with enhanced\_ha\_enabled flag, adds OpenCost for Kubernetes cost analysis, and fixes various issues with VPC, Authentik, and pod scheduling.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * Updates [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) with many new variables
+      for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
+
+    * Adds support for `path_prefix` to [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy) ([@mschnee](https://github.com/mschnee))
+
+    * Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
+      allow for additional cost savings (approximately \$50 / month) in exchange for introducing a small possibility of temporary
+      outages. We estimate that setting this to `false` reduces availability from 99.995% to 99.9%.
+      This can be used to decrease costs in less critical clusters (e.g., `development`).
+
+    * Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
+      to the [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) module.
+
+    * Adds the [kube\_open\_cost](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_open_cost) module
+      for calculating the cost of workloads running on Kubernetes.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addressed issue in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) where NAT nodes wouldn't restart
+      if NAT setup failed with an exit code other than `1`.
+
+    * Increased the memory floor of the Authentik server in [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+      to avoid OOM issues.
+
+    * Updates [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) to allow showing
+      [Gravatar](https://gravatar.com/) profile images.
+
+    * Updates [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) to provide the necessary Permissions-Policy headers to allow
+      use of WebAuthn devices.
+
+    * Correctly applies pod labels in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+
+    * Removes node preferences defaults from [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility)
+      that were preventing efficient node deprovisioning.
+
+    * Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
+
+    * Fixes incorrect SCIM property mapping in [authentik\_aws\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
+
+    * Aligns pod labels, affinities, topologySpreadConstraints, and tolerations in
+      [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd) to conventions used in all
+      other modules.
+  </Fragment>
+</ChangelogEntry>

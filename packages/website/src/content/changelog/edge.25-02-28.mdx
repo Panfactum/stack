@@ -1,0 +1,22 @@
+---
+summary: Adds SSO modules for MongoDB Atlas and GitHub, enhances PostgreSQL WAL retention and S3 access configuration, enables node-local image caching by default, and fixes Argo event source service account issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * Adds [authentik\_atlas\_mongodb\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso) & [mongodb\_atlas\_identity\_provider](/docs/edge/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) module for setting up the Authentik Application and Provider for Atlas MongoDB.
+    * Adds [authentik\_github\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_github_sso) module for setting up the Authentik Application and Provider for Github.
+    * Adds new inputs to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) for configuring the
+      [pg\_wal\_keep\_size\_gb](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#pg_wal_keep_size_gb) settings and adding additional [s3\_bucket\_access\_policy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#s3_bucket_access_policy) for the s3 bucket
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixes where the service account name is not set for the event source pod in [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Node-local image caching is now enabled by default in Panfactum submodules.
+  </Fragment>
+</ChangelogEntry>

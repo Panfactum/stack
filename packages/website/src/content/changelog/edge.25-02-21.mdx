@@ -1,0 +1,28 @@
+---
+summary: Adds private git repository support for first-party modules, enables cluster-wide pod labels and annotations, improves DaemonSet update performance, and fixes CI/CD pipeline and region configuration issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * Adds support for using a private git repository for first-party IaC modules by
+      providing `GIT_USERNAME` and `GIT_PASSWORD` environment variables. See the [updated documentation.](/docs/main/guides/iac/first-party-modules#using-a-private-git-repository)
+
+    * [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies) now takes `common_pod_labels` and `common_pod_annotations` inputs which can be used to apply
+      a standard set of labels and/or annotations to all pods in the cluster.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addressed issue where the `.kube/.gitignore` file was not being created.
+
+    * DaemonSets in the cluster will update in a constant time. Previously the update time scaled with the number
+      of nodes in the cluster which led to timeouts.
+
+    * Resolves a bug that caused [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) workflows
+      to fail.
+
+    * Resolves a bug that caused module deployment to fail if Kubernetes settings weren't set for the region even if
+      Kubernetes wasn't used.
+  </Fragment>
+</ChangelogEntry>

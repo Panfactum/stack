@@ -3,7 +3,7 @@
 This module provides deployments of [self-hosted GHA runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller) 
 that can be targeted in GHA workflows.
 
-For installation instructions, see our [guide](/docs/main/guides/addons/github-actions/installing).
+For installation instructions, see our [guide](/main/guides/addons/github-actions/installing).
 
 ## Usage
 

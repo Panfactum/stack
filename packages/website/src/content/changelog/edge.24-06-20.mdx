@@ -1,0 +1,31 @@
+---
+summary: Introduces an alternative Kubernetes scheduler that significantly improves pod bin-packing for 25-33% cost reduction, adds integrated descheduling for underutilized nodes, and fixes Karpenter deployment issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * Adds [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler), an alternative Kubernetes
+      scheduler that can be used to improve bin-packing of pods on nodes in the Kubernetes cluster. This allows for better,
+      smaller node selection and our tests show an estimated 25-33% reduction in node costs when used. We provide
+      instructions for installing it [here](/docs/edge/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler).
+
+    * Adds `panfactum_scheduler_enabled` (default: `false`) input to most infrastructure modules. When enabled, will
+      use the scheduler provided by [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+      instead of the less-efficient EKS scheduler.
+
+    * If `panfactum_scheduler_enabled` is `true`, the [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
+      will automatically remove pods from low utilization nodes to allow the [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+      to bin-pack them on other nodes.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addresses a bug in the previous release that left [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
+      not deployable.
+
+    * Addresses an issue where nodes were limited a hard cap of 29 pods.
+
+    * Configures Kubernetes nodes to use a fixed amount of system overhead rather than one that scales unnecessarily with node size.
+  </Fragment>
+</ChangelogEntry>

@@ -48,13 +48,13 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 ### Pre-req: Setup MongoDB Atlas Identity Provider Domain Verification
 
 1. Go to your MongoDB Atlas account
-2. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Domains`
-3. Click on `Add Domain`
+1. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Domains`
+1. Click on `Add Domain`
    ![Add Domain](doc\_images/mongodb-atlas-add-domains.png)
-4. Add the root domain that you are using for Authentik (i.e., panfactum.com)
-5. Select `DNS Record` as the verification method
+1. Add the root domain that you are using for Authentik (i.e., panfactum.com)
+1. Select `DNS Record` as the verification method
    ![DNS Verification](doc\_images/mongodb-atlas-dns-verification.png)
-6. Note the `TXT Record` that is generated. You will need this value in future steps.
+1. Note the `TXT Record` that is generated. You will need this value in future steps.
    ![DNS TXT Verification Record](doc\_images/mongodb-atlas-dns-txt-verification.png)
 
 ### Deploy a new DNS TXT Record & Verify
@@ -92,19 +92,19 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
       ```
       :::
 
-2. Run `terragrunt apply`
-3. Go back to MongoDB Atlas and click on `Verify` next to the domain you added
-4. Confirm verification
+1. Run `terragrunt apply`
+1. Go back to MongoDB Atlas and click on `Verify` next to the domain you added
+1. Confirm verification
 
 ### Download the Signing Certificate from Authentik
 
 Before proceeding, make sure to have downloaded the signing certificate from the Authentik application
 
 1. Login to your Authentik instance
-2. Switch over to the `Admin` section
+1. Switch over to the `Admin` section
    ![Authentik Admin](doc\_images/mongodb-atlas-authentik-admin-link.png)
-3. Go to the section `Applications` -> `Providers` -> `MongoDB Atlas`
-4. Find `Related objects` and click on the `Download` button for the `Download signing certificate`
+1. Go to the section `Applications` -> `Providers` -> `MongoDB Atlas`
+1. Find `Related objects` and click on the `Download` button for the `Download signing certificate`
    ![Authentik Identity Provider Signature](doc\_images/mongodb-atlas-providers-certificate.png)
 
 ### Deploy the MongoDB Identity Provider module
@@ -116,19 +116,19 @@ We will first create the resource through the UI and then import it to configure
 #### 1. From MongoDB Atlas UI
 
 1. Go to `Organization Settings`
-2. Note the `Organization ID`. You will need this value in future steps.
-3. Go to `Federated Authentication Settings` -> `Identity Providers`
-4. Click on `Configure Identity Provider`
+1. Note the `Organization ID`. You will need this value in future steps.
+1. Go to `Federated Authentication Settings` -> `Identity Providers`
+1. Click on `Configure Identity Provider`
    ![Configure Identity Provider](doc\_images/mongodb-atlas-configure-identity-provider.png)
-5. Select `Workforce Identity Federation`
-6. Select `SAML for Atlas UI Access`
-7. Set a Name such as `Authentik Integration`
-8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
+1. Select `Workforce Identity Federation`
+1. Select `SAML for Atlas UI Access`
+1. Set a Name such as `Authentik Integration`
+1. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
    ![Fill with placeholder values](doc\_images/mongodb-atlas-saml-fill-placeholder.png)
-9. Upload the `Signing Certificate` that we downloaded above
-10. Set the `Request Binding` to `HTTP-POST`
-11. Set the `Response Signature Algorithm` to `SHA-256`
-12. Continue to the next step and note these values as you will need them in future steps.
+1. Upload the `Signing Certificate` that we downloaded above
+1. Set the `Request Binding` to `HTTP-POST`
+1. Set the `Response Signature Algorithm` to `SHA-256`
+1. Continue to the next step and note these values as you will need them in future steps.
     * `ACS URL`
     * `Audience URI`
     * `IdP ID`
@@ -138,18 +138,18 @@ We will first create the resource through the UI and then import it to configure
 #### 2. Create Access Keys
 
 1. Go to `Organization Settings` -> `Access Manager`
-2. Click on `Applications` tab
-3. Click on `Add new`
-4. Set the description to `terraform`
-5. Set the Organization Permission to `Organization Owner`
-6. Save the public and private key to your `.env` file
+1. Click on `Applications` tab
+1. Click on `Add new`
+1. Set the description to `terraform`
+1. Set the Organization Permission to `Organization Owner`
+1. Save the public and private key to your `.env` file
     1. Set `MONGODB_ATLAS_PUBLIC_KEY`
-    2. Set `MONGODB_ATLAS_PRIVATE_KEY`
+    1. Set `MONGODB_ATLAS_PRIVATE_KEY`
 
 #### 3. From the terminal
 
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
-2. Add a new a `terragrunt.hcl` file that looks like this:
+1. Add a new a `terragrunt.hcl` file that looks like this:
 
       ::: code-group labels=[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
       ```hcl collapse={1-9} "REPLACE_ME"
@@ -192,12 +192,12 @@ We will first create the resource through the UI and then import it to configure
       ```
       :::  
 
-3. Run `pf-tf-init`
-4. Run `terragrunt apply`
+1. Run `pf-tf-init`
+1. Run `terragrunt apply`
 
 #### 4. CICD (Optional)
 
-If you have CICD setup and are deploying infrastructure using the [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf\_tf\_deploy) module,
+If you have CICD setup and are deploying infrastructure using the [wf\_tf\_deploy](/main/reference/infrastructure-modules/submodule/workflow/wf\_tf\_deploy) module,
 you will also need to pass in the keys:
 
 ::: code-group labels=[infrastructure/cicd/deploy.hcl]
@@ -229,7 +229,7 @@ module "tf_deploy" {
 #### 5. Finish Authentik Setup
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
-the [Sync Authentik with the Atlas Settings](/docs/main/reference/infrastructure-modules/direct/authentik/authentik\_mongodb\_atlas\_sso)
+the [Sync Authentik with the Atlas Settings](/main/reference/infrastructure-modules/direct/authentik/authentik\_mongodb\_atlas\_sso)
 section.
 
 ### Disable SSO Bypass

@@ -11,7 +11,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 <p class="subtitle">Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module.</p>
+using our [aws\_eks](/edge/reference/infrastructure-modules/direct/aws/aws_eks) module.</p>
 
 ## A Quick Note
 
@@ -24,7 +24,7 @@ and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
     required to manage the control plane on your own, this is an incredible deal.
 
 <MarkdownAlert severity="info">
-  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/edge/guides/bootstrapping/suspend-kubernetes-cluster)
+  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/edge/guides/bootstrapping/suspend-kubernetes-cluster)
   to suspend resources and resume as you are setting up your cluster.
 </MarkdownAlert>
 
@@ -52,7 +52,7 @@ configured to download the image from the public registry *only if it does not a
 in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
 the initial deployment.
 
-We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
 
 However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
 
@@ -86,52 +86,55 @@ The following instructions apply for **every** environment-region combination wh
 
 3. Add a `terragrunt.hcl` and sops-encrypted `secrets.yaml` to that directory that looks like this:
 
-      ::: code-group labels=[aws_ecr_pull_through_cache/terragrunt.hcl, aws_ecr_pull_through_cache/secrets.yaml]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[aws\_ecr\_pull\_through\_cache/terragrunt.hcl, aws\_ecr\_pull\_through\_cache/secrets.yaml]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      locals {
-         secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         docker_hub_username     = "REPLACE_ME"
-         docker_hub_access_token = local.secrets.docker_hub_access_token
-         github_username         = "REPLACE_ME"
-         github_access_token     = local.secrets.github_access_token
-      }
-      ```
-      ```yaml
-      docker_hub_access_token: ENC[AES256_GCM,data:sfHAIQE6UMhj8Nt4t6h58wCsaXxrvVswDQS090i1K4f7VmmR,iv:8pJWO4ezmNg2gOf2oUbiqJbaJIChTT6Lc5OUiZ1BjC8=,tag:6+NxD3Ucl1i2hwfInkRQHg==,type:str]
-      github_access_token: ENC[AES256_GCM,data:MWfsW39UGATwIfDe/w77ed3DOXndvDaZPherUsXqzqUE5LYOfMAsDw==,iv:N9CfuhTIJ+dZNP0Ngq+EKCUSdpIXZSChaw7I5H38ZxI=,tag:/OfLsqED51L3Ji6iyGRhUg==,type:str]
-      sops:
-         kms:
-            - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
-               created_at: "2024-04-05T14:51:33Z"
-               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQEiLGnxR5S0pzjrxVdwE2M4AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMkkLy3mUgU3uwpptXAgEQgDvRj3ydpGP8B0cjHLGDWepyqFIA+2XJaNkgqfWUY8CVIFCP7YSeUIOIv34UUt2uts2e94wQTYAxS4ITWw==
-               aws_profile: production-superuser
-            - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
-               created_at: "2024-04-05T14:51:33Z"
-               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQGrVJHw9Bkv7OZzsX7WCo+vAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMN3rRF+6gxTL8REbXAgEQgDuObzBPe+Ahl7lJ9zvbX2toJgsvuzJQh6rKHCld1tslbODg/C0/0vRjEShF1waw3U3R3wLRLpxumv3Blw==
-               aws_profile: production-superuser
-         gcp_kms: []
-         azure_kv: []
-         hc_vault: []
-         age: []
-         lastmodified: "2024-04-05T14:51:34Z"
-         mac: ENC[AES256_GCM,data:suw9298kNaX+Kg35Zny2xhEFKcTzioLrv/kfqyoZ+TjxCogJQdadzemjv3rlInQC3u8AGMEaN0qClYa6d1M/7Qc5t666zpETsSmRHfsD7tY33z0HDvDmAp43ADWPdI9Wv+G8RMJ3fs9/MI6FU4AGZlfhE+HC5TKs7oIV6BlQWPM=,iv:3VGtu70GZneuhnqiO6s53B+HQeUybrrGM46XDzQcr6Y=,tag:1fVWus0UDxKS5FmqqspZIQ==,type:str]
-         pgp: []
-         unencrypted_suffix: _unencrypted
-         version: 3.8.1
-      ```
-      :::
+   locals {
+      secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+   }
+
+   inputs = {
+      docker_hub_username     = "REPLACE_ME"
+      docker_hub_access_token = local.secrets.docker_hub_access_token
+      github_username         = "REPLACE_ME"
+      github_access_token     = local.secrets.github_access_token
+   }
+   ```
+
+   ```yaml
+   docker_hub_access_token: ENC[AES256_GCM,data:sfHAIQE6UMhj8Nt4t6h58wCsaXxrvVswDQS090i1K4f7VmmR,iv:8pJWO4ezmNg2gOf2oUbiqJbaJIChTT6Lc5OUiZ1BjC8=,tag:6+NxD3Ucl1i2hwfInkRQHg==,type:str]
+   github_access_token: ENC[AES256_GCM,data:MWfsW39UGATwIfDe/w77ed3DOXndvDaZPherUsXqzqUE5LYOfMAsDw==,iv:N9CfuhTIJ+dZNP0Ngq+EKCUSdpIXZSChaw7I5H38ZxI=,tag:/OfLsqED51L3Ji6iyGRhUg==,type:str]
+   sops:
+      kms:
+         - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+            created_at: "2024-04-05T14:51:33Z"
+            enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQEiLGnxR5S0pzjrxVdwE2M4AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMkkLy3mUgU3uwpptXAgEQgDvRj3ydpGP8B0cjHLGDWepyqFIA+2XJaNkgqfWUY8CVIFCP7YSeUIOIv34UUt2uts2e94wQTYAxS4ITWw==
+            aws_profile: production-superuser
+         - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+            created_at: "2024-04-05T14:51:33Z"
+            enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQGrVJHw9Bkv7OZzsX7WCo+vAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMN3rRF+6gxTL8REbXAgEQgDuObzBPe+Ahl7lJ9zvbX2toJgsvuzJQh6rKHCld1tslbODg/C0/0vRjEShF1waw3U3R3wLRLpxumv3Blw==
+            aws_profile: production-superuser
+      gcp_kms: []
+      azure_kv: []
+      hc_vault: []
+      age: []
+      lastmodified: "2024-04-05T14:51:34Z"
+      mac: ENC[AES256_GCM,data:suw9298kNaX+Kg35Zny2xhEFKcTzioLrv/kfqyoZ+TjxCogJQdadzemjv3rlInQC3u8AGMEaN0qClYa6d1M/7Qc5t666zpETsSmRHfsD7tY33z0HDvDmAp43ADWPdI9Wv+G8RMJ3fs9/MI6FU4AGZlfhE+HC5TKs7oIV6BlQWPM=,iv:3VGtu70GZneuhnqiO6s53B+HQeUybrrGM46XDzQcr6Y=,tag:1fVWus0UDxKS5FmqqspZIQ==,type:str]
+      pgp: []
+      unencrypted_suffix: _unencrypted
+      version: 3.8.1
+   ```
+
+   :::
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -152,42 +155,44 @@ The following instructions apply for **every** environment-region combination wh
 
 3. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[aws_eks/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[aws\_eks/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "aws_vpc" {
-         config_path = "../aws_vpc"
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         vpc_id     = dependency.aws_vpc.outputs.vpc_id
-         egress_ips = dependency.aws_vpc.outputs.nat_ips
+   dependency "aws_vpc" {
+      config_path = "../aws_vpc"
+   }
 
-         // Can be named anything but MUST be unique within your organization.
-         // We recommend "<environment_name>-<region_name>"
-         // Example: "production-us-east-2"
-         cluster_name        = "REPLACE_ME"
-         cluster_description = "REPLACE_ME"
+   inputs = {
+      vpc_id     = dependency.aws_vpc.outputs.vpc_id
+      egress_ips = dependency.aws_vpc.outputs.nat_ips
 
-         // Should contain one subnet if sla_target was set to `1`, and three subnets otherwise.
-         // These should be private subnets unless you have a specific need for public nodes --
-         // note that public subnets are a security risk.
-         // Example: ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"]
-         node_subnets = [REPLACE_ME]
+      // Can be named anything but MUST be unique within your organization.
+      // We recommend "<environment_name>-<region_name>"
+      // Example: "production-us-east-2"
+      cluster_name        = "REPLACE_ME"
+      cluster_description = "REPLACE_ME"
 
-         // We will disable this once more cluster utilities are installed
-         bootstrap_mode_enabled = true 
-      }
-      ```
-      :::
+      // Should contain one subnet if sla_target was set to `1`, and three subnets otherwise.
+      // These should be private subnets unless you have a specific need for public nodes --
+      // note that public subnets are a security risk.
+      // Example: ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"]
+      node_subnets = [REPLACE_ME]
+
+      // We will disable this once more cluster utilities are installed
+      bootstrap_mode_enabled = true 
+   }
+   ```
+
+   :::
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -215,11 +220,13 @@ To download this metadata:
 
 1. Add a `config.yaml` file to the repo's `.kube` directory:
 
-   ::: code-group labels=[.kube/config.yaml]
+   ::: code-group labels=\[.kube/config.yaml]
+
    ```yaml
    clusters:
      - module: "production/us-east-2/aws_eks"
    ```
+
    :::
 
    Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
@@ -230,7 +237,7 @@ To download this metadata:
 3. Run `pf-update-kube --build` to dynamically generate a `cluster_info` file and download your cluster's CA certs.
 
 As you add additional clusters, you will need to update `config.yaml` and re-run `pf-update-kube --build`. More
-information about this file can be found [here](/docs/edge/reference/configuration/kubernetes).
+information about this file can be found [here](/edge/reference/configuration/kubernetes).
 
 ### Set up Kubeconfig
 
@@ -250,12 +257,14 @@ To generate your kubeconfig:
    [^7]: This file is specific to every user as different users will have different access levels to the various
        clusters. Every user will need to set up their own `<kube_dir>/config.user.yaml`. This file is not committed to version control.
 
-   ::: code-group labels=[.kube/config.user.yaml]
+   ::: code-group labels=\[.kube/config.user.yaml]
+
    ```yaml
    clusters:
      - name: "production-primary"
        aws_profile: "production-superuser"
    ```
+
    :::
 
 2. Replace `name` with the name of the EKS cluster which can be found in `cluster_info`.
@@ -266,11 +275,11 @@ To generate your kubeconfig:
 4. Run `pf-update-kube` to generate your kubeconfig file.
 
 Remember that you will need to update your `config.user.yaml` and re-run `pf-update-kube` as you add additional clusters. More
-information about this file can be found [here](/docs/edge/reference/configuration/kubernetes).
+information about this file can be found [here](/edge/reference/configuration/kubernetes).
 
 <MarkdownAlert severity="warning">
   *Every* one of your users will need to set up their own `config.user.yaml` file, and we provide instructions
-  for them [here](/docs/edge/guides/getting-started/connect-to-infrastructure).
+  for them [here](/edge/guides/getting-started/connect-to-infrastructure).
 </MarkdownAlert>
 
 ### Verify Connection
@@ -324,23 +333,24 @@ to a single IaC paradigm, we are able to greatly simplify operations for users o
 
 In order to start using our Kubernetes modules, we must first configure the
 [Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
-some additional [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables).
+some additional [terragrunt variables](/edge/reference/configuration/terragrunt-variables).
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 
+::: code-group labels=\[region.yaml]
 
-   ::: code-group labels=[region.yaml]
-   ```yaml ins={4,8}
-   # The context in your `kubeconfig` file to use for connecting to the cluster in this region.
-   # If this was set up using `pf-update-kube`, this is just the name of the cluster.
-   # Example: production-us-east-2
-   kube_config_context: REPLACE_ME
+```yaml ins={4,8}
+# The context in your `kubeconfig` file to use for connecting to the cluster in this region.
+# If this was set up using `pf-update-kube`, this is just the name of the cluster.
+# Example: production-us-east-2
+kube_config_context: REPLACE_ME
 
-   # This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
-   # Example: https://6B4CCB112AD882D9XXXX73BA90CB8F80.yl4.us-east-2.eks.amazonaws.com
-   kube_api_server: REPLACE_ME
-   ```
-   :::
+# This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
+# Example: https://6B4CCB112AD882D9XXXX73BA90CB8F80.yl4.us-east-2.eks.amazonaws.com
+kube_api_server: REPLACE_ME
+```
+
+:::
 
 The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
 

@@ -2,6 +2,7 @@ module.exports = {
   root: true,
   plugins: [
     "unused-imports",
+    "mdx"
   ],
   extends: [
     "eslint:recommended",
@@ -10,15 +11,16 @@ module.exports = {
     "plugin:import/typescript",
     "plugin:jsx-a11y/recommended",
     "plugin:astro/recommended",
-    "plugin:tailwindcss/recommended"
+    "plugin:tailwindcss/recommended",
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
-    extraFileExtensions: ['.astro']
+    extraFileExtensions: ['.astro', '.mdx']
   },
   ignorePatterns: [
-    "*.js", "*.cjs", "*.mjs", "*.mdx", "*.md", "*.png", "*.css"
+    "*.js", "*.cjs", "*.mjs", "*.md", "*.png", "*.css", "**/*.mdx/*.ts",
+    "**/*.mdx/*.tsx"
   ],
   rules: {
     "no-console": "error",
@@ -44,10 +46,12 @@ module.exports = {
         "order": "asc"
       }
     }],
-    "import/no-unresolved": [2, { ignore: [
+    "import/no-unresolved": [2, {
+      ignore: [
         'astro:.*$',
         '.*?raw$'
-      ]}]
+      ]
+    }]
   },
   settings: {
     "import/resolver": {
@@ -58,7 +62,8 @@ module.exports = {
     },
     "import/extensions": [
       ".ts",
-      ".tsx"
+      ".tsx",
+      ".mdx"
     ],
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"],
@@ -72,15 +77,51 @@ module.exports = {
         "text-primary",
         "toast"
       ]
-    }
+    },
   },
   overrides: [
     {
+      files: ["*.mdx"],
+      extends: [
+        "plugin:mdx/recommended",
+        // Disable type checking for MDX files as they don't support TypeScript type checking
+        "plugin:@typescript-eslint/disable-type-checked"
+      ],
+      settings: {
+        "mdx/code-blocks": false,
+        "mdx/language-mapper": {},
+      },
+      parser: "eslint-mdx",
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true
+        }
+      },
+      rules: {
+
+        // You might want to disable some rules that don't work well with MDX
+        "no-unused-expressions": "off",
+        "react/jsx-no-undef": "off",
+
+        // Import rules for MDX
+        "import/no-unresolved": "off",
+        "import/order": "off",
+        "unused-imports/no-unused-imports": "off",
+
+        // If you want to enforce specific MDX style rules
+        "mdx/remark": [
+          "error"
+        ]
+      }
+    },
+    {
       files: ["*.tsx"],
       plugins: [
-          "@typescript-eslint",
-          "solid",
-          "prettier"
+        "@typescript-eslint",
+        "solid",
+        "prettier"
       ],
       parser: "@typescript-eslint/parser",
       parserOptions: {

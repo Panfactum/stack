@@ -1,0 +1,140 @@
+---
+summary: Major Linkerd upgrade that improves security and startup times, replaces NATS backend for Argo EventBus, and adds support for NATS Jetstream message broker along with numerous improvements to node image caching and AWS EKS features.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="alerts">
+    <MarkdownAlert severity="warning">
+      When upgrading `aws_eks` to this version, you may receive an error about attempting to recreate the cluster due to this change:
+
+      ```shellsession
+      bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
+      ```
+
+      To workaround this issue, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
+      `bootstrap_cluster_creator_admin_privileges` input to `true`.
+    </MarkdownAlert>
+
+    <MarkdownAlert severity="warning">
+      [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) in this version contains a bug
+      that forces redeployment of the underlying NATS StatefulSet on every tag / label update. This also impacts
+      [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) which utilizes
+      NATS under the hood.
+
+      This will cause complete loss of any pending NATS messages in any Jetstream streams. For most users, this should be OK
+      as NATS is primarily used for temporary storage as an event bus. However, if you cannot afford to lose your stream data, you
+      should delay upgrading those modules until your cluster reaches `edge.24-12-22` which contains the fix.
+    </MarkdownAlert>
+
+    <MarkdownAlert severity="warning">
+      Due to the default memory floor for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+      introduced in this release, inbound webhook events for Argo EventSource's may be rejected intermittently. `edge.25-01-04`
+      contains more sane defaults and includes more options for tuning the EventBus to handle different traffic load patterns.
+    </MarkdownAlert>
+  </Fragment>
+
+  <Fragment slot="breaking-changes">
+    * This release contains a major version upgrade to Linkerd.
+
+      This upgrade removes the need for the privileged `proxy-init` initContainer to be injected into every container as the initialization logic
+      is now completed once per node. This should reduce pod startup times by 5-20 seconds and improves overall security by
+      removing the need to run a privileged container in each pod.
+
+      **To upgrade with no downtime, you MUST update the modules in the following order:**
+
+      * [kube\_kyverno](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno)
+      * [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+      * [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium)
+      * [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+      * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+      * [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+      * The remainder of the modules may be updated in any order.
+
+    * The NATS backend for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) has been replaced
+      with our enhanced NATS module, [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats). This provides improved
+      availability, security, observability, and performance.
+
+      To apply this module, you will need to manually delete any existing `EventBus` resources in our cluster, or you will receive an error. You will
+      also need to delete any associated `EventSource` or `Sensor` resources *before* deleting the `EventBus` or the `EventBus`
+      deletion will be blocked.
+
+      **Deleting an existing EventBus will cause any unprocessed events to be deleted.** Make sure that you have no pending events before performing this upgrade.
+
+    * The `kube_fledged` and `kube_reflector` modules have been removed (they were deprecated in `edge.24-11-13`).
+
+    * The `images` input of [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) has
+      been updated to take a list of image configuration options rather than a list of image strings.
+
+      Additionally, `node_image_cached_enabled` has been removed as a top-level input from Panfactum submodules (e.g., [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment))
+      as image cache settings can now be configured on a per-container basis.
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Added support for the [NATS Jetstream message broker](https://docs.nats.io/nats-concepts/jetstream) via a new submodule, [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats).
+      This release also adds NATS integration with the devShell tooling including adding the `nats` CLI and updating `pf-db-tunnel` to support connecting with NATS clusters.
+
+    * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now launches with `arm64` nodes when `bootstrap_mode_enabled` is `true` as we have resolved the remaining issues
+      that have prevented `arm64` from being used during bootstrapping.
+
+    * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html) enabled.
+
+    * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [ARC Zonal Shift](https://docs.aws.amazon.com/eks/latest/userguide/zone-shift.html) enabled if running nodes in multiple subnets.
+
+    * [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) now has [ARC Zonal Shift](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/zonal-shift.html) enabled.
+
+    * [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now schedules pods exclusively on `arm64` nodes
+      in order to support the integration of external secret plugins.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * The [kube\_node\_image\_cache\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller) has
+      been updated with a "prepull" component that automatically pulls cached images in **parallel** as soon as a node launches. Previously,
+      images were pulled serially which resulted in significant delays when many large images were cached.
+
+    * The [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler) will now
+      automatically recreate pods that were not run through the Kyverno policy engine. This provides protection
+      in case the Kyverno admission controller is ever offline.
+
+    * Images provided to and/or used by Panfactum submodules (e.g.,
+      [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment),
+      [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster), etc.) are now
+      cached by default.
+
+    * Additional annotations and labels can now be added to the controllers created via [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment),
+      [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set),
+      [kube\_daemon\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set), and
+      [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job).
+
+    * The `kyverno` CLI has been added to the devShell.
+
+    * Adds support for dynamically generated labels in [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec)
+      via `labels_from_parameters` and `labels_from`.
+
+    * [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) now creates a ServiceAccount and output's its name. This can
+      be used to assign AWS (or other permissions) to the EventSource pods.
+
+    * Adds the ability to configure temporary storage space size in [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * The [kube\_node\_image\_cache\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller)
+      will now deduplicate images that are added to the cache by [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodules/kubernetes/kube_node_image_cache).
+
+    * We have adjusted the Kyverno settings to improve overall stability of the mutation engine.
+
+    * Resolved slow Vault startup times for Vault databases larger than 100MB in [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault).
+
+    * BuildKit cache PVCs are now excluded from Velero backups as they consume a lot of storage and are safe to delete.
+
+    * Fixed root user access provisioning in [kube\_rbac](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_rbac).
+
+    * Addressed issue where the Descheduler was not replacing pods that were older than the max lifetime.
+
+    * Addressed issue where resetting a one's own password via Authentik caused an unauthorized error.
+
+    * Fixed mount permissions in [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec).
+  </Fragment>
+</ChangelogEntry>

@@ -27,7 +27,7 @@ this interface is extremely flexible and can also be used by other utilities to 
 The [AWS EBS CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver) allows you to provision EBS volumes for
 use in your pods. This is the recommended way to store stateful data (i.e., Database storage) within the Panfactum stack.
 
-We provide the [kube\_aws\_ebs\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module to deploy the driver.
+We provide the [kube\_aws\_ebs\_csi](/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module to deploy the driver.
 
 Let's deploy it now:
 
@@ -35,25 +35,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_aws_ebs_csi/terragrunt.hcl]
-    ```hcl collapse={1-14} "REPLACE_ME"
-    include "panfactum" {
-        path   = find_in_parent_folders("panfactum.hcl")
-        expose = true
-    }
+   ::: code-group labels=\[kube\_aws\_ebs\_csi/terragrunt.hcl]
 
-    terraform {
-        source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+       path   = find_in_parent_folders("panfactum.hcl")
+       expose = true
+   }
 
-    dependency "cluster" {
-      config_path  = "../aws_eks"
-      skip_outputs = true
-    }
+   terraform {
+       source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {}
-    ```
-    :::
+   dependency "cluster" {
+     config_path  = "../aws_eks"
+     skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 

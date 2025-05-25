@@ -1,0 +1,31 @@
+---
+summary: Reduces default Vault storage size, adds Loki logging backend, introduces PVC Autoresizer for automatic EBS volume expansion, and fixes Karpenter scheduling issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * The default for `vault_storage_size_gb` in [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+      has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
+      you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * (Alpha) Added the [Loki](https://grafana.com/docs/loki/latest/)
+      logging backend via [kube\_logging](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_logging)
+      and the [Alloy](https://grafana.com/docs/alloy/latest/) log collector via [kube\_alloy](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_alloy).
+
+    * The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
+      [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer) module in order
+      to automatically expand EBS volumes as they fill up. We provide the guide for deploying it
+      [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
+
+    * Added validation for phone number format in
+      [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Resolved issue where scheduling constraints could not be resolved for components deployed before Karpenter ([#41](https://github.com/Panfactum/stack/issues/41))
+  </Fragment>
+</ChangelogEntry>

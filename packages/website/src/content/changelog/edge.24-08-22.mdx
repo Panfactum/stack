@@ -1,0 +1,52 @@
+---
+summary: Improves Redis persistence strategy for faster recovery, adds disruption window controller for scheduling maintenance periods, introduces PostgreSQL synchronous replication, and enhances Velero backup reliability.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * The default behavior of [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+      was to use both [Redis AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/) for persistence.
+      Unfortunately, using AOF concurrently with RDB negates Redis' the ability to do [partial resynchronizations after restarts
+      and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers).
+      Instead, a full copy of the entire database must be transferred from the current master to replicas on every restart. This greatly increases
+      the time-to-recover as well as incurs a high network cost.
+
+      In fact, there is arguably no benefit to AOF-based persistence with our replicated
+      architecture as new Redis nodes will always pull their data from the running master, not from their local AOF. The
+      only benefit would be if *all* Redis nodes simultaneously failed with a non-graceful shutdown (an incredibly unlikely scenario).
+
+      As a result, we have switched the module to use only use RDB for persistence, and the `redis_appendfsync` input
+      has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
+      AOF if you want (though we would not advise it).
+
+    * `token_lifetime_seconds` has been changed to `token_lifetime_hours` in [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to avoid a perpetual diff issue
+      present in the Vault provider.
+
+    * Removed the daily backups from [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
+      as they were undocumented and had no realistic use case.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds a new submodule, [kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
+      which can be used to specify time-based disruption windows for disruption-sensitive workloads (e.g., databases). Disruption
+      window capabilities have also been added to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
+
+    * Adds synchronous replication support to
+      [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      via `pg_sync_replication_enabled`.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addressed issue where `pg_smart_shutdown_timeout` cannot be set to 0 in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      without having CNPG reset it to 180.
+
+    * Fixed an issue in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero) where stale
+      EBS snapshots were not being deleted.
+
+    * Added stricter disruption prevention to the Velero server in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
+      as disrupting the server in the middle of a backup operation would cause it to fail and not be resumed.
+  </Fragment>
+</ChangelogEntry>

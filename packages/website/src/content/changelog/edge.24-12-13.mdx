@@ -1,0 +1,62 @@
+---
+summary: Replaces kube\_rbac with EKS access entries, consolidates priority classes into kube\_policies, upgrades Authentik to 2024.8.2, and fixes Argo Workflows permissions and NATS connection issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="alerts">
+    <MarkdownAlert severity="warning">
+      This Authentik upgrade contains [a problem](https://github.com/goauthentik/authentik/issues/12321) that will result in updates
+      to group names not automatically synchronizing with AWS.
+
+      While we are working with Authentik to develop a workaround, it may be a few more releases until this is resolved. If that
+      is a problem, you should defer an upgrade to this version until the problem is fixed.
+    </MarkdownAlert>
+
+    <MarkdownAlert severity="warning">
+      This release contains an bug that will cause Cilium to crash if deployed via [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+      Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+    </MarkdownAlert>
+  </Fragment>
+
+  <Fragment slot="breaking-changes">
+    * The `kube_rbac` module has been deprecated and will be removed in the next release. Please destroy any deployments of
+      it **after upgrading [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)**.
+
+      Kubernetes access control has now been moved to the [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module using
+      [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html). This provides several benefits:
+
+    * Kubernetes RBAC now works out-of-the-box, making cluster bootstrapping simpler.
+
+    * Accidental lock-out is now fully prevented.
+
+    * One fewer location where custom SSO roles need to be synchronized.
+
+    * The `kube_priority_classes` module has been consolidated with [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+      in order to remove a superfluous bootstrapping step. Please destroy any deployments of it **immediately before upgrading
+      [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)**.
+
+    * `eks_cluster_name` is no longer an input to most submodules as it is now dynamically resolved based on which
+      cluster you are deploying to.
+
+    * This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
+      * `pf`: 0.0.4 -> 0.0.5
+      * `authentik`: 2024.6.1 -> 2024.8.4
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Upgrades Authentik in [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+      to 2024.8.2 ([release notes](https://docs.goauthentik.io/docs/releases/2024.8)).
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Adds correct permissions to allow users to retry specific Workflow nodes in Argo Workflows.
+
+    * Adds automatic NATS connection retries to Argo Events components.
+
+    * Addresses issue in [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+      where the `git_ref` could not be a branch name.
+  </Fragment>
+</ChangelogEntry>

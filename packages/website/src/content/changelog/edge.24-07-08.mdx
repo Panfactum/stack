@@ -1,0 +1,89 @@
+---
+summary: Simplifies AWS EKS configuration with bootstrap mode, adds Fledged for node image caching, introduces PVC annotator for StatefulSet PVC management, and fixes various credential handling and utility command issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * We have made a small, breaking refactor of [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+      to reduce unnecessary options that made onboarding and maintenance more difficult:
+
+    * Most importantly, users will no longer able to set the instance type and count for nodes in EKS node groups. This
+      flexibility is unnecessary since node provisioning is handled
+      by Karpenter and not EKS. Moving forward, there are just two static configurations that are guaranteed to work
+      in all use cases: one for before autoscaling is installed and one for after. This is controlled via the new input,
+      `bootstrap_mode_enabled` (default: `false`).
+
+    * `control_plane_version` and `controller_node_kube_version` have been unified into a single variable
+      called `kube_version` that applies to all subsystems.
+
+    * `controller_node_subnets` has been renamed to `node_subnets` to indicate these subnets are used
+      for all cluster nodes, not just the EKS node groups.
+
+    * `all_nodes_allowed_security_groups` has been renamed to `node_security_groups` to align naming conventions
+
+    * By default, PVCs created by controllers such as StatefulSets can not be updated through their controller as their template (`volumeClaimTemplates`)
+      is immutable (a Kubernetes limitation). This poses a challenge when needing to update PVC metadata such as annotations and labels. We have
+      built a workaround to this ([kube\_pvc\_annotator](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator))
+      and incorporated it in various Panfactum modules. Unfortunately, incorporating this enhancement requires redeploying StatefulSets.
+
+    To complete this upgrade, perform the following steps:
+
+    1. Create a Velero backup of the cluster by running `velero create backup -w <backup_name>` to recover in case of mistakes.
+
+    2. The following StatefulSets need to be deleted **in this order** AND **with `kubectl delete --cascade=orphan`** AND **immediately restored**
+       with a subsequent `terragrunt apply` to their defining module:
+
+    * The Vault StatefulSet created by `kube_vault`
+    * The Redis cluster StatefulSet for Authentik created by `kube_authentik`
+    * The BuildKit StatefulSets created by `kube_buildkit`
+    * Any StatefulSets you have provisioned with [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+    * Any Redis clusters StatefulSets you have provisioned with [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+
+    As long as you use `--cascade=orphan` and take care to minimize the time between the `kubectl delete` and `terragrunt apply`,
+    there will not be any downtime during this operation.
+
+    3. After completing this operation, you need to delete the backing PVCs from each module **one at a time** by deleting
+       the PVC and then deleting its bound pod. The controller will then automatically provision a new PVC with the correct labels and annotations
+       to take advantage of the new functionality.
+
+    After deleting each pod, ensure that a new pod is automatically provisioned and becomes healthy **before** proceeding to the next.
+    As long as you proceed one at a time, this will not cause any downtime or data loss.
+
+    4. Delete the Velero backup you created in step 1 by running `velero delete backup <backup_name>`.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds [kube\_fledged](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_fledged) to the core stack. The
+      [kube-fledged](https://github.com/senthilrch/kube-fledged/tree/master) controller adds the ability to pre-pull images
+      to every node to improve pod startup times for critical or frequently used containers such as the Linkerd proxy or database
+      images. We provide instructions for installing this module [here](docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches)
+
+    * Adds the [kube\_pvc\_annotator](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator) submodule
+      that will provision a CronJob to run `pf-set-pvc-metadata` against PVCs created by immutable templates. See the module
+      documentation for potential use cases.
+
+    * Adds `persistence_backups_enabled` (default: `true`) to [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+      to support disabling EBS snapshot backups.
+
+    * Adds a new [common variable](docs/edge/reference/infrastructure-modules/overview#common-variables), `node_image_cache_enabled`,
+      to Panfactum modules that can be used to enable pre-pulling images to nodes via the `kube_fledged` operator.
+
+    * Adds the `pf-buildkit-clear-cache` command for removing any BuildKit caches not being used by an active image build job.
+
+    * Adds the `pf-set-pvc-metadata` utility command for syncing labels and annotations across groups of PVCs.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixes handling of public ECR registries in `docker-credential-panfactum`.
+
+    * Fixes handling of ECR token caching in `docker-credential-panfactum`.
+
+    * Fixes `pf-get-open-port` to be platform-agnostic.
+
+    * Fixes `pf-get-version-hash` to work with commit hash inputs.
+
+    * Fixes image paths in the Authentik dashboard for applications provisioned by Panfactum modules.
+  </Fragment>
+</ChangelogEntry>

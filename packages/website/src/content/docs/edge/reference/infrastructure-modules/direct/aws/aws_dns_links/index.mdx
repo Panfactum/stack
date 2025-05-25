@@ -1,0 +1,49 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="aws_dns_links" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_dns_links" status="stable" type="direct" />
+
+# AWS DNS Links
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+## Required Inputs
+
+The following input variables are required:
+
+### links
+
+Description: Ancestor domains (keys) to their descendent zone configurations
+
+Type:
+
+```hcl
+map(list(object({
+    subdomain    = string
+    name_servers = list(string)
+    ds_record    = string
+  })))
+```
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+No outputs.
+
+## Maintainer Notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

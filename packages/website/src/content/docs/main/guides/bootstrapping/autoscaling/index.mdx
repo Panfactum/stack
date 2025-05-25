@@ -28,7 +28,7 @@ In Kubernetes, there are three distinct flavors of autoscaling:
   and [Karpenter](https://karpenter.sh/).
 
 The Panfactum stack makes use of all three types of autoscaling. To learn more about autoscaling
-and resource optimization, see our [concept docs.](/docs/main/concepts/autoscaling)
+and resource optimization, see our [concept docs.](/main/concepts/autoscaling)
 
 ## Deploy Metrics Server
 
@@ -37,7 +37,7 @@ CPU and memory usage. Interestingly, this is not built-in to Kubernetes by defau
 powered by [an API extension](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/)
 provided by the [metrics-server](https://github.com/kubernetes-sigs/metrics-server) project.
 
-We provide a module to deploy the server: [kube\_metrics\_server](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_metrics_server).
+We provide a module to deploy the server: [kube\_metrics\_server](/main/reference/infrastructure-modules/direct/kubernetes/kube_metrics_server).
 
 Let's deploy it now:
 
@@ -45,25 +45,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_metrics_server/terragrunt.hcl]
-    ```hcl collapse={1-9}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_metrics\_server/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "cert_issuers" {
-      config_path  = "../kube_cert_issuers"
-      skip_outputs = true
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {}
-    ```
-    :::
+   dependency "cert_issuers" {
+     config_path  = "../kube_cert_issuers"
+     skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -87,7 +89,7 @@ Let's test to ensure it is working as intended:
 
 4. To diagnose utilization issues in the cluster, we bundle a CLI utility called `kube-capacity` for consolidating
    granular metrics across the entire cluster. Run `kube-capacity -uc` now:
-
+   
    ```shellsession collapse={10-40}
    NODE                                         NAMESPACE            POD                                                 CONTAINER                 CPU REQUESTS   CPU LIMITS    CPU UTIL    MEMORY REQUESTS   MEMORY LIMITS   MEMORY UTIL
    *                                            *                    *                                                   *                         1240m (21%)    3700m (63%)   514m (8%)   1740Mi (9%)       5334Mi (29%)    4596Mi (25%)
@@ -137,7 +139,7 @@ Now that we are capturing resource utilization data,
 we can use the vertical pod autoscaler to automatically rightsize your pod's CPU and memory
 [resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) based on historical usage.
 
-We provide a module to deploy the VPA: [kube\_vpa](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vpa).
+We provide a module to deploy the VPA: [kube\_vpa](/main/reference/infrastructure-modules/direct/kubernetes/kube_vpa).
 
 Let's deploy it now:
 
@@ -145,25 +147,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_vpa/terragrunt.hcl]
-    ```hcl collapse={1-9}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_vpa/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "cert_issuers" {
-      config_path  = "../kube_cert_issuers"
-      skip_outputs = true
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {}
-    ```
-    :::
+   dependency "cert_issuers" {
+     config_path  = "../kube_cert_issuers"
+     skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -171,29 +175,31 @@ Let's deploy it now:
 
 5. In your `region.yaml`, set `extra_inputs.vpa_enabled` to `true`:
 
-    ::: code-group labels=[region.yaml]
-    ```yaml collapse={1-15} ins={17}
-    # Meta - Example values only - Replace with your own
-    region: "us-east-2"
+   ::: code-group labels=\[region.yaml]
 
-    # AWS - Example values only - Replace with your own
-    aws_region: "us-east-2"
-    aws_secondary_region: "us-west-2"
+   ```yaml collapse={1-15} ins={17}
+   # Meta - Example values only - Replace with your own
+   region: "us-east-2"
 
-    # Kubernetes - Example values only - Replace with your own
-    kube_config_context: "production-primary"
-    kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com"
+   # AWS - Example values only - Replace with your own
+   aws_region: "us-east-2"
+   aws_secondary_region: "us-west-2"
 
-    # Vault - Example values only - Replace with your own
-    vault_addr: "https://vault.prod.panfactum.com"
+   # Kubernetes - Example values only - Replace with your own
+   kube_config_context: "production-primary"
+   kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com"
 
-    # Extra inputs
-    extra_inputs:
-      vpa_enabled: true # Set to `true` once kube_vpa is deployed
-    ```
-    :::
+   # Vault - Example values only - Replace with your own
+   vault_addr: "https://vault.prod.panfactum.com"
 
-    This will turn on the VPA for all modules in this cluster in the next apply.
+   # Extra inputs
+   extra_inputs:
+     vpa_enabled: true # Set to `true` once kube_vpa is deployed
+   ```
+
+   :::
+
+   This will turn on the VPA for all modules in this cluster in the next apply.
 
 6. Navigate up to the directory containing all your modules (i.e., the region directory). Run
    `terragrunt run-all apply` to re-apply all the modules in the region at once. Note that this might cause your Vault proxy
@@ -254,7 +260,7 @@ performance, and better cost optimization. Specifically:
 
 * It scales extremely well with the ability to spin up and down 100s of nodes at a time.
 
-We provide an infrastructure module to deploy it: [kube\_karpenter](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_karpenter).
+We provide an infrastructure module to deploy it: [kube\_karpenter](/main/reference/infrastructure-modules/direct/kubernetes/kube_karpenter).
 
 Let's deploy it now:
 
@@ -262,31 +268,33 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_karpenter/terragrunt.hcl]
-    ```hcl collapse={1-9}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_karpenter/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "cluster" {
-      config_path = "../aws_eks"
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {
-      cluster_name  = dependency.cluster.outputs.cluster_name
-      node_role_arn = dependency.cluster.outputs.node_role_arn
-      wait = false # IMPORTANT: You must set this to `false` during the initial install process.
-    }
-    ```
-    :::
+   dependency "cluster" {
+     config_path = "../aws_eks"
+   }
+
+   inputs = {
+     cluster_name  = dependency.cluster.outputs.cluster_name
+     node_role_arn = dependency.cluster.outputs.node_role_arn
+     wait = false # IMPORTANT: You must set this to `false` during the initial install process.
+   }
+   ```
+
+   :::
 
 3. Adjust the `wait` input to `false`. This will allow the installation to proceed even though there will
-be temporary errors as Karpenter sets up the required resources.
+   be temporary errors as Karpenter sets up the required resources.
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -294,28 +302,30 @@ be temporary errors as Karpenter sets up the required resources.
 
 6. Remove the `wait` input. That was only needed to allow the installation process to proceed even though there will be temporary errors as Karpenter sets up the required resources.
 
-    ::: code-group labels=[kube_karpenter/terragrunt.hcl]
-    ```hcl collapse={1-13} del={17}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_karpenter/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-13} del={17}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "cluster" {
-      config_path = "../aws_eks"
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {
-      cluster_name  = dependency.cluster.outputs.cluster_name
-      node_role_arn = dependency.cluster.outputs.node_role_arn
-      wait = false
-    }
-    ```
-    :::
+   dependency "cluster" {
+     config_path = "../aws_eks"
+   }
+
+   inputs = {
+     cluster_name  = dependency.cluster.outputs.cluster_name
+     node_role_arn = dependency.cluster.outputs.node_role_arn
+     wait = false
+   }
+   ```
+
+   :::
 
 ### Deploy NodePools
 
@@ -323,7 +333,7 @@ Karpenter requires some instructions about how to perform autoscaling such as wh
 to use for the underlying nodes. It looks for those instructions in [NodePool](https://karpenter.sh/docs/concepts/nodepools/) custom resources.
 
 The Panfactum stack comes with several classes of NodePools which are defined in
-the [kube\_karpenter\_node\_pools](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) module.
+the [kube\_karpenter\_node\_pools](/main/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) module.
 
 Let's deploy the NodePools now:
 
@@ -331,52 +341,54 @@ Let's deploy the NodePools now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_karpenter_node_pools/terragrunt.hcl]
-    ```hcl collapse={1-9}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_karpenter\_node\_pools/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "karpenter" {
-      config_path  = "../kube_karpenter"
-      skip_outputs = true
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    dependency "cluster" {
-      config_path = "../aws_eks"
-    }
+   dependency "karpenter" {
+     config_path  = "../kube_karpenter"
+     skip_outputs = true
+   }
 
-    dependency "vpc" {
-      config_path = "../aws_vpc"
-    }
+   dependency "cluster" {
+     config_path = "../aws_eks"
+   }
 
-    inputs = {
-      cluster_name           = dependency.cluster.outputs.cluster_name
-      cluster_endpoint       = dependency.cluster.outputs.cluster_url
-      cluster_dns_service_ip = dependency.cluster.outputs.dns_service_ip
-      cluster_ca_data        = dependency.cluster.outputs.cluster_ca_data
-      node_instance_profile  = dependency.cluster.outputs.node_instance_profile
-      node_vpc_id            = dependency.vpc.outputs.vpc_id
-      node_security_group_id = dependency.cluster.outputs.node_security_group_id
-      node_subnets = [
-        "PRIVATE_A",
-        "PRIVATE_B",
-        "PRIVATE_C"
-      ]
-    }
-    ```
-    :::
+   dependency "vpc" {
+     config_path = "../aws_vpc"
+   }
 
-    For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for `node_subnets` unless you have a specific reason not to.
+   inputs = {
+     cluster_name           = dependency.cluster.outputs.cluster_name
+     cluster_endpoint       = dependency.cluster.outputs.cluster_url
+     cluster_dns_service_ip = dependency.cluster.outputs.dns_service_ip
+     cluster_ca_data        = dependency.cluster.outputs.cluster_ca_data
+     node_instance_profile  = dependency.cluster.outputs.node_instance_profile
+     node_vpc_id            = dependency.vpc.outputs.vpc_id
+     node_security_group_id = dependency.cluster.outputs.node_security_group_id
+     node_subnets = [
+       "PRIVATE_A",
+       "PRIVATE_B",
+       "PRIVATE_C"
+     ]
+   }
+   ```
 
-4. Run `pf-tf-init` to enable the required providers.
+   :::
 
-5. Run `terragrunt apply`.
+   For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for `node_subnets` unless you have a specific reason not to.
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
 
 ### Test Cluster Autoscaling
 
@@ -429,7 +441,7 @@ wasted resources. [^6]
 [^6]: [This article](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money) provides a
     great real world example of how this impacted a company running Kubernetes clusters in AWS.
 
-We provide an alternative scheduler in [kube\_scheduler](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+We provide an alternative scheduler in [kube\_scheduler](/main/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
 (`panfactum`) that implements the bin-packing scheduling algorithm. Typically, this results in a 25-33% cost reduction.
 
 Let's deploy it now:
@@ -438,61 +450,65 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_scheduler/terragrunt.hcl]
-    ```hcl collapse={1-19}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_scheduler/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-19}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "karpenter" {
-      config_path  = "../kube_karpenter"
-      skip_outputs = true
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    dependency "kyverno" {
-      config_path  = "../kube_kyverno"
-      skip_outputs = true
-    }
+   dependency "karpenter" {
+     config_path  = "../kube_karpenter"
+     skip_outputs = true
+   }
 
-    inputs = {}
-    ```
-    :::
+   dependency "kyverno" {
+     config_path  = "../kube_kyverno"
+     skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
 5. In your `region.yaml`, set `extra_inputs.panfactum_scheduler_enabled` to `true`:
-    
-    ::: code-group labels=[region.yaml]
-    ```yaml collapse={1-15} ins={18}
-    # Meta - Example values only - Replace with your own
-    region: "us-east-2"
 
-    # AWS - Example values only - Replace with your own
-    aws_region: "us-east-2"
-    aws_secondary_region: "us-west-2"
+   ::: code-group labels=\[region.yaml]
 
-    # Kubernetes - Example values only - Replace with your own
-    kube_config_context: "production-primary"
-    kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com"
+   ```yaml collapse={1-15} ins={18}
+   # Meta - Example values only - Replace with your own
+   region: "us-east-2"
 
-    # Vault - Example values only - Replace with your own
-    vault_addr: "https://vault.prod.panfactum.com"
+   # AWS - Example values only - Replace with your own
+   aws_region: "us-east-2"
+   aws_secondary_region: "us-west-2"
 
-    # Extra inputs
-    extra_inputs:
-      vpa_enabled: true # Do not enable until kube_vpa is deployed
-      panfactum_scheduler_enabled: true # Only set to `true` when kube_scheduler has been deployed
-    ```
-    :::
-   
-    This will instruct all modules in this cluster to use this new scheduler instead of the default EKS one.
+   # Kubernetes - Example values only - Replace with your own
+   kube_config_context: "production-primary"
+   kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com"
+
+   # Vault - Example values only - Replace with your own
+   vault_addr: "https://vault.prod.panfactum.com"
+
+   # Extra inputs
+   extra_inputs:
+     vpa_enabled: true # Do not enable until kube_vpa is deployed
+     panfactum_scheduler_enabled: true # Only set to `true` when kube_scheduler has been deployed
+   ```
+
+   :::
+
+   This will instruct all modules in this cluster to use this new scheduler instead of the default EKS one.
 
 6. Re-deploy all Kubernetes modules.
 
@@ -507,7 +523,7 @@ The built-in Kubernetes HPA has several limitations that KEDA allows you to miti
 * Cannot be combined with vertical autoscaling
 * Can only scale on internal metrics like CPU and memory (KEDA supports hundreds of additional metrics)
 
-We provide a module [kube_keda](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_keda) for deploying and managing KEDA.
+We provide a module [kube\_keda](/main/reference/infrastructure-modules/direct/kubernetes/kube_keda) for deploying and managing KEDA.
 
 Let's deploy it now:
 
@@ -515,30 +531,32 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_keda/terragrunt.hcl]
-    ```hcl collapse={1-19}
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[kube\_keda/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-19}
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    dependency "cert_issuers" {
-      config_path  = "../kube_cert_issuers"
-      skip_outputs = true
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    dependency "scheduler" {
-      config_path  = "../kube_scheduler"
-      skip_outputs = true
-    }
+   dependency "cert_issuers" {
+     config_path  = "../kube_cert_issuers"
+     skip_outputs = true
+   }
 
-    inputs = {}
-    ```
-    :::
+   dependency "scheduler" {
+     config_path  = "../kube_scheduler"
+     skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 

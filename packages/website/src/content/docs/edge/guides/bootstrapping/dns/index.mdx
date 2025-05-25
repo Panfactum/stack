@@ -51,7 +51,7 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
 ## Deploy the AWS Registered Domains Module
 
 To use your domain registrations in IaC and to align them with best practices, we will now deploy the
-[aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) module. [^1]
+[aws\_registered\_domains](/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) module. [^1]
 
 This module will **not** register / unregister domains, only update the registration settings. In addition,
 it will set up the root [hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) and enable [DNSSEC](https://www.cloudflare.com/dns/dnssec/how-dnssec-works/) to prevent domain hijacking.
@@ -82,98 +82,101 @@ Let's deploy the module now:
 2. Add a new `aws_registered_domains` folder to your `production` environment in the `global` region.
 
 3. Add a new `terragrunt.hcl` file that looks like this:
-      
-      ::: code-group labels=[global/aws_registered_domains/terragrunt.hcl, global/aws_registered_domains/secrets.yaml]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ::: code-group labels=\[global/aws\_registered\_domains/terragrunt.hcl, global/aws\_registered\_domains/secrets.yaml]
+
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
+
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
 
-      // Note that we use sops-encrypted values here as we did in the `aws_account` module. It is up to you what you
-      // leave encrypted / unencrypted throughout this guide. However,
-      // if you choose to use encrypted values, ensure that you create an encrypted `secrets.yaml`.
-      locals {
-         secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
-         organization         = "REPLACE_ME"
-         contact_first_name   = "REPLACE_ME"
-         contact_last_name    = "REPLACE_ME"
-         country_code         = "REPLACE_ME"
-      }
+   // Note that we use sops-encrypted values here as we did in the `aws_account` module. It is up to you what you
+   // leave encrypted / unencrypted throughout this guide. However,
+   // if you choose to use encrypted values, ensure that you create an encrypted `secrets.yaml`.
+   locals {
+      secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+      organization         = "REPLACE_ME"
+      contact_first_name   = "REPLACE_ME"
+      contact_last_name    = "REPLACE_ME"
+      country_code         = "REPLACE_ME"
+   }
 
-      inputs = {
-         domain_names = [
-            "REPLACE_ME"
-         ]
+   inputs = {
+      domain_names = [
+         "REPLACE_ME"
+      ]
 
-         // Note that this do NOT all need to be the same, but they can be
-         admin_organization_name = local.organization
-         admin_first_name        = local.contact_first_name
-         admin_last_name         = local.contact_last_name
-         admin_email_address     = local.secrets.email_address
-         admin_phone_number      = local.secrets.phone_number
-         admin_address_line_1    = local.secrets.address_line_1
-         admin_city              = local.secrets.city
-         admin_state             = local.secrets.state
-         admin_zip_code          = local.secrets.postal_code
-         admin_country_code      = local.country_code
+      // Note that this do NOT all need to be the same, but they can be
+      admin_organization_name = local.organization
+      admin_first_name        = local.contact_first_name
+      admin_last_name         = local.contact_last_name
+      admin_email_address     = local.secrets.email_address
+      admin_phone_number      = local.secrets.phone_number
+      admin_address_line_1    = local.secrets.address_line_1
+      admin_city              = local.secrets.city
+      admin_state             = local.secrets.state
+      admin_zip_code          = local.secrets.postal_code
+      admin_country_code      = local.country_code
 
-         registrant_organization_name = local.organization
-         registrant_first_name        = local.contact_first_name
-         registrant_last_name         = local.contact_last_name
-         registrant_email_address     = local.secrets.email_address
-         registrant_phone_number      = local.secrets.phone_number
-         registrant_address_line_1    = local.secrets.address_line_1
-         registrant_city              = local.secrets.city
-         registrant_state             = local.secrets.state
-         registrant_zip_code          = local.secrets.postal_code
-         registrant_country_code      = local.country_code
+      registrant_organization_name = local.organization
+      registrant_first_name        = local.contact_first_name
+      registrant_last_name         = local.contact_last_name
+      registrant_email_address     = local.secrets.email_address
+      registrant_phone_number      = local.secrets.phone_number
+      registrant_address_line_1    = local.secrets.address_line_1
+      registrant_city              = local.secrets.city
+      registrant_state             = local.secrets.state
+      registrant_zip_code          = local.secrets.postal_code
+      registrant_country_code      = local.country_code
 
-         tech_organization_name = local.organization
-         tech_first_name        = local.contact_first_name
-         tech_last_name         = local.contact_last_name
-         tech_email_address     = local.secrets.email_address
-         tech_phone_number      = local.secrets.phone_number
-         tech_address_line_1    = local.secrets.address_line_1
-         tech_city              = local.secrets.city
-         tech_state             = local.secrets.state
-         tech_zip_code          = local.secrets.postal_code
-         tech_country_code      = local.country_code
-      }
-      ```
-      ```yaml
-      address_line_1: ENC[AES256_GCM,data:/gV4Nzpiqam7RJuQpuLZvA==,iv:DCcQ1CVck5ApoupeOvsveXKSmFBhsvKh7lW6n4ArKIE=,tag:lK8vZjHe7cBgWypDi1TLfw==,type:str]
-      city: ENC[AES256_GCM,data:foB1bIiTYQSY5oMu,iv:vKvwrNt0yn0asPkJysTUJh7cQiHXoKe9uuQSCtG5rWo=,tag:01xygD8insWf2noW/TA69g==,type:str]
-      state: ENC[AES256_GCM,data:/jc=,iv:oUc49cYz/3wX6LW5U8IeP8AiIMUUa1pjUiOt6gFcwuU=,tag:/Mp8FyRfFW+aNJ9qrHRTnQ==,type:str]
-      postal_code: ENC[AES256_GCM,data:jQsDUyM=,iv:yx8ZRJvFcvydePs6S1oyaOw551c3XyZ7mK9NLNWQtdI=,tag:9rfvLSUxF+/XBfH+owqejQ==,type:str]
-      phone_number: ENC[AES256_GCM,data:/OpDy4H4pgr21TjmSA==,iv:1OHDjb++H/kCKpBGostFTZ1QezzhL8nf4UWT1zSlUi4=,tag:1XO0cqOzhHk+nD+ESmjo9w==,type:str]
-      email_address: ENC[AES256_GCM,data:LgWpTizdx0GKpkB98Ldv+CaK,iv:ixAAT+PByoy6BijLCaGGTPDzIuugZBG3yLTFqg3gWy4=,tag:wj+b32v8y6pM6CxOgTG7zA==,type:str]
-      sops:
-         kms:
-            - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
-               created_at: "2024-04-05T14:25:52Z"
-               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQEKyjuS1S0wj4XoBY7+4maxAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMYOOt558m53s0GXFYAgEQgDuk0n7mrG+pCAcwy+E6xoHIRvmGfkWsVRV/cElJa31QyvRcp0IzrA+dN7n8n1qsiFclTPL2HdLJrDvCXQ==
-               aws_profile: production-superuser
-            - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
-               created_at: "2024-04-05T14:25:52Z"
-               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQG70pH8ZCo3ZS40JLDOWgocAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMY6+hZP/N/X7Mof2TAgEQgDtOqjSKIDVoinwFrW+8lXR3LKL3HqzJFtV77Czl8uaa+e5LHFCrEbHy7Tpq/GQGtBlr99UifceGm6v5zA==
-               aws_profile: production-superuser
-         gcp_kms: []
-         azure_kv: []
-         hc_vault: []
-         age: []
-         lastmodified: "2024-04-05T14:25:52Z"
-         mac: ENC[AES256_GCM,data:GwkLspWC59AAjhgTTShUPN1cSuW0OzNOGws/+OSY6+ZLzwEGYHuH0GPo+reoH+Dxy7GejCuymIxQsp9ClYT0W9xJM/Nx/c53ddrcijCyVt/aO8/b93B+cs6b0wv2LlUZfA4QQd6aUoyTB/VlkNrZBT67oUHLrZ4O76A5CoTFV/o=,iv:iGuVrPkJlw6i1+Ot9jX+qlsmLwVMq6LhmlN8pPxTJO4=,tag:KU4ZhKAqLGhJDCSNrnZWBg==,type:str]
-         pgp: []
-         unencrypted_suffix: _unencrypted
-         version: 3.8.1
-      ```
-      :::
+      tech_organization_name = local.organization
+      tech_first_name        = local.contact_first_name
+      tech_last_name         = local.contact_last_name
+      tech_email_address     = local.secrets.email_address
+      tech_phone_number      = local.secrets.phone_number
+      tech_address_line_1    = local.secrets.address_line_1
+      tech_city              = local.secrets.city
+      tech_state             = local.secrets.state
+      tech_zip_code          = local.secrets.postal_code
+      tech_country_code      = local.country_code
+   }
+   ```
+
+   ```yaml
+   address_line_1: ENC[AES256_GCM,data:/gV4Nzpiqam7RJuQpuLZvA==,iv:DCcQ1CVck5ApoupeOvsveXKSmFBhsvKh7lW6n4ArKIE=,tag:lK8vZjHe7cBgWypDi1TLfw==,type:str]
+   city: ENC[AES256_GCM,data:foB1bIiTYQSY5oMu,iv:vKvwrNt0yn0asPkJysTUJh7cQiHXoKe9uuQSCtG5rWo=,tag:01xygD8insWf2noW/TA69g==,type:str]
+   state: ENC[AES256_GCM,data:/jc=,iv:oUc49cYz/3wX6LW5U8IeP8AiIMUUa1pjUiOt6gFcwuU=,tag:/Mp8FyRfFW+aNJ9qrHRTnQ==,type:str]
+   postal_code: ENC[AES256_GCM,data:jQsDUyM=,iv:yx8ZRJvFcvydePs6S1oyaOw551c3XyZ7mK9NLNWQtdI=,tag:9rfvLSUxF+/XBfH+owqejQ==,type:str]
+   phone_number: ENC[AES256_GCM,data:/OpDy4H4pgr21TjmSA==,iv:1OHDjb++H/kCKpBGostFTZ1QezzhL8nf4UWT1zSlUi4=,tag:1XO0cqOzhHk+nD+ESmjo9w==,type:str]
+   email_address: ENC[AES256_GCM,data:LgWpTizdx0GKpkB98Ldv+CaK,iv:ixAAT+PByoy6BijLCaGGTPDzIuugZBG3yLTFqg3gWy4=,tag:wj+b32v8y6pM6CxOgTG7zA==,type:str]
+   sops:
+      kms:
+         - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+            created_at: "2024-04-05T14:25:52Z"
+            enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQEKyjuS1S0wj4XoBY7+4maxAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMYOOt558m53s0GXFYAgEQgDuk0n7mrG+pCAcwy+E6xoHIRvmGfkWsVRV/cElJa31QyvRcp0IzrA+dN7n8n1qsiFclTPL2HdLJrDvCXQ==
+            aws_profile: production-superuser
+         - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+            created_at: "2024-04-05T14:25:52Z"
+            enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQG70pH8ZCo3ZS40JLDOWgocAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMY6+hZP/N/X7Mof2TAgEQgDtOqjSKIDVoinwFrW+8lXR3LKL3HqzJFtV77Czl8uaa+e5LHFCrEbHy7Tpq/GQGtBlr99UifceGm6v5zA==
+            aws_profile: production-superuser
+      gcp_kms: []
+      azure_kv: []
+      hc_vault: []
+      age: []
+      lastmodified: "2024-04-05T14:25:52Z"
+      mac: ENC[AES256_GCM,data:GwkLspWC59AAjhgTTShUPN1cSuW0OzNOGws/+OSY6+ZLzwEGYHuH0GPo+reoH+Dxy7GejCuymIxQsp9ClYT0W9xJM/Nx/c53ddrcijCyVt/aO8/b93B+cs6b0wv2LlUZfA4QQd6aUoyTB/VlkNrZBT67oUHLrZ4O76A5CoTFV/o=,iv:iGuVrPkJlw6i1+Ot9jX+qlsmLwVMq6LhmlN8pPxTJO4=,tag:KU4ZhKAqLGhJDCSNrnZWBg==,type:str]
+      pgp: []
+      unencrypted_suffix: _unencrypted
+      version: 3.8.1
+   ```
+
+   :::
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -183,7 +186,7 @@ Let's deploy the module now:
     [privacy protection](https://en.wikipedia.org/wiki/Domain_privacy), auto-renewal,
     and [transfer lock](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-lock.html).
     For more information,
-    refer to the [module documentation](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains).
+    refer to the [module documentation](/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains).
 
 [^2]: If the zone does not exist, you may skip this step. If you want to *keep* this zone, follow the import instructions above.
 
@@ -244,8 +247,8 @@ subdomain will be managed by its own hosted zone (not the root hosted zone). Thi
   subdomain `dev.panfactum.com`, a user would not need *any* access to records in other environments. This would not
   be possible if all records were stored in a single, global hosted zone.
 
-This is accomplished via a concept called [subdomain delegation](/docs/edge/concepts/networking/subdomain-delegation). Panfactum's
-[aws\_delegated\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_delegated_zones) will provide the relevant setup
+This is accomplished via a concept called [subdomain delegation](/edge/concepts/networking/subdomain-delegation). Panfactum's
+[aws\_delegated\_zones](/edge/reference/infrastructure-modules/direct/aws/aws_delegated_zones) will provide the relevant setup
 for this to work.
 
 Let's do this now for **every** environment:
@@ -258,79 +261,85 @@ Let's do this now for **every** environment:
 
 3. Create a `terragrunt.hcl` in that directory that looks like this: [^4]
 
-      ::: code-group labels=[global/aws_delegated_zones_production/terragrunt.hcl, global/aws_delegated_zones_development/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[global/aws\_delegated\_zones\_production/terragrunt.hcl, global/aws\_delegated\_zones\_development/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "root_domains" {
-         config_path = "../aws_registered_domains"
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         root_domain_names     = keys(dependency.root_domains.outputs.domains)
-         subdomain_identifiers = ["prod", "production"]
-      }
-      ```
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   dependency "root_domains" {
+      config_path = "../aws_registered_domains"
+   }
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   inputs = {
+      root_domain_names     = keys(dependency.root_domains.outputs.domains)
+      subdomain_identifiers = ["prod", "production"]
+   }
+   ```
 
-      dependency "root_domains" {
-         config_path = "../aws_registered_domains"
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      inputs = {
-         root_domain_names     = keys(dependency.root_domains.outputs.domains)
-         subdomain_identifiers = ["dev", "development"]
-      }
-      ```
-      :::
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
+
+   dependency "root_domains" {
+      config_path = "../aws_registered_domains"
+   }
+
+   inputs = {
+      root_domain_names     = keys(dependency.root_domains.outputs.domains)
+      subdomain_identifiers = ["dev", "development"]
+   }
+   ```
+
+   :::
 
    Use the appropriate `subdomain_identifiers` for your environment.
 
 4. Create a `module.yaml` in that directory:
 
-      ::: code-group labels=[global/aws_delegated_zones_production/module.yaml, global/aws_delegated_zones_development/module.yaml]
-      ```yaml "REPLACE_ME" "PRODUCTION"
-      aws_account_id: 'REPLACE_ME' # Should be the PRODUCTION environment's account id
-      aws_profile: REPLACE_ME # Should be the PRODUCTION environment's AWS profile (e.g., production-superuser)
+   ::: code-group labels=\[global/aws\_delegated\_zones\_production/module.yaml, global/aws\_delegated\_zones\_development/module.yaml]
 
-      # Required since we are using a directory name `aws_delegated_zones_production` that
-      # is different from the Panfactum module `aws_delegated_zones`
-      module: aws_delegated_zones 
-      ```
-      ```yaml "REPLACE_ME" "DEVELOPMENT"
-      aws_account_id: 'REPLACE_ME' # Should be the DEVELOPMENT environment's account id
-      aws_profile: REPLACE_ME # Should be the DEVELOPMENT environment's AWS profile (e.g., production-superuser)
+   ```yaml "REPLACE_ME" "PRODUCTION"
+   aws_account_id: 'REPLACE_ME' # Should be the PRODUCTION environment's account id
+   aws_profile: REPLACE_ME # Should be the PRODUCTION environment's AWS profile (e.g., production-superuser)
 
-      # Required since we are using a directory name `aws_delegated_zones_development` that
-      # is different from the Panfactum module `aws_delegated_zones`
-      module: aws_delegated_zones 
-      ```
-      :::
+   # Required since we are using a directory name `aws_delegated_zones_production` that
+   # is different from the Panfactum module `aws_delegated_zones`
+   module: aws_delegated_zones 
+   ```
 
-      Set the `aws_account_id` and `aws_profile` to the appropriate values for the *target* environment.
+   ```yaml "REPLACE_ME" "DEVELOPMENT"
+   aws_account_id: 'REPLACE_ME' # Should be the DEVELOPMENT environment's account id
+   aws_profile: REPLACE_ME # Should be the DEVELOPMENT environment's AWS profile (e.g., production-superuser)
 
-      For example, if setting up `aws_delegated_zones_development`, the `aws_account_id` should be set to your
-      development account and the `aws_profile` should be set to your profile for creating resources in the
-      development account (e.g., `development-superuser`).
+   # Required since we are using a directory name `aws_delegated_zones_development` that
+   # is different from the Panfactum module `aws_delegated_zones`
+   module: aws_delegated_zones 
+   ```
 
-      Note that this module deploys resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the
-      target environment account and the secondary `aws` provider to deploy the appropriate DNS records in root hosted
-      zone inside the `production` environment.
+   :::
+
+   Set the `aws_account_id` and `aws_profile` to the appropriate values for the *target* environment.
+
+   For example, if setting up `aws_delegated_zones_development`, the `aws_account_id` should be set to your
+   development account and the `aws_profile` should be set to your profile for creating resources in the
+   development account (e.g., `development-superuser`).
+
+   Note that this module deploys resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the
+   target environment account and the secondary `aws` provider to deploy the appropriate DNS records in root hosted
+   zone inside the `production` environment.
 
 5. Run `pf-tf-init` to enable the required providers.
 
@@ -349,7 +358,7 @@ shows both the return `A` record and the dnssec signature.
 
 ## Deploy Records
 
-If you have static records to deploy, you can use our [aws\_dns\_records](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records)
+If you have static records to deploy, you can use our [aws\_dns\_records](/edge/reference/infrastructure-modules/direct/aws/aws_dns_records)
 module to deploy them to the appropriate hosted zone.
 
 Specifically, now would be a good time to migrate and/or set up your [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)

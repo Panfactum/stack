@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule" />
 
 # PostgreSQL Cluster on Kubernetes
 
@@ -19,22 +20,22 @@ from the [CNPG container repository.](https://github.com/cloudnative-pg/postgres
 The default value for `pg_version` is the one that we test in our clusters, so we recommend starting there.
 
 <MarkdownAlert severity="warning">
-    At this time, major version upgrades are not supported for existing clusters (coming soon). Minor version upgrades will be applied
-    automatically when `pg_version` is changed.
+  At this time, major version upgrades are not supported for existing clusters (coming soon). Minor version upgrades will be applied
+  automatically when `pg_version` is changed.
 </MarkdownAlert>
 
 ### Credentials
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
 
-- `superuser_creds_secret`: Complete access to the database
-- `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
-- `reader_creds_secret`: Read-only access to the database
+* `superuser_creds_secret`: Complete access to the database
+* `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
+* `reader_creds_secret`: Read-only access to the database
 
 Each of the above named Secrets contains the following values:
 
-- `username`: The username to use for authentication
-- `password`: The password to use for authentication
+* `username`: The username to use for authentication
+* `password`: The password to use for authentication
 
 The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
 Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
@@ -44,16 +45,16 @@ to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thu
 credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
 
 <MarkdownAlert severity="warning">
-    The module also supplies `root_username` and `root_password` outputs for the root user of the database.
-    These credentials are **unsafe** to use as they are not automatically rotated without re-applying
-    this module.
+  The module also supplies `root_username` and `root_password` outputs for the root user of the database.
+  These credentials are **unsafe** to use as they are not automatically rotated without re-applying
+  this module.
 </MarkdownAlert>
 
 ### Connecting
 
 The below example show how to connect to the PostgreSQL cluster through
 the read-write PgBouncer using dynamically rotated admin credentials by setting various
-environment variables in our [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_deployment) module.
+environment variables in our [kube\_deployment](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
 module "database" {
@@ -87,14 +88,14 @@ You must provide an initial storage amount for the database with `pg_initial_sto
 of the underlying EBS volumes.
 
 Once the database is running, the PVC autoresizer
-(provided by [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer))
+(provided by [kube\_pvc\_autoresizer](/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
 will automatically expand the EBS volumes once the free space
 drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
 
 <MarkdownAlert severity="warning">
-    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-    ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+  Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+  ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
 </MarkdownAlert>
 
 ### Resource Allocation
@@ -117,11 +118,11 @@ Similarly, resources given to the PgBouncer instances are controlled via:
 If `vpa_enabled` is `false`, the actual resource requests and limits will be set to the minimums.
 
 <MarkdownAlert severity="warning">
-    You should take care to tune the memory minimums appropriately, especially for bursty workloads. If you are regularly
-    issuing queries that take more than twice the 95th percentile memory utilization, you must manually set `pg_minimum_memory_mb` to
-    a sensible value for your workloads as the VPA will under-provision resources.
+  You should take care to tune the memory minimums appropriately, especially for bursty workloads. If you are regularly
+  issuing queries that take more than twice the 95th percentile memory utilization, you must manually set `pg_minimum_memory_mb` to
+  a sensible value for your workloads as the VPA will under-provision resources.
 
-    Additionally, you should review our section on memory tuning below.
+  Additionally, you should review our section on memory tuning below.
 </MarkdownAlert>
 
 ### Memory Tuning
@@ -135,10 +136,10 @@ the settings further for your particular use case.
 
 These three settings are the most important:
 
-- `pg_work_mem_percent`: How much memory is set aside for intermediate calculations in a query (i.e., sorts, joins, etc.).
-- `pg_max_connections`: How many simultaneous connections / queries you can run in the database.
-- `pg_shared_buffers_percent`: How much of the memory given to the cluster is set aside for caching data so that
-it does not need to be read from disk.
+* `pg_work_mem_percent`: How much memory is set aside for intermediate calculations in a query (i.e., sorts, joins, etc.).
+* `pg_max_connections`: How many simultaneous connections / queries you can run in the database.
+* `pg_shared_buffers_percent`: How much of the memory given to the cluster is set aside for caching data so that
+  it does not need to be read from disk.
 
 `pg_work_mem_percent` is the most important and most likely to slow down your complex queries. This parameter
 represents the total memory set aside for all connections for their query calculations.
@@ -158,13 +159,13 @@ will always be more performant than the generic page cache, so tuning this can h
 
 Postgres has [three shutdown modes](https://www.postgresql.org/docs/current/server-shutdown.html):
 
-- Smart Shutdown: Prevents new connections, but allows existing sessions to finish their work before
-shutting down.
-- Fast Shutdown: Prevents new connections and forces all existing sessions to abort safely before
-shutting down.
-- Immediate Shutdown: Immediately exits without doing normal database shutdown processing (including
-forcibly killing sessions w/ doing graceful aborts). Forces a database recovery operation on the next
-startup.
+* Smart Shutdown: Prevents new connections, but allows existing sessions to finish their work before
+  shutting down.
+* Fast Shutdown: Prevents new connections and forces all existing sessions to abort safely before
+  shutting down.
+* Immediate Shutdown: Immediately exits without doing normal database shutdown processing (including
+  forcibly killing sessions w/ doing graceful aborts). Forces a database recovery operation on the next
+  startup.
 
 The default behavior of this module is to do a fast shutdown with a 30-second timeout (`pg_switchover_delay`)
 until an immediate shutdown is issued.
@@ -198,18 +199,18 @@ are paused and replicas are given a chance to catch up with the primary before o
 
 However, there are a few drawbacks:
 
-- In the case of a catastrophic instance failure on the primary (e.g., power outage), there is a possibility
-of data loss (up to roughly 5 seconds).
+* In the case of a catastrophic instance failure on the primary (e.g., power outage), there is a possibility
+  of data loss (up to roughly 5 seconds).
 
-- If you are reading from the replicas, you may be reading stale data (up to roughly 5 seconds old).
+* If you are reading from the replicas, you may be reading stale data (up to roughly 5 seconds old).
 
-- About 5 seconds of additional downtime must be accounted for on failovers in order to allow the replicas to catch-up.
+* About 5 seconds of additional downtime must be accounted for on failovers in order to allow the replicas to catch-up.
 
 To avoid these drawbacks, you can set `pg_sync_replication_enabled`. However, this comes with its own tradeoffs:
 
-- Database mutations will take significantly longer because writes must be distributed across every replica before returning successfully.
+* Database mutations will take significantly longer because writes must be distributed across every replica before returning successfully.
 
-- Database mutations will not complete unless *all* replicas are available. This will increase the chance of downtime for write operations.
+* Database mutations will not complete unless *all* replicas are available. This will increase the chance of downtime for write operations.
 
 We advise you to stick with the default asynchronous replication unless you have a specific, demonstrated need for synchronous replication.
 
@@ -220,11 +221,11 @@ In the case of an emergency, you can recover the database from the backups and W
 Complete the following steps:
 
 1. Run `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. Verify that there exists a "First Point of
-Recoverability".
+   Recoverability".
 
-    If this is not available, that means that your logical PostgreSQL backups were not configured correctly and
-    are not available. You will need to restore from the hourly EBS snapshots
-    created by Velero instead.
+   If this is not available, that means that your logical PostgreSQL backups were not configured correctly and
+   are not available. You will need to restore from the hourly EBS snapshots
+   created by Velero instead.
 
 2. Retrieve the `backup_directory` output from this module by running `terragrunt output`.
 
@@ -232,26 +233,26 @@ Recoverability".
 
 4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `backup_directory` output you retrieved in step 2.
 
-    Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
-    timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
-    must be **after** the "First Point of Recoverability" that was reported in step 1.
+   Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
+   timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
+   must be **after** the "First Point of Recoverability" that was reported in step 1.
 
-    If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
-    should be within 5 seconds of the last database write.
+   If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
+   should be within 5 seconds of the last database write.
 
 5. Set the `pg_backup_directory` module input to anything **other than** the `backup_directory` output you retrieved in step 2. This ensures
-that the new cluster will not use overwrite the existing backup directory and instead create a new one.
+   that the new cluster will not use overwrite the existing backup directory and instead create a new one.
 
 6. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
-come back online.
+   come back online.
 
 7. When the recovered database is back online, an initial backup of the new database will be performed. You can monitor it's progress
-from the `:backups.postgresql.cnpg.io` in k9s. When this complete, you should see a "First Point of
-Recoverability" when running `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. If an initial backup cannot be created,
-something has gone wrong, and you should restart the recovery process.
+   from the `:backups.postgresql.cnpg.io` in k9s. When this complete, you should see a "First Point of
+   Recoverability" when running `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. If an initial backup cannot be created,
+   something has gone wrong, and you should restart the recovery process.
 
 8. After the initial backup for the recovered database is created, you can optionally delete the `pg_recovery_directory` directory from the S3 bucket
-provided by the `backup_bucket_name` output. This can save space as that old backup is no longer needed.
+   provided by the `backup_bucket_name` output. This can save space as that old backup is no longer needed.
 
 <MarkdownAlert severity="info">
   Note that the "First Point of Recoverability" is determined by the `backups_retention_days`
@@ -287,7 +288,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the
-[kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_disruption\_window\_controller)
+[kube\_disruption\_window\_controller](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
 submodule.
 
 #### Custom PDBs
@@ -339,20 +340,20 @@ or PgBouncer pods.
 
 This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
 
-- Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
-- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
-- Connect through PgBouncer with `pgbouncer_pool_mode` set to `transaction`
+* Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+* Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+* Connect through PgBouncer with `pgbouncer_pool_mode` set to `transaction`
 
 Note that the above configuration will significantly increase the costs of running PostgreSQL (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
 
 <MarkdownAlert severity="warning">
-    Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
-    disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
-    and limited by the use of PDBs.
+  Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+  disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+  and limited by the use of PDBs.
 
-    An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
-    you should still implement defensive coding practices in your client code to account for potential disruptions.
+  An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+  you should still implement defensive coding practices in your client code to account for potential disruptions.
 </MarkdownAlert>
 
 ### PostgreSQL Parameters
@@ -377,19 +378,19 @@ Note that this will NOT create the extra schemas; you should do that in your dat
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
-- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -605,7 +606,7 @@ Default: `500`
 
 ### pg\_parameters
 
-Description: A map of postgres parameters. See https://cloudnative-pg.io/documentation/1.23/postgresql_conf.
+Description: A map of postgres parameters. See [https://cloudnative-pg.io/documentation/1.23/postgresql\_conf](https://cloudnative-pg.io/documentation/1.23/postgresql_conf).
 
 Type: `map(string)`
 
@@ -733,7 +734,7 @@ Default: `false`
 
 ### pgbouncer\_autodb\_idle\_timeout
 
-Description: If the automatically created (via “*”) database pools have been unused this many seconds, they are freed.
+Description: If the automatically created (via “\*”) database pools have been unused this many seconds, they are freed.
 
 Type: `number`
 
@@ -1041,11 +1042,11 @@ Description: Whether to use the ECR pull through cache for the deployed images
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### s3\_bucket\_access\_policy
 
-Description: Additional AWS access policy for the backup S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
+Description: Additional AWS access policy for the backup S3 bucket. [https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam\_policy\_document#argument-reference](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference)
 
 Type: `string`
 

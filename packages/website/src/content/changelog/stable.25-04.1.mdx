@@ -1,0 +1,13 @@
+---
+summary: Fixes the default value for `min_node_cpu` of kube\_karpenter\_node\_pools to prevent errors.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="fixes">
+    * Fixes the default value for `min_node_cpu` of [kube\_karpenter\_node\_pools](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) so
+      that an error no longer occurs.
+  </Fragment>
+</ChangelogEntry>

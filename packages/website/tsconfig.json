@@ -7,8 +7,12 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./"],
-      "@/*": ["./src/*"]
+      "~/*": [
+        "./"
+      ],
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
@@ -16,6 +20,8 @@
     "src/**/*.tsx",
     "src/**/*.astro",
     "src/**/*.mdx",
+    "src/**/*.mdx/*.ts",
+    "src/**/*.mdx/*.tsx",
     ".astro/types.d.ts"
   ],
 }

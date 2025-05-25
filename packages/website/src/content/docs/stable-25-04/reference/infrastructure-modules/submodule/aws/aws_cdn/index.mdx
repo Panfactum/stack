@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/aws_cdn" status="beta" type="submodule"/>
+
+<ModuleHeader name="aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/aws_cdn" status="beta" type="submodule" />
 
 # AWS CloudFront CDN
 
@@ -14,30 +15,30 @@ Deploys an [AWS CloudFront distribution](https://docs.aws.amazon.com/AmazonCloud
 
 This module performs several functions in addition to providing sensible defaults for the CDN:
 
-- Establishes the CDN TLS certificates
-- Deploys the DNS records for the CDN
-- Provides pre-packaged edge function behaviors (e.g., URL rewrite rules)
-- Configures request logging (optional)
+* Establishes the CDN TLS certificates
+* Deploys the DNS records for the CDN
+* Provides pre-packaged edge function behaviors (e.g., URL rewrite rules)
+* Configures request logging (optional)
 
 ## Limitations
 
-- The domain names used for the CDN must be served by Route53 zones in the AWS account within which this module
+* The domain names used for the CDN must be served by Route53 zones in the AWS account within which this module
   is deployed. This zone must be deployed before using this module because this module automatically configures all the necessary DNS records.
 
-- Your origin servers must be identified by domain name (not IP address) and be able to serve HTTPS traffic
+* Your origin servers must be identified by domain name (not IP address) and be able to serve HTTPS traffic
   from their domain (i.e., have valid TLS certificates).
 
 ## Usage
 
 ### Overview
 
-Conceptually, a CloudFront _distribution_ is a set of servers distributed all over the world that collectively comprise
+Conceptually, a CloudFront *distribution* is a set of servers distributed all over the world that collectively comprise
 a content distribution network (CDN). These servers
 are called points-of-presence (PoPs). PoPs serve several purposes:
 
-- Enhancing TLS performance by speeding up the initial connection between the client and server ([reference](https://www.imperva.com/learn/performance/cdn-and-ssl-tls/))
-- Improving overall performance and reducing load on servers by caching responses from origin servers
-- Running edge computations ([CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html))
+* Enhancing TLS performance by speeding up the initial connection between the client and server ([reference](https://www.imperva.com/learn/performance/cdn-and-ssl-tls/))
+* Improving overall performance and reducing load on servers by caching responses from origin servers
+* Running edge computations ([CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html))
 
 Unlike traditional servers where DNS records such as `example.com` route
 to a single set of servers, CloudFront works with AWS's DNS servers to ensure that clients are always routed
@@ -49,8 +50,8 @@ routed from the PoP to your origin servers is configured by `origin_configs`.
 ### Using the Global Provider
 
 <MarkdownAlert severity="warning">
-   Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
-   are deployed globally.
+  Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
+  are deployed globally.
 </MarkdownAlert>
 
 ```hcl
@@ -92,55 +93,55 @@ is controlled via `path_prefix`. Each origin must have a unique `path_prefix`.
 Traffic that matches a given `path_prefix` will:
 
 1. The CDN will check to see if the request path matches any of the `path_match_behavior` keys (e.g., `*.jpg`).
-If so, the rules from that behavior configuration will be applied. See below.
+   If so, the rules from that behavior configuration will be applied. See below.
 
 2. If no `path_match_behavior` keys are matched (or none are provided), the `default_cache_behavior` configuration will take effect.
 
 The cache "behavior" for both `default_cache_behavior` and `path_match_behavior` works as follows:
 
 1. The `viewer_protocol_policy` ([docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesViewerProtocolPolicy))
-will be applied. [^2]
+   will be applied. [^2]
 
 2. Any global redirect (see below) will take effect. Otherwise, the request will be processed.
 
 3. If `caching_enabled` is `true`, the request's HTTP method is in `cached_methods`, and the request has a cached response, then a cached response will be immediately returned.
 
 4. If no cached response is found and the request HTTP method is in `allowed_methods`, the request be forwarded
-to the `origin_domain` in its original form (including the original `Host` header)
-except for anything blocked by `cookies_not_forwarded`, `headers_not_forwarded`, and `query_strings_forwarded`. Additionally,
-path `rewrite_rules` (see below) will take effect.
+   to the `origin_domain` in its original form (including the original `Host` header)
+   except for anything blocked by `cookies_not_forwarded`, `headers_not_forwarded`, and `query_strings_forwarded`. Additionally,
+   path `rewrite_rules` (see below) will take effect.
 
 5. When a response is received, CloudFront will [automatically compress responses](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-cloudfront-how-it-works)
-if `compression_enabled` is `true` and the client accepts either the Gzip or Brotli compression formats (via the `Accept-Encoding` HTTP header).
+   if `compression_enabled` is `true` and the client accepts either the Gzip or Brotli compression formats (via the `Accept-Encoding` HTTP header).
 
 6. After optional compression, the request will be cached if `caching_enabled` is `true` and the request's HTTP method is in `cached_methods`.
-The cache key is determined by `cookies_in_cache_key`, `headers_in_cache_key`, and `query_strings_in_cache_key` (the HTTP method and path are
-always included in the key). [^1]
+   The cache key is determined by `cookies_in_cache_key`, `headers_in_cache_key`, and `query_strings_in_cache_key` (the HTTP method and path are
+   always included in the key). [^1]
 
    How long the request will stay cached depends on the following values and the response's [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control)
    and [Expires](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires) headers:
 
-   - `min_ttl`: The minimum amount of time in seconds that CloudFront will keep responses in the cache before revalidating them
-   with the origin server.
-   - `default_ttl`: The amount of time in seconds that CloudFront will keep responses in the cache **only** when the response
-   does not supply `Cache-Control` or `Expires` headers.
-   - `max_ttl`: The maximum amount of time in seconds that Cloudfront will keep responses in the cache before revalidating them
-   with the origin server **regardless** of the response's `Cache-Control` or `Expires` headers.
-   - `Cache-Control` response headers: CloudFront respects the `max-age`, `no-cache`, `no-store`, `private`, `stale-while-revalidate` and `stale-if-error`
-   directives.
-   - `Expires` response headers: Cloudfront respects this header but `Cache-Control` should be preferred due to its increased specificity.
+   * `min_ttl`: The minimum amount of time in seconds that CloudFront will keep responses in the cache before revalidating them
+     with the origin server.
+   * `default_ttl`: The amount of time in seconds that CloudFront will keep responses in the cache **only** when the response
+     does not supply `Cache-Control` or `Expires` headers.
+   * `max_ttl`: The maximum amount of time in seconds that Cloudfront will keep responses in the cache before revalidating them
+     with the origin server **regardless** of the response's `Cache-Control` or `Expires` headers.
+   * `Cache-Control` response headers: CloudFront respects the `max-age`, `no-cache`, `no-store`, `private`, `stale-while-revalidate` and `stale-if-error`
+     directives.
+   * `Expires` response headers: Cloudfront respects this header but `Cache-Control` should be preferred due to its increased specificity.
 
    For a much more detailed breakdown of CloudFront caching, see [AWS's documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-key-understand-cache-policy.html).
 
 7. The response will be sent to the client.
 
 [^1]: The more values you specify for the cache key, the lower your hit ratio will be, so tune this carefully. By default,
-we include all cookies and query strings in the cache key to ensure that responses are not unintentionally shared across
-clients. You will likely want to loosen these settings for your specific scenario. For more information on tuning
-the cache key see [this documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/understanding-the-cache-key.html).
+    we include all cookies and query strings in the cache key to ensure that responses are not unintentionally shared across
+    clients. You will likely want to loosen these settings for your specific scenario. For more information on tuning
+    the cache key see [this documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/understanding-the-cache-key.html).
 
 [^2]: We default to `redirect-to-https` for backwards-compatibility, but it is more secure to use `https-only`. See
-the documentation for [HTTP Strict Transport Security.](https://https.cio.gov/hsts/)
+    the documentation for [HTTP Strict Transport Security.](https://https.cio.gov/hsts/)
 
 #### No Origin Matches
 
@@ -183,8 +184,8 @@ Rewrite rules work as follows:
 [^91]: If multiple rewrite rules match, the one with the longest `match` regex applies.
 
 [^92]: Note that we do not allow transforming the entire path at this phase because that would impact which config
-from `origin_configs` would match. If you need that behavior, a `redirect_rule` would be more appropriate than
-a `rewrite_rule`.
+    from `origin_configs` would match. If you need that behavior, a `redirect_rule` would be more appropriate than
+    a `rewrite_rule`.
 
 [^93]: Note that path rewriting occurs **after** a path behavior is selected.
 
@@ -222,21 +223,21 @@ headers set before forwarding the response to the client.
 
 You can customize the CORS behavior with the following inputs:
 
-- `cors_max_age_seconds`: Sets the `Access-Control-Max-Age` response header.
-- `cors_allowed_headers`: Sets the `Access-Control-Allow-Headers` response header.
-- `cors_allowed_methods`: Sets the `Access-Control-Allow-Methods` response header.
+* `cors_max_age_seconds`: Sets the `Access-Control-Max-Age` response header.
+* `cors_allowed_headers`: Sets the `Access-Control-Allow-Headers` response header.
+* `cors_allowed_methods`: Sets the `Access-Control-Allow-Methods` response header.
 
 By default, the only allowed origins will be from the `domains` input. If you want to allow additional origins,
 you must set `cors_additional_allowed_origins`. Adding `"*"` to this input will allow all origins.
 
 <MarkdownAlert severity="warning">
-   By enabling CORS handling in CloudFront, the CORS headers set by your origin servers will be overwritten.
+  By enabling CORS handling in CloudFront, the CORS headers set by your origin servers will be overwritten.
 </MarkdownAlert>
 
 #### S3 Origins
 
 If you want to use an S3 bucket as the origin for this CloudFront distribution, you should use our
-[aws\_s3\_public\_website](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws\_s3\_public\_website) module.
+[aws\_s3\_public\_website](/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
 
 ### Number of PoPs
 
@@ -281,11 +282,11 @@ by following [this documentation.](https://docs.aws.amazon.com/AmazonCloudFront/
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -392,7 +393,7 @@ The following input variables are optional (have default values):
 
 ### cors\_additional\_allowed\_origins
 
-Description: Specifies which origins are allowed besides the domain name specified. Use '*' to allow any origin.
+Description: Specifies which origins are allowed besides the domain name specified. Use '\*' to allow any origin.
 
 Type: `list(string)`
 

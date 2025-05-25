@@ -1,10 +1,11 @@
-import {makeModuleDir} from "@/pages/docs/_components/util/makeModuleDir.ts";
+
+import { makeModuleDir } from "@/components/layouts/primary/util/makeModuleDir.ts";
 
 import modules from "./modules.json";
 import {
   NavIcons,
   type TopLevelDocsSectionMetadata,
-} from "../../../pages/docs/_components/types.ts";
+} from "../../../components/layouts/primary/types.ts";
 
 export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
   {
@@ -530,90 +531,5 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
         path: "/rbac",
       },
     ],
-  },
-  {
-    text: "Changelog",
-    path: "/changelog",
-    icon: NavIcons.history,
-    notVersioned: true,
-    defaultSubPath: "/edge",
-    sub: [
-      {
-        text: "Edge",
-        path: "/edge",
-      },
-      {
-        text: "Stable.25-04",
-        path: "/stable-25-04"
-      }
-    ],
-  },
-  {
-    text: "Maturity Model",
-    path: "/maturity",
-    icon: NavIcons.dataFlow,
-    notVersioned: true,
-    sub: [
-      {
-        text: "Overview",
-        path: "/"
-      },
-      {
-        text: "Measures",
-        path: "/measures",
-        sub: [
-          {
-            text: "KPIs",
-            path: "/kpis",
-          },
-          {
-            text: "Downtime Visibility",
-            path: "/downtime-visibility",
-          },
-          {
-            text: "Security Backlog",
-            path: "/security-backlog",
-          },
-        ],
-      },
-      {
-        text: "Pillars",
-        path: "/pillars",
-        sub: [
-          {
-            text: "Automation",
-            path: "/automation",
-          },
-          {
-            text: "Observability",
-            path: "/observability",
-          },
-          {
-            text: "Security",
-            path: "/security",
-          },
-          {
-            text: "Resiliency",
-            path: "/resiliency",
-          },
-          {
-            text: "Performance",
-            path: "/performance",
-          },
-          {
-            text: "Immediate Integration",
-            path: "/immediate-integration",
-          },
-          {
-            text: "Efficiency",
-            path: "/efficiency",
-          },
-          {
-            text: "Coordination",
-            path: "/coordination",
-          },
-        ],
-      },
-    ],
-  },
+  }
 ];

@@ -1,0 +1,102 @@
+***
+
+## title: "Framework for Platform Engineering"
+
+# Maturity Model for Platform Engineering
+
+## What is Platform Engineering?
+
+In software development, your *platform* is the set of practices and systems you use to reliability and rapidly build, deploy, and operate
+your organization's software. The platform itself is an abstract concept representing dozens of subsystems
+that work in tandem to accomplish your goals.
+
+*Platform engineering* is the process of designing those practices and systems within
+your organization's unique context. In some organizations, this responsibility falls on a dedicated role or team; in others, platform-level responsibilities
+are handled by other technical leaders or even the head of engineering / CTO. [^1] [^2]
+
+[^1]: Often a comparison is made between [devops](https://en.wikipedia.org/wiki/DevOps) and platform engineering. There is indeed substantial overlap, but when
+    it comes to the specific *roles* that you see in the wild, devops roles tend to be more tactical (e.g., "manage this
+    Kubernetes cluster") while platform engineering roles denote a broader focus (e.g., "design a system that allows us
+    to ship software more effectively").
+
+[^2]: Platform engineering can be considered the technical complement to people-and-process focused engineering managers. **Together,
+    these roles shape the foundations of your engineering organization.** The actual titles and roles are often not so clear-cut and in smaller organizations
+    you'll often find people wearing both hats.
+
+Successful platform engineers excel in two different sets of activities:
+
+* Creating awareness and alignment about the state of the current platform
+
+* Designing and deploying systems that improve the platform effectiveness
+
+In this *Framework* section of the Panfactum documentation, we provide recommendations for what you can do as a platform
+engineer to improve awareness and alignment. This complements the Panfactum *Stack*, which reduces the effort needed to design, deploy, and maintain an
+effective foundational platform by > 95%.
+
+## Gaining Organizational Awareness
+
+Before proposing any platform improvements, the first priority of a platform engineer is to build organizational
+awareness about the current state of the platform. This awareness is critical for prioritizing the areas of highest impact
+and for gaining alignment and support for the (often disruptive) changes that you will need to introduce to improve
+platform effectiveness.
+
+We have found success in breaking organizational awareness into three discrete categories:
+
+* [Key performance indicators (KPIs)](/docs/maturity/measures/kpis)
+
+* [Downtime visibility](/docs/maturity/measures/downtime-visibility)
+
+* [Security backlog](/docs/maturity/measures/security-backlog)
+
+## Aligning on Platform Priorities
+
+After providing organizational awareness, you will need to build alignment on what specifically needs to improve
+to boost your overall effectiveness. However, before diving into tactical improvements, you should provide your organization a
+strategic vision for what an effective platform might look like.
+
+Fortunately, most organizations trend toward a similar set of long-term platform goals. We are able to
+bucket those goals into eight core pillars of excellence. These pillars serve as a starting
+point as you build your own framework and vision for your organization:
+
+* [Automation](/docs/maturity/pillars/automation)
+
+* [Observability](/docs/maturity/pillars/observability)
+
+* [Security](/docs/maturity/pillars/security)
+
+* [Resiliency](/docs/maturity/pillars/resiliency)
+
+* [Performance](/docs/maturity/pillars/performance)
+
+* [Immediate Integration](/docs/maturity/pillars/immediate-integration)
+
+* [Efficiency](/docs/maturity/pillars/efficiency)
+
+* [Coordination](/docs/maturity/pillars/coordination)
+
+The entry for each pillar provides:
+
+* A description of the activities the pillar encompasses
+
+* The concrete business value that should motivate improvement
+
+* Metrics you can use to assess your effectiveness
+
+* Concrete goals / steps that you can take to improve your effectiveness and align your organization with best practices
+
+As you socialize these pillars, the most important gaps will become apparent, not just to you but to the wider
+organization as well. Soon, you will have all the support you need to build a concrete roadmap to address
+these gaps and improve your team's effectiveness.
+
+## Next Steps
+
+If you are looking for a concrete place to start, we recommend the [Panfactum Stack](/stack). The stack combines
+many of the world's most trusted open-source projects into comprehensive set of practices and tooling that let you
+excel on every platform pillar from day one.
+
+Unlike other providers, we believe in the long-term value of understanding and owning your own
+tooling and systems. Not only does this give you unparalleled flexibility,
+but our unified approach unlocks new functionality not possible when working with each tool independently.
+
+To learn more, check out our [bootstrapping guide](/docs/edge/guides/bootstrapping/overview) which takes you step-by-step through
+the process of deploying a 10x more affordable, flexible, and featureful platform.

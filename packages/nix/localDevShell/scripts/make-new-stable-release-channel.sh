@@ -3,6 +3,7 @@
 # Script is used to cut a new version of the docs
 
 DOCS_DIR="$REPO_ROOT/packages/website/src/content/docs"
+CHANGELOG_DIR="$REPO_ROOT/packages/website/src/content/changelog"
 CONSTANTS_FILE="$REPO_ROOT/packages/website/src/lib/constants.json"
 
 DATE=$(date +'%y-%m')
@@ -68,29 +69,22 @@ jq --arg slug "$RELEASE_SLUG" \
   "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
 # Create a new changelog file for the stable release channel
-cat >"$DOCS_DIR/changelog/$RELEASE_SLUG.mdx" <<EOF
+cat >"$CHANGELOG_DIR/$RELEASE_SLUG.mdx" <<EOF
 ---
-title: "$CHANNEL_LABEL Changelog"
+summary: Initial release of the $CHANNEL_LABEL release channel.
 ---
 
+import ChangelogEntry from "./ChangelogEntry.astro"
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
-# $CHANNEL_LABEL Releases
-
-{/* lint disable no-duplicate-headings */}
-
-## $STABLE_VERSION_TAG
-
-This release was forked from the $($LATEST_EDGE_TAG) edge release.
+<ChangelogEntry>
+  <Fragment slot="alerts">
+    <MarkdownAlert severity="info">
+      This release was forked from the $($LATEST_EDGE_TAG) edge release.
+    </MarkdownAlert>
+  </Fragment>
+</ChangelogEntry>
 EOF
-
-# Find the header line for the latest edge tag and add the alert below it
-sed -i "/^## $LATEST_EDGE_TAG$/a\\
-\\
-<MarkdownAlert severity=\"info\">\\
-  This release serves as the base for the \`$STABLE_BRANCH\` release channel.\\
-</MarkdownAlert>\\
-" "$DOCS_DIR/changelog/edge.mdx"
 
 # Commit the docs changes
 git add "$REPO_ROOT"

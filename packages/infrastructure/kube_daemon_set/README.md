@@ -19,4 +19,4 @@ with the following enhancements:
 
 ### Basics
 
-This module follows the basic workload deployment patterns describe in [this guide](/docs/main/guides/deploying-workloads/basics).
+This module follows the basic workload deployment patterns describe in [this guide](/main/guides/deploying-workloads/basics).
