@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_dns_zones" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_dns_zones" status="stable" type="direct"/>
+
+<ModuleHeader name="aws_dns_zones" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_dns_zones" status="stable" type="direct" />
 
 # AWS Zones
 
@@ -11,33 +12,31 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### domain\_names
+### domains
 
-Description: Domain names for the zones.
+Description: Domain names (keys) and their configs (values) for the zones.
 
-Type: `set(string)`
+Type:
+
+```hcl
+map(object({
+    dnssec_enabled = optional(bool, false)
+  }))
+```
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### dnssec\_enabled
-
-Description: True iff DNSSEC should be enabled for the zones.
-
-Type: `bool`
-
-Default: `false`
+No optional inputs.
 
 ## Outputs
 

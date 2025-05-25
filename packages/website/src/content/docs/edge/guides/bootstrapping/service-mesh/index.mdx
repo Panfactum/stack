@@ -12,12 +12,12 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 ## Background
 
 For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd,
-check out our [concept documentation.](/docs/edge/concepts/networking/cluster-networking#service-mesh)
+check out our [concept documentation.](/edge/concepts/networking/cluster-networking#service-mesh)
 
 ## Deploy Linkerd
 
 [Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes,
-and we provide a module for deploying it: [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+and we provide a module for deploying it: [kube\_linkerd](/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
 
 This module not only deploys linkerd but also connects it to the certificate infrastructure that we
 provisioned in the previous section. It also installs linkerd-specific observability tooling that we
@@ -29,26 +29,28 @@ Let's deploy the module now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_linkerd/terragrunt.hcl]
-    ```hcl collapse={1-9} "REPLACE_ME"
-    include "panfactum" {
-        path   = find_in_parent_folders("panfactum.hcl")
-        expose = true
-    }
+   ::: code-group labels=\[kube\_linkerd/terragrunt.hcl]
 
-    terraform {
-        source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+       path   = find_in_parent_folders("panfactum.hcl")
+       expose = true
+   }
 
-    dependency "cert_issuers" {
-        config_path = "../kube_cert_issuers"
-    }
+   terraform {
+       source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {
-        vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
-    }
-    ```
-    :::
+   dependency "cert_issuers" {
+       config_path = "../kube_cert_issuers"
+   }
+
+   inputs = {
+       vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
+   }
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 

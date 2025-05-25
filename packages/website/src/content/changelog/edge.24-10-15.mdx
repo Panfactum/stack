@@ -1,0 +1,116 @@
+---
+summary: Introduces the Panfactum provider to greatly simplify module development, upgrades to OpenTofu v1.8, adds CDN capabilities with CloudFront integration, and significantly improves DNS and ingress routing configuration.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * This release integrates the new [Panfactum provider](https://registry.terraform.io/providers/Panfactum/pf/latest) and
+      removes the need to pass many different variables through the module tree.
+
+      Additionally, we have upgraded [OpenTofu to v1.8](https://opentofu.org/blog/opentofu-1-8-0/) which now supports variables in module `source` fields. To take advantage
+      of this, we now pass two new inputs to every module by default: `pf_module_source` and `pf_module_ref`.
+
+      This greatly simplifies developer experience for first-party modules by removing boilerplate with no loss of functionality.
+
+      **Original:**
+
+      ```hcl
+      module "namespace" {
+        source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+
+        namespace = "example"
+
+        # pf-generate: pass_vars
+        pf_stack_version = var.pf_stack_version
+        pf_stack_commit  = var.pf_stack_commit
+        environment      = var.environment
+        region           = var.region
+        pf_root_module   = var.pf_root_module
+        is_local         = var.is_local
+        extra_tags       = var.extra_tags
+        # end-generate
+      }
+      ```
+
+      **Simplified:**
+
+      ```hcl
+      module "namespace" {
+        source = "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
+
+        namespace = "example"
+      }
+      ```
+
+      For more information, see the [updated first-party IaC development documentation.](/docs/edge/guides/iac/first-party-modules#writing-modules)
+
+      This does come with a couple breaking changes:
+
+      1. Terragrunt no longer passes the following inputs to modules by default as they can be accessed via the Panfactum provider:
+
+      * `pf_stack_version`
+
+      * `pf_stack_commit`
+
+      * `environment`
+
+      * `region`
+
+      * `pf_root_module`
+
+      * `is_local`
+
+      2. The templating system and `pf-update-iac` have been removed as they are no longer necessary.
+
+    * [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `rewrite_rules`
+      to be specified on `ingress_configs`. Instead, there is now a top-level `redirect_rules` variables that has enhanced capabilities:
+      * Can pattern match against the entire url (`https://google.com/some/path`) instead of just the path component (`/some/path`).
+      * Can specify whether a permanent or temporary HTTP redirect should be used.
+
+    * [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `domains`
+      to be specified on individual `ingress_configs`. Instead, `domains` is now a top-level variable. This provides better
+      compatibility with the new CDN option and prevents confusing behavior in several edge cases. This also better
+      matches the intent of the module: to provide routing rules for a single set of domains, not to provide routing rules
+      for *all* domains in your system.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * A new module, [kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn), has been
+      created that enables setting up a CloudFront distribution (CDN) in front of Ingress resources for improved performance and security
+      as well as reduced server costs. [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+      has been updated to support CDN settings.
+
+    Additionally, a non-Kubernetes CDN module, [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
+    has also been created.
+
+    * A new module, [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones), has been
+      created that allows you to create Route53 zones that have a non-AWS registrar.
+
+    * Adds the `acl_aws_logs_delivery_enabled` input to [aws\_s3\_private\_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
+      which makes it easier to use the bucket for AWS log delivery purposes.
+
+    * Adds support for Cloudflare in [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) and [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+  </Fragment>
+
+  <Fragment slot="changes">
+    * `tls_1_2_enabled` now defaults to `true` in [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) in order
+      to support CDNs like CloudFront which do not yet support TLSv1.3.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * The internal logic of [aws\_dns\_records](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) has been
+      updated so that each record is managed independently of the others. This fixes an issue where adding or removing
+      records would cause *all* records to be created. However, this update will cause all records to be recreated
+      one last time.
+
+    * `pf-wf-git-checkout` no longer automatically appends a `.git` to the end of given repo URLs as this is incompatible
+      with some git hosting providers (e.g., Azure DevOps). This does mean that the `repo` variable input
+      to [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) and
+      [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) should
+      be updated to include the `.git` suffix if required for cloning over HTTP.
+
+    * Pinned helm provider version for `kube_redis_sentinel` submodule.
+  </Fragment>
+</ChangelogEntry>

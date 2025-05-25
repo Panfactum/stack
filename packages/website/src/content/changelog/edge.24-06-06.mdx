@@ -1,0 +1,61 @@
+---
+summary: Introduces workload utility submodule for standardized pod specs, disables VPC flow logs by default, improves environment setup with scaffolding script, and fixes several environment and resource-related issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * The reloader deployment must be deleted before the next apply of [kube\_reloader](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reloader). No
+      inputs have changed.
+
+    * The alpha module `kube_labels` has been removed in favor of the labels provided by [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility).
+
+    * VPC flow logs in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) are now disabled by default as they
+      can be fairly expensive and should only be used if you have a specific use-case in mind. They can be enabled
+      by setting `vpc_flow_logs_enabled` to `true`.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
+      [bootstrapping guide section for setting up terragrunt.](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
+
+    * Added [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened
+      Pod specs that take advantage of all capabilities included in the Panfactum stack.
+
+    * A new standard label `panfactum.com/workload` can be used to group replicated pods for the purpose of aggregating metrics. This is
+      now applied in all core infrastructure modules.
+
+    * Added [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) that export static configuration values that can be useful
+      when creating resources that run on clusters in the Panfactum stack.
+
+    * [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) will now automatically delete Certificate secrets if the Certificate is deleted.
+
+    * [aws\_ses\_domain](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain) now takes an optional input `smtp_allowed_cidrs`
+      that restricts what IPs can use the generated SMTP credentials. This allows users to mitigate
+      credential exfiltration attacks. We provide an example of how to use this [here.](https://github.com/Panfactum/stack/blob/main/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl)
+
+    * The Vault login UI will now have the OIDC login as the default method.
+
+    * Terragrunt will now automatically retry on some errors up to three times before exiting the process with a failure. This should
+      address intermittent issues such as network disruptions or race conditions.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
+      instead of full devenv re-evaluations.
+
+    * Temporarily adds `GIT_CLONE_PROTECTION_ACTIVE=false` to the shell environment in order to address
+      [this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
+      disables new bleeding edge security features which were accidentally shipped in a broken
+      state.
+
+    * Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when bootstrapping before VPA
+      take effect.
+
+    * [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) now respects `log_level` input.
+
+    * Sets `max_history` to `5` for all Helm charts to prevent overloading the Kubernetes API server with an every-growing amount
+      of historical Helm deployments.
+  </Fragment>
+</ChangelogEntry>

@@ -1,0 +1,46 @@
+---
+summary: Improves Karpenter node size management with instance type anti-affinity and maximum size limits, fixes EBS volume mount performance, and addresses issues with Cilium memory limits and Ingress NGINX on large CPU nodes.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * In all Panfactum submodules, `instance_type_spread_required` has been renamed to `instance_type_anti_affinity_required`
+      as we have had to replace TopologySpreadConstraints with AntiAffinity rules to work around [this issue with Karpenter.](https://github.com/kubernetes-sigs/karpenter/issues/1762)
+
+      This change will ensure that Karpenter will not randomly create massive nodes.
+
+    * To add further protection against Karpenter provisioning extremely large nodes, we have
+      two variables for [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools), `max_node_memory_mb` and `max_node_cpu`,
+      that limit the maximum size of nodes that can be provisioned.
+
+      The default limits are 64GB of memory and 32 CPUs. If you require nodes larger than these limits, you will need to adjust these new inputs.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Prevents Karpenter from scheduling instances on bare metal instances which we have observed issues with.
+
+    * Removes memory limits on the Cilium node agent in [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) as
+      these limits can cause Cilium to fail to launch on larger node sizes. This is due to the fact that Cilium's memory requirements increase proportionally
+      to the size of the node, but the VPA does not take this into account when assigning limits.
+
+    * Upgrades [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_nginx_ingress) so that it can run on nodes with a large number of CPU cores.
+
+    * EBS-backed PVs with many large files took a long time to mount due to [this issue](https://github.com/bottlerocket-os/bottlerocket/issues/3151)
+      with Bottlerocket OS (our underlying node OS). We have added the recommended remediation and now PVs should mount
+      nearly instantly. Note that this fix will **not** apply to existing PVs, only new ones.
+
+      To apply the fix to existing PVs, you will need to manually add the following mount option to their manifests:
+
+      ```yaml
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+          name: XXXX
+      spec:
+          mountOptions:
+            - context="system_u:object_r:local_t:s0"
+      ```
+  </Fragment>
+</ChangelogEntry>

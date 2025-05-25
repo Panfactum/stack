@@ -7,8 +7,8 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Internal Cluster Networking
 
-<p class="subtitle">Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
-and [kube\_cilium](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.</p>
+<p class="subtitle">Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+and [kube\_cilium](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.</p>
 
 ## Background
 
@@ -16,14 +16,14 @@ In the Panfactum framework, we use [CoreDNS](https://coredns.io/) to handle
 cluster DNS resolution and [Cilium](https://docs.cilium.io) to handle all the L3/L4 networking in our Kubernetes cluster.
 
 In this guide, we won't go into detail about the underlying design decisions and network concepts, so
-we recommend reviewing the [concept documentation](/docs/stable-25-04/concepts/networking/cluster-networking) for more
+we recommend reviewing the [concept documentation](/stable-25-04/concepts/networking/cluster-networking) for more
 information.
 
 ## Deploy Cilium
 
 Cilium provides workloads in your clusters with network interfaces that allow them to connect with each other and the wider
 internet. Without this controller, your pods would not be able to communicate. We provide a module
-for deploying Cilium: [kube\_cilium](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
+for deploying Cilium: [kube\_cilium](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
 
 Let's deploy it now.
 
@@ -69,7 +69,7 @@ Let's deploy it now.
 
 Kubernetes provides human-readable DNS names for pods and services running inside the cluster (e.g., `my-service.namespace.svc.cluster.local`);
 however, it does not come with its own DNS servers. The standard way to provide this functionality is via CoreDNS.
-We provide a module to deploy CoreDNS called [kube\_core\_dns](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
+We provide a module to deploy CoreDNS called [kube\_core\_dns](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
 
 Let's deploy it now.
 
@@ -111,7 +111,7 @@ Let's deploy it now.
 
    If you see only 1/2 pods running, that is because we force the CoreDNS pods to run on nodes with different instance types
    for high-availability. However, the cluster won't be able to dynamically provision the new instance types until
-   you complete the [autoscaling section](/docs/stable-25-04/guides/bootstrapping/autoscaling) of the bootstrapping guide.
+   you complete the [autoscaling section](/stable-25-04/guides/bootstrapping/autoscaling) of the bootstrapping guide.
    Once you complete that guide section, you will see that both CoreDNS pods have launched successfully. This should
    not have any impact in the interim.
 

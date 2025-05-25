@@ -26,7 +26,7 @@ with the following enhancements:
 
 ### Basics
 
-This module follows the basic workload deployment patterns describe in [this guide](/docs/main/guides/deploying-workloads/basics).
+This module follows the basic workload deployment patterns describe in [this guide](/main/guides/deploying-workloads/basics).
 
 ### Horizontal Autoscaling
 
@@ -47,7 +47,7 @@ pod in the StatefulSet.
 The configuration values are as follows:
 
 - `storage_class`: The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) to
-use for the volume. To learn more about the available storage class options, see [our guide.](/docs/main/guides/deploying-workloads/persistence)
+use for the volume. To learn more about the available storage class options, see [our guide.](/main/guides/deploying-workloads/persistence)
 - `initial_size_gb`: The size of the volume when it is first created.
 - `increase_gb`: How much the volume will grow every time it is autoscaled by the [PVC autoresizer](https://github.com/topolvm/pvc-autoresizer).
 - `increase_threshold_percent`: When free storage drops below this percent on the volume, the volume will be autoscaled.

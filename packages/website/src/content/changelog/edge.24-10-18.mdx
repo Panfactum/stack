@@ -1,0 +1,106 @@
+---
+summary: Replaces devenv with plain nix flakes for significantly improved performance, upgrades Cilium and AWS EBS CSI drivers, adds CDN support for core components, and fixes various resource utilization and git-related issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * We have removed [devenv](https://devenv.sh/) from the Panfactum Stack and now use plain [nix flakes](https://nixos.wiki/wiki/Flakes) to manage the local
+      development shell (aka the "devShell"). We did not use the vast majority of the features in devenv, and its removal comes with a couple key improvements:
+
+      * Greatly increased performance on macOS. Initial installation should now take \~ 5 minutes (down from 45+). Additionally,
+        opening the devShell after initial installation should now be instant.
+
+      * More control and flexibility of the Panfactum setup which will allow us to better implement future Panfactum features.
+
+      However, this does come with a few key changes that you must perform manually:
+
+      1. The syntax for your `flake.nix` has changed.
+
+         **Before:**
+
+         ```nix
+         {
+             inputs = {
+                 # Change 'nixos-23.11' to whichever cut of the nixpkgs repository
+                 # you want to use in your project. This will NOT impact the Panfactum stack at all.
+                 # For available versions, see https://github.com/NixOS/nixpkgs
+                 # We recommend using the version that is supported here:
+                 # https://search.nixos.org/packages (updated every 6 mo)
+                 pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+
+                 # Change '__PANFACTUM_VERSION_MAIN__' to be the release version that you desire
+                 # Ensure that this matches the version you use for your infrastructure modules
+                 panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
+             };
+
+             outputs = { self, panfactum, pkgs, ... } @ inputs: {
+                 devShells = panfactum.lib.mkDevShells {
+                     inherit pkgs;
+                     modules = [ (import ./devenv.nix )];
+                 };
+             };
+         }
+         ```
+
+         **After:**
+
+         ```nix
+         {
+           inputs = {
+             flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+             panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+           };
+
+           outputs = { panfactum, flake-utils, ... }@inputs:
+             flake-utils.lib.eachDefaultSystem
+             (system:
+               {
+                 devShell = panfactum.lib.${system}.mkDevShell { };
+               }
+             );
+         }
+         ```
+
+      2. We no longer support `devenv` syntax, so your `devenv.nix` file  and the `.devenv` directory can be removed.
+
+      For alternatives to all the functionality included in devenv using our new devShell paradigm, please
+      see [our documentation.](/docs/main/guides/development-shell/customizing)
+
+    * `pf-get-version-hash` has been renamed to `pf-get-commit-hash` to better reflect what it does (get a commit hash given an arbitrary repo and [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References)).
+      In addition, it has been updated to take named rather than positional arguments in order to align with other Panfactum scripts.
+      Finally, we have fixed several bugs in the script to make it more resilient to various inputs.
+
+    * Removes `pgadmin4` from the devShell as it significantly increased build times and was not useful to all users. Users
+      should have an option to pick their favorite DB clients rather than us be prescriptive.
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Upgrades [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3. This change
+      brings [new Cilium features](https://isovalent.com/blog/post/cilium-1-16), reduces the per-node memory usage by 75MB,
+      and reduces the amount of errors that users can encounter during the bootstrapping guide.
+
+    * Upgrades [kube\_aws\_ebs\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
+      to support Karpenter v1 disruption taints and improve node shutdown performance.
+
+    * Updates [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) to support 10 concurrent image builds per module
+      rather than just one.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds `cdn_mode_enabled` boolean to the [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) & [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) module to enable CDN for Vault.
+    * Adds `image_tag_prefix` string to the [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixed a handful of scheduling constraint bugs that resulted in less-than-optimal resource utilization. These improvements
+      should result in a significant improvement to resource utilization in tiny clusters and a minor improvement in larger clusters.
+
+    * Fixed an issue where `pf_stack_version` could not be a commit hash. It can now be any valid [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References).
+
+    * Fixed an issue where `pf-wf-git-checkout` would fail when given a branch name as a git ref. This impact both
+      [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+      and [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+  </Fragment>
+</ChangelogEntry>

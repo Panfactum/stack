@@ -1,0 +1,36 @@
+---
+const hasBreakingChanges = Astro.slots.has('breaking-changes');
+const hasChanges = Astro.slots.has('changes');
+const hasAdditions = Astro.slots.has('additions');
+const hasFixes = Astro.slots.has('fixes');
+const hasAlerts = Astro.slots.has('alerts');
+---
+<div class="mb-2 mt-1">
+  {hasAlerts && (
+    <slot name="alerts"/>
+  )}
+  {hasBreakingChanges && (
+    <div data-breaking-changes="true">
+      <h3>Breaking Changes</h3>
+      <slot name="breaking-changes"/>
+    </div>
+  )}
+  {hasFixes && (
+    <div data-fixes="true">
+      <h3>Fixed</h3>
+      <slot name="fixes"/>
+    </div>
+  )}
+  {hasAdditions && (
+    <div data-additions="true">
+      <h3>Added</h3>
+      <slot name="additions"/>
+    </div>
+  )}
+  {hasChanges && (
+    <div data-changes="true">
+      <h3>Changed</h3>
+      <slot name="changes"/>
+    </div>
+  )}
+</div>

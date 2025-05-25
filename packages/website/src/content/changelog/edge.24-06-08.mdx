@@ -1,0 +1,36 @@
+---
+summary: Deprecates kube\_trust\_manager in favor of kube\_reflector, adds domain contact type configuration, simplifies EKS reset process with new command, and fixes VPC and CoreDNS-related issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * [kube\_trust\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
+      [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector). We are keeping the module
+      in the repo to support backwards compatibility, but it will be removed in the future. You should perform the following steps to remove it:
+    * Apply this release.
+    * Remove any dependency blocks to it in your `terragrunt.hcl` files.
+    * Run `terragrunt destroy` on the module to remove it.
+    * Delete the `bundles` CRD.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) can now set the contact type
+      for each contact.
+
+    * Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
+      [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+
+    * The manual steps needed to reset new EKS clusters to a clean slate during the bootstrapping guide have been consolidated
+      into a single new command, `pf-eks-reset`.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Addressed issue in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) that caused a temporary, harmless error to crash
+      the `terragrunt apply` on initial bootstrapping.
+
+    * Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
+      [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) module.
+  </Fragment>
+</ChangelogEntry>

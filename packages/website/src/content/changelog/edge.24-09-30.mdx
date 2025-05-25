@@ -1,0 +1,17 @@
+---
+summary: Adds self-hosted GitHub Action runners addon and EKS cluster suspend/resume commands, while fixing voluntary disruption window namespace limitations.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * Adds a [new addon for self-hosted GitHub Action runners.](/docs/edge/guides/addons/github-actions/installing)
+    * Adds the `pf-eks-suspend` and `pf-eks-resume` command to [Suspend and Resume the EKS Cluster](/docs/main/guides/bootstrapping/suspend-kubernetes-cluster).
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixes an issue where voluntary disruption windows created by the [kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+      would only work for the `argo` namespace. They will now work in all namespaces.
+  </Fragment>
+</ChangelogEntry>

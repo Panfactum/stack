@@ -12,8 +12,8 @@ To begin deploying infrastructure, you will first need both a state backend and 
 
 We provide two infrastructure modules that define both those resources:
 
-* [tf\_bootstrap\_resources](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
-* [aws\_kms\_encrypt\_key](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
+* [tf\_bootstrap\_resources](/stable-25-04/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
+* [aws\_kms\_encrypt\_key](/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
 
 Deploying these modules for the first time is a bit cumbersome as they have circular references. [^1]
 
@@ -108,7 +108,7 @@ Let's perform a quick test to ensure sops is working properly.
 ## Deploy the AWS Account Module
 
 Now that you have both the state backends and encryption keys established, we can start deploying infrastructure.
-The first resource will be the [aws\_account](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
+The first resource will be the [aws\_account](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
 to your account including setting up its alias and contact information.
 
 Let's deploy it now:

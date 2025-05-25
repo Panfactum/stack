@@ -6,7 +6,7 @@ import ArchitectureImg from './architecture.svg?raw'
 
 ## Architecture
 
-While we detail how to manage the BuildKit installation in the [kube\_buildkit](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_buildkit)
+While we detail how to manage the BuildKit installation in the [kube\_buildkit](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_buildkit)
 documentation, we also want to provide a holistic picture of the overall image-building architecture recommended by
 Panfactum.
 
@@ -42,7 +42,7 @@ A few critical notes:
 
 8. Images are pulled from ECR by kubelets to run workloads on Kubernetes nodes. A *single* ECR is used to source
    images for *all* Kubernetes clusters, even across accounts. For details on setting up cross-account permissions, see
-   the [aws\_ecr\_repos](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_ecr_repos) module.
+   the [aws\_ecr\_repos](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_ecr_repos) module.
 
 ## Alternatives
 

@@ -1,0 +1,143 @@
+---
+summary: Introduces dedicated DNS zones for cluster management, consolidates certificate modules, adds KEDA for autoscaling, launches the new Panfactum CLI tool, and restructures several AWS modules for better configuration management.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * To simplify cluster administration, every cluster will have a dedicated DNS zone for hosting control-plane utilities specific to that cluster (e.g., Vault, etc.).
+      `kube_domain` is now a required configuration value and should be set in the `region.yaml` for every region that houses a Kubernetes cluster. The value
+      must be a subdomain of a domain available to the environment.
+
+    * We now create the Authentik email template in the kube\_authentik module. The organization name is now a required input.
+      You can use the new `organization_name` output from the kube\_authentik module as an input to the `authentik_core_resources` module.
+
+    * `kube_cert_manager` and `kube_cert_issuers` modules have been consolidated into a single `kube_certificates` module in order to address various race conditions
+      that could occur on cluster installation. Follow these steps to migrate:
+
+      1. Create a `kube_certificates` directory as a sibling to the `kube_cert_manager` and `kube_cert_issuers` directories.
+
+      2. Create a `terragrunt.hcl` file in the `kube_certificates` directory with the following contents:
+
+         ```hcl
+         include "panfactum" {
+           path   = find_in_parent_folders("panfactum.hcl")
+           expose = true
+         }
+
+         terraform {
+           source = include.panfactum.locals.pf_stack_source
+         }
+
+         dependency "vault_core" {
+           config_path  = "../vault_core_resources"
+           skip_outputs = true
+         }
+
+         inputs = {
+           alert_email = "..." # Copy from kube_cert_issuers
+         }
+         ```
+
+      3. From the **region** directory, run the following:
+
+         ```bash
+         (cd kube_cert_issuers; terragrunt state pull > state.json);
+         (cd kube_cert_manager; terragrunt state pull > state.json);
+         jq -s '
+           .[0] as $f1
+           | .[1] as $f2
+           | $f1
+             | .outputs = ($f1.outputs + $f2.outputs)
+             | .resources = ($f1.resources + $f2.resources)
+         ' kube_cert_issuers/state.json kube_cert_manager/state.json > kube_certificates/state.json;
+         jq 'del(
+           .resources[]
+           | select(
+             .type == "pf_kube_labels"
+             and (has("module") | not)
+           )
+         )' kube_certificates/state.json > tmp && mv tmp kube_certificates/state.json;
+         rm kube_cert_issuers/state.json;
+         rm kube_cert_manager/state.json;
+         ```
+
+      4. Update the version of the Panfactum framework you are using.
+
+      5. Navigate to the `kube_certificates` directory.
+
+         1. Run `terragrunt init`.
+
+         2. Run `terragrunt state push state.json && rm state.json`.
+
+         3. Run `terragrunt apply` and review the changes. There should be only a few resources that will be replaced as we fixed a typo in the name.
+
+      6. Remove the `kube_cert_issuers` and `kube_cert_manager` directories.
+
+      7. Replace any references to `kube_cert_issuers` and `kube_cert_manager` with `kube_certificates` in your code.
+
+    * We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed.
+      See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
+
+    * `burstable_nodes_enabled` now defaults to `true` for all modules. This fixes the default behavior which was broken in `edge.25-03-26`.
+
+    * The contact information variables on [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) have been consolidated to
+      single objects for each contact as they are no longer strictly required due to the new [aws\_organization](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization)
+      module.
+
+    * The contact information variables on [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) have been consolidated to
+      single objects for each contact to provide better compatibility with the new Panfactum CLI.
+
+    * The inputs to [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) have been consolidated to a single
+      `domains` object in order to provide better per-domain granular configuration.
+
+    * The backup vault name in [tf\_bootstrap\_resources](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) now has a unique
+      suffix to prevent conflicts on installation. However, this change requires that you manually delete the existing backup vaults **before**
+      you apply the updated `tf_bootstrap_resources` module. The vault that needs to be deleted will be named: `terraform-<env_name>`. In order
+      to delete the vault, you will need to delete all of the recovery points first.
+      See the documentation for [AWS Backup](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html) for more information.
+
+    * This release adds the new `pf` CLI tool which provides many automations for managing your panfactum framework installation. In order to begin using the the `pf` CLI,
+      you must complete the following steps:
+
+      1. Complete the migration steps for all the breaking changes described above.
+
+      2. Run `pf devshell sync`. This should complete successfully before proceeding.
+
+      3. Run `terragrunt apply` on **all** modules (or `terragrunt run-all apply`).
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds the [kube\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_job) submodule to support running one-off
+      [Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/) as a part of larger module deployment processes. This can be used to execute
+      pre-/post-deployment scripts such as database migrations.
+
+    * Adds [KEDA](https://keda.sh/) to the base cluster installation with
+      the [kube\_keda](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda) module.
+
+    * Adds `sub_paths` to `config_map_mounts` and `secret_mounts` inputs in all applicable Panfactum submodules to support more granular control over
+      mounted files.
+
+    * Adds backup:TagResource to [tf\_bootstrap\_resource](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resource) to address [AWS Notification](https://github.com/Panfactum/stack/issues/291).
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixed issue where AWS SSO sessions would not automatically sync across profiles, resulting in many unnecessary SSO login prompts. Moving forward,
+      you will only need to login with SSO once and those credentials will be available for all AWS profiles.
+
+    * Fixes the default value for `min_node_cpu` of
+      [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) so
+      that an error no longer occurs.
+
+    * Addressed an issue that slowed down node bootstrapping due to self-imposed rate-limits on image pulling.
+
+    * Fixes private repo authentication in [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+
+    * Adds missing `lifetime_evictions_enabled` input to [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+
+    * Adds additional AAAA record for IPV6 support for [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn).
+
+    * Addresses invalided policy document format for the DNSSEC KMS keys in [aws\_dnssec](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_dnssec).
+  </Fragment>
+</ChangelogEntry>

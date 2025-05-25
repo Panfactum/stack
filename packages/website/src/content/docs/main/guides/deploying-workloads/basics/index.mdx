@@ -8,37 +8,37 @@ Learn how to deploy your code and workloads onto the Kubernetes clusters created
 
 ## Prerequisites
 
-* [Guide for writing and deploying IaC modules](/docs/main/guides/iac/first-party-modules)
+* [Guide for writing and deploying IaC modules](/main/guides/iac/first-party-modules)
 
 ## Overview
 
 In the Panfactum Stack, your code will run on the Kubernetes clusters you created in the
-[bootstrapping guide](/docs/main/guides/bootstrapping/overview). [^1]
+[bootstrapping guide](/main/guides/bootstrapping/overview). [^1]
 
 [^1]: The exception would be services running on edge compute. Coming soon.
 
 The basic process for running first-party code in a Kubernetes cluster is as follows:
 
 1. Build a container image containing the code your wish to deploy. We recommend using our
-   [BuildKit addon](/docs/main/guides/addons/buildkit/installing) to build from Dockerfiles. [^10]
+   [BuildKit addon](/main/guides/addons/buildkit/installing) to build from Dockerfiles. [^10]
 
-2. [Create a first-party IaC module](/docs/main/guides/iac/first-party-modules#writing-modules)
+2. [Create a first-party IaC module](/main/guides/iac/first-party-modules#writing-modules)
    that defines the Kubernetes resources you wish to deploy. We provide pre-configured submodules for many
    of the most common Kubernetes resources:
 
    | Kubernetes Type                                                                            | Submodule                                                                                                 | Description                                                                                                             |
    | :----------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
-   | [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) | [kube\_namespace](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_namespace)        | A logical container for Kubernetes resources. Most resources must be assigned a namespace.                              |
-   | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)        | [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)      | Orchestrates stateless workloads such as webservers.                                                                    |
-   | [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)      | [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) | Orchestrates for stateful workloads such as databases.                                                                  |
-   | [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)            | [kube\_cron\_job](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job)         | Periodically runs one-shot processes on a schedule such as system maintenance scripts.                                  |
-   | [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)          | [kube\_daemon\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set)     | Runs a pod on every tolerated node in the cluster.                                                                      |
-   | [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)                      | [kube\_job](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_job)     | Runs a one-off process as a part of a module deployment. Useful for pre-/post-deployment scripts such as DB migrations.                |
-   | [Argo Workflow](https://argoproj.github.io/workflows/)                                     | [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflows/wf_spec)                       | An advanced pattern available through our [Workflow Engine Addon](/docs/main/guides/addons/workflow-engine/installing). |
+   | [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) | [kube\_namespace](/main/reference/infrastructure-modules/submodule/kubernetes/kube_namespace)        | A logical container for Kubernetes resources. Most resources must be assigned a namespace.                              |
+   | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)        | [kube\_deployment](/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)      | Orchestrates stateless workloads such as webservers.                                                                    |
+   | [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)      | [kube\_stateful\_set](/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) | Orchestrates for stateful workloads such as databases.                                                                  |
+   | [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)            | [kube\_cron\_job](/main/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job)         | Periodically runs one-shot processes on a schedule such as system maintenance scripts.                                  |
+   | [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)          | [kube\_daemon\_set](/main/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set)     | Runs a pod on every tolerated node in the cluster.                                                                      |
+   | [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)                      | [kube\_job](/main/reference/infrastructure-modules/submodule/kubernetes/kube_job)                    | Runs a one-off process as a part of a module deployment. Useful for pre-/post-deployment scripts such as DB migrations. |
+   | [Argo Workflow](https://argoproj.github.io/workflows/)                                     | [wf\_spec](/main/reference/infrastructure-modules/submodule/workflows/wf_spec)                       | An advanced pattern available through our [Workflow Engine Addon](/main/guides/addons/workflow-engine/installing). |
 
-3. [Deploy the IaC module](/docs/main/guides/iac/first-party-modules#deploying-modules) by configuring it in the appropriate environment directory and running `terragrunt apply`.
+3. [Deploy the IaC module](/main/guides/iac/first-party-modules#deploying-modules) by configuring it in the appropriate environment directory and running `terragrunt apply`.
 
-4. (Optional) Connect the module deployment to our [CI / CD addon.](/docs/main/guides/cicd/getting-started)
+4. (Optional) Connect the module deployment to our [CI / CD addon.](/main/guides/cicd/getting-started)
 
 <MarkdownAlert severity="info">
   To see a basic example in action, we recommend you take a look at the IaC for this website:
@@ -57,7 +57,7 @@ Most of the controllers (e.g., Deployments, StatefulSets, etc.) create and manag
 Kubernetes [Pods.](https://kubernetes.io/docs/concepts/workloads/pods/) [^2]
 As all pods have very similar configuration requirements, we will review the core concepts here.
 
-[^2]: In fact, our submodules utilize a shared interface for defining pods: [kube\_pod](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod).
+[^2]: In fact, our submodules utilize a shared interface for defining pods: [kube\_pod](/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod).
 
 ### Containers
 
@@ -85,8 +85,8 @@ the root file system and runs `/bin/bash -c "tail -f /dev/null"`. [^4]
 
 <MarkdownAlert severity="info">
   For public images, we strongly recommend that you use the ECR pull-through caches for the `image_registry` (setup
-  as a [step in the bootstrapping guide](/docs/main/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
-  We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/docs/main/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
+  as a [step in the bootstrapping guide](/main/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
+  We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/main/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
 </MarkdownAlert>
 
 ### Init Containers
@@ -128,7 +128,7 @@ the cluster to self-heal if there is an issue with a pod.
 The readiness probe can be helpful if you need a mechanism to temporarily stop routing traffic to the container, but is unnecessary beyond that.
 
 We support multiple configuration options under `liveness_probe_` and `readiness_probe_` prefixes (see the
-[module docs](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod) for more information).
+[module docs](/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod) for more information).
 
 We also automatically create startup probes based on the configuration for the liveness probe.
 
@@ -169,7 +169,7 @@ Containers created by Panfactum submodules are secured by default in the followi
   are dropped by default. You can add capabilities on a per-container basis through the `linux_capabilities` input.
 
 * Every container has a ready-only root filesystem. If you need to write to disk, we recommend using temporary directories (see below)
-  or a [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set). However, you
+  or a [kube\_stateful\_set](/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set). However, you
   can override the security measure by setting `read_only` to false.
 
 * The [pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/) is set to baseline (not privileged). The
@@ -205,7 +205,7 @@ In all clusters, you should be aware of how pods are spread across individual in
 Note that enabling any of these options will increase the cost of running your workload by lowering overall
 resource utilization. As a result, we recommend `instance_type_anti_affinity_required`
 be enabled **only** in production environments and disabling `host_anti_affinity_required` if possible.
-See our [high availability guide](/docs/main/guides/deploying-workloads/high-availability) for more information.
+See our [high availability guide](/main/guides/deploying-workloads/high-availability) for more information.
 
 #### Geographic Spread
 
@@ -233,7 +233,7 @@ controller are spread across those AZs.
 Note that enabling any of these options will increase the cost of running your workload by lowering overall
 resource utilization. As a result, we recommend `az_spread_preferred` or `az_spread_required`
 be enabled **only** in production environments.
-See our [high availability guide](/docs/main/guides/deploying-workloads/high-availability) for more information.
+See our [high availability guide](/main/guides/deploying-workloads/high-availability) for more information.
 
 #### Node Classes
 
@@ -292,7 +292,7 @@ this by setting the `node_requirements` input.
 #### Panfactum Scheduler
 
 In the bootstrapping guide, your cluster administrator deployed the Panfactum
-[bin-packing scheduler.](/docs/main/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler) This
+[bin-packing scheduler.](/main/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler) This
 enables better bin-packing of pods onto nodes, improving resource utilization and lower your cluster costs.
 
 However, if you need to opt-out of the bin-packing scheduler, you can set `panfactum_scheduler_enabled`
@@ -335,7 +335,7 @@ Voluntary disruptions include:
 * Any other scripts that utilize the eviction API; almost all utilities that can terminate pods use the eviction API so
   that they respect PDBs.
 
-All of our controller submodules such as [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+All of our controller submodules such as [kube\_deployment](/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
 will automatically create an appropriate PDB; however, there are a few configurable parameters set via module inputs:
 
 * `unhealthy_pod_eviction_policy`: Sets the [unhealthy pod eviction policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy);
@@ -403,7 +403,7 @@ several inputs:
 * `common_env`: A key-value mapping of plaintext values that will be set as environment variables.
 * `common_secrets`: A key-value mapping of secret values. The values will be stored in a Kubernetes
   secret so as not to be exposed to cluster users who only have `restricted_reader` access (see [RBAC
-  reference](/docs/main/reference/rbac)).
+  reference](/main/reference/rbac)).
 * `common_env_from_config_maps`: A key-configuration mapping of environment variables that will be set to a value in an existing Kubernetes ConfigMap. [^20]
 * `common_env_from_secrets`: A key-configuration mapping of environment variables that will be set to a value in an existing Kubernetes Secret. [^20]
 
@@ -464,7 +464,7 @@ read its own pod manifest via Kubernetes API (e.g., `kubectl --namespace $POD_NA
 As containers are created in read-only mode, you will need to create temporary directories to be able
 to write to the local file system. [^8]
 
-[^8]: Unless you are using [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+[^8]: Unless you are using [kube\_stateful\_set](/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
     which adds support for persistent volumes which will retain their data across pod restarts.
 
 Our controller submodules provide an input to take care of this provisioning: `tmp_directories`.
@@ -480,18 +480,18 @@ limited disk space.
 
 ### Labels and Annotations
 
-Pod created by Panfactum submodules will automatically be labeled with our [standard resource tags](/docs/main/reference/resource-tags).
+Pod created by Panfactum submodules will automatically be labeled with our [standard resource tags](/main/reference/resource-tags).
 
 For a specific workload, you can add additional labels and annotations via the `extra_pod_labels` and `extra_pod_annotations` inputs, respectively.
 
 If you need to add a set of labels and/or annotations globally to all pods in a given Kubernetes cluster, you
-can utilize the `common_pod_labels` and `common_pod_annotations` inputs of the [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+can utilize the `common_pod_labels` and `common_pod_annotations` inputs of the [kube\_policies](/main/reference/infrastructure-modules/direct/kubernetes/kube_policies)
 module which was set up during cluster bootstrapping.
 
 ### Priority Class
 
 Kubernetes [priority classes](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)
-define precedence for pod preemption. Our [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+define precedence for pod preemption. Our [kube\_policies](/main/reference/infrastructure-modules/direct/kubernetes/kube_policies)
 module installs a few additional priority classes in addition to the Kubernetes defaults.
 
 The following priority classes are included in the Panfactum stack (ordered by precedence):
@@ -517,29 +517,29 @@ All our controller submodules will automatically create a dedicated Service Acco
 by the controller and provide its name via the `service_account_name` output.
 
 You can use the output to assign additional permissions to the pods by following our guides
-[here](/docs/main/guides/deploying-workloads/permissions).
+[here](/main/guides/deploying-workloads/permissions).
 
 ### Caching Images on Nodes
 
 By default, a pod's images are pulled just-in-time to the nodes where the pod is assigned. This can result in a significant
 delay to startup time, especially for large images.
 
-We provide a [custom controller](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller) that will automatically cache images on nodes before the pods are scheduled
+We provide a [custom controller](/main/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller) that will automatically cache images on nodes before the pods are scheduled
 to ensure that they are available as soon as possible. Panfactum workload submodules already have implicit integration with this
 controller, and you can control the image cache settings on a per-container basis through the `containers` input to each workload submodule.
 
 In particular, the container configuration object has two relevant fields:
 
 * `image_prepull_enabed`: Iff true, will schedule a pod to seed the node cache of new nodes immediately upon node creation. (default: `true`)
-* `image_pin_enabled`: Iff true, will pin the image to the node to prevent it from evey being garbage collected. (default: `true`)
+* `image_pin_enabled`: Iff true, will pin the image to the node to prevent it from ever being garbage collected. (default: `true`)
 
 If you are not using a Panfactum workload submodule, you can add images directly to the node cache by using the
-[kube\_node\_image\_cache](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
+[kube\_node\_image\_cache](/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
 
 ## Custom Workload Deployments
 
 All the above information applies specifically to the Panfactum submodules for deploying workloads
-(e.g., [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)).
+(e.g., [kube\_deployment](/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)).
 However, nothing prevents you from deploying workloads to Kubernetes directly without using our
 modules. Using Panfactum-flavored Kubernetes does not prevent you from doing anything that you
 could not do using stock Kubernetes.

@@ -1,0 +1,55 @@
+---
+summary: Improves PostgreSQL storage configuration and memory tuning, simplifies Karpenter node pool management, adds support for custom PostgreSQL parameters and schemas, and fixes several bootstrapping and environment issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * `pg_storage_increase_percent` has been changed to `pg_storage_increase_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+      This allows for more predictable storage autoscaling and optimal resource provisioning regardless of the current storage scale.
+
+    * `pg_storage_gb` has been changed to `pg_initial_storage_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+      This better indicates that this value is *only used during the initial database provisioning* and has no effect thereafter.
+
+    * `node_vpc_id`, `node_subnets`, and `node_security_group_id` have been moved from [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
+      to [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) in order to simplify the logic
+      of assigning nodes to subnets, VPCs, and security groups. Additionally, we have removed Karpenter auto-discovery tags as they are no longer necessary.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Adds new enhancements to the [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) module:
+
+    * Better defaults and options for memory tuning
+
+    * Provides the ability to set arbitrary [PostgreSQL parameters](https://cloudnative-pg.io/documentation/1.23/postgresql_conf)
+
+    * Provides the ability to set a custom backup schedule
+
+    * Adds support for additional schemas via the `extra_schemas` input
+
+    * Adds another local retry for Terragrunt when providers produce an inconsistent final plan.
+
+    * Adds check for an updated `direnv` version to prevent issues when setting up the local devenv.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Added deterministic ordering to additional resources in [authentik\_core\_resources](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
+
+    * Fixed the following bugs in `pf-env-bootstrap`:
+
+    * Would use a non-existent AWS profile for the `.sops.yaml` file.
+
+    * Would not install all the platform checksums in the `.terraform.lock.hcl` files.
+
+    * `amd64` nodes are now used when `bootstrapping_enabled` is `true` in [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) in order
+      to allow certain bootstrapping tests (e.g., Cilium) to run successfully.
+
+    * Restores the `pf-db-tunnel` command to the devenv.
+
+    * `pf-get-version-hash local` now properly returns `local` without an error code.
+
+    * Updates the Panfactum image version in [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) to
+      a version that is compatible with the latest pre-built workflows.
+  </Fragment>
+</ChangelogEntry>

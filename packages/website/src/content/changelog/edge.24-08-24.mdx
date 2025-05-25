@@ -1,0 +1,15 @@
+---
+summary: Improves Authentik stability by preventing deployment failures during initial creation and eliminating downtime during database failovers.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="fixes">
+    * Addressed a couple of issues with the [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+      module:
+    * [authentik\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources) will no longer
+      fail to apply and end up in an invalid state when first created.
+    * Authentik should no longer experience any downtime during database failover events
+  </Fragment>
+</ChangelogEntry>

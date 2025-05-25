@@ -77,7 +77,7 @@ repos:
         name: Lint Website
         entry: precommit-lint-website
         language: system
-        files: ^packages/website/.*\.(ts|tsx|astro)$
+        files: ^packages/website/src/.*\.(ts|tsx|astro)$
         pass_filenames: true
         description: "Runs linting for the website code"
         fail_fast: true

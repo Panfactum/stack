@@ -1,0 +1,27 @@
+---
+summary: Updates Vault domain configuration, adds the Reflector module for cross-namespace synchronization, and fixes PostgreSQL graceful shutdown issues.
+---
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now takes `vault_domain`
+      as an input instead of `environment_domains`. This change was made as having multiple domains for Vault
+      is incompatible with using Vault as an intermediary IdP.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * New [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for deploying
+      the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
+      namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
+      the module as a part of the foundational Stack.
+
+    * `pg_shutdown_timeout` variable to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      to control how long the postgres instances will wait for active connections to close before shutting down.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixed an issue where simultaneous, graceful shutdown of *all* postgres nodes in a [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      would cause unnecessary downtime when the primary was running on a spot instance.
+  </Fragment>
+</ChangelogEntry>

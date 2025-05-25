@@ -50,7 +50,7 @@ While workflows can be triggered manually or via a cron schedule, [Argo Events](
 allows them to be triggered via events from external systems. [^1]
 
 [^1]: Argo Events can also be used to trigger many more actions than just Argo Workflows. See our
-    [Event Bus Addon](/docs/stable-25-04/guides/addons/event-bus/installing) guide.
+    [Event Bus Addon](/stable-25-04/guides/addons/event-bus/installing) guide.
 
 Events can be inbound webhooks, messages in a message queue, or any other [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/)
 that Argo Events supports.
@@ -60,7 +60,7 @@ in this guide even though they are separate projects.
 
 ## Installing
 
-We provide a module, [kube\_argo](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_argo), that
+We provide a module, [kube\_argo](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_argo), that
 deploys the controllers for both Argo Workflows and Argo Events.
 
 Let's deploy it now:
@@ -220,10 +220,10 @@ check out the following resources:
 * For a brief overview of all the capabilities of Argo Workflows, we strongly recommend
   working through [these Argo Workflow tutorials.](https://argo-workflows.readthedocs.io/en/latest/walk-through/)
 
-* To start creating your own custom Workflows, take a look at [our documentation](/docs/stable-25-04/guides/addons/workflow-engine/creating-workflows).
+* To start creating your own custom Workflows, take a look at [our documentation](/stable-25-04/guides/addons/workflow-engine/creating-workflows).
 
-* Deploy some of [our pre-built Workflows](/docs/stable-25-04/guides/addons/workflow-engine/prebuilt-workflows) for common tasks in the Panfactum Stack
+* Deploy some of [our pre-built Workflows](/stable-25-04/guides/addons/workflow-engine/prebuilt-workflows) for common tasks in the Panfactum Stack
 
-* Learn how to use Workflows for your CI / CD system [here.](/docs/stable-25-04/guides/cicd/getting-started)
+* Learn how to use Workflows for your CI / CD system [here.](/stable-25-04/guides/cicd/getting-started)
 
-* Learn more about how to leverage Argo Events [here.](/docs/stable-25-04/guides/addons/event-bus/installing)
+* Learn more about how to leverage Argo Events [here.](/stable-25-04/guides/addons/event-bus/installing)

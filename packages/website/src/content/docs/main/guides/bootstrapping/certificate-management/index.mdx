@@ -17,7 +17,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 In this and the following sections we will be deploying various systems for managing your network's cryptography.
 For a detailed discussion of the fundamental concepts and motivations, we *strongly* recommend reviewing
-our [concept docs on network cryptography](/docs/main/concepts/networking/cryptography) for the relevant background
+our [concept docs on network cryptography](/main/concepts/networking/cryptography) for the relevant background
 information.
 
 ## Deploy cert-manger
@@ -27,7 +27,7 @@ It handles the entire certificate lifecycle: provisioning, deployment, and renew
 with both public certificate authorities (e.g., [Let's Encrypt](https://letsencrypt.org/)) and private CAs
 (e.g., Vault).
 
-We provide a module for deploying cert-manager: [kube\_cert\_manager](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
+We provide a module for deploying cert-manager: [kube\_cert\_manager](/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
 
 Let's deploy it now:
 
@@ -35,30 +35,32 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_cert_manager/terragrunt.hcl]
-      ```hcl collapse={1-19} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_cert\_manager/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
-      
-      dependency "cilium" {
-         config_path  = "../kube_cilium"
-         skip_outputs = true
-      }
+   ```hcl collapse={1-19} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "vault_core" {
-         config_path  = "../vault_core_resources"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "cilium" {
+      config_path  = "../kube_cilium"
+      skip_outputs = true
+   }
+
+   dependency "vault_core" {
+      config_path  = "../vault_core_resources"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -95,7 +97,7 @@ Creating certificates using cert-manager is a two-step process:
 
 You can read more about this process in the [cert-manager documentation here](https://cert-manager.io/docs/configuration/).
 
-We provide a module to set up the issuers required by the Panfactum stack: [kube\_cert\_issuers](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers).
+We provide a module to set up the issuers required by the Panfactum stack: [kube\_cert\_issuers](/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers).
 
 This module creates three different types of issuers:
 
@@ -114,49 +116,51 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_cert_issuers/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_cert\_issuers/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "cert_manager" {
-         config_path  = "../kube_cert_manager"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         vault_internal_url = dependency.vault.outputs.vault_internal_url
+   dependency "cert_manager" {
+      config_path  = "../kube_cert_manager"
+      skip_outputs = true
+   }
 
-         // The `alert_email` will receive notifications if your certificates fail to renew. Set it to
-         // an email that is actively monitored to prevent unexpected service disruptions.
-         alert_email        = "REPLACE_ME"
+   inputs = {
+      vault_internal_url = dependency.vault.outputs.vault_internal_url
 
-         // See below for instructions
-         route53_zones = {
-            "REPLACE_ME" = {
-               zone_id                 = "REPLACE_ME"
-               record_manager_role_arn = "REPLACE_ME"
-            }
+      // The `alert_email` will receive notifications if your certificates fail to renew. Set it to
+      // an email that is actively monitored to prevent unexpected service disruptions.
+      alert_email        = "REPLACE_ME"
+
+      // See below for instructions
+      route53_zones = {
+         "REPLACE_ME" = {
+            zone_id                 = "REPLACE_ME"
+            record_manager_role_arn = "REPLACE_ME"
          }
       }
-      ```
-      :::
+   }
+   ```
 
-4. Let's walk through the `route53_zones` input:
+   :::
+
+3. Let's walk through the `route53_zones` input:
 
    1. When creating certificates
       for use in creating TLS connections to particular domains, cert-manager must have the ability to create DNS records as a part of [Let's Encrypt's
       DNS challenge flow](https://letsencrypt.org/docs/challenge-types/). That means cert-manager
       needs access to our AWS Route53 zones that host our DNS records for the cluster's environment.
 
-   2. In the prior [DNS guide](/docs/main/guides/bootstrapping/dns), we configured DNS in the [aws\_registered\_domains](/docs/main/reference/infrastructure-modules/direct/aws/aws_registered_domains)
-      and [aws\_delegated\_zones](/docs/main/reference/infrastructure-modules/direct/aws/aws_delegated_zones) modules
+   2. In the prior [DNS guide](/main/guides/bootstrapping/dns), we configured DNS in the [aws\_registered\_domains](/main/reference/infrastructure-modules/direct/aws/aws_registered_domains)
+      and [aws\_delegated\_zones](/main/reference/infrastructure-modules/direct/aws/aws_delegated_zones) modules
       under `production/global`. If you are setting up an environment **other than** production,
       we cannot reference them in terragrunt `dependency` blocks.
       Instead, we must copy the necessary values manually from the module outputs. [^2]
@@ -170,9 +174,9 @@ Let's deploy it now:
       zone created by the module. The `zone_id` is the unique internal AWS identifier for
       the Route53 zone hosting records for the domain.
 
-5. Run `pf-tf-init` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
-6. Run `terragrunt apply`.
+5. Run `terragrunt apply`.
 
 [^2]: This is because cross-environment dependencies will break the CI permission model
     where each CI runner only gets access to a single environment at a time.
@@ -203,32 +207,34 @@ ones generated by Vault:
 
 2. Set `self_generated_certs_enabled` to `false` as we can now use securely provisioned certificates.
 
-      ::: code-group labels=[kube_cert_manager/terragrunt.hcl]
-      ```hcl collapse={1-19} ins={21} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_cert\_manager/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
-      
-      dependency "cilium" {
-         config_path  = "../kube_cilium"
-         skip_outputs = true
-      }
+   ```hcl collapse={1-19} ins={21} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "vault_core" {
-         config_path  = "../vault_core_resources"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         self_generated_certs_enabled = false
-      }
-      ```
-      :::
+   dependency "cilium" {
+      config_path  = "../kube_cilium"
+      skip_outputs = true
+   }
+
+   dependency "vault_core" {
+      config_path  = "../vault_core_resources"
+      skip_outputs = true
+   }
+
+   inputs = {
+      self_generated_certs_enabled = false
+   }
+   ```
+
+   :::
 
    This will instruct the module to instead use the internal certificate issuer created by `kube_cert_issuers`.
 

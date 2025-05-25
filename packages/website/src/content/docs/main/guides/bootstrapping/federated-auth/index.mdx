@@ -42,13 +42,13 @@ Let's get started.
   choose to keep your existing configuration. However, you will need to manually add your SSO roles
   as inputs to:
 
-  * [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) to allow SSO authentication
+  * [aws\_eks](/main/reference/infrastructure-modules/direct/aws/aws_eks) to allow SSO authentication
     with the cluster KMS encryption key.
 
-  * sops keys (deployed with [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key)) to allow SSO authentication
+  * sops keys (deployed with [aws\_kms\_encrypt\_key](/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key)) to allow SSO authentication
     with the sops KMS encryption key.
 
-  * [kube\_vault](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vault) to allow SSO authentication
+  * [kube\_vault](/main/reference/infrastructure-modules/direct/kubernetes/kube_vault) to allow SSO authentication
     with the Vault KMS unseal key.
 </MarkdownAlert>
 
@@ -88,7 +88,7 @@ Let's do this now:
 ### Deploy AWS Provider in Authentik
 
 We have a module for configuring Authentik to work with Identity Center:
-[authentik\_aws\_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
+[authentik\_aws\_sso](/main/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
 
 Let's deploy it now:
 
@@ -96,7 +96,8 @@ Let's deploy it now:
 
 2. Add a new `terragrunt.hcl` file that looks like this:
 
-   ::: code-group labels=[authentik_aws_sso/terragrunt.hcl]
+   ::: code-group labels=\[authentik\_aws\_sso/terragrunt.hcl]
+
    ```hcl collapse={1-9} "REPLACE_ME"
    include "panfactum" {
       path   = find_in_parent_folders("panfactum.hcl")
@@ -144,6 +145,7 @@ Let's deploy it now:
       ]
    }
    ```
+
    :::
 
 3. Run `pf-tf-init` to enable the required providers.
@@ -170,89 +172,92 @@ Let's deploy it now:
 
 11. Enable SCIM in the `authentik_aws_sso` module.
 
-      ::: code-group labels=[authentik_aws_sso/terragrunt.hcl, authentik_aws_sso/secrets.yaml]
-      ```hcl collapse={1-17,23-33,45-56} "REPLACE_ME" ins={18-20,39,43} {35}
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+    ::: code-group labels=\[authentik\_aws\_sso/terragrunt.hcl, authentik\_aws\_sso/secrets.yaml]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+    ```hcl collapse={1-17,23-33,45-56} "REPLACE_ME" ins={18-20,39,43} {35}
+    include "panfactum" {
+       path   = find_in_parent_folders("panfactum.hcl")
+       expose = true
+    }
 
-      dependency "authentik_core" {
-         config_path = "../authentik_core_resources"
-      }
+    terraform {
+       source = include.panfactum.locals.pf_stack_source
+    }
 
-      dependency "kube_authentik" {
-         config_path = "../kube_authentik"
-      }
+    dependency "authentik_core" {
+       config_path = "../authentik_core_resources"
+    }
 
-      locals {
-         secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
-      }
+    dependency "kube_authentik" {
+       config_path = "../kube_authentik"
+    }
 
-      inputs = {
-         // Set to the "IAM Identity Center Assertion Consumer Service (ACS) URL" from the page you opened in the prior section.
-         // Example: https://us-east-2.signin.aws.amazon.com/platform/saml/acs/95dd9da3-94ec-448b-9449-6564c5630e9b
-         aws_acs_url      = "REPLACE_ME"
+    locals {
+       secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+    }
 
-         // Set to the "AWS access portal sign-in URL" from the page you opened in the prior section.
-         // Example: https://panfactum.awsapps.com/start
-         aws_sign_in_url  = "REPLACE_ME"
+    inputs = {
+       // Set to the "IAM Identity Center Assertion Consumer Service (ACS) URL" from the page you opened in the prior section.
+       // Example: https://us-east-2.signin.aws.amazon.com/platform/saml/acs/95dd9da3-94ec-448b-9449-6564c5630e9b
+       aws_acs_url      = "REPLACE_ME"
 
-         // Set to the "IAM Identity Center issuer URL" from the page you opened in the prior section.
-         // Example: https://us-east-2.signin.aws.amazon.com/platform/saml/d-9a6709eac6
-         aws_issuer       = "REPLACE_ME"
+       // Set to the "AWS access portal sign-in URL" from the page you opened in the prior section.
+       // Example: https://panfactum.awsapps.com/start
+       aws_sign_in_url  = "REPLACE_ME"
 
-         aws_scim_enabled = true
+       // Set to the "IAM Identity Center issuer URL" from the page you opened in the prior section.
+       // Example: https://us-east-2.signin.aws.amazon.com/platform/saml/d-9a6709eac6
+       aws_issuer       = "REPLACE_ME"
 
-         // Set to the "SCIM endpoint" from the previous step.
-         // Example: https://scim.us-east-2.amazonaws.com/Hw59fdecb43-083d-4307-b59f-ef4a9eb90ca6/scim/v2/
-         aws_scim_url     = "REPLACE_ME"
+       aws_scim_enabled = true
 
-         // Set to the secret "Access token" from the previous step. Ensure that you save it in an encrypted
-         // sops file (secrets.yaml) and read it as shown above.
-         aws_scim_token   = local.secrets.aws_scim_token
+       // Set to the "SCIM endpoint" from the previous step.
+       // Example: https://scim.us-east-2.amazonaws.com/Hw59fdecb43-083d-4307-b59f-ef4a9eb90ca6/scim/v2/
+       aws_scim_url     = "REPLACE_ME"
 
-         organization_name   = dependency.authentik_core.outputs.organization_name
-         authentik_namespace = dependency.kube_authentik.outputs.namespace
-         media_configmap     = dependency.kube_authentik.outputs.media_configmap
-         authentik_domain    = dependency.kube_authentik.outputs.domain
+       // Set to the secret "Access token" from the previous step. Ensure that you save it in an encrypted
+       // sops file (secrets.yaml) and read it as shown above.
+       aws_scim_token   = local.secrets.aws_scim_token
 
-         allowed_groups = [
-            "superusers",
-            "privileged_engineers",
-            "engineers",
-            "restricted_engineers",
-            "billing_admins"
-         ]
-      }
-      ```
-      ```yaml
-      aws_scim_token: ENC[AES256_GCM,data:XXYaGpMGySIuo6jBzlT/bNAUfBF4p9UwPHWVReuw4SelCfXtntkBWDiol7y418xuStPbjUEg3sh0xfm4V2fbmLo5CtWyZgimtqYpIoKD3M9skQ453IxRo2XtMW3GYdSdUPqbkgivKzfgTJupTabuh6LUQZRBh/TsPl0qoDxlc7jfDOk8VX7Q8gmha6tg/ZnRQ/5DtxuSUmM1U+RTev4x5PEi8N/mskfUoN4015G1yn8KrwDcGFr+VIpiYZj6V0rIFEBpSOK57nd0tfTcbyo/81lWxmvnq1G/EO+wBUS91g8IcBxUwJOqT40b7wS9T76QSvmuF30uMSM38NWRPZV0XxImhH1zM3aBFIVtcetwcpAmPzjPBa/TxK0B70ILJDevKPDnjDweVPlJFMgdd5uU/vL48me3vZA30bTTzpprpfFFi5vStihlkGtGmzSsoHB+q3luZHMFGQklRDNc2Wq3wqNsHyeIlAgBujSlJ4Kx8x82XmmzgiqM3V4wNP21NSR73z7kXgXkdGUIqNahuIzx5nRENd1Sj/O3qL28sb03rKnM/BPSeY3iouv5zkHhRV/OnCruB21gqh7eCpA9wjr5FXTV97rKBp3sNCZYRIiAFSqPk4gsX6QMKaNExscPO2pyoj0BmYDGEyVdJ9Ec7nhC41XgrshzgpqTQQM/aXoCYjUwWM50+NZXrifqxBTMJXVsx3JjpRY9jBfXQJDl82nOA/kApow14BVd15USqharfe2sYxkddMoW5AiMr/ftn68DBfBXZ6zr6g==,iv:YBAm+LTkaSbkzPZR7yqJAzTGBkIXcszZMSdg0rIqXA0=,tag:F33Rr0vts1NCdK0RFcoj2w==,type:str]
-      sops:
-         kms:
-            - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
-               created_at: "2024-04-12T19:51:50Z"
-               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQG90CFCzP573t/U1v0tdp/xAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM4lCgFdzEK5M7WFhQAgEQgDutaddLGr11As5LdlkrZ30jY2ulbB7++paPBQaezNsHdTeUh5AYYpMbDqk99mn2lIEFJTM/BqIQFT/Cdg==
-               aws_profile: production-superuser
-            - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
-               created_at: "2024-04-12T19:51:50Z"
-               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQHHO+DZZsE0iNyh+nxZpax/AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM7b6BpFsWxPM54O5PAgEQgDvgF7G3lqydTjiy0bfuzSMmqLnSWofHjaHhtQVZ+mnkbwDdc0BYqlft8qZ99Y9mxL3vYVapugEPM7ypdw==
-               aws_profile: production-superuser
-         gcp_kms: []
-         azure_kv: []
-         hc_vault: []
-         age: []
-         lastmodified: "2024-04-12T19:51:50Z"
-         mac: ENC[AES256_GCM,data:dA4H6Fw03CLcT+WJ5dT0hvTvDBZMB+SWABrw3Jckaq4DGKIhRv+lYI+0PhxwUMwgxw3j1VL+2hj94ik3IPxtSrB+IHXIZ3BlRAbvlVOuWIfd+g32XVNEqetHaY18J07aNBwHrVcjdgqwema1MLIiFKAqLYFTGXjilrAhW1/KI/w=,iv:BvzlspeexbA2mBchw3nkMC+uOIVeMhLgtlNhiiihjeI=,tag:67ZeOZwIk7EOzjdPJrgZ6g==,type:str]
-         pgp: []
-         unencrypted_suffix: _unencrypted
-         version: 3.8.1
-      ```
-      :::
+       organization_name   = dependency.authentik_core.outputs.organization_name
+       authentik_namespace = dependency.kube_authentik.outputs.namespace
+       media_configmap     = dependency.kube_authentik.outputs.media_configmap
+       authentik_domain    = dependency.kube_authentik.outputs.domain
+
+       allowed_groups = [
+          "superusers",
+          "privileged_engineers",
+          "engineers",
+          "restricted_engineers",
+          "billing_admins"
+       ]
+    }
+    ```
+
+    ```yaml
+    aws_scim_token: ENC[AES256_GCM,data:XXYaGpMGySIuo6jBzlT/bNAUfBF4p9UwPHWVReuw4SelCfXtntkBWDiol7y418xuStPbjUEg3sh0xfm4V2fbmLo5CtWyZgimtqYpIoKD3M9skQ453IxRo2XtMW3GYdSdUPqbkgivKzfgTJupTabuh6LUQZRBh/TsPl0qoDxlc7jfDOk8VX7Q8gmha6tg/ZnRQ/5DtxuSUmM1U+RTev4x5PEi8N/mskfUoN4015G1yn8KrwDcGFr+VIpiYZj6V0rIFEBpSOK57nd0tfTcbyo/81lWxmvnq1G/EO+wBUS91g8IcBxUwJOqT40b7wS9T76QSvmuF30uMSM38NWRPZV0XxImhH1zM3aBFIVtcetwcpAmPzjPBa/TxK0B70ILJDevKPDnjDweVPlJFMgdd5uU/vL48me3vZA30bTTzpprpfFFi5vStihlkGtGmzSsoHB+q3luZHMFGQklRDNc2Wq3wqNsHyeIlAgBujSlJ4Kx8x82XmmzgiqM3V4wNP21NSR73z7kXgXkdGUIqNahuIzx5nRENd1Sj/O3qL28sb03rKnM/BPSeY3iouv5zkHhRV/OnCruB21gqh7eCpA9wjr5FXTV97rKBp3sNCZYRIiAFSqPk4gsX6QMKaNExscPO2pyoj0BmYDGEyVdJ9Ec7nhC41XgrshzgpqTQQM/aXoCYjUwWM50+NZXrifqxBTMJXVsx3JjpRY9jBfXQJDl82nOA/kApow14BVd15USqharfe2sYxkddMoW5AiMr/ftn68DBfBXZ6zr6g==,iv:YBAm+LTkaSbkzPZR7yqJAzTGBkIXcszZMSdg0rIqXA0=,tag:F33Rr0vts1NCdK0RFcoj2w==,type:str]
+    sops:
+       kms:
+          - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+             created_at: "2024-04-12T19:51:50Z"
+             enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQG90CFCzP573t/U1v0tdp/xAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM4lCgFdzEK5M7WFhQAgEQgDutaddLGr11As5LdlkrZ30jY2ulbB7++paPBQaezNsHdTeUh5AYYpMbDqk99mn2lIEFJTM/BqIQFT/Cdg==
+             aws_profile: production-superuser
+          - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+             created_at: "2024-04-12T19:51:50Z"
+             enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQHHO+DZZsE0iNyh+nxZpax/AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM7b6BpFsWxPM54O5PAgEQgDvgF7G3lqydTjiy0bfuzSMmqLnSWofHjaHhtQVZ+mnkbwDdc0BYqlft8qZ99Y9mxL3vYVapugEPM7ypdw==
+             aws_profile: production-superuser
+       gcp_kms: []
+       azure_kv: []
+       hc_vault: []
+       age: []
+       lastmodified: "2024-04-12T19:51:50Z"
+       mac: ENC[AES256_GCM,data:dA4H6Fw03CLcT+WJ5dT0hvTvDBZMB+SWABrw3Jckaq4DGKIhRv+lYI+0PhxwUMwgxw3j1VL+2hj94ik3IPxtSrB+IHXIZ3BlRAbvlVOuWIfd+g32XVNEqetHaY18J07aNBwHrVcjdgqwema1MLIiFKAqLYFTGXjilrAhW1/KI/w=,iv:BvzlspeexbA2mBchw3nkMC+uOIVeMhLgtlNhiiihjeI=,tag:67ZeOZwIk7EOzjdPJrgZ6g==,type:str]
+       pgp: []
+       unencrypted_suffix: _unencrypted
+       version: 3.8.1
+    ```
+
+    :::
 
 12. Re-apply the module via `terragrunt apply`.
 
@@ -287,7 +292,7 @@ Let's deploy it now:
 
 We will now configure permissions in AWS Identity Center to allow your users access to accounts in your AWS
 organizations. Fortunately, AWS *does* expose APIs for this, so we can provide an infrastructure module
-to automatically set this up: [aws\_iam\_identity\_center\_permissions](/docs/main/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions).
+to automatically set this up: [aws\_iam\_identity\_center\_permissions](/main/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions).
 
 Let's deploy it now:
 
@@ -295,51 +300,53 @@ Let's deploy it now:
 
 2. Add a new `terragrunt.hcl` file that looks like this:
 
-      ::: code-group labels=[management/global/aws_iam_identity_center_permissions/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[management/global/aws\_iam\_identity\_center\_permissions/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      inputs = {
-         // IMPORTANT! Edit this configuration your organization's
-         // unique needs. See below for instructions.
-         account_access_configuration = {
-            management = {
-               account_id               = "REPLACE_ME"
-               superuser_groups         = ["superusers"]
-               restricted_reader_groups = ["privileged_engineers", "engineers"]
-               billing_admin_groups     = ["billing_admins"]
-            }
-            production = {
-               account_id               = "REPLACE_ME"
-               superuser_groups         = ["superusers"]
-               admin_groups             = ["privileged_engineers"]
-               reader_groups            = ["engineers"]
-               restricted_reader_groups = ["restricted_engineers", "demo_users"]
-               billing_admin_groups     = ["billing_admins"]
-            }
-            development = {
-               account_id              = "REPLACE_ME"
-               superuser_groups        = [
-                  "superusers",
-                  "privileged_engineers",
-                  "engineers"
-               ]
-               admin_groups            = ["restricted_engineers"]
-               billing_admin_groups    = ["billing_admins"]
-            }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
+
+   inputs = {
+      // IMPORTANT! Edit this configuration your organization's
+      // unique needs. See below for instructions.
+      account_access_configuration = {
+         management = {
+            account_id               = "REPLACE_ME"
+            superuser_groups         = ["superusers"]
+            restricted_reader_groups = ["privileged_engineers", "engineers"]
+            billing_admin_groups     = ["billing_admins"]
+         }
+         production = {
+            account_id               = "REPLACE_ME"
+            superuser_groups         = ["superusers"]
+            admin_groups             = ["privileged_engineers"]
+            reader_groups            = ["engineers"]
+            restricted_reader_groups = ["restricted_engineers", "demo_users"]
+            billing_admin_groups     = ["billing_admins"]
+         }
+         development = {
+            account_id              = "REPLACE_ME"
+            superuser_groups        = [
+               "superusers",
+               "privileged_engineers",
+               "engineers"
+            ]
+            admin_groups            = ["restricted_engineers"]
+            billing_admin_groups    = ["billing_admins"]
          }
       }
-      ```
-      :::
+   }
+   ```
 
-3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](/docs/main/reference/rbac),
+   :::
+
+3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](/main/reference/rbac),
    but you have the flexibility to choose what works best for your organization.
 
    1. Each top-level object is an AWS account that you have created. You will likely have different accounts than
@@ -348,7 +355,7 @@ Let's deploy it now:
    2. The top-level key (e.g., `production`) is for reference only. The `account_id` value determines the account.
 
    3. The remaining values determine which Authentik groups get assigned which roles in the specified account. For descriptions
-      of the roles, see this [reference document.](/docs/main/reference/rbac)
+      of the roles, see this [reference document.](/main/reference/rbac)
       You must have already allowed these groups access to AWS in the `authentik_aws_sso` module above.
 
 4. Run `pf-tf-init` to enable the required providers.
@@ -390,23 +397,25 @@ provisioned SSO credentials and roles and stop using your static root access key
 2. As AWS KMS keys are special resources that require explicit permission grants, you must re-apply
    **every** module that make use of KMS keys in order to pick up the new SSO roles. In this guide, that would be the following modules:
 
-   * sops keys deployed with the [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) module
-   * Vault clusters deployed with [kube\_vaults](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+   * sops keys deployed with the [aws\_kms\_encrypt\_key](/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) module
+   * Vault clusters deployed with [kube\_vaults](/main/reference/infrastructure-modules/direct/kubernetes/kube_vault)
 
 3. Run `pf-update-aws` to scaffold files in your `aws_dir` directory.
 
 4. Copy the generated `config.example.yaml` file to `config.yaml`.
 
-5. Set up `config.yaml` according to [these reference docs](/docs/main/reference/configuration/aws). Here is an example file:
+5. Set up `config.yaml` according to [these reference docs](/main/reference/configuration/aws). Here is an example file:
 
-   ::: code-group labels=[.aws/config.yaml]
+   ::: code-group labels=\[.aws/config.yaml]
+
    ```yaml "REPLACE_ME"
    sso_start_url: REPLACE_ME # Found in your AWS IAM Identity Center dashboard page.
    sso_region: REPLACE_ME # MUST be the AWS IAM Identity Center region. Found in your AWS IAM Identity Center dashboard page.
    default_aws_region: REPLACE_ME # Can be any AWS region
    module: management/global/aws_iam_identity_center_permissions
    ```
-   ::: 
+
+   :::
 
 6. Run `pf-update-aws --build`. This will automatically generate your `<aws_dir>/config` file to support
    all SSO roles ([file format](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)).
@@ -423,15 +432,15 @@ provisioned SSO credentials and roles and stop using your static root access key
 8. Ensure that you adjust your `<kube_dir>/config.user.yaml` and terragrunt variables to reflect the
    generated profile names:
 
-   ::: code-group labels=[.kube/config.user.yaml]
+   ::: code-group labels=\[.kube/config.user.yaml]
+
    ```yaml "REPLACE_ME"
    clusters:
    - name: "production-primary"
       aws_profile: "production-superuser"
    ```
-   ::: 
 
-
+   :::
 
 9. Verify that you still have Kubernetes connectivity by running `kubectl cluster-info` for every cluster
    (after running `pf-update-kube` to reflect any changes to your `<kube_dir>/config.user.yaml`).
@@ -450,12 +459,12 @@ provisioned SSO credentials and roles and stop using your static root access key
     credentials to fix.
 
 <MarkdownAlert severity="info">
-   In general, your [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables)
-   for AWS profiles should use the `<environment>-superuser` roles as some modules
-   will require superuser privileges to run. This is the default and should already have been configured earlier in the guide.
-   Your organization's users can override this profile
-   in their personal `environment.user.yaml` files if they need to run terragrunt but do not have `superuser`
-   access. See [this guide](/docs/main/guides/iac/deploying-modules#local-deployments) for more information.
+  In general, your [terragrunt variables](/main/reference/configuration/terragrunt-variables)
+  for AWS profiles should use the `<environment>-superuser` roles as some modules
+  will require superuser privileges to run. This is the default and should already have been configured earlier in the guide.
+  Your organization's users can override this profile
+  in their personal `environment.user.yaml` files if they need to run terragrunt but do not have `superuser`
+  access. See [this guide](/main/guides/iac/deploying-modules#local-deployments) for more information.
 </MarkdownAlert>
 
 ## Vault
@@ -467,7 +476,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 ### Deploy Vault Provider in Authentik
 
 We have a module for configuring Authentik to serve as the IdP for Vault clusters:
-[authentik\_vault\_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_vault_sso).
+[authentik\_vault\_sso](/main/reference/infrastructure-modules/direct/authentik/authentik_vault_sso).
 
 Let's deploy it now:
 
@@ -475,69 +484,9 @@ Let's deploy it now:
 
 2. Add `terragrunt.hcl` and `module.yaml` files that looks like this:
 
-      ::: code-group labels=[authentik_vault_sso_production/terragrunt.hcl, authentik_vault_sso_production/module.yaml]
-      ```hcl collapse={1-9} "REPLACE_ME"
-         include "panfactum" {
-            path   = find_in_parent_folders("panfactum.hcl")
-            expose = true
-         }
+   ::: code-group labels=\[authentik\_vault\_sso\_production/terragrunt.hcl, authentik\_vault\_sso\_production/module.yaml]
 
-         terraform {
-            source = include.panfactum.locals.pf_stack_source
-         }
-
-         dependency "kube_authentik" {
-            config_path = "../kube_authentik"
-         }
-
-         dependency "authentik_core" {
-            config_path = "../authentik_core_resources"
-         }
-
-         inputs = {
-            authentik_namespace = dependency.kube_authentik.outputs.namespace
-            media_configmap     = dependency.kube_authentik.outputs.media_configmap
-            organization_name   = dependency.authentik_core.outputs.organization_name
-            authentik_domain    = dependency.kube_authentik.outputs.domain
-
-            # Every one of your Vault clusters must have a unique name
-            vault_name   = "REPLACE_ME"
-
-            # Must be a subdomain of your environment's domain
-            # Example: vault.prod.panfactum.com
-            vault_domain = "REPLACE_ME"
-
-            # Provide *all* the groups that you want to allow to access the particular Vault cluster (we will assign roles later). 
-            allowed_groups = [
-               "superusers",
-               "privileged_engineers",
-               "engineers",
-               "restricted_engineers"
-            ]
-         }
-      ```
-      ```yaml
-      # Must be set since the directory name is not authentik_vault_sso
-      module: authentik_vault_sso
-      ```
-      :::
-
-4. Run `pf-tf-init` to enable the required providers.
-
-5. Run `terragrunt apply`.
-
-### Deploy Vault OIDC Login Configuration
-
-We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/docs/main/reference/infrastructure-modules/direct/vault/vault_auth_oidc).
-
-Let's deploy it now:
-
-1. For **every** Vault cluster, add a `vault_auth_oidc` folder adjacent to its `kube_vault` folder.
-
-2. Add new `terragrunt.hcl` and sops-encryped `secrets.yaml` files that looks like this:
-
-       ::: code-group labels=[vault_auth_oidc/terragrunt.hcl, vault_auth_oidc/secrets.yaml]
-      ```hcl collapse={1-9} "REPLACE_ME"
+   ```hcl collapse={1-9} "REPLACE_ME"
       include "panfactum" {
          path   = find_in_parent_folders("panfactum.hcl")
          expose = true
@@ -547,76 +496,142 @@ Let's deploy it now:
          source = include.panfactum.locals.pf_stack_source
       }
 
-      dependency "vault" {
-         config_path  = "../kube_vault"
-         skip_outputs = true
+      dependency "kube_authentik" {
+         config_path = "../kube_authentik"
       }
 
-      locals {
-         secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+      dependency "authentik_core" {
+         config_path = "../authentik_core_resources"
       }
 
       inputs = {
+         authentik_namespace = dependency.kube_authentik.outputs.namespace
+         media_configmap     = dependency.kube_authentik.outputs.media_configmap
+         organization_name   = dependency.authentik_core.outputs.organization_name
+         authentik_domain    = dependency.kube_authentik.outputs.domain
 
-         // Note: If the modules are not in the same environment, you will need to copy
-         // the relevant outputs from `authentik_vault_sso`
-         // (via `terragrunt output -json` to get the secrets) into the `terragrunt.hcl`
-         // and make sure you encrypt the `client_secret` with sops.
+         # Every one of your Vault clusters must have a unique name
+         vault_name   = "REPLACE_ME"
 
-         // The `client_id` output from `authentik_vault_sso`
-         // Example: 06fcaxxxeaee0113
-         client_id          = "REPLACE_MET"
+         # Must be a subdomain of your environment's domain
+         # Example: vault.prod.panfactum.com
+         vault_domain = "REPLACE_ME"
 
-         // The `client_secret` output from `authentik_vault_sso`
-         // Example: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
-         client_secret      = local.secrets.client_secret
-
-         // The `oidc_discovery_url` output from `authentik_vault_sso`
-         // Example: https://authentik.panfactum.com/application/o/vault-primary/
-         oidc_discovery_url = "REPLACE_ME"
-
-         // The `oidc_discovery_url` output from `authentik_vault_sso`
-         // Example: [
-         //  "https://vault.prod.panfactum.com/ui/vault/auth/oidc/oidc/callback",
-         //  "https://vault.prod.panfactum.com/oidc/callback",
-         //  "http://localhost:8250/oidc/callback" 
-         // ]
-         oidc_redirect_uris = [REPLACE_ME]
-
-         // The `oidc_issuer` output from `authentik_vault_sso`
-         // Example: https://authentik.panfactum.com/application/o/vault-primary/
-         oidc_issuer = "REPLACE_ME"
-
-         // See below instructions
-         superuser_groups         = [REPLACE_ME]
-         admin_groups             = [REPLACE_ME]
-         reader_groups            = [REPLACE_ME]
-         restricted_reader_groups = [REPLACE_ME]
+         # Provide *all* the groups that you want to allow to access the particular Vault cluster (we will assign roles later). 
+         allowed_groups = [
+            "superusers",
+            "privileged_engineers",
+            "engineers",
+            "restricted_engineers"
+         ]
       }
-      ```
-      ```yaml
-      client_secret: ENC[AES256_GCM,data:o0WIq8WQw7ToDb65Oz5H0JrTLmVUMZoZCUB3glIWVp1gj9/JkOdcNlBAUqn6Dwh5Hz2TXIKnZ77hvGdwnV/7whD0S5ltGEkTc/7sKKgc50MJsVyNxcCZuezh5NQiHlmpKsIQIa+xXsa+mxyJwQDvbqJ4YGiXd6GjZcWBhpHHncw=,iv:QPXGiUtEwXj9h+Sg1vgynKt5JdvtBzWt6/i9/vgb1jE=,tag:naxk2hjfE2S88F4MIOZSaQ==,type:str]
-      sops:
-         kms:
-            - arn: arn:aws:kms:us-east-2:471112902605:key/mrk-9cb675458a2b480ba6df9162e0122dee
-               created_at: "2025-02-24T18:30:43Z"
-               enc: AQICAHh86KuTi8Z88iNHPYXdu1XpVFjv3Aax24dfJJ8cPst7fwH09ojkjExrc5r2k4na6s1nAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMURDz5GZ03DygMWgAAgEQgDvGAHYALQ/J6s3KWXuF61BzSUJHigMGaAmioBNe4LlBTfh4yz4pZnaUS+/CyFZwejG4Eo8Vk5mdI3aU7g==
-               aws_profile: development-superuser
-            - arn: arn:aws:kms:us-west-2:471112902605:key/mrk-9cb675458a2b480ba6df9162e0122dee
-               created_at: "2025-02-24T18:30:43Z"
-               enc: AQICAHh86KuTi8Z88iNHPYXdu1XpVFjv3Aax24dfJJ8cPst7fwFU6zO2YCx2fLZVzWPZFMH/AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMQvQvI9PmA1k/2Z3nAgEQgDs8jEixzMxFgSYeV0oNYC/3Sf7CnsFt4UYL3JBz/4MraVrGHDR0vAbbXLAZGFDiU6Ap/s7dXIGQHSvoOQ==
-               aws_profile: development-superuser
-         gcp_kms: []
-         azure_kv: []
-         hc_vault: []
-         age: []
-         lastmodified: "2025-02-24T18:30:45Z"
-         mac: ENC[AES256_GCM,data:jRg6qhnueEe/lwQbJCqMKon/ijyp/66FP0qtlopmqfKmCeSV+Mdmhq+oMo0crC/oGomOOzZb25iz4hsZPmdUE4i1UgKvnSR33zDSjo3GX+TPuYxHXVN3Whw+y1QLQTFCeB36sPoHD8voswEUNLa91iVE0naUVjKiDeADl4RN2wk=,iv:ViOheAB5OgwDsdwD8oDBYYvFFLvLpfFifzYdmf594x0=,tag:1ArVhWX0k1MuWnYaECRzYw==,type:str]
-         pgp: []
-         unencrypted_suffix: _unencrypted
-         version: 3.9.1
-      ```
-      :::
+   ```
+
+   ```yaml
+   # Must be set since the directory name is not authentik_vault_sso
+   module: authentik_vault_sso
+   ```
+
+   :::
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+### Deploy Vault OIDC Login Configuration
+
+We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/main/reference/infrastructure-modules/direct/vault/vault_auth_oidc).
+
+Let's deploy it now:
+
+1. For **every** Vault cluster, add a `vault_auth_oidc` folder adjacent to its `kube_vault` folder.
+
+2. Add new `terragrunt.hcl` and sops-encrypted `secrets.yaml` files that looks like this:
+
+   ::: code-group labels=\[vault\_auth\_oidc/terragrunt.hcl, vault\_auth\_oidc/secrets.yaml]
+
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
+
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
+
+   dependency "vault" {
+      config_path  = "../kube_vault"
+      skip_outputs = true
+   }
+
+   locals {
+      secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+   }
+
+   inputs = {
+
+      // Note: If the modules are not in the same environment, you will need to copy
+      // the relevant outputs from `authentik_vault_sso`
+      // (via `terragrunt output -json` to get the secrets) into the `terragrunt.hcl`
+      // and make sure you encrypt the `client_secret` with sops.
+
+      // The `client_id` output from `authentik_vault_sso`
+      // Example: 06fcaxxxeaee0113
+      client_id          = "REPLACE_MET"
+
+      // The `client_secret` output from `authentik_vault_sso`
+      // Example: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
+      client_secret      = local.secrets.client_secret
+
+      // The `oidc_discovery_url` output from `authentik_vault_sso`
+      // Example: https://authentik.panfactum.com/application/o/vault-primary/
+      oidc_discovery_url = "REPLACE_ME"
+
+      // The `oidc_discovery_url` output from `authentik_vault_sso`
+      // Example: [
+      //  "https://vault.prod.panfactum.com/ui/vault/auth/oidc/oidc/callback",
+      //  "https://vault.prod.panfactum.com/oidc/callback",
+      //  "http://localhost:8250/oidc/callback" 
+      // ]
+      oidc_redirect_uris = [REPLACE_ME]
+
+      // The `oidc_issuer` output from `authentik_vault_sso`
+      // Example: https://authentik.panfactum.com/application/o/vault-primary/
+      oidc_issuer = "REPLACE_ME"
+
+      // See below instructions
+      superuser_groups         = [REPLACE_ME]
+      admin_groups             = [REPLACE_ME]
+      reader_groups            = [REPLACE_ME]
+      restricted_reader_groups = [REPLACE_ME]
+   }
+   ```
+
+   ```yaml
+   client_secret: ENC[AES256_GCM,data:o0WIq8WQw7ToDb65Oz5H0JrTLmVUMZoZCUB3glIWVp1gj9/JkOdcNlBAUqn6Dwh5Hz2TXIKnZ77hvGdwnV/7whD0S5ltGEkTc/7sKKgc50MJsVyNxcCZuezh5NQiHlmpKsIQIa+xXsa+mxyJwQDvbqJ4YGiXd6GjZcWBhpHHncw=,iv:QPXGiUtEwXj9h+Sg1vgynKt5JdvtBzWt6/i9/vgb1jE=,tag:naxk2hjfE2S88F4MIOZSaQ==,type:str]
+   sops:
+      kms:
+         - arn: arn:aws:kms:us-east-2:471112902605:key/mrk-9cb675458a2b480ba6df9162e0122dee
+            created_at: "2025-02-24T18:30:43Z"
+            enc: AQICAHh86KuTi8Z88iNHPYXdu1XpVFjv3Aax24dfJJ8cPst7fwH09ojkjExrc5r2k4na6s1nAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMURDz5GZ03DygMWgAAgEQgDvGAHYALQ/J6s3KWXuF61BzSUJHigMGaAmioBNe4LlBTfh4yz4pZnaUS+/CyFZwejG4Eo8Vk5mdI3aU7g==
+            aws_profile: development-superuser
+         - arn: arn:aws:kms:us-west-2:471112902605:key/mrk-9cb675458a2b480ba6df9162e0122dee
+            created_at: "2025-02-24T18:30:43Z"
+            enc: AQICAHh86KuTi8Z88iNHPYXdu1XpVFjv3Aax24dfJJ8cPst7fwFU6zO2YCx2fLZVzWPZFMH/AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMQvQvI9PmA1k/2Z3nAgEQgDs8jEixzMxFgSYeV0oNYC/3Sf7CnsFt4UYL3JBz/4MraVrGHDR0vAbbXLAZGFDiU6Ap/s7dXIGQHSvoOQ==
+            aws_profile: development-superuser
+      gcp_kms: []
+      azure_kv: []
+      hc_vault: []
+      age: []
+      lastmodified: "2025-02-24T18:30:45Z"
+      mac: ENC[AES256_GCM,data:jRg6qhnueEe/lwQbJCqMKon/ijyp/66FP0qtlopmqfKmCeSV+Mdmhq+oMo0crC/oGomOOzZb25iz4hsZPmdUE4i1UgKvnSR33zDSjo3GX+TPuYxHXVN3Whw+y1QLQTFCeB36sPoHD8voswEUNLa91iVE0naUVjKiDeADl4RN2wk=,iv:ViOheAB5OgwDsdwD8oDBYYvFFLvLpfFifzYdmf594x0=,tag:1ArVhWX0k1MuWnYaECRzYw==,type:str]
+      pgp: []
+      unencrypted_suffix: _unencrypted
+      version: 3.9.1
+   ```
+
+   :::
 
 3. Set the `superuser_groups`, `admin_groups`, and `reader_groups` as appropriate.
 
@@ -637,14 +652,16 @@ Let's deploy it now:
 ### Configure Developer Environment for OIDC Auth to Vault
 
 1. Remove your hardcoded `VAULT_ADDR` and `VAULT_TOKEN` token from your `.env` file. Make sure that you added the
-   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](/docs/main/guides/bootstrapping/inbound-networking#deploy-the-vault-ingress)
+   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](/main/guides/bootstrapping/inbound-networking#deploy-the-vault-ingress)
 
-      ::: code-group labels=[.env]
-      ```dotenv del={1-2}
-      VAULT_ADDR=vault.example.com
-      VAULT_TOKEN=hvs.XXXXXXXXXXXXXXXXXX
-      ```
-      :::
+   ::: code-group labels=\[.env]
+
+   ```dotenv del={1-2}
+   VAULT_ADDR=vault.example.com
+   VAULT_TOKEN=hvs.XXXXXXXXXXXXXXXXXX
+   ```
+
+   :::
 
 2. Terragrunt will automatically work with the new SSO login flow. Test this by re-applying the `vault_auth_oidc` module.
 

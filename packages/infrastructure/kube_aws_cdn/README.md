@@ -3,10 +3,10 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs`
-output from instances of the [kube_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
-module and forwarding them to the [aws_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module.
+output from instances of the [kube_ingress](/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+module and forwarding them to the [aws_cdn](/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module.
 
-This module takes the same arguments as `aws_cdn`, so see it's [module documentation](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn)
+This module takes the same arguments as `aws_cdn`, so see it's [module documentation](/main/reference/infrastructure-modules/submodule/aws/aws_cdn)
 for more information.
 
 ## Limitations
@@ -21,7 +21,7 @@ for more information.
 * You cannot use the same domain name on multiple CDNs. As a result, you can only create ONE `kube_aws_cdn` resource
    for all ingresses that use a particular domain name.
 
-* For additional limitations, see the [aws_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module docs.
+* For additional limitations, see the [aws_cdn](/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module docs.
 
 ## Usage
 

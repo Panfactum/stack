@@ -1,12 +1,10 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import Layout from "@/components/layouts/primary/Layout.astro";
 
 import Button from "../components/ui/Button.astro";
-import MainSection from "../layouts/MainSection.astro";
 ---
 
-<Layout heroClass="bg-secondary" title="Not found" description="404 Page">
-  <MainSection>
+<Layout title="Not found" description="404 Page">
     <h1>Page Not Found</h1>
     <p>
       If you have reached this page in error, please report it to our <a
@@ -14,7 +12,6 @@ import MainSection from "../layouts/MainSection.astro";
       >
     </p>
     <Button id="back" variant="primary">Go Back</Button>
-  </MainSection>
 </Layout>
 
 <script>

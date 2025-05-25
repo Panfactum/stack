@@ -5,7 +5,7 @@ directly to AWS.
 
 ## Pulling and Pushing Images Locally
 
-We cover this in the [BuildKit guide](/docs/main/guides/addons/buildkit/installing).
+We cover this in the [BuildKit guide](/main/guides/addons/buildkit/installing).
 
 ## Pulling and Pushing Images Across Accounts
 
@@ -17,7 +17,7 @@ image artifacts across environments rather than rebuilding for each environment.
 
 IAM users and roles in other accounts must still have the 
 [appropriate permissions to interact with ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html). 
-We provide this automatically for Kubernetes clusters deployed with the [aws_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks)
+We provide this automatically for Kubernetes clusters deployed with the [aws_eks](/main/reference/infrastructure-modules/direct/aws/aws_eks)
 module.
 
 ## Image Immutability
@@ -35,11 +35,11 @@ three means to do so:
 
 1. We automatically remove untagged images as if an image loses its tag, it is assumed it will never be pulled again.
 
-2. If set to `true`, `<repo>.expire_all_images` will automatically remove an image 14 days after it was created. This
+1. If set to `true`, `<repo>.expire_all_images` will automatically remove an image 14 days after it was created. This
 can be helpful for images generated during local development that will not be used in production and can be easily
 regenerated.
 
-3. We provide a `<repo>.expiration_rules` field that will allow you to specify custom 
+1. We provide a `<repo>.expiration_rules` field that will allow you to specify custom 
 [lifecycle policies](https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html) for
 each repository based on the image's tag pattern. See the linked docs for available patterns.
 

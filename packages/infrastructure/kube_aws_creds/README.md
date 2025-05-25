@@ -4,10 +4,10 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module uses the [AWS secrets engine](https://developer.hashicorp.com/vault/docs/secrets/aws) of the Vault instance in the Kubernetes cluster
 to provision an IAM User and associated credentials. The credentials are periodically rotated based on `credential_lifetime_hours`, but
-no other security controls are applied (unlike [kube_sa_auth_aws](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)).
+no other security controls are applied (unlike [kube_sa_auth_aws](/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)).
 
 <MarkdownAlert severity="warning">
-   This module should *only* be used when [kube_sa_auth_aws](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)
+   This module should *only* be used when [kube_sa_auth_aws](/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)
    is not suitable. The credentials provisioned by this module offers far less security than [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html),
    but occasionally you may need credentials that are not session-based.
 

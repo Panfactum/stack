@@ -202,8 +202,8 @@
     },
     {
       "module": "kube_cert_issuers",
-      "type": "",
-      "group": ""
+      "type": "direct",
+      "group": "kubernetes"
     },
     {
       "module": "kube_cert_manager",

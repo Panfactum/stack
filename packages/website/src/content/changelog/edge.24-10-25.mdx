@@ -1,0 +1,16 @@
+---
+summary: Release contains a critical bug that can cause a complete cluster crash due to issues with the Kyverno policy engine. Skip this release and use edge.24-11-13 instead.
+skip: true
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="alerts">
+    <MarkdownAlert severity="warning">
+      A bug has been discovered in this release that can cause a complete cluster crash due to the introduction of the new Kyverno
+      policy engine. Please skip this release and use `edge.24-11-13` instead.
+    </MarkdownAlert>
+  </Fragment>
+</ChangelogEntry>

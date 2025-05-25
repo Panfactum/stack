@@ -1,0 +1,36 @@
+---
+summary: Makes S3 backups mandatory for PostgreSQL clusters, adds native database restoration capabilities, creates immediate base backups for new databases, and fixes failover disruption issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="breaking-changes">
+    * We removed the ability to disable S3 backups in
+      [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). The backups
+      have an extremely low cost impact and significantly improves the durability of data. Moreover, the continuous
+      WAL archiving provided by the backups improves our system's ability to automatically recover in the case
+      of failover events.
+
+      Ultimately, we found that the risk of misuse (resulting in unexpected data loss or downtime)
+      significantly outweighed any potential benefits gained by providing this functionality.
+  </Fragment>
+
+  <Fragment slot="additions">
+    * Added native support for restoring from database backups to the [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      submodule.
+
+    * Added automatic creation of an immediate base backup to the
+      [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to ensure that
+      new databases can be recovered all the way up to their point of creation.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Mitigated a rare scenario where disruption in the middle of a database failover would result in
+      the PostgreSQL databases being unable to restart without manual intervention in the
+      [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) submodule.
+
+    * Fixed an issue where `pf-get-repo-variables` would provide the wrong directory for the root of the repository
+      when run inside a downloaded `.terragrunt-cache` directory.
+  </Fragment>
+</ChangelogEntry>

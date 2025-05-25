@@ -1,0 +1,28 @@
+---
+summary: Contains CI/CD pipeline issues (fixed in next release). Improves provider metadata handling, fixes version pinning in first-party modules, properly respects external replica changes, and resolves cert-manager webhook configuration.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="alerts">
+    <MarkdownAlert severity="warning">
+      This release causes issues in the CI/CD pipelines for IaC deployments. This is resolved in the subsequent release.
+    </MarkdownAlert>
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * The `pf` provider will now receive Kubernetes metadata regardless of whether the Kubernetes provides are enabled
+      in the module tree.
+
+    * Pinning the `version` of first-party IaC modules should now work without error regardless of what version of
+      the Panfactum modules are used (including if using a local copy).
+
+    * `ignore_replica_count` in [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+      and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) will
+      now properly *not* reset `spec.replicas` to the `replicas` input if `spec.replicas` has been mutated by an external process.
+
+    * Fixed to use `{}` from using `null` for `webhookConfigurations` in `kube_cert_manager`.
+  </Fragment>
+</ChangelogEntry>

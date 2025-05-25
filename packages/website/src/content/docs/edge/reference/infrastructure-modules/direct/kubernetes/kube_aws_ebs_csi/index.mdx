@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_aws_ebs_csi" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_aws_ebs_csi" status="stable" type="direct"/>
+
+<ModuleHeader name="kube_aws_ebs_csi" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_aws_ebs_csi" status="stable" type="direct" />
 
 # AWS EBS CSI Driver
 
@@ -14,10 +15,10 @@ as [PVs](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for po
 
 Additionally, this creates two base [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/):
 
-- `ebs-standard`: Uses [EBS gp3 volumes](https://aws.amazon.com/ebs/general-purpose/). Is the default
+* `ebs-standard`: Uses [EBS gp3 volumes](https://aws.amazon.com/ebs/general-purpose/). Is the default
   Storage Class if none is indicated.
 
-- `ebs-standard-retained`: Uses [EBS gp3 volumes](https://aws.amazon.com/ebs/general-purpose/). Must be manually
+* `ebs-standard-retained`: Uses [EBS gp3 volumes](https://aws.amazon.com/ebs/general-purpose/). Must be manually
   deleted which is useful for databases where you do not want to accidentally lose data.
 
 ## Usage
@@ -30,29 +31,29 @@ See this reference document for [descriptions of the various parameters](https:/
 
 All storage classes created by this module have the following properties:
 
-- Creates volumes that use the [ext4 filesystem](https://en.wikipedia.org/wiki/Ext4)
-- Uses encrypted volumes
-- Allows [volume expansions](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#csi-volume-expansion) and
-creates volumes that are eligible for autoresizing by the
-[PVC autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer)
-- Have a [volume binding mode](https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode) of `WaitForFirstConsumer`
-- Creates volumes that are named `{{ .PVCNamespace }}/{{ .PVCName }}` in AWS (via the `Name` tag)
+* Creates volumes that use the [ext4 filesystem](https://en.wikipedia.org/wiki/Ext4)
+* Uses encrypted volumes
+* Allows [volume expansions](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#csi-volume-expansion) and
+  creates volumes that are eligible for autoresizing by the
+  [PVC autoresizer](/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer)
+* Have a [volume binding mode](https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode) of `WaitForFirstConsumer`
+* Creates volumes that are named `{{ .PVCNamespace }}/{{ .PVCName }}` in AWS (via the `Name` tag)
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 

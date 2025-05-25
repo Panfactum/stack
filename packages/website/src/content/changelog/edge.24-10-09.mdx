@@ -1,0 +1,25 @@
+---
+summary: Adds support for local Stack module development, loosens git provider requirements, makes environment bootstrapping idempotent, and fixes EKS bootstrap mode and installation issues.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * Adds a new [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables), `pf_stack_local_path`, that can be used to deploy local copies of the Panfactum Stack modules. This
+      can be used by developers when testing changes to Panfactum modules on personal infrastructure before submitting pull requests to the [Stack repository](https://github.com/Panfactum/stack).
+  </Fragment>
+
+  <Fragment slot="changes">
+    * Loosened the requirements for the [repo variable](/docs/edge/reference/configuration/repo-variables) `repo_url` so that we
+      can now support users on arbitrary git hosting providers (not just GitHub).
+
+    * `pf-env-bootstrap` is now idempotent, allowing it to be re-run if it fails in the middle of its initial execution.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Fixes the ami instance type mismatch when `bootstrap_mode_enabled` is enabled in the [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.
+    * Fixes issues that prevented bootstrapping scripts from running with new `pf-tf-init` logic.
+    * Adjusts the defaults for [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) so that installation does not fail in the bootstrapping guide.
+  </Fragment>
+</ChangelogEntry>

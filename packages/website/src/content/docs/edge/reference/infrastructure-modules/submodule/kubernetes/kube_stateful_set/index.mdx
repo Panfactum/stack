@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_stateful_set" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_stateful_set" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_stateful_set" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_stateful_set" status="stable" type="submodule" />
 
 # Kubernetes StatefulSet
 
@@ -12,28 +13,28 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 Provides a production-hardened instance of a Kubernetes [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 with the following enhancements:
 
-- Automatic headless service creation
-- Standardized resource labels
-- Pod and container security hardening
-- Persistent volume creation and mounting with automatic integrations with the
-- [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) and [Velero](https://github.com/vmware-tanzu/velero)
-- Temporary directory mounting
-- [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
-- [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
-- Service account configuration with default permissions
-- Integration with the Panfactum bin-packing scheduler
-- High-availability scheduling constraints
-- [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
-- Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
-- [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
-- [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
-- [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+* Automatic headless service creation
+* Standardized resource labels
+* Pod and container security hardening
+* Persistent volume creation and mounting with automatic integrations with the
+* [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) and [Velero](https://github.com/vmware-tanzu/velero)
+* Temporary directory mounting
+* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+* Service account configuration with default permissions
+* Integration with the Panfactum bin-packing scheduler
+* High-availability scheduling constraints
+* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
+* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
 
 ## Usage
 
 ### Basics
 
-This module follows the basic workload deployment patterns describe in [this guide](/docs/edge/guides/deploying-workloads/basics).
+This module follows the basic workload deployment patterns describe in [this guide](/edge/guides/deploying-workloads/basics).
 
 ### Horizontal Autoscaling
 
@@ -53,18 +54,18 @@ pod in the StatefulSet.
 
 The configuration values are as follows:
 
-- `storage_class`: The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) to
-use for the volume. To learn more about the available storage class options, see [our guide.](/docs/edge/guides/deploying-workloads/persistence)
-- `initial_size_gb`: The size of the volume when it is first created.
-- `increase_gb`: How much the volume will grow every time it is autoscaled by the [PVC autoresizer](https://github.com/topolvm/pvc-autoresizer).
-- `increase_threshold_percent`: When free storage drops below this percent on the volume, the volume will be autoscaled.
-- `size_limit_gb`: The maximum size the volume is allowed to grow to.
-- `mount_path`: Absolute path inside each container that the volume is mounted to.
-- `backups_enabled`: Whether the PVC snapshots will be created when [Velero](https://github.com/vmware-tanzu/velero) backups are created (by default hourly).
+* `storage_class`: The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) to
+  use for the volume. To learn more about the available storage class options, see [our guide.](/edge/guides/deploying-workloads/persistence)
+* `initial_size_gb`: The size of the volume when it is first created.
+* `increase_gb`: How much the volume will grow every time it is autoscaled by the [PVC autoresizer](https://github.com/topolvm/pvc-autoresizer).
+* `increase_threshold_percent`: When free storage drops below this percent on the volume, the volume will be autoscaled.
+* `size_limit_gb`: The maximum size the volume is allowed to grow to.
+* `mount_path`: Absolute path inside each container that the volume is mounted to.
+* `backups_enabled`: Whether the PVC snapshots will be created when [Velero](https://github.com/vmware-tanzu/velero) backups are created (by default hourly).
 
 <MarkdownAlert severity="warning">
-    PVCs can only be autoscaled every six hours (AWS limitation), so you must choose autoscaling parameters
-    that ensure autoscaling can keep pace with your data growth rate.
+  PVCs can only be autoscaled every six hours (AWS limitation), so you must choose autoscaling parameters
+  that ensure autoscaling can keep pace with your data growth rate.
 </MarkdownAlert>
 
 You can configure the [retention policy](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention)
@@ -74,15 +75,15 @@ of the volumes through the `volume_retention_policy` input.
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
@@ -209,7 +210,7 @@ Description: Whether to allow pods to schedule on burstable nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### cilium\_required
 
@@ -273,8 +274,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 
@@ -376,6 +378,14 @@ Description: Whether to enable anti-affinity to prevent pods from being schedule
 Type: `bool`
 
 Default: `null`
+
+### lifetime\_evictions\_enabled
+
+Description: Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)
+
+Type: `bool`
+
+Default: `false`
 
 ### linkerd\_enabled
 
@@ -497,8 +507,9 @@ Type:
 
 ```hcl
 map(object({
-    mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
   }))
 ```
 
@@ -578,7 +589,7 @@ Default: `{}`
 
 ### unhealthy\_pod\_eviction\_policy
 
-Description: Whether to allow unhealthy pods to be evicted. See https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy.
+Description: Whether to allow unhealthy pods to be evicted. See [https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
 
 Type: `string`
 

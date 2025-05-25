@@ -15,7 +15,7 @@ and validating Kubernetes resources.</p>
 
 Kyverno is [a CNCF project](https://www.cncf.io/projects/kyverno/) which allows us to add many features to vanilla Kubernetes:
 
-* Native integration with the [pull through cache](/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
+* Native integration with the [pull through cache](/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
 * Support for [arm64](https://aws.amazon.com/ec2/graviton/) and [spot instances](https://aws.amazon.com/ec2/spot/)
 * Support for our bin-packing pod scheduler
 * Descriptive labels and automatically injected reflexive environment variables for pods
@@ -32,7 +32,7 @@ For a full architectural breakdown, see their [excellent documentation.](https:/
 
 ## Deploy Kyverno
 
-We provide a module for deploying Kyverno, [kube\_kyverno](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
+We provide a module for deploying Kyverno, [kube\_kyverno](/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
 
 Let's deploy it now:
 
@@ -40,25 +40,27 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_kyverno/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_kyverno/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "cilium" {
-         config_path  = "../kube_cilium"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "cilium" {
+      config_path  = "../kube_cilium"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -71,7 +73,7 @@ Let's deploy it now:
 ## Deploy Panfactum Policies
 
 While `kube_kyverno` installs Kyverno itself, Kyverno does not apply any policy rules by default. To load in the default
-[Kyverno Policies](https://kyverno.io/docs/kyverno-policies/), we provide a module called [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
+[Kyverno Policies](https://kyverno.io/docs/kyverno-policies/), we provide a module called [kube\_policies](/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
 
 Let's deploy the policies now:
 
@@ -79,25 +81,27 @@ Let's deploy the policies now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-      ::: code-group labels=[kube_policies/terragrunt.hcl]
-      ```hcl collapse={1-14} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[kube\_policies/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-14} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "kyverno" {
-         config_path  = "../kube_kyverno"
-         skip_outputs = true
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {}
-      ```
-      :::
+   dependency "kyverno" {
+      config_path  = "../kube_kyverno"
+      skip_outputs = true
+   }
+
+   inputs = {}
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -129,11 +133,11 @@ Let's deploy the policies now:
 ## Run Network Tests
 
 <MarkdownAlert severity="warning">
-    This test takes awhile to complete, but please run it before continuing. If something is broken,
-    it will break other components in non-obvious ways. Additionally, the fix will usually require
-    re-provisioning your entire cluster.
+  This test takes awhile to complete, but please run it before continuing. If something is broken,
+  it will break other components in non-obvious ways. Additionally, the fix will usually require
+  re-provisioning your entire cluster.
 
-    Additionally, this test can be somewhat flaky. If the test fails the first time, try running it again.
+  Additionally, this test can be somewhat flaky. If the test fails the first time, try running it again.
 </MarkdownAlert>
 
 Now that both networking and the policy controller are installed, let's verify that everything is working as intended. The
@@ -154,13 +158,13 @@ We will use that to test that cilium is working as intended:
    ```
 
 4. Unfortunately, the test does not clean up after itself. You should run `kubectl delete ns cilium-test` to remove
-the test resources.
+   the test resources.
 
 [^90]: Skipping the pod-to-pod-encryption test is required due to [this issue](https://github.com/cilium/cilium/issues/36018).
 
 [^91]: If you receive an error like `Unable to detect Cilium version, assuming vX.X.X for connectivity tests: unable to parse cilium version on pod.`
-that means that you tried to run the test while not all `cilium-xxxx` pods were ready. Wait for all the `cilium-xxxxx` pods to reach
-a ready state and then try again.
+    that means that you tried to run the test while not all `cilium-xxxx` pods were ready. Wait for all the `cilium-xxxxx` pods to reach
+    a ready state and then try again.
 
 ## Next Steps
 

@@ -14,7 +14,7 @@ written using the OpenTofu (Terraform) [syntax](https://opentofu.org/docs/langua
 It is assumed that your infrastructure modules will live in your stack repository under a single
 directory.
 
-Set the `iac_dir` repo variable to that directory per the [reference docs](/docs/stable-25-04/reference/configuration/repo-variables).
+Set the `iac_dir` repo variable to that directory per the [reference docs](/stable-25-04/reference/configuration/repo-variables).
 
 For example, if `iac_dir` is set to `infrastructure`, it is expected your filesystem layout
 will look as follows:
@@ -34,7 +34,7 @@ All the normal conventions for developing OpenTofu (Terraform) modules apply.
 
 ## Deploying Modules
 
-All the rules in the [main module deployment guide](/docs/stable-25-04/guides/iac/deploying-modules#defining-a-module-for-deployment) apply.
+All the rules in the [main module deployment guide](/stable-25-04/guides/iac/deploying-modules#defining-a-module-for-deployment) apply.
 However, there are some additional considerations for first-party modules:
 
 ### Sourcing
@@ -86,9 +86,9 @@ Now the sourced module will be `infrastructure/module2`.
 
 If your first-party IaC is stored in a private git repository, you will need to do some additional setup:
 
-* Set the `repo_url` [repository variable](/docs/stable-25-04/reference/configuration/repo-variables). This will likely have already been set up when your system was first deployed.
+* Set the `repo_url` [repository variable](/stable-25-04/reference/configuration/repo-variables). This will likely have already been set up when your system was first deployed.
 
-* Set `GIT_USERNAME` and `GIT_PASSWORD` in your [personal `.env` file](/docs/stable-25-04/reference/configuration/dotenv). The values will be combined with `repo_url` to clone your IaC over HTTPS as follows:
+* Set `GIT_USERNAME` and `GIT_PASSWORD` in your [personal `.env` file](/stable-25-04/reference/configuration/dotenv). The values will be combined with `repo_url` to clone your IaC over HTTPS as follows:
 
     `git clone https://<GIT_USERNAME>:<GIT_PASSWORD>@<repo_url>` [^99]
 
@@ -113,7 +113,7 @@ then the framework will automatically insert the `GIT_USERNAME` and `GIT_PASSWOR
 
 <MarkdownAlert severity="info">
     If you are also deploying IaC using our CI/CD module, ensure you also provide git credentials to the CI/CD system
-    by following [these instructions.](/docs/stable-25-04/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy#authenticating-with-private-repositories)
+    by following [these instructions.](/stable-25-04/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy#authenticating-with-private-repositories)
 </MarkdownAlert>
 
 ### Versioning
@@ -177,8 +177,8 @@ deployed:
 <MarkdownSVGImage src={VersioningImg} alt="Terragrunt module versioning diagram" />
 
 <MarkdownAlert severity="info">
-    Even thought the infrastructure-as-code versions will differ based on the `version` value, the [configuration-as-code](/docs/stable-25-04/concepts/iac#configuration-as-code) (i.e., module versions, module inputs, etc.) for **all** module deployments will **always** be defined
-    by the values in the primary integration branch. This is set by the `repo_primary_branch` [repo variable.](/docs/stable-25-04/reference/configuration/repo-variables)
+    Even thought the infrastructure-as-code versions will differ based on the `version` value, the [configuration-as-code](/stable-25-04/concepts/iac#configuration-as-code) (i.e., module versions, module inputs, etc.) for **all** module deployments will **always** be defined
+    by the values in the primary integration branch. This is set by the `repo_primary_branch` [repo variable.](/stable-25-04/reference/configuration/repo-variables)
 
     This ensures that you have a single view containing the settings for all your systems across all environments and regions. This is critical
     as your infrastructure footprint expands over time.
@@ -188,7 +188,7 @@ deployed:
 
 ### Using Panfactum Submodules
 
-In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/docs/stable-25-04/reference/infrastructure-modules/overview)
+In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/stable-25-04/reference/infrastructure-modules/overview)
 that you many import directly for use in your custom modules.
 
 You can accomplish this via `module` blocks in your infrastructure code ([docs](https://developer.hashicorp.com/terraform/language/modules/sources)).
@@ -233,7 +233,7 @@ Fortunately, we provide a convenient way to automatically align your submodule v
    ```
 
 Our Terragrunt configuration automatically takes care of passing in the appropriate values for `pf_module_source`
-and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/docs/stable-25-04/reference/configuration/terragrunt-variables#module-source), these variables will
+and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/stable-25-04/reference/configuration/terragrunt-variables#module-source), these variables will
 automatically update.
 
 Finally, if you are using Panfactum submodules, you should **not** set version constraints for IaC providers used by the submodule (check
@@ -254,12 +254,12 @@ terraform {
 ```
 
 <MarkdownAlert severity="info">
-    If you are [using a local copy of the Panfactum submodules](/docs/stable-25-04/guides/iac/deploying-modules#using-a-local-copy-of-panfactum-modules),
+    If you are [using a local copy of the Panfactum submodules](/stable-25-04/guides/iac/deploying-modules#using-a-local-copy-of-panfactum-modules),
     `pf_module_source` will be a relative path. Unlike absolute paths, [relative paths provide performance improvements and automatic updates.](https://opentofu.org/docs/language/modules/sources/#local-paths)
     However, the relative path cannot always be used such as from within nested folders inside your modules.
 
     You can use absolute paths instead
-    by setting the `pf_stack_local_use_relative` [Terragrunt variable](/docs/stable-25-04/reference/configuration/terragrunt-variables#module-source) to `false`.
+    by setting the `pf_stack_local_use_relative` [Terragrunt variable](/stable-25-04/reference/configuration/terragrunt-variables#module-source) to `false`.
     However, this will force you to re-init any time you change the local Panfactum module code.
 </MarkdownAlert>
 
@@ -285,7 +285,7 @@ a specific AWS profile for authentication).
 
 You can override all values in the committed version of `global.yaml`, `environment.yaml`, `region.yaml`, and `module.yaml`
 with `*.user.yaml` counterparts (e.g., `environment.user.yaml`). These files are never committed and are specific
-to **you**. For all available settings, see the [reference documentation.](/docs/stable-25-04/reference/configuration/terragrunt-variables)
+to **you**. For all available settings, see the [reference documentation.](/stable-25-04/reference/configuration/terragrunt-variables)
 
 For example, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
 in a module directory.

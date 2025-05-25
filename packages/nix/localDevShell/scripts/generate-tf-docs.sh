@@ -90,7 +90,6 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
         >"$DOCS_DIR/index.mdx"
 
     # Copy only image files from the doc_images directory if it exists
-    echo "$d/doc_images"
     if [ -d "$d/doc_images" ]; then
       mkdir -p "$DOCS_DIR/doc_images"
       find "$d/doc_images" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.svg" -o -iname "*.webp" \) -exec cp {} "$DOCS_DIR/doc_images/" \;

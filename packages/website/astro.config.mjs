@@ -27,6 +27,9 @@ const DEFAULT_SITE_URL = "http://localhost:4321"
 export default defineConfig({
   cacheDir: ".cache",
   site: process.env.SITE_URL ?? DEFAULT_SITE_URL,
+  redirects: {
+    "/": "/edge/guides/"
+  },
   env: {
     schema: {
       ALGOLIA_APP_ID: envField.string({
@@ -75,12 +78,12 @@ export default defineConfig({
     expressiveCode({
       shiki: {
         bundledLangs: [
-            'shellsession',
-            'nix',
-            'hcl',
-            'yaml',
-            'dockerfile',
-            'dotenv'
+          'shellsession',
+          'nix',
+          'hcl',
+          'yaml',
+          'dockerfile',
+          'dotenv'
         ]
       }
     }),
@@ -88,11 +91,11 @@ export default defineConfig({
     sitemap(),
     criticalCSS({
       dimensions: [
-        {width: 624, height: 900 },
-        {width: 765, height: 900 },
-        {width: 1023, height: 1500 },
-        {width: 1263, height: 2000 },
-        {width: 1500, height: 2000 }
+        { width: 624, height: 900 },
+        { width: 765, height: 900 },
+        { width: 1023, height: 1500 },
+        { width: 1263, height: 2000 },
+        { width: 1500, height: 2000 }
       ],
       strict: true,
       inline: {

@@ -21,7 +21,7 @@ to the PVCs.
 ## Usage Notes
 
 We make extensive use of this submodule in our core Panfactum modules such as in
-[kube_stateful_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+[kube_stateful_set](/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
 
 Most of the time you will not need to use this directly. However, we expose it in case you
 are using a controller that creates PVCs that is not included in the stack.

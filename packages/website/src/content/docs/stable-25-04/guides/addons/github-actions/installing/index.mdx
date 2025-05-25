@@ -20,17 +20,17 @@ to leverage your Panfactum clusters for executing GHA workflows.
 </MarkdownAlert>
 
 GitHub Actions are **not** the recommended method for setting up CI / CD in Panfactum clusters. We
-provide a full set of guides for our recommended architecture [here](/docs/stable-25-04/guides/cicd/getting-started).
+provide a full set of guides for our recommended architecture [here](/stable-25-04/guides/cicd/getting-started).
 
 Additionally, GitHub Actions have many shortcomings compared to a more full-featured, Kubernetes-native workflow
-engine such as Argo Workflows. See our detailed analysis and list of limitations [here](/docs/stable-25-04/concepts/cicd/gha).
+engine such as Argo Workflows. See our detailed analysis and list of limitations [here](/stable-25-04/concepts/cicd/gha).
 
 ## Install the Runner Controller
 
 To begin using self-hosted runners, you must first install the [Actions Runner Controller (ARC)](https://github.com/actions/actions-runner-controller)
 which is a Kubernetes operator that orchestrates and scales the runners based on Kubernetes custom resources.
 
-We provide a module to deploy this controller: [kube\_gha](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_gha).
+We provide a module to deploy this controller: [kube\_gha](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_gha).
 
 Let's deploy it now:
 
@@ -68,13 +68,13 @@ You should now see a new Deployment running in the `gha` namespace called `gha-c
 
 The controller allows you to create various "runners" which are the pods that will actually execute your GHA code.
 
-To create runners, you will use our [kube\_gha\_runners](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners) module.
+To create runners, you will use our [kube\_gha\_runners](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners) module.
 
 Let's deploy one type of runner now:
 
 1. Create a new directory adjacent to your `kube_gha` module called `kube_gha_runners`.
 
-2. Add a `terragrunt.hcl` and sops-enrypted `secrets.yaml` to that directory that looks like this:
+2. Add a `terragrunt.hcl` and sops-encrypted `secrets.yaml` to that directory that looks like this:
 
       ::: code-group labels=[kube_gha_runners/terragrunt.hcl, kube_gha_runners/secrets.yaml]
       ```hcl collapse={1-14} "REPLACE_ME"
@@ -136,10 +136,10 @@ Let's deploy one type of runner now:
 
    1. Follow [GitHub's documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api#authenticating-arc-with-a-personal-access-token-classic) to provision a
       Classic Personal Access Token (PAT) with the correct permissions. Provide this token
-      as an input via `github_token`. Make sure that the token is [encrypted with sops.](/docs/stable-25-04/guides/iac/deploying-modules#using-secrets)
+      as an input via `github_token`. Make sure that the token is [encrypted with sops.](/stable-25-04/guides/iac/deploying-modules#using-secrets)
 
    2. The `runners` input is a key-value map that defines the different runner groups that your workflow jobs can target. The keys
-      are the names of the groups and the values are their configuration. See the [module documentation](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners)
+      are the names of the groups and the values are their configuration. See the [module documentation](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners)
       for information on the various configuration values.
 
       <MarkdownAlert severity="warning">

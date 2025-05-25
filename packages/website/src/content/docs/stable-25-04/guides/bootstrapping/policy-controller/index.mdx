@@ -15,7 +15,7 @@ and validating Kubernetes resources.</p>
 
 Kyverno is [a CNCF project](https://www.cncf.io/projects/kyverno/) which allows us to add many features to vanilla Kubernetes:
 
-* Native integration with the [pull through cache](/docs/stable-25-04/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
+* Native integration with the [pull through cache](/stable-25-04/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
 * Support for [arm64](https://aws.amazon.com/ec2/graviton/) and [spot instances](https://aws.amazon.com/ec2/spot/)
 * Support for our bin-packing pod scheduler
 * Descriptive labels and automatically injected reflexive environment variables for pods
@@ -32,7 +32,7 @@ For a full architectural breakdown, see their [excellent documentation.](https:/
 
 ## Deploy Kyverno
 
-We provide a module for deploying Kyverno, [kube\_kyverno](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
+We provide a module for deploying Kyverno, [kube\_kyverno](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
 
 Let's deploy it now:
 
@@ -71,7 +71,7 @@ Let's deploy it now:
 ## Deploy Panfactum Policies
 
 While `kube_kyverno` installs Kyverno itself, Kyverno does not apply any policy rules by default. To load in the default
-[Kyverno Policies](https://kyverno.io/docs/kyverno-policies/), we provide a module called [kube\_policies](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
+[Kyverno Policies](https://kyverno.io/docs/kyverno-policies/), we provide a module called [kube\_policies](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
 
 Let's deploy the policies now:
 

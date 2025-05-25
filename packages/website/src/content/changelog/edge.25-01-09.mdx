@@ -1,0 +1,20 @@
+---
+summary: Adds cluster-wide environment variable injection capability, pins Bottlerocket OS AMIs to prevent node crashes from unexpected AWS updates, and fixes EKS module conditions for low SLA targets.
+---
+
+import ChangelogEntry from "./ChangelogEntry.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+<ChangelogEntry>
+  <Fragment slot="additions">
+    * [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) now has `common_env` and `common_secrets` inputs that inject environment variables into all containers in the
+      cluster.
+  </Fragment>
+
+  <Fragment slot="fixes">
+    * Pins Bottlerocket OS AMIs to pre-tested versions as AWS occasionally publishes breaking AMI changes that can crash
+      nodes in the cluster.
+
+    * Fixes the pre- and post- condition check for the `aws_eks` module when `sla_target` is set to 1.
+  </Fragment>
+</ChangelogEntry>

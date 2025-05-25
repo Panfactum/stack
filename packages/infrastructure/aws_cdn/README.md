@@ -87,26 +87,26 @@ Traffic that matches a given `path_prefix` will:
 1. The CDN will check to see if the request path matches any of the `path_match_behavior` keys (e.g., `*.jpg`).
 If so, the rules from that behavior configuration will be applied. See below.
 
-2. If no `path_match_behavior` keys are matched (or none are provided), the `default_cache_behavior` configuration will take effect.
+1. If no `path_match_behavior` keys are matched (or none are provided), the `default_cache_behavior` configuration will take effect.
 
 The cache "behavior" for both `default_cache_behavior` and `path_match_behavior` works as follows:
 
 1. The `viewer_protocol_policy` ([docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesViewerProtocolPolicy))
 will be applied. [^2]
 
-2. Any global redirect (see below) will take effect. Otherwise, the request will be processed.
+1. Any global redirect (see below) will take effect. Otherwise, the request will be processed.
 
-3. If `caching_enabled` is `true`, the request's HTTP method is in `cached_methods`, and the request has a cached response, then a cached response will be immediately returned.
+1. If `caching_enabled` is `true`, the request's HTTP method is in `cached_methods`, and the request has a cached response, then a cached response will be immediately returned.
 
-4. If no cached response is found and the request HTTP method is in `allowed_methods`, the request be forwarded 
+1. If no cached response is found and the request HTTP method is in `allowed_methods`, the request be forwarded 
 to the `origin_domain` in its original form (including the original `Host` header) 
 except for anything blocked by `cookies_not_forwarded`, `headers_not_forwarded`, and `query_strings_forwarded`. Additionally,
 path `rewrite_rules` (see below) will take effect.
 
-5. When a response is received, CloudFront will [automatically compress responses](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-cloudfront-how-it-works)
+1. When a response is received, CloudFront will [automatically compress responses](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-cloudfront-how-it-works)
 if `compression_enabled` is `true` and the client accepts either the Gzip or Brotli compression formats (via the `Accept-Encoding` HTTP header).
 
-6. After optional compression, the request will be cached if `caching_enabled` is `true` and the request's HTTP method is in `cached_methods`.
+1. After optional compression, the request will be cached if `caching_enabled` is `true` and the request's HTTP method is in `cached_methods`.
 The cache key is determined by `cookies_in_cache_key`, `headers_in_cache_key`, and `query_strings_in_cache_key` (the HTTP method and path are
 always included in the key). [^1] 
 
@@ -125,7 +125,7 @@ always included in the key). [^1]
 
    For a much more detailed breakdown of CloudFront caching, see [AWS's documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-key-understand-cache-policy.html).
 
-7. The response will be sent to the client.
+1. The response will be sent to the client.
 
 [^1]: The more values you specify for the cache key, the lower your hit ratio will be, so tune this carefully. By default,
 we include all cookies and query strings in the cache key to ensure that responses are not unintentionally shared across
@@ -165,13 +165,13 @@ Rewrite rules work as follows:
 
 1. The appropriate configuration from `origin_configs` is chosen based on its `path_prefix`.
 
-2. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
+1. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
    that regex matches, then the ***path after the `path_prefix`*** is transformed to `rewrite`. [^91] [^92] [^93] Regex capture groups are allowed in `match`
    and can be used in `rewrite`.
 
-3. Iff `remove_prefix` is `true`, prefix is removed from the request.
+1. Iff `remove_prefix` is `true`, prefix is removed from the request.
 
-4. The request is then forwarded to the upstream service.
+1. The request is then forwarded to the upstream service.
 
 [^91]: If multiple rewrite rules match, the one with the longest `match` regex applies.
 
@@ -230,7 +230,7 @@ you must set `cors_additional_allowed_origins`. Adding `"*"` to this input will 
 #### S3 Origins
 
 If you want to use an S3 bucket as the origin for this CloudFront distribution, you should use our
-[aws_s3_public_website](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
+[aws_s3_public_website](/main/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
 
 ### Number of PoPs
 

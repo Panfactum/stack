@@ -1,0 +1,27 @@
+---
+import FrameworkFeaturesSection from "./_archived/_components/FrameworkFeaturesSection/FrameworkFeaturesSection.astro";
+import FrameworkSummarySection from "./_archived/_components/FrameworkSummarySection.astro";
+import HeroSection from "./_archived/_components/HeroSection.astro";
+import PanfactumPlusSection from "./_archived/_components/PanfactumPlusSection.astro";
+import ReplacedServicesSection from "./_archived/_components/ReplacedServicesSection/ReplacedServicesSection.astro";
+import Layout from "../layouts/Layout.astro";
+import MainSection from "../layouts/MainSection.astro";
+---
+<Layout
+  heroClass="bg-secondary"
+  hasBorder={false}
+  title="Panfactum"
+  description="The Open-Source Framework for Cloud Infrastructure"
+>
+  <HeroSection slot="hero"/>
+  <MainSection title="The Panfactum Framework">
+    <div slot="chip" class="mb-6 rounded-lg bg-brand-100 px-2 py-1 text-sm font-semibold text-brand-800 ring-2 ring-brand-800">Free, Open-Source</div>
+    <FrameworkSummarySection />
+    <FrameworkFeaturesSection />
+      <div class="hidden sm:block">
+          <ReplacedServicesSection />
+      </div>
+
+  </MainSection>
+  <PanfactumPlusSection />
+</Layout>

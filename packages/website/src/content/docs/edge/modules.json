@@ -51,6 +51,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_dns_links",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
       "module": "aws_dns_records",
       "type": "direct",
       "group": "aws"
@@ -93,6 +98,11 @@
     {
       "module": "aws_kms_encrypt_key",
       "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_organization",
+      "type": "direct",
       "group": "aws"
     },
     {
@@ -182,6 +192,11 @@
     },
     {
       "module": "kube_buildkit",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_certificates",
       "type": "direct",
       "group": "kubernetes"
     },
@@ -281,12 +296,22 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_job",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_karpenter",
       "type": "direct",
       "group": "kubernetes"
     },
     {
       "module": "kube_karpenter_node_pools",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_keda",
       "type": "direct",
       "group": "kubernetes"
     },
@@ -343,6 +368,11 @@
     {
       "module": "kube_open_cost",
       "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_opensearch",
+      "type": "submodule",
       "group": "kubernetes"
     },
     {

@@ -392,7 +392,7 @@ variable "hooks" {
 }
 
 variable "passthrough_parameters" {
-  description = "Workflow paramaters that should automatically passthrough to every template on the workflow"
+  description = "Workflow parameters that should automatically passthrough to every template on the workflow"
   type = list(object({
     default     = optional(string)
     description = optional(string)

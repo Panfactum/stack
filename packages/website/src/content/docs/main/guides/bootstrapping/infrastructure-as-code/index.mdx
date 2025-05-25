@@ -12,8 +12,8 @@ To begin deploying infrastructure, you will first need both a state backend and 
 
 We provide two infrastructure modules that define both those resources:
 
-* [tf\_bootstrap\_resources](/docs/main/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
-* [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
+* [tf\_bootstrap\_resources](/main/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
+* [aws\_kms\_encrypt\_key](/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
 
 Deploying these modules for the first time is a bit cumbersome as they have circular references. [^1]
 
@@ -108,7 +108,7 @@ Let's perform a quick test to ensure sops is working properly.
 ## Deploy the AWS Account Module
 
 Now that you have both the state backends and encryption keys established, we can start deploying infrastructure.
-The first resource will be the [aws\_account](/docs/main/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
+The first resource will be the [aws\_account](/main/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
 to your account including setting up its alias and contact information.
 
 Let's deploy it now:
@@ -117,66 +117,70 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to the directory that looks like this:
 
-    ::: code-group labels=[management/global/aws_account/terragrunt.hcl]
-    ```hcl collapse={1-9} "REPLACE_ME"
-    include "panfactum" {
-      path   = find_in_parent_folders("panfactum.hcl")
-      expose = true
-    }
+   ::: code-group labels=\[management/global/aws\_account/terragrunt.hcl]
 
-    terraform {
-      source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
 
-    locals {
-      // Note that this is the standard way to read encrypted files into terragrunt.
-      secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
-    }
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
 
-    // Replace the values as needed for your organization. Feel free to also change what values are secret or not.
-    inputs = {
-      contact_company_name       = "REPLACE_ME"
-      contact_website            = "REPLACE_ME"
-      contact_full_name          = "REPLACE_ME"
-      contact_address_line_1     = local.secrets.address_line_1
-      contact_city               = local.secrets.city
-      contact_district_or_county = local.secrets.district_or_county
-      contact_state_or_region    = local.secrets.state_or_region
-      contact_postal_code        = local.secrets.postal_code
-      contact_country_code       = "REPLACE_ME"
-      contact_phone_number       = local.secrets.phone_number
+   locals {
+     // Note that this is the standard way to read encrypted files into terragrunt.
+     secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+   }
 
-      security_full_name         = "REPLACE_ME"
-      security_title             = "REPLACE_ME"
-      security_phone_number      = local.secrets.phone_number
-      security_email_address     = local.secrets.email_address
+   // Replace the values as needed for your organization. Feel free to also change what values are secret or not.
+   inputs = {
+     contact_company_name       = "REPLACE_ME"
+     contact_website            = "REPLACE_ME"
+     contact_full_name          = "REPLACE_ME"
+     contact_address_line_1     = local.secrets.address_line_1
+     contact_city               = local.secrets.city
+     contact_district_or_county = local.secrets.district_or_county
+     contact_state_or_region    = local.secrets.state_or_region
+     contact_postal_code        = local.secrets.postal_code
+     contact_country_code       = "REPLACE_ME"
+     contact_phone_number       = local.secrets.phone_number
 
-      billing_full_name          = "REPLACE_ME"
-      billing_title              = "REPLACE_ME"
-      billing_phone_number       = local.secrets.phone_number
-      billing_email_address      = local.secrets.email_address
+     security_full_name         = "REPLACE_ME"
+     security_title             = "REPLACE_ME"
+     security_phone_number      = local.secrets.phone_number
+     security_email_address     = local.secrets.email_address
 
-      operations_full_name       = "REPLACE_ME"
-      operations_title           = "REPLACE_ME"
-      operations_phone_number    = local.secrets.phone_number
-      operations_email_address   = local.secrets.email_address
-    }
-    ```
-    :::
+     billing_full_name          = "REPLACE_ME"
+     billing_title              = "REPLACE_ME"
+     billing_phone_number       = local.secrets.phone_number
+     billing_email_address      = local.secrets.email_address
+
+     operations_full_name       = "REPLACE_ME"
+     operations_title           = "REPLACE_ME"
+     operations_phone_number    = local.secrets.phone_number
+     operations_email_address   = local.secrets.email_address
+   }
+   ```
+
+   :::
 
 3. Add a `secrets.yaml` to the directory:
 
-    ::: code-group labels=[management/global/aws_account/secrets.yaml]
-    ```yaml "REPLACE_ME"
-    address_line_1: REPLACE_ME
-    city: REPLACE_ME
-    district_or_county: REPLACE_ME
-    state_or_region: REPLACE_ME
-    postal_code: REPLACE_ME
-    phone_number: REPLACE_ME # Needs to be of format "+15555555555"
-    email_address: REPLACE_ME
-    ```
-    :::
+   ::: code-group labels=\[management/global/aws\_account/secrets.yaml]
+
+   ```yaml "REPLACE_ME"
+   address_line_1: REPLACE_ME
+   city: REPLACE_ME
+   district_or_county: REPLACE_ME
+   state_or_region: REPLACE_ME
+   postal_code: REPLACE_ME
+   phone_number: REPLACE_ME # Needs to be of format "+15555555555"
+   email_address: REPLACE_ME
+   ```
+
+   :::
 
 4. Run `sops -e -i secrets.yaml` to encrypt the file.
 

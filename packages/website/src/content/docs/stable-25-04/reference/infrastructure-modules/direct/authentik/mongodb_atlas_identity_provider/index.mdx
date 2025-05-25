@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="mongodb_atlas_identity_provider" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/mongodb_atlas_identity_provider" status="beta" type="direct"/>
+
+<ModuleHeader name="mongodb_atlas_identity_provider" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/mongodb_atlas_identity_provider" status="beta" type="direct" />
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
@@ -14,16 +15,16 @@ This module sets up the identity provider configuration in MongoDB Atlas.
 <MarkdownAlert severity="warning">
   Due to limitations with MongoDB Atlas, users will not be automatically removed from MongoDB Atlas when they are removed from Authentik.
 
-They will lose the ability to login, but you should be aware of the following caveats:
+  They will lose the ability to login, but you should be aware of the following caveats:
 
-- If "Bypass SAML Mode" is enabled, users will be able to bypass Authentik and login directly to Atlas using their
-  static usernames and passwords. As a result, we strongly recommend keeping the [SSO Debug Mode](#sso\_debug\_enabled) input as `false` after initial setup.
-- Any active session tokens that the user has with the Atlas web UI will not be automatically revoked. Until these
-  tokens expire, the user may still have the ability to interact with the web UI unless you manually remove them from
-  the Atlas organization.
-- Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be
-  able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if
-  removing a user in the `superusers` or `privileged_engineers` group (and any other group configured with access to application keys).
+  * If "Bypass SAML Mode" is enabled, users will be able to bypass Authentik and login directly to Atlas using their
+    static usernames and passwords. As a result, we strongly recommend keeping the [SSO Debug Mode](#sso_debug_enabled) input as `false` after initial setup.
+  * Any active session tokens that the user has with the Atlas web UI will not be automatically revoked. Until these
+    tokens expire, the user may still have the ability to interact with the web UI unless you manually remove them from
+    the Atlas organization.
+  * Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be
+    able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if
+    removing a user in the `superusers` or `privileged_engineers` group (and any other group configured with access to application keys).
 </MarkdownAlert>
 
 ## Panfactum Role to MongoDB Atlas Role Mapping
@@ -32,16 +33,16 @@ This document outlines the default role mappings between **Panfactum Roles** and
 ensure that users in Panfactum have appropriate permissions in MongoDB Atlas, maintaining security and role-based access
 control.
 
-For more details on MongoDB Atlas roles, refer to the official documentation:  
+For more details on MongoDB Atlas roles, refer to the official documentation:\
 [MongoDB Atlas User Roles](https://www.mongodb.com/docs/atlas/reference/user-roles/)
 
-| **Panfactum Role**       | **MongoDB Atlas Role(s)** | **Reason for Mapping**                                                                                                                       |
-|--------------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| **superusers**           | `ORG_OWNER`               | Superusers require full administrative access to the MongoDB Atlas organization, including user management, billing, and resource creation.  |
-| **privileged\_engineers** | `ORG_OWNER`               | Privileged engineers act as admins, enabling them to fully manage Atlas independently without relying on Panfactum.                          |
-| **billing\_admins**       | `ORG_BILLING_ADMIN`       | Billing admins manage payment details and invoices but do not need full administrative control over the organization.                        |
-| **engineers**            | `ORG_READ_ONLY`           | Engineers require read-only access to view Atlas organization settings but cannot modify any configurations.                                 |
-| **restricted\_engineers** | `ORG_MEMBER`              | Restricted engineers have basic membership access, allowing them to work within assigned projects but without organization-wide privileges.  |
+| **Panfactum Role**        | **MongoDB Atlas Role(s)** | **Reason for Mapping**                                                                                                                      |
+| ------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **superusers**            | `ORG_OWNER`               | Superusers require full administrative access to the MongoDB Atlas organization, including user management, billing, and resource creation. |
+| **privileged\_engineers** | `ORG_OWNER`               | Privileged engineers act as admins, enabling them to fully manage Atlas independently without relying on Panfactum.                         |
+| **billing\_admins**       | `ORG_BILLING_ADMIN`       | Billing admins manage payment details and invoices but do not need full administrative control over the organization.                       |
+| **engineers**             | `ORG_READ_ONLY`           | Engineers require read-only access to view Atlas organization settings but cannot modify any configurations.                                |
+| **restricted\_engineers** | `ORG_MEMBER`              | Restricted engineers have basic membership access, allowing them to work within assigned projects but without organization-wide privileges. |
 
 ## Guide
 
@@ -50,50 +51,54 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 1. Go to your MongoDB Atlas account
 2. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Domains`
 3. Click on `Add Domain`
-   ![Add Domain](doc\_images/mongodb-atlas-add-domains.png)
+   ![Add Domain](doc_images/mongodb-atlas-add-domains.png)
 4. Add the root domain that you are using for Authentik (i.e., panfactum.com)
 5. Select `DNS Record` as the verification method
-   ![DNS Verification](doc\_images/mongodb-atlas-dns-verification.png)
+   ![DNS Verification](doc_images/mongodb-atlas-dns-verification.png)
 6. Note the `TXT Record` that is generated. You will need this value in future steps.
-   ![DNS TXT Verification Record](doc\_images/mongodb-atlas-dns-txt-verification.png)
+   ![DNS TXT Verification Record](doc_images/mongodb-atlas-dns-txt-verification.png)
 
 ### Deploy a new DNS TXT Record & Verify
 
 1. Add a text record to your `production/global/aws_dns/terragrunt.hcl` file that looks
    like this:
 
-      ::: code-group labels=[production/global/aws\_dns/terragrunt.hcl]
-      ```hcl collapse={1-9} ins={19} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[production/global/aws\_dns/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} ins={19} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      inputs = {
-         zones = {
-            // Replace with the domain from
-            // "Setup MongoDB Atlas Identity Provider Domain Verification"
-            "REPLACE_ME" = {
-               txt_records = [
-                  {
-                     subdomain = ""
-                     records = [
-                        "mongodb-site-verification=REPLACE_ME", // MongoDB Atlas SSO
-                     ]
-                  }
-               ]
-            }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
+
+   inputs = {
+      zones = {
+         // Replace with the domain from
+         // "Setup MongoDB Atlas Identity Provider Domain Verification"
+         "REPLACE_ME" = {
+            txt_records = [
+               {
+                  subdomain = ""
+                  records = [
+                     "mongodb-site-verification=REPLACE_ME", // MongoDB Atlas SSO
+                  ]
+               }
+            ]
          }
       }
-      ```
-      :::
+   }
+   ```
+
+   :::
 
 2. Run `terragrunt apply`
+
 3. Go back to MongoDB Atlas and click on `Verify` next to the domain you added
+
 4. Confirm verification
 
 ### Download the Signing Certificate from Authentik
@@ -102,10 +107,10 @@ Before proceeding, make sure to have downloaded the signing certificate from the
 
 1. Login to your Authentik instance
 2. Switch over to the `Admin` section
-   ![Authentik Admin](doc\_images/mongodb-atlas-authentik-admin-link.png)
+   ![Authentik Admin](doc_images/mongodb-atlas-authentik-admin-link.png)
 3. Go to the section `Applications` -> `Providers` -> `MongoDB Atlas`
 4. Find `Related objects` and click on the `Download` button for the `Download signing certificate`
-   ![Authentik Identity Provider Signature](doc\_images/mongodb-atlas-providers-certificate.png)
+   ![Authentik Identity Provider Signature](doc_images/mongodb-atlas-providers-certificate.png)
 
 ### Deploy the MongoDB Identity Provider module
 
@@ -119,12 +124,12 @@ We will first create the resource through the UI and then import it to configure
 2. Note the `Organization ID`. You will need this value in future steps.
 3. Go to `Federated Authentication Settings` -> `Identity Providers`
 4. Click on `Configure Identity Provider`
-   ![Configure Identity Provider](doc\_images/mongodb-atlas-configure-identity-provider.png)
+   ![Configure Identity Provider](doc_images/mongodb-atlas-configure-identity-provider.png)
 5. Select `Workforce Identity Federation`
 6. Select `SAML for Atlas UI Access`
 7. Set a Name such as `Authentik Integration`
 8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
-   ![Fill with placeholder values](doc\_images/mongodb-atlas-saml-fill-placeholder.png)
+   ![Fill with placeholder values](doc_images/mongodb-atlas-saml-fill-placeholder.png)
 9. Upload the `Signing Certificate` that we downloaded above
 10. Set the `Request Binding` to `HTTP-POST`
 11. Set the `Response Signature Algorithm` to `SHA-256`
@@ -143,64 +148,69 @@ We will first create the resource through the UI and then import it to configure
 4. Set the description to `terraform`
 5. Set the Organization Permission to `Organization Owner`
 6. Save the public and private key to your `.env` file
-    1. Set `MONGODB_ATLAS_PUBLIC_KEY`
-    2. Set `MONGODB_ATLAS_PRIVATE_KEY`
+   1. Set `MONGODB_ATLAS_PUBLIC_KEY`
+   2. Set `MONGODB_ATLAS_PRIVATE_KEY`
 
 #### 3. From the terminal
 
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
+
 2. Add a new a `terragrunt.hcl` file that looks like this:
 
-      ::: code-group labels=[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
-      ```hcl collapse={1-9} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+   ::: code-group labels=\[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+   }
 
-      dependency "authentik_atlas_mongodb_sso" {
-         config_path = "../authentik_mongodb_atlas_sso"
-      }
+   terraform {
+      source = include.panfactum.locals.pf_stack_source
+   }
 
-      inputs = {
-         issuer_url = dependency.authentik_atlas_mongodb_sso.outputs.issuer_url
-         sso_url    = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
+   dependency "authentik_atlas_mongodb_sso" {
+      config_path = "../authentik_mongodb_atlas_sso"
+   }
 
-         // Set to "Organization ID" from step 1.2
-         // Example: 679ac9030691076f53402259
-         organization_id = "REPLACE_ME"
+   inputs = {
+      issuer_url = dependency.authentik_atlas_mongodb_sso.outputs.issuer_url
+      sso_url    = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
 
-         // Set to "Federation Settings ID" from step 1.12
-         // Example: 679ac90e37161e292db2780e
-         federation_settings_id = "REPLACE_ME"
+      // Set to "Organization ID" from step 1.2
+      // Example: 679ac9030691076f53402259
+      organization_id = "REPLACE_ME"
 
-         // Set to "IdP ID" from step 1.12
-         // Example: 67a80b37499ddf3676fa8f2b
-         idp_id = "REPLACE_ME"
+      // Set to "Federation Settings ID" from step 1.12
+      // Example: 679ac90e37161e292db2780e
+      federation_settings_id = "REPLACE_ME"
 
-         // Set to the domain you verified in the prerequisite step:
-         // "Setup MongoDB Atlas Identity Provider Domain Verification"
-         // Example: panfactum.com
-         associated_domains = [REPLACE_ME]
+      // Set to "IdP ID" from step 1.12
+      // Example: 67a80b37499ddf3676fa8f2b
+      idp_id = "REPLACE_ME"
 
-         sso_debug_enabled  = true
-      }
-      ```
-      :::  
+      // Set to the domain you verified in the prerequisite step:
+      // "Setup MongoDB Atlas Identity Provider Domain Verification"
+      // Example: panfactum.com
+      associated_domains = [REPLACE_ME]
+
+      sso_debug_enabled  = true
+   }
+   ```
+
+   :::
 
 3. Run `pf-tf-init`
+
 4. Run `terragrunt apply`
 
 #### 4. CICD (Optional)
 
-If you have CICD setup and are deploying infrastructure using the [wf\_tf\_deploy](/docs/stable-25-04/reference/infrastructure-modules/submodule/workflow/wf\_tf\_deploy) module,
+If you have CICD setup and are deploying infrastructure using the [wf\_tf\_deploy](/stable-25-04/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) module,
 you will also need to pass in the keys:
 
-::: code-group labels=[infrastructure/cicd/deploy.hcl]
+::: code-group labels=\[infrastructure/cicd/deploy.hcl]
+
 ```hcl "REPLACE_ME" ins={18-19}
 module "tf_deploy" {
   source = "${var.pf_module_source}wf_tf_deploy${var.pf_module_ref}"
@@ -224,15 +234,17 @@ module "tf_deploy" {
   }
 }
 ```
+
 :::
 
 #### 5. Finish Authentik Setup
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
-the [Sync Authentik with the Atlas Settings](/docs/stable-25-04/reference/infrastructure-modules/direct/authentik/authentik\_mongodb\_atlas\_sso)
+the [Sync Authentik with the Atlas Settings](/stable-25-04/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
 section.
 
 ### Disable SSO Bypass
+
 <MarkdownAlert severity="warning">
   You MUST verify that SSO works prior to disabling the bypass.
   Disabling this toggle will lock you out of your MongoDB Atlas account if you have not configured SSO correctly.
@@ -242,54 +254,56 @@ section.
 After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle by removing the `sso_debug_enabled`
 in the `mongodb_atlas_identity_provider` module.
 
-      ::: code-group labels=[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
-      ```hcl collapse={1-9, 15-33} del={35} "REPLACE_ME"
-      include "panfactum" {
-         path   = find_in_parent_folders("panfactum.hcl")
-         expose = true
-      }
+::: code-group labels=\[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
 
-      terraform {
-         source = include.panfactum.locals.pf_stack_source
-      }
+```hcl collapse={1-9, 15-33} del={35} "REPLACE_ME"
+include "panfactum" {
+   path   = find_in_parent_folders("panfactum.hcl")
+   expose = true
+}
 
-      dependency "authentik_atlas_mongodb_sso" {
-         config_path = "../authentik_mongodb_atlas_sso"
-      }
+terraform {
+   source = include.panfactum.locals.pf_stack_source
+}
 
-      inputs = {
-         issuer_url = dependency.authentik_atlas_mongodb_sso.outputs.issuer_url
-         sso_url    = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
+dependency "authentik_atlas_mongodb_sso" {
+   config_path = "../authentik_mongodb_atlas_sso"
+}
 
-         // Set to "Organization ID" from step 1.2
-         // Example: 679ac9030691076f53402259
-         organization_id = "REPLACE_ME"
+inputs = {
+   issuer_url = dependency.authentik_atlas_mongodb_sso.outputs.issuer_url
+   sso_url    = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
 
-         // Set to "Federation Settings ID" from step 1.12
-         // Example: 679ac90e37161e292db2780e
-         federation_settings_id = "REPLACE_ME"
+   // Set to "Organization ID" from step 1.2
+   // Example: 679ac9030691076f53402259
+   organization_id = "REPLACE_ME"
 
-         // Set to "IdP ID" from step 1.12
-         // Example: 67a80b37499ddf3676fa8f2b
-         idp_id = "REPLACE_ME"
+   // Set to "Federation Settings ID" from step 1.12
+   // Example: 679ac90e37161e292db2780e
+   federation_settings_id = "REPLACE_ME"
 
-         // Set to the domain you verified in the prerequisite step:
-         // "Setup MongoDB Atlas Identity Provider Domain Verification"
-         // Example: panfactum.com
-         associated_domains = [REPLACE_ME]
+   // Set to "IdP ID" from step 1.12
+   // Example: 67a80b37499ddf3676fa8f2b
+   idp_id = "REPLACE_ME"
 
-         sso_debug_enabled  = true
-      }
-      ```
-      :::  
+   // Set to the domain you verified in the prerequisite step:
+   // "Setup MongoDB Atlas Identity Provider Domain Verification"
+   // Example: panfactum.com
+   associated_domains = [REPLACE_ME]
+
+   sso_debug_enabled  = true
+}
+```
+
+:::
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
+* [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
 
-- [mongodbatlas](https://registry.terraform.io/providers/panfactum/mongodbatlas/1.26.1/docs) (1.26.1)
+* [mongodbatlas](https://registry.terraform.io/providers/panfactum/mongodbatlas/1.26.1/docs) (1.26.1)
 
 ## Required Inputs
 
