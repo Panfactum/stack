@@ -65,5 +65,46 @@ pf aws profile-for-context production-primary
   - Automatic SSH key generation and Vault signing
   - Uses autossh for persistent connections
 
+### Phase 4: Container & Build Management
+
+#### 4.1 Shared BuildKit Utilities
+Created reusable utilities for BuildKit operations:
+- ✅ `pf-buildkit-validate.sh` → `src/util/buildkit/constants.ts`
+  - Defines shared constants and types
+  - Architecture type: 'amd64' | 'arm64'
+- ✅ `pf-buildkit-get-address.sh` → `src/util/buildkit/getAddress.ts`
+  - Finds BuildKit instance with least CPU usage
+  - Returns cluster-internal TCP address
+- ✅ `pf-buildkit-record-build.sh` → `src/util/buildkit/recordBuild.ts`
+  - Records build timestamp on StatefulSet annotations
+  - Prevents premature scale-down during builds
+- ✅ Additional utilities:
+  - `src/util/buildkit/config.ts` - BuildKit configuration management
+  - `src/util/buildkit/getLastBuildTime.ts` - Retrieves last build timestamp
+
+#### 4.2 BuildKit CLI Commands
+- ✅ `pf-buildkit-scale-up.sh` → `pf buildkit scale up`
+  - Scales BuildKit from 0 to 1 replica
+  - Options: `--only=<arch>`, `--wait`, `--context`
+  - Records "build" to prevent immediate scale-down
+- ✅ `pf-buildkit-scale-down.sh` → `pf buildkit scale down`
+  - Scales BuildKit to 0 replicas
+  - Options: `--timeout=<seconds>`, `--context`
+  - Respects timeout based on last build annotation
+- ✅ `pf-buildkit-clear-cache.sh` → `pf buildkit clear-cache`
+  - Deletes unused PVCs
+  - Prunes cache in running BuildKit pods
+  - Options: `--context`
+- ✅ `pf-buildkit-tunnel.sh` → `pf buildkit tunnel`
+  - Creates network tunnel to BuildKit server
+  - Options: `--arch=<arch>`, `--port=<port>`
+  - Auto-scales BuildKit instance before connecting
+- ✅ `pf-buildkit-build.sh` → `pf buildkit build`
+  - Multi-platform container builds (amd64 + arm64)
+  - Options: `--repo`, `--tag`, `--file`, `--context`
+  - Parallel builds with automatic tunnel management
+  - Creates multi-platform manifest with manifest-tool
+  - Supports S3 cache import/export
+
 ## Next Steps
-Continue with Phase 4 migrations as outlined in MIGRATION_PLAN.md
+Continue with Phase 5 migrations as outlined in MIGRATION_PLAN.md
