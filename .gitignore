@@ -22,3 +22,4 @@ node_modules/
 .cursorignore
 
 .tmp-panfactum-install-config.json
+**/.claude/settings.local.json

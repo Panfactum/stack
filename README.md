@@ -13,7 +13,7 @@ the best experience for building, deploying, and managing software on AWS and Ku
 
 ## Installation
 
-If you'd like to add the Panfactum stack to your organization, see our [deployment guide.](https://panfactum.com/docs/edge/guides/bootstrapping/overview)
+If you'd like to add the Panfactum Framework to your organization, see our [deployment guide.](https://panfactum.com/docs/edge/guides/bootstrapping/overview)
 
 If you'd like to connect to an existing stack, see the [new user guide.](https://panfactum.com/docs/edge/guides/getting-started/overview)
 
@@ -22,15 +22,23 @@ If you'd like to connect to an existing stack, see the [new user guide.](https:/
 This repository contains the following components of the panfactum architecture which are all versioned
 together to ensure internal consistency:
 
-- [Panfactum Local Development Environment](packages/nix/mkDevShells)
+- [Panfactum Local Development Environment](packages/nix) - Nix-based development shell and tooling scripts
 
-- [Infrastructure Modules](packages/infrastructure)
+- [Infrastructure Modules](packages/infrastructure) - OpenTofu/Terraform modules for AWS and Kubernetes infrastructure
 
-- [Documentation Website](packages/website)
+- [Documentation Website](packages/website) - The panfactum.com documentation site
 
-- [Reference Architecture](packages/reference)
+- [Reference Architecture](packages/reference) - Example infrastructure configurations and best practices
 
-- [Bastion Host](packages/bastion)
+- [Panfactum CLI](packages/cli) - Command-line interface for infrastructure setup and management
+
+- [Web Scraper](packages/scraper) - Tool for maintaining search indexes and website data
+
+- [Installer](packages/installer) - Installation scripts for the Panfactum Framework
+
+- [Bastion Host](packages/bastion) - Containerized bastion host for secure access
+
+- [Vault](packages/vault) - Custom Vault container with additional plugins
 
 ## Licensing
 
