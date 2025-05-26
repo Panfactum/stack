@@ -73,4 +73,12 @@
 
 ### Bash / Shell
 
+Use the following rules when making changes to `.sh` files:
+
 - Run `shfmt` and `shellcheck` against any new code.
+
+### Typescript
+
+Use the following rules when making changes to `.ts` or `.tsx` files:
+
+- **NEVER use the `non-null assertion operator`**
