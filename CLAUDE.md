@@ -65,7 +65,9 @@ See @README.md for project overview.
 
 - NEVER name things as 'improved' or 'new' or 'enhanced', etc. Code naming should be evergreen. What is new today will be "old" someday.
 
+- ALWAYS `git pull --rebase` to merge in remote changes, if necessary.
 
+- ALWAYS use descriptive variable names.
 
 ## Language-specific rules
 
