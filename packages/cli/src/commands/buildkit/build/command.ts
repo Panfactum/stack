@@ -3,10 +3,10 @@ import { existsSync } from 'fs'
 import { dirname, basename, join } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
-import type { BuildKitConfig } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getOpenPort } from '@/util/network/getOpenPort.js'
 import { execute } from '@/util/subprocess/execute.js'
+import type { BuildKitConfig } from '@/util/buildkit/constants.js'
 
 export default class BuildkitBuildCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'build']]

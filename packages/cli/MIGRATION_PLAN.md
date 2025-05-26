@@ -2,6 +2,15 @@
 
 This document outlines the migration strategy for moving shell scripts from `packages/nix/packages/scripts/` to TypeScript CLI commands in `packages/cli/`.
 
+## Migration Progress
+- ✅ Phase 1: Core Utilities - COMPLETED
+- ✅ Phase 2: Development Tools - COMPLETED (partial - terraform init only)
+- ✅ Phase 3: Infrastructure Management - COMPLETED
+- ✅ Phase 4: Container & Build Management - COMPLETED
+- ✅ Phase 5: Advanced Operations - COMPLETED
+- ⏳ Phase 6: User Management - IN PROGRESS
+- ⏳ Phase 7: Final Phase
+
 ## Current CLI Architecture
 
 ### Command Structure Pattern
@@ -85,48 +94,51 @@ pf-tunnel.sh        → pf tunnel <service> <port> [--namespace] (✅ exists)
 pf-vpc-network-test.sh → pf aws vpc-network-test --module-path <path> (✅ placeholder exists)
 ```
 
-### Phase 4: Container & Build Management
+### Phase 4: Container & Build Management ✅ COMPLETED
 BuildKit operations with complex dependency chains.
 
-#### 4.1 Shared BuildKit Services
+#### 4.1 Shared BuildKit Services ✅
 ```typescript
-// Convert to shared utilities
-pf-buildkit-validate.sh     → src/util/buildkit/validate.ts
-pf-buildkit-get-address.sh  → src/util/buildkit/getAddress.ts
-pf-buildkit-record-build.sh → src/util/buildkit/recordBuild.ts
+// Converted to shared utilities
+pf-buildkit-validate.sh     → src/util/buildkit/constants.ts ✅
+pf-buildkit-get-address.sh  → src/util/buildkit/getAddress.ts ✅
+pf-buildkit-record-build.sh → src/util/buildkit/recordBuild.ts ✅
+// Additional utilities created:
+- src/util/buildkit/config.ts (BuildKit configuration management)
+- src/util/buildkit/getLastBuildTime.ts (Retrieve last build timestamp)
 ```
 
-#### 4.2 BuildKit CLI Commands
+#### 4.2 BuildKit CLI Commands ✅
 ```typescript
-pf-buildkit-build.sh       → pf buildkit build <dockerfile> <context> <tags...>
-pf-buildkit-clear-cache.sh → pf buildkit clear-cache
-pf-buildkit-scale-down.sh  → pf buildkit scale down [--timeout]
-pf-buildkit-scale-up.sh    → pf buildkit scale up [--arch]
-pf-buildkit-tunnel.sh      → pf buildkit tunnel [--arch]
+pf-buildkit-build.sh       → pf buildkit build --repo --tag --file --context ✅
+pf-buildkit-clear-cache.sh → pf buildkit clear-cache [--context] ✅
+pf-buildkit-scale-down.sh  → pf buildkit scale down [--timeout] [--context] ✅
+pf-buildkit-scale-up.sh    → pf buildkit scale up [--only] [--wait] [--context] ✅
+pf-buildkit-tunnel.sh      → pf buildkit tunnel --arch --port ✅
 ```
 
-### Phase 5: Advanced Operations
+### Phase 5: Advanced Operations ✅ COMPLETED
 Complex commands with multiple dependencies.
 
-#### 5.1 Database Operations
+#### 5.1 Database Operations ✅
 ```typescript
-pf-db-tunnel.sh → pf db tunnel [--namespace] [--type postgresql|redis|nats]
+pf-db-tunnel.sh → pf db tunnel [--namespace] [--type postgresql|redis|nats] ✅
 ```
 
-#### 5.2 Kubernetes Management
+#### 5.2 Kubernetes Management ✅
 ```typescript
-pf-eks-suspend.sh → pf k8s cluster suspend [--cluster]
-pf-eks-resume.sh  → pf k8s cluster resume [--cluster]
+pf-eks-suspend.sh → pf k8s cluster suspend [--cluster] ✅
+pf-eks-resume.sh  → pf k8s cluster resume [--cluster] ✅
 ```
 
-#### 5.3 Docker Integration
+#### 5.3 Docker Integration ✅
 ```typescript
-docker-credential-panfactum.sh → pf docker credential-helper <action>
+docker-credential-panfactum.sh → pf docker credential-helper <action> ✅
 ```
 
-#### 5.4 CI/CD Operations
+#### 5.4 CI/CD Operations ✅
 ```typescript
-pf-wf-git-checkout.sh → pf workflow git-checkout <ref> <directory>
+pf-wf-git-checkout.sh → pf workflow git-checkout <ref> <directory> ✅
 ```
 
 ## Proposed Command Structure
