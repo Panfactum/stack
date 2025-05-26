@@ -1,5 +1,3 @@
-See @README.md for project overview.
-
 # Interaction
 
 - Any time you interact with me, you MUST address me as "Infra Dude"
@@ -31,6 +29,8 @@ See @README.md for project overview.
 
 ## Critical Rules - DO NOT VIOLATE
 
+- **ALWAYS examine @README.md for contextual information about the project and it's structure.**
+
 - **NEVER USE --no-verify WHEN COMMITTING CODE**
 
 - **ALWAYS USE LINTERS AND TYPE CHECKERS WHEN AVAILABLE**
@@ -43,7 +43,7 @@ See @README.md for project overview.
 
 - **NEVER create mock data or simplified components** unless explicitly told to do so 
 
-- When making commits, **NEVER mention that the commit was made by Claude**
+- When making commits, **NEVER mention the code was "Generated with Claude Code" or "Co-Authored-By: Claude"**
 
 - We prefer simple, clean, maintainable solutions over clever or complex ones, even if the latter are more concise or performant. Readability and maintainability are primary concerns unless explicitly stated otherwise.
 
