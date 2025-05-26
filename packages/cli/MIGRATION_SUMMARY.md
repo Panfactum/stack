@@ -106,5 +106,45 @@ Created reusable utilities for BuildKit operations:
   - Creates multi-platform manifest with manifest-tool
   - Supports S3 cache import/export
 
+## Phase 5: Advanced Operations (COMPLETED)
+
+### Utilities Created
+- ✅ `/src/util/db/types.ts` - Database type definitions
+- ✅ `/src/util/db/listDatabases.ts` - List databases from Kubernetes
+- ✅ `/src/util/db/getVaultRole.ts` - Generate Vault role paths
+- ✅ `/src/util/db/getTempCredentials.ts` - Get temporary DB credentials
+- ✅ `/src/util/docker/credentialCache.ts` - Docker credential caching (4hr TTL)
+- ✅ `/src/util/docker/getEcrToken.ts` - Get ECR authentication tokens
+- ✅ `/src/util/eks/types.ts` - EKS type definitions
+- ✅ `/src/util/eks/validateRootProfile.ts` - Validate root AWS account access
+
+### Commands Implemented
+- ✅ `pf-db-tunnel.sh` → `pf db tunnel`
+  - Interactive database selection
+  - Options: `--namespace`, `--type` (postgresql|redis|nats), `--port`
+  - Temporary Vault credentials with automatic revocation
+  - Displays connection strings for easy access
+- ✅ `docker-credential-panfactum.sh` → `pf docker credential-helper`
+  - Docker credential helper protocol implementation
+  - Supports public and private ECR registries
+  - 4-hour token caching to reduce API calls
+  - Automatic SSO login/refresh
+- ✅ `pf-wf-git-checkout.sh` → `pf workflow git-checkout`
+  - Shallow clone optimized for CI/CD
+  - Arguments: `<ref>` `<directory>`
+  - Options: `--username`, `--password`
+  - Git LFS support
+  - Safe directory configuration for containers
+- ✅ `pf-eks-suspend.sh` → `pf k8s cluster suspend`
+  - Suspends EKS cluster to save costs
+  - Options: `--cluster` (required)
+  - Tags cluster, scales down all nodes, deletes load balancers
+  - Preserves configuration for restoration
+- ✅ `pf-eks-resume.sh` → `pf k8s cluster resume`
+  - Restores suspended EKS cluster
+  - Options: `--cluster` (required)
+  - Restores NAT gateways, node groups, removes limits
+  - Clears pending pods and restores schedulers
+
 ## Next Steps
 Continue with Phase 5 migrations as outlined in MIGRATION_PLAN.md
