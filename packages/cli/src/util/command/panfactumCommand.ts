@@ -9,6 +9,7 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
         description: "Activates debug logging",
     });
 
+    // todo: change to repo dir
     cwd: string | undefined = Option.String("--cwd", {
         description: "The working directory to use",
     });

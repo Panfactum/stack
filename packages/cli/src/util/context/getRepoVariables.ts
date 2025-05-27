@@ -38,6 +38,7 @@ export const getRepoVariables = async (cwd: string): Promise<RepoVariables> => {
   //####################################################################
   // Step 3: Validate required variables & set defaults
   //####################################################################
+  // todo: add zod error handler
   const validatedValues: RepoVariables = { ...PANFACTUM_YAML_SCHEMA.parse(values), ...{ repo_root: repoRootPath } };
 
   //####################################################################

@@ -13,9 +13,11 @@ dependency "vault" {
 }
 
 locals {
+   // todo: utilize module.secrets.yaml
    secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
 }
 
+// todo: move to module.yaml
 inputs = {
    // The `client_secret` output from `authentik_vault_sso`
    // Example: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx

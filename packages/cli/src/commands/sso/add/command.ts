@@ -29,6 +29,7 @@ export class SSOAddCommand extends PanfactumCommand {
         /*******************************************
          * Select Environment and Region
          *******************************************/
+          // todo: just show a single list env/regions where clusters are deployed
         const environments = (await getEnvironments(this.context)).filter(env => env.name !== MANAGEMENT_ENVIRONMENT && env.deployed);
 
         if (environments.length === 0) {
@@ -66,12 +67,14 @@ export class SSOAddCommand extends PanfactumCommand {
             directory: selectedRegion.path,
         });
 
+        // todo: remove
         const {
             environment,
             region,
         } = config;
 
         if (!environment || !region) {
+            // todo: remove
             throw new CLIError([
                 "Cluster installation must be run from within a valid region-specific directory.",
                 "If you do not have this file structure please ensure you've completed the initial setup steps here:",
@@ -84,6 +87,7 @@ export class SSOAddCommand extends PanfactumCommand {
         tasks.add({
             title: this.context.logger.applyColors("Setup Authentik"),
             skip: async () => {
+                // todo: remove and utilize api to confirm user token setup completion
                 const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
                     filePath: join(selectedRegion.path, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context: this.context,

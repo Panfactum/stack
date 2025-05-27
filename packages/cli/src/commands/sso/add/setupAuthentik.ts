@@ -89,7 +89,7 @@ export async function setupAuthentik(
             title: "Get Authentik User Configuration",
             task: async (ctx, task) => {
 
-                // FIX: @seth - You should NEVER read the module.yaml files directly.
+                // FIX: @seth - You should NEVER read the module.yaml files directly. use get panfactum config
                 const originalSESInputs = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AWS_SES_DOMAIN, "module.yaml"),
                     context,

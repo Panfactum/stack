@@ -30,6 +30,7 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
                 name,
                 path: regionPath,
                 primary: primaryRegion === awsRegion && name !== GLOBAL_REGION,
+                // todo: handle null check inside isClusterDeployed
                 clusterDeployed: !!(environment && region && kubeApiServer && await isClusterDeployed({ context, environment, region })),
             }
         } catch (e) {

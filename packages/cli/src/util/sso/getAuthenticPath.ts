@@ -33,6 +33,7 @@ export async function findAuthentikLocation(context: PanfactumContext): Promise<
           });
 
           if (moduleStatus.deploy_status === "success") {
+            // todo: return env and region object vs value
             return {
                 path: authentikPath,
                 environmentName: environment.name,

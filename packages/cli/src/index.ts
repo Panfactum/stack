@@ -57,6 +57,7 @@ try {
     phClient.captureImmediate({
       event: 'cli-start',
       distinctId: repoVariables.user_id,
+      // todo: pass in sub command level command arguments
       properties: {
         path: proc.path.join(" "),
         help: proc.help,
@@ -68,6 +69,7 @@ try {
 
   await cli.runExit(proc, panfactumContext);
 
+  // todo: move to finally block
   await phClient.shutdown()
 } catch(error: unknown) {
   await phClient.shutdown()

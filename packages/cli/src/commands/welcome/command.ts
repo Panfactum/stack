@@ -114,6 +114,8 @@ export class WelcomeCommand extends PanfactumCommand {
             `, { removeIndent: true })
 
             const installationId = randomUUID()
+
+            // todo: handle when userId is not set but installation Id exists
             const userId = randomUUID()
 
             await upsertRepoVariables({
@@ -158,10 +160,5 @@ export class WelcomeCommand extends PanfactumCommand {
             await Bun.sleep(1000);
             await this.context.track.flush()
         }
-    }
+    } // todo: we want to capture when the devshell is initialized
 }
-
-/**
- * installation_id: dcec12e2-ad13-4757-9ca6-d6f162163370
- * user_id: 28f0d25b-7988-47a9-82a4-94c3f7b6fdf8
- */

@@ -17,6 +17,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
 }: {
   awsProfile?: string;
   context: PanfactumContext;
+  // todo: why are there keys that are not set to value?
   env?: Record<string, string | undefined>;
   environment: string;
   region: string;

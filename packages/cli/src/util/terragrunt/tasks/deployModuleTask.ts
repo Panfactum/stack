@@ -265,6 +265,8 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             subtasks.add({
                 title: "Apply module",
                 task: async (_, task) => {
+                    // todo: accept eta minutes vs free form string
+                    // todo: this should be persistent, ensure it does not disappear until completion
                     task.title = `Applying - Planning changes${inputs.etaWarningMessage ? ` (${inputs.etaWarningMessage})` : ""}`;
                     let deltas = 0;
                     let deltaCounter = 0;

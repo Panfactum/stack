@@ -487,6 +487,7 @@ export async function setupFederatedAuth(
         }),
         {
             task: async () => {
+                // todo: remove, there is no skip logic. always apply
                 await upsertPFYAMLFile({
                     context,
                     environment,

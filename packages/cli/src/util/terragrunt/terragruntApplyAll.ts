@@ -12,6 +12,7 @@ export async function terragruntApplyAll({
   context: PanfactumContext;
   env?: Record<string, string | undefined>;
   environment: string;
+  // todo: revert to support undefined
   region: string;
   onLogLine?: (line: string) => void;
 }) {

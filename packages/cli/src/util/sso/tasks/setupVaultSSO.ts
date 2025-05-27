@@ -16,12 +16,16 @@ import { findAuthentikLocation } from "../getAuthenticPath";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
+// todo: post Task to function name
+// todo: return a task with sub-task listr
+// todo: either choose to run immediately or return a task with no side-effects
 export async function setupVaultSSO(
     context: PanfactumContext,
     mainTask: PanfactumTaskWrapper,
     regionPath: string
 ) {
 
+    // todo: this should be run in a task
     const config = await getPanfactumConfig({
         context,
         directory: regionPath,
@@ -35,6 +39,7 @@ export async function setupVaultSSO(
         vault_token: vaultToken,
     } = config;
 
+    // todo: breakout error message per missing value
     if (!environment || !region || !awsProfile || !kubeContext) {
         throw new CLIError([
             "Cluster installation must be run from within a valid region-specific directory.",
@@ -49,6 +54,7 @@ export async function setupVaultSSO(
     );
     const clusterPath = join(environmentPath, region);
 
+    // todo: why are we re-reading the config file?
     const regionConfig = await getConfigValuesFromFile({
         environment,
         context,
@@ -82,6 +88,7 @@ export async function setupVaultSSO(
         module: MODULES.AUTHENTIK_AWS_SSO,
     })
 
+    // todo: validate aws_sign_in_url is a valid URL
     if (!authentikAWSSSOConfig?.extra_inputs?.["aws_sign_in_url"]) {
         throw new CLIError(
             `AWS SSO sign in URL not found in ${MODULES.AUTHENTIK_AWS_SSO} config.`
@@ -111,17 +118,19 @@ export async function setupVaultSSO(
             context,
             environment: authentikLocation.environmentName,
             region: authentikLocation.regionName,
-            module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig?.kube_config_context,
+            // todo: kube_config_context needs to be snake case
+            module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig.kube_config_context,
             skipIfAlreadyApplied: true,
             realModuleName: MODULES.AUTHENTIK_VAULT_SSO,
             hclIfMissing: await Bun.file(authentikVaultSSO).text(),
             inputUpdates: {
                 vault_name: defineInputUpdate({
                     schema: z.string(),
-                    update: () => `vault-${regionConfig.kube_config_context!}`,
+                    update: () => `vault-${regionConfig.kube_config_context}`,
                 }),
                 vault_domain: defineInputUpdate({
                     schema: z.string(),
+                    // todo: avoid bang
                     update: () => regionConfig.vault_addr!.replace('https://', ''),
                 }),
             },
@@ -133,7 +142,8 @@ export async function setupVaultSSO(
                     context,
                     environment: authentikLocation.environmentName,
                     region: authentikLocation.regionName,
-                    module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig?.kube_config_context,
+                    // todo: kube_config_context needs to be snake case
+                    module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig.kube_config_context,
                     validationSchema: z.object({
                         client_id: z.object({
                             value: z.string(),
@@ -158,6 +168,7 @@ export async function setupVaultSSO(
                 ctx.oidc_redirect_uris = outputs.oidc_redirect_uris.value
                 ctx.oidc_issuer = outputs.oidc_issuer.value
 
+                // todo: utilize module.secrets.yaml instead of a new secret.yaml file type
                 await sopsUpsert({
                     values: {
                         client_secret: outputs.client_secret.value,
@@ -178,11 +189,11 @@ export async function setupVaultSSO(
             inputUpdates: {
                 client_id: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.client_id!,
+                    update: (_, ctx) => ctx.client_id,
                 }),
                 oidc_discovery_url: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.oidc_discovery_url!,
+                    update: (_, ctx) => ctx.oidc_discovery_url,
                 }),
                 oidc_redirect_uris: defineInputUpdate({
                     schema: z.array(z.string()),
@@ -190,7 +201,7 @@ export async function setupVaultSSO(
                 }),
                 oidc_issuer: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.oidc_issuer!,
+                    update: (_, ctx) => ctx.oidc_issuer,
                 }),
             },
         }),
@@ -215,10 +226,12 @@ export async function setupVaultSSO(
                 await execute({
                     command: vaultTokenRevokeCommand,
                     context,
+                    // todo: utilize context.cwd
                     workingDirectory: process.cwd(),
                     errorMessage: "Failed to revoke vault token",
                 });
 
+                // todo: utilize config file writer to write to config files
                 await sopsUpsert({
                     values: {
                         vault_token: undefined

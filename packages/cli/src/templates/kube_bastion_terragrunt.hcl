@@ -17,11 +17,14 @@ dependency "lb_controller" {
   skip_outputs = true
 }
 
+// todo: should not be a dependency
 dependency "kyverno" {
   config_path  = "../kube_kyverno"
   skip_outputs = true
 }
 
+
+// todo: ssh_cert_lifetime_seconds is not required
 inputs = {
   ssh_cert_lifetime_seconds = 60 * 60 * 8
 }

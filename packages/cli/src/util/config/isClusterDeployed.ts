@@ -9,6 +9,7 @@ export async function isClusterDeployed(inputs: { context: PanfactumContext, env
     context,
     region,
     environment,
+    // todo: figure out a better mark to determine if a cluster is deployed
     module: MODULES.KUBE_RELOADER
   })
   return status.deploy_status === "success"
