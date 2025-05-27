@@ -27,7 +27,7 @@ export async function validateRootProfile(context: PanfactumContext): Promise<vo
       throw new Error(`Current AWS profile is not for the root account. Expected ${masterAccountId}, got ${accountId}`)
     }
   } catch (error) {
-    if (error.message.includes('AccessDeniedException') || error.message.includes('is not in organization')) {
+    if (error instanceof Error && (error.message.includes('AccessDeniedException') || error.message.includes('is not in organization'))) {
       throw new Error('AWS profile does not have root organization access')
     }
     if (error instanceof Error) {

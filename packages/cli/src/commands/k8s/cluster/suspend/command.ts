@@ -206,10 +206,10 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           
           const groups = JSON.parse(stdout)
           autoScalingGroups = groups.map((g: Record<string, any>) => ({
-            name: g.AutoScalingGroupName,
-            minSize: g.MinSize,
-            maxSize: g.MaxSize,
-            desiredCapacity: g.DesiredCapacity,
+            name: g['AutoScalingGroupName'],
+            minSize: g['MinSize'],
+            maxSize: g['MaxSize'],
+            desiredCapacity: g['DesiredCapacity'],
           }))
         },
       },

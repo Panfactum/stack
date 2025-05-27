@@ -32,8 +32,8 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
     ],
   })
 
-  ref = Command.String({ required: true })
-  directory = Command.String({ required: true })
+  ref = Option.String({ required: true })
+  directory = Option.String({ required: true })
   
   username = Option.String('--username', {
     description: 'Git username for authentication',

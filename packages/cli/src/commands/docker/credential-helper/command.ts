@@ -1,4 +1,4 @@
-import { Command } from 'clipanion'
+import { Command, Option } from 'clipanion'
 import { getBuildKitConfig } from '../../../util/buildkit/config'
 import { PanfactumCommand } from '../../../util/command/panfactumCommand'
 import { getCachedCredential, setCachedCredential } from '../../../util/docker/credentialCache'
@@ -32,7 +32,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     ],
   })
 
-  action = Command.String({ required: true })
+  action = Option.String({ required: true })
 
   async execute() {
     const { context } = this
@@ -79,7 +79,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     // Check BuildKit config for profile mapping
     try {
       const buildkitConfig = await getBuildKitConfig(context)
-      const profileMapping = (buildkitConfig as Record<string, any>).aws_profile_for_registry || {}
+      const profileMapping = (buildkitConfig as Record<string, any>)['aws_profile_for_registry'] || {}
       awsProfile = profileMapping[registry]
     } catch {
       // BuildKit config not found, continue without profile
