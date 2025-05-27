@@ -26,7 +26,8 @@ export async function getModuleHash(modulePath: string): Promise<string> {
   })) {
     // Skip hidden files
     if (!file.startsWith('.') && !file.includes('/.')) {
-      files.push(file);
+      // Use absolute path to match bash behavior with realpath
+      files.push(path.join(absolutePath, file));
     }
   }
 
@@ -40,13 +41,14 @@ export async function getModuleHash(modulePath: string): Promise<string> {
   // Calculate hash for each file
   const hashes: string[] = [];
   for (const file of files) {
-    const filePath = path.join(absolutePath, file);
-    const content = await readFile(filePath);
+    // File is already an absolute path
+    const content = await readFile(file);
     const hash = createHash('sha1').update(content).digest('hex');
     hashes.push(`${hash}  ${file}`);
   }
 
   // Calculate final hash
-  const combinedContent = hashes.join('\n');
+  // Add trailing newline to match bash sha1sum output format
+  const combinedContent = hashes.join('\n') + '\n';
   return createHash('sha1').update(combinedContent).digest('hex');
 }

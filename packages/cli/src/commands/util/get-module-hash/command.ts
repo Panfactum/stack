@@ -15,7 +15,7 @@ export class GetModuleHashCommand extends PanfactumCommand {
   async execute(): Promise<number> {
     const hash = await getModuleHash(this.modulePath || '');
     if (hash) {
-      this.context.stdout.write(hash);
+      this.context.stdout.write(hash + '\n');
     }
     return 0;
   }
