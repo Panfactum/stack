@@ -1,8 +1,8 @@
 import { spawn } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { Option } from 'clipanion';
 import { input } from '@inquirer/prompts';
+import { Option } from 'clipanion';
 import { parse as parseYaml } from 'yaml';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
