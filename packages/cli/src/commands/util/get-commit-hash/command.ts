@@ -28,6 +28,6 @@ export class GetCommitHashCommand extends PanfactumCommand {
       ref: this.ref,
       noVerify: this.noVerify,
     });
-    this.context.stdout.write(hash);
+    this.context.stdout.write(hash + '\n');
   }
 }
