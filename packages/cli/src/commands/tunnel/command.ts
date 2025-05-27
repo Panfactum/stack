@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { Option } from 'clipanion';
-import { prompt } from 'enquirer';
+import { input } from '@inquirer/prompts';
 import { parse as parseYaml } from 'yaml';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
@@ -148,9 +148,7 @@ export default class TunnelCommand extends PanfactumCommand {
         }
       } else {
         // Prompt for port
-        const response = await prompt<{ port: string }>({
-          type: 'input',
-          name: 'port',
+        const portString = await input({
           message: 'Enter a local port for the tunnel (1024-65535):',
           validate: (value) => {
             const port = parseInt(value);
@@ -159,7 +157,7 @@ export default class TunnelCommand extends PanfactumCommand {
             return true;
           }
         });
-        localPortNumber = parseInt(response.port);
+        localPortNumber = parseInt(portString);
       }
 
       // Establish tunnel
