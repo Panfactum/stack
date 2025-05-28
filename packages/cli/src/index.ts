@@ -32,6 +32,7 @@ import { TerraformInitCommand } from "./commands/terraform/init/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
 import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts";
+import { GetDbCredsCommand } from "./commands/vault/get-db-creds/command.ts";
 import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/workflow/git-checkout/command.ts";
@@ -75,6 +76,7 @@ cli.register(SSOAddCommand)
 cli.register(GetModuleHashCommand)
 cli.register(GetCommitHashCommand)
 cli.register(GetVaultTokenCommand)
+cli.register(GetDbCredsCommand)
 cli.register(K8sDisruptionsDisableCommand)
 cli.register(K8sDisruptionsEnableCommand)
 cli.register(K8sVeleroSnapshotGcCommand)

@@ -41,6 +41,7 @@ export VAULT_TOKEN
 #####################################################
 # Step 5: Update sops-encrypted files so the runner can decrypt them
 #####################################################
+# todo: replace with pf sops set-profile . ci
 pf-sops-set-profile --directory . --profile ci
 
 #####################################################

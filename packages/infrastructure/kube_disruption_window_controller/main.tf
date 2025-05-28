@@ -90,6 +90,7 @@ module "disruption_window_enabler" {
     image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
+    // todo: implement pf k8s disruptions enable
     command = [
       "/bin/pf-voluntary-disruptions-enable",
       "--window-id=${random_id.window_id.hex}",
@@ -119,6 +120,7 @@ module "disruption_window_disabler" {
     image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
+    // todo: implement pf k8s disruptions disable
     command = [
       "/bin/pf-voluntary-disruptions-disable",
       "--window-id=${random_id.window_id.hex}",

@@ -120,21 +120,23 @@ export default class TunnelCommand extends PanfactumCommand {
       // Sign SSH key with Vault
       this.context.logger.info('Signing SSH key with Vault...');
       const vaultToken = await getVaultTokenString({ address: bastionConfig.vault });
-      
+
       const { stdout: signedKey } = await execute({
         command: [
           'vault',
           'write',
-          '-field=signed_key',
+          '-field',
+          'signed_key',
           'ssh/sign/default',
           `public_key=@${publicKeyFile}`
         ],
-        env: {
-          VAULT_ADDR: bastionConfig.vault,
-          VAULT_TOKEN: vaultToken
-        },
         context: this.context,
         workingDirectory: process.cwd(),
+        env: {
+          ...process.env,
+          VAULT_ADDR: bastionConfig.vault,
+          VAULT_TOKEN: vaultToken
+        }
       });
 
       writeFileSync(signedPublicKeyFile, signedKey);
