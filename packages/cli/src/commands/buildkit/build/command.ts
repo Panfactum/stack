@@ -168,6 +168,7 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
         '--local', `context=${this.buildContext}`,
         '--local', `dockerfile=${dirname(this.file)}`,
         '--opt', `filename=./${basename(this.file)}`,
+        '--opt', `platform=linux/${arch}`,
         '--export-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
         '--import-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
         '--progress', 'plain',
