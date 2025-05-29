@@ -116,14 +116,12 @@ try {
   }
 
   await cli.runExit(proc, panfactumContext);
-
-  // todo: move to finally block
-  await phClient.shutdown()
 } catch(error: unknown) {
-  await phClient.shutdown()
   if (error instanceof Error) {
     throw error.message;
   } else {
     throw error;
   }
+} finally {
+  await phClient.shutdown()
 }
