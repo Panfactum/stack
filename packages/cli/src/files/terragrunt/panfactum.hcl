@@ -62,15 +62,14 @@ locals {
   use_local_pf_modules = local.pf_stack_version == "local"
 
   # Long commit sha for the specific branch / tag / commit specified
-  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
+  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "util", "get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
 
   # The absolute path on the machine to the local copy of the Panfactum modules
   # If pf_stack_local_path isn't set, we assume that the we are in the reference repository (note that we use get_repo_root() vs local.repo_root to get the actual git repo root)
   pf_stack_local_absolute_path = lookup(local.vars, "pf_stack_local_path", get_repo_root())
 
   # This is used for cache invalidation since we cannot use git refs for the local copy
-  # todo: utilize new pf util get-module-hash command to get local module hash
-  pf_stack_local_ref = local.use_local_pf_modules ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", local.use_local_pf_modules ? "${local.pf_stack_local_absolute_path}/packages/infrastructure" : "") : ""
+  pf_stack_local_ref = local.use_local_pf_modules ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "util", "get-module-hash", local.use_local_pf_modules ? "${local.pf_stack_local_absolute_path}/packages/infrastructure" : "") : ""
 
   # We can either choose to use relative or absolute file paths for sourcing local module versions
   # We default to using relative b/c this adds enhanced cache invalidation logic
