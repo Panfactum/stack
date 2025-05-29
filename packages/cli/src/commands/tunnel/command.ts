@@ -118,7 +118,6 @@ export default class TunnelCommand extends PanfactumCommand {
       }
 
       // Sign SSH key with Vault
-      this.context.logger.info('Signing SSH key with Vault...');
       const vaultToken = await getVaultTokenString({ address: bastionConfig.vault });
 
       const { stdout: signedKey } = await execute({
@@ -138,6 +137,8 @@ export default class TunnelCommand extends PanfactumCommand {
           VAULT_TOKEN: vaultToken
         }
       });
+
+      this.context.logger.info('SSH Key signed successfully');
 
       writeFileSync(signedPublicKeyFile, signedKey);
 
@@ -163,10 +164,6 @@ export default class TunnelCommand extends PanfactumCommand {
       }
 
       // Establish tunnel
-      this.context.logger.info(
-        `Establishing tunnel: localhost:${localPortNumber} → ${this.remoteAddress} via ${this.bastion}`
-      );
-
       const knownHostsFile = join(sshDir, 'known_hosts');
       
       // Use spawn to run autossh in the foreground
@@ -191,6 +188,12 @@ export default class TunnelCommand extends PanfactumCommand {
         },
         stdio: 'inherit'
       });
+
+      this.context.logger.info(
+        `Tunnel established: localhost:${localPortNumber} → ${this.remoteAddress} via ${this.bastion}`
+      );
+
+      this.context.logger.info(`Press Ctrl+C to close the tunnel.`);
 
       // Handle process termination
       process.on('SIGINT', () => {

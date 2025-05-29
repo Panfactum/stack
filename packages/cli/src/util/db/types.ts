@@ -5,11 +5,23 @@ export interface Database {
   namespace: string
   type: DatabaseType
   port: number
+  annotations?: {
+    'panfactum.com/superuser-role'?: string
+    'panfactum.com/admin-role'?: string
+    'panfactum.com/reader-role'?: string
+    'panfactum.com/service'?: string
+    'panfactum.com/service-port'?: string
+  }
 }
 
 export interface DatabaseCredentials {
   username: string
   password: string
+  certs?: {
+    ca: string
+    cert: string
+    key: string
+  }
   leaseId?: string
 }
 
