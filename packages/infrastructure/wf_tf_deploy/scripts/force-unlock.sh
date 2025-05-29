@@ -6,6 +6,7 @@ set -eo pipefail
 # Step 1: Clone the repo
 #####################################################
 cd /code
+# todo: replace with pf-wf-git-checkout
 pf-wf-git-checkout \
   -r "$REPO" \
   -c "$GIT_REF" \

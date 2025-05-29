@@ -2,8 +2,9 @@ import { promises as fs } from 'fs'
 import { join } from 'path'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
-import { PanfactumCommand } from '../../../util/command/panfactumCommand'
-import { execute } from '../../../util/subprocess/execute'
+import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
+import { getCommitHash } from '@/util/git/getCommitHash.ts'
+import { execute } from '@/util/subprocess/execute.ts'
 
 export class WorkflowGitCheckoutCommand extends PanfactumCommand {
   static override paths = [['workflow', 'git-checkout']]
@@ -67,12 +68,10 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
         },
       },
       {
-        title: 'Configuring git authentication',
-        enabled: () => !!(this.username && this.password),
+        title: 'Configuring git user',
         task: async () => {
-          // Configure git to use provided credentials
+          // Configure git user for commits
           const gitConfigCommands = [
-            ['git', 'config', '--global', 'credential.helper', `store --file=${join(this.directory, '.git-credentials')}`],
             ['git', 'config', '--global', 'user.name', this.username || 'Panfactum Workflow'],
             ['git', 'config', '--global', 'user.email', `${this.username || 'workflow'}@panfactum.local`],
           ]
@@ -81,18 +80,8 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
             await execute({
               command: cmd,
               context,
-              workingDirectory: this.directory,
+              workingDirectory: process.cwd(),
             })
-          }
-
-          // Store credentials if provided
-          if (this.username && this.password) {
-            const credentialsContent = `https://${this.username}:${this.password}@github.com\n`
-            await fs.writeFile(
-              join(this.directory, '.git-credentials'),
-              credentialsContent,
-              { mode: 0o600 }
-            )
           }
         },
       },
@@ -115,52 +104,49 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
       {
         title: 'Performing shallow clone',
         task: async () => {
-          const cloneCmd = ['git', 'clone', '--depth=1', '--branch', this.ref, repoUrl, this.directory]
-          
-          try {
-            await execute({
-              command: cloneCmd,
-              context,
-              workingDirectory: process.cwd(),
-            })
-          } catch (error) {
-            // If branch doesn't exist, try as a tag or commit
-            if (error instanceof Error && (error.message.includes('Remote branch') || error.message.includes('not found'))) {
-              // Clone default branch first
-              const defaultCloneCmd = ['git', 'clone', '--depth=1', repoUrl, this.directory]
-              await execute({
-                command: defaultCloneCmd,
-                context,
-                workingDirectory: process.cwd(),
-              })
-              
-              // Then fetch the specific ref
-              await execute({
-                command: ['git', 'fetch', '--depth=1', 'origin', this.ref],
-                context,
-                workingDirectory: this.directory,
-              })
-              
-              await execute({
-                command: ['git', 'checkout', this.ref],
-                context,
-                workingDirectory: this.directory,
-              })
-            } else {
-              throw error
+          // Build clone URL with authentication if provided
+          let cloneUrl = repoUrl
+          if (this.username && this.password) {
+            // Extract protocol and rest of URL
+            const urlMatch = repoUrl.match(/^(https?:\/\/)(.+)$/)
+            if (urlMatch) {
+              cloneUrl = `${urlMatch[1]}${this.username}:${this.password}@${urlMatch[2]}`
             }
           }
+          
+          const cloneCmd = ['git', 'clone', '-q', '--depth=1', cloneUrl, this.directory]
+          
+          await execute({
+            command: cloneCmd,
+            context,
+            workingDirectory: process.cwd(),
+          })
         },
       },
       {
-        title: 'Resolving git reference',
+        title: 'Resolving and checking out reference',
         task: async () => {
-          const { stdout } = await execute({
-            command: ['git', 'rev-parse', 'HEAD'],
+          // Resolve the ref to a commit SHA using the utility function
+          // This matches the bash script's use of pf-get-commit-hash
+          commitSha = await getCommitHash({
+            repo: repoUrl,
+            ref: this.ref,
+            noVerify: true  // Don't verify locally since we haven't fetched yet
+          })
+          
+          // Fetch the specific commit
+          await execute({
+            command: ['git', 'fetch', 'origin', commitSha],
             context,
             workingDirectory: this.directory,
           })
-          commitSha = stdout.trim()
+          
+          // Checkout the commit
+          await execute({
+            command: ['git', 'checkout', commitSha],
+            context,
+            workingDirectory: this.directory,
+          })
         },
       },
       {
@@ -207,6 +193,23 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
           for (const cmd of configCommands) {
             await execute({
               command: cmd,
+              context,
+              workingDirectory: this.directory,
+            })
+          }
+          
+          // Configure URL rewriting for authentication if credentials provided
+          if (this.username && this.password && repoUrl) {
+            // Extract the base repo URL without protocol
+            const repoWithoutProtocol = repoUrl.replace(/^https?:\/\//, '')
+            
+            await execute({
+              command: [
+                'git', 
+                'config', 
+                `url.https://${this.username}:${this.password}@${repoWithoutProtocol}.insteadOf`,
+                `https://${repoWithoutProtocol}`
+              ],
               context,
               workingDirectory: this.directory,
             })

@@ -6,6 +6,7 @@ set -eo pipefail
 # Step 1: Checkout the repo
 #####################################################
 cd /code
+# todo: replace with pf workflow git-checkout
 pf-wf-git-checkout \
   -r "$REPO" \
   -c "$GIT_REF" \
