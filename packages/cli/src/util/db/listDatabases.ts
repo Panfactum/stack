@@ -4,89 +4,94 @@ import type { PanfactumContext } from '@/util/context/context'
 
 export async function listDatabases(
   context: PanfactumContext,
-  namespace?: string,
   type?: DatabaseType
 ): Promise<Database[]> {
   const databases: Database[] = []
 
   // List PostgreSQL databases
   if (!type || type === 'postgresql') {
-    const pgCommand = namespace
-      ? `kubectl get cluster.postgresql.cnpg.io -n ${namespace} -o json`
-      : 'kubectl get cluster.postgresql.cnpg.io --all-namespaces -o json'
+    const pgCommand = 'kubectl get cluster.postgresql.cnpg.io --all-namespaces -o json'
 
-    try {
-      const { stdout } = await execute({
-        command: pgCommand.split(' '),
-        context,
-        workingDirectory: process.cwd(),
+    const { stdout } = await execute({
+      command: pgCommand.split(' '),
+      context,
+      workingDirectory: context.repoVariables.repo_root,
+    })
+    const result = JSON.parse(stdout)
+
+    for (const item of result.items || []) {
+      const annotations = item.metadata.annotations || {}
+      const port = annotations['panfactum.com/service-port'] 
+        ? parseInt(annotations['panfactum.com/service-port'], 10) 
+        : 5432
+        
+      databases.push({
+        name: item.metadata.name,
+        namespace: item.metadata.namespace,
+        type: 'postgresql',
+        port,
+        annotations,
       })
-      const result = JSON.parse(stdout)
-
-      for (const item of result.items || []) {
-        databases.push({
-          name: item.metadata.name,
-          namespace: item.metadata.namespace,
-          type: 'postgresql',
-          port: 5432,
-        })
-      }
-    } catch {
-      // No PostgreSQL clusters found
     }
   }
 
   // List Redis databases  
   if (!type || type === 'redis') {
-    const redisCommand = namespace
-      ? `kubectl get redisfailovers.databases.spotahome.com -n ${namespace} -o json`
-      : 'kubectl get redisfailovers.databases.spotahome.com --all-namespaces -o json'
+    const stsCommand = 'kubectl get statefulset --all-namespaces -o json'
 
-    try {
-      const { stdout } = await execute({
-        command: redisCommand.split(' '),
-        context,
-        workingDirectory: process.cwd(),
-      })
-      const result = JSON.parse(stdout)
-
-      for (const item of result.items || []) {
+    const { stdout } = await execute({
+      command: stsCommand.split(' '),
+      context,
+      workingDirectory: context.repoVariables.repo_root,
+    })
+    const result = JSON.parse(stdout)
+    
+    // Filter for Redis databases by annotation
+    for (const item of result.items || []) {
+      const annotations = item.metadata.annotations || {}
+      if (annotations['panfactum.com/db-type'] === 'Redis') {
+        const port = annotations['panfactum.com/service-port'] 
+          ? parseInt(annotations['panfactum.com/service-port'], 10) 
+          : 6379
+          
         databases.push({
           name: item.metadata.name,
           namespace: item.metadata.namespace,
           type: 'redis',
-          port: 6379,
+          port,
+          annotations,
         })
       }
-    } catch {
-      // No Redis clusters found
     }
   }
 
   // List NATS clusters
   if (!type || type === 'nats') {
-    const natsCommand = namespace
-      ? `kubectl get statefulset -n ${namespace} -l app.kubernetes.io/name=nats -o json`
-      : 'kubectl get statefulset --all-namespaces -l app.kubernetes.io/name=nats -o json'
+    const stsCommand = 'kubectl get statefulset --all-namespaces -o json'
 
-    try {
-      const { stdout } = await execute({
-        command: natsCommand.split(' '),
-        context,
-        workingDirectory: process.cwd(),
-      })
-      const result = JSON.parse(stdout)
-
-      for (const item of result.items || []) {
+    const { stdout } = await execute({
+      command: stsCommand.split(' '),
+      context,
+      workingDirectory: context.repoVariables.repo_root,
+    })
+    const result = JSON.parse(stdout)
+    
+    // Filter for NATS databases by annotation
+    for (const item of result.items || []) {
+      const annotations = item.metadata.annotations || {}
+      if (annotations['panfactum.com/db-type'] === 'NATS') {
+        const port = annotations['panfactum.com/service-port'] 
+          ? parseInt(annotations['panfactum.com/service-port'], 10) 
+          : 4222
+          
         databases.push({
           name: item.metadata.name,
           namespace: item.metadata.namespace,
           type: 'nats',
-          port: 4222,
+          port,
+          annotations,
         })
       }
-    } catch {
-      // No NATS clusters found
     }
   }
 

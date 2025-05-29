@@ -1,23 +1,38 @@
-import type { DatabaseType, VaultRole } from './types'
+import type { Database, VaultRole } from './types'
 
 export function getVaultRole(
-  databaseType: DatabaseType,
-  namespace: string,
-  dbName: string,
+  database: Database,
   role: VaultRole
 ): string {
-  // Format: db/creds/<namespace>-<db-type>-<db-name>-<role>
+  // Check if the role is provided in annotations
+  if (database.annotations) {
+    const roleMap: Record<VaultRole, keyof NonNullable<Database['annotations']>> = {
+      superuser: 'panfactum.com/superuser-role',
+      admin: 'panfactum.com/admin-role',
+      reader: 'panfactum.com/reader-role',
+    }
+    
+    const annotationKey = roleMap[role]
+    const annotationValue = database.annotations[annotationKey]
+    
+    if (annotationValue) {
+      // The annotation value already contains the full path after db/creds/
+      return `db/creds/${annotationValue}`
+    }
+  }
+  
+  // Fallback to constructing the role path
   const roleMap: Record<VaultRole, string> = {
     superuser: 'superuser',
     admin: 'admin', 
     reader: 'reader',
   }
 
-  const typeMap: Record<DatabaseType, string> = {
+  const typeMap: Record<Database['type'], string> = {
     postgresql: 'pg',
     redis: 'redis',
     nats: 'nats',
   }
 
-  return `db/creds/${namespace}-${typeMap[databaseType]}-${dbName}-${roleMap[role]}`
+  return `db/creds/${database.namespace}-${typeMap[database.type]}-${database.name}-${roleMap[role]}`
 }

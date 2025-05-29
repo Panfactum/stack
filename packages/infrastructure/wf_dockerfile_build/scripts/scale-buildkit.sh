@@ -13,4 +13,5 @@ fi
 ###########################################################
 ## Step 1: Scale up buildkit
 ###########################################################
+# todo: replace with pf buildkit scale up
 /bin/pf-buildkit-scale-up "$@"

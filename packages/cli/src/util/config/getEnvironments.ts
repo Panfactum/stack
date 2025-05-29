@@ -21,6 +21,7 @@ export async function getEnvironments(context: PanfactumContext): Promise<Array<
         try {
             const { environment, environment_subdomain: subdomain } = await getConfigValuesFromFile({ filePath, context }) || {}
             const name = environment ?? basename(envPath);
+
             return {
                 name,
                 path: envPath,
