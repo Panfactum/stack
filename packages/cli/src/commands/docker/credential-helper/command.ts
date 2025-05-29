@@ -36,7 +36,6 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
 
   async execute() {
     const { context } = this
-    
     switch (this.action) {
       case 'get':
         await this.handleGet(context)
@@ -55,16 +54,37 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     }
   }
 
+  private extractRegistry(url: string): string {
+    // Extract just the registry from a full image URL
+    // e.g., "891377197483.dkr.ecr.us-east-2.amazonaws.com/demo-user-service:test-5"
+    // becomes "891377197483.dkr.ecr.us-east-2.amazonaws.com"
+    
+    // For public ECR, just return as-is
+    if (url.startsWith('public.ecr.aws')) {
+      return 'public.ecr.aws'
+    }
+    
+    // For private ECR, extract the registry part (before the first slash)
+    const match = url.match(/^(\d+\.dkr\.ecr\.[^.]+\.amazonaws\.com)/)
+    if (match && match[1]) {
+      return match[1]
+    }
+    
+    // If no match, return the original URL (let validation handle it)
+    return url
+  }
+
   private async handleGet(context: PanfactumContext) {
     const input = await this.readStdin()
-    const registry = input.trim()
+    const fullUrl = input.trim()
+    const registry = this.extractRegistry(fullUrl)
 
     if (!this.isEcrRegistry(registry)) {
       throw new Error('Not an ECR registry')
     }
 
     // Check cache first
-    const cached = await getCachedCredential(registry)
+    const cached = await getCachedCredential(context, registry)
     if (cached) {
       this.context.stdout.write(JSON.stringify({
         Username: cached.username,
@@ -73,24 +93,17 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
       return
     }
 
-    // Determine AWS profile to use
-    let awsProfile: string | undefined
-
-    // Check BuildKit config for profile mapping
-    try {
-      const buildkitConfig = await getBuildKitConfig(context)
-      const profileMapping = (buildkitConfig as Record<string, any>)['aws_profile_for_registry'] || {}
-      awsProfile = profileMapping[registry]
-    } catch {
-      // BuildKit config not found, continue without profile
-    }
+    // Get BuildKit config and use cluster context to determine AWS profile
+    const buildkitConfig = await getBuildKitConfig(context)
+    const { getAWSProfileForContext } = await import('@/util/aws/getProfileForContext')
+    const awsProfile = getAWSProfileForContext(context, buildkitConfig.cluster)
 
     // Get fresh token from ECR
     try {
       const { username, password } = await getEcrToken(context, registry, awsProfile)
       
       // Cache the credential
-      await setCachedCredential(registry, password, username)
+      await setCachedCredential(context, registry, password)
 
       // Output in Docker credential helper format
       this.context.stdout.write(JSON.stringify({
@@ -110,7 +123,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
           
           // Retry getting token
           const { username, password } = await getEcrToken(context, registry, awsProfile)
-          await setCachedCredential(registry, password, username)
+          await setCachedCredential(context, registry, password)
 
           this.context.stdout.write(JSON.stringify({
             Username: username,
