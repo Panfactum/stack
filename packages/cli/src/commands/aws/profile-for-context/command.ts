@@ -1,9 +1,7 @@
-import { execSync } from 'child_process';
-import { existsSync } from 'fs';
-import { join } from 'path';
 import { Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
+import { getAWSProfileForContext } from '@/util/aws/getProfileForContext';
 
 export default class ProfileForContextCommand extends PanfactumCommand {
   static override paths = [['aws', 'profile-for-context']];
@@ -25,41 +23,8 @@ export default class ProfileForContextCommand extends PanfactumCommand {
     const { kubeContext } = this;
 
     try {
-      // Get repository variables
-      const { repoVariables } = this.context;
-      const kubeDir = repoVariables.kube_dir;
-      const kubeUserConfigFile = join(kubeDir, 'config.user.yaml');
-
-      // Check if config file exists
-      if (!existsSync(kubeUserConfigFile)) {
-        throw new CLIError(
-          `Error: ${kubeUserConfigFile} does not exist. It is required to set this up before interacting with BuildKit.`
-        );
-      }
-
-      // Check if context exists in kubeconfig
-      try {
-        execSync(`kubectl config get-contexts "${kubeContext}"`, {
-          stdio: 'pipe',
-          encoding: 'utf8',
-        });
-      } catch {
-        throw new CLIError(
-          `'${kubeContext}' not found in kubeconfig. Run pf-update-kube to regenerate kubeconfig.`
-        );
-      }
-
-      // Get AWS profile from config
-      const awsProfile = execSync(
-        `yq -r '.clusters[] | select(.name == "${kubeContext}") | .aws_profile' "${kubeUserConfigFile}"`,
-        { encoding: 'utf8', stdio: 'pipe' }
-      ).trim();
-
-      if (!awsProfile || awsProfile === 'null') {
-        throw new CLIError(
-          `Error: AWS profile not configured for cluster ${kubeContext}. Add cluster to ${kubeUserConfigFile}.`
-        );
-      }
+      // Get AWS profile using the utility function
+      const awsProfile = getAWSProfileForContext(this.context, kubeContext);
 
       // Output the profile
       this.context.stdout.write(awsProfile);

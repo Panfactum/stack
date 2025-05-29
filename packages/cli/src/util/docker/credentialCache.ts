@@ -1,52 +1,87 @@
 import { promises as fs } from 'fs'
-import { homedir } from 'os'
 import { join } from 'path'
+import type { PanfactumContext } from '@/util/context/context'
 
 interface CachedCredential {
   token: string
-  username: string
-  expiresAt: number
+  expires: string
 }
 
-const CACHE_DIR = join(homedir(), '.docker', 'panfactum-cache')
+interface CredentialsFile {
+  [registry: string]: CachedCredential
+}
+
 const CACHE_TTL = 4 * 60 * 60 * 1000 // 4 hours in milliseconds
 
-export async function getCachedCredential(registry: string): Promise<CachedCredential | null> {
+async function getCredsFilePath(context: PanfactumContext): Promise<string> {
+  const buildkitDir = context.repoVariables.buildkit_dir
+  return join(buildkitDir, 'creds.json')
+}
+
+async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile> {
   try {
-    await fs.mkdir(CACHE_DIR, { recursive: true })
-    
-    const cacheFile = join(CACHE_DIR, `${registry.replace(/[^a-zA-Z0-9]/g, '_')}.json`)
-    const data = await fs.readFile(cacheFile, 'utf8')
-    const cached = JSON.parse(data) as CachedCredential
-    
-    if (Date.now() < cached.expiresAt) {
-      return cached
-    }
-    
-    // Clean up expired cache
-    await fs.unlink(cacheFile).catch(() => {
-      // Ignore errors
-    })
+    const credsFile = await getCredsFilePath(context)
+    const data = await fs.readFile(credsFile, 'utf8')
+    return JSON.parse(data) as CredentialsFile
   } catch {
-    // No cache or invalid cache
+    return {}
   }
+}
+
+async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile): Promise<void> {
+  const credsFile = await getCredsFilePath(context)
+  const buildkitDir = context.repoVariables.buildkit_dir
+  
+  // Ensure buildkit directory exists
+  await fs.mkdir(buildkitDir, { recursive: true })
+  
+  // Write atomically using a temp file
+  const tmpFile = join(buildkitDir, 'tmp.json')
+  await fs.writeFile(tmpFile, JSON.stringify(creds, null, 2), 'utf8')
+  await fs.rename(tmpFile, credsFile)
+}
+
+export async function getCachedCredential(
+  context: PanfactumContext,
+  registry: string
+): Promise<{ token: string; username: string } | null> {
+  const creds = await readCredsFile(context)
+  const cached = creds[registry]
+  
+  if (!cached) {
+    return null
+  }
+  
+  // Check if expired (expires is Unix timestamp in seconds as string)
+  const expiresAt = parseInt(cached.expires, 10) * 1000 // Convert to milliseconds
+  if (Date.now() < expiresAt) {
+    return {
+      token: cached.token,
+      username: 'AWS' // ECR always uses AWS as username
+    }
+  }
+  
+  // Clean up expired credential
+  delete creds[registry]
+  await writeCredsFile(context, creds)
   
   return null
 }
 
 export async function setCachedCredential(
+  context: PanfactumContext,
   registry: string,
   token: string,
-  username: string
 ): Promise<void> {
-  await fs.mkdir(CACHE_DIR, { recursive: true })
+  const creds = await readCredsFile(context)
   
-  const cacheFile = join(CACHE_DIR, `${registry.replace(/[^a-zA-Z0-9]/g, '_')}.json`)
-  const credential: CachedCredential = {
+  // Calculate expiration as Unix timestamp in seconds (4 hours from now)
+  const expiresAt = Math.floor((Date.now() + CACHE_TTL) / 1000)
+  
+  creds[registry] = {
     token,
-    username,
-    expiresAt: Date.now() + CACHE_TTL,
+    expires: expiresAt.toString()
   }
   
-  await fs.writeFile(cacheFile, JSON.stringify(credential), 'utf8')
+  await writeCredsFile(context, creds)
 }
