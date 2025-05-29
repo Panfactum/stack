@@ -130,21 +130,8 @@ locals {
   # Vault Token Sourcing
   ############################################################################################
 
-  # We have customized the retrieval of the Vault token in order to handle all the various scenarios for how modules
-  # can be applied
-  // todo: this can be done in pf config get
-  vault_address = local.is_ci ? get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
-  // todo: do a lookup on vault_token and fallback to run command
-  use_local_vault_token = try(local.vars.vault_token != null && local.vars.vault_token != "", false)
-  // todo: pf-get-vault-token can be occuring in the pf config get command instead
-  vault_token = local.use_local_vault_token ? local.vars.vault_token : (
-    run_cmd(
-      "--terragrunt-global-cache", "--terragrunt-quiet",
-      "pf-get-vault-token",
-      "--address", local.vault_address,
-      local.enable_vault && !local.use_local_vault_token ? "" : "--noop"
-    )
-  )
+  vault_address = local.vars.vault_addr
+  vault_token   = local.vars.vault_token
 
   ############################################################################################
   # Kubernetes Connection

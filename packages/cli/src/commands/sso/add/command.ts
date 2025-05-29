@@ -4,7 +4,6 @@ import { Listr } from "listr2";
 import { z } from "zod";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import {getEnvironments} from "@/util/config/getEnvironments.ts";
-import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import {getRegions} from "@/util/config/getRegions.ts";
 import { CLIError } from "@/util/error/error";
 import { setupVaultSSO } from "@/util/sso/tasks/setupVaultSSO";
@@ -61,26 +60,6 @@ export class SSOAddCommand extends PanfactumCommand {
                 name: `${region.name}`
             })),
         });
-
-        const config = await getPanfactumConfig({
-            context: this.context,
-            directory: selectedRegion.path,
-        });
-
-        // todo: remove
-        const {
-            environment,
-            region,
-        } = config;
-
-        if (!environment || !region) {
-            // todo: remove
-            throw new CLIError([
-                "Cluster installation must be run from within a valid region-specific directory.",
-                "If you do not have this file structure please ensure you've completed the initial setup steps here:",
-                "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo",
-            ]);
-        }
 
         const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });
 
