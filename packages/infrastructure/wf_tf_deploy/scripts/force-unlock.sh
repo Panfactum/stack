@@ -6,8 +6,7 @@ set -eo pipefail
 # Step 1: Clone the repo
 #####################################################
 cd /code
-# todo: replace with pf-wf-git-checkout
-pf-wf-git-checkout \
+pf wf git-checkout \
   -r "$REPO" \
   -c "$GIT_REF" \
   -u "$GIT_USERNAME" \
@@ -35,8 +34,7 @@ LOCK_TABLE_REGION=$(echo "$TG_VARIABLES" | jq '.tf_state_region' -r)
 #####################################################
 # Step 4: Unlock
 #####################################################
-# todo: replace with pf terraform delete-locks
-pf-tf-delete-locks \
+pf tf delete-locks \
   --profile ci \
   --region "$LOCK_TABLE_REGION" \
   --table "$LOCK_TABLE" \

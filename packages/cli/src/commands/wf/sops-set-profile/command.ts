@@ -5,7 +5,7 @@ import yaml from 'yaml';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 
 export class SopsSetProfileCommand extends PanfactumCommand {
-  static override paths = [['sops', 'set-profile']];
+  static override paths = [['wf', 'sops-set-profile']];
 
   static override usage = Command.Usage({
     description: 'Update AWS profile used for KMS access in SOPS-encrypted YAML files',
