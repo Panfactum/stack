@@ -26,6 +26,7 @@ import { K8sClusterResumeCommand } from "./commands/k8s/cluster/resume/command.t
 import { K8sClusterSuspendCommand } from "./commands/k8s/cluster/suspend/command.ts";
 import { K8sDisruptionsDisableCommand } from "./commands/k8s/disruptions/disable/command.ts";
 import { K8sDisruptionsEnableCommand } from "./commands/k8s/disruptions/enable/command.ts";
+import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
@@ -83,6 +84,7 @@ cli.register(GetVaultTokenCommand)
 cli.register(GetDbCredsCommand)
 cli.register(K8sDisruptionsDisableCommand)
 cli.register(K8sDisruptionsEnableCommand)
+cli.register(K8sGetTokenCommand)
 cli.register(K8sVeleroSnapshotGcCommand)
 cli.register(SopsSetProfileCommand)
 cli.register(TerraformInitCommand)
