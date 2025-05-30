@@ -4,7 +4,7 @@ import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/comma
 import ProfileForContextCommand from "./commands/aws/profile-for-context/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import BuildkitBuildCommand from "./commands/buildkit/build/command.ts";
-import BuildkitClearCacheCommand from "./commands/buildkit/cache/clear/command.ts";
+import BuildkitClearCacheCommand from "./commands/buildkit/clear-cache/command.ts";
 import { GetAddressCommand } from "./commands/buildkit/get-address/command.ts";
 import { RecordBuildCommand } from "./commands/buildkit/record-build/command.ts";
 import BuildkitScaleDownCommand from "./commands/buildkit/scale/down/command.ts";

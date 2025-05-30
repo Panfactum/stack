@@ -131,6 +131,20 @@ Use the following rules when making changes to `.ts` or `.tsx` files:
     - Linters: shellcheck, shfmt, cspell, nixfmt
     - Version control: git, git-lfs, pre-commit
 
+### Container Runtime Integration
+- **Panfactum Container Image**: The same Nix-based toolset available in devshell is packaged as a container image
+- **Image Location**: `public.ecr.aws/panfactum/panfactum` (referenced via module.constants)
+- **Tool Availability**: All devshell tools are available in the container at standard paths:
+    - Legacy scripts: `/bin/pf-*` (e.g., `/bin/pf-voluntary-disruptions-enable`)
+    - CLI: `pf` command available directly in PATH
+    - All other tools: kubectl, terragrunt, aws, etc.
+- **Usage in Terraform**: When using in Kubernetes jobs/cronjobs, commands can reference tools directly:
+    ```hcl
+    command = ["pf", "k8s", "disruptions", "enable", "--namespace=foo", "--window-id=bar"]
+    ```
+- **BuildKit Integration**: Container builds use local BuildKit instances managed via `pf buildkit` commands or legacy `pf-buildkit-*` scripts
+- **Consistency**: Same tool versions in devshell and container ensure reproducible behavior
+
 # Best Practices
 
 - utilize @ paths when importing vs using relative path
