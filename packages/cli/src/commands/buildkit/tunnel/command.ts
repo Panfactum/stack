@@ -47,7 +47,7 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
         workingDirectory: process.cwd()
       })
     } catch {
-      this.context.logger.error(`'${config.cluster}' not found in kubeconfig. Run pf-update-kube to regenerate kubeconfig.`)
+      this.context.logger.error(`'${config.cluster}' not found in kubeconfig. Run pf devshell sync to regenerate kubeconfig.`)
       return 1
     }
 
@@ -79,10 +79,9 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
     // Run the tunnel
     await execute({
       command: [
-        'pf-tunnel',
-        '--bastion',
+        'pf',
+        'tunnel',
         config.bastion,
-        '--remote-address',
         address,
         '--local-port',
         this.port

@@ -64,7 +64,7 @@ export default class TunnelCommand extends PanfactumCommand {
       const connectionInfoFile = join(sshDir, 'connection_info');
       if (!existsSync(connectionInfoFile)) {
         throw new CLIError(
-          `Connection info file not found at ${connectionInfoFile}. Run pf-update-ssh to generate it.`
+          `Connection info file not found at ${connectionInfoFile}. Run pf devshell sync to generate it.`
         );
       }
 
@@ -73,7 +73,7 @@ export default class TunnelCommand extends PanfactumCommand {
       
       if (!bastionLine) {
         throw new CLIError(
-          `${this.bastion} not found in ${connectionInfoFile}. Ensure this name is correct or run pf-update-ssh to regenerate this file.`
+          `${this.bastion} not found in ${connectionInfoFile}. Ensure this name is correct or run pf devshell sync to regenerate this file.`
         );
       }
 
