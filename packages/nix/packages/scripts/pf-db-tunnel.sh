@@ -181,7 +181,7 @@ Admin)
   exit 1
   ;;
 esac
-echo "ROLE: $ACTUAL_ROLE" >&2
+
 export VAULT_TOKEN
 
 if [[ $SELECTED_DB_TYPE == "NATS" ]]; then
