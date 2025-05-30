@@ -1,7 +1,7 @@
-import { $ } from 'bun';
 import { mkdtemp, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { $ } from 'bun';
 
 export interface GetCommitHashOptions {
   repo?: string;

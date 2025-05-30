@@ -1,6 +1,7 @@
 import { confirm } from '@inquirer/prompts'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
+import { getAWSProfileForContext } from '../../../../util/aws/getProfileForContext'
 import { PanfactumCommand } from '../../../../util/command/panfactumCommand'
 import { validateRootProfile } from '../../../../util/eks/validateRootProfile'
 import { execute } from '../../../../util/subprocess/execute'
@@ -42,6 +43,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
     let clusterInfo: EksClusterInfo
     let nodeGroups: string[] = []
     let autoScalingGroups: AutoScalingGroup[] = []
+    let awsProfile: string
 
     // Confirm dangerous operation
     const confirmed = await confirm({
@@ -58,7 +60,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       {
         title: 'Validating AWS access',
         task: async () => {
-          await validateRootProfile(context)
+          awsProfile = getAWSProfileForContext(context, this.cluster)
+          await validateRootProfile(awsProfile, context)
         },
       },
       {

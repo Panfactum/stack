@@ -1,7 +1,7 @@
 import { Option } from 'clipanion';
+import { getAWSProfileForContext } from '@/util/aws/getProfileForContext';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
-import { getAWSProfileForContext } from '@/util/aws/getProfileForContext';
 
 export default class ProfileForContextCommand extends PanfactumCommand {
   static override paths = [['aws', 'profile-for-context']];

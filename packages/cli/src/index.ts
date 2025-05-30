@@ -28,7 +28,6 @@ import { K8sDisruptionsDisableCommand } from "./commands/k8s/disruptions/disable
 import { K8sDisruptionsEnableCommand } from "./commands/k8s/disruptions/enable/command.ts";
 import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
-import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import DeleteLocksCommand from "./commands/tf/delete-locks/command.ts";
 import { TerraformInitCommand } from "./commands/tf/init/command.ts";
@@ -39,6 +38,7 @@ import { GetDbCredsCommand } from "./commands/vault/get-db-creds/command.ts";
 import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";
+import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
 import { phClient } from "./util/posthog/tracking.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
@@ -124,9 +124,9 @@ try {
   await cli.runExit(proc, panfactumContext);
 } catch(error: unknown) {
   if (error instanceof Error) {
-    console.error(error.message)
+    globalThis.console.error(error.message)
   } else {
-    console.error(error);
+    globalThis.console.error(error);
   }
 } finally {
   await phClient.shutdown()

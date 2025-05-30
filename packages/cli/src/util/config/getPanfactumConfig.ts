@@ -2,9 +2,9 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import { CLIError } from "@/util/error/error";
+import { getVaultTokenString } from "@/util/vault";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import type { PanfactumContext } from "../context/context";
-import { getVaultTokenString } from "@/util/vault";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
 type OutputValues = InputValues & {

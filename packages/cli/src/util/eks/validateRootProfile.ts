@@ -1,35 +1,23 @@
 import { execute } from '../subprocess/execute'
 import type { PanfactumContext } from '@/util/context/context'
 
-export async function validateRootProfile(context: PanfactumContext): Promise<void> {
-  // Check if we have root account access
+export async function validateRootProfile(profile: string, context: PanfactumContext): Promise<void> {
+  const workingDirectory = context.repoVariables.repo_root
+  // Check if the provided profile is for a root user
   try {
     const { stdout } = await execute({
-      command: ['aws', 'sts', 'get-caller-identity', '--output', 'json'],
+      command: ['aws', 'sts', 'get-caller-identity', '--profile', profile, '--output', 'json'],
       context,
-      workingDirectory: process.cwd(),
+      workingDirectory,
     })
     
     const identity = JSON.parse(stdout)
-    const accountId = identity.Account
+    const arn = identity.Arn
     
-    // Get organization info to verify root account
-    const { stdout: orgStdout } = await execute({
-      command: ['aws', 'organizations', 'describe-organization', '--output', 'json'],
-      context,
-      workingDirectory: process.cwd(),
-    })
-    
-    const org = JSON.parse(orgStdout)
-    const masterAccountId = org.Organization.MasterAccountId
-    
-    if (accountId !== masterAccountId) {
-      throw new Error(`Current AWS profile is not for the root account. Expected ${masterAccountId}, got ${accountId}`)
+    if (!arn.includes('root')) {
+      throw new Error(`Provided profile is not the root user. Ensure that the aws profile set in your './kube/config.user.yaml' is for a root user.`)
     }
   } catch (error) {
-    if (error instanceof Error && (error.message.includes('AccessDeniedException') || error.message.includes('is not in organization'))) {
-      throw new Error('AWS profile does not have root organization access')
-    }
     if (error instanceof Error) {
       throw error
     }
