@@ -2113,6 +2113,28 @@ let
         hash = "sha256-b0Fdrl3GBw8bQtruYWXquUGpcQGYIwX6zIuv2vMAvEo=";
       };
     };
+    "@inquirer/core/wrap-ansi/strip-ansi" = {
+      out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/strip-ansi";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "strip-ansi@6.0.1";
+        url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz";
+        hash = "sha256-m9t10L/0nxVt2MO8sOBrP6lsPYjd1MNCpDRYZqQMCMo=";
+      };
+    };
+    "@inquirer/core/wrap-ansi/strip-ansi/ansi-regex" = {
+      out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/strip-ansi/node_modules/ansi-regex";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "ansi-regex@5.0.1";
+        url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz";
+        hash = "sha256-Dg6tzaragF212FtTrVzcoHYLmW7hmeyWWOezSqbI4Nk=";
+      };
+    };
     "@inquirer/editor" = {
       out_path = "@inquirer/editor";
       binaries =
@@ -3444,17 +3466,6 @@ let
         hash = "sha256-mXU0W4Db+Am5v+DGmORcDVIjwoHTsljHRSjM/G0TE0o=";
       };
     };
-    "ansi-colors" = {
-      out_path = "ansi-colors";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-colors@4.1.3";
-        url = "https://registry.npmjs.org/ansi-colors/-/ansi-colors-4.1.3.tgz";
-        hash = "sha256-joh02S4YBeYq4+F4RlIccMaOrxbSyXe6nI0+LOu9iTE=";
-      };
-    };
     "ansi-escapes" = {
       out_path = "ansi-escapes";
       binaries =
@@ -3472,9 +3483,9 @@ let
         {
         };
       pkg = fetchurl {
-        name = "ansi-regex@5.0.1";
-        url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz";
-        hash = "sha256-Dg6tzaragF212FtTrVzcoHYLmW7hmeyWWOezSqbI4Nk=";
+        name = "ansi-regex@6.1.0";
+        url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.1.0.tgz";
+        hash = "sha256-BG9v4XYCtoaqUi3hk9YEanXlV5MzZbpR4+PY4fppTzw=";
       };
     };
     "ansi-styles" = {
@@ -4135,17 +4146,6 @@ let
         name = "emoji-regex@10.4.0";
         url = "https://registry.npmjs.org/emoji-regex/-/emoji-regex-10.4.0.tgz";
         hash = "sha256-uN4xAqKX53jV6X8VFKN0p6Vlgpxr0aMnqtJfn/H1mzs=";
-      };
-    };
-    "enquirer" = {
-      out_path = "enquirer";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "enquirer@2.4.1";
-        url = "https://registry.npmjs.org/enquirer/-/enquirer-2.4.1.tgz";
-        hash = "sha256-/hHZv4y2tBRNsja1b6aZHGC7i19J3MfZz9I2h5gb23g=";
       };
     };
     "environment" = {
@@ -5744,28 +5744,6 @@ let
         hash = "sha256-XjgKW6S+ju8EdQYz6XcWhw/J8Qk2pow435KcU7yRexU=";
       };
     };
-    "log-update/strip-ansi" = {
-      out_path = "log-update/node_modules/strip-ansi";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "strip-ansi@7.1.0";
-        url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.1.0.tgz";
-        hash = "sha256-lMSjCUaQVYsbBvVFG8OAGW0taEsolTdjNUIcFXqzk3E=";
-      };
-    };
-    "log-update/strip-ansi/ansi-regex" = {
-      out_path = "log-update/node_modules/strip-ansi/node_modules/ansi-regex";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-regex@6.1.0";
-        url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.1.0.tgz";
-        hash = "sha256-BG9v4XYCtoaqUi3hk9YEanXlV5MzZbpR4+PY4fppTzw=";
-      };
-    };
     "lru-cache" = {
       out_path = "lru-cache";
       binaries =
@@ -6877,28 +6855,6 @@ let
         hash = "sha256-PpCQGpjK3vaYb+KVPm0YH0lzDYHHhVd2pjN/75O78fM=";
       };
     };
-    "string-width/strip-ansi" = {
-      out_path = "string-width/node_modules/strip-ansi";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "strip-ansi@7.1.0";
-        url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.1.0.tgz";
-        hash = "sha256-lMSjCUaQVYsbBvVFG8OAGW0taEsolTdjNUIcFXqzk3E=";
-      };
-    };
-    "string-width/strip-ansi/ansi-regex" = {
-      out_path = "string-width/node_modules/strip-ansi/node_modules/ansi-regex";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-regex@6.1.0";
-        url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.1.0.tgz";
-        hash = "sha256-BG9v4XYCtoaqUi3hk9YEanXlV5MzZbpR4+PY4fppTzw=";
-      };
-    };
     "string.prototype.trim" = {
       out_path = "string.prototype.trim";
       binaries =
@@ -6938,9 +6894,9 @@ let
         {
         };
       pkg = fetchurl {
-        name = "strip-ansi@6.0.1";
-        url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz";
-        hash = "sha256-m9t10L/0nxVt2MO8sOBrP6lsPYjd1MNCpDRYZqQMCMo=";
+        name = "strip-ansi@7.1.0";
+        url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.1.0.tgz";
+        hash = "sha256-lMSjCUaQVYsbBvVFG8OAGW0taEsolTdjNUIcFXqzk3E=";
       };
     };
     "strip-bom" = {
@@ -7437,28 +7393,6 @@ let
         name = "wrap-ansi@9.0.0";
         url = "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-9.0.0.tgz";
         hash = "sha256-5DEN+wvv/dQk+KJ1uLxWV7AN9CHgZPewEXHKcdo9kHI=";
-      };
-    };
-    "wrap-ansi/strip-ansi" = {
-      out_path = "wrap-ansi/node_modules/strip-ansi";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "strip-ansi@7.1.0";
-        url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.1.0.tgz";
-        hash = "sha256-lMSjCUaQVYsbBvVFG8OAGW0taEsolTdjNUIcFXqzk3E=";
-      };
-    };
-    "wrap-ansi/strip-ansi/ansi-regex" = {
-      out_path = "wrap-ansi/node_modules/strip-ansi/node_modules/ansi-regex";
-      binaries =
-        {
-        };
-      pkg = fetchurl {
-        name = "ansi-regex@6.1.0";
-        url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.1.0.tgz";
-        hash = "sha256-BG9v4XYCtoaqUi3hk9YEanXlV5MzZbpR4+PY4fppTzw=";
       };
     };
     "ws" = {
