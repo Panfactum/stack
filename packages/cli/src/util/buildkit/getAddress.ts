@@ -18,9 +18,13 @@ export async function getBuildKitAddress(
 ): Promise<string> {
   const { arch, kubectlContext, omitProtocol = false, context } = options
 
+  const workingDirectory = context.repoVariables.repo_root
+
   // Get running pods filtered by architecture
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
   const podsResult = await execute({
+    context,
+    workingDirectory,
     command: [
       'kubectl',
       ...contextArgs,
@@ -30,8 +34,6 @@ export async function getBuildKitAddress(
       BUILDKIT_NAMESPACE,
       '-o=jsonpath={range .items[?(@.status.phase=="Running")]}{.metadata.name}{"\\n"}'
     ],
-    context,
-    workingDirectory: process.cwd()
   })
 
   const pods = podsResult.stdout
@@ -48,6 +50,8 @@ export async function getBuildKitAddress(
     pods.map(async (pod: string) => {
       try {
         const metricsResult = await execute({
+          context,
+          workingDirectory,
           command: [
             'kubectl',
             ...contextArgs,
@@ -58,8 +62,6 @@ export async function getBuildKitAddress(
             pod,
             '-o=jsonpath={.containers[*].usage.cpu}'
           ],
-          context,
-          workingDirectory: process.cwd()
         })
         // Parse CPU usage (e.g., "100m" -> 100, "1" -> 1000)
         const cpuUsage = metricsResult.stdout.trim()
@@ -93,6 +95,8 @@ export async function getBuildKitAddress(
 
   // Get pod IP
   const ipResult = await execute({
+    context,
+    workingDirectory,
     command: [
       'kubectl',
       ...contextArgs,
@@ -103,8 +107,6 @@ export async function getBuildKitAddress(
       BUILDKIT_NAMESPACE,
       '-o=jsonpath={.status.podIP}'
     ],
-    context,
-    workingDirectory: process.cwd()
   })
 
   const podIP = ipResult.stdout.trim()

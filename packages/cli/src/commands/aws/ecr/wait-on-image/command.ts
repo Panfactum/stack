@@ -64,7 +64,7 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
             '--output', 'text',
           ],
           context: this.context,
-          workingDirectory: process.cwd(),
+          workingDirectory: this.context.repoVariables.repo_root,
         });
 
         if (result.stdout.trim()) {
