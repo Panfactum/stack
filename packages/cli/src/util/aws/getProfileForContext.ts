@@ -30,7 +30,7 @@ export function getAWSProfileForContext(
     })
   } catch {
     throw new CLIError(
-      `'${kubeContext}' not found in kubeconfig. Run pf-update-kube to regenerate kubeconfig.`
+      `'${kubeContext}' not found in kubeconfig. Run pf devshell sync to regenerate kubeconfig.`
     )
   }
 

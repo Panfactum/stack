@@ -111,7 +111,7 @@ locals {
   version = lookup(local.vars, "version", local.primary_branch)
 
   # Long commit sha for the specific branch / tag / commit specified
-  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.version}")
+  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "util", "get-commit-hash", "--ref=${local.version}")
 
   # Whether to use the local copy of the first-party IaC rather than download from the remote git repo
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues

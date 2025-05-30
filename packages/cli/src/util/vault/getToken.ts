@@ -93,7 +93,7 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
       if (process.env['VAULT_ADDR'] !== '@@TERRAGRUNT_INVALID@@') {
         // In Node.js environment, console is globally available
         // eslint-disable-next-line no-undef
-        console.error('Warning: pf-get-vault-token failed, but exiting with 0 as --silent is enabled.');
+        console.error('Warning: getVaultToken failed, but exiting with 0 as --silent is enabled.');
       }
       return { token: 'invalid_token', isValid: false };
     }

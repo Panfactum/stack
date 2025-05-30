@@ -23,7 +23,7 @@ export async function getBuildKitConfig(context: PanfactumContext): Promise<Buil
     config = JSON.parse(configContent)
   } catch {
     throw new Error(
-      `No BuildKit configuration file exists at ${configPath}. A superuser must create one by running 'pf-update-buildkit --build'.`
+      `No BuildKit configuration file exists at ${configPath}. A superuser must create one by running 'pf devshell sync'.`
     )
   }
 
