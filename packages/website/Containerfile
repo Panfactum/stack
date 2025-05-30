@@ -50,7 +50,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
 COPY packages/website/package.json packages/website/
-RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile --shamefully-hoist
 
 
 #################################################

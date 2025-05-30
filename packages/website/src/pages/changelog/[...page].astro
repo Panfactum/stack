@@ -1,6 +1,6 @@
 ---
-import { getContainerRenderer as mdxContainerRenderer } from "@astrojs/mdx";
-import { getContainerRenderer as solidContainerRenderer } from "@astrojs/solid-js";
+import * as mdx from "@astrojs/mdx";
+import * as solid from "@astrojs/solid-js";
 import { experimental_AstroContainer } from 'astro/container';
 import { loadRenderers } from "astro:container";
 import { getCollection, render } from 'astro:content';
@@ -141,7 +141,7 @@ if("entries" in page) {
   label = DOCS_VERSIONS.find((version) => version.slug === versionFromPath)?.label ?? "";
   title = `${label} Changelog Entries - Page ${page.pageNumber}`
 
-  const renderers = await loadRenderers([solidContainerRenderer(), mdxContainerRenderer()]);
+  const renderers = await loadRenderers([solid.getContainerRenderer(), mdx.getContainerRenderer()]);
   const container = await experimental_AstroContainer.create({
     renderers
   });

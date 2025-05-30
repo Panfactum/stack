@@ -75,7 +75,7 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "^4.0.7",
     "@astrojs/sitemap": "^3.2.1",
-    "@astrojs/solid-js": "^5.0.4",
+    "@astrojs/solid-js": "5.1.0",
     "@astrojs/tailwind": "^5.1.5",
     "@expressive-code/plugin-collapsible-sections": "^0.40.2",
     "@kobalte/core": "^0.13.7",
