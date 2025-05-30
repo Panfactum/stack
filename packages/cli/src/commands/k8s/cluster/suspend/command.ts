@@ -1,11 +1,11 @@
 import { confirm } from '@inquirer/prompts'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
-import { getAWSProfileForContext } from '../../../../util/aws/getProfileForContext'
-import { PanfactumCommand } from '../../../../util/command/panfactumCommand'
-import { validateRootProfile } from '../../../../util/eks/validateRootProfile'
-import { execute } from '../../../../util/subprocess/execute'
-import type { EksClusterInfo, AutoScalingGroup } from '../../../../util/eks/types'
+import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
+import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
+import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
+import { execute } from '@/util/subprocess/execute.ts'
+import type { EksClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
 
 export class K8sClusterSuspendCommand extends PanfactumCommand {
   static override paths = [['k8s', 'cluster', 'suspend']]
