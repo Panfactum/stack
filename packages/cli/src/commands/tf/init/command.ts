@@ -3,7 +3,7 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { execute } from '@/util/subprocess/execute';
 
 export class TerraformInitCommand extends PanfactumCommand {
-  static override paths = [['terraform', 'init']];
+  static override paths = [['tf', 'init']];
 
   static override usage = Command.Usage({
     description: 'Initialize Terraform/OpenTofu modules and lock providers for cross-platform compatibility',

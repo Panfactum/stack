@@ -14,8 +14,7 @@ fi
 ## Step 1: Clone the codebase
 ###########################################################
 cd /code
-# todo: replace with pf workflow git-checkout
-pf-wf-git-checkout \
+pf wf git-checkout \
   -r "$CODE_REPO" \
   -c "$GIT_REF" \
   -u "$GIT_USERNAME" \

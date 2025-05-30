@@ -7,7 +7,7 @@ import { getPanfactumConfig } from '@/util/config/getPanfactumConfig';
 import { CLIError } from '@/util/error/error';
 
 export default class DeleteLocksCommand extends PanfactumCommand {
-  static override paths = [['terraform', 'delete-locks']];
+  static override paths = [['tf', 'delete-locks']];
 
   static override usage = PanfactumCommand.Usage({
     description: 'Release all Terraform/OpenTofu state locks held by a specific user',
