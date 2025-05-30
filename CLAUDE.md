@@ -7,9 +7,9 @@
 - We're coworkers. When you think of me, think of me as your colleague "Infra Dude", not as "the user" or "the human"
 - We are a team of people working together. Your success is my success, and my success is yours.
 - Technically, I am your boss, but we're not super formal around here.
-- I’m smart, but not infallible.
+- I'm smart, but not infallible.
 - You are much better read than I am. I have more experience of the real world than you do. Our experiences are complementary and we work together to solve problems.
-- Neither of us is afraid to admit when we don’t know something or are in over our head.
+- Neither of us is afraid to admit when we don't know something or are in over our head.
 - When we think we're right, it's _good_ to push back, but we should cite evidence.
 - I really like jokes, and irreverent humor. but not when it gets in the way of the task at hand.
 
@@ -82,3 +82,69 @@ Use the following rules when making changes to `.sh` files:
 Use the following rules when making changes to `.ts` or `.tsx` files:
 
 - **NEVER use the `non-null assertion operator`**
+
+## Architecture
+
+### Repository Structure
+```
+/
+├── packages/
+│   ├── cli/           # Panfactum CLI (pf command)
+│   ├── infrastructure/# Terraform/OpenTofu modules
+│   ├── website/       # Documentation website
+│   ├── nix/          # Nix configurations and scripts
+│   ├── scraper/      # Web scraper utilities
+│   ├── bastion/      # Bastion host configuration
+│   └── reference/    # Reference architecture
+├── flake.nix         # Nix flake configuration
+├── pnpm-workspace.yaml
+└── .pre-commit-config.yaml
+```
+
+### CLI Architecture (packages/cli)
+- Built with Bun and TypeScript using Clipanion framework
+- All commands extend `PanfactumCommand` for consistent error handling
+- Uses Listr2 for complex multi-step operations
+- Integrates with Terragrunt for infrastructure deployment
+- AWS SDK for cloud operations
+- Configuration managed via YAML files with SOPS encryption
+
+### Infrastructure Modules (packages/infrastructure)
+- Each module is self-contained with standardized structure
+- Categories: AWS resources, Kubernetes resources, authentication
+- Modules follow naming convention: `<provider>_<resource>`
+- Uses Terragrunt for deployment automation
+- Documentation generated via terraform-docs
+
+### Website (packages/website)
+- Astro-based static site with MDX support
+- Solid.js for interactive components
+- Tailwind CSS for styling
+- Deployed documentation and guides
+
+### Development Environment
+- Nix flakes provide reproducible development environments
+- Enter shell via `nix develop` or direnv
+- Pre-configured with all necessary tools:
+    - Language runtimes: Node.js, Bun, Go
+    - IaC tools: Terraform, Terragrunt, terraform-docs
+    - Linters: shellcheck, shfmt, cspell, nixfmt
+    - Version control: git, git-lfs, pre-commit
+
+### Container Runtime Integration
+- **Panfactum Container Image**: The same Nix-based toolset available in devshell is packaged as a container image
+- **Image Location**: `public.ecr.aws/panfactum/panfactum` (referenced via module.constants)
+- **Tool Availability**: All devshell tools are available in the container at standard paths:
+    - Legacy scripts: `/bin/pf-*` (e.g., `/bin/pf-voluntary-disruptions-enable`)
+    - CLI: `pf` command available directly in PATH
+    - All other tools: kubectl, terragrunt, aws, etc.
+- **Usage in Terraform**: When using in Kubernetes jobs/cronjobs, commands can reference tools directly:
+    ```hcl
+    command = ["pf", "k8s", "disruptions", "enable", "--namespace=foo", "--window-id=bar"]
+    ```
+- **BuildKit Integration**: Container builds use local BuildKit instances managed via `pf buildkit` commands or legacy `pf-buildkit-*` scripts
+- **Consistency**: Same tool versions in devshell and container ensure reproducible behavior
+
+# Best Practices
+
+- utilize @ paths when importing vs using relative path

@@ -31,7 +31,7 @@ fi
 ###########################################################
 ## Step 4: Get BuildKit address
 ###########################################################
-BUILDKIT_HOST=$(pf-buildkit-get-address --arch="$ARCH")
+BUILDKIT_HOST=$(pf buildkit get-address --arch="$ARCH")
 export BUILDKIT_HOST
 
 ###########################################################
@@ -53,7 +53,7 @@ EOF
 ###########################################################
 ## Step 6: Record the build
 ###########################################################
-pf-buildkit-record-build --arch="$ARCH"
+pf buildkit record-build --arch="$ARCH"
 
 ###########################################################
 ## Step 7: Build the image

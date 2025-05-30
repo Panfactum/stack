@@ -216,7 +216,16 @@ words: [
   "PersistentVolumes",
   "Airbyte",
   "workflowtemplate",
-  "opensearch"
+  "opensearch",
+  "nixfmt",
+  "nologin",
+  "nodir",
+  "libgit",
+  "autossh",
+  "TARGETARCH",
+  "edgefarm",
+  "buildx",
+  "skopeo"
 ]
 languageSettings:
   - languageId: markdown,mdx
