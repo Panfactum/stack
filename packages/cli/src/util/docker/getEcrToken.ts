@@ -25,16 +25,17 @@ export async function getEcrToken(
   const { stdout } = await execute({
     command: command.split(' '),
     context,
-    workingDirectory: process.cwd(),
+    workingDirectory: context.repoVariables.repo_root,
   })
 
-  const response = JSON.parse(stdout)
+  const response = JSON.parse(stdout) as { authorizationData: { authorizationToken: string } | Array<{ authorizationToken: string }> }
   let token: string
   
   if (isPublicRegistry) {
-    token = response.authorizationData.authorizationToken
+    token = (response.authorizationData as { authorizationToken: string }).authorizationToken
   } else {
-    token = response.authorizationData[0].authorizationToken
+    const authData = response.authorizationData as Array<{ authorizationToken: string }>
+    token = authData[0]?.authorizationToken || ''
   }
 
   // ECR tokens are base64 encoded username:password

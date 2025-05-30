@@ -4,8 +4,8 @@
 import { execSync } from 'child_process'
 import { existsSync } from 'fs'
 import { join } from 'path'
-import type { PanfactumContext } from '@/util/context/context'
 import { CLIError } from '@/util/error/error'
+import type { PanfactumContext } from '@/util/context/context'
 
 export function getAWSProfileForContext(
   context: PanfactumContext,

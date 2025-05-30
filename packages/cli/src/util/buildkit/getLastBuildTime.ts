@@ -33,7 +33,7 @@ export async function getLastBuildTime(
         `-o=go-template={{index .metadata.annotations "${BUILDKIT_LAST_BUILD_ANNOTATION_KEY}"}}`
       ],
       context,
-      workingDirectory: process.cwd()
+      workingDirectory: context.repoVariables.repo_root
     })
 
     const lastBuild = result.stdout.trim()

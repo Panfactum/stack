@@ -34,6 +34,6 @@ export async function recordBuildKitBuild(
       '--overwrite'
     ],
     context,
-    workingDirectory: process.cwd()
+    workingDirectory: context.repoVariables.repo_root
   })
 }

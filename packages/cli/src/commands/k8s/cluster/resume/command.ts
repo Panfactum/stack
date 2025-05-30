@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
+import { getAWSProfileForContext } from '../../../../util/aws/getProfileForContext'
 import { PanfactumCommand } from '../../../../util/command/panfactumCommand'
 import { validateRootProfile } from '../../../../util/eks/validateRootProfile'
 import { execute } from '../../../../util/subprocess/execute'
@@ -37,12 +38,14 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
   async execute() {
     const { context } = this
     let clusterInfo: EksClusterInfo
+    let awsProfile: string
 
     const tasks = new Listr([
       {
         title: 'Validating AWS access',
         task: async () => {
-          await validateRootProfile(context)
+          awsProfile = getAWSProfileForContext(context, this.cluster)
+          await validateRootProfile(awsProfile, context)
         },
       },
       {
