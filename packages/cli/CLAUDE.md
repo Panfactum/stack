@@ -85,3 +85,29 @@ Currently no test files in `src/`, but the test infrastructure is set up for `bu
 - `picocolors`: Terminal colorization (blue=info, magenta=prompts, red=errors, cyan=actions, green=success)
 - `@aws-sdk/*`: AWS service clients
 - `terragrunt`: Infrastructure deployment (not a direct dependency, expected in environment)
+
+## CLI Migration Patterns
+
+### Migrating Legacy Scripts
+When migrating bash scripts from `packages/nix/packages/scripts/pf-*.sh` to CLI commands:
+
+1. **Command Structure**: Convert from `pf-command-name` to `pf command name` (replace hyphens with spaces)
+2. **Container Usage**: In Terraform modules, update from `/bin/pf-command-name` to `["pf", "command", "name"]`
+3. **Behavior Parity**: Ensure CLI commands replicate all functionality including:
+   - Default values and warnings for missing data
+   - Same kubectl operations and arguments
+   - Error handling (though CLI provides better structure)
+4. **Output Differences**: 
+   - Bash scripts use stderr (`>&2`), CLI uses logger methods
+   - CLI can add helpful summaries that scripts didn't have
+   - kubectl output is captured but not displayed (available in debug mode)
+
+### Example Migration
+```bash
+# Old: /bin/pf-voluntary-disruptions-enable --namespace=foo --window-id=bar
+# New: pf k8s disruptions enable --namespace=foo --window-id=bar
+
+# In Terraform:
+# Old: command = ["/bin/pf-voluntary-disruptions-enable", "--namespace=${var.namespace}", "--window-id=${var.id}"]
+# New: command = ["pf", "k8s", "disruptions", "enable", "--namespace=${var.namespace}", "--window-id=${var.id}"]
+```
