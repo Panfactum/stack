@@ -1,11 +1,12 @@
 import { execSync } from 'child_process';
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
+import { parseJson } from '@/util/zod/parseJson';
 import { getVaultTokenString } from './getVaultToken';
 import type {PanfactumContext} from "@/util/context/context.ts";
 
 // Zod schema for Vault database credentials response
-const VaultDbCredsResponseSchema = z.object({
+const VAULT_DB_CREDS_RESPONSE_SCHEMA = z.object({
   data: z.object({
     username: z.string(),
     password: z.string()
@@ -70,8 +71,7 @@ export async function getDBCreds(options: GetDbCredsOptions): Promise<DbCredenti
  */
 function parseVaultResponse(output: string): DbCredentials {
   try {
-    const rawResponse = JSON.parse(output);
-    const response = VaultDbCredsResponseSchema.parse(rawResponse);
+    const response = parseJson(VAULT_DB_CREDS_RESPONSE_SCHEMA, output);
 
     return {
       username: response.data.username,

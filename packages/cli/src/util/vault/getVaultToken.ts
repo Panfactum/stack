@@ -1,6 +1,15 @@
+import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
+import { parseJson } from '@/util/zod/parseJson';
 import type { PanfactumContext } from '@/util/context/context';
+
+// Zod schema for Vault token lookup response
+const VAULT_TOKEN_LOOKUP_SCHEMA = z.object({
+  data: z.object({
+    ttl: z.coerce.number() // Convert string to number automatically
+  }).passthrough()
+}).passthrough();
 
 export interface GetVaultTokenOptions {
   address?: string;
@@ -77,8 +86,8 @@ export async function getVaultToken(options: GetVaultTokenOptions): Promise<Vaul
           env: { ...env, VAULT_TOKEN: existingToken }
         });
         
-        const lookupData = JSON.parse(lookupResult.stdout) as { data: { ttl: string } };
-        const ttl = parseInt(lookupData.data.ttl);
+        const lookupData = parseJson(VAULT_TOKEN_LOOKUP_SCHEMA, lookupResult.stdout);
+        const ttl = lookupData.data.ttl; // Now already a number from Zod coercion
 
         // If token has more than 30 minutes left, use it
         if (ttl >= 1800) {
