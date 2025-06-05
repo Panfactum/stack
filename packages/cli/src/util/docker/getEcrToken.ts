@@ -1,5 +1,20 @@
+import { z } from 'zod';
+import { parseJson } from '@/util/zod/parseJson';
 import { execute } from '../subprocess/execute'
 import type { PanfactumContext } from '@/util/context/context'
+
+// Zod schemas for ECR authorization responses
+const ECR_PUBLIC_AUTH_SCHEMA = z.object({
+  authorizationData: z.object({
+    authorizationToken: z.string()
+  }).passthrough()
+}).passthrough();
+
+const ECR_PRIVATE_AUTH_SCHEMA = z.object({
+  authorizationData: z.array(z.object({
+    authorizationToken: z.string()
+  }).passthrough())
+}).passthrough();
 
 
 export async function getEcrToken(
@@ -28,14 +43,14 @@ export async function getEcrToken(
     workingDirectory: context.repoVariables.repo_root,
   })
 
-  const response = JSON.parse(stdout) as { authorizationData: { authorizationToken: string } | Array<{ authorizationToken: string }> }
   let token: string
   
   if (isPublicRegistry) {
-    token = (response.authorizationData as { authorizationToken: string }).authorizationToken
+    const response = parseJson(ECR_PUBLIC_AUTH_SCHEMA, stdout);
+    token = response.authorizationData.authorizationToken
   } else {
-    const authData = response.authorizationData as Array<{ authorizationToken: string }>
-    token = authData[0]?.authorizationToken || ''
+    const response = parseJson(ECR_PRIVATE_AUTH_SCHEMA, stdout);
+    token = response.authorizationData[0]?.authorizationToken || ''
   }
 
   // ECR tokens are base64 encoded username:password
