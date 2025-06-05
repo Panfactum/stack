@@ -37,6 +37,7 @@ import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts
 import { GetDbCredsCommand } from "./commands/vault/get-db-creds/command.ts";
 import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
+import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
@@ -63,6 +64,7 @@ cli.register(DevshellEnterCommand)
 cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
+cli.register(AWSVPCNetworkTestCommand)
 cli.register(ProfileForContextCommand)
 cli.register(AwsEcrWaitOnImageCommand)
 cli.register(BuildkitBuildCommand)
