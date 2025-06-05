@@ -102,12 +102,6 @@ Use the following rules when making changes to `.ts` or `.tsx` files:
 ```
 
 ### CLI Architecture (packages/cli)
-- Built with Bun and TypeScript using Clipanion framework
-- All commands extend `PanfactumCommand` for consistent error handling
-- Uses Listr2 for complex multi-step operations
-- Integrates with Terragrunt for infrastructure deployment
-- AWS SDK for cloud operations
-- Configuration managed via YAML files with SOPS encryption
 - See @packages/cli/CLAUDE.md for detailed CLI development guidelines
 
 ### Infrastructure Modules (packages/infrastructure)

@@ -36,6 +36,14 @@ This is a Bun-based CLI application built with TypeScript and the Clipanion fram
 cli.register(YourCommand);
 ```
 
+**Architecture Notes**:
+- Built with Bun and TypeScript using Clipanion framework
+- All commands extend `PanfactumCommand` for consistent error handling
+- Uses Listr2 for complex multi-step operations
+- Integrates with Terragrunt for infrastructure deployment
+- AWS SDK for cloud operations
+- Configuration managed via YAML files with SOPS encryption
+
 ### Key Patterns
 
 **Asynchronous Task Management**: Uses Listr2 for complex multi-step operations. See `src/commands/cluster/add/command.ts` for a comprehensive example with:
