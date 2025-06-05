@@ -2,6 +2,7 @@ import { Option } from 'clipanion'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.js'
 
 export default class BuildkitScaleUpCommand extends PanfactumCommand {
@@ -138,7 +139,7 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
       const remainingSeconds = timeoutSeconds - elapsedSeconds
 
       if (elapsedSeconds >= timeoutSeconds) {
-        throw new Error(`Timeout reached while waiting for StatefulSet ${statefulsetName} to scale up.`)
+        throw new CLIError(`Timeout reached while waiting for StatefulSet ${statefulsetName} to scale up.`)
       }
 
       this.context.logger.info(`${arch}: Waiting ${remainingSeconds} seconds for at least one BuildKit replica to become available...`)

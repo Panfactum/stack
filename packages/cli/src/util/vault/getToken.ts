@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import { CLIError } from '@/util/error/error';
 
 export interface GetVaultTokenOptions {
   address?: string;
@@ -31,13 +32,13 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
     const vaultAddr = address || process.env['VAULT_ADDR'];
     
     if (!vaultAddr) {
-      throw new Error('VAULT_ADDR is not set. Either set the env variable or use the --address flag.');
+      throw new CLIError('VAULT_ADDR is not set. Either set the env variable or use the --address flag.');
     }
 
     // Handle special terragrunt case
     if (vaultAddr === '@@TERRAGRUNT_INVALID@@') {
       if (!silent) {
-        throw new Error('Vault provider is enabled but vault_addr is not set.');
+        throw new CLIError('Vault provider is enabled but vault_addr is not set.');
       }
       return { token: 'invalid_token', isValid: false };
     }
@@ -114,12 +115,12 @@ function performOIDCLogin(env: Record<string, string | undefined>): string {
     }).trim();
 
     if (!token) {
-      throw new Error('Failed to get token from OIDC login');
+      throw new CLIError('Failed to get token from OIDC login');
     }
 
     return token;
   } catch (error) {
-    throw new Error(`Vault OIDC login failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new CLIError(`Vault OIDC login failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -130,7 +131,7 @@ export async function getVaultTokenString(options: GetVaultTokenOptions = {}): P
   const result = await getVaultToken(options);
   
   if (!result.isValid) {
-    throw new Error(result.error || 'Failed to get valid Vault token');
+    throw new CLIError(result.error || 'Failed to get valid Vault token');
   }
   
   return result.token;

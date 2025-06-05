@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { Builtins, Cli, type BaseContext } from "clipanion";
+import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
 import ProfileForContextCommand from "./commands/aws/profile-for-context/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
@@ -37,7 +38,6 @@ import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts
 import { GetDbCredsCommand } from "./commands/vault/get-db-creds/command.ts";
 import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
-import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";

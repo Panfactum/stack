@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { z } from 'zod'
+import { CLIError } from '@/util/error/error'
 import type { BuildKitConfig } from './constants.js'
 import type { PanfactumContext } from '@/util/context/context.js'
 
@@ -22,14 +23,14 @@ export async function getBuildKitConfig(context: PanfactumContext): Promise<Buil
     const configContent = readFileSync(configPath, 'utf-8')
     config = JSON.parse(configContent)
   } catch {
-    throw new Error(
+    throw new CLIError(
       `No BuildKit configuration file exists at ${configPath}. A superuser must create one by running 'pf devshell sync'.`
     )
   }
 
   const parseResult = buildKitConfigSchema.safeParse(config)
   if (!parseResult.success) {
-    throw new Error(
+    throw new CLIError(
       `Invalid BuildKit configuration: ${parseResult.error.message}`
     )
   }

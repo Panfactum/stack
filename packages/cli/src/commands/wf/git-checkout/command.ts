@@ -1,6 +1,7 @@
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
+import { CLIError } from '@/util/error/error'
 import { getCommitHash } from '@/util/git/getCommitHash.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 
@@ -57,7 +58,7 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
     
     // Validate that password is provided if username is provided
     if (this.username && !this.password) {
-      throw new Error('If --username is supplied, a --password must also be supplied.')
+      throw new CLIError('If --username is supplied, a --password must also be supplied.')
     }
     
     // Set default directory to 'repo' if not provided

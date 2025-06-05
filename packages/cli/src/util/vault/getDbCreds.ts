@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import { CLIError } from '@/util/error/error';
 import { getVaultTokenString } from './getToken';
 
 export interface GetDbCredsOptions {
@@ -24,7 +25,7 @@ export async function getDbCreds(options: GetDbCredsOptions): Promise<DbCredenti
   const { role, vaultAddress } = options;
 
   if (!role) {
-    throw new Error('role is a required argument.');
+    throw new CLIError('role is a required argument.');
   }
 
   // Set up environment
@@ -47,7 +48,7 @@ export async function getDbCreds(options: GetDbCredsOptions): Promise<DbCredenti
 
     return parseVaultResponse(output);
   } catch (error) {
-    throw new Error(`Failed to get database credentials for role '${role}': ${error instanceof Error ? error.message : String(error)}`);
+    throw new CLIError(`Failed to get database credentials for role '${role}': ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -67,7 +68,7 @@ function parseVaultResponse(output: string): DbCredentials {
     };
     
     if (!response.data || !response.data.username || !response.data.password) {
-      throw new Error('Invalid response format from Vault');
+      throw new CLIError('Invalid response format from Vault');
     }
 
     return {
@@ -78,7 +79,7 @@ function parseVaultResponse(output: string): DbCredentials {
       data: response.data as Record<string, unknown>
     };
   } catch (error) {
-    throw new Error(`Failed to parse Vault response: ${error instanceof Error ? error.message : String(error)}`);
+    throw new CLIError(`Failed to parse Vault response: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

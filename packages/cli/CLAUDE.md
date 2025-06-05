@@ -59,6 +59,8 @@ cli.register(YourCommand);
 - SOPS encryption: `src/util/sops/`
 
 ### Error Handling
+Never use Error. Always use one of our custom error classes such as CLIError.
+
 Use `CLIError` for user-facing errors with detailed messages:
 ```typescript
 throw new CLIError('User-friendly message', { 

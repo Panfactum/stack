@@ -1,3 +1,4 @@
+import { CLIError } from '@/util/error/error';
 import { computeColumnWidths } from './utils/computeColumnWidths';
 import { getColumnContentWidths } from './utils/getColumnContentWidth';
 import { getOptions } from './utils/getOptions';
@@ -25,7 +26,7 @@ export const terminalColumns = (
     const { stdoutColumns, columns } = getOptions(options);
 
     if (columns.length > columnCount) {
-        throw new Error(`${columns.length} columns defined, but only ${columnCount} columns found`);
+        throw new CLIError(`${columns.length} columns defined, but only ${columnCount} columns found`);
     }
 
     const computedColumns = computeColumnWidths(

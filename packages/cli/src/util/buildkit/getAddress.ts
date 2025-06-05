@@ -1,3 +1,4 @@
+import { CLIError } from '@/util/error/error'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
@@ -42,7 +43,7 @@ export async function getBuildKitAddress(
     .filter(pod => pod.includes(arch))
 
   if (pods.length === 0) {
-    throw new Error(`No running BuildKit pods found for architecture ${arch}`)
+    throw new CLIError(`No running BuildKit pods found for architecture ${arch}`)
   }
 
   // Sort pods by CPU usage (pods without metrics go first as they're likely unused)
@@ -90,7 +91,7 @@ export async function getBuildKitAddress(
   const selectedPod = podMetrics[0]?.pod
   
   if (!selectedPod) {
-    throw new Error('No pod available')
+    throw new CLIError('No pod available')
   }
 
   // Get pod IP
@@ -111,7 +112,7 @@ export async function getBuildKitAddress(
 
   const podIP = ipResult.stdout.trim()
   if (!podIP) {
-    throw new Error(`Could not get IP for pod ${selectedPod}`)
+    throw new CLIError(`Could not get IP for pod ${selectedPod}`)
   }
 
   // Convert IP to Kubernetes DNS format (dots to dashes)

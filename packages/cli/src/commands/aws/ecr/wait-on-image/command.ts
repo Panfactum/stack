@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 
 export class AwsEcrWaitOnImageCommand extends PanfactumCommand {
@@ -24,14 +25,14 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     // Parse the image specifier
     const imageParts = this.image.split(':');
     if (imageParts.length !== 2) {
-      throw new Error('Image must include a tag (format: registry/repository:tag)');
+      throw new CLIError('Image must include a tag (format: registry/repository:tag)');
     }
     const registryAndRepo = imageParts[0]!;
     const tag = imageParts[1]!;
 
     const repoParts = registryAndRepo.split('/');
     if (repoParts.length !== 2) {
-      throw new Error('Invalid image format. Expected: registry/repository:tag');
+      throw new CLIError('Invalid image format. Expected: registry/repository:tag');
     }
     const registry = repoParts[0]!;
     const repoName = repoParts[1]!;
@@ -41,7 +42,7 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     const region = registryParts[3];
 
     if (!accountId || !region) {
-      throw new Error('Invalid ECR registry format');
+      throw new CLIError('Invalid ECR registry format');
     }
 
     const timeoutSeconds = parseInt(this.timeout, 10);
@@ -84,6 +85,6 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
       elapsed += intervalSeconds;
     }
 
-    throw new Error(`Could not find ${this.image} within ${timeoutSeconds} seconds.`);
+    throw new CLIError(`Could not find ${this.image} within ${timeoutSeconds} seconds.`);
   }
 }

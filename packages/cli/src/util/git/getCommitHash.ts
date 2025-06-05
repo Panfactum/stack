@@ -2,6 +2,7 @@ import { mkdtemp, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { $ } from 'bun';
+import { CLIError } from '@/util/error/error';
 
 export interface GetCommitHashOptions {
   repo?: string;
@@ -29,7 +30,7 @@ export async function getCommitHash(options: GetCommitHashOptions = {}): Promise
       const result = await $`git rev-parse HEAD`.quiet();
       return result.text().trim();
     } else {
-      throw new Error('You cannot specify an empty git_ref and also specify a git_repo. Too ambiguous to resolve the hash.');
+      throw new CLIError('You cannot specify an empty git_ref and also specify a git_repo. Too ambiguous to resolve the hash.');
     }
   }
 
@@ -42,7 +43,7 @@ export async function getCommitHash(options: GetCommitHashOptions = {}): Promise
           await $`git fetch origin ${ref}`.quiet();
           return ref;
         } catch {
-          throw new Error(`Commit ${ref} does not exist in the remote origin`);
+          throw new CLIError(`Commit ${ref} does not exist in the remote origin`);
         }
       } else {
         // Create temp dir and verify from custom repo
@@ -52,7 +53,7 @@ export async function getCommitHash(options: GetCommitHashOptions = {}): Promise
           await $`git fetch ${repo} ${ref}`.cwd(tempDir).quiet();
           return ref;
         } catch {
-          throw new Error(`Commit ${ref} does not exist in ${repo}`);
+          throw new CLIError(`Commit ${ref} does not exist in ${repo}`);
         } finally {
           await rmdir(tempDir, { recursive: true });
         }
@@ -75,7 +76,7 @@ export async function getCommitHash(options: GetCommitHashOptions = {}): Promise
       const result = await $`git rev-parse ${ref}`.quiet();
       return result.text().trim();
     } catch {
-      throw new Error(`Unable to resolve git reference: ${ref}`);
+      throw new CLIError(`Unable to resolve git reference: ${ref}`);
     }
   } else {
     // Use git ls-remote for custom repos
@@ -86,9 +87,9 @@ export async function getCommitHash(options: GetCommitHashOptions = {}): Promise
         const sha = output.split('\t')[0];
         return sha || '';
       }
-      throw new Error(`Unable to resolve git reference: ${ref} in ${repo}`);
+      throw new CLIError(`Unable to resolve git reference: ${ref} in ${repo}`);
     } catch {
-      throw new Error(`Unable to resolve git reference: ${ref} in ${repo}`);
+      throw new CLIError(`Unable to resolve git reference: ${ref} in ${repo}`);
     }
   }
 }

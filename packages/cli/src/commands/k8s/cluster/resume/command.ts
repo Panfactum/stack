@@ -3,6 +3,7 @@ import { Listr } from 'listr2'
 import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
+import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.ts'
 import type { EksClusterInfo } from '@/util/eks/types.ts'
 
@@ -59,7 +60,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           clusterInfo = JSON.parse(stdout).cluster
           
           if (clusterInfo.tags?.['panfactum.com/suspended'] !== 'true') {
-            throw new Error('Cluster is not marked as suspended')
+            throw new CLIError('Cluster is not marked as suspended')
           }
         },
       },

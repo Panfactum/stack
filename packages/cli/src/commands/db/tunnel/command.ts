@@ -52,7 +52,7 @@ export class DbTunnelCommand extends PanfactumCommand {
     if (this.type) {
       const validTypes: DatabaseType[] = ['postgresql', 'redis', 'nats']
       if (!validTypes.includes(this.type as DatabaseType)) {
-        throw new Error(`Invalid database type. Must be one of: ${validTypes.join(', ')}`)
+        throw new CLIError(`Invalid database type. Must be one of: ${validTypes.join(', ')}`)
       }
     }
 
@@ -113,7 +113,7 @@ export class DbTunnelCommand extends PanfactumCommand {
     const databases = await listDatabases(context, this.type as DatabaseType)
     
     if (databases.length === 0) {
-      throw new Error('No databases found matching the criteria')
+      throw new CLIError('No databases found matching the criteria')
     }
 
     // Select database
@@ -253,7 +253,7 @@ Connection details:\n
       tunnelProcess.on('error', reject)
       tunnelProcess.on('exit', (code) => {
         if (code !== 0 && code !== null) {
-          reject(new Error(`Tunnel process exited with code ${code}`))
+          reject(new CLIError(`Tunnel process exited with code ${code}`))
         } else {
           resolve()
         }

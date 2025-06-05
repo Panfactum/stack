@@ -1,3 +1,4 @@
+import { CLIError } from '@/util/error/error'
 import { execute } from '../subprocess/execute'
 import type { PanfactumContext } from '@/util/context/context'
 
@@ -15,12 +16,12 @@ export async function validateRootProfile(profile: string, context: PanfactumCon
     const arn = identity.Arn
     
     if (!arn.includes('root')) {
-      throw new Error(`Provided profile is not the root user. Ensure that the aws profile set in your './kube/config.user.yaml' is for a root user.`)
+      throw new CLIError(`Provided profile is not the root user. Ensure that the aws profile set in your './kube/config.user.yaml' is for a root user.`)
     }
   } catch (error) {
     if (error instanceof Error) {
       throw error
     }
-    throw new Error('Unknown error occurred')
+    throw new CLIError('Unknown error occurred')
   }
 }

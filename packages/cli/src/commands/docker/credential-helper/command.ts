@@ -1,4 +1,5 @@
 import { Command, Option } from 'clipanion'
+import { CLIError } from '@/util/error/error'
 import { getBuildKitConfig } from '../../../util/buildkit/config'
 import { PanfactumCommand } from '../../../util/command/panfactumCommand'
 import { getCachedCredential, setCachedCredential } from '../../../util/docker/credentialCache'
@@ -50,7 +51,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
         await this.handleList()
         break
       default:
-        throw new Error(`Unknown action: ${this.action}`)
+        throw new CLIError(`Unknown action: ${this.action}`)
     }
   }
 
@@ -80,7 +81,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     const registry = this.extractRegistry(fullUrl)
 
     if (!this.isEcrRegistry(registry)) {
-      throw new Error('Not an ECR registry')
+      throw new CLIError('Not an ECR registry')
     }
 
     // Check cache first

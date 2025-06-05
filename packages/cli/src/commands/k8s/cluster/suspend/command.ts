@@ -4,6 +4,7 @@ import { Listr } from 'listr2'
 import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
+import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.ts'
 import type { EksClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
 
@@ -75,7 +76,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           clusterInfo = JSON.parse(stdout).cluster
           
           if (clusterInfo.tags?.['panfactum.com/suspended'] === 'true') {
-            throw new Error('Cluster is already suspended')
+            throw new CLIError('Cluster is already suspended')
           }
         },
       },
@@ -208,7 +209,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           })
           
           const groups = JSON.parse(stdout)
-          autoScalingGroups = groups.map((g: Record<string, any>) => ({
+          autoScalingGroups = groups.map((g: Record<string, unknown>) => ({
             name: g['AutoScalingGroupName'],
             minSize: g['MinSize'],
             maxSize: g['MaxSize'],

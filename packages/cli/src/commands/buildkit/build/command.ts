@@ -4,6 +4,7 @@ import { dirname, basename, join } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.js'
 import { execute } from '@/util/subprocess/execute.js'
 import type { BuildKitConfig } from '@/util/buildkit/constants.js'
@@ -156,7 +157,7 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
       await new Promise(resolve => globalThis.setTimeout(resolve, 1000))
     }
 
-    throw new Error(`Tunnel on port ${port} did not become available`)
+    throw new CLIError(`Tunnel on port ${port} did not become available`)
   }
 
   private async runBuild(arch: string, port: number, config: BuildKitConfig): Promise<number> {

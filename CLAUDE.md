@@ -108,6 +108,7 @@ Use the following rules when making changes to `.ts` or `.tsx` files:
 - Integrates with Terragrunt for infrastructure deployment
 - AWS SDK for cloud operations
 - Configuration managed via YAML files with SOPS encryption
+- See @packages/cli/CLAUDE.md for detailed CLI development guidelines
 
 ### Infrastructure Modules (packages/infrastructure)
 - Each module is self-contained with standardized structure

@@ -1,4 +1,5 @@
 import net from 'net';
+import { CLIError } from '@/util/error/error';
 
 /**
  * Finds an available port on the system
@@ -14,7 +15,7 @@ export async function getOpenPort(startPort = 30000, endPort = 32767): Promise<n
     }
   }
   
-  throw new Error(`No open ports found between ${startPort} and ${endPort}`);
+  throw new CLIError(`No open ports found between ${startPort} and ${endPort}`);
 }
 
 /**
