@@ -1,7 +1,18 @@
 import { execSync } from 'child_process';
+import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
 import { getVaultTokenString } from './getVaultToken';
 import type {PanfactumContext} from "@/util/context/context.ts";
+
+// Zod schema for Vault database credentials response
+const VaultDbCredsResponseSchema = z.object({
+  data: z.object({
+    username: z.string(),
+    password: z.string()
+  }).passthrough(), // Allow additional fields
+  lease_id: z.string().optional(),
+  lease_duration: z.number().optional()
+}).passthrough(); // Allow additional top-level fields
 
 export interface GetDbCredsOptions {
   role: string;
@@ -23,7 +34,7 @@ export interface DbCredentials {
  * @param options Configuration options including role and optional vault address
  * @returns Database credentials
  */
-export async function getDbCreds(options: GetDbCredsOptions): Promise<DbCredentials> {
+export async function getDBCreds(options: GetDbCredsOptions): Promise<DbCredentials> {
   const { role, vaultAddress, context } = options;
 
   if (!role) {
@@ -59,19 +70,8 @@ export async function getDbCreds(options: GetDbCredsOptions): Promise<DbCredenti
  */
 function parseVaultResponse(output: string): DbCredentials {
   try {
-    const response = JSON.parse(output) as {
-      data?: {
-        username?: string;
-        password?: string;
-        [key: string]: unknown;
-      };
-      lease_id?: string;
-      lease_duration?: number;
-    };
-    
-    if (!response.data || !response.data.username || !response.data.password) {
-      throw new CLIError('Invalid response format from Vault');
-    }
+    const rawResponse = JSON.parse(output);
+    const response = VaultDbCredsResponseSchema.parse(rawResponse);
 
     return {
       username: response.data.username,
@@ -81,6 +81,9 @@ function parseVaultResponse(output: string): DbCredentials {
       data: response.data as Record<string, unknown>
     };
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new CLIError(`Invalid Vault response format: ${error.message}`);
+    }
     throw new CLIError(`Failed to parse Vault response: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
@@ -92,7 +95,7 @@ function parseVaultResponse(output: string): DbCredentials {
  * @returns Formatted string output
  */
 export async function getDbCredsFormatted(options: GetDbCredsOptions): Promise<string> {
-  const creds = await getDbCreds(options);
+  const creds = await getDBCreds(options);
   
   // Format output similar to vault read command
   const lines = [

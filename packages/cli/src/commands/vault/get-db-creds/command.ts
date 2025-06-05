@@ -3,7 +3,7 @@
 
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
-import { getDbCreds, getDbCredsFormatted } from '@/util/vault/getDbCreds';
+import { getDBCreds, getDbCredsFormatted } from '@/util/vault/getDBCreds.ts';
 
 export class GetDbCredsCommand extends PanfactumCommand {
   static override paths = [['vault', 'get-db-creds']];
@@ -41,7 +41,7 @@ export class GetDbCredsCommand extends PanfactumCommand {
     try {
       if (this.json) {
         // Output as JSON
-        const creds = await getDbCreds({
+        const creds = await getDBCreds({
           context:  this.context,
           role: this.role,
           vaultAddress: this.vaultAddress,
