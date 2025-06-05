@@ -1,10 +1,12 @@
 import { execSync } from 'child_process';
 import { CLIError } from '@/util/error/error';
-import { getVaultTokenString } from './getToken';
+import { getVaultTokenString } from './getVaultToken';
+import type {PanfactumContext} from "@/util/context/context.ts";
 
 export interface GetDbCredsOptions {
   role: string;
   vaultAddress?: string;
+  context: PanfactumContext;
 }
 
 export interface DbCredentials {
@@ -22,7 +24,7 @@ export interface DbCredentials {
  * @returns Database credentials
  */
 export async function getDbCreds(options: GetDbCredsOptions): Promise<DbCredentials> {
-  const { role, vaultAddress } = options;
+  const { role, vaultAddress, context } = options;
 
   if (!role) {
     throw new CLIError('role is a required argument.');
@@ -35,7 +37,7 @@ export async function getDbCreds(options: GetDbCredsOptions): Promise<DbCredenti
   }
 
   // Get Vault token
-  const token = await getVaultTokenString({ address: vaultAddress });
+  const token = await getVaultTokenString({ context, address: vaultAddress });
   env['VAULT_TOKEN'] = token;
 
   // Read credentials from Vault

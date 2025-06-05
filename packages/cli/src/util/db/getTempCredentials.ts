@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { getVaultTokenString } from '@/util/vault'
+import { getVaultTokenString } from '@/util/vault/getVaultToken'
 import { execute } from '../subprocess/execute'
 import type { DatabaseCredentials, DatabaseType } from './types'
 import type { PanfactumContext } from '@/util/context/context'
@@ -14,7 +14,7 @@ export async function getTempCredentials(
   databaseNamespace?: string
 ): Promise<DatabaseCredentials> {
   // Get vault token
-  const vaultToken = await getVaultTokenString({ address: vaultAddress }) // Will use default from env
+  const vaultToken = await getVaultTokenString({ context, address: vaultAddress }) // Will use default from env
   
   if (databaseType === 'nats' && databaseName && databaseNamespace) {
     // NATS uses PKI certificates

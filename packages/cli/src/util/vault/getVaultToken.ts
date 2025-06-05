@@ -1,10 +1,12 @@
-import { execSync } from 'child_process';
 import { CLIError } from '@/util/error/error';
+import { execute } from '@/util/subprocess/execute';
+import type { PanfactumContext } from '@/util/context/context';
 
 export interface GetVaultTokenOptions {
   address?: string;
   silent?: boolean;
   noop?: boolean;
+  context: PanfactumContext;
 }
 
 export interface VaultTokenResult {
@@ -19,8 +21,8 @@ export interface VaultTokenResult {
  * @param options Configuration options
  * @returns Vault token result
  */
-export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise<VaultTokenResult> {
-  const { address, silent = false, noop = false } = options;
+export async function getVaultToken(options: GetVaultTokenOptions): Promise<VaultTokenResult> {
+  const { address, silent = false, noop = false, context } = options;
 
   // Handle noop mode
   if (noop) {
@@ -29,7 +31,7 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
 
   try {
     // Set vault address
-    const vaultAddr = address || process.env['VAULT_ADDR'];
+    const vaultAddr = address;
     
     if (!vaultAddr) {
       throw new CLIError('VAULT_ADDR is not set. Either set the env variable or use the --address flag.');
@@ -38,27 +40,29 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
     // Handle special terragrunt case
     if (vaultAddr === '@@TERRAGRUNT_INVALID@@') {
       if (!silent) {
-        throw new CLIError('Vault provider is enabled but vault_addr is not set.');
+        throw new CLIError('Vault provider is enabled but VAULT_ADDR is not set.');
       }
       return { token: 'invalid_token', isValid: false };
     }
 
-    // Set environment for vault commands
-    const env = { ...process.env, VAULT_ADDR: vaultAddr };
-
     // Check for existing token in environment
-    if (process.env['VAULT_TOKEN']) {
-      return { token: process.env['VAULT_TOKEN'], isValid: true };
+    if (context.env['VAULT_TOKEN']) {
+      return { token: context.env['VAULT_TOKEN'], isValid: true };
     }
+
+    // Set environment for vault commands
+    const env = { ...context.env, VAULT_ADDR: vaultAddr };
 
     // Try to get existing token from vault credential helper
     let existingToken: string | null = null;
     try {
-      existingToken = execSync('vault print token', { 
-        env, 
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'pipe'] 
-      }).trim();
+      const result = await execute({
+        command: ['vault', 'print', 'token'],
+        context,
+        workingDirectory: context.repoVariables.repo_root,
+        env
+      });
+      existingToken = result.stdout.trim();
     } catch {
       // No existing token, will need to login
     }
@@ -66,13 +70,14 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
     if (existingToken) {
       // Check token TTL
       try {
-        const lookupResult = execSync('vault token lookup -format=json', {
-          env: { ...env, VAULT_TOKEN: existingToken },
-          encoding: 'utf8',
-          stdio: ['pipe', 'pipe', 'pipe']
+        const lookupResult = await execute({
+          command: ['vault', 'token', 'lookup', '-format=json'],
+          context,
+          workingDirectory: context.repoVariables.repo_root,
+          env: { ...env, VAULT_TOKEN: existingToken }
         });
         
-        const lookupData = JSON.parse(lookupResult) as { data: { ttl: string } };
+        const lookupData = JSON.parse(lookupResult.stdout) as { data: { ttl: string } };
         const ttl = parseInt(lookupData.data.ttl);
 
         // If token has more than 30 minutes left, use it
@@ -85,13 +90,13 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
     }
 
     // Perform OIDC login to get new token
-    const token = performOIDCLogin(env);
+    const token = await performOIDCLogin(env, context);
     return { token, isValid: true };
 
   } catch (error) {
     if (silent) {
       // In silent mode, return invalid token and don't throw
-      if (process.env['VAULT_ADDR'] !== '@@TERRAGRUNT_INVALID@@') {
+      if (context.env['VAULT_ADDR'] !== '@@TERRAGRUNT_INVALID@@') {
         // In Node.js environment, console is globally available
         // eslint-disable-next-line no-undef
         console.error('Warning: getVaultToken failed, but exiting with 0 as --silent is enabled.');
@@ -106,14 +111,16 @@ export async function getVaultToken(options: GetVaultTokenOptions = {}): Promise
 /**
  * Perform OIDC login to get a new Vault token
  */
-function performOIDCLogin(env: Record<string, string | undefined>): string {
+async function performOIDCLogin(env: Record<string, string | undefined>, context: PanfactumContext): Promise<string> {
   try {
-    const token = execSync('vault login -method=oidc -field=token', {
-      env,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe']
-    }).trim();
+    const result = await execute({
+      command: ['vault', 'login', '-method=oidc', '-field=token'],
+      context,
+      workingDirectory: context.repoVariables.repo_root,
+      env
+    });
 
+    const token = result.stdout.trim();
     if (!token) {
       throw new CLIError('Failed to get token from OIDC login');
     }
@@ -127,7 +134,7 @@ function performOIDCLogin(env: Record<string, string | undefined>): string {
 /**
  * Convenience function to get just the token string, throwing on error
  */
-export async function getVaultTokenString(options: GetVaultTokenOptions = {}): Promise<string> {
+export async function getVaultTokenString(options: GetVaultTokenOptions): Promise<string> {
   const result = await getVaultToken(options);
   
   if (!result.isValid) {

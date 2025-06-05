@@ -3,7 +3,7 @@
 
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
-import { getVaultToken } from '@/util/vault/getToken';
+import { getVaultToken } from '@/util/vault/getVaultToken';
 
 export class GetVaultTokenCommand extends PanfactumCommand {
   static override paths = [['vault', 'get-token']];
@@ -44,6 +44,7 @@ export class GetVaultTokenCommand extends PanfactumCommand {
       address: this.address,
       silent: this.silent,
       noop: this.noop,
+      context: this.context,
     });
 
     // Output the token to stdout (matching bash script behavior)

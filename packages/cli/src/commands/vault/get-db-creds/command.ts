@@ -42,6 +42,7 @@ export class GetDbCredsCommand extends PanfactumCommand {
       if (this.json) {
         // Output as JSON
         const creds = await getDbCreds({
+          context:  this.context,
           role: this.role,
           vaultAddress: this.vaultAddress,
         });
@@ -49,6 +50,7 @@ export class GetDbCredsCommand extends PanfactumCommand {
       } else {
         // Output as formatted text (matching vault CLI output)
         const formatted = await getDbCredsFormatted({
+          context: this.context,
           role: this.role,
           vaultAddress: this.vaultAddress,
         });

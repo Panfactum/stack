@@ -13,7 +13,7 @@ import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT} from '@/util/terragrunt/constants'
-import { getVaultTokenString } from '@/util/vault'
+import { getVaultTokenString } from '@/util/vault/getVaultToken'
 import type { DatabaseType, VaultRole } from '@/util/db/types.ts'
 
 export class DbTunnelCommand extends PanfactumCommand {
@@ -230,7 +230,7 @@ Connection details:\n
       if (credentials.leaseId) {
         try {
           context.logger.info('Revoking database credentials...')
-          const vaultToken = await getVaultTokenString({ address: '' })
+          const vaultToken = await getVaultTokenString({ context, address: '' })
           await execute({
             command: ['vault', 'lease', 'revoke', credentials.leaseId],
             context,

@@ -7,7 +7,7 @@ import { parse as parseYaml } from 'yaml';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
-import { getVaultTokenString } from '@/util/vault';
+import { getVaultTokenString } from '@/util/vault/getVaultToken';
 
 interface BastionConfig {
   name: string;
@@ -118,7 +118,7 @@ export default class TunnelCommand extends PanfactumCommand {
       }
 
       // Sign SSH key with Vault
-      const vaultToken = await getVaultTokenString({ address: bastionConfig.vault });
+      const vaultToken = await getVaultTokenString({ context: this.context, address: bastionConfig.vault });
 
       const { stdout: signedKey } = await execute({
         command: [

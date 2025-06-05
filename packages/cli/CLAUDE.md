@@ -76,6 +76,49 @@ throw new CLIError('User-friendly message', {
 });
 ```
 
+### Data Validation
+**ALWAYS use Zod schema validation for all external input and output**, especially when using `execute` to call external scripts like `kubectl`. This ensures type safety and data integrity throughout the CLI:
+
+```typescript
+import { z } from 'zod';
+
+const KubectlOutputSchema = z.object({
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string()
+  })
+});
+
+// Validate external command output
+const result = await execute('kubectl', ['get', 'pod', '-o', 'json']);
+const validated = KubectlOutputSchema.parse(JSON.parse(result.stdout));
+```
+
+### Subprocess Execution
+**NEVER use `spawn`, `exec`, or `execSync` from Node.js. ALWAYS use the `execute` utility** from `src/util/subprocess/execute.ts`. This provides:
+- Consistent error handling with `CLISubprocessError`
+- Proper logging and debug output
+- Retry capabilities with configurable delays
+- Stream handling for real-time output processing
+- Standardized environment variable handling
+
+```typescript
+import { execute } from '@/util/subprocess/execute';
+
+// Good: Use execute utility
+const result = await execute({
+  command: ['vault', 'token', 'lookup', '-format=json'],
+  context,
+  workingDirectory: process.cwd(),
+  env: { ...process.env, VAULT_ADDR: vaultAddr }
+});
+
+// Bad: Never use these
+// execSync('vault token lookup -format=json');
+// spawn('vault', ['token', 'lookup']);
+// exec('vault token lookup');
+```
+
 ### File Structure Conventions
 - Commands: `src/commands/<category>/<action>/command.ts`
 - Utilities: `src/util/<category>/<function>.ts`
