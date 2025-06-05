@@ -27,9 +27,6 @@ const DEFAULT_SITE_URL = "http://localhost:4321"
 export default defineConfig({
   cacheDir: ".cache",
   site: process.env.SITE_URL ?? DEFAULT_SITE_URL,
-  redirects: {
-    "/": "/edge/guides/"
-  },
   env: {
     schema: {
       ALGOLIA_APP_ID: envField.string({
@@ -97,7 +94,7 @@ export default defineConfig({
         { width: 1263, height: 2000 },
         { width: 1500, height: 2000 }
       ],
-      strict: true,
+      strict: false,
       inline: {
         // The actual default is "swap" which appears to not work will with astro view transitions
         // as the stylesheets end up above the inlined styles which breaks styling in some circumstances (the external stylesheets
