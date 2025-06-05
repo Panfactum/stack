@@ -108,9 +108,6 @@ export async function setupCertificates(
       title: "Start Vault Proxy",
       task: async (ctx) => {
         const { pid, port } = await startVaultProxy({
-          env: {
-            ...process.env,
-          },
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_CERTIFICATES),
         });
@@ -125,7 +122,7 @@ export async function setupCertificates(
             taskTitle: "Deploy Certificate Infrastructure",
             context,
             env: {
-              ...process.env,
+              ...context.env,
               VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
             },
             environment,
@@ -170,7 +167,7 @@ export async function setupCertificates(
             taskTitle: "Deploy The First Certificate",
             context,
             env: {
-              ...process.env,
+              ...context.env,
               VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
             },
             environment,
