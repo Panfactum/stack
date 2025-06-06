@@ -2,10 +2,10 @@
 // Replaces the legacy pf-get-kube-token.sh script
 
 import { Option } from 'clipanion'
+import { getEksToken } from '@/util/aws/getEksToken'
 import { getIdentity } from '@/util/aws/getIdentity'
 import { PanfactumCommand } from '@/util/command/panfactumCommand'
 import { CLIError } from '@/util/error/error'
-import { execute } from '@/util/subprocess/execute'
 
 export default class K8sGetTokenCommand extends PanfactumCommand {
   static override paths = [['k8s', 'get-token']]
@@ -48,8 +48,8 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
       // This will handle SSO login automatically if needed
       await getIdentity({ context: this.context, profile: this.profile })
       
-      // Get the EKS token using AWS CLI (now that we know auth is working)
-      const token = await this.getEKSToken()
+      // Get the EKS token using our utility that combines AWS SDK validation with CLI token generation
+      const token = await getEksToken(this.context, this.clusterName, this.region, this.profile)
       
       // Output the token as JSON (matching the original script behavior)
       logger.writeRaw(JSON.stringify(token) + '\n')
@@ -60,32 +60,6 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
       }
       throw new CLIError(
         `Failed to get EKS token: ${error instanceof Error ? error.message : String(error)}`
-      )
-    }
-  }
-
-  private async getEKSToken(): Promise<unknown> {
-    try {
-      // Execute aws eks get-token command
-      // Since getIdentity() already handled SSO, this should work
-      const { stdout } = await execute({
-        command: [
-          'aws',
-          '--region', this.region,
-          '--profile', this.profile,
-          'eks', 'get-token',
-          '--cluster-name', this.clusterName,
-          '--output', 'json'
-        ],
-        context: this.context,
-        workingDirectory: process.cwd(),
-      })
-      
-      return JSON.parse(stdout)
-    } catch (error) {
-      throw new CLIError(
-        `Failed to get EKS token for cluster '${this.clusterName}' in region '${this.region}' with profile '${this.profile}'`,
-        error instanceof Error ? error : undefined
       )
     }
   }
