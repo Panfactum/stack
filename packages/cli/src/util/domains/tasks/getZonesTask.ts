@@ -58,13 +58,18 @@ export async function getZonesTask<T extends {}>(inputs: {
                         for (const hclPath of domainModuleHCLPaths) {
                             const moduleDirectory = dirname(hclPath);
                             const { environment_dir: envDir, region_dir: regionDir, environment } = await getPanfactumConfig({ context, directory: moduleDirectory })
-                            if (!envDir) {
-                                throw new CLIError("Module is not in a valid environment directory.")
-                            } else if (!regionDir) {
-                                throw new CLIError("Module is not in a valid region directory.")
-                            } else if (!environment) {
-                                throw new CLIError("Environment is unknown")
+
+                            if (!envDir || !regionDir || !environment) {
+                                if (!envDir) {
+                                    throw new CLIError("Module is not in a valid environment directory.")
+                                } else if (!regionDir) {
+                                    throw new CLIError("Module is not in a valid region directory.")
+                                } else if (!environment) {
+                                    throw new CLIError("Environment is unknown")
+                                }
                             }
+
+
                             subsubtasks.add({
                                 title: `Get ${environment} zones`,
                                 task: async (_, task) => {
@@ -84,7 +89,7 @@ export async function getZonesTask<T extends {}>(inputs: {
                                                 zoneId,
                                                 recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
                                                 env: {
-                                                    name: environment!,
+                                                    name: environment,
                                                     path: envDir,
                                                     deployed
                                                 },

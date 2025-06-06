@@ -36,7 +36,7 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
       try {
         validatedInitStatus = INIT_STATUS_SCHEMA.parse(initStatus)
       } catch (error) {
-        parseErrorHandler({ error, errorMessage: "Invalid value for --init-status/-i", location: "--init-status/-i" })
+        throw parseErrorHandler({ error, errorMessage: "Invalid value for --init-status/-i", location: "--init-status/-i" })
       }
     }
 
@@ -45,7 +45,7 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
       try {
         validatedDeployStatus = DEPLOY_STATUS_SCHEMA.parse(deployStatus)
       } catch (error) {
-        parseErrorHandler({ error, errorMessage: "Invalid value for --deploy-status/-d", location: "--deploy-status/-d" })
+        throw parseErrorHandler({ error, errorMessage: "Invalid value for --deploy-status/-d", location: "--deploy-status/-d" })
       }
     }
 

@@ -73,6 +73,10 @@ export async function setupVaultSSO(
         );
     }
 
+    // Extract validated values to help TypeScript understand they're non-null
+    const kubeConfigContext = regionConfig.kube_config_context;
+    const vaultAddr = regionConfig.vault_addr;
+
     const authentikLocation = await findAuthentikLocation(context);
 
     if (!authentikLocation) {
@@ -119,19 +123,18 @@ export async function setupVaultSSO(
             environment: authentikLocation.environmentName,
             region: authentikLocation.regionName,
             // todo: kube_config_context needs to be snake case
-            module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig.kube_config_context,
+            module: MODULES.AUTHENTIK_VAULT_SSO + "_" + kubeConfigContext,
             skipIfAlreadyApplied: true,
             realModuleName: MODULES.AUTHENTIK_VAULT_SSO,
             hclIfMissing: await Bun.file(authentikVaultSSO).text(),
             inputUpdates: {
                 vault_name: defineInputUpdate({
                     schema: z.string(),
-                    update: () => `vault-${regionConfig.kube_config_context}`,
+                    update: () => `vault-${kubeConfigContext}`,
                 }),
                 vault_domain: defineInputUpdate({
                     schema: z.string(),
-                    // todo: avoid bang
-                    update: () => regionConfig.vault_addr!.replace('https://', ''),
+                    update: () => vaultAddr.replace('https://', ''),
                 }),
             },
         }),
@@ -143,7 +146,7 @@ export async function setupVaultSSO(
                     environment: authentikLocation.environmentName,
                     region: authentikLocation.regionName,
                     // todo: kube_config_context needs to be snake case
-                    module: MODULES.AUTHENTIK_VAULT_SSO + "_" + regionConfig.kube_config_context,
+                    module: MODULES.AUTHENTIK_VAULT_SSO + "_" + kubeConfigContext,
                     validationSchema: z.object({
                         client_id: z.object({
                             value: z.string(),

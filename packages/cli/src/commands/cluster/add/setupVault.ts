@@ -232,7 +232,7 @@ export async function setupVault(
             overwrite: true,
             filePath: join(modulePath, ".pf.yaml"),
           });
-          parseErrorHandler({
+          throw parseErrorHandler({
             error,
             errorMessage: "Failed to parse vault operator init",
             nonZodErrorMessage:
@@ -243,7 +243,7 @@ export async function setupVault(
 
         await sopsUpsert({
           values: {
-            vault_token: recoveryKeys!.root_token,
+            vault_token: recoveryKeys.root_token,
           },
           context,
           filePath: join(clusterPath, "region.secrets.yaml"),
@@ -251,7 +251,7 @@ export async function setupVault(
 
         await sopsUpsert({
           values: {
-            recovery_keys: recoveryKeys!.recovery_keys_hex.map(
+            recovery_keys: recoveryKeys.recovery_keys_hex.map(
               (key) => key
             ),
           },
@@ -259,10 +259,10 @@ export async function setupVault(
           filePath: join(modulePath, "recovery.yaml"),
         });
 
-        ctx.recoveryKeys = recoveryKeys!.recovery_keys_hex.map(
+        ctx.recoveryKeys = recoveryKeys.recovery_keys_hex.map(
           (key) => key
         );
-        ctx.rootToken = recoveryKeys!.root_token;
+        ctx.rootToken = recoveryKeys.root_token;
       }
     },
     {
@@ -373,7 +373,7 @@ export async function setupVault(
           //   overwrite: true,
           //   filePath: join(modulePath, ".pf.yaml"),
           // });
-          parseErrorHandler({
+          throw parseErrorHandler({
             error,
             errorMessage: "Failed to unseal Vault",
             nonZodErrorMessage: "Failed to unseal Vault",

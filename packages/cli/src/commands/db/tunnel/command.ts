@@ -105,6 +105,10 @@ export class DbTunnelCommand extends PanfactumCommand {
       throw new CLIError('AWS profile is not configured. Please set aws_profile in your panfactum.json or environment variables.')
     }
 
+    if (!config.kube_config_context) {
+      throw new CLIError('Kubernetes context is not configured. Please set kube_config_context in your panfactum.json or environment variables.')
+    }
+
     await getIdentity({ context, profile: config.aws_profile });
 
 
@@ -215,7 +219,7 @@ Connection details:\n
 
     // Create tunnel process
     const tunnelProcess = spawn('pf tunnel', [
-      config.kube_config_context!,
+      config.kube_config_context,
       `${serviceName}:${selectedDb.port.toString()}`,
       '--local-port',
       localPort.toString(),

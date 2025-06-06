@@ -39,11 +39,15 @@ export async function setupLinkerd(
     {
       title: "Start Vault Proxy",
       task: async (ctx) => {
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
+        
         const { pid, port } = await startVaultProxy({
           env: {
             ...process.env,
           },
-          kubeContext: ctx.kubeContext!,
+          kubeContext: ctx.kubeContext,
           modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
         });
         ctx.vaultProxyPid = pid;
