@@ -1,8 +1,8 @@
-import { existsSync } from 'fs'
 import { dirname, basename, join } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { fileExists } from '@/util/fs/fileExists.js'
 import { getOpenPort } from '@/util/network/getOpenPort.js'
 import { waitForPort } from '@/util/network/waitForPort.js'
 import { execute } from '@/util/subprocess/execute.js'
@@ -43,13 +43,13 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate dockerfile exists
-    if (!existsSync(this.file)) {
+    if (!(await fileExists(this.file))) {
       this.context.logger.error(`Dockerfile not found: ${this.file}`)
       return 1
     }
 
     // Validate build context exists
-    if (!existsSync(this.buildContext)) {
+    if (!(await fileExists(this.buildContext))) {
       this.context.logger.error(`Build context not found: ${this.buildContext}`)
       return 1
     }
@@ -171,7 +171,7 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
 
       return result.exitCode
     } catch (error) {
-      this.context.logger.error(`Build failed for ${arch}: ${error}`)
+      this.context.logger.error(`Build failed for ${arch}: ${error instanceof Error ? error.message : String(error)}`)
       return 1
     }
   }
