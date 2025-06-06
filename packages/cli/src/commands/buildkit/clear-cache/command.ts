@@ -63,6 +63,14 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
       workingDirectory: process.cwd()
     })
 
+    /*
+    1. kubectl output format: The jsonpath={.items[*].metadata.name} returns space-separated PVC names
+    2. Split creates empty strings: split(/\s+/) can create empty strings if there are extra whitespaces
+    3. Filter(Boolean) removes empty entries: Ensures we only get actual PVC names, not empty strings
+
+    Without filter(Boolean), you could get an array like ["cache-pvc-1", "", "cache-pvc-2", ""] which would cause issues when trying to process each PVC
+    name later in the code.
+     */
     const pvcs = pvcsResult.stdout.trim().split(/\s+/).filter(Boolean)
 
     // Get pods that use PVCs
