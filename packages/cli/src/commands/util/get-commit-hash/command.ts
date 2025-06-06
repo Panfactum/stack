@@ -27,6 +27,8 @@ export class GetCommitHashCommand extends PanfactumCommand {
       repo: this.repo,
       ref: this.ref,
       noVerify: this.noVerify,
+      context: this.context,
+      workingDirectory: process.cwd(),
     });
     this.context.stdout.write(hash + '\n');
   }
