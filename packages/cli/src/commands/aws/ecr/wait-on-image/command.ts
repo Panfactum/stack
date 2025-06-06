@@ -27,22 +27,30 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     if (imageParts.length !== 2) {
       throw new CLIError('Image must include a tag (format: registry/repository:tag)');
     }
-    const registryAndRepo = imageParts[0]!;
-    const tag = imageParts[1]!;
+    const registryAndRepo = imageParts[0];
+    const tag = imageParts[1];
+    
+    if (!registryAndRepo || !tag) {
+      throw new CLIError('Image must include both registry/repository and tag');
+    }
 
     const repoParts = registryAndRepo.split('/');
     if (repoParts.length !== 2) {
       throw new CLIError('Invalid image format. Expected: registry/repository:tag');
     }
-    const registry = repoParts[0]!;
-    const repoName = repoParts[1]!;
+    const registry = repoParts[0];
+    const repoName = repoParts[1];
+    
+    if (!registry || !repoName) {
+      throw new CLIError('Invalid image format. Registry and repository name are required');
+    }
 
     const registryParts = registry.split('.');
     const accountId = registryParts[0];
     const region = registryParts[3];
 
     if (!accountId || !region) {
-      throw new CLIError('Invalid ECR registry format');
+      throw new CLIError('Invalid ECR registry format. Expected: accountId.dkr.ecr.region.amazonaws.com');
     }
 
     const timeoutSeconds = parseInt(this.timeout, 10);
