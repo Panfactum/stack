@@ -1,5 +1,5 @@
 import { rm } from "node:fs/promises";
-import { CLIError } from "../error/error";
+import { CLIError } from "@/util/error/error";
 
 export const removeDirectory = async (
     dirPath: string) => {

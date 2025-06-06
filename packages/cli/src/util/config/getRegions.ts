@@ -1,10 +1,10 @@
 import { dirname, basename, join } from "node:path";
 import { Glob } from "bun";
-import { asyncIterMap } from "../asyncIterMap";
+import { asyncIterMap } from "@/util/asyncIterMap";
+import { CLIError } from "@/util/error/error";
+import { GLOBAL_REGION } from "@/util/terragrunt/constants";
 import { getPanfactumConfig } from "./getPanfactumConfig";
 import { isClusterDeployed } from "./isClusterDeployed";
-import { CLIError } from "../error/error";
-import { GLOBAL_REGION } from "../terragrunt/constants";
 import type { PanfactumContext } from "@/util/context/context";
 
 export interface RegionMeta {

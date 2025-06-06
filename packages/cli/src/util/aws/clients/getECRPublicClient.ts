@@ -1,5 +1,5 @@
 import { ECRPUBLICClient } from "@aws-sdk/client-ecr-public";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getECRPublicClient(inputs: { 

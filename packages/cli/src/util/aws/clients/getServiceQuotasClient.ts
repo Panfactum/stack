@@ -1,5 +1,5 @@
 import { ServiceQuotasClient } from "@aws-sdk/client-service-quotas";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getServiceQuotasClient(inputs: { context: PanfactumContext, profile: string; region: string; }) {

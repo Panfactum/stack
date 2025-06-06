@@ -1,5 +1,5 @@
 import { GetCommandInvocationCommand } from "@aws-sdk/client-ssm";
-import { CLISubprocessError, CLIError } from "../error/error";
+import { CLISubprocessError, CLIError } from "@/util/error/error";
 import { getSSMClient } from "./clients/getSSMClient";
 import type { PanfactumContext } from "@/util/context/context";
 

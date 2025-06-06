@@ -1,10 +1,10 @@
+import { execute } from '@/util/subprocess/execute.js'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
   BUILDKIT_STATEFULSET_NAME_PREFIX,
   BUILDKIT_LAST_BUILD_ANNOTATION_KEY
 } from './constants.js'
-import { execute } from '../subprocess/execute.js'
 import type { PanfactumContext } from '@/util/context/context.js'
 
 interface RecordBuildOptions {

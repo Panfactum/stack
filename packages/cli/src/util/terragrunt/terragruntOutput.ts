@@ -1,9 +1,9 @@
 import { join } from "node:path"
 import { z, ZodError } from "zod";
+import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { getIdentity } from "../aws/getIdentity";
-import { CLIError, PanfactumZodError } from "../error/error";
-import { execute } from "../subprocess/execute";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 export const terragruntOutput = async <T extends z.ZodType<object>>({

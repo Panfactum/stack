@@ -1,5 +1,5 @@
 import { STSClient } from "@aws-sdk/client-sts";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getSTSClient(inputs: { context: PanfactumContext, profile: string; }) {

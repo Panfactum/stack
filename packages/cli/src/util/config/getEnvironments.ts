@@ -1,9 +1,9 @@
 import { dirname, basename, join } from "node:path";
 import { Glob } from "bun";
+import { asyncIterMap } from "@/util/asyncIterMap";
+import { CLIError } from "@/util/error/error";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
-import { asyncIterMap } from "../asyncIterMap";
 import { isEnvironmentDeployed } from "./isEnvironmentDeployed";
-import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 export interface EnvironmentMeta {

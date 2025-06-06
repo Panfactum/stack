@@ -1,5 +1,5 @@
 import { AutoScalingClient } from "@aws-sdk/client-auto-scaling";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getAutoScalingClient(inputs: { 

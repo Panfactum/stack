@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
+import { CLIError } from "@/util/error/error";
 import { fileExists } from "./fileExists";
-import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**

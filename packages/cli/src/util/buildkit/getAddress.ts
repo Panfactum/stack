@@ -1,10 +1,10 @@
 import { CLIError } from '@/util/error/error'
+import { execute } from '@/util/subprocess/execute.js'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
   BUILDKIT_PORT
 } from './constants.js'
-import { execute } from '../subprocess/execute.js'
 import type { PanfactumContext } from '@/util/context/context.js'
 
 interface GetAddressOptions {

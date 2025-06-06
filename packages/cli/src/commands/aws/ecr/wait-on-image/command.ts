@@ -1,7 +1,7 @@
 import { Command, Option } from 'clipanion';
+import { checkImageExists } from '@/util/aws/checkImageExists';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
-import { checkImageExists } from '@/util/aws/checkImageExists';
 
 export class AwsEcrWaitOnImageCommand extends PanfactumCommand {
   static override paths = [['aws', 'ecr', 'wait-on-image']];

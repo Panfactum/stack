@@ -1,8 +1,8 @@
 import { GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { GetAuthorizationTokenCommand as GetPublicAuthCommand } from '@aws-sdk/client-ecr-public';
+import { CLIError } from '@/util/error/error';
 import { getECRClient } from '../aws/clients/getECRClient';
 import { getECRPublicClient } from '../aws/clients/getECRPublicClient';
-import { CLIError } from '../error/error';
 import type { PanfactumContext } from '@/util/context/context'
 
 

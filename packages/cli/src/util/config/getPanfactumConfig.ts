@@ -4,7 +4,7 @@ import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import { CLIError } from "@/util/error/error";
 import { getVaultTokenString } from "@/util/vault/getVaultToken";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
-import type { PanfactumContext } from "../context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
 type OutputValues = InputValues & {

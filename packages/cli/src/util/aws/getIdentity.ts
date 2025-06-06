@@ -1,8 +1,8 @@
 import { GetCallerIdentityCommand } from "@aws-sdk/client-sts";
-import { getCredsFromFile } from "./getCredsFromFile";
+import { CLIError } from "@/util/error/error";
+import { execute } from "@/util/subprocess/execute";
 import { getSTSClient } from "./clients/getSTSClient";
-import { CLIError } from "../error/error";
-import { execute } from "../subprocess/execute";
+import { getCredsFromFile } from "./getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**

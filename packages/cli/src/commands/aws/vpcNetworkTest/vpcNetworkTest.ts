@@ -1,17 +1,17 @@
 import path from "node:path";
-import { z } from "zod";
 import { DescribeAutoScalingGroupsCommand } from "@aws-sdk/client-auto-scaling";
 import { SendCommandCommand } from "@aws-sdk/client-ssm";
+import { z } from "zod";
+import { getAutoScalingClient } from "@/util/aws/clients/getAutoScalingClient.ts";
+import { getSSMClient } from "@/util/aws/clients/getSSMClient.ts";
+import { getSSMCommandOutput } from "@/util/aws/getSSMCommandOutput.ts";
+import { scaleASG } from "@/util/aws/scaleASG.ts";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { checkConnection } from "@/util/network/checkConnection";
 import { MODULES } from "@/util/terragrunt/constants";
-import { getAutoScalingClient } from "../../../util/aws/clients/getAutoScalingClient";
-import { getSSMClient } from "../../../util/aws/clients/getSSMClient";
-import { getSSMCommandOutput } from "../../../util/aws/getSSMCommandOutput";
-import { scaleASG } from "../../../util/aws/scaleASG";
-import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
-import type { PanfactumContext } from "../../../util/context/context";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput.ts";
+import type { PanfactumContext } from "@/util/context/context.ts";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 /**

@@ -1,5 +1,5 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getS3Client(inputs: { context: PanfactumContext, profile: string; region: string; }) {
