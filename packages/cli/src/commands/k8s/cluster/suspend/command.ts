@@ -61,7 +61,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       {
         title: 'Validating AWS access',
         task: async () => {
-          awsProfile = getAWSProfileForContext(context, this.cluster)
+          awsProfile = await getAWSProfileForContext(context, this.cluster)
           await validateRootProfile(awsProfile, context)
         },
       },

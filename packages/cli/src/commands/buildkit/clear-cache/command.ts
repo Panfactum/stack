@@ -1,7 +1,9 @@
 import { Option } from 'clipanion'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { execute } from '@/util/subprocess/execute.js'
+import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
 export default class BuildkitClearCacheCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'clear-cache']]
@@ -17,14 +19,16 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
   async execute(): Promise<number> {
     // Validate context if provided
     if (this.kubectlContext) {
-      try {
-        await execute({
-          command: ['kubectl', 'config', 'get-contexts', this.kubectlContext],
-          context: this.context,
-          workingDirectory: process.cwd()
-        })
-      } catch {
-        this.context.logger.error(`'${this.kubectlContext}' not found in kubeconfig.`)
+      const clustersData = await readYAMLFile({
+        context: this.context,
+        filePath: `${this.context.repoVariables.kube_dir}/clusters.yaml`,
+        validationSchema: CLUSTERS_FILE_SCHEMA,
+        throwOnMissing: false,
+        throwOnEmpty: false
+      })
+
+      if (!clustersData || !clustersData[this.kubectlContext]) {
+        this.context.logger.error(`'${this.kubectlContext}' not found in clusters.yaml.`)
         return 1
       }
     }

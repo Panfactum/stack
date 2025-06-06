@@ -3,7 +3,9 @@ import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { type Architecture, architectures } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { execute } from '@/util/subprocess/execute.js'
+import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
 export default class BuildkitTunnelCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'tunnel']]
@@ -40,14 +42,16 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
     const config = await getBuildKitConfig(this.context)
 
     // Validate context exists
-    try {
-      await execute({
-        command: ['kubectl', 'config', 'get-contexts', config.cluster],
-        context: this.context,
-        workingDirectory: process.cwd()
-      })
-    } catch {
-      this.context.logger.error(`'${config.cluster}' not found in kubeconfig. Run pf devshell sync to regenerate kubeconfig.`)
+    const clustersData = await readYAMLFile({
+      context: this.context,
+      filePath: `${this.context.repoVariables.kube_dir}/clusters.yaml`,
+      validationSchema: CLUSTERS_FILE_SCHEMA,
+      throwOnMissing: false,
+      throwOnEmpty: false
+    })
+
+    if (!clustersData || !clustersData[config.cluster]) {
+      this.context.logger.error(`'${config.cluster}' not found in clusters.yaml. Run pf devshell sync to regenerate kubeconfig.`)
       return 1
     }
 

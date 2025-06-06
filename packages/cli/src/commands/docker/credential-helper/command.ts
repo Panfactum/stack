@@ -97,7 +97,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     // Get BuildKit config and use cluster context to determine AWS profile
     const buildkitConfig = await getBuildKitConfig(context)
     const { getAWSProfileForContext } = await import('@/util/aws/getProfileForContext')
-    const awsProfile = getAWSProfileForContext(context, buildkitConfig.cluster)
+    const awsProfile = await getAWSProfileForContext(context, buildkitConfig.cluster)
 
     // Get fresh token from ECR
     try {
