@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
+import { CLIError } from '@/util/error/error.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 import { parseJson } from '@/util/zod/parseJson.js'
@@ -184,6 +185,7 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
           })
         } catch (error) {
           this.context.logger.error(`Failed to prune cache in ${podName}: ${String(error)}`)
+          throw new CLIError(`Failed to prune cache in pod ${podName}`, error)
         }
       }
     }
