@@ -1,6 +1,8 @@
 import { Command } from 'clipanion';
+import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { execute } from '@/util/subprocess/execute';
+import { parseJson } from '@/util/zod/parseJson';
 
 interface VolumeSnapshot {
   namespace: string;
@@ -40,18 +42,19 @@ Velero backups, cleaning up cloud storage resources.`,
         workingDirectory: process.cwd(),
       });
       
-      const data = JSON.parse(result.stdout) as {
-        items: Array<{
-          metadata: {
-            namespace: string;
-            name: string;
-            labels?: Record<string, string>;
-          };
-          status?: {
-            boundVolumeSnapshotContentName?: string;
-          };
-        }>;
-      };
+      const data = parseJson(z.object({
+        items: z.array(z.object({
+          metadata: z.object({
+            namespace: z.string(),
+            name: z.string(),
+            labels: z.record(z.string()).optional()
+          }),
+          status: z.object({
+            boundVolumeSnapshotContentName: z.string().optional()
+          }).optional()
+        }))
+      }), result.stdout);
+
       return data.items.map((item) => ({
         namespace: item.metadata.namespace,
         name: item.metadata.name,

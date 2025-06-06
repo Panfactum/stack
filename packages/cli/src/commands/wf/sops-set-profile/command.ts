@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Command, Option } from 'clipanion';
 import yaml from 'yaml';
+import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 
 export class SopsSetProfileCommand extends PanfactumCommand {
@@ -24,12 +25,15 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
     const updateSopsFile = async (filePath: string): Promise<boolean> => {
       try {
         const content = await fs.readFile(filePath, 'utf8');
-        interface SopsFile {
-          sops?: {
-            kms?: Array<Record<string, string>>;
-          };
-        }
-        const data = yaml.parse(content) as SopsFile;
+        
+        const sopsFileSchema = z.object({
+          sops: z.object({
+            kms: z.array(z.record(z.string())).optional()
+          }).optional()
+        }).passthrough(); // Allow other fields in the YAML
+        
+        const parsedYaml = yaml.parse(content);
+        const data = sopsFileSchema.parse(parsedYaml);
         
         if (data?.sops?.kms && Array.isArray(data.sops.kms)) {
           let updated = false;

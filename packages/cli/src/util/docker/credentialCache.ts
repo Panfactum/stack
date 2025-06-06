@@ -1,5 +1,7 @@
 import { promises as fs } from 'fs'
 import { join } from 'path'
+import { z } from 'zod'
+import { parseJson } from '@/util/zod/parseJson'
 import type { PanfactumContext } from '@/util/context/context'
 
 interface CachedCredential {
@@ -22,7 +24,13 @@ async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile
   try {
     const credsFile = await getCredsFilePath(context)
     const data = await fs.readFile(credsFile, 'utf8')
-    return JSON.parse(data) as CredentialsFile
+    
+    const credentialsFileSchema = z.record(z.object({
+      token: z.string(),
+      expires: z.string()
+    }))
+    
+    return parseJson(credentialsFileSchema, data)
   } catch {
     return {}
   }

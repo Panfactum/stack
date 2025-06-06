@@ -2,9 +2,10 @@
 // Used by CI/CD pipelines to load balance builds across BuildKit instances
 
 import { Command, Option } from 'clipanion'
+import { architectures } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import type { Architecture } from '@/util/buildkit/constants.js'
+import { validateEnum } from '@/util/types/typeGuards.js'
 
 export class GetAddressCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'get-address']]
@@ -35,14 +36,11 @@ export class GetAddressCommand extends PanfactumCommand {
   })
 
   async execute(): Promise<number> {
-    // Validate architecture
-    if (this.arch !== 'amd64' && this.arch !== 'arm64') {
-      this.context.logger.error('Architecture must be either amd64 or arm64')
-      return 1
-    }
+    // Validate and get properly typed architecture
+    const validatedArch = validateEnum(this.arch, architectures)
 
     const address = await getBuildKitAddress({
-      arch: this.arch as Architecture,
+      arch: validatedArch,
       kubectlContext: this.kubectlContext,
       omitProtocol: this.omitProtocol,
       context: this.context

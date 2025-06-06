@@ -78,7 +78,7 @@ function parseVaultResponse(output: string): DbCredentials {
       password: response.data.password,
       leaseId: response.lease_id || '',
       leaseDuration: response.lease_duration || 0,
-      data: response.data as Record<string, unknown>
+      data: response.data
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

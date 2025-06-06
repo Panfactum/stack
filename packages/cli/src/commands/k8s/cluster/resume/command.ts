@@ -1,10 +1,12 @@
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
+import { z } from 'zod'
 import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.ts'
+import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo } from '@/util/eks/types.ts'
 
 export class K8sClusterResumeCommand extends PanfactumCommand {
@@ -78,14 +80,13 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          const groups = JSON.parse(stdout)
+          const groups = parseJson(z.array(z.object({ AutoScalingGroupName: z.string(), Tags: z.array(z.object({ Key: z.string(), Value: z.string() })) })), stdout)
           
           for (const group of groups) {
             // Extract original values from tags
-            const tags = group.Tags as Array<{Key: string, Value: string}>
-            const originalMinSize = tags.find(t => t.Key === 'panfactum.com/original-min-size')?.Value || '1'
-            const originalMaxSize = tags.find(t => t.Key === 'panfactum.com/original-max-size')?.Value || '1'
-            const originalDesiredCapacity = tags.find(t => t.Key === 'panfactum.com/original-desired-capacity')?.Value || '1'
+            const originalMinSize = group.Tags.find(t => t.Key === 'panfactum.com/original-min-size')?.Value || '1'
+            const originalMaxSize = group.Tags.find(t => t.Key === 'panfactum.com/original-max-size')?.Value || '1'
+            const originalDesiredCapacity = group.Tags.find(t => t.Key === 'panfactum.com/original-desired-capacity')?.Value || '1'
             
             // Restore original size
             await execute({

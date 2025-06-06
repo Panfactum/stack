@@ -1,6 +1,8 @@
 import { Command, Option } from 'clipanion';
+import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { execute } from '@/util/subprocess/execute';
+import { parseJson } from '@/util/zod/parseJson';
 
 export class K8sDisruptionsDisableCommand extends PanfactumCommand {
   static override paths = [['k8s', 'disruptions', 'disable']];
@@ -49,7 +51,7 @@ have passed their disruption window time, preventing pods from being evicted.`,
         workingDirectory: process.cwd(),
       });
       
-      return JSON.parse(result.stdout || '{}') as Record<string, string>;
+      return parseJson(z.record(z.string()), result.stdout || '{}');
     };
 
     const disablePDB = async (pdb: string): Promise<void> => {

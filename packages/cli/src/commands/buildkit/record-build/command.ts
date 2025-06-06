@@ -2,9 +2,10 @@
 // Used to track when builds occur for monitoring and scaling purposes
 
 import { Command, Option } from 'clipanion'
+import { architectures } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import type { Architecture } from '@/util/buildkit/constants.js'
+import { validateEnum } from '@/util/types/typeGuards.js'
 
 export class RecordBuildCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'record-build']]
@@ -31,19 +32,16 @@ export class RecordBuildCommand extends PanfactumCommand {
   })
 
   async execute(): Promise<number> {
-    // Validate architecture
-    if (this.arch !== 'amd64' && this.arch !== 'arm64') {
-      this.context.logger.error('Architecture must be either amd64 or arm64')
-      return 1
-    }
+    // Validate and get properly typed architecture
+    const validatedArch = validateEnum(this.arch, architectures)
 
     await recordBuildKitBuild({
-      arch: this.arch as Architecture,
+      arch: validatedArch,
       kubectlContext: this.kubectlContext,
       context: this.context
     })
 
-    this.context.stdout.write(`Successfully recorded build timestamp for ${this.arch} BuildKit\n`)
+    this.context.stdout.write(`Successfully recorded build timestamp for ${validatedArch} BuildKit\n`)
     return 0
   }
 }

@@ -13,6 +13,7 @@ import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT} from '@/util/terragrunt/constants'
+import { validateEnum } from '@/util/types/typeGuards'
 import { getVaultTokenString } from '@/util/vault/getVaultToken'
 import type { DatabaseType, VaultRole } from '@/util/db/types.ts'
 
@@ -48,12 +49,11 @@ export class DbTunnelCommand extends PanfactumCommand {
   async execute() {
     const { context } = this
 
-    // Validate type if provided
+    // Validate type if provided and get properly typed value
+    const validTypes: DatabaseType[] = ['postgresql', 'redis', 'nats']
+    let validatedType: DatabaseType | undefined
     if (this.type) {
-      const validTypes: DatabaseType[] = ['postgresql', 'redis', 'nats']
-      if (!validTypes.includes(this.type as DatabaseType)) {
-        throw new CLIError(`Invalid database type. Must be one of: ${validTypes.join(', ')}`)
-      }
+      validatedType = validateEnum(this.type, validTypes)
     }
 
     /*******************************************
@@ -114,7 +114,7 @@ export class DbTunnelCommand extends PanfactumCommand {
 
     // Step 1: Find databases
     context.logger.info('Finding databases...')
-    const databases = await listDatabases(context, this.type as DatabaseType)
+    const databases = await listDatabases(context, validatedType)
     
     if (databases.length === 0) {
       throw new CLIError('No databases found matching the criteria')
@@ -132,22 +132,26 @@ export class DbTunnelCommand extends PanfactumCommand {
     })
 
     // Select role
+    const validRoles: VaultRole[] = ['superuser', 'admin', 'reader']
     const roleChoices = [
-      { name: 'Superuser', value: 'superuser' as VaultRole },
-      { name: 'Admin', value: 'admin' as VaultRole },
-      { name: 'Reader', value: 'reader' as VaultRole },
+      { name: 'Superuser', value: 'superuser' },
+      { name: 'Admin', value: 'admin' },
+      { name: 'Reader', value: 'reader' },
     ]
 
-    const role = await select({
+    const selectedRole = await select({
       message: 'Select database role',
       choices: roleChoices,
     })
+
+    // Validate the selected role
+    const validatedRole = validateEnum(selectedRole, validRoles)
 
     // Get local port
     const localPort = this.port ? parseInt(this.port, 10) : await getOpenPort()
 
     // Step 2: Get temporary credentials
-    const vaultRole = getVaultRole(selectedDb, role)
+    const vaultRole = getVaultRole(selectedDb, validatedRole)
 
     if (!config.vault_addr) {
       throw new CLIError('Vault address is not configured. Please set VAULT_ADDR in your environment variables or configuration.')

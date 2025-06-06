@@ -7,8 +7,8 @@ export class AwsEcrWaitOnImageCommand extends PanfactumCommand {
   static override paths = [['aws', 'ecr', 'wait-on-image']];
 
   static override usage = Command.Usage({
-    description: 'Wait for a Docker image to be available in AWS ECR',
-    details: `Waits for a Docker image to be available in an AWS ECR repository before proceeding.
+    description: 'Wait for a container image to be available in AWS ECR',
+    details: `Waits for a container image to be available in an AWS ECR repository before proceeding.
 This is designed as a Terragrunt pre-hook to ensure container images are built and pushed before infrastructure deployment.`,
     examples: [
       ['Wait for image', 'pf aws ecr wait-on-image 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp:latest'],

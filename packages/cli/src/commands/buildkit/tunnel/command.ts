@@ -1,10 +1,11 @@
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
-import { type Architecture, architectures } from '@/util/buildkit/constants.js'
+import { architectures } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { execute } from '@/util/subprocess/execute.js'
+import { validateEnum } from '@/util/types/typeGuards.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
 export default class BuildkitTunnelCommand extends PanfactumCommand {
@@ -25,11 +26,8 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
   })
 
   async execute(): Promise<number> {
-    // Validate architecture
-    if (!architectures.includes(this.arch as Architecture)) {
-      this.context.logger.error(`--arch must be one of: ${architectures.join(', ')}`)
-      return 1
-    }
+    // Validate and get properly typed architecture
+    const validatedArch = validateEnum(this.arch, architectures)
 
     // Validate port
     const portNum = parseInt(this.port, 10)
@@ -63,7 +61,7 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
         'scale',
         'up',
         '--only',
-        this.arch,
+        validatedArch,
         '--wait',
         '--context',
         config.cluster
@@ -74,7 +72,7 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
 
     // Get the address of a free instance
     const address = await getBuildKitAddress({
-      arch: this.arch as Architecture,
+      arch: validatedArch,
       kubectlContext: config.cluster,
       omitProtocol: true,
       context: this.context

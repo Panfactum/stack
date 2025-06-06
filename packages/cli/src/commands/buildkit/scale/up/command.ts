@@ -5,6 +5,7 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.js'
+import { validateEnum } from '@/util/types/typeGuards.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
 export default class BuildkitScaleUpCommand extends PanfactumCommand {
@@ -27,10 +28,10 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
   })
 
   async execute(): Promise<number> {
-    // Validate architecture if provided
-    if (this.only && !architectures.includes(this.only as Architecture)) {
-      this.context.logger.error(`--only must be one of: ${architectures.join(', ')}`)
-      return 1
+    // Validate architecture if provided and get properly typed value
+    let validatedOnly: Architecture | undefined
+    if (this.only) {
+      validatedOnly = validateEnum(this.only, architectures)
     }
 
     // Validate context if provided
@@ -49,7 +50,7 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
       }
     }
 
-    const archsToScale = this.only ? [this.only as Architecture] : architectures
+    const archsToScale = validatedOnly ? [validatedOnly] : architectures
 
     // Scale up each architecture
     for (const arch of archsToScale) {

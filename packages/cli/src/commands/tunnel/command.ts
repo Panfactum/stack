@@ -3,16 +3,12 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
-import { parse as parseYaml } from 'yaml';
+import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import { getVaultTokenString } from '@/util/vault/getVaultToken';
-
-interface BastionConfig {
-  name: string;
-  vault: string;
-}
+import { readYAMLFile } from '@/util/yaml/readYAMLFile';
 
 export default class TunnelCommand extends PanfactumCommand {
   static override paths = [['tunnel']];
@@ -48,13 +44,22 @@ export default class TunnelCommand extends PanfactumCommand {
 
       // Read bastion configuration
       const configFile = join(sshDir, 'config.yaml');
-      if (!existsSync(configFile)) {
-        throw new CLIError(`SSH config file not found at ${configFile}`);
-      }
+      
+      const bastionConfigSchema = z.object({
+        bastions: z.array(z.object({
+          name: z.string(),
+          vault: z.string()
+        }))
+      });
 
-      const configContent = readFileSync(configFile, 'utf8');
-      const config = parseYaml(configContent) as { bastions: BastionConfig[] };
-      const bastionConfig = config.bastions?.find(b => b.name === this.bastion);
+      const config = await readYAMLFile({
+        context: this.context,
+        filePath: configFile,
+        validationSchema: bastionConfigSchema,
+        throwOnMissing: true
+      });
+
+      const bastionConfig = config?.bastions?.find(b => b.name === this.bastion);
 
       if (!bastionConfig) {
         throw new CLIError(`No bastion named '${this.bastion}' found in ${configFile}`);

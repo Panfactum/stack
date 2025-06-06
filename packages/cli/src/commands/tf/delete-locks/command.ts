@@ -1,10 +1,12 @@
 import { hostname } from 'os';
 import { DynamoDBClient, ScanCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 import { Option } from 'clipanion';
+import { z } from 'zod';
 import { getIdentity } from '@/util/aws/getIdentity';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getPanfactumConfig } from '@/util/config/getPanfactumConfig';
 import { CLIError } from '@/util/error/error';
+import { parseJson } from '@/util/zod/parseJson';
 
 export default class DeleteLocksCommand extends PanfactumCommand {
   static override paths = [['tf', 'delete-locks']];
@@ -102,10 +104,14 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       }
 
       // Filter locks by owner
+      const lockInfoSchema = z.object({
+        Who: z.string().optional()
+      });
+      
       const locksToDelete = scanResult.Items.filter(item => {
         if (item['Info']?.S) {
           try {
-            const info = JSON.parse(item['Info'].S) as { Who?: string };
+            const info = parseJson(lockInfoSchema, item['Info'].S);
             return info.Who === lockOwner;
           } catch {
             return false;

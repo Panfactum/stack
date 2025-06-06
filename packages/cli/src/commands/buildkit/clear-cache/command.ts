@@ -1,9 +1,11 @@
 import { Option } from 'clipanion'
+import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
+import { parseJson } from '@/util/zod/parseJson.js'
 
 export default class BuildkitClearCacheCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'clear-cache']]
@@ -79,21 +81,21 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
       workingDirectory: process.cwd()
     })
 
-    interface Pod {
-      spec: {
-        volumes?: Array<{
-          persistentVolumeClaim?: {
-            claimName: string
-          }
-        }>
-      }
-    }
+    const podSchema = z.object({
+      spec: z.object({
+        volumes: z.array(z.object({
+          persistentVolumeClaim: z.object({
+            claimName: z.string()
+          }).optional()
+        })).optional()
+      })
+    })
     
-    interface PodsData {
-      items: Pod[]
-    }
+    const podsDataSchema = z.object({
+      items: z.array(podSchema)
+    })
     
-    const podsData = JSON.parse(podsResult.stdout) as PodsData
+    const podsData = parseJson(podsDataSchema, podsResult.stdout)
 
     // Check each PVC
     for (const pvc of pvcs) {
