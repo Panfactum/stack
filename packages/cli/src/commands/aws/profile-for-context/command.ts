@@ -28,7 +28,6 @@ export default class ProfileForContextCommand extends PanfactumCommand {
 
       // Output the profile
       this.context.stdout.write(awsProfile);
-      this.context.stdout.write('\n');
 
       return 0;
     } catch (error) {
@@ -36,7 +35,7 @@ export default class ProfileForContextCommand extends PanfactumCommand {
         throw error;
       }
       throw new CLIError(
-        `Failed to get AWS profile for context: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to get AWS profile for context`, error
       );
     }
   }

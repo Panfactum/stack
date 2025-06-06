@@ -1,12 +1,12 @@
-import { ChildProcess, spawn } from 'child_process'
 import { existsSync } from 'fs'
 import { dirname, basename, join } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.js'
+import { waitForPort } from '@/util/network/waitForPort.js'
 import { execute } from '@/util/subprocess/execute.js'
+import { BACKGROUND_PROCESS_PIDS } from '@/util/subprocess/killBackgroundProcess.js'
 import type { BuildKitConfig } from '@/util/buildkit/constants.js'
 
 export default class BuildkitBuildCommand extends PanfactumCommand {
@@ -40,8 +40,6 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
 
   private armTunnelPid?: number
   private amdTunnelPid?: number
-  private armBuildProcess?: ChildProcess
-  private amdBuildProcess?: ChildProcess
 
   async execute(): Promise<number> {
     // Validate dockerfile exists
@@ -71,40 +69,44 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
       const amdPort = await getOpenPort()
 
       // Start ARM tunnel
-      const armTunnelProcess = spawn('pf', [
+      const armTunnelProcess = Bun.spawn([
+        'pf',
         'buildkit',
         'tunnel',
         '--arch', 'arm64',
         '--port', armPort.toString()
       ], {
-        detached: true,
-        stdio: 'ignore',
+        stdout: 'ignore',
+        stderr: 'ignore',
         env: {
           ...process.env,
           AUTOSSH_PIDFILE: join(buildkitDir, 'arm.pid')
         }
       })
       this.armTunnelPid = armTunnelProcess.pid
+      BACKGROUND_PROCESS_PIDS.push(armTunnelProcess.pid)
 
       // Start AMD tunnel
-      const amdTunnelProcess = spawn('pf', [
+      const amdTunnelProcess = Bun.spawn([
+        'pf',
         'buildkit',
         'tunnel',
         '--arch', 'amd64',
         '--port', amdPort.toString()
       ], {
-        detached: true,
-        stdio: 'ignore',
+        stdout: 'ignore',
+        stderr: 'ignore',
         env: {
           ...process.env,
           AUTOSSH_PIDFILE: join(buildkitDir, 'amd.pid')
         }
       })
       this.amdTunnelPid = amdTunnelProcess.pid
+      BACKGROUND_PROCESS_PIDS.push(amdTunnelProcess.pid)
 
       // Wait for tunnels to be ready
-      await this.waitForTunnel(armPort)
-      await this.waitForTunnel(amdPort)
+      await waitForPort({ port: armPort })
+      await waitForPort({ port: amdPort })
 
       // Run parallel builds
       const [armResult, amdResult] = await Promise.all([
@@ -135,94 +137,67 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
     }
   }
 
-  private async waitForTunnel(port: number, maxAttempts = 30): Promise<void> {
-    const { default: net } = await import('net')
-    
-    for (let i = 0; i < maxAttempts; i++) {
-      const connected = await new Promise<boolean>((resolve) => {
-        const socket = net.createConnection(port, '127.0.0.1')
-        socket.on('connect', () => {
-          socket.end()
-          resolve(true)
-        })
-        socket.on('error', () => {
-          resolve(false)
-        })
-      })
-
-      if (connected) {
-        return
-      }
-
-      await new Promise(resolve => globalThis.setTimeout(resolve, 1000))
-    }
-
-    throw new CLIError(`Tunnel on port ${port} did not become available`)
-  }
 
   private async runBuild(arch: string, port: number, config: BuildKitConfig): Promise<number> {
-    return new Promise((resolve) => {
-      const buildProcess = spawn('buildctl', [
-        'build',
-        '--frontend=dockerfile.v0',
-        '--output', `type=image,name=${config.registry}/${this.repo}:${this.tag}-${arch},push=true`,
-        '--local', `context=${this.buildContext}`,
-        '--local', `dockerfile=${dirname(this.file)}`,
-        '--opt', `filename=./${basename(this.file)}`,
-        '--opt', `platform=linux/${arch}`,
-        '--export-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
-        '--import-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
-        '--progress', 'plain',
-        ...(this.rest || [])
-      ], {
+    try {
+      const result = await execute({
+        command: [
+          'buildctl',
+          'build',
+          '--frontend=dockerfile.v0',
+          '--output', `type=image,name=${config.registry}/${this.repo}:${this.tag}-${arch},push=true`,
+          '--local', `context=${this.buildContext}`,
+          '--local', `dockerfile=${dirname(this.file)}`,
+          '--opt', `filename=./${basename(this.file)}`,
+          '--opt', `platform=linux/${arch}`,
+          '--export-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
+          '--import-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
+          '--progress', 'plain',
+          ...(this.rest || [])
+        ],
+        context: this.context,
+        workingDirectory: process.cwd(),
         env: {
           ...process.env,
           BUILDKIT_HOST: `tcp://127.0.0.1:${port}`
         },
-        stdio: ['ignore', 'pipe', 'pipe']
+        onStdOutNewline: (line) => {
+          this.context.logger.writeRaw(`${arch}: ${line}`)
+        },
+        onStdErrNewline: (line) => {
+          this.context.logger.writeRaw(`${arch}: ${line}`)
+        }
       })
 
-      if (arch === 'arm64') {
-        this.armBuildProcess = buildProcess
-      } else {
-        this.amdBuildProcess = buildProcess
-      }
-
-      // Prefix output with architecture
-      buildProcess.stdout?.on('data', (data) => {
-        this.context.logger.writeRaw(`${arch}: ${data}`)
-      })
-
-      buildProcess.stderr?.on('data', (data) => {
-        this.context.logger.writeRaw(`${arch}: ${data}`)
-      })
-
-      buildProcess.on('exit', (code) => {
-        resolve(code || 0)
-      })
-    })
+      return result.exitCode
+    } catch (error) {
+      this.context.logger.error(`Build failed for ${arch}: ${error}`)
+      return 1
+    }
   }
 
   private cleanup(): void {
-    // Kill build processes
-    if (this.armBuildProcess && !this.armBuildProcess.killed) {
-      this.armBuildProcess.kill('SIGINT')
-    }
-    if (this.amdBuildProcess && !this.amdBuildProcess.killed) {
-      this.amdBuildProcess.kill('SIGINT')
-    }
-
     // Kill tunnel processes
     if (this.armTunnelPid) {
       try {
-        process.kill(-this.armTunnelPid, 'SIGTERM')
+        process.kill(this.armTunnelPid, 'SIGTERM')
+        // Remove from background process tracking
+        const index = BACKGROUND_PROCESS_PIDS.indexOf(this.armTunnelPid)
+        if (index !== -1) {
+          BACKGROUND_PROCESS_PIDS.splice(index, 1)
+        }
       } catch {
         // Ignore errors
       }
     }
     if (this.amdTunnelPid) {
       try {
-        process.kill(-this.amdTunnelPid, 'SIGTERM')
+        process.kill(this.amdTunnelPid, 'SIGTERM')
+        // Remove from background process tracking
+        const index = BACKGROUND_PROCESS_PIDS.indexOf(this.amdTunnelPid)
+        if (index !== -1) {
+          BACKGROUND_PROCESS_PIDS.splice(index, 1)
+        }
       } catch {
         // Ignore errors
       }
