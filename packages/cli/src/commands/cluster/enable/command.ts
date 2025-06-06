@@ -93,7 +93,7 @@ export class ClusterEnableCommand extends PanfactumCommand {
       }
       // Add cases for other features as needed
       default:
-        throw new CLIError(`Unhandled feature: ${validatedFeature as string}`);
+        throw new CLIError(`Unhandled feature: ${String(validatedFeature)}`);
     }
   }
 }
