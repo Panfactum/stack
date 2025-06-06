@@ -1,7 +1,7 @@
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
-import { execute } from '@/util/subprocess/execute';
+import { checkImageExists } from '@/util/aws/checkImageExists';
 
 export class AwsEcrWaitOnImageCommand extends PanfactumCommand {
   static override paths = [['aws', 'ecr', 'wait-on-image']];
@@ -52,29 +52,11 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     this.context.logger.info(`Waiting up to ${timeoutSeconds} seconds for image ${this.image} to be found.`);
 
     while (elapsed < timeoutSeconds) {
-      try {
-        const result = await execute({
-          command: [
-            'aws',
-            'ecr',
-            'list-images',
-            '--registry-id', accountId,
-            '--repository-name', repoName,
-            '--region', region,
-            '--query', `imageIds[?imageTag=='${tag}']`,
-            '--output', 'text',
-          ],
-          context: this.context,
-          workingDirectory: this.context.repoVariables.repo_root,
-        });
-
-        if (result.stdout.trim()) {
-          this.context.logger.success(`Found ${this.image}.`);
-          return;
-        }
-      } catch (error) {
-        // AWS CLI error, might be permissions or connectivity issue
-        this.context.logger.warn(`Error checking for image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const imageExists = await checkImageExists(accountId, repoName, tag, region, this.context);
+      
+      if (imageExists) {
+        this.context.logger.success(`Found ${this.image}.`);
+        return;
       }
 
       if (elapsed + intervalSeconds < timeoutSeconds) {

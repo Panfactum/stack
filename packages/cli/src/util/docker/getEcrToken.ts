@@ -1,6 +1,7 @@
-import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
-import { ECRPUBLICClient, GetAuthorizationTokenCommand as GetPublicAuthCommand } from '@aws-sdk/client-ecr-public';
-import { getCredsFromFile } from '../aws/getCredsFromFile';
+import { GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
+import { GetAuthorizationTokenCommand as GetPublicAuthCommand } from '@aws-sdk/client-ecr-public';
+import { getECRClient } from '../aws/clients/getECRClient';
+import { getECRPublicClient } from '../aws/clients/getECRPublicClient';
 import { CLIError } from '../error/error';
 import type { PanfactumContext } from '@/util/context/context'
 
@@ -17,10 +18,7 @@ export async function getEcrToken(
     
     if (isPublicRegistry) {
       // Use ECR Public client
-      const credentials = awsProfile ? await getCredsFromFile({ context, profile: awsProfile }) : undefined;
-      const client = credentials 
-        ? new ECRPUBLICClient({ credentials, region: 'us-east-1' })
-        : new ECRPUBLICClient({ profile: awsProfile || undefined, region: 'us-east-1' });
+      const client = await getECRPublicClient({ context, profile: awsProfile });
       
       context.logger.debug('Getting ECR public authorization token', { registry });
       const response = await client.send(new GetPublicAuthCommand({}));
@@ -31,10 +29,7 @@ export async function getEcrToken(
       
       token = response.authorizationData.authorizationToken;
     } else {
-      const credentials = awsProfile ? await getCredsFromFile({ context, profile: awsProfile }) : undefined;
-      const client = credentials
-        ? new ECRClient({ credentials, region: 'us-east-1' })
-        : new ECRClient({ profile: awsProfile || undefined, region: 'us-east-1' });
+      const client = await getECRClient({ context, profile: awsProfile });
       
       context.logger.debug('Getting ECR private authorization token', { registry});
       const response = await client.send(new GetAuthorizationTokenCommand({}));

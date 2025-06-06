@@ -94,6 +94,28 @@ const result = await execute('kubectl', ['get', 'pod', '-o', 'json']);
 const validated = KubectlOutputSchema.parse(JSON.parse(result.stdout));
 ```
 
+### AWS Operations
+**ALWAYS prefer AWS SDK over AWS CLI when possible**. Use direct API calls instead of CLI execution for most AWS operations:
+
+```typescript
+import { getSTSClient } from '@/util/aws/clients/getSTSClient';
+
+// Good: Use AWS SDK
+const stsClient = getSTSClient({ profile: 'my-profile' });
+const identity = await stsClient.send(new GetCallerIdentityCommand({}));
+
+// Bad: Only use execute for complex operations that are difficult to replicate with SDK
+const result = await execute({
+  command: ['aws', 'sts', 'get-caller-identity'],
+  context
+});
+```
+
+**Exceptions**: Use `execute` with AWS CLI only when:
+- The operation is too complex to replicate with the SDK
+- Multiple CLI commands need to be chained together
+- CLI-specific formatting or output is required
+
 ### Subprocess Execution
 **NEVER use `spawn`, `exec`, or `execSync` from Node.js. ALWAYS use the `execute` utility** from `src/util/subprocess/execute.ts`. This provides:
 - Consistent error handling with `CLISubprocessError`
