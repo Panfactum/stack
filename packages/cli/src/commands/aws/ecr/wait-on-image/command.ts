@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { checkImageExists } from '@/util/aws/checkImageExists';
+import { AWS_ACCOUNT_ID_SCHEMA, AWS_REGION_SCHEMA } from '@/util/aws/schemas';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
 
@@ -49,8 +50,22 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     const accountId = registryParts[0];
     const region = registryParts[3];
 
-    if (!accountId || !region) {
-      throw new CLIError('Invalid ECR registry format. Expected: accountId.dkr.ecr.region.amazonaws.com');
+    if (!accountId) {
+      throw new CLIError('Invalid registry format: missing account ID');
+    }
+
+    if (!region) {
+      throw new CLIError('Invalid registry format: missing region');
+    }
+
+    const accountIdValidation = AWS_ACCOUNT_ID_SCHEMA.safeParse(accountId);
+    if (!accountIdValidation.success) {
+      throw new CLIError(`Invalid AWS Account ID: ${accountIdValidation.error.errors[0]?.message || 'Invalid format'}`);
+    }
+
+    const regionValidation = AWS_REGION_SCHEMA.safeParse(region);
+    if (!regionValidation.success) {
+      throw new CLIError(`Invalid AWS region: ${regionValidation.error.errors[0]?.message || 'Invalid format'}`);
     }
 
     const timeoutSeconds = parseInt(this.timeout, 10);
