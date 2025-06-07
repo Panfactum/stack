@@ -3,12 +3,11 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
-import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import { getVaultTokenString } from '@/util/vault/getVaultToken';
-import { readYAMLFile } from '@/util/yaml/readYAMLFile';
+import {getAllRegions} from "@/util/config/getAllRegions.ts";
 
 export default class TunnelCommand extends PanfactumCommand {
   static override paths = [['tunnel']];
@@ -17,8 +16,7 @@ export default class TunnelCommand extends PanfactumCommand {
     description: 'Establish SSH tunnel to internal network services through a bastion host',
     details: `
       This command starts a tunnel to an internal network service to allow network connectivity 
-      during local development. It uses SSH to tunnel through a bastion host configured in your 
-      ssh/config.yaml file.
+      during local development.
     `,
     examples: [
       ['Tunnel to argo', '$0 tunnel production-primary argo-server.argo:2746'],
@@ -42,27 +40,12 @@ export default class TunnelCommand extends PanfactumCommand {
         throw new CLIError('Remote address must include both hostname and port (e.g., example.com:443)');
       }
 
-      // Read bastion configuration
-      const configFile = join(sshDir, 'config.yaml');
-      
-      const bastionConfigSchema = z.object({
-        bastions: z.array(z.object({
-          name: z.string(),
-          vault: z.string()
-        }))
-      });
+      const regions = (await getAllRegions(this.context)).filter(region => region.bastionDeployed)
 
-      const config = await readYAMLFile({
-        context: this.context,
-        filePath: configFile,
-        validationSchema: bastionConfigSchema,
-        throwOnMissing: true
-      });
+      const selectedRegion = regions.find(region => region.clusterContextName === this.bastion)
 
-      const bastionConfig = config?.bastions?.find(b => b.name === this.bastion);
-
-      if (!bastionConfig) {
-        throw new CLIError(`No bastion named '${this.bastion}' found in ${configFile}`);
+      if (!selectedRegion) {
+        throw new CLIError(`No bastion found with name '${this.bastion}'. Available bastions: ${regions.map(r => r.clusterContextName).join(', ')}`);
       }
 
       // Read connection info
@@ -123,7 +106,7 @@ export default class TunnelCommand extends PanfactumCommand {
       }
 
       // Sign SSH key with Vault
-      const vaultToken = await getVaultTokenString({ context: this.context, address: bastionConfig.vault });
+      const vaultToken = await getVaultTokenString({ context: this.context, address: selectedRegion.vaultAddress });
 
       const { stdout: signedKey } = await execute({
         command: [
@@ -138,7 +121,7 @@ export default class TunnelCommand extends PanfactumCommand {
         workingDirectory: process.cwd(),
         env: {
           ...process.env,
-          VAULT_ADDR: bastionConfig.vault,
+          VAULT_ADDR: selectedRegion.vaultAddress,
           VAULT_TOKEN: vaultToken
         }
       });
