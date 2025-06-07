@@ -15,7 +15,6 @@ import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
 import { ClusterEnableCommand } from "./commands/cluster/enable/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { DbTunnelCommand } from "./commands/db/tunnel/command.ts";
-import { DevshellEnterCommand } from "./commands/devshell/enter/command.ts";
 import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DockerCredentialHelperCommand } from "./commands/docker/credential-helper/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
@@ -59,7 +58,6 @@ cli.register(Builtins.VersionCommand);
 cli.register(ClusterAddCommand);
 cli.register(ClusterEnableCommand);
 cli.register(DevShellUpdateCommand)
-cli.register(DevshellEnterCommand)
 cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
