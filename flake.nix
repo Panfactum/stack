@@ -161,7 +161,7 @@
             name = name;
             buildInputs = (panfactumPackages withPFCLI) ++ packages;
             shellHook = ''
-              ${if activateDefaultShellHook then "eval \"$(pf devshell enter)\" && pf welcome" else ""}
+              ${if activateDefaultShellHook then "source enter-shell-local" else ""}
               ${shellHook}
             '';
           };
