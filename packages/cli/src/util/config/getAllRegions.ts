@@ -4,6 +4,7 @@ import type { PanfactumContext } from '@/util/context/context';
 
 export interface AllRegionMeta extends RegionMeta {
   environment: string; // Name of the environment this region belongs to
+  awsProfile: string | undefined;
 }
 
 /**
@@ -22,7 +23,8 @@ export async function getAllRegions(context: PanfactumContext): Promise<Array<Al
     for (const region of regions) {
       allRegions.push({
         ...region,
-        environment: environment.name
+        environment: environment.name,
+        awsProfile: environment.awsProfile
       });
     }
   }

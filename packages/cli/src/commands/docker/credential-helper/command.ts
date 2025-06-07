@@ -1,10 +1,11 @@
 import { Command, Option } from 'clipanion'
+import { getAWSProfileForContext } from '@/util/aws/getProfileForContext'
+import { getBuildKitConfig } from '@/util/buildkit'
+import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
+import { getCachedCredential, setCachedCredential } from '@/util/docker/credentialCache.ts'
+import { getEcrToken } from '@/util/docker/getEcrToken.ts'
 import { CLIError } from '@/util/error/error'
-import { getBuildKitConfig } from '../../../util/buildkit/config'
-import { PanfactumCommand } from '../../../util/command/panfactumCommand'
-import { getCachedCredential, setCachedCredential } from '../../../util/docker/credentialCache'
-import { getEcrToken } from '../../../util/docker/getEcrToken'
-import { execute } from '../../../util/subprocess/execute'
+import { execute } from '@/util/subprocess/execute.ts'
 import type { PanfactumContext } from '@/util/context/context'
 
 export class DockerCredentialHelperCommand extends PanfactumCommand {
@@ -96,7 +97,6 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
 
     // Get BuildKit config and use cluster context to determine AWS profile
     const buildkitConfig = await getBuildKitConfig(context)
-    const { getAWSProfileForContext } = await import('@/util/aws/getProfileForContext')
     const awsProfile = await getAWSProfileForContext(context, buildkitConfig.cluster)
 
     // Get fresh token from ECR
