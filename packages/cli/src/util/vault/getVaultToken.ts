@@ -14,7 +14,6 @@ const VAULT_TOKEN_LOOKUP_SCHEMA = z.object({
 export interface GetVaultTokenOptions {
   address?: string;
   silent?: boolean;
-  noop?: boolean;
   context: PanfactumContext;
 }
 
@@ -31,12 +30,7 @@ export interface VaultTokenResult {
  * @returns Vault token result
  */
 export async function getVaultToken(options: GetVaultTokenOptions): Promise<VaultTokenResult> {
-  const { address, silent = false, noop = false, context } = options;
-
-  // Handle noop mode
-  if (noop) {
-    return { token: '', isValid: true };
-  }
+  const { address, silent = false, context } = options;
 
   try {
     // Set vault address

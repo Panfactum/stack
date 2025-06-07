@@ -159,14 +159,15 @@ export const getPanfactumConfig = async ({
         ? values.vault_addr
         : context.env['VAULT_ADDR']) ?? '@@TERRAGRUNT_INVALID@@'
 
-    values.vault_token = values.vault_token
-      ? values.vault_token
-      : await getVaultTokenString({
-          context,
-          address: values.vault_addr,
-          silent: true,
-          noop: !!values.vault_addr,
-        })
+    values.vault_token = values.vault_addr ?
+      values.vault_token
+        ? values.vault_token
+        : await getVaultTokenString({
+            context,
+            address: values.vault_addr,
+            silent: true,
+          })
+      : '@@TERRAGRUNT_INVALID@@';
   }
 
   return values as OutputValues;

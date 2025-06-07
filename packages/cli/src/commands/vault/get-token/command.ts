@@ -35,15 +35,10 @@ export class GetVaultTokenCommand extends PanfactumCommand {
     description: 'Exit with 0 if failing to get the vault token',
   });
 
-  noop = Option.Boolean('-n,--noop', false, {
-    description: 'Exit with 0 immediately (used by terragrunt to skip execution if provider is not enabled)',
-  });
-
   async execute() {
     const result = await getVaultToken({
       address: this.address,
       silent: this.silent,
-      noop: this.noop,
       context: this.context,
     });
 
