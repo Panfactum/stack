@@ -51,6 +51,14 @@ export const AWS_REGION_SCHEMA = z
     })
     .optional();
 
+export const AWS_ACCOUNT_ID_SCHEMA = z
+    .string()
+    .regex(/^\d{12}$/, "AWS Account ID must be exactly 12 digits");
+
+export const ECR_REGISTRY_SCHEMA = z
+    .string()
+    .regex(/^\d{12}\.dkr\.ecr\.[a-z0-9-]+\.amazonaws\.com$/, "Invalid ECR registry format. Expected: accountId.dkr.ecr.region.amazonaws.com");
+
 
 export const BUCKET_NAME_SCHEMA = z.string()
     .max(63, "S3 bucket names must be less than 64 characters long")

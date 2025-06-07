@@ -1,4 +1,4 @@
-import { CLIError } from "../error/error";
+import { CLIError } from "@/util/error/error";
 
 export const fileExists = async (filePath: string) => {
   try {

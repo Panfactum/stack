@@ -119,7 +119,7 @@ export async function setupVPC(
                 const vpc = JSON.parse(stdout);
                 vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
               } catch (error) {
-                parseErrorHandler({
+                throw parseErrorHandler({
                   error,
                   errorMessage:
                     "Failed checking if VPC name is already in use.",
@@ -127,7 +127,7 @@ export async function setupVPC(
                 });
               }
 
-              if (vpcList?.Vpcs.length && vpcList.Vpcs.length > 0) {
+              if (vpcList.Vpcs.length > 0) {
                 return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;
               } else {
                 return true;

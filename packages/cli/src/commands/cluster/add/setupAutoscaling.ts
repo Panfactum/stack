@@ -169,28 +169,7 @@ export async function setupAutoscaling(
           },
         });
       },
-    },
-    // {
-    //   title: "Enable Enhanced Autoscaling",
-    //   task: async (ctx, task) => {
-    //     await terragruntApplyAll({
-    //       context,
-    //       environment,
-    //       region,
-    //       env: {
-    //         ...process.env,
-    //         VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
-    //         VAULT_TOKEN: vaultRootToken,
-    //       },
-    //       onLogLine: (line) => {
-    //         task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
-    //       },
-    //     });
-    //   },
-    //   rendererOptions: {
-    //     outputBar: 5,
-    //   },
-    // },
+    }
   ])
 
   return tasks;

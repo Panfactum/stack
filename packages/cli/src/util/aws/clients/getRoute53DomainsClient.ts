@@ -1,5 +1,5 @@
 import { Route53DomainsClient } from "@aws-sdk/client-route-53-domains";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getRoute53DomainsClient(inputs: { context: PanfactumContext, profile: string; }) {

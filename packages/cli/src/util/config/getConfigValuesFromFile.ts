@@ -1,10 +1,10 @@
 
 import { join } from "node:path"
+import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
+import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { getEnvironments } from "./getEnvironments";
 import { getRegions } from "./getRegions";
 import { PANFACTUM_CONFIG_SCHEMA, type TGConfigFile } from "./schemas";
-import { sopsDecrypt } from "../sops/sopsDecrypt";
-import { readYAMLFile } from "../yaml/readYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 type BaseConfigInput = {

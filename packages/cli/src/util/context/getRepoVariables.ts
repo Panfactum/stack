@@ -1,6 +1,7 @@
 import { join, resolve } from "node:path";
 import yaml from "yaml";
 import { z } from "zod";
+import { CLIError } from '@/util/error/error';
 import { REPO_CONFIG_FILE, REPO_USER_CONFIG_FILE } from "./constants";
 import { getRoot } from "./getRoot";
 import { PANFACTUM_YAML_SCHEMA } from "./schemas";
@@ -22,7 +23,7 @@ export const getRepoVariables = async (cwd: string): Promise<RepoVariables> => {
   //####################################################################
   const configFile = join(repoRootPath, REPO_CONFIG_FILE);
   if (!(await Bun.file(configFile).exists())) {
-    throw new Error(`Repo configuration file does not exist at ${configFile}`);
+    throw new CLIError(`Repo configuration file does not exist at ${configFile}`);
   }
 
   const userConfigFile = join(repoRootPath, REPO_USER_CONFIG_FILE);

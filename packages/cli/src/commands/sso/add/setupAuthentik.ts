@@ -644,7 +644,7 @@ spec:
                     (group) => group.name === "superusers"
                 );
                 if (!superusersGroup) {
-                    throw new Error("Superusers group not found in Authentik");
+                    throw new CLIError("Superusers group not found in Authentik");
                 }
                 const superusersGroupUuid = superusersGroup.pk;
 
@@ -806,7 +806,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                     (user) => user.username === "akadmin"
                 );
                 if (!bootstrapUser) {
-                    throw new Error("Bootstrap user not found in Authentik");
+                    throw new CLIError("Bootstrap user not found in Authentik");
                 }
                 const bootstrapUserUuid = bootstrapUser.pk;
 
