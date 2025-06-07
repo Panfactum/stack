@@ -21,8 +21,8 @@ export default class TunnelCommand extends PanfactumCommand {
       ssh/config.yaml file.
     `,
     examples: [
-      ['Tunnel to a database', '$0 tunnel prod db.internal:5432'],
-      ['Specify local port', '$0 tunnel prod api.internal:443 --local-port 8443'],
+      ['Tunnel to argo', '$0 tunnel production-primary argo-server.argo:2746'],
+      ['Tunnel to argo with local port', '$0 tunnel production-primary argo-server.argo:2746 --local-port 3333'],
     ],
   });
 
