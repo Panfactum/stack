@@ -31,7 +31,6 @@ import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import DeleteLocksCommand from "./commands/tf/delete-locks/command.ts";
-import { TerraformInitCommand } from "./commands/tf/init/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
 import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts";
@@ -89,7 +88,6 @@ cli.register(K8sDisruptionsEnableCommand)
 cli.register(K8sGetTokenCommand)
 cli.register(K8sVeleroSnapshotGcCommand)
 cli.register(SopsSetProfileCommand)
-cli.register(TerraformInitCommand)
 cli.register(DeleteLocksCommand)
 cli.register(TunnelCommand)
 cli.register(DbTunnelCommand)

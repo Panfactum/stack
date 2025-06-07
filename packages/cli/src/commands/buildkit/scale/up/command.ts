@@ -20,7 +20,11 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
   })
 
   wait = Option.Boolean('--wait', false, {
-    description: 'If provided, will wait up to 10 minutes for the scale-up to complete before exiting.'
+    description: 'If provided, will wait for the scale-up to complete before exiting.'
+  })
+
+  timeout = Option.String('--timeout', '600', {
+    description: 'Timeout in seconds to wait for scale-up to complete (default: 600)'
   })
 
   kubectlContext = Option.String('--context', {
@@ -52,18 +56,20 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
 
     const archsToScale = validatedOnly ? [validatedOnly] : architectures
 
-    // Scale up each architecture
-    for (const arch of archsToScale) {
-      await this.scaleUp(arch)
-    }
+    // Scale up each architecture in parallel
+    await Promise.all(archsToScale.map(arch => this.scaleUp(arch)))
 
     // Wait for scale-up if requested
     if (this.wait) {
-      const timeout = 600 // 10 minutes
+      const timeoutSeconds = parseInt(this.timeout, 10)
+      if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
+        throw new CLIError('Timeout must be a positive number')
+      }
+      
       const startTime = Date.now()
 
       for (const arch of archsToScale) {
-        await this.waitForScaleUp(arch, startTime, timeout)
+        await this.waitForScaleUp(arch, startTime, timeoutSeconds)
       }
     }
 
