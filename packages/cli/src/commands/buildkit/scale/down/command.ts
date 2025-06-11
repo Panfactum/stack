@@ -1,4 +1,5 @@
 import { Option } from 'clipanion'
+import { z } from 'zod'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
 import { getLastBuildTime } from '@/util/buildkit/getLastBuildTime.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
@@ -25,11 +26,8 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
     // Validate timeout if provided
     let timeoutSeconds: number | undefined
     if (this.timeout) {
-      timeoutSeconds = parseInt(this.timeout, 10)
-      if (isNaN(timeoutSeconds) || timeoutSeconds < 0) {
-        this.context.logger.error('Please provide a valid numeric argument for --timeout')
-        return 1
-      }
+      const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
+      timeoutSeconds = timeoutSchema.parse(this.timeout);
     }
 
     // Validate context if provided

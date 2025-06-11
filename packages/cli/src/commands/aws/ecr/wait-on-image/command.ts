@@ -1,4 +1,5 @@
 import { Command, Option } from 'clipanion';
+import { z } from 'zod';
 import { checkImageExists } from '@/util/aws/checkImageExists';
 import { AWS_ACCOUNT_ID_SCHEMA, AWS_REGION_SCHEMA } from '@/util/aws/schemas';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
@@ -68,7 +69,8 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
       throw new CLIError(`Invalid AWS region: ${regionValidation.error.errors[0]?.message || 'Invalid format'}`);
     }
 
-    const timeoutSeconds = parseInt(this.timeout, 10);
+    const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
+    const timeoutSeconds = timeoutSchema.parse(this.timeout);
     const intervalSeconds = 30;
     let elapsed = 0;
 

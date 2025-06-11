@@ -1,4 +1,5 @@
 import { Option } from 'clipanion'
+import { z } from 'zod'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
@@ -61,10 +62,8 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
 
     // Wait for scale-up if requested
     if (this.wait) {
-      const timeoutSeconds = parseInt(this.timeout, 10)
-      if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
-        throw new CLIError('Timeout must be a positive number')
-      }
+      const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
+      const timeoutSeconds = timeoutSchema.parse(this.timeout);
       
       const startTime = Date.now()
 
