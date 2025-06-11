@@ -58,9 +58,7 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
       if (error instanceof CLIError) {
         throw error
       }
-      throw new CLIError(
-        `Failed to get EKS token: ${error instanceof Error ? error.message : String(error)}`
-      )
+      throw new CLIError(`Failed to get EKS token: ${(error as Error).message}`, error)
     }
   }
 }

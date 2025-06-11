@@ -130,7 +130,7 @@ async function performOIDCLogin(env: Record<string, string | undefined>, context
 
     return token;
   } catch (error) {
-    throw new CLIError(`Vault OIDC login failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new CLIError(`Vault OIDC login failed`, error);
   }
 }
 

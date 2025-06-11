@@ -62,7 +62,7 @@ export async function getDBCreds(options: GetDbCredsOptions): Promise<DbCredenti
 
     return parseVaultResponse(output);
   } catch (error) {
-    throw new CLIError(`Failed to get database credentials for role '${role}': ${error instanceof Error ? error.message : String(error)}`);
+    throw new CLIError(`Failed to get database credentials for role '${role}'`, error);
   }
 }
 
@@ -84,7 +84,7 @@ function parseVaultResponse(output: string): DbCredentials {
     if (error instanceof z.ZodError) {
       throw new CLIError(`Invalid Vault response format: ${error.message}`);
     }
-    throw new CLIError(`Failed to parse Vault response: ${error instanceof Error ? error.message : String(error)}`);
+    throw new CLIError(`Failed to parse Vault response:`, error);
   }
 }
 

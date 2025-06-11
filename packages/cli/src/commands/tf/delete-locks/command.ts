@@ -148,9 +148,7 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       if (error instanceof CLIError) {
         throw error;
       }
-      throw new CLIError(
-        `Failed to delete locks: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new CLIError(`Failed to delete locks: ${(error as Error).message}`, error);
     }
   }
 }

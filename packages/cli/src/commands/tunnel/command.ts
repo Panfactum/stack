@@ -4,10 +4,10 @@ import { join } from 'path';
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { getAllRegions } from "@/util/config/getAllRegions.ts";
 import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import { getVaultTokenString } from '@/util/vault/getVaultToken';
-import {getAllRegions} from "@/util/config/getAllRegions.ts";
 
 export default class TunnelCommand extends PanfactumCommand {
   static override paths = [['tunnel']];
@@ -206,9 +206,7 @@ export default class TunnelCommand extends PanfactumCommand {
       if (error instanceof CLIError) {
         throw error;
       }
-      throw new CLIError(
-        `Failed to establish tunnel: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new CLIError(`Failed to establish tunnel: ${(error as Error).message}`, error);
     }
   }
 }

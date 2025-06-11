@@ -704,8 +704,7 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
         }
     } catch (error) {
         // If we can't get the contact info, just log and continue
-        context.logger.debug(
-            `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
+        context.logger.debug(`Could not retrieve primary contact information from AWS: ${(error as Error).message}`);
     }
 
     return null;

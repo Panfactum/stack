@@ -1,12 +1,12 @@
 import { dirname, basename, join } from "node:path";
 import { Glob } from "bun";
 import { asyncIterMap } from "@/util/asyncIterMap";
+import { isBastionDeployed } from "@/util/config/isBastionDeployed.ts";
 import { CLIError } from "@/util/error/error";
 import { GLOBAL_REGION } from "@/util/terragrunt/constants";
 import { getPanfactumConfig } from "./getPanfactumConfig";
 import { isClusterDeployed } from "./isClusterDeployed";
 import type { PanfactumContext } from "@/util/context/context";
-import { isBastionDeployed } from "@/util/config/isBastionDeployed.ts";
 
 export interface RegionMeta {
     path: string; // Absolute path to the directory for the region
