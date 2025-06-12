@@ -3,11 +3,33 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
+import { z, ZodError } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getAllRegions } from "@/util/config/getAllRegions.ts";
-import { CLIError } from '@/util/error/error';
+import { CLIError, PanfactumZodError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import { getVaultTokenString } from '@/util/vault/getVaultToken';
+
+// Zod schema for port validation
+const portSchema = z.string()
+  .regex(/^\d+$/, 'Port must be a number')
+  .transform(Number)
+  .refine((port) => port >= 1024 && port <= 65535, {
+    message: 'Port must be between 1024 and 65535'
+  });
+
+// Zod schema for remote address validation (hostname:port format)
+const remoteAddressSchema = z.string()
+  .regex(/^.+:\d+$/, 'Remote address must include both hostname and port (e.g., example.com:443)')
+  .refine((address) => {
+    const parts = address.split(':');
+    if (parts.length !== 2) return false;
+    const [hostname, portStr] = parts;
+    const port = parseInt(portStr!, 10);
+    return hostname!.length > 0 && !isNaN(port) && port > 0 && port <= 65535;
+  }, {
+    message: 'Remote address must have a valid hostname and port number (1-65535)'
+  });
 
 export default class TunnelCommand extends PanfactumCommand {
   static override paths = [['tunnel']];
@@ -36,9 +58,7 @@ export default class TunnelCommand extends PanfactumCommand {
       const sshDir = repoVariables.ssh_dir;
       
       // Validate remote address format
-      if (!this.remoteAddress.includes(':')) {
-        throw new CLIError('Remote address must include both hostname and port (e.g., example.com:443)');
-      }
+      remoteAddressSchema.parse(this.remoteAddress);
 
       const regions = (await getAllRegions(this.context)).filter(region => region.bastionDeployed)
 
@@ -133,22 +153,24 @@ export default class TunnelCommand extends PanfactumCommand {
       // Determine local port
       let localPortNumber: number;
       if (this.localPort) {
-        localPortNumber = parseInt(this.localPort);
-        if (isNaN(localPortNumber) || localPortNumber < 1024 || localPortNumber > 65535) {
-          throw new CLIError('Local port must be a number between 1024 and 65535');
-        }
+        localPortNumber = portSchema.parse(this.localPort);
       } else {
         // Prompt for port
         const portString = await input({
           message: 'Enter a local port for the tunnel (1024-65535):',
           validate: (value) => {
-            const port = parseInt(value);
-            if (isNaN(port)) return 'Not a number!';
-            if (port < 1024 || port > 65535) return 'Port out of range (1024-65535)';
-            return true;
+            try {
+              portSchema.parse(value);
+              return true;
+            } catch (error) {
+              if (error instanceof z.ZodError) {
+                return error.errors[0]?.message || 'Invalid port';
+              }
+              return 'Invalid port';
+            }
           }
         });
-        localPortNumber = parseInt(portString);
+        localPortNumber = portSchema.parse(portString);
       }
 
       // Establish tunnel
@@ -203,8 +225,12 @@ export default class TunnelCommand extends PanfactumCommand {
       });
 
     } catch (error) {
-      if (error instanceof CLIError) {
-        throw error;
+      if (error instanceof ZodError) {
+        throw new PanfactumZodError(
+          'Invalid input provided for tunnel command',
+          'tunnel command',
+          error
+        );
       }
       throw new CLIError(`Failed to establish tunnel: ${(error as Error).message}`, error);
     }

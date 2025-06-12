@@ -29,7 +29,7 @@ import { K8sDisruptionsEnableCommand } from "./commands/k8s/disruptions/enable/c
 import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
-import DeleteLocksCommand from "./commands/tf/delete-locks/command.ts";
+import DeleteLocksCommand from "./commands/iac/delete-locks/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
 import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts";

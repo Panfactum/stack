@@ -9,6 +9,10 @@ import { execute } from '@/util/subprocess/execute.js'
 import { validateEnum } from '@/util/types/typeGuards.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
+// Zod schemas for kubectl output validation
+const replicaCountSchema = z.string().regex(/^\d+$/, 'Replica count must be a non-negative integer').transform(Number)
+const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number)
+
 export default class BuildkitScaleUpCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'scale', 'up']]
 
@@ -62,8 +66,7 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
 
     // Wait for scale-up if requested
     if (this.wait) {
-      const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
-      const timeoutSeconds = timeoutSchema.parse(this.timeout);
+      const timeoutSeconds = timeoutSchema.parse(this.timeout)
       
       const startTime = Date.now()
 
@@ -95,7 +98,7 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
       workingDirectory: process.cwd()
     })
 
-    const currentReplicas = parseInt(result.stdout.trim(), 10)
+    const currentReplicas = replicaCountSchema.parse(result.stdout.trim())
 
     if (currentReplicas === 0) {
       // Scale up
@@ -139,7 +142,7 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
         workingDirectory: process.cwd()
       })
 
-      const availableReplicas = parseInt(result.stdout.trim() || '0', 10)
+      const availableReplicas = replicaCountSchema.parse(result.stdout.trim() || '0')
 
       if (availableReplicas >= 1) {
         break

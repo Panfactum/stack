@@ -9,7 +9,7 @@ import { CLIError } from '@/util/error/error';
 import { parseJson } from '@/util/zod/parseJson';
 
 export default class DeleteLocksCommand extends PanfactumCommand {
-  static override paths = [['tf', 'delete-locks']];
+  static override paths = [['iac', 'delete-locks']];
 
   static override usage = PanfactumCommand.Usage({
     description: 'Release all Terraform/OpenTofu state locks held by a specific user',
@@ -19,9 +19,9 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       terraform operations.
     `,
     examples: [
-      ['Release all your locks using defaults', '$0 terraform delete-locks'],
-      ['Release locks for specific user', '$0 terraform delete-locks --who "john@workstation"'],
-      ['Use specific AWS profile and table', '$0 terraform delete-locks --profile prod --table my-locks'],
+      ['Release all your locks using defaults', '$0 iac delete-locks'],
+      ['Release locks for specific user', '$0 iac delete-locks --who "john@workstation"'],
+      ['Use specific AWS profile and table', '$0 iac delete-locks --profile prod --table my-locks'],
     ],
   });
 
@@ -145,9 +145,6 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       return 0;
 
     } catch (error) {
-      if (error instanceof CLIError) {
-        throw error;
-      }
       throw new CLIError(`Failed to delete locks: ${(error as Error).message}`, error);
     }
   }

@@ -1,8 +1,8 @@
 // Utility to get EKS authentication tokens using AWS CLI with Zod validation
 // Uses AWS CLI for token generation with proper error handling and type safety
 
-import { z } from 'zod';
-import { CLIError } from '../error/error';
+import { z, ZodError } from 'zod';
+import { CLIError, PanfactumZodError } from '../error/error';
 import { execute } from '../subprocess/execute';
 import type { PanfactumContext } from '@/util/context/context';
 
@@ -48,12 +48,16 @@ export async function getEksToken(
     return token;
     
   } catch (error) {
-    if (error instanceof CLIError) {
-      throw error;
+    if (error instanceof ZodError) {
+      throw new PanfactumZodError(
+        `Invalid EKS token response format for cluster '${clusterName}' in region '${region}' with profile '${awsProfile}'`,
+        'getEksToken',
+        error
+      );
     }
     throw new CLIError(
       `Failed to get EKS token for cluster '${clusterName}' in region '${region}' with profile '${awsProfile}'`,
-      error instanceof Error ? error : undefined
+      error
     );
   }
 }

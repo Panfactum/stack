@@ -4,6 +4,14 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { execute } from '@/util/subprocess/execute';
 import { parseJson } from '@/util/zod/parseJson';
 
+// Zod schema for timestamp validation
+const timestampSchema = z.string()
+  .regex(/^\d+$/, 'Timestamp must be a numeric string')
+  .transform(Number)
+  .refine((timestamp) => timestamp > 0, {
+    message: 'Timestamp must be a positive number'
+  });
+
 export class K8sDisruptionsDisableCommand extends PanfactumCommand {
   static override paths = [['k8s', 'disruptions', 'disable']];
 
@@ -107,7 +115,7 @@ have passed their disruption window time, preventing pods from being evicted.`,
         this.context.logger.info(`\tSkipping... PDB does not have 'panfactum.com/voluntary-disruption-window-start' annotation.`);
         skipped++;
       } else {
-        const startTimestamp = parseInt(startTime, 10);
+        const startTimestamp = timestampSchema.parse(startTime);
         const currentTime = Math.floor(Date.now() / 1000);
         
         if (startTimestamp + lengthSeconds >= currentTime) {
