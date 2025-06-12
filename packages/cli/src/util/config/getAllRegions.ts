@@ -24,7 +24,7 @@ export async function getAllRegions(context: PanfactumContext): Promise<Array<Al
       allRegions.push({
         ...region,
         environment: environment.name,
-        awsProfile: environment.awsProfile
+        awsProfile: region.awsProfile ?? environment.awsProfile
       });
     }
   }

@@ -16,6 +16,7 @@ export interface RegionMeta {
     clusterDeployed: boolean; // Whether the region has a cluster deployed
     bastionDeployed: boolean;
     vaultAddress: string | undefined; // Optional vault address for the region
+    awsProfile?: string; // Optional AWS region for the region
 }
 
 export async function getRegions(context: PanfactumContext, envPath: string): Promise<Array<RegionMeta>> {
@@ -26,7 +27,7 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
         const filePath = join(envPath, path)
         const regionPath = dirname(filePath);
         try {
-            const { region, aws_region: awsRegion, kube_api_server: kubeApiServer, environment, kube_config_context, vault_addr } = await getPanfactumConfig({ directory: regionPath, context }) || {}
+            const { region, aws_region: awsRegion, aws_profile: awsProfile, kube_api_server: kubeApiServer, environment, kube_config_context, vault_addr } = await getPanfactumConfig({ directory: regionPath, context }) || {}
 
             const name = region ?? basename(regionPath)
 
@@ -41,6 +42,7 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
                 bastionDeployed,
                 clusterContextName: kube_config_context,
                 vaultAddress: vault_addr,
+                awsProfile
             }
         } catch (e) {
             throw new CLIError("Unable to get regions", e)
