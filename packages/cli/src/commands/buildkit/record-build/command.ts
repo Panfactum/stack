@@ -2,10 +2,9 @@
 // Used to track when builds occur for monitoring and scaling purposes
 
 import { Command, Option } from 'clipanion'
-import { architectures } from '@/util/buildkit/constants.js'
+import { architectureSchema } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { validateEnum } from '@/util/types/typeGuards.js'
 
 export class RecordBuildCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'record-build']]
@@ -33,7 +32,7 @@ export class RecordBuildCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
-    const validatedArch = validateEnum(this.arch, architectures)
+    const validatedArch = architectureSchema.parse(this.arch)
 
     await recordBuildKitBuild({
       arch: validatedArch,

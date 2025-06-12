@@ -21,6 +21,7 @@ import { DomainAddCommand } from "./commands/domain/add/command.ts";
 import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
 import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";
 import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
+import DeleteLocksCommand from "./commands/iac/delete-locks/command.ts";
 import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/command.ts";
 import { K8sClusterResumeCommand } from "./commands/k8s/cluster/resume/command.ts";
 import { K8sClusterSuspendCommand } from "./commands/k8s/cluster/suspend/command.ts";
@@ -29,7 +30,6 @@ import { K8sDisruptionsEnableCommand } from "./commands/k8s/disruptions/enable/c
 import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
-import DeleteLocksCommand from "./commands/iac/delete-locks/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
 import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts";

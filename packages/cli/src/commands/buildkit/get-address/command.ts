@@ -2,10 +2,9 @@
 // Used by CI/CD pipelines to load balance builds across BuildKit instances
 
 import { Command, Option } from 'clipanion'
-import { architectures } from '@/util/buildkit/constants.js'
+import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { validateEnum } from '@/util/types/typeGuards.js'
 
 export class GetAddressCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'get-address']]
@@ -37,7 +36,7 @@ export class GetAddressCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
-    const validatedArch = validateEnum(this.arch, architectures)
+    const validatedArch = architectureSchema.parse(this.arch)
 
     const address = await getBuildKitAddress({
       arch: validatedArch,

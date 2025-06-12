@@ -1,12 +1,11 @@
 import { Option } from 'clipanion'
 import { z } from 'zod'
-import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
+import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures, architectureSchema } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.js'
-import { validateEnum } from '@/util/types/typeGuards.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
 // Zod schemas for kubectl output validation
@@ -40,7 +39,7 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
     // Validate architecture if provided and get properly typed value
     let validatedOnly: Architecture | undefined
     if (this.only) {
-      validatedOnly = validateEnum(this.only, architectures)
+      validatedOnly = architectureSchema.parse(this.only)
     }
 
     // Validate context if provided

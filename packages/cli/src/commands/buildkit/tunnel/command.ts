@@ -1,12 +1,20 @@
 import { Option } from 'clipanion'
+import { z } from 'zod'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
-import { architectures } from '@/util/buildkit/constants.js'
+import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { execute } from '@/util/subprocess/execute.js'
-import { validateEnum } from '@/util/types/typeGuards.js'
 import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
+
+// Zod schema for port validation
+const portSchema = z.string()
+  .regex(/^\d+$/, 'Port must be a number')
+  .transform(Number)
+  .refine((port) => port >= 1 && port <= 65535, {
+    message: 'Port must be between 1 and 65535'
+  })
 
 export default class BuildkitTunnelCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'tunnel']]
@@ -27,14 +35,10 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
-    const validatedArch = validateEnum(this.arch, architectures)
+    const validatedArch = architectureSchema.parse(this.arch)
 
     // Validate port
-    const portNum = parseInt(this.port, 10)
-    if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
-      this.context.logger.error('Please provide a valid port number')
-      return 1
-    }
+    const portNum = portSchema.parse(this.port)
 
     // Get BuildKit configuration
     const config = await getBuildKitConfig(this.context)
@@ -86,7 +90,7 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
         config.bastion,
         address,
         '--local-port',
-        this.port
+        portNum.toString()
       ],
       context: this.context,
       workingDirectory: process.cwd()
