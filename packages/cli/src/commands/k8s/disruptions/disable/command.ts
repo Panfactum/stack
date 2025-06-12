@@ -106,7 +106,7 @@ have passed their disruption window time, preventing pods from being evicted.`,
       let lengthSeconds = 3600;
       const lengthSecondsAnnotation = annotations['panfactum.com/voluntary-disruption-window-seconds'];
       if (lengthSecondsAnnotation) {
-        lengthSeconds = parseInt(lengthSecondsAnnotation, 10);
+        lengthSeconds = timestampSchema.parse(lengthSecondsAnnotation);
       } else {
         this.context.logger.warn(`\tWarning: PDB does not have 'panfactum.com/voluntary-disruption-window-seconds' annotation. Defaulting disruption window length to 3600 seconds.`);
       }
