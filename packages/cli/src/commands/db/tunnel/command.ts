@@ -10,16 +10,14 @@ import { getRegions } from '@/util/config/getRegions'
 import { getTempCredentials } from '@/util/db/getTempCredentials.ts'
 import { getVaultRole } from '@/util/db/getVaultRole.ts'
 import { listDatabases } from '@/util/db/listDatabases.ts'
+import { databaseTypeSchema, vaultRoleSchema, type DatabaseType } from '@/util/db/types.ts'
 import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT} from '@/util/terragrunt/constants'
 import { getVaultTokenString } from '@/util/vault/getVaultToken'
-import type { DatabaseType, VaultRole } from '@/util/db/types.ts'
 
-// Zod schemas for validation
-const databaseTypeSchema = z.enum(['postgresql', 'redis', 'nats'])
-const vaultRoleSchema = z.enum(['superuser', 'admin', 'reader'])
+// Zod schema for port validation
 const portSchema = z.string()
   .regex(/^\d+$/, 'Port must be a number')
   .transform(Number)
@@ -153,7 +151,7 @@ export class DbTunnelCommand extends PanfactumCommand {
     })
 
     // Validate the selected role
-    const validatedRole = vaultRoleSchema.parse(selectedRole) as VaultRole
+    const validatedRole = vaultRoleSchema.parse(selectedRole)
 
     // Get local port
     const localPort = this.port ? portSchema.parse(this.port) : await getOpenPort()
