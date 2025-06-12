@@ -42,6 +42,8 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
       validatedOnly = architectureSchema.parse(this.only)
     }
 
+    const timeoutSeconds = timeoutSchema.parse(this.timeout)
+
     // Validate context if provided
     if (this.kubectlContext) {
       const clustersData = await readYAMLFile({
@@ -65,8 +67,6 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
 
     // Wait for scale-up if requested
     if (this.wait) {
-      const timeoutSeconds = timeoutSchema.parse(this.timeout)
-      
       const startTime = Date.now()
 
       for (const arch of archsToScale) {

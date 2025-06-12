@@ -9,6 +9,41 @@ import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo } from '@/util/eks/types.ts'
 
+// Zod schemas for AWS CLI and kubectl output validation
+const eksDescribeClusterSchema = z.object({
+  cluster: z.object({
+    name: z.string(),
+    arn: z.string(),
+    status: z.string(),
+    version: z.string(),
+    endpoint: z.string(),
+    certificateAuthority: z.object({
+      data: z.string()
+    }),
+    tags: z.record(z.string()).optional()
+  })
+})
+
+const eksListNodegroupsSchema = z.object({
+  nodegroups: z.array(z.string()).optional()
+})
+
+const kubernetesItemsSchema = z.object({
+  items: z.array(z.object({
+    metadata: z.object({
+      name: z.string()
+    })
+  })).optional()
+})
+
+const autoScalingGroupsSchema = z.array(z.object({
+  AutoScalingGroupName: z.string(),
+  Tags: z.array(z.object({
+    Key: z.string(),
+    Value: z.string()
+  }))
+}))
+
 export class K8sClusterResumeCommand extends PanfactumCommand {
   static override paths = [['k8s', 'cluster', 'resume']]
 
@@ -59,7 +94,8 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             context,
             workingDirectory: process.cwd(),
           })
-          clusterInfo = JSON.parse(stdout).cluster
+          const result = parseJson(eksDescribeClusterSchema, stdout)
+          clusterInfo = result.cluster
           
           if (clusterInfo.tags?.['panfactum.com/suspended'] !== 'true') {
             throw new CLIError('Cluster is not marked as suspended')
@@ -80,7 +116,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          const groups = parseJson(z.array(z.object({ AutoScalingGroupName: z.string(), Tags: z.array(z.object({ Key: z.string(), Value: z.string() })) })), stdout)
+          const groups = parseJson(autoScalingGroupsSchema, stdout)
           
           for (const group of groups) {
             // Extract original values from tags
@@ -163,7 +199,8 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             context,
             workingDirectory: process.cwd(),
           })
-          const nodeGroups = JSON.parse(stdout).nodegroups || []
+          const result = parseJson(eksListNodegroupsSchema, stdout)
+          const nodeGroups = result.nodegroups || []
           
           for (const nodeGroup of nodeGroups) {
             // Get the original configuration (usually 3 nodes)
@@ -196,7 +233,8 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
               workingDirectory: process.cwd(),
             })
             
-            const nodePools = JSON.parse(stdout).items || []
+            const result = parseJson(kubernetesItemsSchema, stdout)
+            const nodePools = result.items || []
             
             for (const nodePool of nodePools) {
               // Remove CPU and memory limits

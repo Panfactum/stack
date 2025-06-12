@@ -1,5 +1,4 @@
 import { spawn } from 'child_process'
-import { select } from '@inquirer/prompts'
 import { Option, Command } from 'clipanion'
 import { z } from 'zod'
 import {getIdentity} from "@/util/aws/getIdentity.ts";
@@ -133,7 +132,7 @@ export class DbTunnelCommand extends PanfactumCommand {
       value: db,
     }))
 
-    const selectedDb = await select({
+    const selectedDb = await this.context.logger.select({
       message: 'Select a database',
       choices: dbChoices,
     })
@@ -145,7 +144,7 @@ export class DbTunnelCommand extends PanfactumCommand {
       { name: 'Reader', value: 'reader' },
     ]
 
-    const selectedRole = await select({
+    const selectedRole = await this.context.logger.select({
       message: 'Select database role',
       choices: roleChoices,
     })
