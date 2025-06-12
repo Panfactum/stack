@@ -1,18 +1,25 @@
 import {Command, Option} from "clipanion";
+import { z } from "zod";
 import {PanfactumCommand} from "@/util/command/panfactumCommand.ts";
 
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { getRegions } from "@/util/config/getRegions";
 import {CLIError} from "@/util/error/error.ts";
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
-import { validateEnum } from "@/util/types/typeGuards";
 import { setupECR } from "./setupECR";
 import type { PanfactumContext } from "@/util/context/context";
 
-enum Feature {
-  ECR_PULL_THROUGH_CACHE = "ecr-pull-through-cache",
+// Zod schema for feature validation
+const featureSchema = z.enum([
+  "ecr-pull-through-cache",
   // Add more features as needed
-}
+]);
+
+// Create feature constants for switch statement
+const FEATURE = {
+  ECR_PULL_THROUGH_CACHE: "ecr-pull-through-cache" as const,
+  // Add more features as needed
+} as const;
 
 export interface FeatureEnableOptions {
   context: PanfactumContext,
@@ -41,7 +48,7 @@ export class ClusterEnableCommand extends PanfactumCommand {
 
   async execute() {
     // Validate and get properly typed feature
-    const validatedFeature = validateEnum(this.feature, Object.values(Feature))
+    const validatedFeature = featureSchema.parse(this.feature)
 
     /*******************************************
      * Select Environment and Region
@@ -80,7 +87,7 @@ export class ClusterEnableCommand extends PanfactumCommand {
 
     // Use the validated feature in the implementation
     switch (validatedFeature) {
-      case Feature.ECR_PULL_THROUGH_CACHE: {
+      case FEATURE.ECR_PULL_THROUGH_CACHE: {
         // Implement ECR pull-through cache logic
         const tasks = await setupECR({
           environment: selectedEnvironment.name,
