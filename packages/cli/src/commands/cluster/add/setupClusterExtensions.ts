@@ -87,9 +87,6 @@ export async function setupClusterExtensions(
                     await buildDeployModuleTask({
                       taskTitle: "Deploy Bastion",
                       context,
-                      env: {
-                        ...process.env,
-                      },
                       environment,
                       region,
                       skipIfAlreadyApplied: true,
@@ -126,9 +123,6 @@ export async function setupClusterExtensions(
                     await buildDeployModuleTask({
                       taskTitle: "Deploy External Snapshotter",
                       context,
-                      env: {
-                        ...process.env,
-                      },
                       environment,
                       region,
                       skipIfAlreadyApplied: true,
@@ -140,9 +134,6 @@ export async function setupClusterExtensions(
                     await buildDeployModuleTask({
                       taskTitle: "Deploy Velero",
                       context,
-                      env: {
-                        ...process.env,
-                      },
                       environment,
                       region,
                       skipIfAlreadyApplied: true,
@@ -159,9 +150,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "Deploy KEDA",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: true,
@@ -171,9 +159,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "Deploy Reloader",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: true,
@@ -185,9 +170,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "Deploy Node Image Cache Controller",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: true,
@@ -199,9 +181,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "Deploy PVC Autoresizer",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: true,
@@ -213,9 +192,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "Deploy Descheduler",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: true,
@@ -227,9 +203,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "Deploy PostgreSQL via CloudNativePG",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: true,
@@ -239,9 +212,6 @@ export async function setupClusterExtensions(
             await buildDeployModuleTask({
               taskTitle: "EKS NodePools Adjustment",
               context,
-              env: {
-                ...process.env,
-              },
               environment,
               region,
               skipIfAlreadyApplied: await shouldSkipNodePoolsAdjustment(),
