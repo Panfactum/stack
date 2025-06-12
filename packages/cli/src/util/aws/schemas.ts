@@ -86,6 +86,63 @@ export const AWS_ACCOUNT_ALIAS_SCHEMA = z
     .refine(val => !val.startsWith('-') && !val.endsWith('-'), "Account names/aliases cannot start or end with a hyphen")
     .refine(val => !/^\d{12}$/.test(val), "Account names/aliases cannot be a 12-digit number")
 
+// AWS CLI and kubectl output validation schemas
+// Used across multiple k8s cluster commands to ensure consistency and reduce duplication
+
+// AWS EKS describe-cluster response schema
+export const EKS_DESCRIBE_CLUSTER_SCHEMA = z.object({
+  cluster: z.object({
+    name: z.string(),
+    arn: z.string(),
+    status: z.string(),
+    version: z.string(),
+    endpoint: z.string(),
+    certificateAuthority: z.object({
+      data: z.string()
+    }),
+    tags: z.record(z.string()).optional()
+  })
+})
+
+// AWS EKS list-nodegroups response schema
+export const EKS_LIST_NODEGROUPS_SCHEMA = z.object({
+  nodegroups: z.array(z.string()).optional()
+})
+
+// Kubernetes resources list schema (kubectl get -o json)
+export const KUBERNETES_ITEMS_SCHEMA = z.object({
+  items: z.array(z.object({
+    metadata: z.object({
+      name: z.string()
+    })
+  })).optional()
+})
+
+// AWS Auto Scaling Groups with tags (for resume operations)
+export const AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA = z.array(z.object({
+  AutoScalingGroupName: z.string(),
+  Tags: z.array(z.object({
+    Key: z.string(),
+    Value: z.string()
+  }))
+}))
+
+// AWS Auto Scaling Groups with sizing info (for suspend operations)
+export const AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA = z.array(z.object({
+  AutoScalingGroupName: z.string(),
+  MinSize: z.number(),
+  MaxSize: z.number(),
+  DesiredCapacity: z.number()
+}))
+
+// AWS EC2 instances query response (nested arrays from Reservations[*].Instances[*].InstanceId)
+export const EC2_INSTANCES_SCHEMA = z.array(z.array(z.string()))
+
+// AWS ELBv2 load balancers response schema
+export const LOAD_BALANCERS_SCHEMA = z.array(z.object({
+  LoadBalancerArn: z.string()
+}))
+
 export const COUNTRY_CODES = [
     { value: 'US', name: 'United States (US)' },
     { value: 'AF', name: 'Afghanistan (AF)' },

@@ -1,48 +1,18 @@
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
-import { z } from 'zod'
 import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
+import {
+  AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA,
+  EKS_DESCRIBE_CLUSTER_SCHEMA,
+  EKS_LIST_NODEGROUPS_SCHEMA,
+  KUBERNETES_ITEMS_SCHEMA
+} from '@/util/aws/schemas.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo } from '@/util/eks/types.ts'
-
-// Zod schemas for AWS CLI and kubectl output validation
-const eksDescribeClusterSchema = z.object({
-  cluster: z.object({
-    name: z.string(),
-    arn: z.string(),
-    status: z.string(),
-    version: z.string(),
-    endpoint: z.string(),
-    certificateAuthority: z.object({
-      data: z.string()
-    }),
-    tags: z.record(z.string()).optional()
-  })
-})
-
-const eksListNodegroupsSchema = z.object({
-  nodegroups: z.array(z.string()).optional()
-})
-
-const kubernetesItemsSchema = z.object({
-  items: z.array(z.object({
-    metadata: z.object({
-      name: z.string()
-    })
-  })).optional()
-})
-
-const autoScalingGroupsSchema = z.array(z.object({
-  AutoScalingGroupName: z.string(),
-  Tags: z.array(z.object({
-    Key: z.string(),
-    Value: z.string()
-  }))
-}))
 
 export class K8sClusterResumeCommand extends PanfactumCommand {
   static override paths = [['k8s', 'cluster', 'resume']]
@@ -94,7 +64,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             context,
             workingDirectory: process.cwd(),
           })
-          const result = parseJson(eksDescribeClusterSchema, stdout)
+          const result = parseJson(EKS_DESCRIBE_CLUSTER_SCHEMA, stdout)
           clusterInfo = result.cluster
           
           if (clusterInfo.tags?.['panfactum.com/suspended'] !== 'true') {
@@ -116,7 +86,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          const groups = parseJson(autoScalingGroupsSchema, stdout)
+          const groups = parseJson(AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA, stdout)
           
           for (const group of groups) {
             // Extract original values from tags
@@ -199,7 +169,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             context,
             workingDirectory: process.cwd(),
           })
-          const result = parseJson(eksListNodegroupsSchema, stdout)
+          const result = parseJson(EKS_LIST_NODEGROUPS_SCHEMA, stdout)
           const nodeGroups = result.nodegroups || []
           
           for (const nodeGroup of nodeGroups) {
@@ -233,7 +203,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
               workingDirectory: process.cwd(),
             })
             
-            const result = parseJson(kubernetesItemsSchema, stdout)
+            const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
             const nodePools = result.items || []
             
             for (const nodePool of nodePools) {

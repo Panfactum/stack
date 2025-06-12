@@ -1,11 +1,20 @@
 import { confirm } from '@inquirer/prompts'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
+import {
+  AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA,
+  EC2_INSTANCES_SCHEMA,
+  EKS_DESCRIBE_CLUSTER_SCHEMA,
+  EKS_LIST_NODEGROUPS_SCHEMA,
+  KUBERNETES_ITEMS_SCHEMA,
+  LOAD_BALANCERS_SCHEMA
+} from '@/util/aws/schemas.ts'
 import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
 import { execute } from '@/util/subprocess/execute.ts'
+import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
 
 export class K8sClusterSuspendCommand extends PanfactumCommand {
@@ -73,7 +82,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
             context,
             workingDirectory: process.cwd(),
           })
-          clusterInfo = JSON.parse(stdout).cluster
+          const result = parseJson(EKS_DESCRIBE_CLUSTER_SCHEMA, stdout)
+          clusterInfo = result.cluster
           
           if (clusterInfo.tags?.['panfactum.com/suspended'] === 'true') {
             throw new CLIError('Cluster is already suspended')
@@ -121,7 +131,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
               workingDirectory: process.cwd(),
             })
             
-            const nodePools = JSON.parse(stdout).items || []
+            const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
+            const nodePools = result.items || []
             
             for (const nodePool of nodePools) {
               // Set limits to 0
@@ -148,7 +159,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
             context,
             workingDirectory: process.cwd(),
           })
-          nodeGroups = JSON.parse(stdout).nodegroups || []
+          const result = parseJson(EKS_LIST_NODEGROUPS_SCHEMA, stdout)
+          nodeGroups = result.nodegroups || []
         },
       },
       {
@@ -184,7 +196,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          const instances = JSON.parse(stdout).flat()
+          const result = parseJson(EC2_INSTANCES_SCHEMA, stdout)
+          const instances = result.flat()
           
           if (instances.length > 0) {
             await execute({
@@ -208,12 +221,12 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          const groups = JSON.parse(stdout)
-          autoScalingGroups = groups.map((g: Record<string, unknown>) => ({
-            name: g['AutoScalingGroupName'],
-            minSize: g['MinSize'],
-            maxSize: g['MaxSize'],
-            desiredCapacity: g['DesiredCapacity'],
+          const groups = parseJson(AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA, stdout)
+          autoScalingGroups = groups.map(g => ({
+            name: g.AutoScalingGroupName,
+            minSize: g.MinSize,
+            maxSize: g.MaxSize,
+            desiredCapacity: g.DesiredCapacity,
           }))
         },
       },
@@ -260,7 +273,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          const loadBalancers = JSON.parse(stdout)
+          const loadBalancers = parseJson(LOAD_BALANCERS_SCHEMA, stdout)
           
           for (const lb of loadBalancers) {
             await execute({
