@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import { select } from '@inquirer/prompts'
 import { Option, Command } from 'clipanion'
+import { z } from 'zod'
 import {getIdentity} from "@/util/aws/getIdentity.ts";
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import {getEnvironments} from "@/util/config/getEnvironments.ts";
@@ -13,9 +14,18 @@ import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT} from '@/util/terragrunt/constants'
-import { validateEnum } from '@/util/types/typeGuards'
 import { getVaultTokenString } from '@/util/vault/getVaultToken'
 import type { DatabaseType, VaultRole } from '@/util/db/types.ts'
+
+// Zod schemas for validation
+const databaseTypeSchema = z.enum(['postgresql', 'redis', 'nats'])
+const vaultRoleSchema = z.enum(['superuser', 'admin', 'reader'])
+const portSchema = z.string()
+  .regex(/^\d+$/, 'Port must be a number')
+  .transform(Number)
+  .refine((port) => port >= 1 && port <= 65535, {
+    message: 'Port must be between 1 and 65535'
+  })
 
 export class DbTunnelCommand extends PanfactumCommand {
   static override paths = [['db', 'tunnel']]
@@ -50,10 +60,9 @@ export class DbTunnelCommand extends PanfactumCommand {
     const { context } = this
 
     // Validate type if provided and get properly typed value
-    const validTypes: DatabaseType[] = ['postgresql', 'redis', 'nats']
     let validatedType: DatabaseType | undefined
     if (this.type) {
-      validatedType = validateEnum(this.type, validTypes)
+      validatedType = databaseTypeSchema.parse(this.type)
     }
 
     /*******************************************
@@ -132,7 +141,6 @@ export class DbTunnelCommand extends PanfactumCommand {
     })
 
     // Select role
-    const validRoles: VaultRole[] = ['superuser', 'admin', 'reader']
     const roleChoices = [
       { name: 'Superuser', value: 'superuser' },
       { name: 'Admin', value: 'admin' },
@@ -145,10 +153,10 @@ export class DbTunnelCommand extends PanfactumCommand {
     })
 
     // Validate the selected role
-    const validatedRole = validateEnum(selectedRole, validRoles)
+    const validatedRole = vaultRoleSchema.parse(selectedRole) as VaultRole
 
     // Get local port
-    const localPort = this.port ? parseInt(this.port, 10) : await getOpenPort()
+    const localPort = this.port ? portSchema.parse(this.port) : await getOpenPort()
 
     // Step 2: Get temporary credentials
     const vaultRole = getVaultRole(selectedDb, validatedRole)
