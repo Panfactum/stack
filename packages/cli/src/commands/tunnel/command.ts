@@ -232,7 +232,7 @@ export default class TunnelCommand extends PanfactumCommand {
           error
         );
       }
-      throw new CLIError(`Failed to establish tunnel: ${(error as Error).message}`, error);
+      throw new CLIError(`Failed to establish tunnel`, error);
     }
   }
 }

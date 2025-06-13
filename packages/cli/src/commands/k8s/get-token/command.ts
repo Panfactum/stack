@@ -3,7 +3,6 @@
 
 import { Option } from 'clipanion'
 import { getEksToken } from '@/util/aws/getEksToken'
-import { getIdentity } from '@/util/aws/getIdentity'
 import { PanfactumCommand } from '@/util/command/panfactumCommand'
 import { CLIError } from '@/util/error/error'
 
@@ -44,10 +43,6 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
     const { logger } = this.context
 
     try {
-      // Ensure we have valid AWS credentials by getting identity
-      // This will handle SSO login automatically if needed
-      await getIdentity({ context: this.context, profile: this.profile })
-      
       // Get the EKS token using our utility that combines AWS SDK validation with CLI token generation
       const token = await getEksToken(this.context, this.clusterName, this.region, this.profile)
       
@@ -58,7 +53,7 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
       if (error instanceof CLIError) {
         throw error
       }
-      throw new CLIError(`Failed to get EKS token: ${(error as Error).message}`, error)
+      throw new CLIError(`Failed to get EKS token`, error)
     }
   }
 }

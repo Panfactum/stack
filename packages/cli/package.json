@@ -33,6 +33,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-sdk/client-account": "^3.794.0",
     "@aws-sdk/client-auto-scaling": "^3.787.0",
     "@aws-sdk/client-dynamodb": "^3.787.0",
@@ -47,9 +48,11 @@
     "@aws-sdk/client-service-quotas": "^3.810.0",
     "@aws-sdk/client-ssm": "^3.787.0",
     "@aws-sdk/client-sts": "^3.787.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
     "@goauthentik/api": "^2025.4.0-1746018955",
     "@inquirer/prompts": "^7.4.0",
     "@kubernetes/client-node": "^1.1.2",
+    "@smithy/protocol-http": "^5.1.2",
     "@types/ini": "^4.1.1",
     "clipanion": "^4.0.0-rc.4",
     "eslint-plugin-unused-imports": "^4.1.4",

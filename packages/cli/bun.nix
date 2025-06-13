@@ -199,6 +199,17 @@ let
         hash = "sha256-e1IxKVtcYwRUc7L4tyN7LLiikBeaBPifrfl78vomZ/Q=";
       };
     };
+    "@aws-sdk/client-account/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-account/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-auto-scaling" = {
       out_path = "@aws-sdk/client-auto-scaling";
       binaries =
@@ -252,6 +263,17 @@ let
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
         hash = "sha256-IK/LOrW56bqQUdAPX1E8SPUxqr/QlUEyNvcISfexDe0=";
+      };
+    };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node" = {
@@ -584,6 +606,17 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
+    "@aws-sdk/client-auto-scaling/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+      };
+    };
     "@aws-sdk/client-auto-scaling/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/hash-node";
       binaries =
@@ -749,15 +782,15 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-auto-scaling/@smithy/protocol-http" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/protocol-http";
+    "@aws-sdk/client-auto-scaling/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
       binaries =
         {
         };
       pkg = fetchurl {
-        name = "@smithy/protocol-http@5.1.2";
-        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.2.tgz";
-        hash = "sha256-hUQpc+Z6zunFEkFnaJUBqMFjMVClckkrdhyA2F8IZHo=";
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-auto-scaling/@smithy/smithy-client" = {
@@ -945,6 +978,17 @@ let
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
         hash = "sha256-tNABHMG1lBQYLZnhbfXBfM7yrNHc6kPCWiXOSBCffk4=";
+      };
+    };
+    "@aws-sdk/client-dynamodb/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node" = {
@@ -1266,6 +1310,17 @@ let
         hash = "sha256-Z6mqTpnTXtJ/0D0yWmnp5CJ+RQ5j7vJzYLVXWA68Iak=";
       };
     };
+    "@aws-sdk/client-dynamodb/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-dynamodb/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/smithy-client";
       binaries =
@@ -1385,6 +1440,17 @@ let
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
         hash = "sha256-tNABHMG1lBQYLZnhbfXBfM7yrNHc6kPCWiXOSBCffk4=";
+      };
+    };
+    "@aws-sdk/client-ec2/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node" = {
@@ -1541,6 +1607,17 @@ let
         hash = "sha256-CVuT/IAAnDaLrej88UzB94aHBzJbp43fcpExdoUUTwU=";
       };
     };
+    "@aws-sdk/client-ec2/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-ec2/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-ec2/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@smithy/node_modules/util-waiter";
       binaries =
@@ -1616,6 +1693,17 @@ let
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
         hash = "sha256-IK/LOrW56bqQUdAPX1E8SPUxqr/QlUEyNvcISfexDe0=";
+      };
+    };
+    "@aws-sdk/client-ecr-public/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node" = {
@@ -1948,6 +2036,17 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
+    "@aws-sdk/client-ecr-public/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+      };
+    };
     "@aws-sdk/client-ecr-public/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/hash-node";
       binaries =
@@ -2113,15 +2212,15 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ecr-public/@smithy/protocol-http" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/protocol-http";
+    "@aws-sdk/client-ecr-public/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
       binaries =
         {
         };
       pkg = fetchurl {
-        name = "@smithy/protocol-http@5.1.2";
-        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.2.tgz";
-        hash = "sha256-hUQpc+Z6zunFEkFnaJUBqMFjMVClckkrdhyA2F8IZHo=";
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ecr-public/@smithy/smithy-client" = {
@@ -2320,6 +2419,17 @@ let
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
         hash = "sha256-IK/LOrW56bqQUdAPX1E8SPUxqr/QlUEyNvcISfexDe0=";
+      };
+    };
+    "@aws-sdk/client-ecr/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node" = {
@@ -2652,6 +2762,17 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
+    "@aws-sdk/client-ecr/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+      };
+    };
     "@aws-sdk/client-ecr/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/hash-node";
       binaries =
@@ -2817,15 +2938,15 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ecr/@smithy/protocol-http" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/protocol-http";
+    "@aws-sdk/client-ecr/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
       binaries =
         {
         };
       pkg = fetchurl {
-        name = "@smithy/protocol-http@5.1.2";
-        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.2.tgz";
-        hash = "sha256-hUQpc+Z6zunFEkFnaJUBqMFjMVClckkrdhyA2F8IZHo=";
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ecr/@smithy/smithy-client" = {
@@ -2993,6 +3114,17 @@ let
         hash = "sha256-7KQNT6TPTA+PlMLcB7/5NfN1L/1URubbnkHIx2dLMMM=";
       };
     };
+    "@aws-sdk/client-iam/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-iam/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-iam/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-iam/node_modules/@smithy/node_modules/util-waiter";
       binaries =
@@ -3013,6 +3145,17 @@ let
         name = "@aws-sdk/client-organizations@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-organizations/-/client-organizations-3.787.0.tgz";
         hash = "sha256-mTUNKeQ84H27nnDmLvlviYmftEt+1elfx4v2X4yA47c=";
+      };
+    };
+    "@aws-sdk/client-organizations/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-organizations/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@aws-sdk/client-route-53" = {
@@ -3037,6 +3180,28 @@ let
         hash = "sha256-25DU/MievNOEQz4Z9e7tWa0nhW4frUHW7QJ2ofyJ6bM=";
       };
     };
+    "@aws-sdk/client-route-53-domains/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-route-53-domains/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
+    "@aws-sdk/client-route-53/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-route-53/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-route-53/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-route-53/node_modules/@smithy/node_modules/util-waiter";
       binaries =
@@ -3057,6 +3222,17 @@ let
         name = "@aws-sdk/client-s3@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.787.0.tgz";
         hash = "sha256-jYnnvWK3OUeo8f1whgwjdaxRRHTlYWy4zYE4yxc3mVA=";
+      };
+    };
+    "@aws-sdk/client-s3/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-s3/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@aws-sdk/client-s3/@smithy/util-waiter" = {
@@ -3101,6 +3277,17 @@ let
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
         hash = "sha256-tNABHMG1lBQYLZnhbfXBfM7yrNHc6kPCWiXOSBCffk4=";
+      };
+    };
+    "@aws-sdk/client-service-quotas/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node" = {
@@ -3422,6 +3609,17 @@ let
         hash = "sha256-Z6mqTpnTXtJ/0D0yWmnp5CJ+RQ5j7vJzYLVXWA68Iak=";
       };
     };
+    "@aws-sdk/client-service-quotas/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-service-quotas/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/smithy-client";
       binaries =
@@ -3552,6 +3750,17 @@ let
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
         hash = "sha256-IK/LOrW56bqQUdAPX1E8SPUxqr/QlUEyNvcISfexDe0=";
+      };
+    };
+    "@aws-sdk/client-ssm/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node" = {
@@ -3884,6 +4093,17 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
+    "@aws-sdk/client-ssm/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+      };
+    };
     "@aws-sdk/client-ssm/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/hash-node";
       binaries =
@@ -4049,15 +4269,15 @@ let
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ssm/@smithy/protocol-http" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/protocol-http";
+    "@aws-sdk/client-ssm/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
       binaries =
         {
         };
       pkg = fetchurl {
-        name = "@smithy/protocol-http@5.1.2";
-        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.2.tgz";
-        hash = "sha256-hUQpc+Z6zunFEkFnaJUBqMFjMVClckkrdhyA2F8IZHo=";
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/client-ssm/@smithy/smithy-client" = {
@@ -4225,6 +4445,17 @@ let
         hash = "sha256-zbfDpFbPnXo9fDW0Cpzta6Tzxp0j6RlYvMN6Cq8zn7s=";
       };
     };
+    "@aws-sdk/client-sso/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-sso/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/client-sts" = {
       out_path = "@aws-sdk/client-sts";
       binaries =
@@ -4236,6 +4467,17 @@ let
         hash = "sha256-++iMnPLVBtsQiLHBdIkWUVxF+31iyiAPtclAHvuqYpk=";
       };
     };
+    "@aws-sdk/client-sts/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-sts/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/core" = {
       out_path = "@aws-sdk/core";
       binaries =
@@ -4245,6 +4487,39 @@ let
         name = "@aws-sdk/core@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.775.0.tgz";
         hash = "sha256-aENyQhtRp2djjLr+EiCSK/7pCGSpD5UYyaRKUHD5weo=";
+      };
+    };
+    "@aws-sdk/core/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/core/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
+    "@aws-sdk/core/@smithy/signature-v4" = {
+      out_path = "@aws-sdk/core/node_modules/@smithy/node_modules/signature-v4";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/signature-v4@5.0.2";
+        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
+        hash = "sha256-tp0etdUAUNMwntbwbo8NoD84mhxdNxXxunOMZlZrVjI=";
+      };
+    };
+    "@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/credential-provider-env" = {
@@ -4267,6 +4542,17 @@ let
         name = "@aws-sdk/credential-provider-http@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.775.0.tgz";
         hash = "sha256-ykHVHYjK5sGT7tWV0H7XKcdiPru1rqMKDyMVo0gLsKk=";
+      };
+    };
+    "@aws-sdk/credential-provider-http/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/credential-provider-http/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@aws-sdk/credential-provider-ini" = {
@@ -4346,6 +4632,17 @@ let
         hash = "sha256-R5EyaYGLGCWhENXBp8Tq20+2nsiggkyBEevoO16lykU=";
       };
     };
+    "@aws-sdk/middleware-bucket-endpoint/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-bucket-endpoint/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/middleware-endpoint-discovery" = {
       out_path = "@aws-sdk/middleware-endpoint-discovery";
       binaries =
@@ -4379,6 +4676,17 @@ let
         hash = "sha256-Z6mqTpnTXtJ/0D0yWmnp5CJ+RQ5j7vJzYLVXWA68Iak=";
       };
     };
+    "@aws-sdk/middleware-endpoint-discovery/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-endpoint-discovery/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/middleware-expect-continue" = {
       out_path = "@aws-sdk/middleware-expect-continue";
       binaries =
@@ -4388,6 +4696,17 @@ let
         name = "@aws-sdk/middleware-expect-continue@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-expect-continue/-/middleware-expect-continue-3.775.0.tgz";
         hash = "sha256-3APjonbW0BNlCn6oKH+FNXmNIYSuRIvnRGrV7ftB66M=";
+      };
+    };
+    "@aws-sdk/middleware-expect-continue/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-expect-continue/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@aws-sdk/middleware-flexible-checksums" = {
@@ -4401,6 +4720,17 @@ let
         hash = "sha256-xMYDYn0Oa3cQ2dXW5vBWNio9BQJiwVRr+mE8oZC+dOQ=";
       };
     };
+    "@aws-sdk/middleware-flexible-checksums/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-flexible-checksums/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/middleware-host-header";
       binaries =
@@ -4410,6 +4740,17 @@ let
         name = "@aws-sdk/middleware-host-header@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.775.0.tgz";
         hash = "sha256-rsT2Brp3kWc7djJGQ2xBQ0pDa7GOrPKpscp4YioxMBU=";
+      };
+    };
+    "@aws-sdk/middleware-host-header/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-host-header/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@aws-sdk/middleware-location-constraint" = {
@@ -4445,6 +4786,17 @@ let
         hash = "sha256-qR24ULM5EQtKz0LnbGU0mD4sCnZioAw4szdzj3gj2tI=";
       };
     };
+    "@aws-sdk/middleware-recursion-detection/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-recursion-detection/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/middleware-sdk-ec2" = {
       out_path = "@aws-sdk/middleware-sdk-ec2";
       binaries =
@@ -4456,6 +4808,17 @@ let
         hash = "sha256-NOIjZf6dgn4+WoSUNpPq0Dl0ZF2l9sBMUZZ8ULX7Nlo=";
       };
     };
+    "@aws-sdk/middleware-sdk-ec2/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/middleware-sdk-ec2/@smithy/signature-v4" = {
       out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/signature-v4";
       binaries =
@@ -4465,6 +4828,17 @@ let
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
         hash = "sha256-tNABHMG1lBQYLZnhbfXBfM7yrNHc6kPCWiXOSBCffk4=";
+      };
+    };
+    "@aws-sdk/middleware-sdk-ec2/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/middleware-sdk-route53" = {
@@ -4489,6 +4863,39 @@ let
         hash = "sha256-bgMEmecayeqJOAJK57A5xnv6pHVVgAwpffT1mITKkvM=";
       };
     };
+    "@aws-sdk/middleware-sdk-s3/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-sdk-s3/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
+    "@aws-sdk/middleware-sdk-s3/@smithy/signature-v4" = {
+      out_path = "@aws-sdk/middleware-sdk-s3/node_modules/@smithy/node_modules/signature-v4";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/signature-v4@5.0.2";
+        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
+        hash = "sha256-tp0etdUAUNMwntbwbo8NoD84mhxdNxXxunOMZlZrVjI=";
+      };
+    };
+    "@aws-sdk/middleware-sdk-s3/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/middleware-sdk-s3/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+      };
+    };
     "@aws-sdk/middleware-ssec" = {
       out_path = "@aws-sdk/middleware-ssec";
       binaries =
@@ -4511,6 +4918,17 @@ let
         hash = "sha256-0trTz2KHrmALqu6Sdx0jNPSKAVQ42LO6LNtlDXM9H7c=";
       };
     };
+    "@aws-sdk/middleware-user-agent/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/middleware-user-agent/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@aws-sdk/nested-clients" = {
       out_path = "@aws-sdk/nested-clients";
       binaries =
@@ -4520,6 +4938,17 @@ let
         name = "@aws-sdk/nested-clients@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.787.0.tgz";
         hash = "sha256-B0ccTDw/ZLeB9AlRSsIIDQQz9EhurVVpDI+9PiX2FHQ=";
+      };
+    };
+    "@aws-sdk/nested-clients/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/nested-clients/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@aws-sdk/region-config-resolver" = {
@@ -4533,6 +4962,17 @@ let
         hash = "sha256-xJ4yzDq3ZRNSXV/TXHarH/IcrvzvbMzVpDL/P1aIOSw=";
       };
     };
+    "@aws-sdk/signature-v4" = {
+      out_path = "@aws-sdk/signature-v4";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/signature-v4@3.374.0";
+        url = "https://registry.npmjs.org/@aws-sdk/signature-v4/-/signature-v4-3.374.0.tgz";
+        hash = "sha256-hKeHnLKxW/Vzl8zoYDyCBHed+RmhRmWHN8o5J+FE3rY=";
+      };
+    };
     "@aws-sdk/signature-v4-multi-region" = {
       out_path = "@aws-sdk/signature-v4-multi-region";
       binaries =
@@ -4542,6 +4982,39 @@ let
         name = "@aws-sdk/signature-v4-multi-region@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.775.0.tgz";
         hash = "sha256-kPJjT4JeScGdkD9D19B4wo23RFcq5E7VrkZnmKd4szM=";
+      };
+    };
+    "@aws-sdk/signature-v4-multi-region/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/signature-v4-multi-region/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
+    "@aws-sdk/signature-v4-multi-region/@smithy/signature-v4" = {
+      out_path = "@aws-sdk/signature-v4-multi-region/node_modules/@smithy/node_modules/signature-v4";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/signature-v4@5.0.2";
+        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
+        hash = "sha256-tp0etdUAUNMwntbwbo8NoD84mhxdNxXxunOMZlZrVjI=";
+      };
+    };
+    "@aws-sdk/signature-v4-multi-region/@smithy/signature-v4/@smithy/util-uri-escape" = {
+      out_path = "@aws-sdk/signature-v4-multi-region/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@aws-sdk/token-providers" = {
@@ -4630,6 +5103,17 @@ let
         name = "@aws-sdk/util-user-agent-node@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.787.0.tgz";
         hash = "sha256-ekl2ej0GDcdGxXLhJ4V1L5QogFr0ipkHyi7kPcv5paY=";
+      };
+    };
+    "@aws-sdk/util-utf8-browser" = {
+      out_path = "@aws-sdk/util-utf8-browser";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/util-utf8-browser@3.259.0";
+        url = "https://registry.npmjs.org/@aws-sdk/util-utf8-browser/-/util-utf8-browser-3.259.0.tgz";
+        hash = "sha256-yQ9sUwrWfz11Kw3BVQFf1CguLOjeCODfvUNs2vpdKpQ=";
       };
     };
     "@aws-sdk/xml-builder" = {
@@ -5402,6 +5886,17 @@ let
         hash = "sha256-fxou05ajq++jZAVhov8sa7yjEeZ37QM0wIh8hzO2NEs=";
       };
     };
+    "@smithy/core/@smithy/protocol-http" = {
+      out_path = "@smithy/core/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@smithy/credential-provider-imds" = {
       out_path = "@smithy/credential-provider-imds";
       binaries =
@@ -5419,9 +5914,97 @@ let
         {
         };
       pkg = fetchurl {
-        name = "@smithy/eventstream-codec@4.0.2";
-        url = "https://registry.npmjs.org/@smithy/eventstream-codec/-/eventstream-codec-4.0.2.tgz";
-        hash = "sha256-XdulvTAnyjAmX6nd/Svjgym4O7Vhvup+Tl7K0nht1UU=";
+        name = "@smithy/eventstream-codec@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/eventstream-codec/-/eventstream-codec-1.1.0.tgz";
+        hash = "sha256-2nB3hut1q6A6r6x76cm+gk+HvLUZEurnVMIJS6KYrJk=";
+      };
+    };
+    "@smithy/eventstream-codec/@aws-crypto/crc32" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-crypto/crc32@3.0.0";
+        url = "https://registry.npmjs.org/@aws-crypto/crc32/-/crc32-3.0.0.tgz";
+        hash = "sha256-6MCGUQs559RyLd1Y+DSZk3/JaTrB5DSTZYcJZoT6PTU=";
+      };
+    };
+    "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-crypto/util" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-crypto/node_modules/util";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-crypto/util@3.0.0";
+        url = "https://registry.npmjs.org/@aws-crypto/util/-/util-3.0.0.tgz";
+        hash = "sha256-yNpdcmpO8sM1S/KqTEdTkwQCCelhUE6vh2N7bYsR5Xc=";
+      };
+    };
+    "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-sdk/types" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-sdk/node_modules/types";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@aws-sdk/types@3.821.0";
+        url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
+        hash = "sha256-Y1e8BV/vXExA3SWWl3WwwB2eToosyCu4XQOeNV3EUwc=";
+      };
+    };
+    "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-sdk/types/@smithy/types" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-sdk/node_modules/types/node_modules/@smithy/node_modules/types";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/types@4.3.1";
+        url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
+        hash = "sha256-AydrmFROn5EQ0IpYvYp/W2wB2xBS/2QIbTlClNiqLEI=";
+      };
+    };
+    "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-sdk/types/tslib" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-sdk/node_modules/types/node_modules/tslib";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "tslib@2.8.1";
+        url = "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz";
+        hash = "sha256-ZvY11e6rrkSAdTSXaROhAs9hW5oEU2g1nJ95rm7iEZ4=";
+      };
+    };
+    "@smithy/eventstream-codec/@aws-crypto/crc32/tslib" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/tslib";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "tslib@1.14.1";
+        url = "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz";
+        hash = "sha256-czsxLinvZIjrZo23KLzQ3ukvCHhyABoGyFlJmcBtkfs=";
+      };
+    };
+    "@smithy/eventstream-codec/@smithy/types" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@smithy/node_modules/types";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/types@1.2.0";
+        url = "https://registry.npmjs.org/@smithy/types/-/types-1.2.0.tgz";
+        hash = "sha256-WayURL+/+57G043lvBMH7kI4vXQok9K3fiMDR2iqTW0=";
+      };
+    };
+    "@smithy/eventstream-codec/@smithy/util-hex-encoding" = {
+      out_path = "@smithy/eventstream-codec/node_modules/@smithy/node_modules/util-hex-encoding";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-hex-encoding@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/util-hex-encoding/-/util-hex-encoding-1.1.0.tgz";
+        hash = "sha256-9gYusCS+CeC4zTIRSA93rBtyP7w/41bmSYGiytrHyL0=";
       };
     };
     "@smithy/eventstream-serde-browser" = {
@@ -5468,6 +6051,17 @@ let
         hash = "sha256-pTIQI1h5ilDEyOSn42bHJANZR9BQoswUwOyTChmWBaA=";
       };
     };
+    "@smithy/eventstream-serde-universal/@smithy/eventstream-codec" = {
+      out_path = "@smithy/eventstream-serde-universal/node_modules/@smithy/node_modules/eventstream-codec";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/eventstream-codec@4.0.2";
+        url = "https://registry.npmjs.org/@smithy/eventstream-codec/-/eventstream-codec-4.0.2.tgz";
+        hash = "sha256-XdulvTAnyjAmX6nd/Svjgym4O7Vhvup+Tl7K0nht1UU=";
+      };
+    };
     "@smithy/fetch-http-handler" = {
       out_path = "@smithy/fetch-http-handler";
       binaries =
@@ -5477,6 +6071,17 @@ let
         name = "@smithy/fetch-http-handler@5.0.2";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.2.tgz";
         hash = "sha256-GaUoHBANaNTQi1mdEdS55DZYTgpvnwVlbvSLvL5Pl+A=";
+      };
+    };
+    "@smithy/fetch-http-handler/@smithy/protocol-http" = {
+      out_path = "@smithy/fetch-http-handler/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@smithy/hash-blob-browser" = {
@@ -5556,6 +6161,17 @@ let
         hash = "sha256-2qrwc6lhI8jDQ26zYJi8MBg6IPxnBGWmXxrM27jHIoI=";
       };
     };
+    "@smithy/middleware-content-length/@smithy/protocol-http" = {
+      out_path = "@smithy/middleware-content-length/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@smithy/middleware-endpoint" = {
       out_path = "@smithy/middleware-endpoint";
       binaries =
@@ -5576,6 +6192,17 @@ let
         name = "@smithy/middleware-retry@4.1.0";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.0.tgz";
         hash = "sha256-jKLntX6tng6GzYZEwfhdX2m9OO4coD/C5YWqES71/XA=";
+      };
+    };
+    "@smithy/middleware-retry/@smithy/protocol-http" = {
+      out_path = "@smithy/middleware-retry/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@smithy/middleware-serde" = {
@@ -5622,6 +6249,17 @@ let
         hash = "sha256-xQB7jCoW5EbZu1umB96gU6kjJsBmZlMPF/wkVp7LEDI=";
       };
     };
+    "@smithy/node-http-handler/@smithy/protocol-http" = {
+      out_path = "@smithy/node-http-handler/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+      };
+    };
     "@smithy/property-provider" = {
       out_path = "@smithy/property-provider";
       binaries =
@@ -5639,9 +6277,20 @@ let
         {
         };
       pkg = fetchurl {
-        name = "@smithy/protocol-http@5.1.0";
-        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
-        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
+        name = "@smithy/protocol-http@5.1.2";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.2.tgz";
+        hash = "sha256-hUQpc+Z6zunFEkFnaJUBqMFjMVClckkrdhyA2F8IZHo=";
+      };
+    };
+    "@smithy/protocol-http/@smithy/types" = {
+      out_path = "@smithy/protocol-http/node_modules/@smithy/node_modules/types";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/types@4.3.1";
+        url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
+        hash = "sha256-AydrmFROn5EQ0IpYvYp/W2wB2xBS/2QIbTlClNiqLEI=";
       };
     };
     "@smithy/querystring-builder" = {
@@ -5653,6 +6302,17 @@ let
         name = "@smithy/querystring-builder@4.0.2";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.2.tgz";
         hash = "sha256-bFnenz6O8cN17EMiY/m8fz3/H/NiT9YCf+2jy66K6vw=";
+      };
+    };
+    "@smithy/querystring-builder/@smithy/util-uri-escape" = {
+      out_path = "@smithy/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-uri-escape@4.0.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
     };
     "@smithy/querystring-parser" = {
@@ -5694,9 +6354,75 @@ let
         {
         };
       pkg = fetchurl {
-        name = "@smithy/signature-v4@5.0.2";
-        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
-        hash = "sha256-tp0etdUAUNMwntbwbo8NoD84mhxdNxXxunOMZlZrVjI=";
+        name = "@smithy/signature-v4@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-1.1.0.tgz";
+        hash = "sha256-Zn87aIp72vy/YY4zZc7pOxd2pZj3R6Nz4sN1vXAFfiE=";
+      };
+    };
+    "@smithy/signature-v4/@smithy/is-array-buffer" = {
+      out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/is-array-buffer";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/is-array-buffer@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/is-array-buffer/-/is-array-buffer-1.1.0.tgz";
+        hash = "sha256-6OYhRi9GjlheTzH1aYTebzLaKz+iTLdX2HpsZPbwvQ0=";
+      };
+    };
+    "@smithy/signature-v4/@smithy/types" = {
+      out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/types";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/types@1.2.0";
+        url = "https://registry.npmjs.org/@smithy/types/-/types-1.2.0.tgz";
+        hash = "sha256-WayURL+/+57G043lvBMH7kI4vXQok9K3fiMDR2iqTW0=";
+      };
+    };
+    "@smithy/signature-v4/@smithy/util-hex-encoding" = {
+      out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-hex-encoding";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-hex-encoding@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/util-hex-encoding/-/util-hex-encoding-1.1.0.tgz";
+        hash = "sha256-9gYusCS+CeC4zTIRSA93rBtyP7w/41bmSYGiytrHyL0=";
+      };
+    };
+    "@smithy/signature-v4/@smithy/util-middleware" = {
+      out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-middleware";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-middleware@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-1.1.0.tgz";
+        hash = "sha256-OKONWes7nDNZsn6gxRj/dX5dBrf0bF+pj+v9+MCtsPg=";
+      };
+    };
+    "@smithy/signature-v4/@smithy/util-utf8" = {
+      out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-utf8";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-utf8@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/util-utf8/-/util-utf8-1.1.0.tgz";
+        hash = "sha256-KFRMZD18RrqBfb7H1nvfGDza45RVIkWqDPCT92rTG5c=";
+      };
+    };
+    "@smithy/signature-v4/@smithy/util-utf8/@smithy/util-buffer-from" = {
+      out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/util-buffer-from@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/util-buffer-from/-/util-buffer-from-1.1.0.tgz";
+        hash = "sha256-WjUya7Y4sTFyyyROZ7SUuVS0/dzAnclPvTzSDJAEHuE=";
       };
     };
     "@smithy/smithy-client" = {
@@ -5708,6 +6434,17 @@ let
         name = "@smithy/smithy-client@4.2.0";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.2.0.tgz";
         hash = "sha256-oXIoom3w5HRlUPGcvWJC2my+8ulyIxk0jRrnmGpV/Tk=";
+      };
+    };
+    "@smithy/smithy-client/@smithy/protocol-http" = {
+      out_path = "@smithy/smithy-client/node_modules/@smithy/node_modules/protocol-http";
+      binaries =
+        {
+        };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.1.0";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
+        hash = "sha256-pmQajTxy9i+5WcYRS4Aso/b+2fohIhX412dBQse6od4=";
       };
     };
     "@smithy/types" = {
@@ -5870,9 +6607,9 @@ let
         {
         };
       pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        name = "@smithy/util-uri-escape@1.1.0";
+        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-1.1.0.tgz";
+        hash = "sha256-YFNjlrBfTTOWrgjJimyAmodlXMNFWqNzjRI26mY3UeM=";
       };
     };
     "@smithy/util-utf8" = {

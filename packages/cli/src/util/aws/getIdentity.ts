@@ -21,12 +21,12 @@ export async function getIdentity(input: { context: PanfactumContext, profile: s
     const credentials = await getCredsFromFile({ context, profile });
     let attemptedSSOFix = Boolean(credentials);
     let retries = 0
+
     while (retries < 5) {
         try {
             context.logger.debug(`sts get-caller-identity`, { profile })
             return await stsClient.send(new GetCallerIdentityCommand({}));
         } catch (e: unknown) {
-
             if (!attemptedSSOFix) {
                 const errorMessage = e instanceof Error ? e.message : String(e);
                 if (errorMessage.includes(`sso`) || errorMessage.includes(`SSO`)) {
