@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
+import { CLIError } from "@/util/error/error";
 import { fileExists } from "./fileExists";
-import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function writeFile({

@@ -1,9 +1,9 @@
 import { join } from "node:path"
 import { parse } from "ini"
 import { z, ZodError } from "zod"
+import { CLIError, PanfactumZodError } from "@/util/error/error"
+import { fileExists } from "@/util/fs/fileExists"
 import { AWS_ACCESS_KEY_ID_SCHEMA, AWS_SECRET_KEY_SCHEMA } from "./schemas"
-import { CLIError, PanfactumZodError } from "../error/error"
-import { fileExists } from "../fs/fileExists"
 import type { PanfactumContext } from "@/util/context/context"
 
 type CredsPayload = {

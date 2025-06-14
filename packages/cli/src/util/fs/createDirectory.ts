@@ -1,5 +1,5 @@
 import { mkdir } from "node:fs/promises";
-import { CLIError } from "../error/error";
+import { CLIError } from "@/util/error/error";
 
 export const createDirectory = async (
     dirPath: string) => {

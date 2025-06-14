@@ -1,4 +1,6 @@
-import { execute } from "../subprocess/execute";
+import { UpdateAutoScalingGroupCommand } from "@aws-sdk/client-auto-scaling";
+import { getAutoScalingClient } from "./clients/getAutoScalingClient";
+import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function scaleASG({
@@ -14,23 +16,21 @@ export async function scaleASG({
   context: PanfactumContext;
   desiredCapacity: number;
 }) {
-  await execute({
-    command: [
-      "aws",
-      "--region",
-      awsRegion,
-      "--profile",
-      awsProfile,
-      "autoscaling",
-      "update-auto-scaling-group",
-      "--auto-scaling-group-name",
-      asgName,
-      "--desired-capacity",
-      desiredCapacity.toString(),
-    ],
-    context,
-    workingDirectory: process.cwd(),
-    errorMessage: `Failed to scale ASG ${asgName}`,
-  });
-  return true;
+  try {
+    const client = await getAutoScalingClient({ 
+      context, 
+      profile: awsProfile, 
+      region: awsRegion 
+    });
+
+    await client.send(new UpdateAutoScalingGroupCommand({
+      AutoScalingGroupName: asgName,
+      DesiredCapacity: desiredCapacity
+    }));
+
+    context.logger.debug(`Successfully scaled ASG ${asgName} to ${desiredCapacity} instances`);
+    return true;
+  } catch (error) {
+    throw new CLIError(`Failed to scale ASG ${asgName}`, { cause: error });
+  }
 }

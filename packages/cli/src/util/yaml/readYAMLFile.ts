@@ -1,7 +1,7 @@
 import { parse } from "yaml";
 import { z, ZodError } from "zod";
-import { CLIError, PanfactumZodError } from "../error/error";
-import { fileExists } from "../fs/fileExists";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { fileExists } from "@/util/fs/fileExists";
 import type { PanfactumContext } from "@/util/context/context";
 
 export const readYAMLFile = async <T extends z.ZodType<object>>(inputs: {

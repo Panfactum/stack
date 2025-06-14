@@ -1,4 +1,5 @@
 import {Command, Option} from "clipanion";
+import { z } from "zod";
 import {PanfactumCommand} from "@/util/command/panfactumCommand.ts";
 
 import { getEnvironments } from "@/util/config/getEnvironments";
@@ -8,10 +9,17 @@ import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constant
 import { setupECR } from "./setupECR";
 import type { PanfactumContext } from "@/util/context/context";
 
-enum Feature {
-  ECR_PULL_THROUGH_CACHE = "ecr-pull-through-cache",
+// Zod schema for feature validation
+const featureSchema = z.enum([
+  "ecr-pull-through-cache",
   // Add more features as needed
-}
+]);
+
+// Create feature constants for switch statement
+const FEATURE = {
+  ECR_PULL_THROUGH_CACHE: "ecr-pull-through-cache" as const,
+  // Add more features as needed
+} as const;
 
 export interface FeatureEnableOptions {
   context: PanfactumContext,
@@ -39,11 +47,8 @@ export class ClusterEnableCommand extends PanfactumCommand {
   });
 
   async execute() {
-    // Validate and convert the feature input to the enum
-    if (!Object.values(Feature).includes(this.feature as Feature)) {
-      const validFeatures = Object.values(Feature).join(", ");
-      throw new CLIError(`Invalid feature "${this.feature}". Valid features are: ${validFeatures}`);
-    }
+    // Validate and get properly typed feature
+    const validatedFeature = featureSchema.parse(this.feature)
 
     /*******************************************
      * Select Environment and Region
@@ -80,12 +85,9 @@ export class ClusterEnableCommand extends PanfactumCommand {
       })),
     });
 
-    // Now we can assign the validated input to our typed property
-    const feature = this.feature as Feature;
-
-    // Use the typed feature in your implementation
-    switch (feature) {
-      case Feature.ECR_PULL_THROUGH_CACHE: {
+    // Use the validated feature in the implementation
+    switch (validatedFeature) {
+      case FEATURE.ECR_PULL_THROUGH_CACHE: {
         // Implement ECR pull-through cache logic
         const tasks = await setupECR({
           environment: selectedEnvironment.name,
@@ -98,7 +100,7 @@ export class ClusterEnableCommand extends PanfactumCommand {
       }
       // Add cases for other features as needed
       default:
-        throw new CLIError(`Unhandled feature: ${this.feature}`);
+        throw new CLIError(`Unhandled feature: ${String(validatedFeature)}`);
     }
   }
 }

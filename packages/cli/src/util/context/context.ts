@@ -1,6 +1,6 @@
+import { phClient } from "@/util/posthog/tracking";
 import { getRepoVariables } from "./getRepoVariables";
 import { Logger } from "./logger";
-import { phClient } from "../posthog/tracking";
 import type { BaseContext } from "clipanion";
 
 export type PanfactumContext = BaseContext & {

@@ -1,5 +1,5 @@
 import { OrganizationsClient } from "@aws-sdk/client-organizations";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getOrganizationsClient(inputs: { context: PanfactumContext, profile: string; }) {

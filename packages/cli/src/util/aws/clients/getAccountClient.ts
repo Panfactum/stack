@@ -1,5 +1,5 @@
 import { AccountClient } from "@aws-sdk/client-account";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getAccountClient(inputs: { context: PanfactumContext, profile: string; }) {

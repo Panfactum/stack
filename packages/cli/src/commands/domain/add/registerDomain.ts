@@ -396,7 +396,7 @@ export async function registerDomain(inputs: {
                     const { OperationId: opId } = await route53DomainsClient.send(registerDomainCommand);
 
                     if (!opId) {
-                        throw new Error("Did not receive an OperationId from the registration request")
+                        throw new CLIError("Did not receive an OperationId from the registration request")
                     }
 
                     ctx.opId = opId
@@ -497,7 +497,7 @@ export async function registerDomain(inputs: {
                 await new Promise((r) => globalThis.setTimeout(r, 15000));
             }
 
-            throw new Error(
+            throw new CLIError(
                 `Timed out after ${maxAttempts} attempts waiting for operation to complete.`
             );
         }
@@ -704,8 +704,7 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
         }
     } catch (error) {
         // If we can't get the contact info, just log and continue
-        context.logger.debug(
-            `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
+        context.logger.debug(`Could not retrieve primary contact information from AWS: ${(error as Error).message}`);
     }
 
     return null;
