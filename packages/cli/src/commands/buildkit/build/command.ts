@@ -74,40 +74,46 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
       }
 
       // Start ARM tunnel
-      const armTunnelProcess = Bun.spawn([
-        'pf',
-        'buildkit',
-        'tunnel',
-        '--arch', 'arm64',
-        '--port', armPort.toString()
-      ], {
-        stdout: 'ignore',
-        stderr: 'ignore',
+      const armTunnelResult = await execute({
+        command: [
+          'pf',
+          'buildkit',
+          'tunnel',
+          '--arch', 'arm64',
+          '--port', armPort.toString()
+        ],
+        context: this.context,
+        workingDirectory: process.cwd(),
+        background: true,
         env: {
           ...process.env,
           AUTOSSH_PIDFILE: join(buildkitDir, 'arm.pid')
         }
       })
-      this.armTunnelPid = armTunnelProcess.pid
-      BACKGROUND_PROCESS_PIDS.push(armTunnelProcess.pid)
+      
+      this.armTunnelPid = armTunnelResult.pid
+      BACKGROUND_PROCESS_PIDS.push(armTunnelResult.pid)
 
       // Start AMD tunnel
-      const amdTunnelProcess = Bun.spawn([
-        'pf',
-        'buildkit',
-        'tunnel',
-        '--arch', 'amd64',
-        '--port', amdPort.toString()
-      ], {
-        stdout: 'ignore',
-        stderr: 'ignore',
+      const amdTunnelResult = await execute({
+        command: [
+          'pf',
+          'buildkit',
+          'tunnel',
+          '--arch', 'amd64',
+          '--port', amdPort.toString()
+        ],
+        context: this.context,
+        workingDirectory: process.cwd(),
+        background: true,
         env: {
           ...process.env,
           AUTOSSH_PIDFILE: join(buildkitDir, 'amd.pid')
         }
       })
-      this.amdTunnelPid = amdTunnelProcess.pid
-      BACKGROUND_PROCESS_PIDS.push(amdTunnelProcess.pid)
+      
+      this.amdTunnelPid = amdTunnelResult.pid
+      BACKGROUND_PROCESS_PIDS.push(amdTunnelResult.pid)
 
       // Wait for tunnels to be ready
       await waitForPort({ port: armPort })

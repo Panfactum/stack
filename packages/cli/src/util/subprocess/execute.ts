@@ -9,7 +9,7 @@ type IsSuccessFn = (results: {
   exitCode: number;
 }) => boolean;
 
-interface ExecInputs {
+export interface ExecInputs {
   command: string[];
   context: PanfactumContext;
   workingDirectory: string;
@@ -29,12 +29,14 @@ interface ExecInputs {
   | number
   | "inherit"
   | null;
+  background?: boolean;
 }
 
-interface ExecReturn {
+export interface ExecReturn {
   stdout: string;
   stderr: string;
   exitCode: number;
+  pid: number;
 }
 
 const defaultIsSuccess: IsSuccessFn = ({ exitCode }) => exitCode === 0;
@@ -53,7 +55,12 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     onStdErrNewline,
     isSuccess = defaultIsSuccess,
     stdin = null,
+    background = false,
   } = inputs;
+  
+  // Background processes always ignore output, foreground processes always pipe
+  const stdoutOption = background ? "ignore" : "pipe";
+  const stderrOption = background ? "ignore" : "pipe";
   let logsBuffer = "";
   for (let i = 0; i < retries + 1; i++) {
     let proc;
@@ -61,8 +68,8 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       proc = Bun.spawn(command, {
         cwd: workingDirectory,
         env,
-        stdout: "pipe",
-        stderr: "pipe",
+        stdout: stdoutOption,
+        stderr: stderrOption,
         stdin,
       });
     } catch (e) {
@@ -72,11 +79,21 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         workingDirectory,
       });
     }
-
+    
+    // For background processes, return immediately with PID
+    if (background) {
+      return {
+        stdout: "",
+        stderr: "",
+        exitCode: 0,
+        pid: proc.pid,
+      };
+    }
+    
     // eslint-disable-next-line prefer-const
-    let [stdoutForMerge, stdoutForCapture] = proc.stdout.tee();
+    let [stdoutForMerge, stdoutForCapture] = proc.stdout!.tee();
     // eslint-disable-next-line prefer-const
-    let [stderrForMerge, stderrForCapture] = proc.stderr.tee();
+    let [stderrForMerge, stderrForCapture] = proc.stderr!.tee();
 
     let stdoutCallbackPromise = Promise.resolve();
     let stderrCallbackPromise = Promise.resolve();
@@ -128,6 +145,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       exitCode,
       stderr: stderr.trim(),
       stdout: stdout.trim(),
+      pid: proc.pid,
     };
     if (isSuccess(retValue)) {
       return retValue;
