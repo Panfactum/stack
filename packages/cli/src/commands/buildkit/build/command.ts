@@ -8,14 +8,14 @@ import { fileExists } from '@/util/fs/fileExists.js'
 import { getOpenPorts } from '@/util/network/getOpenPorts.js'
 import { waitForPort } from '@/util/network/waitForPort.js'
 import { execute } from '@/util/subprocess/execute.js'
-import { BACKGROUND_PROCESS_PIDS } from '@/util/subprocess/killBackgroundProcess.js'
+import { killBackgroundProcess } from '@/util/subprocess/killBackgroundProcess.js'
 import type { BuildKitConfig } from '@/util/buildkit/constants.js'
 
 export default class BuildkitBuildCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'build']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Submits a multi-platform container build to BuildKit'
+    description: 'Submits a multi-platform container image build to BuildKit'
   })
 
   repo = Option.String('--repo', {
@@ -83,11 +83,11 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
         ],
         context: this.context,
         workingDirectory: process.cwd(),
-        background: true
+        background: true,
+        backgroundDescription: 'BuildKit ARM64 tunnel on port ' + armPort
       })
       
       this.armTunnelPid = armTunnelResult.pid
-      BACKGROUND_PROCESS_PIDS.push(armTunnelResult.pid)
 
       // Start AMD tunnel
       const amdTunnelResult = await execute({
@@ -100,12 +100,12 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
         ],
         context: this.context,
         workingDirectory: process.cwd(),
-        background: true
+        background: true,
+        backgroundDescription: 'BuildKit AMD64 tunnel on port ' + amdPort
       })
       
       this.amdTunnelPid = amdTunnelResult.pid
-      BACKGROUND_PROCESS_PIDS.push(amdTunnelResult.pid)
-
+      console.log(this.armTunnelPid, this.amdTunnelPid)
       // Wait for tunnels to be ready
       await waitForPort({ port: armPort })
       await waitForPort({ port: amdPort })
@@ -113,10 +113,11 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
       // Run parallel builds
       const [armResult, amdResult] = await Promise.all([
         this.runBuild('arm64', armPort, config),
-        this.runBuild('amd64', amdPort, config)
+        this.runBuild('amd64', amdPort, config),
       ])
 
       if (armResult !== 0 || amdResult !== 0) {
+        console.log('!!!!!!!!!')
         return 1
       }
 
@@ -179,30 +180,18 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
   }
 
   private cleanup(): void {
-    // Kill tunnel processes
+    // Kill tunnel processes using the centralized utility
     if (this.armTunnelPid) {
-      try {
-        process.kill(this.armTunnelPid, 'SIGTERM')
-        // Remove from background process tracking
-        const index = BACKGROUND_PROCESS_PIDS.indexOf(this.armTunnelPid)
-        if (index !== -1) {
-          BACKGROUND_PROCESS_PIDS.splice(index, 1)
-        }
-      } catch {
-        // Ignore errors
-      }
+      killBackgroundProcess({ 
+        pid: this.armTunnelPid, 
+        context: this.context 
+      })
     }
     if (this.amdTunnelPid) {
-      try {
-        process.kill(this.amdTunnelPid, 'SIGTERM')
-        // Remove from background process tracking
-        const index = BACKGROUND_PROCESS_PIDS.indexOf(this.amdTunnelPid)
-        if (index !== -1) {
-          BACKGROUND_PROCESS_PIDS.splice(index, 1)
-        }
-      } catch {
-        // Ignore errors
-      }
+      killBackgroundProcess({ 
+        pid: this.amdTunnelPid, 
+        context: this.context 
+      })
     }
   }
 }

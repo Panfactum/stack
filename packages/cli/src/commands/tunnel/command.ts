@@ -78,7 +78,7 @@ export default class TunnelCommand extends PanfactumCommand {
 
       const connectionInfo = readFileSync(connectionInfoFile, 'utf8');
       const bastionLine = connectionInfo.split('\n').find(line => line.startsWith(`${this.bastion} `));
-      
+
       if (!bastionLine) {
         throw new CLIError(
           `${this.bastion} not found in ${connectionInfoFile}. Ensure this name is correct or run pf devshell sync to regenerate this file.`
@@ -98,7 +98,7 @@ export default class TunnelCommand extends PanfactumCommand {
       // Generate keys if they don't exist
       if (!existsSync(keyFile) || !existsSync(publicKeyFile) || !existsSync(signedPublicKeyFile)) {
         this.context.logger.info('Generating SSH keys...');
-        
+
         // Clean up any partial keys
         for (const file of [keyFile, publicKeyFile, signedPublicKeyFile]) {
           if (existsSync(file)) {
@@ -175,7 +175,7 @@ export default class TunnelCommand extends PanfactumCommand {
 
       // Establish tunnel
       const knownHostsFile = join(sshDir, 'known_hosts');
-      
+
       // Use spawn to run autossh in the foreground
       const autossh = spawn('autossh', [
         '-M', '0',

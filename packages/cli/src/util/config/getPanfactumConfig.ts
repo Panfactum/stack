@@ -166,7 +166,7 @@ export const getPanfactumConfig = async ({
             context,
             address: values.vault_addr,
             silent: true,
-          })
+          }).catch(() => '@@TERRAGRUNT_INVALID@@')
       : '@@TERRAGRUNT_INVALID@@';
   }
 

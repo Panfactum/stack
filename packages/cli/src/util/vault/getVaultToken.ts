@@ -140,9 +140,5 @@ async function performOIDCLogin(env: Record<string, string | undefined>, context
 export async function getVaultTokenString(options: GetVaultTokenOptions): Promise<string> {
   const result = await getVaultToken(options);
   
-  if (!result.isValid) {
-    throw new CLIError(result.error || 'Failed to get valid Vault token');
-  }
-  
   return result.token;
 }

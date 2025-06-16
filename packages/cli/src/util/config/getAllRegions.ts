@@ -19,7 +19,7 @@ export async function getAllRegions(context: PanfactumContext): Promise<Array<Al
 
   for (const environment of environments) {
     const regions = await getRegions(context, environment.path);
-    
+
     for (const region of regions) {
       allRegions.push({
         ...region,

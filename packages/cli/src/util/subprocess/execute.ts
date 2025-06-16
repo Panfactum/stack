@@ -1,6 +1,7 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
 import { CLISubprocessError } from "@/util/error/error";
 import { concatStreams } from "@/util/streams/concatStreams";
+import { addBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import type { PanfactumContext } from "@/util/context/context";
 
 type IsSuccessFn = (results: {
@@ -30,6 +31,7 @@ export interface ExecInputs {
   | "inherit"
   | null;
   background?: boolean;
+  backgroundDescription?: string;
 }
 
 export interface ExecReturn {
@@ -56,6 +58,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     isSuccess = defaultIsSuccess,
     stdin = null,
     background = false,
+    backgroundDescription,
   } = inputs;
   
   // Background processes always ignore output, foreground processes always pipe
@@ -82,6 +85,13 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     
     // For background processes, return immediately with PID
     if (background) {
+      // Track the background process
+      addBackgroundProcess({
+        pid: proc.pid,
+        command: command.join(' '),
+        description: backgroundDescription
+      });
+      
       return {
         stdout: "",
         stderr: "",

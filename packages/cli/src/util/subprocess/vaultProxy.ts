@@ -1,6 +1,6 @@
 import { createServer } from "net";
 import { CLIError, CLISubprocessError } from "@/util/error/error";
-import { BACKGROUND_PROCESS_PIDS } from "./killBackgroundProcess";
+import { addBackgroundProcess } from "./killBackgroundProcess";
 
 export async function startVaultProxy({
   env,
@@ -32,7 +32,12 @@ export async function startVaultProxy({
       env,
     });
 
-    BACKGROUND_PROCESS_PIDS.push(proc.pid);
+    addBackgroundProcess({
+      pid: proc.pid,
+      command: command.join(' '),
+      description: `Vault proxy for ${modulePath} on port ${openPort}`
+    });
+    
     return { pid: proc.pid, port: openPort };
   } catch {
     throw new CLIError(`Failed to start Vault proxy for ${modulePath}`);

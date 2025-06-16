@@ -145,7 +145,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
   }
 
   private isEcrRegistry(registry: string): boolean {
-    return registry.includes('.ecr.') || registry === 'public.ecr.aws'
+    return registry.includes('.ecr.')
   }
 
   private async readStdin(): Promise<string> {

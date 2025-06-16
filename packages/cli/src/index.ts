@@ -40,6 +40,7 @@ import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.t
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
 import { phClient } from "./util/posthog/tracking.ts";
+import { killAllBackgroundProcesses } from "./util/subprocess/killBackgroundProcess.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
 // Create a CLI instance
@@ -94,6 +95,38 @@ cli.register(K8sClusterSuspendCommand)
 cli.register(K8sClusterResumeCommand)
 cli.register(WorkflowGitCheckoutCommand)
 
+// Global state to track if cleanup has been done
+let cleanupDone = false;
+let panfactumContextInstance: PanfactumContext | null = null;
+
+// Cleanup function
+const cleanup = async () => {
+  if (!cleanupDone && panfactumContextInstance) {
+    cleanupDone = true;
+    killAllBackgroundProcesses({ context: panfactumContextInstance });
+    await phClient.shutdown();
+  }
+};
+
+// Register signal handlers for graceful shutdown
+process.on('SIGINT', async () => {
+  await cleanup();
+  process.exit(130); // Standard exit code for SIGINT
+});
+
+process.on('SIGTERM', async () => {
+  await cleanup();
+  process.exit(143); // Standard exit code for SIGTERM
+});
+
+process.on('exit', () => {
+  // Synchronous cleanup if needed
+  if (!cleanupDone && panfactumContextInstance) {
+    cleanupDone = true;
+    killAllBackgroundProcesses({ context: panfactumContextInstance });
+  }
+});
+
 try {
   const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
   const panfactumContext = await createPanfactumContext(
@@ -103,6 +136,9 @@ try {
       cwd: process.env["CWD"] || process.cwd()
     }
   )
+
+  // Store context for cleanup
+  panfactumContextInstance = panfactumContext;
 
   const { repoVariables } = panfactumContext
   if (repoVariables.user_id) {
@@ -127,5 +163,5 @@ try {
     globalThis.console.error(error);
   }
 } finally {
-  await phClient.shutdown()
+  await cleanup();
 }
