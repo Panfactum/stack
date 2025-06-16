@@ -1,4 +1,4 @@
-import { dirname, basename, join } from 'path'
+import { dirname, basename } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
@@ -58,7 +58,6 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
 
     // Get configurations
     const config = await getBuildKitConfig(this.context)
-    const buildkitDir = this.context.repoVariables.buildkit_dir
 
     // Set up cleanup handler
     process.on('SIGINT', () => this.cleanup())
@@ -84,11 +83,7 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
         ],
         context: this.context,
         workingDirectory: process.cwd(),
-        background: true,
-        env: {
-          ...process.env,
-          AUTOSSH_PIDFILE: join(buildkitDir, 'arm.pid')
-        }
+        background: true
       })
       
       this.armTunnelPid = armTunnelResult.pid
@@ -105,11 +100,7 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
         ],
         context: this.context,
         workingDirectory: process.cwd(),
-        background: true,
-        env: {
-          ...process.env,
-          AUTOSSH_PIDFILE: join(buildkitDir, 'amd.pid')
-        }
+        background: true
       })
       
       this.amdTunnelPid = amdTunnelResult.pid
