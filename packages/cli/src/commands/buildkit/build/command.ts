@@ -2,8 +2,10 @@ import { dirname, basename, join } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { CLIError } from '@/util/error/error.js'
+import { directoryExists } from '@/util/fs/directoryExist.js'
 import { fileExists } from '@/util/fs/fileExists.js'
-import { getOpenPort } from '@/util/network/getOpenPort.js'
+import { getOpenPorts } from '@/util/network/getOpenPorts.js'
 import { waitForPort } from '@/util/network/waitForPort.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { BACKGROUND_PROCESS_PIDS } from '@/util/subprocess/killBackgroundProcess.js'
@@ -49,8 +51,8 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
     }
 
     // Validate build context exists
-    if (!(await fileExists(this.buildContext))) {
-      this.context.logger.error(`Build context not found: ${this.buildContext}`)
+    if (!(await directoryExists(this.buildContext))) {
+      this.context.logger.error(`Build context directory not found: ${this.buildContext}`)
       return 1
     }
 
@@ -65,8 +67,11 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
 
     try {
       // Start tunnels for both architectures
-      const armPort = await getOpenPort()
-      const amdPort = await getOpenPort()
+      const [armPort, amdPort] = await getOpenPorts(2)
+
+      if (!armPort || !amdPort) {
+        throw new CLIError('Failed to get required ports for BuildKit tunnels')
+      }
 
       // Start ARM tunnel
       const armTunnelProcess = Bun.spawn([
