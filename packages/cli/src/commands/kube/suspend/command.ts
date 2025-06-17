@@ -15,7 +15,7 @@ import { CLIError } from '@/util/error/error'
 import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
-import type { EksClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
+import type { EKSClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
 
 export class K8sClusterSuspendCommand extends PanfactumCommand {
   static override paths = [['kube', 'cluster-suspend']]
@@ -50,7 +50,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
 
   async execute() {
     const { context } = this
-    let clusterInfo: EksClusterInfo
+    let clusterInfo: EKSClusterInfo
     let nodeGroups: string[] = []
     let autoScalingGroups: AutoScalingGroup[] = []
     let awsProfile: string

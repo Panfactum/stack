@@ -1,15 +1,12 @@
-import { DeleteTagsCommand } from '@aws-sdk/client-auto-scaling'
-import { DescribeClusterCommand } from '@aws-sdk/client-eks'
+import { DeleteTagsCommand, DescribeAutoScalingGroupsCommand } from '@aws-sdk/client-auto-scaling'
+import { DescribeClusterCommand, ListNodegroupsCommand, UpdateNodegroupConfigCommand, UntagResourceCommand } from '@aws-sdk/client-eks'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
-import { z } from "zod";
 import { getAutoScalingClient } from '@/util/aws/clients/getAutoScalingClient.ts'
 import { getEKSClient } from '@/util/aws/clients/getEKSClient.ts'
 import { scaleASG } from '@/util/aws/scaleASG.ts'
 import {
-  AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA,
   EKS_DESCRIBE_CLUSTER_SCHEMA,
-  EKS_LIST_NODEGROUPS_SCHEMA,
   KUBERNETES_ITEMS_SCHEMA
 } from '@/util/aws/schemas.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
@@ -19,12 +16,8 @@ import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.t
 import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
-import type { EksClusterInfo } from '@/util/eks/types.ts'
-
-// Schema for AWS ARN with region extraction
-// ARN format: arn:partition:service:region:account:resource
-const AWS_ARN_SCHEMA = z.string()
-  .regex(/^arn:aws:[^:]+:[^:]+:[^:]+:.+$/, "Invalid AWS ARN format")
+import type { EKSClusterInfo } from '@/util/eks/types.ts'
+import { getAllRegions } from '@/util/config/getAllRegions';
 
 
 export class K8sClusterResumeCommand extends PanfactumCommand {
@@ -73,11 +66,24 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
       throw new CLIError(`Kube context '${this.kubeContext}' not found in any configured region.`)
     }
 
-    let clusterInfo: EksClusterInfo
-    const awsProfile: string = await getAWSProfileForContext(context, selectedContext.name)
-    let awsRegion: string = ''
+    const regions = await getAllRegions(this.context)
+    const selectedRegion = regions.find(region => region.clusterContextName === selectedContext.name)
 
+    if (!selectedRegion) {
+      throw new CLIError(`Region for context '${selectedContext.name}' not found in any configured region.`)
+    }
+
+    const awsRegion = selectedRegion.awsRegion
+
+    if (!awsRegion) {
+      throw new CLIError(`AWS region for context '${selectedContext.name}' not found in any configured region.`)
+    }
+
+    const awsProfile: string = await getAWSProfileForContext(context, selectedContext.name)
     const autoScalingClient = await getAutoScalingClient({ context, profile: awsProfile, region: awsRegion })
+    const eksClient = await getEKSClient({ context, profile: awsProfile, region: awsRegion })
+
+    let clusterInfo: EKSClusterInfo
 
     const tasks = new Listr([
       {
@@ -89,7 +95,6 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
       {
         title: 'Verifying cluster is suspended',
         task: async () => {
-          const eksClient = await getEKSClient({ context, profile: awsProfile })
           const response = await eksClient.send(new DescribeClusterCommand({
             name: selectedContext.cluster
           }))
@@ -97,17 +102,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           // Validate the response structure for consistency
           const result = parseJson(EKS_DESCRIBE_CLUSTER_SCHEMA, JSON.stringify(response))
           clusterInfo = result.cluster
-          
-          // Extract region from cluster ARN using Zod validation
-          const arnData = AWS_ARN_SCHEMA.parse(clusterInfo.arn)
-          const region = arnData.split(':')[3]
 
-          if (!region) {
-            throw new CLIError('Cluster ARN does not contain a valid region')
-          }
-
-          awsRegion = region
-          
           if (clusterInfo.tags?.['panfactum.com/suspended'] !== 'true') {
             throw new CLIError('Cluster is not marked as suspended')
           }
@@ -117,23 +112,29 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         title: 'Restoring NAT gateway Auto Scaling Groups',
         task: async () => {
           // Find ASGs with original size tags
-          const { stdout } = await execute({
-            command: [
-              'aws', 'autoscaling', 'describe-auto-scaling-groups', 
-              '--query', `AutoScalingGroups[?contains(AutoScalingGroupName, 'nat') && Tags[?Key=='kubernetes.io/cluster/${clusterInfo.name}' && Value=='owned'] && Tags[?Key=='panfactum.com/original-min-size']]`,
-              '--output', 'json'
-            ],
-            context,
-            workingDirectory: process.cwd(),
+          const response = await autoScalingClient.send(new DescribeAutoScalingGroupsCommand({}))
+          
+          // Filter groups matching our criteria
+          const groups = (response.AutoScalingGroups || []).filter(asg => {
+            if (!asg.AutoScalingGroupName?.includes('nat')) return false
+            
+            const tags = asg.Tags || []
+            const hasClusterTag = tags.some(tag => 
+              tag.Key === `kubernetes.io/cluster/${clusterInfo.name}` && tag.Value === 'owned'
+            )
+            const hasOriginalMinSize = tags.some(tag => tag.Key === 'panfactum.com/original-min-size')
+            
+            return hasClusterTag && hasOriginalMinSize
           })
           
-          const groups = parseJson(AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA, stdout)
-          
           for (const group of groups) {
+            if (!group.AutoScalingGroupName) continue
+            
             // Extract original values from tags
-            const originalMinSize = parseInt(group.Tags.find(t => t.Key === 'panfactum.com/original-min-size')?.Value || '1')
-            const originalMaxSize = parseInt(group.Tags.find(t => t.Key === 'panfactum.com/original-max-size')?.Value || '1')
-            const originalDesiredCapacity = parseInt(group.Tags.find(t => t.Key === 'panfactum.com/original-desired-capacity')?.Value || '1')
+            const tags = group.Tags || []
+            const originalMinSize = parseInt(tags.find(t => t.Key === 'panfactum.com/original-min-size')?.Value || '1')
+            const originalMaxSize = parseInt(tags.find(t => t.Key === 'panfactum.com/original-max-size')?.Value || '1')
+            const originalDesiredCapacity = parseInt(tags.find(t => t.Key === 'panfactum.com/original-desired-capacity')?.Value || '1')
             
             // Restore original size using scaleASG utility
             await scaleASG({
@@ -213,26 +214,22 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
       {
         title: 'Restoring EKS node groups',
         task: async () => {
-          const { stdout } = await execute({
-            command: ['aws', 'eks', 'list-nodegroups', '--cluster-name', clusterInfo.name, '--output', 'json'],
-            context,
-            workingDirectory: process.cwd(),
-          })
-          const result = parseJson(EKS_LIST_NODEGROUPS_SCHEMA, stdout)
-          const nodeGroups = result.nodegroups || []
+          const response = await eksClient.send(new ListNodegroupsCommand({
+            clusterName: clusterInfo.name
+          }))
+          const nodeGroups = response.nodegroups || []
           
           for (const nodeGroup of nodeGroups) {
             // Get the original configuration (usually 3 nodes)
-            await execute({
-              command: [
-                'aws', 'eks', 'update-nodegroup-config', 
-                '--cluster-name', clusterInfo.name,
-                '--nodegroup-name', nodeGroup, 
-                '--scaling-config', 'minSize=3,maxSize=3,desiredSize=3'
-              ],
-              context,
-              workingDirectory: process.cwd(),
-            })
+            await eksClient.send(new UpdateNodegroupConfigCommand({
+              clusterName: clusterInfo.name,
+              nodegroupName: nodeGroup,
+              scalingConfig: {
+                minSize: 3,
+                maxSize: 3,
+                desiredSize: 3
+              }
+            }))
           }
           
           if (nodeGroups.length > 0) {
@@ -298,15 +295,10 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
       {
         title: 'Removing suspension tag',
         task: async () => {
-          await execute({
-            command: [
-              'aws', 'eks', 'untag-resource', 
-              '--resource-arn', clusterInfo.arn, 
-              '--tag-keys', 'panfactum.com/suspended'
-            ],
-            context,
-            workingDirectory: process.cwd(),
-          })
+          await eksClient.send(new UntagResourceCommand({
+            resourceArn: clusterInfo.arn,
+            tagKeys: ['panfactum.com/suspended']
+          }))
         },
       },
     ], { rendererOptions: { collapseErrors: false } })

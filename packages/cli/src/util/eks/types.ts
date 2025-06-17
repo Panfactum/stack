@@ -1,4 +1,4 @@
-export interface EksClusterInfo {
+export interface EKSClusterInfo {
   name: string
   arn: string
   status: string

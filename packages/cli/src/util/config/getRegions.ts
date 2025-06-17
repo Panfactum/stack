@@ -11,6 +11,7 @@ import type { PanfactumContext } from "@/util/context/context";
 export interface RegionMeta {
     path: string; // Absolute path to the directory for the region
     name: string; // Name of the region
+    awsRegion: string | undefined; // AWS region name, e.g. "us-east-1"
     primary: boolean; // Whether the region has the state bucket
     clusterContextName: string | undefined; // The name of the cluster context for this region
     clusterDeployed: boolean; // Whether the region has a cluster deployed
@@ -36,6 +37,7 @@ export async function getRegions(context: PanfactumContext, envPath: string): Pr
 
             return {
                 name,
+                awsRegion: awsRegion,
                 path: regionPath,
                 primary: primaryRegion === awsRegion && name !== GLOBAL_REGION,
                 clusterDeployed,
