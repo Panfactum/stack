@@ -17,8 +17,8 @@ export async function getEcrToken(
     let token: string;
     
     if (isPublicRegistry) {
-      // Use ECR Public client
-      const client = await getECRPublicClient({ context, profile: awsProfile });
+      // Use ECR Public client (public registry is always in us-east-1)
+      const client = await getECRPublicClient({ context, profile: awsProfile, region: 'us-east-1' });
       
       context.logger.debug('Getting ECR public authorization token', { registry });
       const response = await client.send(new GetPublicAuthCommand({}));
@@ -29,9 +29,13 @@ export async function getEcrToken(
       
       token = response.authorizationData.authorizationToken;
     } else {
-      const client = await getECRClient({ context, profile: awsProfile });
+      // Extract region from registry URL (format: <accountId>.dkr.ecr.<region>.amazonaws.com)
+      const regionMatch = registry.match(/\.ecr\.([^.]+)\.amazonaws\.com/);
+      const region = regionMatch ? regionMatch[1] : 'us-east-1';
       
-      context.logger.debug('Getting ECR private authorization token', { registry});
+      const client = await getECRClient({ context, profile: awsProfile, region });
+      
+      context.logger.debug('Getting ECR private authorization token', { registry, region });
       const response = await client.send(new GetAuthorizationTokenCommand({}));
       
       if (!response.authorizationData?.[0]?.authorizationToken) {

@@ -4,7 +4,7 @@ import type { PanfactumContext } from "@/util/context/context";
 
 export async function getECRClient(inputs: { 
   context: PanfactumContext; 
-  profile?: string; 
+  profile?: string;
   region?: string;
 }) {
   const { context, profile, region = "us-east-1" } = inputs;
@@ -20,7 +20,7 @@ export async function getECRClient(inputs: {
     });
   } else {
     return new ECRClient({
-      profile: profile || undefined,
+      profile,
       region
     });
   }

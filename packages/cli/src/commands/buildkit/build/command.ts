@@ -117,7 +117,6 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
       ])
 
       if (armResult !== 0 || amdResult !== 0) {
-        console.log('!!!!!!!!!')
         return 1
       }
 

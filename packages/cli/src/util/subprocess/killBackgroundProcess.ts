@@ -1,4 +1,5 @@
 import type { PanfactumContext } from "@/util/context/context";
+const treeKill = require("tree-kill") as (pid: number, signal?: string | number, callback?: (error?: Error) => void) => void;
 
 export interface BackgroundProcess {
   pid: number;
@@ -23,24 +24,49 @@ export const killBackgroundProcess = ({
   pid,
   context,
   gracefulTimeoutMs = 5000,
+  killChildren = true,
 }: {
   pid: number;
   context: PanfactumContext;
   gracefulTimeoutMs?: number;
+  killChildren?: boolean;
 }) => {
   const proc = BACKGROUND_PROCESSES.find(p => p.pid === pid);
   const processInfo = proc ? `${proc.command}${proc.description ? ` (${proc.description})` : ''}` : `PID ${pid}`;
   
   try {
-    // First try SIGTERM for graceful shutdown
-    process.kill(pid, 'SIGTERM');
-    context.logger.debug(`Sent SIGTERM to ${processInfo}`);
+    if (killChildren) {
+      // Use tree-kill to kill the entire process tree
+      treeKill(pid, 'SIGTERM', (err) => {
+        if (err && !err.message.includes('ESRCH')) {
+          context.logger.debug(`Failed to kill process tree for ${processInfo}:`, { error: err });
+        } else {
+          context.logger.debug(`Sent SIGTERM to process tree ${processInfo}`);
+        }
+      });
+    } else {
+      // Kill only the main process
+      process.kill(pid, 'SIGTERM');
+      context.logger.debug(`Sent SIGTERM to process ${processInfo}`);
+    }
     
     // Set up a timeout to force kill if needed
     const killTimeout = globalThis.setTimeout(() => {
       try {
-        process.kill(pid, 'SIGKILL');
-        context.logger.debug(`Sent SIGKILL to ${processInfo} after timeout`);
+        if (killChildren) {
+          // Force kill the entire process tree
+          treeKill(pid, 'SIGKILL', (err) => {
+            if (err && !err.message.includes('ESRCH')) {
+              context.logger.debug(`Failed to force kill process tree for ${processInfo}:`, { error: err });
+            } else {
+              context.logger.debug(`Sent SIGKILL to process tree ${processInfo} after timeout`);
+            }
+          });
+        } else {
+          // Force kill only the main process
+          process.kill(pid, 'SIGKILL');
+          context.logger.debug(`Sent SIGKILL to process ${processInfo} after timeout`);
+        }
       } catch {
         // Process might have already exited
       }
