@@ -1,8 +1,8 @@
 import path from "node:path";
 import { z } from "zod";
-import { vpcNetworkTest } from "@/commands/aws/vpcNetworkTest/vpcNetworkTest";
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { vpcNetworkTest } from "@/util/aws/vpcNetworkTest";
 import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";

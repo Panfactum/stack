@@ -2,7 +2,6 @@
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
-import ProfileForContextCommand from "./commands/kube/profile-for-context/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import BuildkitBuildCommand from "./commands/buildkit/build/command.ts";
 import BuildkitClearCacheCommand from "./commands/buildkit/clear-cache/command.ts";
@@ -29,6 +28,7 @@ import { K8sDisruptionsDisableCommand } from "./commands/k8s/disruptions/disable
 import { K8sDisruptionsEnableCommand } from "./commands/k8s/disruptions/enable/command.ts";
 import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
+import ProfileForContextCommand from "./commands/kube/profile-for-context/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";

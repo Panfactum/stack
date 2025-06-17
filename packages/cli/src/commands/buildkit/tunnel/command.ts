@@ -1,4 +1,5 @@
 import { Option } from 'clipanion'
+import {z} from "zod";
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
@@ -7,7 +8,6 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
 import { CLIError } from '@/util/error/error.js'
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
-import {z} from "zod";
 
 // Zod schema for port validation
 const portSchema = z.string()

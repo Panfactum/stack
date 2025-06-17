@@ -1,6 +1,5 @@
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
-import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import {
   AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA,
   EKS_DESCRIBE_CLUSTER_SCHEMA,
@@ -10,6 +9,7 @@ import {
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
+import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo } from '@/util/eks/types.ts'
