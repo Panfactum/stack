@@ -1,7 +1,8 @@
-import { promises as fs } from 'fs'
 import { join } from 'path'
 import { z } from 'zod'
-import { parseJson } from '@/util/zod/parseJson'
+import { createDirectory } from '@/util/fs/createDirectory'
+import { writeFile } from '@/util/fs/writeFile'
+import { readJSONFile } from '@/util/json/readJSONFile'
 import type { PanfactumContext } from '@/util/context/context'
 
 interface CachedCredential {
@@ -21,19 +22,22 @@ async function getCredsFilePath(context: PanfactumContext): Promise<string> {
 }
 
 async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile> {
-  try {
-    const credsFile = await getCredsFilePath(context)
-    const data = await fs.readFile(credsFile, 'utf8')
-    
-    const credentialsFileSchema = z.record(z.object({
-      token: z.string(),
-      expires: z.string()
-    }))
-    
-    return parseJson(credentialsFileSchema, data)
-  } catch {
-    return {}
-  }
+  const credsFile = await getCredsFilePath(context)
+  
+  const credentialsFileSchema = z.record(z.object({
+    token: z.string(),
+    expires: z.string()
+  }))
+  
+  const result = await readJSONFile({
+    context,
+    filePath: credsFile,
+    validationSchema: credentialsFileSchema,
+    throwOnMissing: false,
+    throwOnEmpty: false
+  })
+  
+  return result || {}
 }
 
 async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile): Promise<void> {
@@ -41,12 +45,15 @@ async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile)
   const buildkitDir = context.repoVariables.buildkit_dir
   
   // Ensure buildkit directory exists
-  await fs.mkdir(buildkitDir, { recursive: true })
+  await createDirectory(buildkitDir)
   
-  // Write atomically using a temp file
-  const tmpFile = join(buildkitDir, 'tmp.json')
-  await fs.writeFile(tmpFile, JSON.stringify(creds, null, 2), 'utf8')
-  await fs.rename(tmpFile, credsFile)
+  // Write credentials file
+  await writeFile({
+    context,
+    filePath: credsFile,
+    contents: JSON.stringify(creds, null, 2),
+    overwrite: true
+  })
 }
 
 export async function getCachedCredential(
