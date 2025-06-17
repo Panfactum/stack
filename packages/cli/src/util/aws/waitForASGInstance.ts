@@ -17,14 +17,14 @@ export async function waitForASGInstance(
   const maxRetries = 10;
   const retryDelay = 10000;
 
+  const client = await getAutoScalingClient({
+    context,
+    profile: awsProfile,
+    region: awsRegion
+  });
+
   while (retries < maxRetries) {
     try {
-      const client = await getAutoScalingClient({ 
-        context, 
-        profile: awsProfile, 
-        region: awsRegion 
-      });
-
       const result = await client.send(new DescribeAutoScalingGroupsCommand({
         AutoScalingGroupNames: [asg]
       }));
@@ -33,23 +33,17 @@ export async function waitForASGInstance(
       if (instance?.InstanceId) {
         return instance.InstanceId;
       }
-
-      // No instance found yet, retry
-      if (retries < maxRetries - 1) {
-        await setTimeout(retryDelay);
-        retries++;
-      } else {
-        throw new CLIError("Failed to get instance ID - no instances found in ASG");
-      }
     } catch (error) {
-      if (retries < maxRetries - 1) {
-        await setTimeout(retryDelay);
-        retries++;
-      } else {
-        throw new CLIError("Failed to get instance ID", { cause: error });
-      }
+      throw new CLIError("Failed to get instance ID", { cause: error });
+    }
+
+    retries++;
+    
+    // Wait before next retry if we haven't reached max retries
+    if (retries < maxRetries) {
+      await setTimeout(retryDelay);
     }
   }
   
-  throw new CLIError("Failed to get instance ID after all retries");
+  throw new CLIError("Failed to get instance ID - no instances found in ASG");
 }
