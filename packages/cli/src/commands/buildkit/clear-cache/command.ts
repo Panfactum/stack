@@ -2,17 +2,16 @@ import { Option } from 'clipanion'
 import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
+import { getAllRegions } from '@/util/config/getAllRegions.js'
 import { CLIError } from '@/util/error/error.js'
 import { execute } from '@/util/subprocess/execute.js'
-import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 import { parseJson } from '@/util/zod/parseJson.js'
 
 export default class BuildkitClearCacheCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'clear-cache']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Deletes the idle cache from all BuildKit instances.'
+    description: 'Clears BuildKit cache by pruning all caches in running pods and deleting unused persistent volumes.'
   })
 
   kubectlContext = Option.String('--context', {
@@ -22,16 +21,11 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
   async execute(): Promise<number> {
     // Validate context if provided
     if (this.kubectlContext) {
-      const clustersData = await readYAMLFile({
-        context: this.context,
-        filePath: `${this.context.repoVariables.kube_dir}/clusters.yaml`,
-        validationSchema: CLUSTERS_FILE_SCHEMA,
-        throwOnMissing: false,
-        throwOnEmpty: false
-      })
+      const allRegions = await getAllRegions(this.context)
+      const matchingRegion = allRegions.find(region => region.clusterContextName === this.kubectlContext)
 
-      if (!clustersData || !clustersData[this.kubectlContext]) {
-        this.context.logger.error(`'${this.kubectlContext}' not found in clusters.yaml.`)
+      if (!matchingRegion) {
+        this.context.logger.error(`'${this.kubectlContext}' not found in any configured region.`)
         return 1
       }
     }
@@ -67,12 +61,12 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
     /*
     1. kubectl output format: The jsonpath={.items[*].metadata.name} returns space-separated PVC names
     2. Split creates empty strings: split(/\s+/) can create empty strings if there are extra whitespaces
-    3. Filter(Boolean) removes empty entries: Ensures we only get actual PVC names, not empty strings
+    3. filter(x => x.trim()) removes empty or whitespace-only entries: Ensures we only get actual PVC names
 
-    Without filter(Boolean), you could get an array like ["cache-pvc-1", "", "cache-pvc-2", ""] which would cause issues when trying to process each PVC
+    Without filtering, you could get an array like ["cache-pvc-1", "", "cache-pvc-2", ""] which would cause issues when trying to process each PVC
     name later in the code.
      */
-    const pvcs = pvcsResult.stdout.trim().split(/\s+/).filter(Boolean)
+    const pvcs = pvcsResult.stdout.trim().split(/\s+/).filter(x => x.trim())
 
     // Get pods that use PVCs
     const podsResult = await execute({
@@ -156,7 +150,7 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
       workingDirectory: process.cwd()
     })
 
-    const pods = podsResult.stdout.trim().split('\n').filter(Boolean)
+    const pods = podsResult.stdout.trim().split('\n').filter(x => x.trim())
 
     for (const podLine of pods) {
       const [podName, status] = podLine.split(' ')
@@ -184,7 +178,6 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
             workingDirectory: process.cwd()
           })
         } catch (error) {
-          this.context.logger.error(`Failed to prune cache in ${podName}: ${String(error)}`)
           throw new CLIError(`Failed to prune cache in pod ${podName}`, error)
         }
       }
