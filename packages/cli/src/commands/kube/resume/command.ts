@@ -1,5 +1,11 @@
+import { DeleteTagsCommand } from '@aws-sdk/client-auto-scaling'
+import { DescribeClusterCommand } from '@aws-sdk/client-eks'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
+import { z } from "zod";
+import { getAutoScalingClient } from '@/util/aws/clients/getAutoScalingClient.ts'
+import { getEKSClient } from '@/util/aws/clients/getEKSClient.ts'
+import { scaleASG } from '@/util/aws/scaleASG.ts'
 import {
   AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA,
   EKS_DESCRIBE_CLUSTER_SCHEMA,
@@ -9,13 +15,20 @@ import {
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
+import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
 import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo } from '@/util/eks/types.ts'
 
+// Schema for AWS ARN with region extraction
+// ARN format: arn:partition:service:region:account:resource
+const AWS_ARN_SCHEMA = z.string()
+  .regex(/^arn:aws:[^:]+:[^:]+:[^:]+:.+$/, "Invalid AWS ARN format")
+
+
 export class K8sClusterResumeCommand extends PanfactumCommand {
-  static override paths = [['k8s', 'cluster', 'resume']]
+  static override paths = [['kube', 'cluster-resume']]
 
   static override usage = Command.Usage({
     description: 'Resume a suspended EKS cluster by restoring nodes',
@@ -38,34 +51,62 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
     ],
   })
 
-  cluster = Option.String('--cluster', {
-    required: true,
-    description: 'Name of the EKS cluster to resume',
+  kubeContext = Option.String('--kube-context', {
+    description: 'Name of the Kube Context to resume',
   })
 
   async execute() {
     const { context } = this
+    const kubeContexts = await getKubeContextsFromConfig(context)
+
+    const selectedContext = this.kubeContext
+      ? kubeContexts.find(context => context.name === this.kubeContext)
+      : await context.logger.select({
+        message: "Select the Cluster context you want to resume:",
+        choices: kubeContexts.map(context => ({
+          value: context,
+          name: `${context.name}`,
+        })),
+      });
+
+    if (!selectedContext) {
+      throw new CLIError(`Kube context '${this.kubeContext}' not found in any configured region.`)
+    }
+
     let clusterInfo: EksClusterInfo
-    let awsProfile: string
+    const awsProfile: string = await getAWSProfileForContext(context, selectedContext.name)
+    let awsRegion: string = ''
+
+    const autoScalingClient = await getAutoScalingClient({ context, profile: awsProfile, region: awsRegion })
 
     const tasks = new Listr([
       {
         title: 'Validating AWS access',
         task: async () => {
-          awsProfile = await getAWSProfileForContext(context, this.cluster)
           await validateRootProfile(awsProfile, context)
         },
       },
       {
         title: 'Verifying cluster is suspended',
         task: async () => {
-          const { stdout } = await execute({
-            command: ['aws', 'eks', 'describe-cluster', '--name', this.cluster, '--output', 'json'],
-            context,
-            workingDirectory: process.cwd(),
-          })
-          const result = parseJson(EKS_DESCRIBE_CLUSTER_SCHEMA, stdout)
+          const eksClient = await getEKSClient({ context, profile: awsProfile })
+          const response = await eksClient.send(new DescribeClusterCommand({
+            name: selectedContext.cluster
+          }))
+          
+          // Validate the response structure for consistency
+          const result = parseJson(EKS_DESCRIBE_CLUSTER_SCHEMA, JSON.stringify(response))
           clusterInfo = result.cluster
+          
+          // Extract region from cluster ARN using Zod validation
+          const arnData = AWS_ARN_SCHEMA.parse(clusterInfo.arn)
+          const region = arnData.split(':')[3]
+
+          if (!region) {
+            throw new CLIError('Cluster ARN does not contain a valid region')
+          }
+
+          awsRegion = region
           
           if (clusterInfo.tags?.['panfactum.com/suspended'] !== 'true') {
             throw new CLIError('Cluster is not marked as suspended')
@@ -79,7 +120,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           const { stdout } = await execute({
             command: [
               'aws', 'autoscaling', 'describe-auto-scaling-groups', 
-              '--query', `AutoScalingGroups[?contains(AutoScalingGroupName, 'nat') && Tags[?Key=='kubernetes.io/cluster/${this.cluster}' && Value=='owned'] && Tags[?Key=='panfactum.com/original-min-size']]`, 
+              '--query', `AutoScalingGroups[?contains(AutoScalingGroupName, 'nat') && Tags[?Key=='kubernetes.io/cluster/${clusterInfo.name}' && Value=='owned'] && Tags[?Key=='panfactum.com/original-min-size']]`,
               '--output', 'json'
             ],
             context,
@@ -90,34 +131,42 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           
           for (const group of groups) {
             // Extract original values from tags
-            const originalMinSize = group.Tags.find(t => t.Key === 'panfactum.com/original-min-size')?.Value || '1'
-            const originalMaxSize = group.Tags.find(t => t.Key === 'panfactum.com/original-max-size')?.Value || '1'
-            const originalDesiredCapacity = group.Tags.find(t => t.Key === 'panfactum.com/original-desired-capacity')?.Value || '1'
+            const originalMinSize = parseInt(group.Tags.find(t => t.Key === 'panfactum.com/original-min-size')?.Value || '1')
+            const originalMaxSize = parseInt(group.Tags.find(t => t.Key === 'panfactum.com/original-max-size')?.Value || '1')
+            const originalDesiredCapacity = parseInt(group.Tags.find(t => t.Key === 'panfactum.com/original-desired-capacity')?.Value || '1')
             
-            // Restore original size
-            await execute({
-              command: [
-                'aws', 'autoscaling', 'update-auto-scaling-group', 
-                '--auto-scaling-group-name', group.AutoScalingGroupName, 
-                '--min-size', originalMinSize, 
-                '--max-size', originalMaxSize, 
-                '--desired-capacity', originalDesiredCapacity
-              ],
+            // Restore original size using scaleASG utility
+            await scaleASG({
+              asgName: group.AutoScalingGroupName,
+              awsProfile,
+              awsRegion,
               context,
-              workingDirectory: process.cwd(),
+              minSize: originalMinSize,
+              maxSize: originalMaxSize,
+              desiredCapacity: originalDesiredCapacity
             })
             
-            // Remove temporary tags
-            await execute({
-              command: [
-                'aws', 'autoscaling', 'delete-tags', '--tags',
-                `ResourceId=${group.AutoScalingGroupName},ResourceType=auto-scaling-group,Key=panfactum.com/original-min-size`,
-                `ResourceId=${group.AutoScalingGroupName},ResourceType=auto-scaling-group,Key=panfactum.com/original-max-size`,
-                `ResourceId=${group.AutoScalingGroupName},ResourceType=auto-scaling-group,Key=panfactum.com/original-desired-capacity`
-              ],
-              context,
-              workingDirectory: process.cwd(),
-            })
+            // Remove temporary tags using SDK
+
+            await autoScalingClient.send(new DeleteTagsCommand({
+              Tags: [
+                {
+                  ResourceId: group.AutoScalingGroupName,
+                  ResourceType: 'auto-scaling-group',
+                  Key: 'panfactum.com/original-min-size'
+                },
+                {
+                  ResourceId: group.AutoScalingGroupName,
+                  ResourceType: 'auto-scaling-group',
+                  Key: 'panfactum.com/original-max-size'
+                },
+                {
+                  ResourceId: group.AutoScalingGroupName,
+                  ResourceType: 'auto-scaling-group',
+                  Key: 'panfactum.com/original-desired-capacity'
+                }
+              ]
+            }))
           }
           
           // Wait for NAT instances to be ready
@@ -130,7 +179,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           try {
             await execute({
               command: [
-                'kubectl', '--context', this.cluster, '-n', 'kube-system', 
+                'kubectl', '--context', selectedContext.name, '-n', 'kube-system',
                 'set', 'env', 'deployment/cilium-operator', 'CILIUM_K8S_SCHEDULER=panfactum'
               ],
               context,
@@ -148,7 +197,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           try {
             await execute({
               command: [
-                'kubectl', '--context', this.cluster, 
+                'kubectl', '--context', selectedContext.name,
                 'delete', 'pods', '--all-namespaces', '--field-selector=status.phase=Pending'
               ],
               context,
@@ -165,7 +214,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         title: 'Restoring EKS node groups',
         task: async () => {
           const { stdout } = await execute({
-            command: ['aws', 'eks', 'list-nodegroups', '--cluster-name', this.cluster, '--output', 'json'],
+            command: ['aws', 'eks', 'list-nodegroups', '--cluster-name', clusterInfo.name, '--output', 'json'],
             context,
             workingDirectory: process.cwd(),
           })
@@ -177,7 +226,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             await execute({
               command: [
                 'aws', 'eks', 'update-nodegroup-config', 
-                '--cluster-name', this.cluster, 
+                '--cluster-name', clusterInfo.name,
                 '--nodegroup-name', nodeGroup, 
                 '--scaling-config', 'minSize=3,maxSize=3,desiredSize=3'
               ],
@@ -198,7 +247,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           try {
             // Get all Karpenter node pools
             const { stdout } = await execute({
-              command: ['kubectl', '--context', this.cluster, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
+              command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
               context,
               workingDirectory: process.cwd(),
             })
@@ -211,7 +260,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
               try {
                 await execute({
                   command: [
-                    'kubectl', '--context', this.cluster, 
+                    'kubectl', '--context', selectedContext.name,
                     'patch', 'nodepool', nodePool.metadata.name, 
                     '--type', 'json', '-p', 
                     '[{"op": "remove", "path": "/spec/limits/cpu"}, {"op": "remove", "path": "/spec/limits/memory"}]'
@@ -235,7 +284,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             // Scale up the scheduler deployment
             await execute({
               command: [
-                'kubectl', '--context', this.cluster, '-n', 'kube-system', 
+                'kubectl', '--context', selectedContext.name, '-n', 'kube-system',
                 'scale', 'deployment', 'panfactum-scheduler', '--replicas=2'
               ],
               context,
@@ -264,13 +313,13 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
 
     await tasks.run()
 
-    context.logger.info('')
-    context.logger.success(`✓ Successfully resumed cluster "${this.cluster}"`)
-    context.logger.info('  - NAT gateways have been restored')
-    context.logger.info('  - Node groups have been restored')
-    context.logger.info('  - Karpenter limits have been removed')
-    context.logger.info('  - Schedulers have been restored')
-    context.logger.info('')
-    context.logger.info('The cluster may take a few minutes to become fully operational.')
+    context.logger.success(`
+✓ Successfully resumed cluster "${selectedContext.name}"
+  - NAT gateways have been restored
+  - Node groups have been restored
+  - Karpenter limits have been removed
+  - Schedulers have been restored
+
+The cluster may take a few minutes to become fully operational.`)
   }
 }

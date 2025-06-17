@@ -18,7 +18,7 @@ import { parseJson } from '@/util/zod/parseJson'
 import type { EksClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
 
 export class K8sClusterSuspendCommand extends PanfactumCommand {
-  static override paths = [['k8s', 'cluster', 'suspend']]
+  static override paths = [['kube', 'cluster-suspend']]
 
   static override usage = Command.Usage({
     description: 'Suspend an EKS cluster to save costs by removing all nodes',

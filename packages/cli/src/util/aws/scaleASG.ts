@@ -8,13 +8,17 @@ export async function scaleASG({
   awsProfile,
   awsRegion,
   context,
-  desiredCapacity
+  desiredCapacity,
+  minSize,
+  maxSize
 }: {
   asgName: string;
   awsProfile: string;
   awsRegion: string;
   context: PanfactumContext;
-  desiredCapacity: number;
+  desiredCapacity?: number;
+  minSize?: number;
+  maxSize?: number;
 }) {
   try {
     const client = await getAutoScalingClient({ 
@@ -23,14 +27,30 @@ export async function scaleASG({
       region: awsRegion 
     });
 
-    await client.send(new UpdateAutoScalingGroupCommand({
-      AutoScalingGroupName: asgName,
-      DesiredCapacity: desiredCapacity
-    }));
+    const command: {
+      AutoScalingGroupName: string;
+      DesiredCapacity?: number;
+      MinSize?: number;
+      MaxSize?: number;
+    } = {
+      AutoScalingGroupName: asgName
+    };
 
-    context.logger.debug(`Successfully scaled ASG ${asgName} to ${desiredCapacity} instances`);
+    if (desiredCapacity !== undefined) {
+      command.DesiredCapacity = desiredCapacity;
+    }
+    if (minSize !== undefined) {
+      command.MinSize = minSize;
+    }
+    if (maxSize !== undefined) {
+      command.MaxSize = maxSize;
+    }
+
+    await client.send(new UpdateAutoScalingGroupCommand(command));
+
+    context.logger.debug(`Successfully updated ASG ${asgName}`);
     return true;
   } catch (error) {
-    throw new CLIError(`Failed to scale ASG ${asgName}`, { cause: error });
+    throw new CLIError(`Failed to update ASG ${asgName}`, { cause: error });
   }
 }
