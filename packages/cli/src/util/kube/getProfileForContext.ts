@@ -1,7 +1,7 @@
 // Utility function to get AWS profile for a Kubernetes context
-// Extracted from the aws profile-for-context command
-import { getAllRegions } from "@/util/config/getAllRegions.ts";
+// Extracted from the kube profile-for-context command
 import { CLIError } from '@/util/error/error'
+import { getAllRegions } from "@/util/config/getAllRegions.ts";
 
 import type { PanfactumContext } from '@/util/context/context'
 

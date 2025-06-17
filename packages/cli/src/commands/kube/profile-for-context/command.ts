@@ -1,10 +1,10 @@
 import { Option } from 'clipanion';
-import { getAWSProfileForContext } from "@/util/aws/getProfileForContext.ts";
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
+import { getAWSProfileForContext } from "@/util/kube/getProfileForContext.ts";
 
 export default class ProfileForContextCommand extends PanfactumCommand {
-  static override paths = [['aws', 'profile-for-context']];
+  static override paths = [['kube', 'profile-for-context']];
 
   static override usage = PanfactumCommand.Usage({
     description: 'Get the AWS profile associated with a Kubernetes context',
@@ -13,7 +13,7 @@ export default class ProfileForContextCommand extends PanfactumCommand {
       a specific Kubernetes context.
     `,
     examples: [
-      ['Get AWS profile for a context', '$0 aws profile-for-context production-primary'],
+      ['Get AWS profile for a context', '$0 kube profile-for-context production-primary'],
     ],
   });
 

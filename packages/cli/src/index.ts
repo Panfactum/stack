@@ -2,7 +2,7 @@
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
-import ProfileForContextCommand from "./commands/aws/profile-for-context/command.ts";
+import ProfileForContextCommand from "./commands/kube/profile-for-context/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
 import BuildkitBuildCommand from "./commands/buildkit/build/command.ts";
 import BuildkitClearCacheCommand from "./commands/buildkit/clear-cache/command.ts";
