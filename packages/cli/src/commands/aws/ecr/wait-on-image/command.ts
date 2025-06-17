@@ -61,12 +61,12 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
 
     const accountIdValidation = AWS_ACCOUNT_ID_SCHEMA.safeParse(accountId);
     if (!accountIdValidation.success) {
-      throw new CLIError(`Invalid AWS Account ID: ${accountIdValidation.error.errors[0]?.message || 'Invalid format'}`);
+      throw new CLIError(`Invalid AWS Account ID: ${accountIdValidation.error.errors[0]?.message || 'Invalid format'} in the provided image name ${this.image}`);
     }
 
     const regionValidation = AWS_REGION_SCHEMA.safeParse(region);
     if (!regionValidation.success) {
-      throw new CLIError(`Invalid AWS region: ${regionValidation.error.errors[0]?.message || 'Invalid format'}`);
+      throw new CLIError(`Invalid AWS region: ${regionValidation.error.errors[0]?.message || 'Invalid format'} in the provided image name ${this.image}`);
     }
 
     const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
