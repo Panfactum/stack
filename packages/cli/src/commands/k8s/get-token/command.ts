@@ -2,7 +2,7 @@
 // Replaces the legacy pf-get-kube-token.sh script
 
 import { Option } from 'clipanion'
-import { getEksToken } from '@/util/aws/getEksToken'
+import { getEKSToken } from '@/util/aws/getEKSToken.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand'
 import { CLIError } from '@/util/error/error'
 
@@ -44,7 +44,7 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
 
     try {
       // Get the EKS token using our utility that combines AWS SDK validation with CLI token generation
-      const token = await getEksToken(this.context, this.clusterName, this.region, this.profile)
+      const token = await getEKSToken(this.context, this.clusterName, this.region, this.profile)
       
       // Output the token as JSON (matching the original script behavior)
       logger.writeRaw(JSON.stringify(token) + '\n')

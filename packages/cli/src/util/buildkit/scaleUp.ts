@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { CLIError } from '@/util/error/error.js'
+import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from './constants.js'
 import { recordBuildKitBuild } from './recordBuild.js'
@@ -40,7 +41,7 @@ export async function scaleUpBuildKit(options: ScaleUpOptions): Promise<void> {
 
 async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlContext?: string): Promise<void> {
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
-  const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
+  const contextArgs = getKubectlContextArgs(kubectlContext)
 
   // Get current replicas
   const result = await execute({
@@ -90,7 +91,7 @@ async function waitForScaleUp(
   timeoutSeconds: number
 ): Promise<void> {
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
-  const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
+  const contextArgs = getKubectlContextArgs(kubectlContext)
 
   while (true) {
     const result = await execute({

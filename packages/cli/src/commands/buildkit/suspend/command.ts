@@ -3,12 +3,12 @@ import { z } from 'zod'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
 import { getLastBuildTime } from '@/util/buildkit/getLastBuildTime.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
+import { getAllRegions } from '@/util/config/getAllRegions.js'
+import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
-import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
 
 export default class BuildkitScaleDownCommand extends PanfactumCommand {
-  static override paths = [['buildkit', 'scale', 'down']]
+  static override paths = [['buildkit', 'suspend']]
 
   static override usage = PanfactumCommand.Usage({
     description: 'Scales the BuildKit instances to 0 replicas.'
@@ -32,16 +32,11 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
 
     // Validate context if provided
     if (this.kubectlContext) {
-      const clustersData = await readYAMLFile({
-        context: this.context,
-        filePath: `${this.context.repoVariables.kube_dir}/clusters.yaml`,
-        validationSchema: CLUSTERS_FILE_SCHEMA,
-        throwOnMissing: false,
-        throwOnEmpty: false
-      })
+      const allRegions = await getAllRegions(this.context)
+      const matchingRegion = allRegions.find(region => region.clusterContextName === this.kubectlContext)
 
-      if (!clustersData || !clustersData[this.kubectlContext]) {
-        this.context.logger.error(`'${this.kubectlContext}' not found in clusters.yaml.`)
+      if (!matchingRegion) {
+        this.context.logger.error(`'${this.kubectlContext}' not found in any configured region.`)
         return 1
       }
     }
@@ -56,7 +51,7 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
 
   private async scaleDown(arch: Architecture, timeoutSeconds?: number): Promise<void> {
     const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
-    const contextArgs = this.kubectlContext ? ['--context', this.kubectlContext] : []
+    const contextArgs = getKubectlContextArgs(this.kubectlContext)
 
     if (timeoutSeconds !== undefined) {
       // Check last build time

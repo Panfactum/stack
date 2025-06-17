@@ -45,5 +45,5 @@ export async function waitForASGInstance(
     }
   }
   
-  throw new CLIError("Failed to get instance ID - no instances found in ASG");
+  throw new CLIError(`Failed to get instance ID - after ${maxRetries} retries`);
 }

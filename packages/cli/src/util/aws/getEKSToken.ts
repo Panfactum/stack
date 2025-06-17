@@ -21,7 +21,7 @@ const EKS_TOKEN_SCHEMA = z.object({
 
 export type EKSTokenResponse = z.infer<typeof EKS_TOKEN_SCHEMA>;
 
-export async function getEksToken(
+export async function getEKSToken(
   context: PanfactumContext,
   clusterName: string,
   region: string,

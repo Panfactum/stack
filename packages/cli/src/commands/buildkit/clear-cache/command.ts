@@ -4,6 +4,7 @@ import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
 import { CLIError } from '@/util/error/error.js'
+import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { parseJson } from '@/util/zod/parseJson.js'
 
@@ -40,7 +41,7 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
   }
 
   private async deleteUnusedPVCs(): Promise<void> {
-    const contextArgs = this.kubectlContext ? ['--context', this.kubectlContext] : []
+    const contextArgs = getKubectlContextArgs(this.kubectlContext)
     
     // Get all PVCs
     const pvcsResult = await execute({
@@ -132,7 +133,7 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
   }
 
   private async prunePodCaches(): Promise<void> {
-    const contextArgs = this.kubectlContext ? ['--context', this.kubectlContext] : []
+    const contextArgs = getKubectlContextArgs(this.kubectlContext)
     
     // Get running pods
     const podsResult = await execute({

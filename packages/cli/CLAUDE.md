@@ -42,7 +42,6 @@ cli.register(YourCommand);
 - Uses Listr2 for complex multi-step operations
 - Integrates with Terragrunt for infrastructure deployment
 - AWS SDK for cloud operations
-- Configuration managed via YAML files with SOPS encryption
 
 ### Key Patterns
 
@@ -147,9 +146,6 @@ const result = await execute({
 - Templates: `src/templates/<module>.hcl`
 - Files: `src/files/<category>/<file>`
 
-### Testing
-Currently no test files in `src/`, but the test infrastructure is set up for `bun test` with pattern `src/**/*.test.ts`.
-
 ### Environment Variables
 - `VERSION`: Injected at build time from package.json
 - AWS credentials and profiles managed through standard AWS SDK mechanisms
@@ -157,7 +153,6 @@ Currently no test files in `src/`, but the test infrastructure is set up for `bu
 ### Key Dependencies
 - `clipanion`: CLI framework for command parsing and execution
 - `listr2`: Task runner for complex operations
-- `picocolors`: Terminal colorization (blue=info, magenta=prompts, red=errors, cyan=actions, green=success)
 - `@aws-sdk/*`: AWS service clients
 - `terragrunt`: Infrastructure deployment (not a direct dependency, expected in environment)
 

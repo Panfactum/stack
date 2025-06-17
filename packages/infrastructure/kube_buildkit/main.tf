@@ -359,7 +359,7 @@ module "scale_to_zero" {
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
-      "pf", "buildkit", "scale", "down",
+      "pf", "buildkit", "suspend",
       "--timeout",
       tostring(var.scale_down_delay_seconds)
     ]
