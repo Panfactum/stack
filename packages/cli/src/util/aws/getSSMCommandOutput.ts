@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import { GetCommandInvocationCommand } from "@aws-sdk/client-ssm";
 import { CLISubprocessError, CLIError } from "@/util/error/error";
 import { getSSMClient } from "./clients/getSSMClient";
@@ -37,16 +38,17 @@ async function getSSMCommandInvocation(inputs: Inputs) {
   const { awsRegion, awsProfile, instanceId, commandId, context } = inputs;
   
   let retries = 0;
-  const maxRetries = 60;
+  const maxRetries = 30;  // 30 seconds total timeout
+  const retryDelay = 1000; // 1 second between retries
+
+  const ssmClient = await getSSMClient({
+    context,
+    profile: awsProfile,
+    region: awsRegion
+  });
 
   while (retries < maxRetries) {
     try {
-      const ssmClient = await getSSMClient({
-        context,
-        profile: awsProfile,
-        region: awsRegion
-      });
-
       const result = await ssmClient.send(new GetCommandInvocationCommand({
         InstanceId: instanceId,
         CommandId: commandId
@@ -54,33 +56,29 @@ async function getSSMCommandInvocation(inputs: Inputs) {
 
       // Check if command is still running
       if (result.Status === "InProgress" || result.Status === "Pending") {
-        if (retries < maxRetries - 1) {
-          await new Promise(resolve => globalThis.setTimeout(resolve, 1000));
-          retries++;
-          continue;
-        } else {
-          throw new CLIError(`SSM command ${commandId} did not complete within timeout`);
-        }
-      }
-
-      // Command completed (Success, Failed, Cancelled, etc.)
-      return {
-        Status: result.Status || "Unknown",
-        StandardOutputContent: result.StandardOutputContent || "",
-        StandardErrorContent: result.StandardErrorContent || ""
-      };
-    } catch (error) {
-      if (retries < maxRetries - 1) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 1000));
-        retries++;
+        // Command is still running, will retry
       } else {
-        throw new CLIError(
-          `Failed to get SSM command invocation for command ${commandId} on instance ${instanceId}`,
-          { cause: error }
-        );
+        // Command completed (Success, Failed, Cancelled, etc.)
+        return {
+          Status: result.Status || "Unknown",
+          StandardOutputContent: result.StandardOutputContent || "",
+          StandardErrorContent: result.StandardErrorContent || ""
+        };
       }
+    } catch (error) {
+      throw new CLIError(
+        `Failed to get SSM command invocation for command ${commandId} on instance ${instanceId}`,
+        { cause: error }
+      );
+    }
+
+    retries++;
+    
+    // Wait before next retry if we haven't reached max retries
+    if (retries < maxRetries) {
+      await setTimeout(retryDelay);
     }
   }
 
-  throw new CLIError(`Failed to get SSM command invocation after ${maxRetries} retries`);
+  throw new CLIError(`SSM command ${commandId} did not complete within timeout`);
 }
