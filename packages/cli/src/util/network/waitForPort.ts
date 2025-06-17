@@ -31,7 +31,7 @@ export async function waitForPort({
       return
     }
 
-    await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay))
+    await Bun.sleep(retryDelay)
   }
 
   throw new CLIError(`Port ${port} on ${host} did not become available after ${maxAttempts} attempts`)

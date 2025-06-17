@@ -166,9 +166,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     }
 
     if (retries > 0) {
-      await new Promise((resolve) => {
-        globalThis.setTimeout(resolve, retryDelay);
-      });
+      await Bun.sleep(retryDelay);
     }
   }
 

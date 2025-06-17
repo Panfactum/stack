@@ -1,4 +1,3 @@
-import { setTimeout } from "node:timers/promises";
 import { SendCommandCommand } from "@aws-sdk/client-ssm";
 import { getSSMClient } from "@/util/aws/clients/getSSMClient.ts";
 import { CLIError } from "@/util/error/error";
@@ -40,7 +39,7 @@ export async function sendSSMCommand(
       return result.Command.CommandId;
     } catch (error) {
       if (ssmRetries < maxSSMRetries - 1) {
-        await setTimeout(1000);
+        await Bun.sleep(1000);
         ssmRetries++;
       } else {
         throw new CLIError("Failed to execute SSM command", { cause: error });

@@ -121,7 +121,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           }
           
           // Wait for NAT instances to be ready
-          await new Promise(resolve => globalThis.setTimeout(resolve, 30000))
+          await Bun.sleep(30000)
         },
       },
       {
@@ -188,7 +188,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           
           if (nodeGroups.length > 0) {
             // Wait for nodes to join
-            await new Promise(resolve => globalThis.setTimeout(resolve, 60000))
+            await Bun.sleep(60000)
           }
         },
       },

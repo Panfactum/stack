@@ -1,4 +1,3 @@
-import { setTimeout } from "node:timers/promises";
 import { DescribeAutoScalingGroupsCommand } from "@aws-sdk/client-auto-scaling";
 import { getAutoScalingClient } from "@/util/aws/clients/getAutoScalingClient.ts";
 import { CLIError } from "@/util/error/error";
@@ -41,7 +40,7 @@ export async function waitForASGInstance(
     
     // Wait before next retry if we haven't reached max retries
     if (retries < maxRetries) {
-      await setTimeout(retryDelay);
+      await Bun.sleep(retryDelay);
     }
   }
   

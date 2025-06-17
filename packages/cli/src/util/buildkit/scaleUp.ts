@@ -125,6 +125,6 @@ async function waitForScaleUp(
     context.logger.info(`${arch}: Waiting ${remainingSeconds} seconds for at least one BuildKit replica to become available...`)
     
     // Sleep for 10 seconds
-    await new Promise(resolve => globalThis.setTimeout(resolve, 10000))
+    await Bun.sleep(10000)
   }
 }

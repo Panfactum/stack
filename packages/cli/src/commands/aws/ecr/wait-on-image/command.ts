@@ -86,7 +86,7 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
 
       if (elapsed + intervalSeconds < timeoutSeconds) {
         this.context.logger.write('Still waiting...');
-        await new Promise(resolve => globalThis.setTimeout(resolve, intervalSeconds * 1000));
+        await Bun.sleep(intervalSeconds * 1000);
       }
       
       elapsed += intervalSeconds;

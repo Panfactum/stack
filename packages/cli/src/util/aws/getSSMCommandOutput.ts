@@ -1,4 +1,3 @@
-import { setTimeout } from "node:timers/promises";
 import { GetCommandInvocationCommand } from "@aws-sdk/client-ssm";
 import { CLISubprocessError, CLIError } from "@/util/error/error";
 import { getSSMClient } from "./clients/getSSMClient";
@@ -76,7 +75,7 @@ async function getSSMCommandInvocation(inputs: Inputs) {
     
     // Wait before next retry if we haven't reached max retries
     if (retries < maxRetries) {
-      await setTimeout(retryDelay);
+      await Bun.sleep(retryDelay);
     }
   }
 
