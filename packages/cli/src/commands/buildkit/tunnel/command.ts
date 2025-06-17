@@ -1,13 +1,13 @@
 import { Option } from 'clipanion'
-import { z } from 'zod'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { scaleUpBuildKit } from '@/util/buildkit/scaleUp.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
-import { execute } from '@/util/subprocess/execute.js'
-import { readYAMLFile } from '@/util/yaml/readYAMLFile.js'
+import { getAllRegions } from '@/util/config/getAllRegions.js'
+import { CLIError } from '@/util/error/error.js'
+import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
+import {z} from "zod";
 
 // Zod schema for port validation
 const portSchema = z.string()
@@ -44,19 +44,6 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
     // Get BuildKit configuration
     const config = await getBuildKitConfig(this.context)
 
-    // Validate context exists
-    const clustersData = await readYAMLFile({
-      context: this.context,
-      filePath: `${this.context.repoVariables.kube_dir}/clusters.yaml`,
-      validationSchema: CLUSTERS_FILE_SCHEMA,
-      throwOnMissing: false,
-      throwOnEmpty: false
-    })
-
-    if (!clustersData || !clustersData[config.cluster]) {
-      this.context.logger.error(`'${config.cluster}' not found in clusters.yaml. Run pf devshell sync to regenerate kubeconfig.`)
-      return 1
-    }
 
     // Scale up the BuildKit instance
     await scaleUpBuildKit({
@@ -74,20 +61,43 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
       context: this.context
     })
 
-    // Run the tunnel
-    await execute({
-      command: [
-        'pf',
-        'tunnel',
-        config.bastion,
-        address,
-        '--local-port',
-        portNum.toString()
-      ],
+    // Get region info for vault address
+    const regions = (await getAllRegions(this.context)).filter(region => region.bastionDeployed)
+    const selectedRegion = regions.find(region => region.clusterContextName === config.bastion)
+
+    if (!selectedRegion) {
+      throw new CLIError(`No bastion found with name '${config.bastion}'. Available bastions: ${regions.map(r => r.clusterContextName).join(', ')}`)
+    }
+
+    if (!selectedRegion.vaultAddress) {
+      throw new CLIError(`Vault address not configured for region ${config.bastion}`)
+    }
+
+    // Create SSH tunnel
+    const tunnelHandle = await createSSHTunnel({
       context: this.context,
-      workingDirectory: process.cwd()
+      bastionName: config.bastion,
+      remoteAddress: address,
+      localPort: portNum,
+      vaultAddress: selectedRegion.vaultAddress
     })
 
-    return 0
+    this.context.logger.info(`BuildKit tunnel established on localhost:${portNum}`)
+    this.context.logger.info(`Press Ctrl+C to close the tunnel.`)
+
+    // Handle process termination
+    const cleanup = async () => {
+      await tunnelHandle.close()
+      process.exit(0)
+    }
+
+    process.on('SIGINT', cleanup)
+    process.on('SIGTERM', cleanup)
+
+    // Keep the command running until terminated
+    return new Promise(() => {
+      // This promise never resolves naturally - it waits for process termination
+      // The cleanup handlers above will exit the process
+    })
   }
 }

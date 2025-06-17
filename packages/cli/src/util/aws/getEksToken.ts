@@ -1,10 +1,10 @@
 // Utility to get EKS authentication tokens using AWS SDK with Zod validation
 // Uses AWS SDK for direct token generation with proper error handling and type safety
 
-import { z, ZodError } from 'zod';
-import { HttpRequest } from '@smithy/protocol-http';
-import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { Sha256 } from '@aws-crypto/sha256-js';
+import { SignatureV4 } from '@aws-sdk/signature-v4';
+import { HttpRequest } from '@smithy/protocol-http';
+import { z, ZodError } from 'zod';
 import { CLIError, PanfactumZodError } from '../error/error';
 import { getSTSClient } from './clients/getSTSClient';
 import type { PanfactumContext } from '@/util/context/context';

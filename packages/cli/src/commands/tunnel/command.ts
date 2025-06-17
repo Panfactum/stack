@@ -1,14 +1,10 @@
-import { spawn } from 'child_process';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
 import { z, ZodError } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getAllRegions } from "@/util/config/getAllRegions.ts";
 import { CLIError, PanfactumZodError } from '@/util/error/error';
-import { execute } from '@/util/subprocess/execute';
-import { getVaultTokenString } from '@/util/vault/getVaultToken';
+import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel';
 
 // Zod schema for port validation
 const portSchema = z.string()
@@ -54,9 +50,6 @@ export default class TunnelCommand extends PanfactumCommand {
 
   override async execute(): Promise<number> {
     try {
-      const { repoVariables } = this.context;
-      const sshDir = repoVariables.ssh_dir;
-      
       // Validate remote address format
       remoteAddressSchema.parse(this.remoteAddress);
 
@@ -67,88 +60,6 @@ export default class TunnelCommand extends PanfactumCommand {
       if (!selectedRegion) {
         throw new CLIError(`No bastion found with name '${this.bastion}'. Available bastions: ${regions.map(r => r.clusterContextName).join(', ')}`);
       }
-
-      // Read connection info
-      const connectionInfoFile = join(sshDir, 'connection_info');
-      if (!existsSync(connectionInfoFile)) {
-        throw new CLIError(
-          `Connection info file not found at ${connectionInfoFile}. Run pf devshell sync to generate it.`
-        );
-      }
-
-      const connectionInfo = readFileSync(connectionInfoFile, 'utf8');
-      const bastionLine = connectionInfo.split('\n').find(line => line.startsWith(`${this.bastion} `));
-
-      if (!bastionLine) {
-        throw new CLIError(
-          `${this.bastion} not found in ${connectionInfoFile}. Ensure this name is correct or run pf devshell sync to regenerate this file.`
-        );
-      }
-
-      const [, bastionDomain, bastionPort] = bastionLine.split(' ');
-      if (!bastionDomain || !bastionPort) {
-        throw new CLIError(`Invalid connection info format for ${this.bastion}`);
-      }
-
-      // Setup SSH keys
-      const keyFile = join(sshDir, `id_ed25519_${this.bastion}`);
-      const publicKeyFile = `${keyFile}.pub`;
-      const signedPublicKeyFile = `${keyFile}_signed.pub`;
-
-      // Generate keys if they don't exist
-      if (!existsSync(keyFile) || !existsSync(publicKeyFile) || !existsSync(signedPublicKeyFile)) {
-        this.context.logger.info('Generating SSH keys...');
-
-        // Clean up any partial keys
-        for (const file of [keyFile, publicKeyFile, signedPublicKeyFile]) {
-          if (existsSync(file)) {
-            await execute({
-              command: ['rm', '-f', file],
-              context: this.context,
-              workingDirectory: process.cwd(),
-            });
-          }
-        }
-
-        // Generate new keys
-        await execute({
-          command: [
-            'ssh-keygen',
-            '-q',
-            '-t', 'ed25519',
-            '-N', '',
-            '-C', this.bastion,
-            '-f', keyFile
-          ],
-          context: this.context,
-          workingDirectory: process.cwd(),
-        });
-      }
-
-      // Sign SSH key with Vault
-      const vaultToken = await getVaultTokenString({ context: this.context, address: selectedRegion.vaultAddress });
-
-      const { stdout: signedKey } = await execute({
-        command: [
-          'vault',
-          'write',
-          '-field',
-          'signed_key',
-          'ssh/sign/default',
-          `public_key=@${publicKeyFile}`
-        ],
-        context: this.context,
-        workingDirectory: process.cwd(),
-        env: {
-          ...process.env,
-          VAULT_ADDR: selectedRegion.vaultAddress,
-          VAULT_TOKEN: vaultToken
-        }
-      });
-
-      this.context.logger.info('SSH Key signed successfully');
-
-      writeFileSync(signedPublicKeyFile, signedKey);
 
       // Determine local port
       let localPortNumber: number;
@@ -173,55 +84,35 @@ export default class TunnelCommand extends PanfactumCommand {
         localPortNumber = portSchema.parse(portString);
       }
 
-      // Establish tunnel
-      const knownHostsFile = join(sshDir, 'known_hosts');
+      // Validate vault address
+      if (!selectedRegion.vaultAddress) {
+        throw new CLIError(`Vault address not configured for bastion ${this.bastion}`);
+      }
 
-      // Use spawn to run autossh in the foreground
-      const autossh = spawn('autossh', [
-        '-M', '0',
-        '-o', `UserKnownHostsFile=${knownHostsFile}`,
-        '-o', 'IdentitiesOnly=yes',
-        '-o', 'IdentityAgent=none',
-        '-o', 'ServerAliveInterval=2',
-        '-o', 'ServerAliveCountMax=3',
-        '-o', 'ConnectTimeout=1',
-        '-N',
-        '-i', keyFile,
-        '-i', signedPublicKeyFile,
-        '-L', `127.0.0.1:${localPortNumber}:${this.remoteAddress}`,
-        '-p', bastionPort,
-        `panfactum@${bastionDomain}`
-      ], {
-        env: {
-          ...process.env,
-          AUTOSSH_GATETIME: '0'
-        },
-        stdio: 'inherit'
+      // Create SSH tunnel
+      const tunnelHandle = await createSSHTunnel({
+        context: this.context,
+        bastionName: this.bastion,
+        remoteAddress: this.remoteAddress,
+        localPort: localPortNumber,
+        vaultAddress: selectedRegion.vaultAddress
       });
-
-      this.context.logger.info(
-        `Tunnel established: localhost:${localPortNumber} → ${this.remoteAddress} via ${this.bastion}`
-      );
 
       this.context.logger.info(`Press Ctrl+C to close the tunnel.`);
 
       // Handle process termination
-      process.on('SIGINT', () => {
-        this.context.logger.info('Closing tunnel...');
-        autossh.kill('SIGTERM');
+      const cleanup = async () => {
+        await tunnelHandle.close();
         process.exit(0);
-      });
+      };
 
-      process.on('SIGTERM', () => {
-        autossh.kill('SIGTERM');
-        process.exit(0);
-      });
+      process.on('SIGINT', cleanup);
+      process.on('SIGTERM', cleanup);
 
-      // Wait for autossh to exit
-      return new Promise((resolve) => {
-        autossh.on('exit', (code) => {
-          resolve(code || 0);
-        });
+      // Keep the command running until terminated
+      return new Promise(() => {
+        // This promise never resolves naturally - it waits for process termination
+        // The cleanup handlers above will exit the process
       });
 
     } catch (error) {

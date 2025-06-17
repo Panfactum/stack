@@ -105,7 +105,7 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
       })
       
       this.amdTunnelPid = amdTunnelResult.pid
-      console.log(this.armTunnelPid, this.amdTunnelPid)
+
       // Wait for tunnels to be ready
       await waitForPort({ port: armPort })
       await waitForPort({ port: amdPort })

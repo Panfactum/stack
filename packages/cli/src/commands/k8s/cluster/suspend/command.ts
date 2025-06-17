@@ -1,6 +1,7 @@
 import { confirm } from '@inquirer/prompts'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
+import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
 import {
   AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA,
   EC2_INSTANCES_SCHEMA,
@@ -9,7 +10,6 @@ import {
   KUBERNETES_ITEMS_SCHEMA,
   LOAD_BALANCERS_SCHEMA
 } from '@/util/aws/schemas.ts'
-import { getAWSProfileForContext } from '@/util/aws/getProfileForContext.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'

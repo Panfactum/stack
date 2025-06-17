@@ -1,11 +1,8 @@
-import { spawn } from 'child_process'
 import { Option, Command } from 'clipanion'
 import { z } from 'zod'
-import {getIdentity} from "@/util/aws/getIdentity.ts";
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
-import {getEnvironments} from "@/util/config/getEnvironments.ts";
+import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import {getPanfactumConfig} from "@/util/config/getPanfactumConfig.ts";
-import { getRegions } from '@/util/config/getRegions'
 import { getTempCredentials } from '@/util/db/getTempCredentials.ts'
 import { getVaultRole } from '@/util/db/getVaultRole.ts'
 import { listDatabases } from '@/util/db/listDatabases.ts'
@@ -13,7 +10,7 @@ import { databaseTypeSchema, vaultRoleSchema, type DatabaseType } from '@/util/d
 import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
-import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT} from '@/util/terragrunt/constants'
+import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
 import { getVaultTokenString } from '@/util/vault/getVaultToken'
 
 // Zod schema for port validation
@@ -53,7 +50,7 @@ export class DbTunnelCommand extends PanfactumCommand {
     description: 'Local port to use for tunnel (default: auto-detect)',
   })
 
-  async execute() {
+  async execute(): Promise<number | void> {
     const { context } = this
 
     // Validate type if provided and get properly typed value
@@ -62,30 +59,11 @@ export class DbTunnelCommand extends PanfactumCommand {
       validatedType = databaseTypeSchema.parse(this.type)
     }
 
-    /*******************************************
-     * Select Environment and Region
-     *******************************************/
-    const environments = (await getEnvironments(this.context)).filter(env => env.name !== MANAGEMENT_ENVIRONMENT);
-
-    if (environments.length === 0) {
-      throw new CLIError([
-        "No environments found. Please run `pf env add` to create an environment first.",
-      ]);
-    }
-
-    const selectedEnvironment = await this.context.logger.select({
-      message: "Select the environment for the cluster:",
-      choices: environments.map(env => ({
-        value: env,
-        name: `${env.name}`
-      })),
-    });
-
-    const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== GLOBAL_REGION);
+    const regions = (await getAllRegions(this.context)).filter(region => region.bastionDeployed)
 
     if (regions.length === 0) {
       throw new CLIError([
-        `No available regions found in environment ${selectedEnvironment.name}.`,
+        `No available regions found with kube_bastion deployed.`,
       ]);
     }
 
@@ -108,15 +86,16 @@ export class DbTunnelCommand extends PanfactumCommand {
     });
 
     if (!config.aws_profile) {
-      throw new CLIError('AWS profile is not configured. Please set aws_profile in your panfactum.json or environment variables.')
+      throw new CLIError('AWS profile is not configured. Please set aws_profile in your environment.yaml.')
     }
 
     if (!config.kube_config_context) {
-      throw new CLIError('Kubernetes context is not configured. Please set kube_config_context in your panfactum.json or environment variables.')
+      throw new CLIError('Kubernetes context is not configured. Please set kube_config_context in your region.yaml.')
     }
 
-    await getIdentity({ context, profile: config.aws_profile });
-
+    if (!config.vault_addr) {
+      throw new CLIError(`vault_addr configuration is missing for the selected region ${selectedRegion.name}.`)
+    }
 
     // Step 1: Find databases
     context.logger.info('Finding databases...')
@@ -158,9 +137,6 @@ export class DbTunnelCommand extends PanfactumCommand {
     // Step 2: Get temporary credentials
     const vaultRole = getVaultRole(selectedDb, validatedRole)
 
-    if (!config.vault_addr) {
-      throw new CLIError('Vault address is not configured. Please set VAULT_ADDR in your environment variables or configuration.')
-    }
 
     const credentials = await getTempCredentials(
       context, 
@@ -171,8 +147,6 @@ export class DbTunnelCommand extends PanfactumCommand {
       selectedDb.namespace
     )
 
-    context.logger.info('Temporary credentials created successfully')
-
     // Step 3: Create tunnel
     // Use the service from annotations if available, otherwise construct it
     const serviceName = selectedDb.annotations?.['panfactum.com/service'] || 
@@ -182,38 +156,38 @@ export class DbTunnelCommand extends PanfactumCommand {
 
     // Display connection info
     context.logger.info(`
-Target Database Connection Details: 
+  Target Database Connection Details: 
 
   Database: ${selectedDb.name}\n
   Type: ${selectedDb.type}\n
   Namespace: ${selectedDb.namespace}`);
     
     
-    let connectionInfo = ''
+    let connectionDetails = ''
     if (selectedDb.type === 'nats') {
       const {ca, cert, key} = credentials.certs || {};
 
-      connectionInfo = `
-Credentials saved to ${context.repoVariables.nats_dir} and will expire in 16 hours.
+      connectionDetails = `
+  Credentials saved to ${context.repoVariables.nats_dir} and will expire in 16 hours.
 
-To connect using the NATS CLI, set the following environment variables:
+  To connect using the NATS CLI, set the following environment variables:
 
   export NATS_CA=${ca}
   export NATS_CERT=${cert}
   export NATS_KEY=${key}
   export NATS_URL=tls://127.0.0.1:${localPort}
 
-If using a different client, configure TLS authentication using the above values.`
+  If using a different client, configure TLS authentication using the above values.`
     } else {
-      connectionInfo = `
-Connection details:\n
+      connectionDetails = `
+  Connection details:\n
   Host: localhost\n
   Port: ${localPort}\n
   Username: ${credentials.username}\n
   Password: ${credentials.password}`
     }
     
-    context.logger.info(`${connectionInfo}`)
+    context.logger.info(`${connectionDetails}`)
 
     let connectionString = ''
     if (selectedDb.type === 'postgresql') {
@@ -226,16 +200,18 @@ Connection details:\n
       context.logger.info(`Connection String: ${connectionString}`)
     }
 
-    // Create tunnel process
-    const tunnelProcess = spawn('pf tunnel', [
-      config.kube_config_context,
-      `${serviceName}:${selectedDb.port.toString()}`,
-      '--local-port',
-      localPort.toString(),
-    ], {
-      ...process.env,
-      stdio: 'inherit',
-      env: process.env,
+    // Validate vault address
+    if (!config.vault_addr) {
+      throw new CLIError(`Vault address not configured for context ${config.kube_config_context}`)
+    }
+
+    // Create tunnel
+    const tunnelHandle = await createSSHTunnel({
+      context,
+      bastionName: config.kube_config_context,
+      remoteAddress: `${serviceName}:${selectedDb.port}`,
+      localPort,
+      vaultAddress: config.vault_addr
     })
 
     // Handle cleanup on process termination
@@ -243,34 +219,32 @@ Connection details:\n
       if (credentials.leaseId) {
         try {
           context.logger.info('Revoking database credentials...')
-          const vaultToken = await getVaultTokenString({ context, address: '' })
+          const vaultToken = await getVaultTokenString({ context, address: config.vault_addr! })
           await execute({
             command: ['vault', 'lease', 'revoke', credentials.leaseId],
             context,
             workingDirectory: process.cwd(),
-            env: { VAULT_TOKEN: vaultToken },
+            env: { 
+              ...process.env,
+              VAULT_ADDR: config.vault_addr,
+              VAULT_TOKEN: vaultToken 
+            },
           })
         } catch {
           // Ignore errors during cleanup
         }
       }
-      tunnelProcess.kill()
+      await tunnelHandle.close()
       process.exit(0)
     }
 
     process.on('SIGINT', cleanup)
     process.on('SIGTERM', cleanup)
 
-    // Wait for tunnel process to exit
-    await new Promise<void>((resolve, reject) => {
-      tunnelProcess.on('error', reject)
-      tunnelProcess.on('exit', (code) => {
-        if (code !== 0 && code !== null) {
-          reject(new CLIError(`Tunnel process exited with code ${code}`))
-        } else {
-          resolve()
-        }
-      })
+    // Keep the command running until terminated
+    return new Promise(() => {
+      // This promise never resolves naturally - it waits for process termination
+      // The cleanup handlers above will exit the process
     })
   }
 }
