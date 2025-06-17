@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
+import { scaleUpBuildKit } from '@/util/buildkit/scaleUp.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLUSTERS_FILE_SCHEMA } from '@/util/devshell/updateKubeConfig.js'
 import { execute } from '@/util/subprocess/execute.js'
@@ -58,20 +59,11 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
     }
 
     // Scale up the BuildKit instance
-    await execute({
-      command: [
-        'pf',
-        'buildkit',
-        'scale',
-        'up',
-        '--only',
-        validatedArch,
-        '--wait',
-        '--context',
-        config.cluster
-      ],
+    await scaleUpBuildKit({
       context: this.context,
-      workingDirectory: process.cwd()
+      architectures: [validatedArch],
+      kubectlContext: config.cluster,
+      wait: true
     })
 
     // Get the address of a free instance
