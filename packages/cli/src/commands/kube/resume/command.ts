@@ -1,5 +1,5 @@
 import { DeleteTagsCommand, DescribeAutoScalingGroupsCommand } from '@aws-sdk/client-auto-scaling'
-import { DescribeClusterCommand, ListNodegroupsCommand, UpdateNodegroupConfigCommand, UntagResourceCommand } from '@aws-sdk/client-eks'
+import { DescribeClusterCommand, UntagResourceCommand } from '@aws-sdk/client-eks'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
 import { getAutoScalingClient } from '@/util/aws/clients/getAutoScalingClient.ts'
@@ -10,14 +10,16 @@ import {
   KUBERNETES_ITEMS_SCHEMA
 } from '@/util/aws/schemas.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
+import { getAllRegions } from '@/util/config/getAllRegions';
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
 import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
 import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
+import {MODULES} from "@/util/terragrunt/constants.ts";
+import {buildDeployModuleTask} from "@/util/terragrunt/tasks/deployModuleTask.ts";
 import { parseJson } from '@/util/zod/parseJson'
 import type { EKSClusterInfo } from '@/util/eks/types.ts'
-import { getAllRegions } from '@/util/config/getAllRegions';
 
 
 export class K8sClusterResumeCommand extends PanfactumCommand {
@@ -211,66 +213,69 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           }
         },
       },
-      {
-        title: 'Restoring EKS node groups',
-        task: async () => {
-          const response = await eksClient.send(new ListNodegroupsCommand({
-            clusterName: clusterInfo.name
-          }))
-          const nodeGroups = response.nodegroups || []
-          
-          for (const nodeGroup of nodeGroups) {
-            // Get the original configuration (usually 3 nodes)
-            await eksClient.send(new UpdateNodegroupConfigCommand({
-              clusterName: clusterInfo.name,
-              nodegroupName: nodeGroup,
-              scalingConfig: {
-                minSize: 3,
-                maxSize: 3,
-                desiredSize: 3
-              }
-            }))
-          }
-          
-          if (nodeGroups.length > 0) {
-            // Wait for nodes to join
-            await Bun.sleep(60000)
-          }
-        },
-      },
+      await buildDeployModuleTask({
+        taskTitle: "Restoring EKS node groups",
+        context,
+        environment: selectedRegion.environment,
+        region: selectedRegion.name,
+        skipIfAlreadyApplied: false,
+        module: MODULES.AWS_EKS,
+        etaWarningMessage: 'This may take up to 15 minutes.',
+      }),
       {
         title: 'Removing Karpenter node pool limits',
         task: async () => {
-          try {
-            // Get all Karpenter node pools
-            const { stdout } = await execute({
-              command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
+          // Check if Karpenter is installed by looking for the CRD
+          const { exitCode } = await execute({
+            command: ['kubectl', '--context', selectedContext.name, 'get', 'crd', 'nodepools.karpenter.sh'],
+            context,
+            workingDirectory: process.cwd(),
+            isSuccess: () => true, // Don't throw on non-zero exit
+          })
+
+          if (exitCode !== 0) {
+            context.logger.debug('Karpenter not installed, skipping nodepool limits removal')
+            return
+          }
+
+          // Karpenter is installed, get all node pools
+          const { stdout } = await execute({
+            command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
+            context,
+            workingDirectory: process.cwd(),
+          })
+          
+          const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
+          const nodePools = result.items || []
+          
+          for (const nodePool of nodePools) {
+            // First check if limits exist
+            const { stdout: limitsCheck } = await execute({
+              command: [
+                'kubectl', '--context', selectedContext.name,
+                'get', 'nodepool', nodePool.metadata.name, 
+                '-o', 'jsonpath={.spec.limits}'
+              ],
               context,
               workingDirectory: process.cwd(),
             })
             
-            const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
-            const nodePools = result.items || []
-            
-            for (const nodePool of nodePools) {
-              // Remove CPU and memory limits
-              try {
-                await execute({
-                  command: [
-                    'kubectl', '--context', selectedContext.name,
-                    'patch', 'nodepool', nodePool.metadata.name, 
-                    '--type', 'json', '-p', 
-                    '[{"op": "remove", "path": "/spec/limits/cpu"}, {"op": "remove", "path": "/spec/limits/memory"}]'
-                  ],
-                  context,
-                  workingDirectory: process.cwd(),
-                })
-              } catch {
-                // Might fail if limits don't exist
-              }
+            // Only patch if limits actually exist
+            if (limitsCheck && limitsCheck.trim() !== '') {
+              await execute({
+                command: [
+                  'kubectl', '--context', selectedContext.name,
+                  'patch', 'nodepool', nodePool.metadata.name, 
+                  '--type', 'json', '-p', 
+                  '[{"op": "remove", "path": "/spec/limits/cpu"}, {"op": "remove", "path": "/spec/limits/memory"}]'
+                ],
+                context,
+                workingDirectory: process.cwd(),
+              })
+              context.logger.debug(`Removed limits from nodepool ${nodePool.metadata.name}`)
+            } else {
+              context.logger.debug(`No limits found for nodepool ${nodePool.metadata.name}, skipping`)
             }
-          } catch {
-            // Karpenter might not be installed
           }
         },
       },
