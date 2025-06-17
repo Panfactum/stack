@@ -30,9 +30,6 @@ export default class ProfileForContextCommand extends PanfactumCommand {
 
       return 0;
     } catch (error) {
-      if (error instanceof CLIError) {
-        throw error;
-      }
       throw new CLIError(
         `Failed to get AWS profile for context`, error
       );
