@@ -1,6 +1,5 @@
 import { join } from 'path'
-import { z, ZodError } from 'zod'
-import { CLIError, PanfactumZodError } from '@/util/error/error'
+import { z } from 'zod'
 import { readJSONFile } from '@/util/json/readJSONFile'
 import type { BuildKitConfig } from './constants.js'
 import type { PanfactumContext } from '@/util/context/context.js'
@@ -24,20 +23,11 @@ export async function getBuildKitConfig(context: PanfactumContext): Promise<Buil
     validationSchema: buildKitConfigSchema,
     throwOnMissing: true,
     throwOnEmpty: true
-  }).catch((error: unknown) => {
-    if (error instanceof ZodError) {
-      throw new PanfactumZodError('Invalid BuildKit configuration', configPath, error)
-    }
-    throw new CLIError(
-      `Failed to get BuildKit Config from ${configPath}`,
-      error
-    )
   })
 
+  // This should never happen with throwOnMissing and throwOnEmpty set to true
   if (!config) {
-    throw new CLIError(
-      `No BuildKit configuration file exists at ${configPath}. A superuser must create one by running 'pf devshell sync'.`
-    )
+    throw new Error('Unexpected null config from readJSONFile')
   }
 
   return config

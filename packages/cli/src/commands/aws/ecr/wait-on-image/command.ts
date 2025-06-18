@@ -80,7 +80,11 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     }
 
     const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
-    const timeoutSeconds = timeoutSchema.parse(this.timeout);
+    const timeoutResult = timeoutSchema.safeParse(this.timeout);
+    if (!timeoutResult.success) {
+      throw new CLIError(`Invalid timeout value: ${timeoutResult.error.errors[0]?.message || 'must be a positive integer'}`);
+    }
+    const timeoutSeconds = timeoutResult.data;
     const intervalSeconds = 30;
     let elapsed = 0;
 

@@ -1,4 +1,4 @@
-import { z, ZodError } from 'zod'
+import { z } from 'zod'
 import { CLIError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
@@ -59,21 +59,15 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
     workingDirectory: process.cwd()
   })
 
-  const currentReplicas = await Promise.resolve(result.stdout.trim())
-    .then(output => replicaCountSchema.parse(output))
-    .catch((error: unknown) => {
-      if (error instanceof ZodError) {
-        throw new PanfactumZodError(
-          `Invalid replica count returned from kubectl for ${statefulsetName}`,
-          'kubectl output',
-          error
-        )
-      }
-      throw new CLIError(
-        `Failed to parse replica count for ${statefulsetName}`,
-        error
-      )
-    })
+  const parseResult = replicaCountSchema.safeParse(result.stdout.trim())
+  if (!parseResult.success) {
+    throw new PanfactumZodError(
+      `Invalid replica count returned from kubectl for ${statefulsetName}`,
+      'kubectl output',
+      parseResult.error
+    )
+  }
+  const currentReplicas = parseResult.data
 
   if (currentReplicas === 0) {
     // Scale up
@@ -123,21 +117,16 @@ async function waitForScaleUp(
       workingDirectory: process.cwd()
     })
 
-    const availableReplicas = await Promise.resolve(result.stdout.trim() || '0')
-      .then(output => replicaCountSchema.parse(output))
-      .catch((error: unknown) => {
-        if (error instanceof ZodError) {
-          throw new PanfactumZodError(
-            `Invalid available replica count returned from kubectl for ${statefulsetName}`,
-            'kubectl output',
-            error
-          )
-        }
-        throw new CLIError(
-          `Failed to parse available replica count for ${statefulsetName}`,
-          error
-        )
-      })
+    const outputValue = result.stdout.trim() || '0'
+    const parseResult = replicaCountSchema.safeParse(outputValue)
+    if (!parseResult.success) {
+      throw new PanfactumZodError(
+        `Invalid available replica count returned from kubectl for ${statefulsetName}`,
+        'kubectl output',
+        parseResult.error
+      )
+    }
+    const availableReplicas = parseResult.data
 
     if (availableReplicas >= 1) {
       break

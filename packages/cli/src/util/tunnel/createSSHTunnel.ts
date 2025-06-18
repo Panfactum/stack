@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { z } from 'zod';
-import { CLIError } from '@/util/error/error.js';
+import { CLIError, PanfactumZodError } from '@/util/error/error.js';
 import { fileExists } from '@/util/fs/fileExists.js';
 import { removeFile } from '@/util/fs/removeFile.js';
 import { writeFile } from '@/util/fs/writeFile.js';
@@ -9,19 +9,8 @@ import { killBackgroundProcess } from '@/util/subprocess/killBackgroundProcess.j
 import { getVaultToken } from '@/util/vault/getVaultToken.js';
 import type { PanfactumContext } from '@/util/context/context.js';
 
-// Zod schemas for validation
+// Zod schema for port validation
 export const portSchema = z.number().int().min(1).max(65535);
-const remoteAddressSchema = z.string()
-  .regex(/^.+:\d+$/, 'Remote address must include both hostname and port (e.g., example.com:443)')
-  .refine((address) => {
-    const parts = address.split(':');
-    if (parts.length !== 2) return false;
-    const [hostname, portStr] = parts;
-    const port = parseInt(portStr!, 10);
-    return hostname!.length > 0 && !isNaN(port) && port > 0 && port <= 65535;
-  }, {
-    message: 'Remote address must have a valid hostname and port number (1-65535)'
-  });
 
 export interface SSHTunnelOptions {
   context: PanfactumContext;
@@ -51,10 +40,6 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
   // Get SSH directory from context
   const sshDir = context.repoVariables.ssh_dir;
 
-  // Validate inputs
-  portSchema.parse(localPort);
-  remoteAddressSchema.parse(remoteAddress);
-
   // Read connection info to get bastion details
   const connectionInfoFile = join(sshDir, 'connection_info');
   if (!(await fileExists(connectionInfoFile))) {
@@ -63,7 +48,33 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
     );
   }
 
-  const connectionInfo = await Bun.file(connectionInfoFile).text();
+  // Schema for connection info line validation
+  const connectionInfoLineSchema = z.string()
+    .transform((line) => {
+      const parts = line.split(' ');
+      if (parts.length !== 3) {
+        throw new Error('Invalid format');
+      }
+      return {
+        name: parts[0],
+        domain: parts[1],
+        port: parts[2]
+      };
+    })
+    .pipe(z.object({
+      name: z.string().min(1),
+      domain: z.string().min(1),
+      port: z.string().regex(/^\d+$/).transform(Number).pipe(portSchema)
+    }));
+
+  const connectionInfo = await Bun.file(connectionInfoFile).text()
+    .catch((error: unknown) => {
+      throw new CLIError(
+        `Failed to read connection info from ${connectionInfoFile}`,
+        error
+      );
+    });
+
   const bastionLine = connectionInfo.split('\n').find(line => line.startsWith(`${bastionName} `));
 
   if (!bastionLine) {
@@ -72,10 +83,18 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
     );
   }
 
-  const [, bastionDomain, bastionPort] = bastionLine.split(' ');
-  if (!bastionDomain || !bastionPort) {
-    throw new CLIError(`Invalid connection info format for ${bastionName}`);
+  // Parse connection data synchronously
+  const parseResult = connectionInfoLineSchema.safeParse(bastionLine);
+  if (!parseResult.success) {
+    throw new PanfactumZodError(
+      `Invalid connection info format for ${bastionName}`,
+      connectionInfoFile,
+      parseResult.error
+    );
   }
+  const connectionData = parseResult.data;
+  const bastionDomain = connectionData.domain;
+  const bastionPort = connectionData.port.toString();
 
   // Setup SSH keys
   const keyFile = join(sshDir, `id_ed25519_${bastionName}`);
@@ -105,13 +124,18 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
       ],
       context,
       workingDirectory: process.cwd(),
+    }).catch((error: unknown) => {
+      throw new CLIError(
+        `Failed to generate SSH keys for ${bastionName}`,
+        error
+      );
     });
   }
 
   // Sign SSH key with Vault
   const vaultToken = await getVaultToken({ context, address: vaultAddress });
 
-  const { stdout: signedKey } = await execute({
+  const result = await execute({
     command: [
       'vault',
       'write',
@@ -127,7 +151,20 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
       VAULT_ADDR: vaultAddress,
       VAULT_TOKEN: vaultToken
     }
+  }).catch((error: unknown) => {
+    throw new CLIError(
+      `Failed to sign SSH key with Vault for ${bastionName}`,
+      error
+    );
   });
+  
+  const signedKey = result.stdout;
+  
+  if (!signedKey || signedKey.trim().length === 0) {
+    throw new CLIError(
+      `Vault returned empty signed key for ${bastionName}`
+    );
+  }
 
   context.logger.info('SSH Key signed successfully');
   await writeFile({
@@ -135,6 +172,11 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
     filePath: signedPublicKeyFile,
     contents: signedKey,
     overwrite: true
+  }).catch((error: unknown) => {
+    throw new CLIError(
+      `Failed to write signed SSH key to ${signedPublicKeyFile}`,
+      error
+    );
   });
 
   // Establish tunnel using execute with background mode
@@ -165,6 +207,11 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
     },
     background: true,
     backgroundDescription: `SSH tunnel to ${remoteAddress} via ${bastionName}`
+  }).catch((error: unknown) => {
+    throw new CLIError(
+      `Failed to establish SSH tunnel to ${remoteAddress} via ${bastionName}`,
+      error
+    );
   });
 
   if (!tunnelResult.pid) {
@@ -175,8 +222,8 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
     `Tunnel established: localhost:${localPort} → ${remoteAddress} via ${bastionName}`
   );
 
-  // Create handle for managing the tunnel
-  const handle: SSHTunnelHandle = {
+  // Return handle for managing the tunnel
+  return {
     pid: tunnelResult.pid,
     localPort,
     remoteAddress,
@@ -190,6 +237,4 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
       });
     }
   };
-
-  return handle;
 }

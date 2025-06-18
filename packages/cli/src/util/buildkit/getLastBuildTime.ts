@@ -1,5 +1,5 @@
-import { z, ZodError } from 'zod'
-import { CLIError, PanfactumZodError } from '@/util/error/error.js'
+import { z } from 'zod'
+import { CLIError } from '@/util/error/error.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { parseJson } from '@/util/zod/parseJson.js'
 import {
@@ -49,21 +49,7 @@ export async function getLastBuildTime(
     )
   })
 
-  const statefulSet = await Promise.resolve(result.stdout)
-    .then(output => parseJson(statefulSetSchema, output))
-    .catch((error: unknown) => {
-      if (error instanceof ZodError) {
-        throw new PanfactumZodError(
-          `Invalid statefulset format for ${statefulsetName}`,
-          'kubectl output',
-          error
-        )
-      }
-      throw new CLIError(
-        `Failed to parse statefulset output for ${statefulsetName}`,
-        error
-      )
-    })
+  const statefulSet = parseJson(statefulSetSchema, result.stdout)
 
   const lastBuild = statefulSet.metadata.annotations?.[BUILDKIT_LAST_BUILD_ANNOTATION_KEY]
   

@@ -1,7 +1,10 @@
 import { z } from 'zod';
+import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import { parseJson } from '@/util/zod/parseJson';
 import type { PanfactumContext } from '@/util/context/context';
+
+const annotationsSchema = z.record(z.string());
 
 /**
  * Get annotations for a PodDisruptionBudget
@@ -15,7 +18,7 @@ export async function getPDBAnnotations(params: {
 }): Promise<Record<string, string>> {
   const { context, namespace, pdbName } = params;
   
-  const result = await execute({
+  const { stdout } = await execute({
     command: [
       'kubectl', 'get', pdbName,
       '-n', namespace,
@@ -23,8 +26,13 @@ export async function getPDBAnnotations(params: {
     ],
     context,
     workingDirectory: process.cwd(),
+  }).catch((error: unknown) => {
+    throw new CLIError(
+      `Failed to get annotations for PodDisruptionBudget '${pdbName}' in namespace '${namespace}'`,
+      error
+    );
   });
   
-  const annotationsSchema = z.record(z.string());
-  return parseJson(annotationsSchema, result.stdout || '{}');
+  // parseJson handles validation and throws appropriate errors
+  return parseJson(annotationsSchema, stdout || '{}');
 }

@@ -1,6 +1,6 @@
 import { join } from "node:path"
 import { parse } from "ini"
-import { z, ZodError } from "zod"
+import { z } from "zod"
 import { CLIError, PanfactumZodError } from "@/util/error/error"
 import { fileExists } from "@/util/fs/fileExists"
 import { AWS_ACCESS_KEY_ID_SCHEMA, AWS_SECRET_KEY_SCHEMA } from "./schemas"
@@ -25,11 +25,12 @@ export async function getCredsFromFile(inputs: { context: PanfactumContext, prof
     }
 
     // Read and parse the credentials file
-    const parsedCredentials = await Bun.file(credsFilePath).text()
-        .then(fileContent => parse(fileContent))
-        .catch(e => {
-            throw new CLIError(`Unable to read credentials file at ${credsFilePath}`, e)
+    const fileContent = await Bun.file(credsFilePath).text()
+        .catch((error: unknown) => {
+            throw new CLIError(`Unable to read credentials file at ${credsFilePath}`, error)
         })
+    
+    const parsedCredentials = parse(fileContent)
 
     // Validate the credentials structure
     const credentialsSchema = z.object({
@@ -40,14 +41,15 @@ export async function getCredsFromFile(inputs: { context: PanfactumContext, prof
         }).optional()
     })
 
-    const validatedCredentials = await Promise.resolve(parsedCredentials)
-        .then(data => credentialsSchema.parse(data))
-        .catch((e: unknown) => {
-            if (e instanceof ZodError) {
-                throw new PanfactumZodError(`Invalid credentials format for profile '${profile}'`, credsFilePath, e)
-            }
-            throw new CLIError(`Failed to validate credentials for profile '${profile}'`, e)
-        })
+    const parseResult = credentialsSchema.safeParse(parsedCredentials)
+    if (!parseResult.success) {
+        throw new PanfactumZodError(
+            `Invalid credentials format for profile '${profile}'`,
+            credsFilePath,
+            parseResult.error
+        )
+    }
+    const validatedCredentials = parseResult.data
 
     const creds = validatedCredentials[profile]
     if (creds) {

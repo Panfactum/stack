@@ -1,18 +1,19 @@
 import { join } from 'path'
 import { z } from 'zod'
+import { CLIError } from '@/util/error/error'
 import { createDirectory } from '@/util/fs/createDirectory'
 import { writeFile } from '@/util/fs/writeFile'
 import { readJSONFile } from '@/util/json/readJSONFile'
 import type { PanfactumContext } from '@/util/context/context'
 
-interface CachedCredential {
-  token: string
-  expires: string
-}
+const cachedCredentialSchema = z.object({
+  token: z.string(),
+  expires: z.string()
+})
 
-interface CredentialsFile {
-  [registry: string]: CachedCredential
-}
+const credentialsFileSchema = z.record(cachedCredentialSchema)
+
+type CredentialsFile = z.infer<typeof credentialsFileSchema>
 
 const CACHE_TTL = 4 * 60 * 60 * 1000 // 4 hours in milliseconds
 
@@ -23,11 +24,6 @@ async function getCredsFilePath(context: PanfactumContext): Promise<string> {
 
 async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile> {
   const credsFile = await getCredsFilePath(context)
-  
-  const credentialsFileSchema = z.record(z.object({
-    token: z.string(),
-    expires: z.string()
-  }))
   
   const result = await readJSONFile({
     context,
@@ -46,6 +42,12 @@ async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile)
   
   // Ensure buildkit directory exists
   await createDirectory(buildkitDir)
+    .catch((error: unknown) => {
+      throw new CLIError(
+        `Failed to create directory ${buildkitDir}`,
+        error
+      )
+    })
   
   // Write credentials file
   await writeFile({
@@ -53,6 +55,11 @@ async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile)
     filePath: credsFile,
     contents: JSON.stringify(creds, null, 2),
     overwrite: true
+  }).catch((error: unknown) => {
+    throw new CLIError(
+      `Failed to write Docker credentials cache to ${credsFile}`,
+      error
+    )
   })
 }
 
@@ -61,14 +68,22 @@ export async function getCachedCredential(
   registry: string
 ): Promise<string | null> {
   const creds = await readCredsFile(context)
+  
   const cached = creds[registry]
   
   if (!cached) {
     return null
   }
   
-  // Check if expired (expires is Unix timestamp in seconds as string)
-  const expiresAt = parseInt(cached.expires, 10) * 1000 // Convert to milliseconds
+  // Validate expires field is a valid number
+  const timestamp = parseInt(cached.expires, 10)
+  if (isNaN(timestamp)) {
+    throw new CLIError(
+      `Invalid expiration timestamp for registry '${registry}': ${cached.expires}`
+    )
+  }
+  const expiresAt = timestamp * 1000 // Convert to milliseconds
+  
   if (Date.now() < expiresAt) {
     return cached.token // Return the full base64 authorization token
   }

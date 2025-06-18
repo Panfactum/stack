@@ -2,7 +2,7 @@ import { mkdtemp, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { CLIError } from '@/util/error/error';
+import { CLIError, PanfactumZodError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import type { PanfactumContext } from '@/util/context/context';
 
@@ -27,26 +27,43 @@ async function getCurrentHead(context: PanfactumContext, workingDirectory: strin
     command: ['git', 'rev-parse', 'HEAD'],
     context,
     workingDirectory,
+  }).catch((error: unknown) => {
+    throw new CLIError('Failed to get current HEAD commit', error);
   });
   
-  const sha = GIT_OUTPUT_SCHEMA.parse(stdout.trim());
-  return GIT_SHA_SCHEMA.parse(sha);
+  const trimmed = stdout.trim();
+  const outputResult = GIT_OUTPUT_SCHEMA.safeParse(trimmed);
+  if (!outputResult.success) {
+    throw new PanfactumZodError(
+      'Invalid git HEAD commit format',
+      'git rev-parse HEAD',
+      outputResult.error
+    );
+  }
+  
+  const shaResult = GIT_SHA_SCHEMA.safeParse(outputResult.data);
+  if (!shaResult.success) {
+    throw new PanfactumZodError(
+      'Invalid git HEAD commit format',
+      'git rev-parse HEAD',
+      shaResult.error
+    );
+  }
+  
+  return shaResult.data;
 }
 
 /**
  * Checks if the repository has any commits (i.e., HEAD exists)
  */
 async function hasCommits(context: PanfactumContext, workingDirectory: string): Promise<boolean> {
-  try {
-    await execute({
-      command: ['git', 'rev-parse', '--verify', 'HEAD'],
-      context,
-      workingDirectory,
-    });
-    return true;
-  } catch {
-    return false;
-  }
+  return execute({
+    command: ['git', 'rev-parse', '--verify', 'HEAD'],
+    context,
+    workingDirectory,
+  })
+    .then(() => true)
+    .catch(() => false);
 }
 
 /**
@@ -57,10 +74,30 @@ async function resolveRefToSha(ref: string, context: PanfactumContext, workingDi
     command: ['git', 'rev-parse', ref],
     context,
     workingDirectory,
+  }).catch((error: unknown) => {
+    throw new CLIError(`Failed to resolve git reference '${ref}'`, error);
   });
   
-  const sha = GIT_OUTPUT_SCHEMA.parse(stdout.trim());
-  return GIT_SHA_SCHEMA.parse(sha);
+  const trimmed = stdout.trim();
+  const outputResult = GIT_OUTPUT_SCHEMA.safeParse(trimmed);
+  if (!outputResult.success) {
+    throw new PanfactumZodError(
+      `Invalid git reference format for '${ref}'`,
+      'git rev-parse',
+      outputResult.error
+    );
+  }
+  
+  const shaResult = GIT_SHA_SCHEMA.safeParse(outputResult.data);
+  if (!shaResult.success) {
+    throw new PanfactumZodError(
+      `Invalid git reference format for '${ref}'`,
+      'git rev-parse',
+      shaResult.error
+    );
+  }
+  
+  return shaResult.data;
 }
 
 /**
@@ -79,6 +116,7 @@ async function verifyCommitInOrigin(sha: string, context: PanfactumContext, work
  */
 async function verifyCommitInCustomRepo(sha: string, repo: string, context: PanfactumContext): Promise<void> {
   const tempDir = await mkdtemp(join(tmpdir(), 'pf-git-'));
+
   try {
     await execute({
       command: ['git', 'init', '-q'],
@@ -104,16 +142,35 @@ async function resolveRefWithLsRemote(ref: string, repo: string, context: Panfac
     command: ['git', 'ls-remote', '--exit-code', repo, ref],
     context,
     workingDirectory,
+  }).catch((error: unknown) => {
+    throw new CLIError(`Failed to resolve git reference '${ref}' in '${repo}'`, error);
   });
   
-  const output = GIT_LS_REMOTE_SCHEMA.parse(stdout.trim());
-  const sha = output.split('\t')[0];
+  const trimmed = stdout.trim();
+  const outputResult = GIT_LS_REMOTE_SCHEMA.safeParse(trimmed);
+  if (!outputResult.success) {
+    throw new PanfactumZodError(
+      `Invalid git ls-remote output format for '${ref}' in '${repo}'`,
+      'git ls-remote',
+      outputResult.error
+    );
+  }
   
+  const sha = outputResult.data.split('\t')[0];
   if (!sha) {
     throw new CLIError(`Unable to resolve git reference: ${ref} in ${repo}`);
   }
   
-  return GIT_SHA_SCHEMA.parse(sha);
+  const shaResult = GIT_SHA_SCHEMA.safeParse(sha);
+  if (!shaResult.success) {
+    throw new PanfactumZodError(
+      `Invalid git ls-remote output format for '${ref}' in '${repo}'`,
+      'git ls-remote',
+      shaResult.error
+    );
+  }
+  
+  return shaResult.data;
 }
 
 /**
@@ -141,15 +198,14 @@ export async function getCommitHash(options: GetCommitHashOptions): Promise<stri
   // If ref is already a 40-char SHA
   if (/^[0-9a-f]{40}$/i.test(ref)) {
     if (!noVerify) {
-      try {
-        if (repo === 'origin') {
-          await verifyCommitInOrigin(ref, context, workingDirectory);
-        } else {
-          await verifyCommitInCustomRepo(ref, repo, context);
-        }
-      } catch {
-        throw new CLIError(`Commit ${ref} does not exist in ${repo === 'origin' ? 'the remote origin' : repo}`);
-      }
+      const verifyPromise = repo === 'origin'
+        ? verifyCommitInOrigin(ref, context, workingDirectory)
+        : verifyCommitInCustomRepo(ref, repo, context);
+      
+      await verifyPromise
+        .catch((error: unknown) => {
+          throw new CLIError(`Commit ${ref} does not exist in ${repo === 'origin' ? 'the remote origin' : repo}`, error);
+        });
     }
     return ref;
   }
@@ -157,22 +213,14 @@ export async function getCommitHash(options: GetCommitHashOptions): Promise<stri
   // Otherwise, we need to resolve the ref to a SHA
   if (repo === 'origin') {
     // Check if the repo has no commits
-    if (!(await hasCommits(context, workingDirectory))) {
+    const hasCommitsResult = await hasCommits(context, workingDirectory);
+    if (!hasCommitsResult) {
       return 'local';
     }
-
     // Try to resolve the ref
-    try {
-      return await resolveRefToSha(ref, context, workingDirectory);
-    } catch {
-      throw new CLIError(`Unable to resolve git reference: ${ref}`);
-    }
+    return resolveRefToSha(ref, context, workingDirectory);
   } else {
     // Use git ls-remote for custom repos
-    try {
-      return await resolveRefWithLsRemote(ref, repo, context, workingDirectory);
-    } catch {
-      throw new CLIError(`Unable to resolve git reference: ${ref} in ${repo}`);
-    }
+    return resolveRefWithLsRemote(ref, repo, context, workingDirectory);
   }
 }
