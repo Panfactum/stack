@@ -76,6 +76,10 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
         task: async () => {
           // Build clone URL with authentication if provided
           let cloneUrl = `https://${this.repoUrl}`
+          if (this.username && !this.password) {
+            throw new Error('If --username is supplied, a --password must also be supplied.')
+          }
+          
           if (this.username && this.password) {
             cloneUrl = `https://${this.username}:${this.password}@${this.repoUrl}`
           }
