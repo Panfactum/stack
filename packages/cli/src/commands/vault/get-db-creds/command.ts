@@ -26,7 +26,6 @@ export class GetDbCredsCommand extends PanfactumCommand {
 
   role = Option.String('-r,--role', {
     description: 'The database role to request credentials for',
-    required: false,
   });
 
   vaultAddress = Option.String('-a,--vault-address', {
@@ -40,19 +39,18 @@ export class GetDbCredsCommand extends PanfactumCommand {
   async execute() {
     try {
       // Prompt for role if not provided
-      let selectedRole = this.role;
-      if (!selectedRole) {
-        selectedRole = await this.context.logger.select({
-          message: 'Select the database role:',
-          choices: vaultRoles.map(role => ({
-            value: role,
-            name: role,
-            description: role === 'superuser' ? 'Full database access' : 
-                        role === 'admin' ? 'Administrative access' : 
-                        'Read-only access'
+      const selectedRole = this.role
+        ? this.role
+        : await this.context.logger.select({
+            message: 'Select the database role:',
+            choices: vaultRoles.map(role => ({
+              value: role,
+              name: role,
+              description: role === 'superuser' ? 'Full database access' :
+                role === 'admin' ? 'Administrative access' :
+                  'Read-only access'
           }))
-        });
-      }
+      });
       
       if (this.json) {
         // Output as JSON
