@@ -1,6 +1,7 @@
-***
+---
+title: "Observability"
+---
 
-## title: "Observability"
 
 # Observability
 
@@ -13,11 +14,11 @@ providing system insights, alerting, and auditability. Six types of data are typ
   of services will expose metrics in the industry-standard [Prometheus](https://github.com/Prometheus/docs/blob/777846211d502a287ab2b304cb515dc779de3474/content/docs/instrumenting/exposition_formats.md#exposition-formats)
   or [OpenMetrics](https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md) data format.
 
-* **Traces:** Also known as "distributed traces," traces records the paths taken by data as it propagates through
+* **Traces:** Also known as "distributed traces," traces record the paths taken by data as it propagates through
   a system. Traces are composed of "spans" which track how long various system component spent processing the data. Spans
   record a location identifier, a start time, an end time, and other optional metadata. Tracing provides two key capabilities:
 
-  * the ability quickly identify issues that occur at the granularity of specific actions such as individual HTTP requests
+  * the ability to quickly identify issues that occur at the granularity of specific actions such as individual HTTP requests
 
   * aggregated span metrics that can expose problems with specific system components such as performance issues or elevated error rates
 
@@ -58,7 +59,7 @@ providing system insights, alerting, and auditability. Six types of data are typ
 
 * **Synthetic Tests:** Synthetic tests are automated programs run against live systems for the purpose of collecting
   data in a controlled manner. These can be as simple as uptime tests such as repeatedly issuing an HTTP request against
-  an endpoint to ensure it is online. These can also be complex end-to-end tests run against production a part of a continuous testing
+  an endpoint to ensure it is online. These can also be complex end-to-end tests run against production as part of a continuous testing
   paradigm. This is explained further in our [downtime visibility guide](/docs/maturity/measures/downtime-visibility).
 
 * **Real User Monitoring (RUM):** For systems that have a client-side UI, a common practice is to embed monitoring
@@ -182,8 +183,8 @@ of impact and optimal approach will depend on your organization's unique context
 |                       | `O.C.3`  | Logs and metrics captured for all managed services for example via [AWS CloudWatch](https://aws.amazon.com/cloudwatch/).                                                                                                                                                       |   |
 |                       | `O.C.4`  | Logs and metrics captured for all version control systems.                                                                                                                                                                                                                     |   |
 |                       | `O.C.5`  | Logs and metrics captured for all CI / CD pipelines.                                                                                                                                                                                                                           |   |
-|                       | `O.C.6`  | Flow logs captured from system routers for example via [AWS VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html).                                                                                                                                   |   |
-|                       | `O.C.7`  | Instrumentation implemented for network interfaces, for example with [Cilium](https://cilium.io/).                                                                                                                                                                             |   |
+|                       | `O.C.6`  | Flow logs are captured from system routers for example via [AWS VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html).                                                                                                                                   |   |
+|                       | `O.C.7`  | Instrumentation is implemented for network interfaces, for example with [Cilium](https://cilium.io/).                                                                                                                                                                             |   |
 |                       | `O.C.8`  | Tracing implemented for all control plane components that interact with the data path, for example with [Ingress NGINX](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/) or [Linkerd Proxy](https://linkerd.io/2.15/reference/architecture/#proxy). |   |
 | Servers               | `O.S.1`  | Servers include active monitoring of node health.                                                                                                                                                                                                                              |   |
 |                       | `O.S.2`  | Server syslogs captured.                                                                                                                                                                                                                                                       |   |
@@ -218,7 +219,7 @@ of impact and optimal approach will depend on your organization's unique context
 |                       | `O.T.3`  | End-to-end tests are frequently run for every critical application flow and success status is captured.                                                                                                                                                                        |   |
 |                       | `O.T.4`  | End-to-end tests do not pollute user metrics.                                                                                                                                                                                                                                  |   |
 |                       | `O.T.5`  | The results of uptime tests are reported on a central dashboard that is updated in realtime.                                                                                                                                                                                   |   |
-| Monitors              | `O.M.1`  | Can alert when *new* errors are occurs (not alert on *every* error).                                                                                                                                                                                                           |   |
+| Monitors              | `O.M.1`  | Can alert when *new* errors occur (not alert on *every* error).                                                                                                                                                                                                           |   |
 |                       | `O.M.2`  | Can alert when application performance on *individual* data paths exceeds predefined latency objectives.                                                                                                                                                                       |   |
 |                       | `O.M.3`  | Can alert when error rates on *individual* data paths exceeds predefined latency objectives.                                                                                                                                                                                   |   |
 |                       | `O.M.4`  | Can alert when logs of severity `error` or higher are generated.                                                                                                                                                                                                               |   |
