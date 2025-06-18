@@ -59,7 +59,7 @@ async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile)
 export async function getCachedCredential(
   context: PanfactumContext,
   registry: string
-): Promise<{ token: string; username: string } | null> {
+): Promise<string | null> {
   const creds = await readCredsFile(context)
   const cached = creds[registry]
   
@@ -70,10 +70,7 @@ export async function getCachedCredential(
   // Check if expired (expires is Unix timestamp in seconds as string)
   const expiresAt = parseInt(cached.expires, 10) * 1000 // Convert to milliseconds
   if (Date.now() < expiresAt) {
-    return {
-      token: cached.token,
-      username: 'AWS' // ECR always uses AWS as username
-    }
+    return cached.token // Return the full base64 authorization token
   }
   
   // Clean up expired credential

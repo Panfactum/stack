@@ -10,7 +10,7 @@ export async function getECRToken(
   context: PanfactumContext,
   registry: string,
   awsProfile: string
-): Promise<{ username: string; password: string }> {
+): Promise<string> {
   const isPublicRegistry = registry.includes('public.ecr.aws');
   
   try {
@@ -45,15 +45,7 @@ export async function getECRToken(
       token = response.authorizationData[0].authorizationToken;
     }
 
-    // ECR tokens are base64 encoded username:password
-    const decoded = globalThis.Buffer.from(token, 'base64').toString('utf8');
-    const [username, password] = decoded.split(':');
-
-    if (!username || !password) {
-      throw new CLIError('Invalid token format received from ECR');
-    }
-
-    return { username, password };
+    return token;
     
   } catch (error) {
     if (error instanceof CLIError) {

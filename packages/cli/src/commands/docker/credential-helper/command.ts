@@ -8,6 +8,18 @@ import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
 import { execute } from '@/util/subprocess/execute.ts'
 import type { PanfactumContext } from '@/util/context/context'
 
+// Helper function to parse ECR authorization token
+function parseECRToken(token: string): { username: string; password: string } {
+  const decoded = globalThis.Buffer.from(token, 'base64').toString('utf8');
+  const [username, password] = decoded.split(':');
+  
+  if (!username || !password) {
+    throw new CLIError('Invalid token format received from ECR');
+  }
+  
+  return { username, password };
+}
+
 export class DockerCredentialHelperCommand extends PanfactumCommand {
   static override paths = [['docker', 'credential-helper']]
 
@@ -86,11 +98,12 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     }
 
     // Check cache first
-    const cached = await getCachedCredential(context, registry)
-    if (cached) {
+    const cachedToken = await getCachedCredential(context, registry)
+    if (cachedToken) {
+      const { username, password } = parseECRToken(cachedToken)
       this.context.stdout.write(JSON.stringify({
-        Username: cached.username,
-        Secret: cached.token,
+        Username: username,
+        Secret: password,
       }))
       return
     }
@@ -101,10 +114,11 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
 
     // Get fresh token from ECR
     try {
-      const { username, password } = await getECRToken(context, registry, awsProfile)
+      const token = await getECRToken(context, registry, awsProfile)
+      const { username, password } = parseECRToken(token)
       
-      // Cache the credential
-      await setCachedCredential(context, registry, password)
+      // Cache the full authorization token
+      await setCachedCredential(context, registry, token)
 
       // Output in Docker credential helper format
       this.context.stdout.write(JSON.stringify({
@@ -123,8 +137,9 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
           })
           
           // Retry getting token
-          const { username, password } = await getECRToken(context, registry, awsProfile)
-          await setCachedCredential(context, registry, password)
+          const token = await getECRToken(context, registry, awsProfile)
+          const { username, password } = parseECRToken(token)
+          await setCachedCredential(context, registry, token)
 
           this.context.stdout.write(JSON.stringify({
             Username: username,
