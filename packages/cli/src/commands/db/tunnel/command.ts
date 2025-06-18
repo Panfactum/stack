@@ -169,7 +169,7 @@ export class DbTunnelCommand extends PanfactumCommand {
       const {ca, cert, key} = credentials.certs || {};
 
       connectionDetails = `
-  Credentials saved to ${context.repoVariables.nats_dir} and will expire in 16 hours.
+  Credentials saved to ${context.repoVariables.nats_dir} and will expire based on your vault_credential_lifetime_hours(default: 16 hours).
 
   To connect using the NATS CLI, set the following environment variables:
 
@@ -181,10 +181,14 @@ export class DbTunnelCommand extends PanfactumCommand {
   If using a different client, configure TLS authentication using the above values.`
     } else {
       connectionDetails = `
-  Connection details:\n
-  Host: localhost\n
-  Port: ${localPort}\n
-  Username: ${credentials.username}\n
+  Connection details:
+  
+  Host: localhost
+  
+  Port: ${localPort}
+  
+  Username: ${credentials.username}
+  
   Password: ${credentials.password}`
     }
     
