@@ -3,7 +3,7 @@ import { Option } from 'clipanion';
 import { z, ZodError } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getAllRegions } from "@/util/config/getAllRegions.ts";
-import { CLIError, PanfactumZodError } from '@/util/error/error';
+import {CLIError, PanfactumZodError} from '@/util/error/error';
 import { getKubeContextsFromConfig } from "@/util/kube/getKubeContextsFromConfig.ts";
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel';
 
