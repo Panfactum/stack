@@ -16,6 +16,7 @@ export class K8sVeleroSnapshotGcCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: 'Remove orphaned VolumeSnapshots and VolumeSnapshotContents',
+    category: 'Kubernetes',
     details: `Garbage collector for Velero backup system. Identifies and removes orphaned 
 VolumeSnapshots and VolumeSnapshotContents that no longer have associated 
 Velero backups, cleaning up cloud storage resources.`,

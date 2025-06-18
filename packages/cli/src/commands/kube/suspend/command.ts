@@ -42,7 +42,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
   static override paths = [['kube', 'cluster-suspend']]
 
   static override usage = Command.Usage({
-    description: 'Suspend an EKS cluster to save costs by removing all nodes',
+    description: 'Suspend an EKS cluster to save costs',
+    category: 'Kubernetes',
     details: `
       This command suspends an EKS cluster by:
       - Tagging the cluster as suspended

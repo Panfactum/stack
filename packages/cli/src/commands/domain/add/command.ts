@@ -18,7 +18,8 @@ export class DomainAddCommand extends PanfactumCommand {
     static override paths = [["domain", "add"]];
 
     static override usage = Command.Usage({
-        description: "Add a domain to the Panfactum framework installation",
+        description: "Add a domain to the Panfactum stack",
+        category: 'Domain',
         details: `
         Connects a domain to the Panfactum framework installation so that clusters and workloads can use it.
 

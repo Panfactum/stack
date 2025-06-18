@@ -9,7 +9,8 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
   static override paths = [['wf', 'git-checkout']]
 
   static override usage = Command.Usage({
-    description: 'Efficiently checkout a git repository for CI/CD workflows',
+    description: 'Efficiently checkout a git repository in CI/CD workflows',
+    category: 'Workflow',
     details: `
       This command performs an optimized git checkout suitable for CI/CD workflows:
       - Shallow clone (depth=1) for speed

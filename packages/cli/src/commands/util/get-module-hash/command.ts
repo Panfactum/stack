@@ -7,7 +7,7 @@ export class GetModuleHashCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: 'Generate SHA1 hash of Terraform module contents',
-    category: 'Utilities',
+    category: 'Utility',
   });
 
   modulePath = Option.String({ required: false });

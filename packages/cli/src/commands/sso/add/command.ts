@@ -16,7 +16,8 @@ export class SSOAddCommand extends PanfactumCommand {
     static override paths = [["sso", "add"]];
 
     static override usage = Command.Usage({
-        description: "Install Authentik into a Panfactum cluster",
+        description: "Install Authentik in a Panfactum cluster",
+        category: 'SSO',
         details:
             "This command sets up a new Authentik instance.",
         examples: [["Start Authentik installation", "pf sso add"]],

@@ -17,7 +17,8 @@ export class SopsSetProfileCommand extends PanfactumCommand {
   static override paths = [['wf', 'sops-set-profile']];
 
   static override usage = Command.Usage({
-    description: 'Update AWS profile used for KMS access in SOPS-encrypted YAML files',
+    description: 'Update AWS profile used for KMS access in SOPS files',
+    category: 'Workflow',
     details: `Updates the AWS profile used to access KMS in all sops-encrypted YAML files in the indicated directory tree.
 This can be used in CI pipelines to simplify access to encrypted files that would otherwise require many AWS profiles to be configured.`,
     examples: [

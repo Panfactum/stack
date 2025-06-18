@@ -11,7 +11,8 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'scale', 'up']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Scales up BuildKit from 0. Helper to be used prior to a build.'
+    description: 'Scales up BuildKit from 0. Helper to be used prior to a build.',
+    category: 'BuildKit',
   })
 
   only = Option.String('--only', {

@@ -126,6 +126,7 @@ export class ClusterAddCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: "Install a Panfactum cluster",
+    category: 'Cluster',
     details:
       "This command sets up a new Panfactum cluster including collecting configuration options and setting up all standard components.",
     examples: [["Start cluster installation", "pf cluster add"]],

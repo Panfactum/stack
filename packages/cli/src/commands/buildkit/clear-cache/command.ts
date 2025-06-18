@@ -12,7 +12,8 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'clear-cache']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Clears BuildKit cache by pruning all caches in running pods and deleting unused persistent volumes.'
+    description: 'Clears BuildKit cache by pruning all caches in running pods and deleting unused persistent volumes.',
+    category: 'BuildKit',
   })
 
   kubectlContext = Option.String('--context', {

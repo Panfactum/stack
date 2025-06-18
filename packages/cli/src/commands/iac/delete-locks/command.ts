@@ -13,7 +13,8 @@ export default class DeleteLocksCommand extends PanfactumCommand {
   static override paths = [['iac', 'delete-locks']];
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Release all Terraform/OpenTofu state locks held by a specific user',
+    description: 'Release all Terraform/OpenTofu state locks held by a user',
+    category: 'Infrastructure as Code',
     details: `
       This command releases all Terraform/OpenTofu state locks in the indicated DynamoDB lock table 
       that are held by the indicated user. This is useful when locks are stuck due to interrupted 

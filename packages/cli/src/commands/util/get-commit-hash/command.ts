@@ -7,7 +7,7 @@ export class GetCommitHashCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: 'Resolve git references to commit SHAs',
-    category: 'Utilities',
+    category: 'Utility',
   });
 
   repo = Option.String('-r,--repo', 'origin', {

@@ -26,6 +26,7 @@ export class DbTunnelCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: 'Create a secure tunnel to a database with temporary credentials',
+    category: 'Database',
     examples: [
       [
         'Create a tunnel to any database',

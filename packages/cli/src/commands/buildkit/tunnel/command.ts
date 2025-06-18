@@ -21,7 +21,8 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'tunnel']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Sets up a network tunnel from the local host to a remote BuildKit server'
+    description: 'Sets up a network tunnel from the local host to a remote BuildKit server',
+    category: 'BuildKit',
   })
 
   arch = Option.String('--arch', {

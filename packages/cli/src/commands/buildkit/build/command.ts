@@ -15,7 +15,8 @@ export default class BuildkitBuildCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'build']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Submits a multi-platform container image build to BuildKit'
+    description: 'Submits a multi-platform container image build to BuildKit',
+    category: 'BuildKit',
   })
 
   repo = Option.String('--repo', {

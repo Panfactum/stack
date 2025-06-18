@@ -26,7 +26,8 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
   static override paths = [['kube', 'cluster-resume']]
 
   static override usage = Command.Usage({
-    description: 'Resume a suspended EKS cluster by restoring nodes',
+    description: 'Resume a suspended EKS cluster',
+    category: 'Kubernetes',
     details: `
       This command resumes a suspended EKS cluster by:
       - Restoring NAT gateway Auto Scaling Groups

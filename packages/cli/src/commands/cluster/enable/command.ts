@@ -32,7 +32,8 @@ export class ClusterEnableCommand extends PanfactumCommand {
   static override paths = [["cluster", "enable"]];
 
   static override usage = Command.Usage({
-    description: "Enable Cluster Features",
+    description: "Enable features for a cluster",
+    category: 'Cluster',
     details:
       "This command adds and enables features for a cluster. This is typically used to enable features that are not enabled by default.\n\n" +
       "Feature List\n\n" +

@@ -12,6 +12,7 @@ export class AWSProfileListCommand extends PanfactumCommand {
 
     static override usage = Command.Usage({
       description: "Returns the list of configured of AWS profiles",
+      category: 'AWS',
       details:
         "Returns the list of configured AWS profiles in the config file inside your aws_dir.",
       examples: [

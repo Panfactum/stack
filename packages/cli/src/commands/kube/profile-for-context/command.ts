@@ -8,6 +8,7 @@ export default class ProfileForContextCommand extends PanfactumCommand {
 
   static override usage = PanfactumCommand.Usage({
     description: 'Get the AWS profile associated with a Kubernetes context',
+    category: 'Kubernetes',
     details: `
       This command returns the AWS profile that should be used when operating with
       a specific Kubernetes context.

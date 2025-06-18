@@ -8,7 +8,8 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
   static override paths = [["iac", "update-module-status"]];
 
   static override usage = Command.Usage({
-    description: "Updates the local status file for a particular IaC module"
+    description: "Updates the local status file for a particular IaC module",
+    category: 'Infrastructure as Code',
   });
 
   directory: string = Option.String("--module-directory,-m", {

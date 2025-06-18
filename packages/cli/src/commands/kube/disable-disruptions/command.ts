@@ -18,7 +18,8 @@ export class K8sDisruptionsDisableCommand extends PanfactumCommand {
   static override paths = [['kube', 'disable-disruptions']];
 
   static override usage = Command.Usage({
-    description: 'Disable voluntary disruptions for Pod Disruption Budgets',
+    description: 'Disable voluntary disruptions for expired maintenance windows',
+    category: 'Kubernetes',
     details: `Disables voluntary disruptions for Kubernetes Pod Disruption Budgets (PDBs) 
 after a maintenance window has expired. Sets maxUnavailable=0 on PDBs that 
 have passed their disruption window time, preventing pods from being evicted.`,

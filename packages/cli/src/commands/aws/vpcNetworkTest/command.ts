@@ -12,6 +12,7 @@ export class AWSVPCNetworkTestCommand extends PanfactumCommand {
   static override paths = [["aws", "vpc-network-test"]];
   static override usage = Command.Usage({
     description: "To ensure connectivity after deploying the aws_vpc modules",
+    category: 'AWS',
     details:
       "This command is intended to test to ensure connectivity after deploying the aws_vpc modules",
     examples: [

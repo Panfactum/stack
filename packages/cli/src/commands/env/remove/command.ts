@@ -6,7 +6,8 @@ export class EnvironmentRemoveCommand extends PanfactumCommand {
     static override paths = [["env", "remove"]];
 
     static override usage = Command.Usage({
-        description: "Destroys an environment and all infrastructure contained in it"
+        description: "Destroys an environment and all infrastructure contained in it",
+        category: 'Environment',
     });
 
     async execute() {

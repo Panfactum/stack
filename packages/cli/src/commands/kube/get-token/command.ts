@@ -10,7 +10,8 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
   static override paths = [['kube', 'get-token']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Get an EKS authentication token with automatic SSO login handling',
+    description: 'Get an EKS authentication token with automatic SSO login',
+    category: 'Kubernetes',
     details: `
       This command retrieves an EKS authentication token using the AWS CLI. 
       If your SSO session has expired or doesn't exist, it will automatically 

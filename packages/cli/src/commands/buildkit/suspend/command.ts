@@ -11,7 +11,8 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'suspend']]
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Scales the BuildKit instances to 0 replicas.'
+    description: 'Scales the BuildKit instances to 0 replicas.',
+    category: 'BuildKit',
   })
 
   timeout = Option.String('--timeout', {

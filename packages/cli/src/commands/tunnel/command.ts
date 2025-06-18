@@ -32,7 +32,8 @@ export default class TunnelCommand extends PanfactumCommand {
   static override paths = [['tunnel']];
 
   static override usage = PanfactumCommand.Usage({
-    description: 'Establish SSH tunnel to internal network services through a bastion host',
+    description: 'Establish SSH tunnel to internal network services',
+    category: 'Tunnel',
     details: `
       This command starts a tunnel to an internal network service to allow network connectivity 
       during local development.

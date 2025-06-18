@@ -24,6 +24,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: 'Docker credential helper for AWS ECR authentication',
+    category: 'Docker',
     details: `
       This command implements the Docker credential helper protocol for AWS ECR.
       
