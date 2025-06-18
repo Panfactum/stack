@@ -167,8 +167,6 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
 
     await tasks.run()
 
-    context.logger.info('')
-    context.logger.success(`✓ Successfully checked out ${this.ref} to ${targetDirectory}`)
-    context.logger.info(`✓ Commit SHA: ${commitSha}`)
+    context.logger.success(`✓ Successfully checked out ${this.ref} to ${targetDirectory} (commit: ${commitSha})`)
   }
 }

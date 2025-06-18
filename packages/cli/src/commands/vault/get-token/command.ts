@@ -1,6 +1,3 @@
-// Command for getting a Vault authentication token
-// Replicates the functionality of pf-get-vault-token.sh script
-
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getVaultToken } from '@/util/vault/getVaultToken';
@@ -44,7 +41,7 @@ export class GetVaultTokenCommand extends PanfactumCommand {
       });
 
       // Output the token to stdout (matching bash script behavior)
-      this.context.stdout.write(token + '\n');
+      this.context.stdout.write(token);
       
       return 0;
     } catch (error) {
