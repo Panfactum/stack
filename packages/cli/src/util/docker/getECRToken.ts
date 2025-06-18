@@ -1,12 +1,44 @@
 import { GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { GetAuthorizationTokenCommand as GetPublicAuthCommand } from '@aws-sdk/client-ecr-public';
 import { CLIError } from '@/util/error/error';
+import { getCachedCredential, setCachedCredential } from './credentialCache';
 import { getECRClient } from '../aws/clients/getECRClient';
 import { getECRPublicClient } from '../aws/clients/getECRPublicClient';
 import type { PanfactumContext } from '@/util/context/context'
 
 
-export async function getECRToken(
+export interface GetECRTokenOptions {
+  context: PanfactumContext
+  registry: string
+  awsProfile: string
+  skipCache?: boolean
+}
+
+export async function getECRToken(options: GetECRTokenOptions): Promise<string> {
+  const { context, registry, awsProfile, skipCache = false } = options
+  
+  // Check cache first unless skipped
+  if (!skipCache) {
+    const cachedToken = await getCachedCredential(context, registry)
+    if (cachedToken) {
+      context.logger.debug('Using cached ECR token', { registry })
+      return cachedToken
+    }
+  }
+  
+  // Get fresh token
+  const token = await fetchECRToken(context, registry, awsProfile)
+  
+  // Cache the token unless skipped
+  if (!skipCache) {
+    await setCachedCredential(context, registry, token)
+  }
+  
+  return token
+}
+
+// Private function that contains the original token fetching logic
+async function fetchECRToken(
   context: PanfactumContext,
   registry: string,
   awsProfile: string

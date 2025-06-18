@@ -1,7 +1,6 @@
 import { Command, Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
-import { getCachedCredential, setCachedCredential } from '@/util/docker/credentialCache.ts'
 import { getECRToken } from '@/util/docker/getECRToken.ts'
 import { CLIError } from '@/util/error/error'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
@@ -97,28 +96,14 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
       throw new CLIError('Not an ECR registry')
     }
 
-    // Check cache first
-    const cachedToken = await getCachedCredential(context, registry)
-    if (cachedToken) {
-      const { username, password } = parseECRToken(cachedToken)
-      this.context.stdout.write(JSON.stringify({
-        Username: username,
-        Secret: password,
-      }))
-      return
-    }
-
     // Get BuildKit config and use cluster context to determine AWS profile
     const buildkitConfig = await getBuildKitConfig(context)
     const awsProfile = await getAWSProfileForContext(context, buildkitConfig.cluster)
 
-    // Get fresh token from ECR
+    // Get token from ECR (with caching)
     try {
-      const token = await getECRToken(context, registry, awsProfile)
+      const token = await getECRToken({ context, registry, awsProfile })
       const { username, password } = parseECRToken(token)
-      
-      // Cache the full authorization token
-      await setCachedCredential(context, registry, token)
 
       // Output in Docker credential helper format
       this.context.stdout.write(JSON.stringify({
@@ -136,10 +121,9 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
             workingDirectory: process.cwd(),
           })
           
-          // Retry getting token
-          const token = await getECRToken(context, registry, awsProfile)
+          // Retry getting token (skip cache to get fresh token after SSO login)
+          const token = await getECRToken({ context, registry, awsProfile, skipCache: true })
           const { username, password } = parseECRToken(token)
-          await setCachedCredential(context, registry, token)
 
           this.context.stdout.write(JSON.stringify({
             Username: username,
