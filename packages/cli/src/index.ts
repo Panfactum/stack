@@ -25,10 +25,10 @@ import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/c
 import { K8sDisruptionsDisableCommand } from "./commands/kube/disable-disruptions/command.ts";
 import { K8sDisruptionsEnableCommand } from "./commands/kube/enable-disruptions/command.ts";
 import K8sGetTokenCommand from "./commands/kube/get-token/command.ts";
-import { K8sVeleroSnapshotGcCommand } from "./commands/kube/velero-snapshot-gc/command.ts";
 import ProfileForContextCommand from "./commands/kube/profile-for-context/command.ts";
 import { K8sClusterResumeCommand } from "./commands/kube/resume/command.ts";
 import { K8sClusterSuspendCommand } from "./commands/kube/suspend/command.ts";
+import { K8sVeleroSnapshotGcCommand } from "./commands/kube/velero-snapshot-gc/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
