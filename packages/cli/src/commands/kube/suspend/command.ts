@@ -17,7 +17,6 @@ import {
   DescribeLoadBalancersCommand,
   DeleteLoadBalancerCommand
 } from '@aws-sdk/client-elastic-load-balancing-v2'
-import { confirm } from '@inquirer/prompts'
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
 import {getAutoScalingClient} from "@/util/aws/clients/getAutoScalingClient.ts";
@@ -27,6 +26,7 @@ import {getELBv2Client} from "@/util/aws/clients/getELBv2Client.ts";
 import {
   EKS_DESCRIBE_CLUSTER_SCHEMA,
   KUBERNETES_ITEMS_SCHEMA,
+  CERTIFICATE_ITEMS_SCHEMA,
 } from '@/util/aws/schemas.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import {getAllRegions} from "@/util/config/getAllRegions.ts";
@@ -110,7 +110,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
     let autoScalingGroups: AutoScalingGroup[] = []
 
     // Confirm dangerous operation
-    const confirmed = await confirm({
+    const confirmed = await context.logger.confirm({
       message: `Are you sure you want to suspend the cluster "${selectedContext.name}"? This will make it completely unavailable!`,
       default: false,
     })
@@ -144,64 +144,102 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
         },
       },
       {
-        title: 'Tagging cluster as suspended',
-        task: async () => {
-          await eksClient.send(new TagResourceCommand({
-            resourceArn: clusterInfo.arn,
-            tags: {
-              'panfactum.com/suspended': 'true'
-            }
-          }))
-        },
-      },
-      {
         title: 'Extending certificate expiration',
         task: async () => {
-          // Update certificate validity to 90 days
-          try {
+          // Check if cert-manager is installed by looking for the Certificate CRD
+          const { exitCode } = await execute({
+            command: ['kubectl', '--context', selectedContext.name, 'get', 'crd', 'certificates.cert-manager.io'],
+            context,
+            workingDirectory: process.cwd(),
+            isSuccess: () => true, // Don't throw on non-zero exit
+          })
+
+          if (exitCode !== 0) {
+            context.logger.debug('Certificate CRD not found, cert-manager not installed, skipping')
+            return
+          }
+
+          const issuerFilter = 'internal'
+          const duration = '2160h' // 90 days
+          
+          // Get all certificates across all namespaces
+          const { stdout } = await execute({
+            command: [
+              'kubectl', '--context', selectedContext.name,
+              'get', 'certificate', '--all-namespaces', '-o', 'json'
+            ],
+            context,
+            workingDirectory: process.cwd(),
+          })
+          
+          const certificates = parseJson(CERTIFICATE_ITEMS_SCHEMA, stdout)
+          const certsToUpdate = (certificates.items || []).filter(cert => 
+            cert.spec?.issuerRef?.name?.includes(issuerFilter)
+          )
+          
+          if (certsToUpdate.length === 0) {
+            context.logger.debug(`No certificates found with an issuer containing '${issuerFilter}'`)
+            return
+          }
+          
+          for (const cert of certsToUpdate) {
+            const namespace = cert.metadata?.namespace
+            const certName = cert.metadata?.name
+            
+            if (!namespace || !certName) continue
+            
+            context.logger.debug(`Processing certificate: ${certName} in namespace: ${namespace}`)
+
             await execute({
               command: [
-                'kubectl', '--context', selectedContext.name, 
-                'patch', 'configmap/kubeadm-config', '-n', 'kube-system', 
-                '--type', 'merge', '-p', 
-                '{"data":{"ClusterConfiguration":"apiServer:\\n  extraArgs:\\n    client-ca-file: /etc/kubernetes/pki/ca.crt\\n    tls-cert-file: /etc/kubernetes/pki/apiserver.crt\\n    tls-private-key-file: /etc/kubernetes/pki/apiserver.key\\n  certSANs:\\n  - localhost\\n  - 127.0.0.1\\ncontrollerManager:\\n  extraArgs:\\n    cluster-signing-duration: 2160h\\n"}}'
+                'kubectl', '--context', selectedContext.name,
+                'patch', 'certificate', certName, '-n', namespace,
+                '--type', 'merge', '-p', JSON.stringify({ spec: { duration } })
               ],
               context,
               workingDirectory: process.cwd(),
             })
-          } catch {
-            // Ignore errors, this might not work on all clusters
+            context.logger.debug(`Successfully updated certificate '${certName}' in namespace '${namespace}' to ${duration}`)
           }
         },
       },
       {
         title: 'Scaling down Karpenter node pools',
         task: async () => {
-          try {
-            // Get all Karpenter node pools
-            const { stdout } = await execute({
-              command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
+          // Check if Karpenter is installed by looking for the CRD
+          const { exitCode } = await execute({
+            command: ['kubectl', '--context', selectedContext.name, 'get', 'crd', 'nodepools.karpenter.sh'],
+            context,
+            workingDirectory: process.cwd(),
+            isSuccess: () => true, // Don't throw on non-zero exit
+          })
+
+          if (exitCode !== 0) {
+            context.logger.debug('Karpenter not installed, skipping nodepool scaling')
+            return
+          }
+
+          // Get all Karpenter node pools
+          const { stdout } = await execute({
+            command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
+            context,
+            workingDirectory: process.cwd(),
+          })
+          
+          const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
+          const nodePools = result.items || []
+          
+          for (const nodePool of nodePools) {
+            // Set limits to 0
+            await execute({
+              command: [
+                'kubectl', '--context', selectedContext.name, 
+                'patch', 'nodepool', nodePool.metadata.name, 
+                '--type', 'merge', '-p', '{"spec":{"limits":{"cpu":"0","memory":"0"}}}'
+              ],
               context,
               workingDirectory: process.cwd(),
             })
-            
-            const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
-            const nodePools = result.items || []
-            
-            for (const nodePool of nodePools) {
-              // Set limits to 0
-              await execute({
-                command: [
-                  'kubectl', '--context', selectedContext.name, 
-                  'patch', 'nodepool', nodePool.metadata.name, 
-                  '--type', 'merge', '-p', '{"spec":{"limits":{"cpu":"0","memory":"0"}}}'
-                ],
-                context,
-                workingDirectory: process.cwd(),
-              })
-            }
-          } catch {
-            // Karpenter might not be installed
           }
         },
       },
@@ -217,17 +255,19 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       {
         title: 'Scaling down EKS node groups',
         task: async () => {
-          for (const nodeGroup of nodeGroups) {
-            await eksClient.send(new UpdateNodegroupConfigCommand({
-              clusterName: selectedContext.cluster,
-              nodegroupName: nodeGroup,
-              scalingConfig: {
-                minSize: 0,
-                maxSize: 0,
-                desiredSize: 0
-              }
-            }))
-          }
+          await Promise.all(
+            nodeGroups.map(nodeGroup =>
+              eksClient.send(new UpdateNodegroupConfigCommand({
+                clusterName: selectedContext.cluster,
+                nodegroupName: nodeGroup,
+                scalingConfig: {
+                  minSize: 0,
+                  maxSize: 0,
+                  desiredSize: 0
+                }
+              }))
+            )
+          )
         },
       },
       {
@@ -292,6 +332,14 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
         title: 'Scaling down NAT gateways',
         task: async () => {
           for (const asg of autoScalingGroups) {
+            // Scale to zero
+            await autoScalingClient.send(new UpdateAutoScalingGroupCommand({
+              AutoScalingGroupName: asg.name,
+              MinSize: 0,
+              MaxSize: 0,
+              DesiredCapacity: 0
+            }))
+
             // Tag with original values for restoration
             await autoScalingClient.send(new CreateOrUpdateTagsCommand({
               Tags: [
@@ -318,14 +366,6 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
                 }
               ]
             }))
-            
-            // Scale to zero
-            await autoScalingClient.send(new UpdateAutoScalingGroupCommand({
-              AutoScalingGroupName: asg.name,
-              MinSize: 0,
-              MaxSize: 0,
-              DesiredCapacity: 0
-            }))
           }
         },
       },
@@ -349,11 +389,21 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           }
         },
       },
+      {
+        title: 'Tagging cluster as suspended',
+        task: async () => {
+          await eksClient.send(new TagResourceCommand({
+            resourceArn: clusterInfo.arn,
+            tags: {
+              'panfactum.com/suspended': 'true'
+            }
+          }))
+        },
+      },
     ], { rendererOptions: { collapseErrors: false } })
 
     await tasks.run()
 
-    context.logger.info('')
     context.logger.success(`✓ Successfully suspended cluster "${selectedContext.name}"`)
     context.logger.info('  - All nodes have been terminated')
     context.logger.info('  - NAT gateways have been scaled down')

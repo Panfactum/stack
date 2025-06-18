@@ -118,6 +118,20 @@ export const KUBERNETES_ITEMS_SCHEMA = z.object({
   })).optional()
 })
 
+export const CERTIFICATE_ITEMS_SCHEMA = z.object({
+  items: z.array(z.object({
+    metadata: z.object({
+      name: z.string(),
+      namespace: z.string()
+    }),
+    spec: z.object({
+      issuerRef: z.object({
+        name: z.string()
+      }).optional()
+    }).optional()
+  })).optional()
+})
+
 // AWS Auto Scaling Groups with tags (for resume operations)
 export const AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA = z.array(z.object({
   AutoScalingGroupName: z.string(),

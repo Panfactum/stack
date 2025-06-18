@@ -388,13 +388,13 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
 
     await tasks.run()
 
-    context.logger.success(`
-✓ Successfully resumed cluster "${selectedContext.name}"
-  - NAT gateways have been restored
-  - Node groups have been restored
-  - Karpenter limits have been removed
-  - Schedulers have been restored
-
-The cluster may take a few minutes to become fully operational.`)
+    context.logger.info('')
+    context.logger.success(`✓ Successfully resumed cluster "${selectedContext.name}"`)
+    context.logger.info('  - NAT gateways have been restored')
+    context.logger.info('  - Node groups have been restored')
+    context.logger.info('  - Karpenter limits have been removed')
+    context.logger.info('  - Schedulers have been restored')
+    context.logger.info('')
+    context.logger.info('The cluster may take a few minutes to become fully operational.')
   }
 }
