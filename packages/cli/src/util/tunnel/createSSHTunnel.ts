@@ -2,6 +2,7 @@ import { join } from 'path';
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error.js';
 import { fileExists } from '@/util/fs/fileExists.js';
+import { removeFile } from '@/util/fs/removeFile.js';
 import { writeFile } from '@/util/fs/writeFile.js';
 import { execute } from '@/util/subprocess/execute.js';
 import { killBackgroundProcess } from '@/util/subprocess/killBackgroundProcess.js';
@@ -88,11 +89,7 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
     // Clean up any partial keys
     for (const file of [keyFile, publicKeyFile, signedPublicKeyFile]) {
       if (await fileExists(file)) {
-        await execute({
-          command: ['rm', '-f', file],
-          context,
-          workingDirectory: process.cwd(),
-        });
+        await removeFile(file);
       }
     }
 
