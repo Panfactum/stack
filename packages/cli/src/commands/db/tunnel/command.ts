@@ -11,7 +11,7 @@ import { CLIError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
-import { getVaultTokenString } from '@/util/vault/getVaultToken'
+import { getVaultToken } from '@/util/vault/getVaultToken'
 
 // Zod schema for port validation
 const portSchema = z.string()
@@ -219,7 +219,7 @@ export class DbTunnelCommand extends PanfactumCommand {
       if (credentials.leaseId) {
         try {
           context.logger.info('Revoking database credentials...')
-          const vaultToken = await getVaultTokenString({ context, address: config.vault_addr! })
+          const vaultToken = await getVaultToken({ context, address: config.vault_addr! })
           await execute({
             command: ['vault', 'lease', 'revoke', credentials.leaseId],
             context,

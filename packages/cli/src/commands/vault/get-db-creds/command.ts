@@ -1,6 +1,3 @@
-// Command for getting database credentials from Vault
-// Replicates the functionality of pf-get-db-creds.sh script
-
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getDBCreds, getDbCredsFormatted } from '@/util/vault/getDBCreds.ts';

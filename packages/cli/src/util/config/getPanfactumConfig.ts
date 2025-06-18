@@ -2,7 +2,7 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import { CLIError } from "@/util/error/error";
-import { getVaultTokenString } from "@/util/vault/getVaultToken";
+import { getVaultToken } from "@/util/vault/getVaultToken";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -162,7 +162,7 @@ export const getPanfactumConfig = async ({
     values.vault_token = values.vault_addr ?
       values.vault_token
         ? values.vault_token
-        : await getVaultTokenString({
+        : await getVaultToken({
             context,
             address: values.vault_addr,
             silent: true,

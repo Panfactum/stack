@@ -30,6 +30,6 @@ export class GetCommitHashCommand extends PanfactumCommand {
       context: this.context,
       workingDirectory: process.cwd(),
     });
-    this.context.stdout.write(hash + '\n');
+    this.context.stdout.write(hash);
   }
 }

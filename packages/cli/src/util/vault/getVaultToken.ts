@@ -17,19 +17,14 @@ export interface GetVaultTokenOptions {
   context: PanfactumContext;
 }
 
-export interface VaultTokenResult {
-  token: string;
-  isValid: boolean;
-  error?: string;
-}
-
 /**
  * Get a Vault authentication token, handling token refresh when needed
  * 
  * @param options Configuration options
- * @returns Vault token result
+ * @returns Vault token string
+ * @throws CLIError if token cannot be obtained (unless silent mode is enabled)
  */
-export async function getVaultToken(options: GetVaultTokenOptions): Promise<VaultTokenResult> {
+export async function getVaultToken(options: GetVaultTokenOptions): Promise<string> {
   const { address, silent = false, context } = options;
 
   try {
@@ -45,12 +40,12 @@ export async function getVaultToken(options: GetVaultTokenOptions): Promise<Vaul
       if (!silent) {
         throw new CLIError('Vault provider is enabled but VAULT_ADDR is not set.');
       }
-      return { token: 'invalid_token', isValid: false };
+      throw new CLIError('Invalid VAULT_ADDR');
     }
 
     // Check for existing token in environment
     if (context.env['VAULT_TOKEN']) {
-      return { token: context.env['VAULT_TOKEN'], isValid: true };
+      return context.env['VAULT_TOKEN'];
     }
 
     // Set environment for vault commands
@@ -85,7 +80,7 @@ export async function getVaultToken(options: GetVaultTokenOptions): Promise<Vaul
 
         // If token has more than 30 minutes left, use it
         if (ttl >= 1800) {
-          return { token: existingToken, isValid: true };
+          return existingToken;
         }
       } catch {
         // Token lookup failed, need new token
@@ -94,17 +89,16 @@ export async function getVaultToken(options: GetVaultTokenOptions): Promise<Vaul
 
     // Perform OIDC login to get new token
     const token = await performOIDCLogin(env, context);
-    return { token, isValid: true };
+    return token;
 
   } catch (error) {
     if (silent) {
-      // In silent mode, return invalid token and don't throw
+      // In silent mode, log warning but don't throw
       if (context.env['VAULT_ADDR'] !== '@@TERRAGRUNT_INVALID@@') {
         // In Node.js environment, console is globally available
         // eslint-disable-next-line no-undef
         console.error('Warning: getVaultToken failed, but exiting with 0 as --silent is enabled.');
       }
-      return { token: 'invalid_token', isValid: false };
     }
     
     throw error;
@@ -134,11 +128,3 @@ async function performOIDCLogin(env: Record<string, string | undefined>, context
   }
 }
 
-/**
- * Convenience function to get just the token string, throwing on error
- */
-export async function getVaultTokenString(options: GetVaultTokenOptions): Promise<string> {
-  const result = await getVaultToken(options);
-  
-  return result.token;
-}

@@ -36,16 +36,25 @@ export class GetVaultTokenCommand extends PanfactumCommand {
   });
 
   async execute() {
-    const result = await getVaultToken({
-      address: this.address,
-      silent: this.silent,
-      context: this.context,
-    });
+    try {
+      const token = await getVaultToken({
+        address: this.address,
+        silent: this.silent,
+        context: this.context,
+      });
 
-    // Output the token to stdout (matching bash script behavior)
-    this.context.stdout.write(result.token + '\n');
-
-    // Exit with appropriate code
-    return result.isValid ? 0 : 1;
+      // Output the token to stdout (matching bash script behavior)
+      this.context.stdout.write(token + '\n');
+      
+      return 0;
+    } catch (error) {
+      // If silent mode is enabled, getVaultToken won't throw
+      // So if we get here in silent mode, still return 0
+      if (this.silent) {
+        return 0;
+      }
+      // Otherwise, let the error propagate
+      throw error;
+    }
   }
 }

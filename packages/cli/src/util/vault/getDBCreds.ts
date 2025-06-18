@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
 import { parseJson } from '@/util/zod/parseJson';
-import { getVaultTokenString } from './getVaultToken';
+import { getVaultToken } from './getVaultToken';
 import type {PanfactumContext} from "@/util/context/context.ts";
 
 // Zod schema for Vault database credentials response
@@ -49,7 +49,7 @@ export async function getDBCreds(options: GetDbCredsOptions): Promise<DbCredenti
   }
 
   // Get Vault token
-  const token = await getVaultTokenString({ context, address: vaultAddress });
+  const token = await getVaultToken({ context, address: vaultAddress });
   env['VAULT_TOKEN'] = token;
 
   // Read credentials from Vault

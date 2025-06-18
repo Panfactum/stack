@@ -6,7 +6,7 @@ import { removeFile } from '@/util/fs/removeFile.js';
 import { writeFile } from '@/util/fs/writeFile.js';
 import { execute } from '@/util/subprocess/execute.js';
 import { killBackgroundProcess } from '@/util/subprocess/killBackgroundProcess.js';
-import { getVaultTokenString } from '@/util/vault/getVaultToken.js';
+import { getVaultToken } from '@/util/vault/getVaultToken.js';
 import type { PanfactumContext } from '@/util/context/context.js';
 
 // Zod schemas for validation
@@ -109,7 +109,7 @@ export async function createSSHTunnel(options: SSHTunnelOptions): Promise<SSHTun
   }
 
   // Sign SSH key with Vault
-  const vaultToken = await getVaultTokenString({ context, address: vaultAddress });
+  const vaultToken = await getVaultToken({ context, address: vaultAddress });
 
   const { stdout: signedKey } = await execute({
     command: [
