@@ -21,12 +21,15 @@ const EKS_TOKEN_SCHEMA = z.object({
 
 export type EKSTokenResponse = z.infer<typeof EKS_TOKEN_SCHEMA>;
 
-export async function getEKSToken(
-  context: PanfactumContext,
-  clusterName: string,
-  region: string,
-  awsProfile: string
-): Promise<EKSTokenResponse> {
+export interface GetEKSTokenParams {
+  context: PanfactumContext;
+  clusterName: string;
+  region: string;
+  awsProfile: string;
+}
+
+export async function getEKSToken(params: GetEKSTokenParams): Promise<EKSTokenResponse> {
+  const { context, clusterName, region, awsProfile } = params;
   try {
     context.logger.debug('Getting EKS authentication token', { clusterName, region, profile: awsProfile });
     

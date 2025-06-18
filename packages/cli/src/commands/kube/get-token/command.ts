@@ -44,15 +44,16 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
 
     try {
       // Get the EKS token using our utility that combines AWS SDK validation with CLI token generation
-      const token = await getEKSToken(this.context, this.clusterName, this.region, this.profile)
+      const token = await getEKSToken({
+        context: this.context,
+        clusterName: this.clusterName,
+        region: this.region,
+        awsProfile: this.profile
+      })
       
-      // Output the token as JSON (matching the original script behavior)
-      logger.writeRaw(JSON.stringify(token) + '\n')
+      logger.writeRaw(JSON.stringify(token))
       return 0
     } catch (error) {
-      if (error instanceof CLIError) {
-        throw error
-      }
       throw new CLIError(`Failed to get EKS token`, error)
     }
   }
