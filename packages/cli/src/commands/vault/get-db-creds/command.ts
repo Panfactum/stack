@@ -59,7 +59,7 @@ export class GetDbCredsCommand extends PanfactumCommand {
           role: selectedRole,
           vaultAddress: this.vaultAddress,
         });
-        this.context.stdout.write(JSON.stringify(creds, null, 2) + '\n');
+        this.context.stdout.write(JSON.stringify(creds, null, 2));
       } else {
         // Output as formatted text (matching vault CLI output)
         const formatted = await getDbCredsFormatted({
@@ -67,7 +67,7 @@ export class GetDbCredsCommand extends PanfactumCommand {
           role: selectedRole,
           vaultAddress: this.vaultAddress,
         });
-        this.context.stdout.write(formatted + '\n');
+        this.context.stdout.write(formatted);
       }
       return 0;
     } catch (error) {
