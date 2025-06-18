@@ -40,16 +40,18 @@ export default class TunnelCommand extends PanfactumCommand {
     `,
     examples: [
       ['Tunnel with prompts', '$0 tunnel'],
-      ['Tunnel to specific service', '$0 tunnel --kube-context production-primary argo-server.argo:2746'],
-      ['Tunnel with all options', '$0 tunnel --kube-context production-primary argo-server.argo:2746 --local-port 3333'],
+      ['Tunnel to specific service', '$0 tunnel --cluster production-primary --remote-address argo-server.argo:2746'],
+      ['Tunnel with all options', '$0 tunnel --cluster production-primary --remote-address argo-server.argo:2746 --local-port 3333'],
     ],
   });
 
-  kubeContext = Option.String('--kube-context', {
-    description: 'Name of the Kube Context to tunnel through',
+  cluster = Option.String('--cluster', {
+    description: 'Name of the Cluster to tunnel through',
   });
-  remoteAddress = Option.String();
-  localPort = Option.String('--local-port', '-l', {
+  remoteAddress = Option.String('--remote-address,-r', {
+    description: 'Remote address to tunnel to (e.g., service.namespace:port)',
+  });
+  localPort = Option.String('--local-port,-l', {
     description: 'Local port to bind to (optional, will prompt if not provided)',
   });
 
@@ -57,27 +59,27 @@ export default class TunnelCommand extends PanfactumCommand {
     try {
       // Get kube contexts if needed
       const kubeContexts = await getKubeContextsFromConfig(this.context);
-      
+
       // Get the kube context - either from option or prompt
-      const selectedKubeContext = this.kubeContext
-        ? kubeContexts.find(context => context.name === this.kubeContext)
+      const selectedKubeContext = this.cluster
+        ? kubeContexts.find(context => context.cluster === this.cluster)
         : await this.context.logger.select({
-            message: "Select the Cluster context you want to tunnel through:",
-            choices: kubeContexts.map(context => ({
-              value: context,
-              name: `${context.name}`,
-            })),
-          });
+          message: "Select the Cluster to tunnel through:",
+          choices: kubeContexts.map(context => ({
+            value: context,
+            name: `${context.name} (${context.cluster})`,
+          })),
+        });
 
       if (!selectedKubeContext) {
-        throw new CLIError(`Kube context '${this.kubeContext}' not found.`);
+        throw new CLIError(`Cluster '${this.cluster}' not found.`);
       }
 
       const regions = (await getAllRegions(this.context)).filter(region => region.bastionDeployed)
       const selectedRegion = regions.find(region => region.clusterContextName === selectedKubeContext.name)
 
       if (!selectedRegion) {
-        throw new CLIError(`No bastion found for context '${selectedKubeContext.name}'. Available bastions: ${regions.map(r => r.clusterContextName).join(', ')}`);
+        throw new CLIError(`No bastion found for cluster '${selectedKubeContext.cluster}'. Available bastions: ${regions.map(r => r.clusterContextName).join(', ')}`);
       }
 
       // Get remote address - either from option or prompt
@@ -129,7 +131,7 @@ export default class TunnelCommand extends PanfactumCommand {
 
       // Validate vault address
       if (!selectedRegion.vaultAddress) {
-        throw new CLIError(`Vault address not configured for bastion ${selectedKubeContext.name}`);
+        throw new CLIError(`Vault address not configured for cluster ${selectedKubeContext.cluster}`);
       }
 
       // Create SSH tunnel
