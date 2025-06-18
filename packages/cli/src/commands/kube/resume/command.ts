@@ -182,7 +182,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           // Check if the Cilium operator deployment exists
           const { exitCode } = await execute({
             command: [
-              'kubectl', '--context', selectedContext.name, '-n', 'kube-system',
+              'kubectl', '--context', selectedContext.name, '-n', 'cilium',
               'get', 'deployment', 'cilium-operator'
             ],
             context,
@@ -195,16 +195,25 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             return
           }
 
-          // Update the scheduler environment variable
+          // Update the scheduler name in the deployment spec to default-scheduler
           await execute({
             command: [
-              'kubectl', '--context', selectedContext.name, '-n', 'kube-system',
-              'set', 'env', 'deployment/cilium-operator', 'CILIUM_K8S_SCHEDULER=panfactum'
+              'kubectl', '--context', selectedContext.name,
+              'patch', 'deployment', 'cilium-operator', '-n', 'cilium',
+              '--patch', JSON.stringify({
+                spec: {
+                  template: {
+                    spec: {
+                      schedulerName: 'default-scheduler'
+                    }
+                  }
+                }
+              })
             ],
             context,
             workingDirectory: process.cwd(),
           })
-          context.logger.debug('Updated Cilium operator scheduler to panfactum')
+          context.logger.debug('Updated Cilium operator to use default-scheduler')
         },
       },
       {
@@ -296,11 +305,11 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
       {
         title: 'Restoring Panfactum scheduler',
         task: async () => {
-          // Check if the scheduler deployment exists
+          // Check if the scheduler deployment exists in the scheduler namespace
           const { exitCode } = await execute({
             command: [
-              'kubectl', '--context', selectedContext.name, '-n', 'kube-system',
-              'get', 'deployment', 'panfactum-scheduler'
+              'kubectl', '--context', selectedContext.name, '-n', 'scheduler',
+              'get', 'deployment', 'scheduler'
             ],
             context,
             workingDirectory: process.cwd(),
@@ -308,20 +317,62 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           })
 
           if (exitCode !== 0) {
-            context.logger.debug('Panfactum scheduler deployment not found, skipping')
+            context.logger.debug('Scheduler deployment not found in scheduler namespace, skipping')
             return
           }
 
-          // Scale up the scheduler deployment
+          // Wait for the scheduler pod to be running (timeout after 5 minutes)
+          const timeout = 300 // seconds
+          const interval = 10 // seconds
+          let elapsed = 0
+          
+          context.logger.debug('Waiting for scheduler pod to be running...')
+          
+          while (elapsed < timeout) {
+            const { stdout: podStatus } = await execute({
+              command: [
+                'kubectl', '--context', selectedContext.name, '-n', 'scheduler',
+                'get', 'pod', '-l', 'panfactum.com/workload=scheduler',
+                '-o', 'jsonpath={.items[0].status.phase}'
+              ],
+              context,
+              workingDirectory: process.cwd(),
+              isSuccess: () => true,
+            })
+
+            if (podStatus === 'Running') {
+              context.logger.debug('Scheduler pod is running')
+              break
+            }
+
+            context.logger.debug(`Pod status: ${podStatus || 'not found'}. Waiting...`)
+            await Bun.sleep(interval * 1000)
+            elapsed += interval
+          }
+
+          if (elapsed >= timeout) {
+            throw new CLIError('Timed out waiting for scheduler pod to be running')
+          }
+
+          // Now update Cilium operator to use the panfactum scheduler
           await execute({
             command: [
-              'kubectl', '--context', selectedContext.name, '-n', 'kube-system',
-              'scale', 'deployment', 'panfactum-scheduler', '--replicas=2'
+              'kubectl', '--context', selectedContext.name,
+              'patch', 'deployment', 'cilium-operator', '-n', 'cilium',
+              '--patch', JSON.stringify({
+                spec: {
+                  template: {
+                    spec: {
+                      schedulerName: 'panfactum'
+                    }
+                  }
+                }
+              })
             ],
             context,
             workingDirectory: process.cwd(),
           })
-          context.logger.debug('Restored Panfactum scheduler to 2 replicas')
+          context.logger.debug('Updated Cilium operator to use panfactum scheduler')
         },
       },
       {
