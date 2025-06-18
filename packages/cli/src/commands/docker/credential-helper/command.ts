@@ -2,7 +2,7 @@ import { Command, Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getCachedCredential, setCachedCredential } from '@/util/docker/credentialCache.ts'
-import { getEcrToken } from '@/util/docker/getEcrToken.ts'
+import { getECRToken } from '@/util/docker/getECRToken.ts'
 import { CLIError } from '@/util/error/error'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
 import { execute } from '@/util/subprocess/execute.ts'
@@ -101,7 +101,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
 
     // Get fresh token from ECR
     try {
-      const { username, password } = await getEcrToken(context, registry, awsProfile)
+      const { username, password } = await getECRToken(context, registry, awsProfile)
       
       // Cache the credential
       await setCachedCredential(context, registry, password)
@@ -123,7 +123,7 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
           })
           
           // Retry getting token
-          const { username, password } = await getEcrToken(context, registry, awsProfile)
+          const { username, password } = await getECRToken(context, registry, awsProfile)
           await setCachedCredential(context, registry, password)
 
           this.context.stdout.write(JSON.stringify({

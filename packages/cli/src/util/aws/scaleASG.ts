@@ -51,6 +51,6 @@ export async function scaleASG({
     context.logger.debug(`Successfully updated ASG ${asgName}`);
     return true;
   } catch (error) {
-    throw new CLIError(`Failed to update ASG ${asgName}`, { cause: error });
+    throw new CLIError(`Failed to update ASG ${asgName}`, error);
   }
 }

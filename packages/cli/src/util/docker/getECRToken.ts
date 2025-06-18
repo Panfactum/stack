@@ -6,7 +6,7 @@ import { getECRPublicClient } from '../aws/clients/getECRPublicClient';
 import type { PanfactumContext } from '@/util/context/context'
 
 
-export async function getEcrToken(
+export async function getECRToken(
   context: PanfactumContext,
   registry: string,
   awsProfile: string
