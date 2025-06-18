@@ -424,11 +424,12 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       context.logger.info(`To resume the cluster, run: pf k8s cluster resume --kube-context ${selectedContext.name}`)
     } else {
       context.logger.success(`✓ Successfully suspended cluster "${selectedContext.name}"`)
-      context.logger.info(`  - All nodes have been terminated
-  - NAT gateways have been scaled down
-  - Load balancers have been deleted
-
-To resume the cluster, run: pf k8s cluster resume --kube-context ${selectedContext.name}`)
+      context.logger.info(`
+        - All nodes have been terminated
+        - NAT gateways have been scaled down
+        - Load balancers have been deleted
+        
+      To resume the cluster, run: pf k8s cluster resume --kube-context ${selectedContext.name}`)
     }
   }
 }
