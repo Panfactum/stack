@@ -104,7 +104,7 @@ export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
                     apiVersion: "client.authentication.k8s.io/v1beta1",
                     command: "pf",
                     args: [
-                        "k8s", "get-token",
+                        "kube", "get-token",
                         "--region", region,
                         "--cluster-name", name,
                         "--profile", profile

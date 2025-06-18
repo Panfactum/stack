@@ -7,7 +7,7 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand'
 import { CLIError } from '@/util/error/error'
 
 export default class K8sGetTokenCommand extends PanfactumCommand {
-  static override paths = [['k8s', 'get-token']]
+  static override paths = [['kube', 'get-token']]
 
   static override usage = PanfactumCommand.Usage({
     description: 'Get an EKS authentication token with automatic SSO login handling',

@@ -91,7 +91,7 @@ module "disruption_window_enabler" {
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
-      "pf", "k8s", "disruptions", "enable",
+      "pf", "kube", "enable-disruptions",
       "--window-id=${random_id.window_id.hex}",
       "--namespace=${var.namespace}"
     ]
@@ -120,7 +120,7 @@ module "disruption_window_disabler" {
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
-      "pf", "k8s", "disruptions", "disable",
+      "pf", "kube", "disable-disruptions",
       "--window-id=${random_id.window_id.hex}",
       "--namespace=${var.namespace}"
     ]

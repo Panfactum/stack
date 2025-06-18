@@ -24,7 +24,7 @@ import DeleteLocksCommand from "./commands/iac/delete-locks/command.ts";
 import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/command.ts";
 import { K8sDisruptionsDisableCommand } from "./commands/kube/disable-disruptions/command.ts";
 import { K8sDisruptionsEnableCommand } from "./commands/kube/enable-disruptions/command.ts";
-import K8sGetTokenCommand from "./commands/k8s/get-token/command.ts";
+import K8sGetTokenCommand from "./commands/kube/get-token/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/k8s/velero/snapshot-gc/command.ts";
 import ProfileForContextCommand from "./commands/kube/profile-for-context/command.ts";
 import { K8sClusterResumeCommand } from "./commands/kube/resume/command.ts";
