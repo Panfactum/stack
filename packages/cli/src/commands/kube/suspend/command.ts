@@ -122,7 +122,6 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
     }
 
     interface Context {
-      suspended: boolean;
       clusterAlreadySuspended?: boolean;
     }
 
@@ -151,7 +150,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Extending certificate expiration',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           // Check if cert-manager is installed by looking for the Certificate CRD
           const { exitCode } = await execute({
@@ -212,7 +211,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Scaling down Karpenter node pools',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           // Check if Karpenter is installed by looking for the CRD
           const { exitCode } = await execute({
@@ -253,7 +252,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Getting EKS node groups',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           const response = await eksClient.send(new ListNodegroupsCommand({
             clusterName: selectedContext.cluster
@@ -263,7 +262,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Scaling down EKS node groups',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           await Promise.all(
             nodeGroups.map(nodeGroup =>
@@ -282,7 +281,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Terminating EC2 instances',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           // Get all instances for this cluster
           const response = await ec2Client.send(new DescribeInstancesCommand({
@@ -316,7 +315,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Finding NAT gateway Auto Scaling Groups',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           const response = await autoScalingClient.send(new DescribeAutoScalingGroupsCommand({}))
           
@@ -342,7 +341,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Scaling down NAT gateways',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           for (const asg of autoScalingGroups) {
             // Scale to zero
@@ -384,7 +383,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Deleting load balancers',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           // Get all load balancers
           const response = await elbv2Client.send(new DescribeLoadBalancersCommand({}))
@@ -405,7 +404,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       },
       {
         title: 'Tagging cluster as suspended',
-        skip: (ctx) => ctx.clusterAlreadySuspended ?? false,
+        skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           await eksClient.send(new TagResourceCommand({
             resourceArn: clusterInfo.arn,
