@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { vaultRoles } from '@/util/db/types';
 import { CLIError } from '@/util/error/error';
 import { getDBCreds, getDbCredsFormatted } from '@/util/vault/getDBCreds.ts';
 
@@ -16,15 +17,16 @@ export class GetDbCredsCommand extends PanfactumCommand {
       The command will automatically handle authentication with Vault.
     `,
     examples: [
-      ['Get database credentials for a role', 'pf vault get-db-creds --role my-app'],
-      ['Get credentials with specific Vault address', 'pf vault get-db-creds --role my-app --vault-address https://vault.example.com'],
-      ['Get credentials in JSON format', 'pf vault get-db-creds --role my-app --json'],
+      ['Get database credentials interactively', 'pf vault get-db-creds'],
+      ['Get database credentials for a specific role', 'pf vault get-db-creds --role admin'],
+      ['Get credentials with specific Vault address', 'pf vault get-db-creds --role reader --vault-address https://vault.example.com'],
+      ['Get credentials in JSON format', 'pf vault get-db-creds --role superuser --json'],
     ],
   });
 
   role = Option.String('-r,--role', {
     description: 'The database role to request credentials for',
-    required: true,
+    required: false,
   });
 
   vaultAddress = Option.String('-a,--vault-address', {
@@ -37,11 +39,26 @@ export class GetDbCredsCommand extends PanfactumCommand {
 
   async execute() {
     try {
+      // Prompt for role if not provided
+      let selectedRole = this.role;
+      if (!selectedRole) {
+        selectedRole = await this.context.logger.select({
+          message: 'Select the database role:',
+          choices: vaultRoles.map(role => ({
+            value: role,
+            name: role,
+            description: role === 'superuser' ? 'Full database access' : 
+                        role === 'admin' ? 'Administrative access' : 
+                        'Read-only access'
+          }))
+        });
+      }
+      
       if (this.json) {
         // Output as JSON
         const creds = await getDBCreds({
           context:  this.context,
-          role: this.role,
+          role: selectedRole,
           vaultAddress: this.vaultAddress,
         });
         this.context.stdout.write(JSON.stringify(creds, null, 2) + '\n');
@@ -49,7 +66,7 @@ export class GetDbCredsCommand extends PanfactumCommand {
         // Output as formatted text (matching vault CLI output)
         const formatted = await getDbCredsFormatted({
           context: this.context,
-          role: this.role,
+          role: selectedRole,
           vaultAddress: this.vaultAddress,
         });
         this.context.stdout.write(formatted + '\n');
