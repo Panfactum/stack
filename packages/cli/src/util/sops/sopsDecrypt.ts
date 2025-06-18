@@ -1,5 +1,5 @@
 import { dirname } from "node:path";
-import { ZodError, type z } from "zod";
+import { type z } from "zod";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { execute } from "@/util/subprocess/execute";
@@ -29,19 +29,27 @@ export const sopsDecrypt = async <T extends z.ZodType<object>>({
     command: ["sops", "-d", "--output-type", "json", filePath],
     context,
     workingDirectory: dirname(filePath),
+  }).catch((error: unknown) => {
+    throw new CLIError(`Failed to decrypt sops file at ${filePath}`, error);
   });
+
+  // Parse JSON output
+  let decryptedData: unknown;
   try {
-    return validationSchema.parse(JSON.parse(stdout)) as z.infer<T>;
-  } catch (e) {
-    if (e instanceof ZodError) {
-      throw new PanfactumZodError(
-        "Decrypted sops data did not match expected schema",
-        filePath,
-        e
-      );
-    } else {
-      throw new CLIError("Error parsing decrypted sops data", e);
-    }
+    decryptedData = JSON.parse(stdout);
+  } catch (error) {
+    throw new CLIError(`Invalid JSON output from sops decrypt for file at ${filePath}`, error);
   }
 
+  // Validate with schema
+  const parseResult = validationSchema.safeParse(decryptedData);
+  if (!parseResult.success) {
+    throw new PanfactumZodError(
+      "Decrypted sops data did not match expected schema",
+      filePath,
+      parseResult.error
+    );
+  }
+
+  return parseResult.data as z.infer<T>;
 };

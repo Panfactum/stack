@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { stringify, parse } from "yaml";
-import { ZodError, type z } from "zod";
+import { type z } from "zod";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { writeFile } from "@/util/fs/writeFile";
 import { REPO_CONFIG_FILE, REPO_USER_CONFIG_FILE } from "./constants";
@@ -29,33 +29,48 @@ export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
     const explainer = "# These are the standard repo variables required by\n" +
         "# https://panfactum.com/docs/reference/repo-variables\n\n"
 
-    try {
-        if (await Bun.file(configFilePath).exists()) {
-            const fileContent = await Bun.file(configFilePath).text();
-            const existingValues = parse(fileContent);
-            await writeFile({
-                filePath: configFilePath,
-                contents: explainer + stringify({
-                    ...existingValues,
-                    ...OPTIONAL_PANFACTUM_YAML_SCHEMA.parse(values)
-                }, yamlOpts),
-                context,
-                overwrite: true
-            })
-        } else {
-            await writeFile({
-                filePath: configFilePath,
-                contents: explainer + stringify(OPTIONAL_PANFACTUM_YAML_SCHEMA.parse(values), yamlOpts),
-                context,
-                overwrite: true
-            })
+    // Validate values first
+    const parseResult = OPTIONAL_PANFACTUM_YAML_SCHEMA.safeParse(values);
+    if (!parseResult.success) {
+        throw new PanfactumZodError("Failed to validate repo variables", "upsertRepoVariables", parseResult.error);
+    }
+    const validatedValues = parseResult.data;
+
+    if (await Bun.file(configFilePath).exists()) {
+        const fileContent = await Bun.file(configFilePath).text()
+            .catch((error: unknown) => {
+                throw new CLIError(`Failed to read config file at ${configFilePath}`, error);
+            });
+        
+        let existingValues: unknown;
+        try {
+            existingValues = parse(fileContent);
+        } catch (error) {
+            throw new CLIError(`Invalid YAML syntax in config file at ${configFilePath}`, error);
         }
-    } catch (e) {
-        if (e instanceof ZodError) {
-            throw new PanfactumZodError("Failed to validate repo variables", "upsertRepoVariables", e)
-        } else {
-            throw new CLIError(`Failed to write new repo variables to ${configFilePath}`, e)
-        }
+        
+        // Ensure existingValues is an object before spreading
+        const mergedValues = (typeof existingValues === 'object' && existingValues !== null && !Array.isArray(existingValues))
+            ? { ...existingValues, ...validatedValues }
+            : validatedValues;
+        
+        await writeFile({
+            filePath: configFilePath,
+            contents: explainer + stringify(mergedValues, yamlOpts),
+            context,
+            overwrite: true
+        }).catch((error: unknown) => {
+            throw new CLIError(`Failed to write repo variables to ${configFilePath}`, error);
+        });
+    } else {
+        await writeFile({
+            filePath: configFilePath,
+            contents: explainer + stringify(validatedValues, yamlOpts),
+            context,
+            overwrite: true
+        }).catch((error: unknown) => {
+            throw new CLIError(`Failed to write repo variables to ${configFilePath}`, error);
+        });
     }
 
     /////////////////////////////////////////////
