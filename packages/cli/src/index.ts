@@ -33,7 +33,7 @@ import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
 import { GetModuleHashCommand } from "./commands/util/get-module-hash/command.ts";
-import { GetDbCredsCommand } from "./commands/vault/get-db-creds/command.ts";
+import { GetDbCredsCommand } from "./commands/db/get-creds/command.ts";
 import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";

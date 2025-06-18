@@ -5,11 +5,11 @@ import { CLIError } from '@/util/error/error';
 import { getDBCreds, getDbCredsFormatted } from '@/util/vault/getDBCreds.ts';
 
 export class GetDbCredsCommand extends PanfactumCommand {
-  static override paths = [['vault', 'get-db-creds']];
+  static override paths = [['db', 'get-creds']];
 
   static override usage = Command.Usage({
     description: 'Get database credentials from Vault for a specific role',
-    category: 'Vault',
+    category: 'Database',
     details: `
       This command retrieves database credentials from Vault's database secrets engine.
       
@@ -17,10 +17,10 @@ export class GetDbCredsCommand extends PanfactumCommand {
       The command will automatically handle authentication with Vault.
     `,
     examples: [
-      ['Get database credentials interactively', 'pf vault get-db-creds'],
-      ['Get database credentials for a specific role', 'pf vault get-db-creds --role admin'],
-      ['Get credentials with specific Vault address', 'pf vault get-db-creds --role reader --vault-address https://vault.example.com'],
-      ['Get credentials in JSON format', 'pf vault get-db-creds --role superuser --json'],
+      ['Get database credentials interactively', 'pf db get-creds'],
+      ['Get database credentials for a specific role', 'pf db get-creds --role admin'],
+      ['Get credentials with specific Vault address', 'pf db get-creds --role reader --vault-address https://vault.example.com'],
+      ['Get credentials in JSON format', 'pf db get-creds --role superuser --json'],
     ],
   });
 
