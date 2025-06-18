@@ -1,4 +1,5 @@
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
+import { CLIError, PanfactumZodError } from '@/util/error/error.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { parseJson } from '@/util/zod/parseJson.js'
 import {
@@ -28,32 +29,52 @@ export async function getLastBuildTime(
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
 
-  try {
-    const result = await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'get',
-        'statefulset',
-        statefulsetName,
-        '--namespace',
-        BUILDKIT_NAMESPACE,
-        '-o=json'
-      ],
-      context,
-      workingDirectory: context.repoVariables.repo_root
+  const result = await execute({
+    command: [
+      'kubectl',
+      ...contextArgs,
+      'get',
+      'statefulset',
+      statefulsetName,
+      '--namespace',
+      BUILDKIT_NAMESPACE,
+      '-o=json'
+    ],
+    context,
+    workingDirectory: context.repoVariables.repo_root
+  }).catch((error: unknown) => {
+    throw new CLIError(
+      `Failed to get statefulset ${statefulsetName} for BuildKit ${arch}`,
+      error
+    )
+  })
+
+  const statefulSet = await Promise.resolve(result.stdout)
+    .then(output => parseJson(statefulSetSchema, output))
+    .catch((error: unknown) => {
+      if (error instanceof ZodError) {
+        throw new PanfactumZodError(
+          `Invalid statefulset format for ${statefulsetName}`,
+          'kubectl output',
+          error
+        )
+      }
+      throw new CLIError(
+        `Failed to parse statefulset output for ${statefulsetName}`,
+        error
+      )
     })
 
-    const statefulSet = parseJson(statefulSetSchema, result.stdout)
-    const lastBuild = statefulSet.metadata.annotations?.[BUILDKIT_LAST_BUILD_ANNOTATION_KEY]
-    
-    if (!lastBuild) {
-      return null
-    }
-
-    const timestamp = parseInt(lastBuild, 10)
-    return isNaN(timestamp) ? null : timestamp
-  } catch {
+  const lastBuild = statefulSet.metadata.annotations?.[BUILDKIT_LAST_BUILD_ANNOTATION_KEY]
+  
+  if (!lastBuild) {
     return null
   }
+
+  const timestamp = parseInt(lastBuild, 10)
+  if (isNaN(timestamp)) {
+    throw new CLIError(`Invalid timestamp format in BuildKit annotation: ${lastBuild}`)
+  }
+  
+  return timestamp
 }

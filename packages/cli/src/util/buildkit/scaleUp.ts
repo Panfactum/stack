@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { CLIError } from '@/util/error/error.js'
+import { z, ZodError } from 'zod'
+import { CLIError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from './constants.js'
@@ -59,7 +59,21 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
     workingDirectory: process.cwd()
   })
 
-  const currentReplicas = replicaCountSchema.parse(result.stdout.trim())
+  const currentReplicas = await Promise.resolve(result.stdout.trim())
+    .then(output => replicaCountSchema.parse(output))
+    .catch((error: unknown) => {
+      if (error instanceof ZodError) {
+        throw new PanfactumZodError(
+          `Invalid replica count returned from kubectl for ${statefulsetName}`,
+          'kubectl output',
+          error
+        )
+      }
+      throw new CLIError(
+        `Failed to parse replica count for ${statefulsetName}`,
+        error
+      )
+    })
 
   if (currentReplicas === 0) {
     // Scale up
@@ -109,7 +123,21 @@ async function waitForScaleUp(
       workingDirectory: process.cwd()
     })
 
-    const availableReplicas = replicaCountSchema.parse(result.stdout.trim() || '0')
+    const availableReplicas = await Promise.resolve(result.stdout.trim() || '0')
+      .then(output => replicaCountSchema.parse(output))
+      .catch((error: unknown) => {
+        if (error instanceof ZodError) {
+          throw new PanfactumZodError(
+            `Invalid available replica count returned from kubectl for ${statefulsetName}`,
+            'kubectl output',
+            error
+          )
+        }
+        throw new CLIError(
+          `Failed to parse available replica count for ${statefulsetName}`,
+          error
+        )
+      })
 
     if (availableReplicas >= 1) {
       break
