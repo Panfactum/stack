@@ -34,7 +34,7 @@ LOCK_TABLE_REGION=$(echo "$TG_VARIABLES" | jq '.tf_state_region' -r)
 #####################################################
 # Step 4: Unlock
 #####################################################
-pf tf delete-locks \
+pf iac delete-locks \
   --profile ci \
   --region "$LOCK_TABLE_REGION" \
   --table "$LOCK_TABLE" \

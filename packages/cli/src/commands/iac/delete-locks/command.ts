@@ -1,4 +1,4 @@
-import { hostname } from 'os';
+import { hostname, userInfo } from 'os';
 import { DynamoDBClient, ScanCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 import { Option } from 'clipanion';
 import { z } from 'zod';
@@ -53,7 +53,7 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       const awsProfile = this.profile || config.tf_state_profile;
       const lockTable = this.table || config.tf_state_lock_table;
       const awsRegion = this.region || config.tf_state_region;
-      const lockOwner = this.who || `${process.env['USER'] || 'unknown'}@${hostname()}`;
+      const lockOwner = this.who || `${userInfo().username}@${hostname()}`;
 
       // Validate required values
       if (!awsProfile) {
