@@ -1,4 +1,6 @@
+import { z } from 'zod'
 import { execute } from '@/util/subprocess/execute.js'
+import { parseJson } from '@/util/zod/parseJson.js'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
@@ -12,6 +14,12 @@ interface GetLastBuildTimeOptions {
   kubectlContext?: string
   context: PanfactumContext
 }
+
+const statefulSetSchema = z.object({
+  metadata: z.object({
+    annotations: z.record(z.string()).optional()
+  })
+})
 
 export async function getLastBuildTime(
   options: GetLastBuildTimeOptions
@@ -30,14 +38,16 @@ export async function getLastBuildTime(
         statefulsetName,
         '--namespace',
         BUILDKIT_NAMESPACE,
-        `-o=go-template={{index .metadata.annotations "${BUILDKIT_LAST_BUILD_ANNOTATION_KEY}"}}`
+        '-o=json'
       ],
       context,
       workingDirectory: context.repoVariables.repo_root
     })
 
-    const lastBuild = result.stdout.trim()
-    if (!lastBuild || lastBuild === '<no value>') {
+    const statefulSet = parseJson(statefulSetSchema, result.stdout)
+    const lastBuild = statefulSet.metadata.annotations?.[BUILDKIT_LAST_BUILD_ANNOTATION_KEY]
+    
+    if (!lastBuild) {
       return null
     }
 
