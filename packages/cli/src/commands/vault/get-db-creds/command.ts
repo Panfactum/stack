@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { CLIError } from '@/util/error/error';
 import { getDBCreds, getDbCredsFormatted } from '@/util/vault/getDBCreds.ts';
 
 export class GetDbCredsCommand extends PanfactumCommand {
@@ -55,8 +56,10 @@ export class GetDbCredsCommand extends PanfactumCommand {
       }
       return 0;
     } catch (error) {
-      this.context.stderr.write(`Error: ${error instanceof Error ? error.message : String(error)}\n`);
-      return 1;
+      throw new CLIError(
+        `Failed to get database credentials: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error }
+      );
     }
   }
 }
