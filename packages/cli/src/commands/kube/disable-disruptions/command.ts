@@ -1,8 +1,10 @@
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
+import { getPDBsByWindowId } from '@/util/kube/getPDBs';
+import { PDB_ANNOTATIONS } from '@/util/kube/pdbConstants';
 import { execute } from '@/util/subprocess/execute';
-import { parseJson } from '@/util/zod/parseJson';
 
 // Zod schema for timestamp validation
 const timestampSchema = z.string()
@@ -13,7 +15,7 @@ const timestampSchema = z.string()
   });
 
 export class K8sDisruptionsDisableCommand extends PanfactumCommand {
-  static override paths = [['k8s', 'disruptions', 'disable']];
+  static override paths = [['kube', 'disable-disruptions']];
 
   static override usage = Command.Usage({
     description: 'Disable voluntary disruptions for Pod Disruption Budgets',
@@ -29,46 +31,18 @@ have passed their disruption window time, preventing pods from being evicted.`,
   windowId = Option.String('-w,--window-id', { required: true });
 
   async execute() {
-    const getPDBs = async (): Promise<string[]> => {
-      const result = await execute({
-        command: [
-          'kubectl', 'get', 'pdb',
-          '-n', this.namespace,
-          '-l', `panfactum.com/voluntary-disruption-window-id=${this.windowId}`,
-          '--ignore-not-found',
-          '-o', 'name',
-        ],
-        context: this.context,
-        workingDirectory: process.cwd(),
-      });
-      
-      return result.stdout
-        .trim()
-        .split('\n')
-        .filter(line => line.length > 0);
-    };
 
-    const getAnnotations = async (pdb: string): Promise<Record<string, string>> => {
-      const result = await execute({
-        command: [
-          'kubectl', 'get', pdb,
-          '-n', this.namespace,
-          '-o', 'jsonpath={.metadata.annotations}',
-        ],
-        context: this.context,
-        workingDirectory: process.cwd(),
-      });
-      
-      return parseJson(z.record(z.string()), result.stdout || '{}');
-    };
-
-    const disablePDB = async (pdb: string): Promise<void> => {
+    const preventDisruptions = async (pdb: string): Promise<void> => {
       await execute({
         command: [
           'kubectl', 'patch', pdb,
           '-n', this.namespace,
           '--type=json',
-          '-p=[{"op": "replace", "path": "/spec/maxUnavailable", "value": 0}]',
+          '-p=' + JSON.stringify([{
+            op: 'replace',
+            path: '/spec/maxUnavailable',
+            value: 0
+          }]),
         ],
         context: this.context,
         workingDirectory: process.cwd(),
@@ -78,7 +52,7 @@ have passed their disruption window time, preventing pods from being evicted.`,
         command: [
           'kubectl', 'annotate', pdb,
           '-n', this.namespace,
-          'panfactum.com/voluntary-disruption-window-start-',
+          `${PDB_ANNOTATIONS.WINDOW_START}-`,
           '--overwrite',
         ],
         context: this.context,
@@ -87,7 +61,11 @@ have passed their disruption window time, preventing pods from being evicted.`,
     };
 
     this.context.logger.info('Finding PDBs with disruption windows...');
-    const pdbs = await getPDBs();
+    const pdbs = await getPDBsByWindowId({
+      context: this.context,
+      namespace: this.namespace,
+      windowId: this.windowId
+    });
     
     if (pdbs.length === 0) {
       this.context.logger.info(`No PDBs found with window ID '${this.windowId}' in namespace '${this.namespace}'`);
@@ -101,18 +79,22 @@ have passed their disruption window time, preventing pods from being evicted.`,
     for (const pdb of pdbs) {
       this.context.logger.info(`Disabling disruption window for '${pdb}' in namespace '${this.namespace}':`);
       
-      const annotations = await getAnnotations(pdb);
-      const startTime = annotations['panfactum.com/voluntary-disruption-window-start'];
+      const annotations = await getPDBAnnotations({
+        context: this.context,
+        namespace: this.namespace,
+        pdbName: pdb
+      });
+      const startTime = annotations[PDB_ANNOTATIONS.WINDOW_START];
       let lengthSeconds = 3600;
-      const lengthSecondsAnnotation = annotations['panfactum.com/voluntary-disruption-window-seconds'];
+      const lengthSecondsAnnotation = annotations[PDB_ANNOTATIONS.WINDOW_SECONDS];
       if (lengthSecondsAnnotation) {
         lengthSeconds = timestampSchema.parse(lengthSecondsAnnotation);
       } else {
-        this.context.logger.warn(`\tWarning: PDB does not have 'panfactum.com/voluntary-disruption-window-seconds' annotation. Defaulting disruption window length to 3600 seconds.`);
+        this.context.logger.warn(`\tWarning: PDB does not have '${PDB_ANNOTATIONS.WINDOW_SECONDS}' annotation. Defaulting disruption window length to 3600 seconds.`);
       }
       
       if (!startTime) {
-        this.context.logger.info(`\tSkipping... PDB does not have 'panfactum.com/voluntary-disruption-window-start' annotation.`);
+        this.context.logger.info(`\tSkipping... PDB does not have '${PDB_ANNOTATIONS.WINDOW_START}' annotation.`);
         skipped++;
       } else {
         const startTimestamp = timestampSchema.parse(startTime);
@@ -123,7 +105,7 @@ have passed their disruption window time, preventing pods from being evicted.`,
           skipped++;
         } else {
           this.context.logger.info(`\tUpdating '${pdb}' in namespace '${this.namespace}' with maxUnavailable=0`);
-          await disablePDB(pdb);
+          await preventDisruptions(pdb);
           disabled++;
         }
       }
