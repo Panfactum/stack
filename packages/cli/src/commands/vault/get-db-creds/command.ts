@@ -57,8 +57,8 @@ export class GetDbCredsCommand extends PanfactumCommand {
       return 0;
     } catch (error) {
       throw new CLIError(
-        `Failed to get database credentials: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error }
+        `Failed to get database credentials`,
+        error
       );
     }
   }
