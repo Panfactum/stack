@@ -1,7 +1,8 @@
 import { hostname, userInfo } from 'os';
-import { DynamoDBClient, ScanCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
+import { ScanCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 import { Option } from 'clipanion';
 import { z } from 'zod';
+import { getDynamoDBClient } from '@/util/aws/clients/getDynamoDBClient';
 import { getIdentity } from '@/util/aws/getIdentity';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getPanfactumConfig } from '@/util/config/getPanfactumConfig';
@@ -80,9 +81,9 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       );
 
       // Initialize DynamoDB client with AWS profile
-      // The AWS SDK will automatically use the credentials from the profile
-      process.env['AWS_PROFILE'] = awsProfile;
-      const dynamoClient = new DynamoDBClient({ 
+      const dynamoClient = await getDynamoDBClient({
+        context: this.context,
+        profile: awsProfile,
         region: awsRegion
       });
 
@@ -105,7 +106,13 @@ export default class DeleteLocksCommand extends PanfactumCommand {
 
       // Filter locks by owner
       const lockInfoSchema = z.object({
-        Who: z.string().optional()
+        ID: z.string().optional(),
+        Operation: z.string().optional(),
+        Info: z.string().optional(),
+        Who: z.string().optional(),
+        Version: z.string().optional(),
+        Created: z.string().optional(),
+        Path: z.string().optional()
       });
       
       const locksToDelete = scanResult.Items.filter(item => {
@@ -125,21 +132,26 @@ export default class DeleteLocksCommand extends PanfactumCommand {
         return 0;
       }
 
-      // Delete each lock
-      for (const lock of locksToDelete) {
-        if (lock['LockID']?.S) {
-          this.context.logger.info(`Deleting lock with ID: ${lock['LockID'].S}`);
+      // Delete locks in parallel
+      const deletePromises = locksToDelete
+        .filter(lock => lock['LockID']?.S)
+        .map(async lock => {
+          const lockId = lock['LockID']?.S;
+          if (!lockId) return; // This shouldn't happen due to filter above, but satisfies TypeScript
+          
+          this.context.logger.info(`Deleting lock with ID: ${lockId}`);
           
           const deleteCommand = new DeleteItemCommand({
             TableName: lockTable,
             Key: {
-              LockID: { S: lock['LockID'].S }
+              LockID: { S: lockId }
             }
           });
 
-          await dynamoClient.send(deleteCommand);
-        }
-      }
+          return dynamoClient.send(deleteCommand);
+        });
+
+      await Promise.all(deletePromises);
 
       this.context.logger.info(`Successfully released ${locksToDelete.length} lock(s).`);
       return 0;
