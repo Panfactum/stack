@@ -4,14 +4,14 @@ import type { PanfactumContext } from "@/util/context/context";
 
 export async function getECRPublicClient(inputs: { 
   context: PanfactumContext; 
-  profile?: string; 
-  region?: string;
+  profile: string;
 }) {
-  const { context, profile, region = "us-east-1" } = inputs;
+  const { context, profile } = inputs;
+  const region = 'us-east-1'; // ECR Public is only available in us-east-1
 
   // This is necessary due to this bug
   // https://github.com/aws/aws-sdk-js-v3/issues/6872
-  const credentials = profile ? await getCredsFromFile({ context, profile }) : undefined;
+  const credentials = await getCredsFromFile({ context, profile });
 
   if (credentials) {
     return new ECRPUBLICClient({
@@ -20,7 +20,7 @@ export async function getECRPublicClient(inputs: {
     });
   } else {
     return new ECRPUBLICClient({
-      profile: profile || undefined,
+      profile,
       region
     });
   }

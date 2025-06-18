@@ -4,7 +4,7 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getCachedCredential, setCachedCredential } from '@/util/docker/credentialCache.ts'
 import { getEcrToken } from '@/util/docker/getEcrToken.ts'
 import { CLIError } from '@/util/error/error'
-import { getAWSProfileForContext } from '@/util/kube/getProfileForContext'
+import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
 import { execute } from '@/util/subprocess/execute.ts'
 import type { PanfactumContext } from '@/util/context/context'
 

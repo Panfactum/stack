@@ -32,8 +32,8 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
+import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
 import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
-import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
 import type { EKSClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { checkImageExists } from '@/util/aws/checkImageExists';
 import { AWS_ACCOUNT_ID_SCHEMA, AWS_REGION_SCHEMA } from '@/util/aws/schemas';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import { CLIError } from '@/util/error/error';
 
 export class AwsEcrWaitOnImageCommand extends PanfactumCommand {
@@ -51,6 +52,14 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     const accountId = registryParts[0];
     const region = registryParts[3];
 
+    const regions = await getAllRegions(this.context)
+
+    const selectedRegion = regions.find(r => r.awsRegion === region);
+
+    if (!selectedRegion || !selectedRegion.awsProfile) {
+      throw new CLIError(`Invalid AWS region: ${region}.`);
+    }
+
     if (!accountId) {
       throw new CLIError('Invalid registry format: missing account ID');
     }
@@ -77,7 +86,7 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     this.context.logger.info(`Waiting up to ${timeoutSeconds} seconds for image ${this.image} to be found.`);
 
     while (elapsed < timeoutSeconds) {
-      const imageExists = await checkImageExists(accountId, repoName, tag, region, this.context);
+      const imageExists = await checkImageExists(accountId, repoName, tag, region, selectedRegion.awsProfile, this.context);
       
       if (imageExists) {
         this.context.logger.success(`Found ${this.image}.`);

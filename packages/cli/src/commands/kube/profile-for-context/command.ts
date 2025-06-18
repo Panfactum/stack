@@ -1,7 +1,7 @@
 import { Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
-import { getAWSProfileForContext } from "@/util/kube/getProfileForContext.ts";
+import { getAWSProfileForContext } from "@/util/kube/getAWSProfileForContext.ts";
 
 export default class ProfileForContextCommand extends PanfactumCommand {
   static override paths = [['kube', 'profile-for-context']];

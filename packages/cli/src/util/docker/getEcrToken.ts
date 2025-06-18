@@ -9,7 +9,7 @@ import type { PanfactumContext } from '@/util/context/context'
 export async function getEcrToken(
   context: PanfactumContext,
   registry: string,
-  awsProfile?: string
+  awsProfile: string
 ): Promise<{ username: string; password: string }> {
   const isPublicRegistry = registry.includes('public.ecr.aws');
   
@@ -18,7 +18,7 @@ export async function getEcrToken(
     
     if (isPublicRegistry) {
       // Use ECR Public client (public registry is always in us-east-1)
-      const client = await getECRPublicClient({ context, profile: awsProfile, region: 'us-east-1' });
+      const client = await getECRPublicClient({ context, profile: awsProfile });
       
       context.logger.debug('Getting ECR public authorization token', { registry });
       const response = await client.send(new GetPublicAuthCommand({}));
@@ -31,7 +31,7 @@ export async function getEcrToken(
     } else {
       // Extract region from registry URL (format: <accountId>.dkr.ecr.<region>.amazonaws.com)
       const regionMatch = registry.match(/\.ecr\.([^.]+)\.amazonaws\.com/);
-      const region = regionMatch ? regionMatch[1] : 'us-east-1';
+      const region = regionMatch?.[1] ?? 'us-east-1';
       
       const client = await getECRClient({ context, profile: awsProfile, region });
       

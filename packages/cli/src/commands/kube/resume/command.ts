@@ -13,8 +13,8 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getAllRegions } from '@/util/config/getAllRegions';
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
+import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
 import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
-import { getAWSProfileForContext } from '@/util/kube/getProfileForContext.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import {MODULES} from "@/util/terragrunt/constants.ts";
 import {buildDeployModuleTask} from "@/util/terragrunt/tasks/deployModuleTask.ts";
