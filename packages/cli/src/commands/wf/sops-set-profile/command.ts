@@ -2,8 +2,16 @@ import { Glob } from 'bun';
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { CLIError } from '@/util/error/error';
 import { readYAMLFile } from '@/util/yaml/readYAMLFile';
 import { writeYAMLFile } from '@/util/yaml/writeYAMLFile';
+
+interface UpdateResult {
+  filePath: string;
+  status: 'updated' | 'skipped' | 'error';
+  reason?: string;
+  error?: Error;
+}
 
 export class SopsSetProfileCommand extends PanfactumCommand {
   static override paths = [['wf', 'sops-set-profile']];
@@ -22,7 +30,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
   profile = Option.String({ required: true });
 
   async execute() {
-    const updateSopsFile = async (filePath: string): Promise<boolean> => {
+    const updateSopsFile = async (filePath: string): Promise<UpdateResult> => {
       try {
         const sopsFileSchema = z.object({
           sops: z.object({
@@ -39,32 +47,64 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
         });
         
         if (!data) {
-          return false;
+          return {
+            filePath,
+            status: 'skipped',
+            reason: 'File is empty or not a valid YAML file'
+          };
         }
         
-        if (data?.sops?.kms && Array.isArray(data.sops.kms)) {
-          let updated = false;
-          for (const kms of data.sops.kms) {
-            if ('aws_profile' in kms) {
-              kms['aws_profile'] = this.profile;
-              updated = true;
-            }
-          }
-          
-          if (updated) {
-            await writeYAMLFile({
-              context: this.context,
-              filePath,
-              values: data,
-              overwrite: true
-            });
-            return true;
+        if (!data.sops?.kms) {
+          return {
+            filePath,
+            status: 'skipped',
+            reason: 'Not a SOPS-encrypted file (no sops.kms section)'
+          };
+        }
+        
+        if (!Array.isArray(data.sops.kms)) {
+          return {
+            filePath,
+            status: 'skipped',
+            reason: 'Invalid SOPS format (kms is not an array)'
+          };
+        }
+        
+        let updated = false;
+        for (const kms of data.sops.kms) {
+          if ('aws_profile' in kms) {
+            kms['aws_profile'] = this.profile;
+            updated = true;
           }
         }
-      } catch {
-        // Not a valid YAML or doesn't have SOPS metadata
+        
+        if (!updated) {
+          return {
+            filePath,
+            status: 'skipped',
+            reason: 'No AWS profiles found in KMS configuration'
+          };
+        }
+        
+        await writeYAMLFile({
+          context: this.context,
+          filePath,
+          values: data,
+          overwrite: true
+        });
+        
+        return {
+          filePath,
+          status: 'updated'
+        };
+      } catch (error) {
+        return {
+          filePath,
+          status: 'error',
+          reason: error instanceof Error ? error.message : 'Unknown error occurred',
+          error: error instanceof Error ? error : new Error(String(error))
+        };
       }
-      return false;
     };
 
     this.context.logger.info(`Finding YAML files in ${this.directory}...`);
@@ -79,23 +119,44 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
     this.context.logger.info(`Updating SOPS-encrypted files with profile '${this.profile}'...`);
     
     const updateResults = await Promise.all(
-      yamlFiles.map(async (file) => {
-        const updated = await updateSopsFile(file);
-        if (updated) {
-          this.context.logger.info(`Updated: ${file}`);
-        }
-        return { file, updated };
-      })
+      yamlFiles.map(updateSopsFile)
     );
     
-    const updatedFiles = updateResults
-      .filter(result => result.updated)
-      .map(result => result.file);
+    // Group results by status
+    const updated = updateResults.filter(r => r.status === 'updated');
+    const skipped = updateResults.filter(r => r.status === 'skipped');
+    const errors = updateResults.filter(r => r.status === 'error');
     
-    if (updatedFiles.length > 0) {
-      this.context.logger.success(`Updated ${updatedFiles.length} SOPS-encrypted files`);
-    } else {
-      this.context.logger.info('No SOPS-encrypted files found to update');
+    // Log individual results
+    for (const result of updateResults) {
+      if (result.status === 'updated') {
+        this.context.logger.info(`✓ Updated: ${result.filePath}`);
+      } else if (result.status === 'error') {
+        this.context.logger.error(`✗ Error: ${result.filePath} - ${result.reason}`);
+      }
+    }
+    
+    // Summary
+    this.context.logger.info('');
+    if (updated.length > 0) {
+      this.context.logger.success(`Successfully updated ${updated.length} SOPS-encrypted file${updated.length !== 1 ? 's' : ''}`);
+    }
+    
+    if (skipped.length > 0) {
+      this.context.logger.info(`Skipped ${skipped.length} file${skipped.length !== 1 ? 's' : ''} (not SOPS-encrypted or no AWS profiles)`);
+    }
+    
+    if (errors.length > 0) {
+      this.context.logger.warn(`Failed to update ${errors.length} file${errors.length !== 1 ? 's' : ''}`);
+      for (const error of errors) {
+        this.context.logger.debug(`  ${error.filePath}: ${error.reason}`);
+      }
+    }
+    
+    // Exit with error if any files failed
+    if (errors.length > 0) {
+      const errorMessages = errors.map(e => `  - ${e.filePath}: ${e.reason}`).join('\n');
+      throw new CLIError(`Failed to update sops ${errors.length} files:\n${errorMessages}`);
     }
   }
 }
