@@ -1,9 +1,9 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { Glob } from 'bun';
 import { Command, Option } from 'clipanion';
-import yaml from 'yaml';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { readYAMLFile } from '@/util/yaml/readYAMLFile';
+import { writeYAMLFile } from '@/util/yaml/writeYAMLFile';
 
 export class SopsSetProfileCommand extends PanfactumCommand {
   static override paths = [['wf', 'sops-set-profile']];
@@ -24,16 +24,23 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
   async execute() {
     const updateSopsFile = async (filePath: string): Promise<boolean> => {
       try {
-        const content = await fs.readFile(filePath, 'utf8');
-        
         const sopsFileSchema = z.object({
           sops: z.object({
             kms: z.array(z.record(z.string())).optional()
           }).optional()
         }).passthrough(); // Allow other fields in the YAML
         
-        const parsedYaml = yaml.parse(content);
-        const data = sopsFileSchema.parse(parsedYaml);
+        const data = await readYAMLFile({
+          context: this.context,
+          filePath,
+          validationSchema: sopsFileSchema,
+          throwOnMissing: false,
+          throwOnEmpty: false
+        });
+        
+        if (!data) {
+          return false;
+        }
         
         if (data?.sops?.kms && Array.isArray(data.sops.kms)) {
           let updated = false;
@@ -45,8 +52,12 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
           }
           
           if (updated) {
-            const newContent = yaml.stringify(data);
-            await fs.writeFile(filePath, newContent);
+            await writeYAMLFile({
+              context: this.context,
+              filePath,
+              values: data,
+              overwrite: true
+            });
             return true;
           }
         }
@@ -56,33 +67,30 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
       return false;
     };
 
-    const findYamlFiles = async (dir: string): Promise<string[]> => {
-      const files: string[] = [];
-      const entries = await fs.readdir(dir, { withFileTypes: true });
-      
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          files.push(...await findYamlFiles(fullPath));
-        } else if (entry.isFile() && entry.name.endsWith('.yaml')) {
-          files.push(fullPath);
-        }
-      }
-      
-      return files;
-    };
-
     this.context.logger.info(`Finding YAML files in ${this.directory}...`);
-    const yamlFiles = await findYamlFiles(this.directory);
+    
+    const glob = new Glob("**/*.yaml");
+    const yamlFiles: string[] = [];
+    
+    for await (const file of glob.scan({ cwd: this.directory, absolute: true })) {
+      yamlFiles.push(file);
+    }
     
     this.context.logger.info(`Updating SOPS-encrypted files with profile '${this.profile}'...`);
-    const updatedFiles: string[] = [];
-    for (const file of yamlFiles) {
-      if (await updateSopsFile(file)) {
-        updatedFiles.push(file);
-        this.context.logger.info(`Updated: ${file}`);
-      }
-    }
+    
+    const updateResults = await Promise.all(
+      yamlFiles.map(async (file) => {
+        const updated = await updateSopsFile(file);
+        if (updated) {
+          this.context.logger.info(`Updated: ${file}`);
+        }
+        return { file, updated };
+      })
+    );
+    
+    const updatedFiles = updateResults
+      .filter(result => result.updated)
+      .map(result => result.file);
     
     if (updatedFiles.length > 0) {
       this.context.logger.success(`Updated ${updatedFiles.length} SOPS-encrypted files`);
