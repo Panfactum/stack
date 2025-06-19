@@ -1,21 +1,5 @@
 import { OrganizationsClient, ListAccountsCommand } from "@aws-sdk/client-organizations";
-import { z } from "zod";
-import { PanfactumZodError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
-
-// Zod schema for AWS Organizations API response
-const listAccountsResponseSchema = z.object({
-    Accounts: z.array(z.object({
-        Id: z.string().optional(),
-        Arn: z.string().optional(),
-        Email: z.string().optional(),
-        Name: z.string().optional(),
-        Status: z.string().optional(),
-        JoinedMethod: z.string().optional(),
-        JoinedTimestamp: z.date().optional()
-    }).passthrough()).optional(),
-    NextToken: z.string().optional()
-}).passthrough();
 
 // Returns and email address associated with an existing AWS account
 // Note this is not guaranteed to be the email of any particular account
@@ -38,17 +22,7 @@ export async function getAccountEmail(inputs: { context: PanfactumContext, orgCl
         return null;
     }
 
-    // Validate the response
-    const validationResult = listAccountsResponseSchema.safeParse(response);
-    if (!validationResult.success) {
-        throw new PanfactumZodError(
-            "Invalid list accounts response format",
-            "Organizations ListAccounts API",
-            validationResult.error
-        );
-    }
-
-    const accounts = validationResult.data.Accounts || [];
+    const accounts = response.Accounts || [];
 
     if (accounts.length > 0 && accounts[0]) {
         const email = accounts[0].Email;
