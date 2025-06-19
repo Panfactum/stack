@@ -1,25 +1,24 @@
-// Utility to get EKS authentication tokens using AWS SDK with Zod validation
-// Uses AWS SDK for direct token generation with proper error handling and type safety
+// Utility to get EKS authentication tokens using AWS SDK with proper error handling
+// Uses AWS SDK for direct token generation with type safety
 
+import { Buffer } from 'node:buffer';
+import { URL } from 'node:url';
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@smithy/protocol-http';
-import { z } from 'zod';
-import { CLIError, PanfactumZodError } from '../error/error';
+import { CLIError } from '../error/error';
 import { getSTSClient } from './clients/getSTSClient';
 import type { PanfactumContext } from '@/util/context/context';
 
-const EKS_TOKEN_SCHEMA = z.object({
-  kind: z.string(),
-  apiVersion: z.string(),
-  spec: z.object({}),
-  status: z.object({
-    expirationTimestamp: z.string(),
-    token: z.string()
-  })
-});
-
-export type EKSTokenResponse = z.infer<typeof EKS_TOKEN_SCHEMA>;
+export interface EKSTokenResponse {
+  kind: string;
+  apiVersion: string;
+  spec: Record<string, never>;
+  status: {
+    expirationTimestamp: string;
+    token: string;
+  };
+}
 
 export interface GetEKSTokenParams {
   context: PanfactumContext;
@@ -113,15 +112,5 @@ export async function getEKSToken(params: GetEKSTokenParams): Promise<EKSTokenRe
     }
   };
   
-  // Validate the response structure
-  const parseResult = EKS_TOKEN_SCHEMA.safeParse(response);
-  if (!parseResult.success) {
-    throw new PanfactumZodError(
-      `Invalid EKS token response format for cluster '${clusterName}' in region '${region}' with profile '${awsProfile}'`,
-      'getEksToken',
-      parseResult.error
-    );
-  }
-  
-  return parseResult.data;
+  return response;
 }
