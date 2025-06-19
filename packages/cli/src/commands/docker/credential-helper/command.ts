@@ -1,18 +1,11 @@
 import { Command, Option } from 'clipanion'
-import { z } from 'zod'
 import { getBuildKitConfig } from '@/util/buildkit'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getECRToken, parseECRToken } from '@/util/docker/getECRToken.ts'
-import { CLIError, PanfactumZodError } from '@/util/error/error'
+import { CLIError } from '@/util/error/error'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
 import { execute } from '@/util/subprocess/execute.ts'
 import type { PanfactumContext } from '@/util/context/context'
-
-// Zod schemas for validation
-const dockerCredentialOutputSchema = z.object({
-  Username: z.string(),
-  Secret: z.string()
-})
 
 export class DockerCredentialHelperCommand extends PanfactumCommand {
   static override paths = [['docker', 'credential-helper']]
@@ -132,19 +125,11 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     
     const { username, password } = parseECRToken(token)
 
-    // Validate output format before sending
-    const output = { Username: username, Secret: password }
-    const outputResult = dockerCredentialOutputSchema.safeParse(output)
-    if (!outputResult.success) {
-      throw new PanfactumZodError(
-        'Invalid Docker credential output format',
-        'Docker credential helper response',
-        outputResult.error
-      )
-    }
-
     // Output in Docker credential helper format
-    this.context.stdout.write(JSON.stringify(outputResult.data))
+    this.context.stdout.write(JSON.stringify({
+      Username: username,
+      Secret: password
+    }))
   }
 
   private async handleList() {
