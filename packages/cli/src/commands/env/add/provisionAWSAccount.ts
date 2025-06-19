@@ -485,11 +485,9 @@ export async function provisionAWSAccount(inputs: {
                         const createUserCommand = new CreateUserCommand({
                             UserName: adminUsername
                         });
-                        try {
-                            await ctx.iamClient.send(createUserCommand);
-                        } catch (e) {
+                        await ctx.iamClient.send(createUserCommand).catch((e) => {
                             throw new CLIError(`Was not able to create the IAM user ${adminUsername}`, e)
-                        }
+                        })
 
                     }
                 },
@@ -504,11 +502,9 @@ export async function provisionAWSAccount(inputs: {
                             PolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess"
                         });
 
-                        try {
-                            await ctx.iamClient.send(attachPolicyCommand);
-                        } catch (e) {
+                        await ctx.iamClient.send(attachPolicyCommand).catch((e) => {
                             throw new CLIError(`Was not able to attach 'AdministratorAccess' policy to the the IAM user ${adminUsername}`, e)
-                        }
+                        })
                     }
                 },
                 {
@@ -521,12 +517,9 @@ export async function provisionAWSAccount(inputs: {
                             UserName: adminUsername
                         });
 
-                        let accessKeyResponse;
-                        try {
-                            accessKeyResponse = await ctx.iamClient.send(createAccessKeyCommand);
-                        } catch (e) {
+                        const accessKeyResponse = await ctx.iamClient.send(createAccessKeyCommand).catch((e) => {
                             throw new CLIError("Failed to create access key for the admin user", e);
-                        }
+                        })
 
                         if (!accessKeyResponse.AccessKey) {
                             throw new CLIError("Failed to create access key for the admin user");
@@ -588,20 +581,18 @@ async function listAccounts(orgClient: OrganizationsClient) {
     let existingAccounts: Array<{ name: string, email: string, id: string }> = [];
     let nextToken: string | undefined;
     while (true) {
-        try {
-            const listAccountsCommand = new ListAccountsCommand({ MaxResults: 10, NextToken: nextToken });
-            const response = await orgClient.send(listAccountsCommand);
-            existingAccounts = existingAccounts.concat((response.Accounts || []).map(account => ({
-                name: account.Name || '',
-                email: account.Email || '',
-                id: account.Id || ''
-            })));
-            nextToken = response.NextToken
-            if (!nextToken) {
-                break;
-            }
-        } catch (e) {
+        const listAccountsCommand = new ListAccountsCommand({ MaxResults: 10, NextToken: nextToken });
+        const response = await orgClient.send(listAccountsCommand).catch((e) => {
             throw new CLIError("Failed to list AWS organization accounts", e);
+        });
+        existingAccounts = existingAccounts.concat((response.Accounts || []).map(account => ({
+            name: account.Name || '',
+            email: account.Email || '',
+            id: account.Id || ''
+        })));
+        nextToken = response.NextToken
+        if (!nextToken) {
+            break;
         }
     }
     return existingAccounts

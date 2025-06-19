@@ -1,4 +1,4 @@
-import { CLIError } from "../error/error";
+import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 import type { Listr } from "listr2";
 

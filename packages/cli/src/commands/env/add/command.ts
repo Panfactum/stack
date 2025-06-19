@@ -30,7 +30,8 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
     static override paths = [["env", "add"]];
 
     static override usage = Command.Usage({
-        description: "Adds an environment to the Panfactum framework installation",
+        description: "Adds an environment to the Panfactum stack",
+        category: 'Environment',
         details: `
         Adds an environment to the Panfactum framework installation.
 

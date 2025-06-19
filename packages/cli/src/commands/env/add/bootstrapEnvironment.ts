@@ -106,14 +106,12 @@ export async function bootstrapEnvironment(inputs: {
             if (!await fileExists(flakeFilePath)) {
                 throw new CLIError("No flake.nix found at repo root")
             }
-            try {
-                const flakeContents = await Bun.file(flakeFilePath).text()
-                const match = flakeContents.match(/panfactum\/stack\/([-.0-9a-zA-Z]+)/i);
-                ctx.version = (match && match[1]) ?? "main";
-                task.title = context.logger.applyColors(`Got Panfactum version to deploy ${ctx.version}`, { lowlights: [ctx.version] })
-            } catch (e) {
-                throw new CLIError("Was not able to get the framework version from the repo's flake.nix file.", e)
-            }
+            const flakeContents = await Bun.file(flakeFilePath).text().catch((error) => {
+                throw new CLIError("Was not able to get the framework version from the repo's flake.nix file.", error)
+            })
+            const match = flakeContents.match(/panfactum\/stack\/([-.0-9a-zA-Z]+)/i);
+            ctx.version = (match && match[1]) ?? "main";
+            task.title = context.logger.applyColors(`Got Panfactum version to deploy ${ctx.version}`, { lowlights: [ctx.version] })
         }
     })
 
@@ -145,15 +143,14 @@ export async function bootstrapEnvironment(inputs: {
                     },
                     validate: async (profile: string) => {
                         if (profile) {
-                            let profileIdentityARN;
-
                             // Step 1: Verify that the user can use the selected profile.
-                            try {
-                                const identity = await getIdentity({ context, profile })
-                                profileIdentityARN = identity.Arn
-                            } catch {
+                            const identity = await getIdentity({ context, profile }).catch(() => {
+                                return null
+                            })
+                            if (!identity) {
                                 return "Was not able to authenticate with the selected profile. Are you sure you have access to the correct credentials?"
                             }
+                            const profileIdentityARN = identity.Arn
 
                             // Step 2: Verify that the profile has AdministratorAccess permissions
                             const iamClient = await getIAMClient({ context, profile })
@@ -161,35 +158,30 @@ export async function bootstrapEnvironment(inputs: {
                             const isAssumedRole = profileIdentityARN?.includes(':assumed-role/');
                             if (isRole || isAssumedRole) {
                                 const roleName = isAssumedRole ? profileIdentityARN?.split('/')[1] : profileIdentityARN?.split('/').pop() || "";
-                                try {
-                                    const userPoliciesResponse = await iamClient.send(new ListAttachedRolePoliciesCommand({
-                                        RoleName: roleName
-                                    }));
-                                    const hasAdminAccess = userPoliciesResponse.AttachedPolicies?.some(
-                                        (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
-                                    );
+                                const userPoliciesResponse = await iamClient.send(new ListAttachedRolePoliciesCommand({
+                                    RoleName: roleName
+                                })).catch((error) => {
+                                    throw new CLIError(`Failed to list attached policies for role ${roleName}`, error)
+                                });
+                                const hasAdminAccess = userPoliciesResponse?.AttachedPolicies?.some(
+                                    (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
+                                );
 
-                                    if (!hasAdminAccess) {
-                                        return `Profile '${profile}' is linked to IAM role '${roleName}' which does not have the 'AdministratorAccess' policy assigned.`
-                                    }
-                                } catch {
+                                if (!hasAdminAccess) {
                                     return `Profile '${profile}' is linked to IAM role '${roleName}' which does not have the 'AdministratorAccess' policy assigned.`
                                 }
                             } else {
                                 const userName = profileIdentityARN?.split('/').pop() || "";
-                                try {
-                                    const userPoliciesResponse = await iamClient.send(new ListAttachedUserPoliciesCommand({
-                                        UserName: userName
-                                    }));
-                                    const hasAdminAccess = userPoliciesResponse.AttachedPolicies?.some(
-                                        (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
-                                    );
-                                    if (!hasAdminAccess) {
-                                        return `Profile '${profile}' is linked to IAM user '${userName}' which does not have the 'AdministratorAccess' policy assigned.`
-                                    }
-                                } catch {
+                                const userPoliciesResponse = await iamClient.send(new ListAttachedUserPoliciesCommand({
+                                    UserName: userName
+                                })).catch((error) => {
+                                    throw new CLIError(`Failed to list attached policies for user ${userName}`, error)
+                                });
+                                const hasAdminAccess = userPoliciesResponse?.AttachedPolicies?.some(
+                                    (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
+                                );
+                                if (!hasAdminAccess) {
                                     return `Profile '${profile}' is linked to IAM user '${userName}' which does not have the 'AdministratorAccess' policy assigned.`
-
                                 }
                             }
                             return true
@@ -238,7 +230,7 @@ export async function bootstrapEnvironment(inputs: {
         title: "Select regions",
         task: async (ctx, task) => {
 
-            let primaryRegion, secondaryRegion;
+            let primaryRegion: string | undefined, secondaryRegion: string | undefined;
 
             // Try to restore region selections if previously selected
             if (existingConfig.tf_state_region) {
@@ -349,29 +341,31 @@ export async function bootstrapEnvironment(inputs: {
             while (retryCount < maxRetries) {
                 const attemptPhrase = `attempt ${retryCount + 1}/${maxRetries}`
                 task.title = context.logger.applyColors(`Activating S3 service ${attemptPhrase}`, { lowlights: [attemptPhrase] });
-                try {
-                    await s3Client.send(new CreateBucketCommand({
-                        Bucket: dummyBucketName
-                    }));
+                
+                let createError: unknown = null;
+                await s3Client.send(new CreateBucketCommand({
+                    Bucket: dummyBucketName
+                })).catch((error) => {
+                    createError = error;
+                });
+                
+                if (!createError) {
                     bucketCreated = true;
                     break;
-                } catch (error) {
-                    if (error instanceof Error &&
-                        error.message.includes("not signed up")) {
-                        retryCount++;
-                        if (retryCount < maxRetries) {
-                            const delay = Math.min(15000, 1000 * Math.pow(2, retryCount)) + Math.random() * 1000;
-                            await new Promise((resolve) => {
-                                globalThis.setTimeout(resolve, delay);
-                            });
-                        } else {
-                            throw new CLIError("S3 service did not activate after multiple attempts. The AWS account may still be provisioning S3 access.", error);
-                        }
+                } else if (createError instanceof Error && createError.message.includes("not signed up")) {
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        const delay = Math.min(15000, 1000 * Math.pow(2, retryCount)) + Math.random() * 1000;
+                        await new Promise((resolve) => {
+                            globalThis.setTimeout(resolve, delay);
+                        });
                     } else {
-                        // If it's some other error, S3 service is likely active but there's another issue
-                        // so we can continue safely
-                        break;
+                        throw new CLIError("S3 service did not activate after multiple attempts. The AWS account may still be provisioning S3 access.", createError);
                     }
+                } else {
+                    // If it's some other error, S3 service is likely active but there's another issue
+                    // so we can continue safely
+                    break;
                 }
             }
 
@@ -380,23 +374,28 @@ export async function bootstrapEnvironment(inputs: {
                 let deleteRetries = 0;
                 const maxDeleteRetries = 10;
                 while (deleteRetries < maxDeleteRetries) {
-                    try {
-                        await s3Client.send(new DeleteBucketCommand({
-                            Bucket: dummyBucketName
-                        }));
+                    const deleteResult = await s3Client.send(new DeleteBucketCommand({
+                        Bucket: dummyBucketName
+                    })).then(() => true)
+                       .catch((error) => {
+                           context.logger.debug(`Failed to delete test bucket on attempt ${deleteRetries + 1}: ${error}`);
+                           return false;
+                       });
+                    
+                    if (deleteResult) {
                         break;
-                    } catch (e) {
-                        deleteRetries++;
-                        if (deleteRetries >= maxDeleteRetries) {
-                            context.logger.error(`Failed to delete dummy bucket ${dummyBucketName} after ${maxDeleteRetries} attempts: ${JSON.stringify(e)}`);
-                        } else {
-                            context.logger.error(`Retry ${deleteRetries}/${maxDeleteRetries} deleting dummy bucket ${dummyBucketName}`);
-                            const delay = Math.min(15000, 1000 * Math.pow(2, deleteRetries)) +
-                                (Math.random() * 1000);
-                            await new Promise((resolve) => {
-                                globalThis.setTimeout(resolve, delay);
-                            });
-                        }
+                    }
+                    
+                    deleteRetries++;
+                    if (deleteRetries >= maxDeleteRetries) {
+                        context.logger.error(`Failed to delete dummy bucket ${dummyBucketName} after ${maxDeleteRetries} attempts`);
+                    } else {
+                        context.logger.error(`Retry ${deleteRetries}/${maxDeleteRetries} deleting dummy bucket ${dummyBucketName}`);
+                        const delay = Math.min(15000, 1000 * Math.pow(2, deleteRetries)) +
+                            (Math.random() * 1000);
+                        await new Promise((resolve) => {
+                            globalThis.setTimeout(resolve, delay);
+                        });
                     }
                 }
             }
@@ -431,38 +430,42 @@ export async function bootstrapEnvironment(inputs: {
                 const proposedBucketName = `tf-${truncatedEnvName}-${randomString}`;
 
                 // Check if bucket already exists
-                try {
-                    const s3Client = await getS3Client({ context, profile: ctx.profile!, region: ctx.primaryRegion! });
+                const s3Client = await getS3Client({ context, profile: ctx.profile!, region: ctx.primaryRegion! });
 
-                    // Retries a couple times b/c communication with s3
-                    // tends to be a bit flakey on initial account creation
-                    let headBucketRetries = 0;
-                    const maxHeadBucketRetries = 3;
-                    while (true) {
-                        try {
-                            await s3Client.send(new HeadBucketCommand({
-                                Bucket: proposedBucketName
-                            }));
-                            break;
-                        } catch (e) {
-                            headBucketRetries++;
-                            if (headBucketRetries >= maxHeadBucketRetries) {
-                                throw e;
-                            }
-                            await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
+                // Retries a couple times b/c communication with s3
+                // tends to be a bit flakey on initial account creation
+                let headBucketRetries = 0;
+                const maxHeadBucketRetries = 3;
+
+                while (headBucketRetries < maxHeadBucketRetries) {
+                    const available = await s3Client.send(new HeadBucketCommand({
+                        Bucket: proposedBucketName
+                    }))
+                      .then(() => false)
+                      .catch((error) => {
+                        if (error instanceof Error && error.name === 'NotFound') {
+                            return true;
                         }
-                    }
 
-                    continue;
-                } catch (error) {
-                    if (error instanceof Error && error.name === 'NotFound') {
+                        if (headBucketRetries >= maxHeadBucketRetries) {
+                            throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
+                        }
+
+                        return undefined;
+                      });
+                    
+                    if (available === true) {
                         ctx.bucketName = proposedBucketName;
                         ctx.locktableName = proposedBucketName;
-
-                        // TODO @jack - retry loop - fails in af-south-1 for some reason? 
-                    } else {
-                        throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
+                        break;
                     }
+
+                    if (available === false) {
+                        break;
+                    }
+
+                    headBucketRetries++;
+                    await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
                 }
             }
 
@@ -621,7 +624,7 @@ export async function bootstrapEnvironment(inputs: {
 
             if (await fileExists(sopsFilePath)) {
                 const fileContent = await Bun.file(sopsFilePath).text();
-                const existingConfig = parse(fileContent) as { creation_rules?: [] }
+                const existingConfig = parse(fileContent) as { creation_rules?: unknown[] }
                 await writeFile({
                     context,
                     filePath: sopsFilePath,
@@ -737,27 +740,20 @@ export async function bootstrapEnvironment(inputs: {
                         imports: {
                             "aws_organizations_organization.org": {
                                 resourceId: async () => {
-                                    try {
-                                        const organizationsClient = await getOrganizationsClient({ context, profile })
-                                        const describeOrgCommand = new DescribeOrganizationCommand({});
-                                        const orgResponse = await organizationsClient.send(describeOrgCommand);
-
-                                        const id = orgResponse.Organization?.Id;
-
-                                        if (id) {
-                                            return id
-                                        } else {
-                                            return undefined
-                                        }
-                                    } catch (error) {
-                                        // If the error is because organization doesn't exist, return false
+                                    const organizationsClient = await getOrganizationsClient({ context, profile })
+                                    const describeOrgCommand = new DescribeOrganizationCommand({});
+                                    const orgResponse = await organizationsClient.send(describeOrgCommand).catch((error) => {
+                                        // If the error is because organization doesn't exist, return null
                                         if (error instanceof AWSOrganizationsNotInUseException || (error instanceof Error && error.name === 'AWSOrganizationsNotInUseException')) {
-                                            return undefined;
+                                            return null;
                                         }
-                                        // Log other errors but still return false to create new org
+                                        // Log other errors but still return null to create new org
                                         context.logger.debug(`Failed to check for existing AWS organization: ${JSON.stringify(error)}`);
-                                        return undefined;
-                                    }
+                                        return null;
+                                    });
+
+                                    const id = orgResponse?.Organization?.Id;
+                                    return id ? id : undefined
                                 }
                             }
                         },
@@ -832,24 +828,23 @@ export async function bootstrapEnvironment(inputs: {
                 imports: {
                     "aws_iam_service_linked_role.spot": {
                         resourceId: async (ctx) => {
-                            try {
-                                const iamClient = await getIAMClient({ context, profile: ctx.profile! })
+                            const iamClient = await getIAMClient({ context, profile: ctx.profile! })
 
-                                const getRoleCommand = new GetRoleCommand({
-                                    RoleName: 'AWSServiceRoleForEC2Spot'
-                                });
+                            const getRoleCommand = new GetRoleCommand({
+                                RoleName: 'AWSServiceRoleForEC2Spot'
+                            });
 
-                                await iamClient.send(getRoleCommand);
-                                return `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`;
-                            } catch (error) {
+                            const role = await iamClient.send(getRoleCommand).catch((error) => {
                                 if (error instanceof NoSuchEntityException) {
-                                    return undefined;
+                                    return null;
                                 } else {
                                     // For any other error, swallow it, just in case we can recover
                                     context.logger.debug(`Failed to query for service-linked role 'AWSServiceRoleForEC2Spot': ${JSON.stringify(error)}`)
-                                    return undefined;
+                                    return null;
                                 }
-                            }
+                            });
+                            
+                            return role ? `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot` : undefined
                         }
                     }
                 }

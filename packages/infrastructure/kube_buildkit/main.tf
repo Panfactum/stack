@@ -359,7 +359,7 @@ module "scale_to_zero" {
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
-      "/bin/pf-buildkit-scale-down",
+      "pf", "buildkit", "suspend",
       "--timeout",
       tostring(var.scale_down_delay_seconds)
     ]
@@ -436,8 +436,9 @@ module "cache_clear" {
     image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
+
     command = [
-      "/bin/pf-buildkit-clear-cache",
+      "pf", "buildkit", "clear-cache"
     ]
     minimum_memory = 50
   }]

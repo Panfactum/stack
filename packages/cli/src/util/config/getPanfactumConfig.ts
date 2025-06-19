@@ -2,8 +2,9 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import { CLIError } from "@/util/error/error";
+import { getVaultToken } from "@/util/vault/getVaultToken";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
-import type { PanfactumContext } from "../context/context";
+import type { PanfactumContext } from "@/util/context/context";
 
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
 type OutputValues = InputValues & {
@@ -149,5 +150,25 @@ export const getPanfactumConfig = async ({
     values.module_dir = parts[2]!;
   }
 
+  if (values.region_dir) {
+    const isCi = context.env['CI'] === 'true' || context.env['CI'] === '1';
+
+    values.vault_addr = (isCi
+      ? context.env['VAULT_ADDR']
+      : values.vault_addr
+        ? values.vault_addr
+        : context.env['VAULT_ADDR']) ?? '@@TERRAGRUNT_INVALID@@'
+
+    values.vault_token = values.vault_addr ?
+      values.vault_token
+        ? values.vault_token
+        : await getVaultToken({
+            context,
+            address: values.vault_addr,
+            silent: true,
+          }).catch(() => '@@TERRAGRUNT_INVALID@@')
+      : '@@TERRAGRUNT_INVALID@@';
+  }
+
   return values as OutputValues;
-};
+}

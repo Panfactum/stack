@@ -196,17 +196,17 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_certificates",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_cert_issuers",
       "type": "direct",
       "group": "kubernetes"
     },
     {
       "module": "kube_cert_manager",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_certificates",
       "type": "direct",
       "group": "kubernetes"
     },

@@ -1,7 +1,8 @@
-import { GetCallerIdentityCommand, STSClient } from "@aws-sdk/client-sts";
+import { GetCallerIdentityCommand } from "@aws-sdk/client-sts";
+import { CLIError } from "@/util/error/error";
+import { execute } from "@/util/subprocess/execute";
+import { getSTSClient } from "./clients/getSTSClient";
 import { getCredsFromFile } from "./getCredsFromFile";
-import { CLIError } from "../error/error";
-import { execute } from "../subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -14,31 +15,18 @@ import type { PanfactumContext } from "@/util/context/context";
 export async function getIdentity(input: { context: PanfactumContext, profile: string }) {
     const { context, profile } = input;
 
-    // This is necessary due to this bug
-    // https://github.com/aws/aws-sdk-js-v3/issues/6872
-    const credentials = await getCredsFromFile({ context, profile })
-
-    let stsClient;
-    if (credentials) {
-        stsClient = new STSClient({
-            credentials,
-            region: "us-east-1"
-        });
-    } else {
-        stsClient = new STSClient({
-            profile,
-            region: "us-east-1"
-        });
-    }
-
+    const stsClient = await getSTSClient({ context, profile });
+    
+    // Track if we already have credentials (for SSO fix logic)
+    const credentials = await getCredsFromFile({ context, profile });
     let attemptedSSOFix = Boolean(credentials);
     let retries = 0
+
     while (retries < 5) {
         try {
             context.logger.debug(`sts get-caller-identity`, { profile })
             return await stsClient.send(new GetCallerIdentityCommand({}));
         } catch (e: unknown) {
-
             if (!attemptedSSOFix) {
                 const errorMessage = e instanceof Error ? e.message : String(e);
                 if (errorMessage.includes(`sso`) || errorMessage.includes(`SSO`)) {

@@ -1,6 +1,6 @@
 import { join } from "node:path"
-import { CLIError } from "../error/error";
-import { fileExists } from "../fs/fileExists";
+import { CLIError } from "@/util/error/error";
+import { fileExists } from "@/util/fs/fileExists";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getAWSProfiles(context: PanfactumContext, opts: { throwOnMissingConfig?: boolean } = {}): Promise<string[]> {

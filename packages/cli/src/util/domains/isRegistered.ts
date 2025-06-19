@@ -1,4 +1,4 @@
-import { execute } from "../subprocess/execute";
+import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**

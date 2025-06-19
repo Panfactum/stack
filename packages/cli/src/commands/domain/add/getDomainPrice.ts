@@ -18,31 +18,42 @@ export async function getDomainPrice(inputs: {
         throw new CLIError(`Was not able to find AWS profile for '${env.name}' environment`);
     }
 
-    try {
-        await getIdentity({ context, profile });
-    } catch (error) {
-        throw new CLIError(`Was not able to authenticate with AWS profile '${profile}'`, error);
-    }
-
-    try {
-        const route53DomainsClient = await getRoute53DomainsClient({ context, profile })
-        const listPricesCommand = new ListPricesCommand({
-            Tld: tld,
+    await getIdentity({ context, profile })
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Was not able to authenticate with AWS profile '${profile}'`,
+                error
+            );
         });
 
-        const priceResponse = await route53DomainsClient.send(listPricesCommand);
+    const route53DomainsClient = await getRoute53DomainsClient({ context, profile })
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Failed to create Route53 Domains client for profile '${profile}'`,
+                error
+            );
+        });
+        
+    const listPricesCommand = new ListPricesCommand({
+        Tld: tld,
+    });
 
-        if (priceResponse.Prices?.length) {
-            const registrationPrice = priceResponse.Prices.find(
-                (price) => price.RegistrationPrice?.Price !== undefined
-            )?.RegistrationPrice?.Price;
-            if (registrationPrice !== undefined) {
-                return registrationPrice
-            }
+    const priceResponse = await route53DomainsClient.send(listPricesCommand)
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Failed to get pricing information for TLD .${tld}`,
+                error
+            );
+        });
+    
+    if (priceResponse.Prices?.length) {
+        const registrationPrice = priceResponse.Prices.find(
+            (price) => price.RegistrationPrice?.Price !== undefined
+        )?.RegistrationPrice?.Price;
+        if (registrationPrice !== undefined) {
+            return registrationPrice;
         }
-
-        throw new CLIError(`No registration prices returned`);
-    } catch (error) {
-        throw new CLIError(`Failed to get pricing information for TLD .${tld}`, error);
     }
+
+    throw new CLIError(`No registration prices returned for TLD .${tld}`);
 }

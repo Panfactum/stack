@@ -2,6 +2,7 @@ import { ListAttachedUserPoliciesCommand, NoSuchEntityException } from "@aws-sdk
 import { GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { getIAMClient } from "@/util/aws/clients/getIAMClient.ts";
 import { getSTSClient } from "@/util/aws/clients/getSTSClient";
+import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function checkAdminPermissions(inputs: { context: PanfactumContext, profile: string }): Promise<{
@@ -10,39 +11,61 @@ export async function checkAdminPermissions(inputs: { context: PanfactumContext,
     accountId?: string;
 }> {
     const stsClient = await getSTSClient(inputs)
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Failed to create STS client for profile '${inputs.profile}'`,
+                error
+            );
+        });
 
-    let username, accountId;
-    try {
-        const identity = await stsClient.send(new GetCallerIdentityCommand({}));
-        username = identity.Arn?.split('/').pop() || "";
-        accountId = identity.Account
-    } catch {
-        return { status: "invalidCredentials" }
+    const identity = await stsClient.send(new GetCallerIdentityCommand({}))
+        .catch(() => {
+            // If we can't get caller identity, credentials are invalid
+            return null;
+        });
+    
+    if (!identity) {
+        return { status: "invalidCredentials" };
     }
 
+    const username = identity.Arn?.split('/').pop() || "";
+    const accountId = identity.Account;
+
     if (username === "") {
-        return { status: "invalidUsername" }
+        return { status: "invalidUsername" };
     }
 
     const iamClient = await getIAMClient(inputs)
-    try {
-        const userPoliciesResponse = await iamClient.send(new ListAttachedUserPoliciesCommand({
-            UserName: username
-        }));
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Failed to create IAM client for profile '${inputs.profile}'`,
+                error
+            );
+        });
 
-        if (userPoliciesResponse.AttachedPolicies?.some(
-            (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
-        )) {
-            return { status: "success", username }
-        } else {
-            return { status: "missingAdministratorAccess", username, accountId }
+    const userPoliciesResponse = await iamClient.send(new ListAttachedUserPoliciesCommand({
+        UserName: username
+    })).catch((error: unknown) => {
+        if (error instanceof NoSuchEntityException) {
+            return "invalidUsername";
         }
-    } catch (e) {
-        if (e instanceof NoSuchEntityException) {
-            return { status: "invalidUsername" }
-        } else {
-            return { status: "missingAdministratorAccess", username, accountId }
-        }
+        // Any other error means missing permissions
+        return null;
+    });
+
+    if (userPoliciesResponse === "invalidUsername") {
+        return { status: "invalidUsername" };
     }
 
+    if (!userPoliciesResponse) {
+        return { status: "missingAdministratorAccess", username, accountId };
+    }
+    
+    if (userPoliciesResponse.AttachedPolicies?.some(
+        (policy) => policy.PolicyName === "AdministratorAccess"
+    )) {
+        return { status: "success", username };
+    } else {
+        return { status: "missingAdministratorAccess", username, accountId };
+    }
 }

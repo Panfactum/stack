@@ -1,8 +1,8 @@
 import { dirname } from "node:path";
-import { CLIError } from "../error/error";
-import { fileExists } from "../fs/fileExists";
-import { removeFile } from "../fs/removeFile";
-import { execute } from "../subprocess/execute";
+import { CLIError } from "@/util/error/error";
+import { fileExists } from "@/util/fs/fileExists";
+import { removeFile } from "@/util/fs/removeFile";
+import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 

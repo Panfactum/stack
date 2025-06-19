@@ -1,5 +1,6 @@
-import { CLISubprocessError } from "../error/error";
-import { execute } from "../subprocess/execute";
+import { GetCommandInvocationCommand } from "@aws-sdk/client-ssm";
+import { CLISubprocessError, CLIError } from "@/util/error/error";
+import { getSSMClient } from "./clients/getSSMClient";
 import type { PanfactumContext } from "@/util/context/context";
 
 interface Inputs {
@@ -10,133 +11,73 @@ interface Inputs {
   context: PanfactumContext;
 }
 
+/**
+ * Get the output from an SSM command execution
+ * Checks command status first, and if failed, throws error with stderr content
+ */
 export const getSSMCommandOutput = async (inputs: Inputs): Promise<string> => {
-  const workingDirectory = process.cwd();
-  const status = await getSSMCommandStatus({ ...inputs, workingDirectory });
+  const result = await getSSMCommandInvocation(inputs);
 
-  if (status === "Failed") {
-    await getSSMCommandStdErr({ ...inputs, workingDirectory });
+  if (result.Status === "Failed") {
+    throw new CLISubprocessError(`SSM command on remote instance failed`, {
+      command: `SSM command ${inputs.commandId} on instance ${inputs.instanceId}`,
+      subprocessLogs: result.StandardErrorContent || "No error details available",
+      workingDirectory: process.cwd(),
+    });
   }
 
-  return getSSMCommandStdOut({ ...inputs, workingDirectory });
+  return result.StandardOutputContent || "";
 };
 
-async function getSSMCommandStdOut(
-  inputs: Inputs & { workingDirectory: string }
-) {
-  const {
-    awsRegion,
-    awsProfile,
-    instanceId,
-    commandId,
-    context,
-    workingDirectory
-  } = inputs;
+/**
+ * Get the complete SSM command invocation details
+ * Uses retry logic to wait for command completion
+ */
+async function getSSMCommandInvocation(inputs: Inputs) {
+  const { awsRegion, awsProfile, instanceId, commandId, context } = inputs;
+  
+  let retries = 0;
+  const maxRetries = 30;  // 30 seconds total timeout
+  const retryDelay = 1000; // 1 second between retries
 
-  const { stdout } = await execute({
-    command: [
-      "aws",
-      "--region",
-      awsRegion,
-      "--profile",
-      awsProfile,
-      "ssm",
-      "get-command-invocation",
-      "--instance-id",
-      instanceId,
-      "--command-id",
-      commandId,
-      "--query",
-      "StandardOutputContent",
-      "--output",
-      "text",
-    ],
+  const ssmClient = await getSSMClient({
     context,
-    workingDirectory,
-    errorMessage: `Failed to get stdout from SSM command ${commandId} on instance ${instanceId}`
+    profile: awsProfile,
+    region: awsRegion
   });
 
-  return stdout;
-}
+  while (retries < maxRetries) {
+    try {
+      const result = await ssmClient.send(new GetCommandInvocationCommand({
+        InstanceId: instanceId,
+        CommandId: commandId
+      }));
 
-async function getSSMCommandStdErr(
-  inputs: Inputs & { workingDirectory: string }
-) {
-  const {
-    awsRegion,
-    awsProfile,
-    instanceId,
-    commandId,
-    context,
-    workingDirectory,
-  } = inputs;
+      // Check if command is still running
+      if (result.Status === "InProgress" || result.Status === "Pending") {
+        // Command is still running, will retry
+      } else {
+        // Command completed (Success, Failed, Cancelled, etc.)
+        return {
+          Status: result.Status || "Unknown",
+          StandardOutputContent: result.StandardOutputContent || "",
+          StandardErrorContent: result.StandardErrorContent || ""
+        };
+      }
+    } catch (error) {
+      throw new CLIError(
+        `Failed to get SSM command invocation for command ${commandId} on instance ${instanceId}`,
+        { cause: error }
+      );
+    }
 
-  const { stdout } = await execute({
-    command: [
-      "aws",
-      "--region",
-      awsRegion,
-      "--profile",
-      awsProfile,
-      "ssm",
-      "get-command-invocation",
-      "--instance-id",
-      instanceId,
-      "--command-id",
-      commandId,
-      "--query",
-      "StandardErrorContent",
-      "--output",
-      "text",
-    ],
-    context,
-    workingDirectory,
-    errorMessage: `Failed to get stderr from SSM command ${commandId} on instance ${instanceId}`
-  });
+    retries++;
+    
+    // Wait before next retry if we haven't reached max retries
+    if (retries < maxRetries) {
+      await Bun.sleep(retryDelay);
+    }
+  }
 
-  throw new CLISubprocessError(`SSM command on remote instance failed`, {
-    command: `SSM command ${commandId} on instance ${instanceId}`,
-    subprocessLogs: stdout,
-    workingDirectory,
-  });
-}
-
-async function getSSMCommandStatus(
-  inputs: Inputs & { workingDirectory: string }
-) {
-  const {
-    awsRegion,
-    awsProfile,
-    instanceId,
-    commandId,
-    context,
-    workingDirectory
-  } = inputs;
-
-  const { stdout } = await execute({
-    command: [
-      "aws",
-      "--region",
-      awsRegion,
-      "--profile",
-      awsProfile,
-      "ssm",
-      "get-command-invocation",
-      "--instance-id",
-      instanceId,
-      "--command-id",
-      commandId,
-      "--query",
-      "Status",
-      "--output",
-      "text",
-    ],
-    context,
-    workingDirectory,
-    errorMessage: `Failed to get SSM command status for command ${commandId} on instance ${instanceId}`,
-    retries: 60,
-    isSuccess: ({ stdout, exitCode }) =>
-      exitCode === 0 && (stdout === "Success" || stdout === "Failed")
-  });
-  return stdout;
+  throw new CLIError(`SSM command ${commandId} did not complete within timeout`);
 }

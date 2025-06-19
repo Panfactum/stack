@@ -196,36 +196,35 @@ async function getExistingContactInfo(profile: string, context: PanfactumContext
     countryCode?: string;
     zipCode?: string;
 }> {
-    try {
-        // Create an AccountClient
-        const accountClient = await getAccountClient({ context, profile })
+    // Create an AccountClient
+    const accountClient = await getAccountClient({ context, profile })
 
-        // Create command to get contact information
-        const getContactInfoCommand = new GetContactInformationCommand({});
+    // Create command to get contact information
+    const getContactInfoCommand = new GetContactInformationCommand({});
 
-        // Send the command to AWS
-        const response = await accountClient.send(getContactInfoCommand);
-
-        if (response.ContactInformation) {
-            const contactInfo = response.ContactInformation;
-
-            // Convert AWS contact format to our format
-            return {
-                fullName: contactInfo.FullName,
-                organizationName: contactInfo.CompanyName,
-                phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3') : undefined,
-                addressLine1: contactInfo.AddressLine1,
-                addressLine2: contactInfo.AddressLine2,
-                city: contactInfo.City,
-                state: contactInfo.StateOrRegion,
-                countryCode: contactInfo.CountryCode,
-                zipCode: contactInfo.PostalCode
-            };
-        }
-    } catch (error) {
+    // Send the command to AWS
+    const response = await accountClient.send(getContactInfoCommand).catch((error) => {
         // If we can't get the contact info, just log and continue
         context.logger.debug(
             `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
+        return null;
+    });
+
+    if (response?.ContactInformation) {
+        const contactInfo = response.ContactInformation;
+
+        // Convert AWS contact format to our format
+        return {
+            fullName: contactInfo.FullName,
+            organizationName: contactInfo.CompanyName,
+            phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3') : undefined,
+            addressLine1: contactInfo.AddressLine1,
+            addressLine2: contactInfo.AddressLine2,
+            city: contactInfo.City,
+            state: contactInfo.StateOrRegion,
+            countryCode: contactInfo.CountryCode,
+            zipCode: contactInfo.PostalCode
+        };
     }
 
     return {};

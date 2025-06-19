@@ -21,7 +21,7 @@ export async function setSLA(inputs: {
   });
 
   if (regionConfig?.sla_target) {
-    return regionConfig.sla_target as NonNullable<SlaTarget>;
+    return regionConfig.sla_target;
   }
 
   let confirmedSLATarget: NonNullable<SlaTarget> = slaTarget ?? 3;

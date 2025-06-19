@@ -141,3 +141,5 @@ dist
 .DS_Store
 
 bin
+
+tmp
