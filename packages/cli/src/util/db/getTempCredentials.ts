@@ -1,7 +1,9 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { z } from 'zod'
 import { getVaultToken } from '@/util/vault/getVaultToken'
 import { execute } from '../subprocess/execute'
+import { parseJson } from '@/util/zod/parseJson'
 import type { DatabaseCredentials, DatabaseType } from './types'
 import type { PanfactumContext } from '@/util/context/context'
 
@@ -32,7 +34,18 @@ export async function getTempCredentials(
       },
     })
     
-    const result = JSON.parse(stdout)
+    // Define schema for vault PKI response
+    const VaultPKIResponseSchema = z.object({
+      data: z.object({
+        issuing_ca: z.string(),
+        certificate: z.string(),
+        private_key: z.string()
+      }),
+      lease_id: z.string()
+    });
+    
+    // Parse and validate JSON response
+    const result = parseJson(VaultPKIResponseSchema, stdout)
     
     // Write certificates to files
     const natsDir = context.repoVariables.nats_dir
@@ -70,7 +83,17 @@ export async function getTempCredentials(
       },
     })
     
-    const result = JSON.parse(stdout)
+    // Define schema for vault database credentials response
+    const VaultCredsResponseSchema = z.object({
+      data: z.object({
+        username: z.string(),
+        password: z.string()
+      }),
+      lease_id: z.string()
+    });
+    
+    // Parse and validate JSON response
+    const result = parseJson(VaultCredsResponseSchema, stdout)
     
     return {
       username: result.data.username,

@@ -1,5 +1,5 @@
 import { createServer } from "net";
-import { CLIError, CLISubprocessError } from "@/util/error/error";
+import { CLISubprocessError } from "@/util/error/error";
 import { addBackgroundProcess } from "./killBackgroundProcess";
 
 export async function startVaultProxy({
@@ -11,37 +11,45 @@ export async function startVaultProxy({
   kubeContext: string;
   modulePath: string;
 }) {
-  try {
-    const openPort = await findAvailablePort(8200);
-    const command = [
-      "kubectl",
-      "port-forward",
-      "--address",
-      "0.0.0.0",
-      "-n",
-      "vault",
-      "--context",
-      kubeContext,
-      "svc/vault-active",
-      `${openPort}:8200`,
-    ];
+  const openPort = await findAvailablePort(8200);
+  const command = [
+    "kubectl",
+    "port-forward",
+    "--address",
+    "0.0.0.0",
+    "-n",
+    "vault",
+    "--context",
+    kubeContext,
+    "svc/vault-active",
+    `${openPort}:8200`,
+  ];
 
-    const proc = Bun.spawn(command, {
-      stdout: "pipe",
-      stderr: "pipe",
-      env,
-    });
+  const proc = Bun.spawn(command, {
+    stdout: "pipe",
+    stderr: "pipe",
+    env,
+  });
 
-    addBackgroundProcess({
-      pid: proc.pid,
-      command: command.join(' '),
-      description: `Vault proxy for ${modulePath} on port ${openPort}`
-    });
-    
-    return { pid: proc.pid, port: openPort };
-  } catch {
-    throw new CLIError(`Failed to start Vault proxy for ${modulePath}`);
+  // Check if the process started successfully
+  if (!proc.pid || proc.exitCode !== null) {
+    throw new CLISubprocessError(
+      `Failed to start Vault proxy for ${modulePath}`,
+      {
+        command: command.join(' '),
+        subprocessLogs: 'Process failed to start',
+        workingDirectory: process.cwd(),
+      }
+    );
   }
+
+  addBackgroundProcess({
+    pid: proc.pid,
+    command: command.join(' '),
+    description: `Vault proxy for ${modulePath} on port ${openPort}`
+  });
+  
+  return { pid: proc.pid, port: openPort };
 }
 
 async function findAvailablePort(

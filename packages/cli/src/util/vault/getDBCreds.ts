@@ -1,7 +1,7 @@
-import { execSync } from 'child_process';
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
 import { parseJson } from '@/util/zod/parseJson';
+import { execute } from '@/util/subprocess/execute';
 import { getVaultToken } from './getVaultToken';
 import type {PanfactumContext} from "@/util/context/context.ts";
 
@@ -53,17 +53,16 @@ export async function getDBCreds(options: GetDbCredsOptions): Promise<DbCredenti
   env['VAULT_TOKEN'] = token;
 
   // Read credentials from Vault
-  try {
-    const output = execSync(`vault read -format=json db/creds/${role}`, {
-      env,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    return parseVaultResponse(output);
-  } catch (error) {
+  const { stdout } = await execute({
+    command: ['vault', 'read', '-format=json', `db/creds/${role}`],
+    context,
+    workingDirectory: context.repoVariables.repo_root,
+    env
+  }).catch((error: unknown) => {
     throw new CLIError(`Failed to get database credentials for role '${role}'`, error);
-  }
+  });
+
+  return parseVaultResponse(stdout);
 }
 
 /**

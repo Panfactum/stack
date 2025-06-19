@@ -1,4 +1,6 @@
+import { z } from 'zod'
 import { execute } from '../subprocess/execute'
+import { parseJson } from '@/util/zod/parseJson'
 import type { Database, DatabaseType } from './types'
 import type { PanfactumContext } from '@/util/context/context'
 
@@ -7,6 +9,17 @@ export async function listDatabases(
   type?: DatabaseType
 ): Promise<Database[]> {
   const databases: Database[] = []
+
+  // Define schema for kubectl output
+  const KubectlListSchema = z.object({
+    items: z.array(z.object({
+      metadata: z.object({
+        name: z.string(),
+        namespace: z.string(),
+        annotations: z.record(z.string()).optional()
+      })
+    }))
+  });
 
   // List PostgreSQL databases
   if (!type || type === 'postgresql') {
@@ -17,12 +30,15 @@ export async function listDatabases(
       context,
       workingDirectory: context.repoVariables.repo_root,
     })
-    const result = JSON.parse(stdout)
+    
+    // Parse and validate JSON response
+    const result = parseJson(KubectlListSchema, stdout)
 
-    for (const item of result.items || []) {
+    for (const item of result.items) {
       const annotations = item.metadata.annotations || {}
-      const port = annotations['panfactum.com/service-port'] 
-        ? parseInt(annotations['panfactum.com/service-port'], 10) 
+      const portString = annotations['panfactum.com/service-port']
+      const port = portString 
+        ? parseInt(portString, 10) 
         : 5432
         
       databases.push({
@@ -44,14 +60,17 @@ export async function listDatabases(
       context,
       workingDirectory: context.repoVariables.repo_root,
     })
-    const result = JSON.parse(stdout)
+    
+    // Parse and validate JSON response
+    const result = parseJson(KubectlListSchema, stdout)
     
     // Filter for Redis databases by annotation
-    for (const item of result.items || []) {
+    for (const item of result.items) {
       const annotations = item.metadata.annotations || {}
       if (annotations['panfactum.com/db-type'] === 'Redis') {
-        const port = annotations['panfactum.com/service-port'] 
-          ? parseInt(annotations['panfactum.com/service-port'], 10) 
+        const portString = annotations['panfactum.com/service-port']
+        const port = portString 
+          ? parseInt(portString, 10) 
           : 6379
           
         databases.push({
@@ -74,14 +93,17 @@ export async function listDatabases(
       context,
       workingDirectory: context.repoVariables.repo_root,
     })
-    const result = JSON.parse(stdout)
+    
+    // Parse and validate JSON response
+    const result = parseJson(KubectlListSchema, stdout)
     
     // Filter for NATS databases by annotation
-    for (const item of result.items || []) {
+    for (const item of result.items) {
       const annotations = item.metadata.annotations || {}
       if (annotations['panfactum.com/db-type'] === 'NATS') {
-        const port = annotations['panfactum.com/service-port'] 
-          ? parseInt(annotations['panfactum.com/service-port'], 10) 
+        const portString = annotations['panfactum.com/service-port']
+        const port = portString 
+          ? parseInt(portString, 10) 
           : 4222
           
         databases.push({

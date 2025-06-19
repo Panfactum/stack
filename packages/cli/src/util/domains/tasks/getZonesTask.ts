@@ -73,16 +73,20 @@ export async function getZonesTask<T extends {}>(inputs: {
                             subsubtasks.add({
                                 title: `Get ${environment} zones`,
                                 task: async (_, task) => {
-                                    try {
-                                        const deployed = await isEnvironmentDeployed({ context, environment })
-                                        const moduleOutput = await terragruntOutput({
-                                            context,
-                                            environment: envDir,
-                                            region: regionDir,
-                                            module: MODULES.AWS_DNS_ZONES,
-                                            validationSchema: DNS_ZONES_MODULE_OUTPUT_SCHEMA,
-                                        });
+                                    const deployed = await isEnvironmentDeployed({ context, environment })
+                                    const moduleOutput = await terragruntOutput({
+                                        context,
+                                        environment: envDir,
+                                        region: regionDir,
+                                        module: MODULES.AWS_DNS_ZONES,
+                                        validationSchema: DNS_ZONES_MODULE_OUTPUT_SCHEMA,
+                                    }).catch(() => {
+                                        task.skip(context.logger.applyColors(`Get ${environment} zones Failure`, { badlights: ["Failure"] }))
+                                        parentTask.title = context.logger.applyColors(`Retrieve DNS zone info Partial failure`, { badlights: ["Partial failure"] })
+                                        return null;
+                                    });
 
+                                    if (moduleOutput) {
                                         Object.entries(moduleOutput.zones.value).forEach(([domain, { zone_id: zoneId }]) => {
                                             dnsZoneDomainConfigs[domain] = {
                                                 domain,
@@ -95,9 +99,6 @@ export async function getZonesTask<T extends {}>(inputs: {
                                                 },
                                             }
                                         })
-                                    } catch {
-                                        task.skip(context.logger.applyColors(`Get ${environment} zones Failure`, { badlights: ["Failure"] }))
-                                        parentTask.title = context.logger.applyColors(`Retrieve DNS zone info Partial failure`, { badlights: ["Partial failure"] })
                                     }
                                 }
                             })
