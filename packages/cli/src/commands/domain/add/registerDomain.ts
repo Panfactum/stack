@@ -3,8 +3,7 @@ import { join } from "node:path";
 import { GetContactInformationCommand } from "@aws-sdk/client-account";
 import {
     Route53Client,
-    ListHostedZonesByNameCommand,
-    type HostedZone
+    ListHostedZonesByNameCommand
 } from "@aws-sdk/client-route-53";
 import { ContactType, CountryCode, GetOperationDetailCommand, RegisterDomainCommand, ResendOperationAuthorizationCommand, Route53DomainsClient, type ContactDetail } from "@aws-sdk/client-route-53-domains";
 import { Listr } from "listr2";
@@ -16,7 +15,7 @@ import { COUNTRY_CODES } from "@/util/aws/schemas";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
-import { CLIError } from "@/util/error/error";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
@@ -49,6 +48,38 @@ const CONTACT_INFO_SCHEMA = z.object({
     zip_code: z.string().optional(),
     country_code: z.string().length(2).optional().catch(undefined)
 })
+
+// Zod schemas for AWS API responses
+const registerDomainResponseSchema = z.object({
+    OperationId: z.string().optional()
+}).passthrough();
+
+const getOperationDetailResponseSchema = z.object({
+    Status: z.string().optional(),
+    Message: z.string().optional(),
+    StatusFlag: z.string().optional()
+}).passthrough();
+
+const listHostedZonesByNameResponseSchema = z.object({
+    HostedZones: z.array(z.object({
+        Id: z.string().optional(),
+        Name: z.string().optional()
+    }).passthrough()).optional()
+}).passthrough();
+
+const getContactInformationResponseSchema = z.object({
+    ContactInformation: z.object({
+        FullName: z.string().optional(),
+        CompanyName: z.string().optional(),
+        PhoneNumber: z.string().optional(),
+        AddressLine1: z.string().optional(),
+        AddressLine2: z.string().optional(),
+        City: z.string().optional(),
+        StateOrRegion: z.string().optional(),
+        CountryCode: z.string().optional(),
+        PostalCode: z.string().optional()
+    }).optional()
+}).passthrough();
 
 export async function registerDomain(inputs: {
     domain: string,
@@ -95,11 +126,13 @@ export async function registerDomain(inputs: {
         throw new CLIError(`Was not able to find AWS profile for '${env.name}' environment`);
     }
 
-    try {
-        await getIdentity({ context, profile });
-    } catch (error) {
-        throw new CLIError(`Was not able to authenticate with AWS profile '${profile}'`, error);
-    }
+    await getIdentity({ context, profile })
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Was not able to authenticate with AWS profile '${profile}'`,
+                error
+            );
+        });
 
     const route53DomainsClient = new Route53DomainsClient({
         profile,
@@ -362,61 +395,72 @@ export async function registerDomain(inputs: {
         {
             title: `Submitting registration request to AWS`,
             task: async (ctx, task) => {
-                try {
+                const contactDetails: ContactDetail = {
+                    FirstName: ctx.contactInfo.first_name!,
+                    LastName: ctx.contactInfo.last_name!,
+                    OrganizationName: ctx.contactInfo.organization_name,
+                    AddressLine1: ctx.contactInfo.address_line_1!,
+                    AddressLine2: ctx.contactInfo.address_line_2,
+                    City: ctx.contactInfo.city!,
+                    State: ctx.contactInfo.state!,
+                    ZipCode: ctx.contactInfo.zip_code!,
+                    CountryCode: ctx.contactInfo.country_code! as CountryCode,
+                    Email: ctx.contactInfo.email_address!,
+                    PhoneNumber: ctx.contactInfo.phone_number!,
+                    ContactType: ctx.contactInfo.organization_name ? ContactType.COMPANY : ContactType.PERSON
+                };
 
-                    const contactDetails: ContactDetail = {
-                        FirstName: ctx.contactInfo.first_name!,
-                        LastName: ctx.contactInfo.last_name!,
-                        OrganizationName: ctx.contactInfo.organization_name,
-                        AddressLine1: ctx.contactInfo.address_line_1!,
-                        AddressLine2: ctx.contactInfo.address_line_2,
-                        City: ctx.contactInfo.city!,
-                        State: ctx.contactInfo.state!,
-                        ZipCode: ctx.contactInfo.zip_code!,
-                        CountryCode: ctx.contactInfo.country_code! as CountryCode,
-                        Email: ctx.contactInfo.email_address!,
-                        PhoneNumber: ctx.contactInfo.phone_number!,
-                        ContactType: ctx.contactInfo.organization_name ? ContactType.COMPANY : ContactType.PERSON
-                    };
+                // Create command to register the domain
+                const registerDomainCommand = new RegisterDomainCommand({
+                    DomainName: domain,
+                    AdminContact: contactDetails,
+                    RegistrantContact: contactDetails,
+                    TechContact: contactDetails,
+                    AutoRenew: true,
+                    PrivacyProtectAdminContact: true,
+                    PrivacyProtectRegistrantContact: true,
+                    PrivacyProtectTechContact: true,
+                    DurationInYears: 1
+                });
 
-                    // Create command to register the domain
-                    const registerDomainCommand = new RegisterDomainCommand({
-                        DomainName: domain,
-                        AdminContact: contactDetails,
-                        RegistrantContact: contactDetails,
-                        TechContact: contactDetails,
-                        AutoRenew: true,
-                        PrivacyProtectAdminContact: true,
-                        PrivacyProtectRegistrantContact: true,
-                        PrivacyProtectTechContact: true,
-                        DurationInYears: 1
+                // Send command to AWS
+                const response = await route53DomainsClient.send(registerDomainCommand)
+                    .catch((error: unknown) => {
+                        if (error instanceof Error) {
+                            if (error.message.includes("Account not found") || error.message.includes("not authorized")) {
+                                task.output = context.logger.applyColors(
+                                    `If your AWS account is relatively new, purchasing a domain may fail with a vague error.\n` +
+                                    `AWS limits domain purchases for organizations that have not yet paid their first bill, but\n` +
+                                    `you can open a ticket requesting access and AWS support will unlock your account within 24 hours.\n\n` +
+                                    `For more information, visit: https://docs.aws.amazon.com/awssupport/latest/user/case-management.html\n\n` +
+                                    `If you'd like to proceed quicker, you can purchase a domain from an alternative DNS registrar such as\n` +
+                                    `https://www.namecheap.com/ as then re-run this command.`,
+                                    { style: "warning" }
+                                )
+                            }
+                        }
+                        throw new CLIError(
+                            "Failed to register domain with AWS",
+                            error
+                        );
                     });
 
-                    // Send command to AWS
-                    const { OperationId: opId } = await route53DomainsClient.send(registerDomainCommand);
-
-                    if (!opId) {
-                        throw new CLIError("Did not receive an OperationId from the registration request")
-                    }
-
-                    ctx.opId = opId
-
-                } catch (error) {
-                    if (error instanceof Error) {
-                        if (error.message.includes("Account not found") || error.message.includes("not authorized")) {
-                            task.output = context.logger.applyColors(
-                                `If your AWS account is relatively new, purchasing a domain may fail with a vague error.\n` +
-                                `AWS limits domain purchases for organizations that have not yet paid their first bill, but\n` +
-                                `you can open a ticket requesting access and AWS support will unlock your account within 24 hours.\n\n` +
-                                `For more information, visit: https://docs.aws.amazon.com/awssupport/latest/user/case-management.html\n\n` +
-                                `If you'd like to proceed quicker, you can purchase a domain from an alternative DNS registrar such as\n` +
-                                `https://www.namecheap.com/ as then re-run this command.`,
-                                { style: "warning" }
-                            )
-                        }
-                    }
-                    throw error;
+                // Validate response
+                const validationResult = registerDomainResponseSchema.safeParse(response);
+                if (!validationResult.success) {
+                    throw new PanfactumZodError(
+                        "Invalid register domain response format",
+                        "Route53 Domains RegisterDomain API",
+                        validationResult.error
+                    );
                 }
+
+                const { OperationId: opId } = validationResult.data;
+                if (!opId) {
+                    throw new CLIError("Did not receive an OperationId from the registration request")
+                }
+
+                ctx.opId = opId
             }
         }
     )
@@ -432,17 +476,26 @@ export async function registerDomain(inputs: {
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 const statusStr = lastStatus ? `${attempt}/${maxAttempts} - ${lastStatus}` : `${attempt}/${maxAttempts}`
                 task.title = context.logger.applyColors(`Polling registration status ${statusStr}`, { lowlights: [statusStr] })
-                let status, message, flag;
-                try {
-                    const response = await route53DomainsClient.send(
-                        new GetOperationDetailCommand({ OperationId: ctx.opId! })
+                const response = await route53DomainsClient.send(
+                    new GetOperationDetailCommand({ OperationId: ctx.opId! })
+                ).catch((error: unknown) => {
+                    throw new CLIError(
+                        "Failed to get registration status",
+                        error
                     );
-                    status = response.Status
-                    message = response.Message
-                    flag = response.StatusFlag
-                } catch (e) {
-                    throw new CLIError("Failed to get registration status", e)
+                });
+                
+                // Validate response
+                const validationResult = getOperationDetailResponseSchema.safeParse(response);
+                if (!validationResult.success) {
+                    throw new PanfactumZodError(
+                        "Invalid operation detail response format",
+                        "Route53 Domains GetOperationDetail API",
+                        validationResult.error
+                    );
                 }
+                
+                const { Status: status, Message: message, StatusFlag: flag } = validationResult.data;
 
                 // 1) Handle terminal statuses first:
                 if (status === "SUCCESSFUL") {
@@ -515,13 +568,25 @@ export async function registerDomain(inputs: {
                 MaxItems: 1
             });
 
-            let hostedZones: HostedZone[] = []
-            try {
-                const response = await route53Client.send(listHostedZonesCommand);
-                hostedZones = response.HostedZones ?? []
-            } catch (e) {
-                throw new CLIError(`Failed to call ListHostedZonesByNameCommand`, e)
+            const response = await route53Client.send(listHostedZonesCommand)
+                .catch((error: unknown) => {
+                    throw new CLIError(
+                        `Failed to call ListHostedZonesByNameCommand`,
+                        error
+                    );
+                });
+            
+            // Validate response
+            const validationResult = listHostedZonesByNameResponseSchema.safeParse(response);
+            if (!validationResult.success) {
+                throw new PanfactumZodError(
+                    "Invalid hosted zones response format",
+                    "Route53 ListHostedZonesByName API",
+                    validationResult.error
+                );
             }
+            
+            const hostedZones = validationResult.data.HostedZones ?? []
 
             if (!hostedZones.length ||
                 !hostedZones[0]?.Name?.startsWith(domain)) {
@@ -669,35 +734,54 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
     countryCode?: string;
     zipCode?: string;
 } | null> {
-    try {
-        const accountClient = await getAccountClient({ context, profile })
-
-        // Create command to get contact information
-        const getContactInfoCommand = new GetContactInformationCommand({});
-
-        // Send the command to AWS
-        const response = await accountClient.send(getContactInfoCommand);
-
-        if (response.ContactInformation) {
-            const contactInfo = response.ContactInformation;
-
-            // Convert AWS contact format to our format
-            return {
-                fullName: contactInfo.FullName,
-                organizationName: contactInfo.CompanyName,
-                phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/ /g, '.').replace(/-/g, '') : undefined, // Convert phone format
-                addressLine1: contactInfo.AddressLine1,
-                addressLine2: contactInfo.AddressLine2,
-                city: contactInfo.City,
-                state: contactInfo.StateOrRegion,
-                countryCode: contactInfo.CountryCode,
-                zipCode: contactInfo.PostalCode
-            };
-        }
-    } catch (error) {
-        // If we can't get the contact info, just log and continue
-        context.logger.debug(`Could not retrieve primary contact information from AWS: ${(error as Error).message}`);
+    const accountClient = await getAccountClient({ context, profile })
+        .catch((error: unknown) => {
+            // If we can't create the client, just log and continue
+            context.logger.debug(`Could not create account client: ${error instanceof Error ? error.message : String(error)}`);
+            return null;
+        });
+    
+    if (!accountClient) {
+        return null;
     }
 
-    return null;
+    // Create command to get contact information
+    const getContactInfoCommand = new GetContactInformationCommand({});
+
+    // Send the command to AWS
+    const response = await accountClient.send(getContactInfoCommand)
+        .catch((error: unknown) => {
+            // If we can't get the contact info, just log and continue
+            context.logger.debug(`Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
+            return null;
+        });
+    
+    if (!response) {
+        return null;
+    }
+
+    // Validate response
+    const validationResult = getContactInformationResponseSchema.safeParse(response);
+    if (!validationResult.success) {
+        context.logger.debug(`Invalid contact information response format: ${validationResult.error.message}`);
+        return null;
+    }
+
+    const { ContactInformation: contactInfo } = validationResult.data;
+    if (!contactInfo) {
+        return null;
+    }
+
+    // Convert AWS contact format to our format
+    return {
+        fullName: contactInfo.FullName,
+        organizationName: contactInfo.CompanyName,
+        phoneNumber: contactInfo.PhoneNumber ? contactInfo.PhoneNumber.replace(/ /g, '.').replace(/-/g, '') : undefined, // Convert phone format
+        addressLine1: contactInfo.AddressLine1,
+        addressLine2: contactInfo.AddressLine2,
+        city: contactInfo.City,
+        state: contactInfo.StateOrRegion,
+        countryCode: contactInfo.CountryCode,
+        zipCode: contactInfo.PostalCode
+    };
 }
