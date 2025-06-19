@@ -1,6 +1,6 @@
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
-import { z, ZodError } from 'zod';
+import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getAllRegions } from "@/util/config/getAllRegions.ts";
 import {CLIError, PanfactumZodError} from '@/util/error/error';
@@ -56,9 +56,8 @@ export default class TunnelCommand extends PanfactumCommand {
   });
 
   override async execute(): Promise<number> {
-    try {
-      // Get kube contexts if needed
-      const kubeContexts = await getKubeContextsFromConfig(this.context);
+    // Get kube contexts if needed
+    const kubeContexts = await getKubeContextsFromConfig(this.context);
 
       // Get the kube context - either from option or prompt
       const selectedKubeContext = this.cluster
@@ -90,43 +89,58 @@ export default class TunnelCommand extends PanfactumCommand {
         remoteAddressValue = await input({
           message: 'Enter the remote address to tunnel to (e.g., service.namespace:port):',
           validate: (value) => {
-            try {
-              remoteAddressSchema.parse(value);
-              return true;
-            } catch (error) {
-              if (error instanceof z.ZodError) {
-                return error.errors[0]?.message || 'Invalid remote address';
-              }
-              return 'Invalid remote address';
+            const result = remoteAddressSchema.safeParse(value);
+            if (!result.success) {
+              return result.error.errors[0]?.message || 'Invalid remote address';
             }
+            return true;
           }
         });
       }
 
       // Validate remote address format
-      remoteAddressSchema.parse(remoteAddressValue);
+      const remoteAddressResult = remoteAddressSchema.safeParse(remoteAddressValue);
+      if (!remoteAddressResult.success) {
+        throw new PanfactumZodError(
+          'Invalid remote address format',
+          'remote address',
+          remoteAddressResult.error
+        );
+      }
 
       // Determine local port
       let localPortNumber: number;
       if (this.localPort) {
-        localPortNumber = portSchema.parse(this.localPort);
+        const localPortResult = portSchema.safeParse(this.localPort);
+        if (!localPortResult.success) {
+          throw new PanfactumZodError(
+            'Invalid local port',
+            'local port',
+            localPortResult.error
+          );
+        }
+        localPortNumber = localPortResult.data;
       } else {
         // Prompt for port
         const portString = await input({
           message: 'Enter a local port for the tunnel (1024-65535):',
           validate: (value) => {
-            try {
-              portSchema.parse(value);
-              return true;
-            } catch (error) {
-              if (error instanceof z.ZodError) {
-                return error.errors[0]?.message || 'Invalid port';
-              }
-              return 'Invalid port';
+            const result = portSchema.safeParse(value);
+            if (!result.success) {
+              return result.error.errors[0]?.message || 'Invalid port';
             }
+            return true;
           }
         });
-        localPortNumber = portSchema.parse(portString);
+        const portResult = portSchema.safeParse(portString);
+        if (!portResult.success) {
+          throw new PanfactumZodError(
+            'Invalid port number',
+            'local port',
+            portResult.error
+          );
+        }
+        localPortNumber = portResult.data;
       }
 
       // Validate vault address
@@ -159,16 +173,5 @@ export default class TunnelCommand extends PanfactumCommand {
         // This promise never resolves naturally - it waits for process termination
         // The cleanup handlers above will exit the process
       });
-
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new PanfactumZodError(
-          'Invalid input provided for tunnel command',
-          'tunnel command',
-          error
-        );
-      }
-      throw new CLIError(`Failed to establish tunnel`, error);
-    }
   }
 }

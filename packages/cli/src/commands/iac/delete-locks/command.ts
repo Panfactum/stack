@@ -44,12 +44,11 @@ export default class DeleteLocksCommand extends PanfactumCommand {
   });
 
   override async execute(): Promise<number> {
-    try {
-      // Get config from current directory context
-      const config = await getPanfactumConfig({ 
-        context: this.context, 
-        directory: process.cwd() 
-      });
+    // Get config from current directory context
+    const config = await getPanfactumConfig({ 
+      context: this.context, 
+      directory: process.cwd() 
+    });
 
       // Determine values from options or config
       const awsProfile = this.profile || config.tf_state_profile;
@@ -117,15 +116,15 @@ export default class DeleteLocksCommand extends PanfactumCommand {
       });
       
       const locksToDelete = scanResult.Items.filter(item => {
-        if (item['Info']?.S) {
-          try {
-            const info = parseJson(lockInfoSchema, item['Info'].S);
-            return info.Who === lockOwner;
-          } catch {
-            return false;
-          }
+        const infoValue = item['Info']?.S;
+        if (!infoValue) return false;
+        
+        try {
+          const info = parseJson(lockInfoSchema, infoValue);
+          return info.Who === lockOwner;
+        } catch {
+          return false;
         }
-        return false;
       });
 
       if (locksToDelete.length === 0) {
@@ -156,9 +155,5 @@ export default class DeleteLocksCommand extends PanfactumCommand {
 
       this.context.logger.info(`Successfully released ${locksToDelete.length} lock(s).`);
       return 0;
-
-    } catch (error) {
-      throw new CLIError(`Failed to delete locks`, error);
-    }
   }
 }

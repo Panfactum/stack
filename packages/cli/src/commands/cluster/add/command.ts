@@ -257,29 +257,28 @@ export class ClusterAddCommand extends PanfactumCommand {
           if (error) {
             return error.issues[0]?.message ?? "Invalid subdomain";
           }
-          try {
-            const glob = new Glob('**/region.yaml')
-            // Find all region.yaml files across all environments
-            const regionFiles = Array.from(glob.scanSync(selectedEnvironment.path));
+          const glob = new Glob('**/region.yaml')
+          // Find all region.yaml files across all environments
+          const regionFiles = Array.from(glob.scanSync(selectedEnvironment.path));
 
-            for (const regionFile of regionFiles) {
-              // Skip checking the current cluster's region.yaml
-              if (regionFile === join(selectedRegion.path, "region.yaml")) continue;
+          for (const regionFile of regionFiles) {
+            // Skip checking the current cluster's region.yaml
+            if (regionFile === join(selectedRegion.path, "region.yaml")) continue;
 
-              // Read and parse the region.yaml file
-              const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) });
+            // Read and parse the region.yaml file
+            const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) })
+              .catch((error) => {
+                this.context.logger.debug(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`);
+                return null;
+              });
 
-              // Check if this region.yaml has a kube_domain that matches our proposed domain
-              if (yamlContent && yamlContent.kube_domain === `${value}.${ancestorDomain}`) {
-                return `Domain ${value}.${ancestorDomain} is already used by another cluster`;
-              }
-
-              // FIX: Need to see if this domain is already taken (even if not by another cluster)
-
+            // Check if this region.yaml has a kube_domain that matches our proposed domain
+            if (yamlContent && yamlContent.kube_domain === `${value}.${ancestorDomain}`) {
+              return `Domain ${value}.${ancestorDomain} is already used by another cluster`;
             }
-          } catch (error) {
-            this.context.logger.debug(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`);
-            // Continue even if there's an error reading files
+
+            // FIX: Need to see if this domain is already taken (even if not by another cluster)
+
           }
 
           return true;

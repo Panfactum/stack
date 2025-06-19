@@ -92,7 +92,7 @@ export async function setupLinkerd(
           errorMessage: "Linkerd control plane checks failed",
           isSuccess: ({ exitCode, stdout }) =>
             exitCode === 0 ||
-            (stdout).includes("Status check results are √"),
+            stdout.includes("Status check results are √"),
           env: {
             ...process.env,
             VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,

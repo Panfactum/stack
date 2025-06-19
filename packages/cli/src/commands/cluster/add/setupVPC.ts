@@ -3,8 +3,8 @@ import { z } from "zod";
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { vpcNetworkTest } from "@/util/aws/vpcNetworkTest";
-import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { execute } from "@/util/subprocess/execute";
+import { parseJson } from "@/util/zod/parseJson";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
@@ -114,18 +114,7 @@ export async function setupVPC(
                 context: context,
                 workingDirectory: clusterPath,
               });
-              let vpcList;
-              try {
-                const vpc = JSON.parse(stdout);
-                vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
-              } catch (error) {
-                throw parseErrorHandler({
-                  error,
-                  errorMessage:
-                    "Failed checking if VPC name is already in use.",
-                  location: vpcListCommand.join(" "),
-                });
-              }
+              const vpcList = parseJson(DESCRIBE_VPCS_SCHEMA, stdout);
 
               if (vpcList.Vpcs.length > 0) {
                 return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;

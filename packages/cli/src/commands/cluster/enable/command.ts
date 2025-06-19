@@ -4,7 +4,7 @@ import {PanfactumCommand} from "@/util/command/panfactumCommand.ts";
 
 import { getEnvironments } from "@/util/config/getEnvironments";
 import { getRegions } from "@/util/config/getRegions";
-import {CLIError} from "@/util/error/error.ts";
+import {CLIError, PanfactumZodError} from "@/util/error/error.ts";
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { setupECR } from "./setupECR";
 import type { PanfactumContext } from "@/util/context/context";
@@ -49,7 +49,15 @@ export class ClusterEnableCommand extends PanfactumCommand {
 
   async execute() {
     // Validate and get properly typed feature
-    const validatedFeature = featureSchema.parse(this.feature)
+    const featureResult = featureSchema.safeParse(this.feature);
+    if (!featureResult.success) {
+      throw new PanfactumZodError(
+        'Invalid feature provided',
+        'feature parameter',
+        featureResult.error
+      );
+    }
+    const validatedFeature = featureResult.data;
 
     /*******************************************
      * Select Environment and Region

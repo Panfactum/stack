@@ -6,7 +6,6 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
-import { parseErrorHandler } from "@/util/error/parseErrorHandler";
 import { fileExists } from "@/util/fs/fileExists";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
@@ -161,23 +160,22 @@ export async function setupVault(
           errorMessage: "Vault pods failed to start",
           retries: 60,
           isSuccess: (result) => {
+            const podsSchema = z.object({
+              items: z.array(
+                z.object({
+                  metadata: z.object({
+                    name: z.string(),
+                    namespace: z.string(),
+                  }),
+                  status: z.object({
+                    phase: z.string(),
+                  }),
+                })
+              ),
+            });
             try {
-              const pods = JSON.parse(result.stdout);
-              const podsSchema = z.object({
-                items: z.array(
-                  z.object({
-                    metadata: z.object({
-                      name: z.string(),
-                      namespace: z.string(),
-                    }),
-                    status: z.object({
-                      phase: z.string(),
-                    }),
-                  })
-                ),
-              });
-              const parsedPods = podsSchema.parse(pods);
-              return parsedPods.items.every(
+              const pods = parseJson(podsSchema, result.stdout);
+              return pods.items.every(
                 (pod) => pod.status.phase === "Running"
               );
             } catch {
@@ -212,18 +210,12 @@ export async function setupVault(
           "-format=json",
         ];
 
-        let recoveryKeys: z.infer<typeof RECOVER_KEYS_SCHEMA>;
-        try {
-          const { stdout } = await execute({
-            command: vaultOperatorInitCommand,
-            context,
-            workingDirectory: clusterPath,
-            errorMessage: "Failed to initialize vault",
-          });
-
-          const data = JSON.parse(stdout.trim());
-          recoveryKeys = RECOVER_KEYS_SCHEMA.parse(data);
-        } catch (error) {
+        const { stdout } = await execute({
+          command: vaultOperatorInitCommand,
+          context,
+          workingDirectory: clusterPath,
+          errorMessage: "Failed to initialize vault",
+        }).catch(async (error) => {
           await writeYAMLFile({
             context,
             values: {
@@ -232,14 +224,10 @@ export async function setupVault(
             overwrite: true,
             filePath: join(modulePath, ".pf.yaml"),
           });
-          throw parseErrorHandler({
-            error,
-            errorMessage: "Failed to parse vault operator init",
-            nonZodErrorMessage:
-              "Unable to parse outputs from vault operator init",
-            location: vaultOperatorInitCommand.join(" "),
-          });
-        }
+          throw error;
+        });
+
+        const recoveryKeys = parseJson(RECOVER_KEYS_SCHEMA, stdout.trim());
 
         await sopsUpsert({
           values: {
@@ -304,82 +292,55 @@ export async function setupVault(
           throw new CLIError("Kube context not found");
         }
         let vaultUnsealCommand: string[] = [];
-        try {
-          let sealedStatus = true;
-          for (const key of vaultRecoveryKeys || ctx.recoveryKeys!) {
-            vaultUnsealCommand = [
-              "kubectl",
-              "exec",
-              "-i",
-              "vault-0",
-              "--namespace=vault",
-              "--context",
-              ctx.kubeContext,
-              "--",
-              "vault",
-              "operator",
-              "unseal",
-              "-format=json",
-              key,
-            ];
-            const { stdout } = await execute({
-              command: vaultUnsealCommand,
-              context,
-              workingDirectory: clusterPath,
-              errorMessage: "Failed to unseal Vault",
-            });
 
-            const statusData = JSON.parse(stdout.trim());
-            const unsealOutput = UNSEAL_OUTPUT_SCHEMA.parse(statusData);
-            sealedStatus = unsealOutput.sealed;
-            if (!sealedStatus) {
-              break;
-            }
-          }
-
-          if (sealedStatus) {
-            // FIX: @seth this logic doesn't make sense????
-            // await writeYAMLFile({
-            //   context,
-            //   values: {
-            //     status: "error",
-            //   },
-            //   overwrite: true,
-            //   filePath: join(modulePath, ".pf.yaml"),
-            // });
-            throw new CLIError(
-              "Failed to unseal Vault after applying all recovery keys"
-            );
-          }
-
-          await upsertConfigValues({
+        let sealedStatus = true;
+        for (const key of vaultRecoveryKeys || ctx.recoveryKeys!) {
+          vaultUnsealCommand = [
+            "kubectl",
+            "exec",
+            "-i",
+            "vault-0",
+            "--namespace=vault",
+            "--context",
+            ctx.kubeContext,
+            "--",
+            "vault",
+            "operator",
+            "unseal",
+            "-format=json",
+            key,
+          ];
+          const { stdout } = await execute({
+            command: vaultUnsealCommand,
             context,
-            environment,
-            region,
-            module: MODULES.KUBE_VAULT,
-            values: {
-              extra_inputs: {
-                wait: undefined
-              }
-            }
-          });
-        } catch (error) {
-          // FIX: @seth this logic doesn't make sense????
-          // await writeYAMLFile({
-          //   context,
-          //   values: {
-          //     status: "error",
-          //   },
-          //   overwrite: true,
-          //   filePath: join(modulePath, ".pf.yaml"),
-          // });
-          throw parseErrorHandler({
-            error,
+            workingDirectory: clusterPath,
             errorMessage: "Failed to unseal Vault",
-            nonZodErrorMessage: "Failed to unseal Vault",
-            location: vaultUnsealCommand.join(" "),
           });
+
+          const unsealOutput = parseJson(UNSEAL_OUTPUT_SCHEMA, stdout.trim());
+          sealedStatus = unsealOutput.sealed;
+          if (!sealedStatus) {
+            break;
+          }
         }
+
+        if (sealedStatus) {
+          throw new CLIError(
+            "Failed to unseal Vault after applying all recovery keys"
+          );
+        }
+
+        await upsertConfigValues({
+          context,
+          environment,
+          region,
+          module: MODULES.KUBE_VAULT,
+          values: {
+            extra_inputs: {
+              wait: undefined
+            }
+          }
+        });
       },
     },
     {

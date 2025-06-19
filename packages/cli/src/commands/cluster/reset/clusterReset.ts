@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { execute } from "@/util/subprocess/execute";
+import { parseJson } from "@/util/zod/parseJson";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -59,12 +60,10 @@ export async function clusterReset({
     workingDirectory: clusterPath,
   });
   const addonsToDisable = ["coredns", "kube-proxy", "vpc-cni"];
-  const addons = JSON.parse(awsAddons);
-  const addonsJson = z
-    .object({
-      addons: z.array(z.string()),
-    })
-    .parse(addons);
+  const addonsSchema = z.object({
+    addons: z.array(z.string()),
+  });
+  const addonsJson = parseJson(addonsSchema, awsAddons);
   for (const addon of addonsJson.addons) {
     if (addonsToDisable.includes(addon)) {
       await execute({
