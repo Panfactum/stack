@@ -1,6 +1,7 @@
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumZodError } from '@/util/error/error';
 import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
 import { getPDBsByWindowId } from '@/util/kube/getPDBs';
 import { PDB_ANNOTATIONS } from '@/util/kube/pdbConstants';
@@ -89,7 +90,11 @@ have passed their disruption window time, preventing pods from being evicted.`,
       let lengthSeconds = 3600;
       const lengthSecondsAnnotation = annotations[PDB_ANNOTATIONS.WINDOW_SECONDS];
       if (lengthSecondsAnnotation) {
-        lengthSeconds = timestampSchema.parse(lengthSecondsAnnotation);
+        const lengthResult = timestampSchema.safeParse(lengthSecondsAnnotation);
+        if (!lengthResult.success) {
+          throw new PanfactumZodError('Invalid timestamp format for window length', 'window-seconds', lengthResult.error);
+        }
+        lengthSeconds = lengthResult.data;
       } else {
         this.context.logger.warn(`\tWarning: PDB does not have '${PDB_ANNOTATIONS.WINDOW_SECONDS}' annotation. Defaulting disruption window length to 3600 seconds.`);
       }
@@ -98,7 +103,11 @@ have passed their disruption window time, preventing pods from being evicted.`,
         this.context.logger.info(`\tSkipping... PDB does not have '${PDB_ANNOTATIONS.WINDOW_START}' annotation.`);
         skipped++;
       } else {
-        const startTimestamp = timestampSchema.parse(startTime);
+        const startResult = timestampSchema.safeParse(startTime);
+        if (!startResult.success) {
+          throw new PanfactumZodError('Invalid timestamp format for window start', 'window-start', startResult.error);
+        }
+        const startTimestamp = startResult.data;
         const currentTime = Math.floor(Date.now() / 1000);
         
         if (startTimestamp + lengthSeconds >= currentTime) {

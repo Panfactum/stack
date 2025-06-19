@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { type Architecture, architectureSchema } from '@/util/buildkit/constants.js'
 import { scaleUpBuildKit } from '@/util/buildkit/scaleUp.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumZodError } from '@/util/error/error.js'
 
 // Zod schemas for input validation
 const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number)
@@ -35,11 +36,18 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
     // Validate architecture if provided and get properly typed value
     let architectures: Architecture[] | undefined
     if (this.only) {
-      const validatedOnly = architectureSchema.parse(this.only)
-      architectures = [validatedOnly]
+      const result = architectureSchema.safeParse(this.only)
+      if (!result.success) {
+        throw new PanfactumZodError('Invalid architecture value', 'architecture', result.error);
+      }
+      architectures = [result.data]
     }
 
-    const timeoutSeconds = timeoutSchema.parse(this.timeout)
+    const timeoutResult = timeoutSchema.safeParse(this.timeout)
+    if (!timeoutResult.success) {
+      throw new PanfactumZodError('Invalid timeout value', 'timeout', timeoutResult.error);
+    }
+    const timeoutSeconds = timeoutResult.data
 
     await scaleUpBuildKit({
       context: this.context,

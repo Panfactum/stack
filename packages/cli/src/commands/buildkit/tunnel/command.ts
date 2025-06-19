@@ -6,7 +6,7 @@ import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { scaleUpBuildKit } from '@/util/buildkit/scaleUp.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
-import { CLIError } from '@/util/error/error.js'
+import { CLIError, PanfactumZodError } from '@/util/error/error.js'
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
 
 // Zod schema for port validation
@@ -37,10 +37,18 @@ export default class BuildkitTunnelCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
-    const validatedArch = architectureSchema.parse(this.arch)
+    const archResult = architectureSchema.safeParse(this.arch)
+    if (!archResult.success) {
+      throw new PanfactumZodError('Invalid architecture value', 'architecture', archResult.error);
+    }
+    const validatedArch = archResult.data
 
     // Validate port
-    const portNum = portSchema.parse(this.port)
+    const portResult = portSchema.safeParse(this.port)
+    if (!portResult.success) {
+      throw new PanfactumZodError('Invalid port value', 'port', portResult.error);
+    }
+    const portNum = portResult.data
 
     // Get BuildKit configuration
     const config = await getBuildKitConfig(this.context)

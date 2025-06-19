@@ -110,10 +110,8 @@ export class SSOAddCommand extends PanfactumCommand {
             }
         })
 
-        try {
-            await tasks.run();
-        } catch (e) {
+        await tasks.run().catch((e) => {
             throw new CLIError("Failed to Install Authentik", e);
-        }
+        })
     }
 }

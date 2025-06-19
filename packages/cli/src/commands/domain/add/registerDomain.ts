@@ -8,7 +8,7 @@ import {
 } from "@aws-sdk/client-route-53";
 import { ContactType, CountryCode, GetOperationDetailCommand, RegisterDomainCommand, ResendOperationAuthorizationCommand, Route53DomainsClient, type ContactDetail } from "@aws-sdk/client-route-53-domains";
 import { Listr } from "listr2";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 import moduleHCL from "@/templates/aws_registered_domains.hcl" with { type: "file" };
 import { getAccountClient } from "@/util/aws/clients/getAccountClient";
 import { getIdentity } from "@/util/aws/getIdentity";
@@ -16,7 +16,7 @@ import { COUNTRY_CODES } from "@/util/aws/schemas";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
-import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
@@ -649,15 +649,7 @@ export async function registerDomain(inputs: {
     })
     context.logger.success(`${domain} registered in ${env.name} successfully!`)
 
-    try {
-        return validateDomainConfig(domainConfig)
-    } catch (e) {
-        if (e instanceof ZodError) {
-            throw new PanfactumZodError("Failed to parse domain config", "registerDomain", e)
-        } else {
-            throw new CLIError("Failed to parse domain config", e)
-        }
-    }
+    return validateDomainConfig(domainConfig)
 }
 
 

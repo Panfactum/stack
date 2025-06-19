@@ -38,7 +38,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
             kms: z.array(z.record(z.string())).optional()
           }).optional()
         }).passthrough(); // Allow other fields in the YAML
-        
+
         const data = await readYAMLFile({
           context: this.context,
           filePath,
@@ -46,7 +46,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
           throwOnMissing: false,
           throwOnEmpty: false
         });
-        
+
         if (!data) {
           return {
             filePath,
@@ -62,7 +62,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
             reason: 'Not a SOPS-encrypted file (no sops.kms section)'
           };
         }
-        
+
         if (!Array.isArray(data.sops.kms)) {
           return {
             filePath,
@@ -70,7 +70,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
             reason: 'Invalid SOPS format (kms is not an array)'
           };
         }
-        
+
         let updated = false;
         for (const kms of data.sops.kms) {
           if ('aws_profile' in kms) {
@@ -78,7 +78,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
             updated = true;
           }
         }
-        
+
         if (!updated) {
           return {
             filePath,
@@ -86,14 +86,14 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
             reason: 'No AWS profiles found in KMS configuration'
           };
         }
-        
+
         await writeYAMLFile({
           context: this.context,
           filePath,
           values: data,
           overwrite: true
         });
-        
+
         return {
           filePath,
           status: 'updated'

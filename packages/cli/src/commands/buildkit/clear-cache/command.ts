@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
-import { CLIError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { parseJson } from '@/util/zod/parseJson.js'
@@ -160,28 +159,25 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
       if (status === 'Running' && podName && podName.includes('buildkit')) {
         this.context.logger.info(`Pruning cache in running BuildKit pod: ${podName}`)
         
-        try {
-          await execute({
-            command: [
-              'kubectl',
-              ...contextArgs,
-              'exec',
-              podName,
-              '-c',
-              'buildkitd',
-              '-n',
-              BUILDKIT_NAMESPACE,
-              '--',
-              'buildctl',
-              'prune',
-              '--all'
-            ],
-            context: this.context,
-            workingDirectory: process.cwd()
-          })
-        } catch (error) {
-          throw new CLIError(`Failed to prune cache in pod ${podName}`, error)
-        }
+        await execute({
+          command: [
+            'kubectl',
+            ...contextArgs,
+            'exec',
+            podName,
+            '-c',
+            'buildkitd',
+            '-n',
+            BUILDKIT_NAMESPACE,
+            '--',
+            'buildctl',
+            'prune',
+            '--all'
+          ],
+          context: this.context,
+          workingDirectory: process.cwd(),
+          errorMessage: `Failed to prune cache in pod ${podName}`
+        })
       }
     }
   }

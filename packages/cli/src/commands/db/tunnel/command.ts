@@ -7,7 +7,7 @@ import { getTempCredentials } from '@/util/db/getTempCredentials.ts'
 import { getVaultRole } from '@/util/db/getVaultRole.ts'
 import { listDatabases } from '@/util/db/listDatabases.ts'
 import { databaseTypeSchema, vaultRoleSchema, type DatabaseType } from '@/util/db/types.ts'
-import { CLIError } from '@/util/error/error'
+import { CLIError, PanfactumZodError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
@@ -57,7 +57,21 @@ export class DbTunnelCommand extends PanfactumCommand {
     // Validate type if provided and get properly typed value
     let validatedType: DatabaseType | undefined
     if (this.type) {
-      validatedType = databaseTypeSchema.parse(this.type)
+      const typeResult = databaseTypeSchema.safeParse(this.type)
+      if (!typeResult.success) {
+        throw new PanfactumZodError('Invalid database type', 'type', typeResult.error)
+      }
+      validatedType = typeResult.data
+    }
+
+    // Validate port if provided (fail fast)
+    let validatedPort: number | undefined
+    if (this.port) {
+      const portResult = portSchema.safeParse(this.port)
+      if (!portResult.success) {
+        throw new PanfactumZodError('Invalid port', 'port', portResult.error)
+      }
+      validatedPort = portResult.data
     }
 
     const regions = (await getAllRegions(this.context)).filter(region => region.bastionDeployed)
@@ -130,10 +144,14 @@ export class DbTunnelCommand extends PanfactumCommand {
     })
 
     // Validate the selected role
-    const validatedRole = vaultRoleSchema.parse(selectedRole)
+    const roleResult = vaultRoleSchema.safeParse(selectedRole)
+    if (!roleResult.success) {
+      throw new PanfactumZodError('Invalid database role', 'role', roleResult.error)
+    }
+    const validatedRole = roleResult.data
 
     // Get local port
-    const localPort = this.port ? portSchema.parse(this.port) : await getOpenPort()
+    const localPort = validatedPort ?? await getOpenPort()
 
     // Step 2: Get temporary credentials
     const vaultRole = getVaultRole(selectedDb, validatedRole)
@@ -222,22 +240,21 @@ export class DbTunnelCommand extends PanfactumCommand {
     // Handle cleanup on process termination
     const cleanup = async () => {
       if (credentials.leaseId) {
-        try {
-          context.logger.info('Revoking database credentials...')
-          const vaultToken = await getVaultToken({ context, address: config.vault_addr! })
-          await execute({
-            command: ['vault', 'lease', 'revoke', credentials.leaseId],
-            context,
-            workingDirectory: process.cwd(),
-            env: { 
-              ...process.env,
-              VAULT_ADDR: config.vault_addr,
-              VAULT_TOKEN: vaultToken 
-            },
-          })
-        } catch {
-          // Ignore errors during cleanup
-        }
+        context.logger.info('Revoking database credentials...')
+        const vaultToken = await getVaultToken({ context, address: config.vault_addr! })
+        await execute({
+          command: ['vault', 'lease', 'revoke', credentials.leaseId],
+          context,
+          workingDirectory: process.cwd(),
+          env: { 
+            ...process.env,
+            VAULT_ADDR: config.vault_addr,
+            VAULT_TOKEN: vaultToken 
+          },
+        }).catch((error) => {
+          // Log cleanup errors but don't throw
+          context.logger.debug('Error during tunnel cleanup', { error })
+        })
       }
       await tunnelHandle.close()
       process.exit(0)

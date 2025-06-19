@@ -24,16 +24,13 @@ Velero backups, cleaning up cloud storage resources.`,
 
   async execute() {
     const backupExists = async (backupName: string): Promise<boolean> => {
-      try {
-        const result = await execute({
-          command: ['kubectl', 'get', 'backup.velero.io', backupName, '-n', 'velero', '--ignore-not-found'],
-          context: this.context,
-          workingDirectory: process.cwd(),
-        });
-        return result.stdout.trim() !== '';
-      } catch {
-        return false;
-      }
+      return execute({
+        command: ['kubectl', 'get', 'backup.velero.io', backupName, '-n', 'velero', '--ignore-not-found'],
+        context: this.context,
+        workingDirectory: process.cwd(),
+      })
+        .then((result) => result.stdout.trim() !== '')
+        .catch(() => false);
     };
 
     const getVolumeSnapshots = async (): Promise<VolumeSnapshot[]> => {

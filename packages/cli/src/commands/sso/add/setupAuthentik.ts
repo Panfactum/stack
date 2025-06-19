@@ -1,6 +1,6 @@
 import path, { join } from "node:path";
 import { cwd } from "node:process";
-import { CoreApi, Configuration, type PaginatedGroupList, type User, type Link, IntentEnum, type PaginatedUserList, type PaginatedBrandList } from "@goauthentik/api";
+import { CoreApi, Configuration, type User, IntentEnum } from "@goauthentik/api";
 import open from "open";
 import { z } from "zod";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
@@ -373,17 +373,14 @@ export async function setupAuthentik(
                 process.env["BUN_CONFIG_DNS_TIME_TO_LIVE_SECONDS"] = "5";
 
                 while (attempts < maxAttempts) {
-                    try {
-                        const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
-                        task.title = context.logger.applyColors(`Verifying the Authentik Ingress ${statusStr}`, { lowlights: [statusStr] });
-                        const response = await Bun.fetch(`https://${data.extra_inputs.domain}/-/health/ready/`);
-                        if (response.status === 200) {
-                            task.title = context.logger.applyColors("Authentik ready check successful");
-                            break;
-                        }
-                    } catch {
-                        // Expected to error while waiting for DNS to propagate
+                    const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
+                    task.title = context.logger.applyColors(`Verifying the Authentik Ingress ${statusStr}`, { lowlights: [statusStr] });
+                    const response = await Bun.fetch(`https://${data.extra_inputs.domain}/-/health/ready/`).catch(() => null);
+                    if (response?.status === 200) {
+                        task.title = context.logger.applyColors("Authentik ready check successful");
+                        break;
                     }
+                    // Expected to error while waiting for DNS to propagate
                     attempts++;
 
                     if (attempts < maxAttempts) {
@@ -425,28 +422,23 @@ export async function setupAuthentik(
 
                 const authentikClient = new CoreApi(configuration)
 
-                let brands: PaginatedBrandList
-                try {
-                    brands = await authentikClient.coreBrandsList()
-                } catch (error) {
+                const brands = await authentikClient.coreBrandsList().catch((error) => {
                     throw new CLIError("Failed to get brands from Authentik", error);
-                }
+                })
 
                 const authentikDefaultBrand = brands.results.find(
                     (brand) => brand.domain === "authentik-default"
                 );
                 if (authentikDefaultBrand) {
-                    try {
-                        await authentikClient.coreBrandsUpdate({
-                            brandUuid: authentikDefaultBrand.brandUuid,
-                            brandRequest: {
-                                domain: authentikDefaultBrand.domain,
-                                _default: false,
-                            }
-                        })
-                    } catch (error) {
+                    await authentikClient.coreBrandsUpdate({
+                        brandUuid: authentikDefaultBrand.brandUuid,
+                        brandRequest: {
+                            domain: authentikDefaultBrand.domain,
+                            _default: false,
+                        }
+                    }).catch((error) => {
                         throw new CLIError("Failed to update default brand in Authentik", error);
-                    }
+                    })
                 }
 
                 // FIX: @seth - NEVER read to the config files directly
@@ -634,12 +626,9 @@ spec:
 
                 // get superusers group uuid
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-groups-list
-                let groups: PaginatedGroupList
-                try {
-                    groups = await originalAuthentikClient.coreGroupsList()
-                } catch (error) {
+                const groups = await originalAuthentikClient.coreGroupsList().catch((error) => {
                     throw new CLIError("Failed to get groups in Authentik", error);
-                }
+                })
                 const superusersGroup = groups.results.find(
                     (group) => group.name === "superusers"
                 );
@@ -651,42 +640,35 @@ spec:
                 // create the user via API
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-create
                 let user: User | undefined
-                try {
-                    const users = await originalAuthentikClient.coreUsersList()
-                    user = users.results.find(
-                        (user) => user.username === ctx.authentikAdminEmail
-                    );
-                } catch (error) {
+                const existingUsers = await originalAuthentikClient.coreUsersList().catch((error) => {
                     throw new CLIError("Failed to get users from Authentik", error);
-                }
+                })
+                user = existingUsers.results.find(
+                    (user) => user.username === ctx.authentikAdminEmail
+                );
 
                 if (!user) {
-                    try {
-                        user = await originalAuthentikClient.coreUsersCreate({
-                            userRequest: {
-                                username: ctx.authentikAdminEmail,
-                                name: ctx.authentikAdminName,
-                                email: ctx.authentikAdminEmail,
-                                isActive: true,
-                                groups: [superusersGroupUuid],
-                                path: "users",
-                                type: "internal",
-                            }
-                        })
-                    } catch (error) {
+                    user = await originalAuthentikClient.coreUsersCreate({
+                        userRequest: {
+                            username: ctx.authentikAdminEmail,
+                            name: ctx.authentikAdminName,
+                            email: ctx.authentikAdminEmail,
+                            isActive: true,
+                            groups: [superusersGroupUuid],
+                            path: "users",
+                            type: "internal",
+                        }
+                    }).catch((error) => {
                         throw new CLIError("Failed to create user in Authentik", error);
-                    }
+                    })
                 }
                 const userId = user.pk;
 
-                let passwordReset: Link
-                try {
-                    passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
-                        id: userId,
-                    })
-                } catch (error) {
+                const passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
+                    id: userId,
+                }).catch((error) => {
                     throw new CLIError("Failed to get password reset link in Authentik", error);
-                }
+                })
                 const passwordResetLink = passwordReset.link;
 
                 const openBrowser = await context.logger.confirm({
@@ -723,20 +705,18 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                 // Get a new token
                 // If they manually disable the token we will run into identifier collisions
                 const tokenIdentifier = "local-framework-token" + Date.now()
-                try {
-                    await originalAuthentikClient.coreTokensCreate({
-                        tokenRequest: {
-                            identifier: tokenIdentifier,
-                            intent: IntentEnum.Api,
-                            user: userId,
-                            expiring: false,
-                            description:
-                                "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
-                        }
-                    })
-                } catch (error) {
+                await originalAuthentikClient.coreTokensCreate({
+                    tokenRequest: {
+                        identifier: tokenIdentifier,
+                        intent: IntentEnum.Api,
+                        user: userId,
+                        expiring: false,
+                        description:
+                            "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
+                    }
+                }).catch((error) => {
                     throw new CLIError("Failed to create API token in Authentik", error);
-                }
+                })
 
                 const tokenLink = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D`
                 await open(tokenLink)
@@ -750,22 +730,18 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                     Look for the token with the identifier '${tokenIdentifier}'`,
                     message: "Copy the token and paste it here:",
                     validate: async (value) => {
-                        try {
-                            const response = await Bun.fetch(
-                                `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3/core/groups/`,
-                                {
-                                    headers: {
-                                        Authorization: `Bearer ${value}`,
-                                    },
-                                }
-                            );
-                            if (response.status !== 200) {
-                                return "This does not appear to be a valid Authentik Access Token. Please try again.";
+                        const response = await Bun.fetch(
+                            `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3/core/groups/`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${value}`,
+                                },
                             }
-                            return true;
-                        } catch {
-                            return "Error validating Authentik Access Token, please try again.";
+                        ).catch(() => null);
+                        if (!response || response.status !== 200) {
+                            return response ? "This does not appear to be a valid Authentik Access Token. Please try again." : "Error validating Authentik Access Token, please try again.";
                         }
+                        return true;
                     },
                 });
 
@@ -786,23 +762,18 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
 
                 // delete the bootstrap token
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-destroy
-                try {
-                    await originalAuthentikClient.coreTokensDestroy({
-                        identifier: "authentik-bootstrap-token",
-                    })
-                } catch (error) {
+                await originalAuthentikClient.coreTokensDestroy({
+                    identifier: "authentik-bootstrap-token",
+                }).catch((error) => {
                     throw new CLIError("Failed to delete bootstrap token in Authentik", error);
-                }
+                })
 
                 // get all the users
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-list
-                let users: PaginatedUserList
-                try {
-                    users = await newAuthentikClient.coreUsersList()
-                } catch (error) {
+                const allUsers = await newAuthentikClient.coreUsersList().catch((error) => {
                     throw new CLIError("Failed to get users from Authentik", error);
-                }
-                const bootstrapUser = users.results.find(
+                })
+                const bootstrapUser = allUsers.results.find(
                     (user) => user.username === "akadmin"
                 );
                 if (!bootstrapUser) {
@@ -812,18 +783,16 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
 
                 // disable the bootstrap user
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-update
-                try {
-                    await newAuthentikClient.coreUsersUpdate({
-                        id: bootstrapUserUuid,
-                        userRequest: {
-                            username: "akadmin",
-                            name: 'Authentik Root User',
-                            isActive: false,
-                        }
-                    })
-                } catch (error) {
+                await newAuthentikClient.coreUsersUpdate({
+                    id: bootstrapUserUuid,
+                    userRequest: {
+                        username: "akadmin",
+                        name: 'Authentik Root User',
+                        isActive: false,
+                    }
+                }).catch((error) => {
                     throw new CLIError("Failed to disable bootstrap user in Authentik", error);
-                }
+                })
 
                 await upsertPFYAMLFile({
                     context,

@@ -4,6 +4,7 @@ import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX
 import { getLastBuildTime } from '@/util/buildkit/getLastBuildTime.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
+import { PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 
@@ -28,7 +29,11 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
     let timeoutSeconds: number | undefined
     if (this.timeout) {
       const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number);
-      timeoutSeconds = timeoutSchema.parse(this.timeout);
+      const result = timeoutSchema.safeParse(this.timeout);
+      if (!result.success) {
+        throw new PanfactumZodError('Invalid timeout value', 'timeout', result.error);
+      }
+      timeoutSeconds = result.data;
     }
 
     // Validate context if provided
