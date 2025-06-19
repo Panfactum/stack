@@ -3,7 +3,7 @@ import { GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { z } from "zod";
 import { getIAMClient } from "@/util/aws/clients/getIAMClient.ts";
 import { getSTSClient } from "@/util/aws/clients/getSTSClient";
-import { PanfactumZodError } from "@/util/error/error";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 // Zod schemas for AWS API responses
@@ -26,14 +26,12 @@ export async function checkAdminPermissions(inputs: { context: PanfactumContext,
     accountId?: string;
 }> {
     const stsClient = await getSTSClient(inputs)
-        .catch(() => {
-            // If we can't create the STS client, credentials are invalid
-            return null;
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Failed to create STS client for profile '${inputs.profile}'`,
+                error
+            );
         });
-    
-    if (!stsClient) {
-        return { status: "invalidCredentials" };
-    }
 
     const identity = await stsClient.send(new GetCallerIdentityCommand({}))
         .catch(() => {
@@ -64,14 +62,12 @@ export async function checkAdminPermissions(inputs: { context: PanfactumContext,
     }
 
     const iamClient = await getIAMClient(inputs)
-        .catch(() => {
-            // If we can't create the IAM client, assume missing permissions
-            return null;
+        .catch((error: unknown) => {
+            throw new CLIError(
+                `Failed to create IAM client for profile '${inputs.profile}'`,
+                error
+            );
         });
-    
-    if (!iamClient) {
-        return { status: "missingAdministratorAccess", username, accountId };
-    }
 
     const userPoliciesResponse = await iamClient.send(new ListAttachedUserPoliciesCommand({
         UserName: username
