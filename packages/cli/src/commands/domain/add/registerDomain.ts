@@ -15,7 +15,7 @@ import { COUNTRY_CODES } from "@/util/aws/schemas";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { validateDomainConfig, type DomainConfig } from "@/util/domains/tasks/types";
-import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
@@ -48,38 +48,6 @@ const CONTACT_INFO_SCHEMA = z.object({
     zip_code: z.string().optional(),
     country_code: z.string().length(2).optional().catch(undefined)
 })
-
-// Zod schemas for AWS API responses
-const registerDomainResponseSchema = z.object({
-    OperationId: z.string().optional()
-}).passthrough();
-
-const getOperationDetailResponseSchema = z.object({
-    Status: z.string().optional(),
-    Message: z.string().optional(),
-    StatusFlag: z.string().optional()
-}).passthrough();
-
-const listHostedZonesByNameResponseSchema = z.object({
-    HostedZones: z.array(z.object({
-        Id: z.string().optional(),
-        Name: z.string().optional()
-    }).passthrough()).optional()
-}).passthrough();
-
-const getContactInformationResponseSchema = z.object({
-    ContactInformation: z.object({
-        FullName: z.string().optional(),
-        CompanyName: z.string().optional(),
-        PhoneNumber: z.string().optional(),
-        AddressLine1: z.string().optional(),
-        AddressLine2: z.string().optional(),
-        City: z.string().optional(),
-        StateOrRegion: z.string().optional(),
-        CountryCode: z.string().optional(),
-        PostalCode: z.string().optional()
-    }).optional()
-}).passthrough();
 
 export async function registerDomain(inputs: {
     domain: string,
@@ -445,17 +413,7 @@ export async function registerDomain(inputs: {
                         );
                     });
 
-                // Validate response
-                const validationResult = registerDomainResponseSchema.safeParse(response);
-                if (!validationResult.success) {
-                    throw new PanfactumZodError(
-                        "Invalid register domain response format",
-                        "Route53 Domains RegisterDomain API",
-                        validationResult.error
-                    );
-                }
-
-                const { OperationId: opId } = validationResult.data;
+                const { OperationId: opId } = response;
                 if (!opId) {
                     throw new CLIError("Did not receive an OperationId from the registration request")
                 }
@@ -485,17 +443,7 @@ export async function registerDomain(inputs: {
                     );
                 });
                 
-                // Validate response
-                const validationResult = getOperationDetailResponseSchema.safeParse(response);
-                if (!validationResult.success) {
-                    throw new PanfactumZodError(
-                        "Invalid operation detail response format",
-                        "Route53 Domains GetOperationDetail API",
-                        validationResult.error
-                    );
-                }
-                
-                const { Status: status, Message: message, StatusFlag: flag } = validationResult.data;
+                const { Status: status, Message: message, StatusFlag: flag } = response;
 
                 // 1) Handle terminal statuses first:
                 if (status === "SUCCESSFUL") {
@@ -576,17 +524,7 @@ export async function registerDomain(inputs: {
                     );
                 });
             
-            // Validate response
-            const validationResult = listHostedZonesByNameResponseSchema.safeParse(response);
-            if (!validationResult.success) {
-                throw new PanfactumZodError(
-                    "Invalid hosted zones response format",
-                    "Route53 ListHostedZonesByName API",
-                    validationResult.error
-                );
-            }
-            
-            const hostedZones = validationResult.data.HostedZones ?? []
+            const hostedZones = response.HostedZones ?? []
 
             if (!hostedZones.length ||
                 !hostedZones[0]?.Name?.startsWith(domain)) {
@@ -760,14 +698,7 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
         return null;
     }
 
-    // Validate response
-    const validationResult = getContactInformationResponseSchema.safeParse(response);
-    if (!validationResult.success) {
-        context.logger.debug(`Invalid contact information response format: ${validationResult.error.message}`);
-        return null;
-    }
-
-    const { ContactInformation: contactInfo } = validationResult.data;
+    const { ContactInformation: contactInfo } = response;
     if (!contactInfo) {
         return null;
     }

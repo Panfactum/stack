@@ -1,22 +1,10 @@
 import { ListPricesCommand } from "@aws-sdk/client-route-53-domains";
-import { z } from "zod";
 import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { CLIError } from "@/util/error/error";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
-
-// Zod schema for validating Route53 Domains pricing response
-const priceItemSchema = z.object({
-    RegistrationPrice: z.object({
-        Price: z.number()
-    }).optional()
-}).passthrough();
-
-const listPricesResponseSchema = z.object({
-    Prices: z.array(priceItemSchema).optional()
-}).passthrough();
 
 export async function getDomainPrice(inputs: {
     context: PanfactumContext;
@@ -57,21 +45,9 @@ export async function getDomainPrice(inputs: {
                 error
             );
         });
-
-    // Validate the response
-    const validationResult = listPricesResponseSchema.safeParse(priceResponse);
-    if (!validationResult.success) {
-        throw new PanfactumZodError(
-            `Invalid pricing response format for TLD .${tld}`,
-            'Route53 Domains ListPrices API',
-            validationResult.error
-        );
-    }
-
-    const validatedResponse = validationResult.data;
     
-    if (validatedResponse.Prices?.length) {
-        const registrationPrice = validatedResponse.Prices.find(
+    if (priceResponse.Prices?.length) {
+        const registrationPrice = priceResponse.Prices.find(
             (price) => price.RegistrationPrice?.Price !== undefined
         )?.RegistrationPrice?.Price;
         if (registrationPrice !== undefined) {

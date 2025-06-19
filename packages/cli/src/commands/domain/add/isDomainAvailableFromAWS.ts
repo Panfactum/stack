@@ -1,16 +1,10 @@
 import { CheckDomainAvailabilityCommand, UnsupportedTLD } from "@aws-sdk/client-route-53-domains";
-import { z } from "zod";
 import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsClient";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { CLIError } from "@/util/error/error";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
-
-// Zod schema for validating domain availability response
-const checkDomainAvailabilityResponseSchema = z.object({
-    Availability: z.enum(['AVAILABLE', 'UNAVAILABLE', 'RESERVED', 'DONT_KNOW']).optional()
-}).passthrough();
 
 export async function isDomainAvailableFromAWS(inputs: { context: PanfactumContext, env: EnvironmentMeta, domain: string, tld: string }): Promise<boolean> {
     const { context, env, domain, tld } = inputs;
@@ -63,21 +57,9 @@ export async function isDomainAvailableFromAWS(inputs: { context: PanfactumConte
         return false;
     }
 
-    // Validate the response
-    const validationResult = checkDomainAvailabilityResponseSchema.safeParse(availabilityResponse);
-    if (!validationResult.success) {
-        throw new PanfactumZodError(
-            `Invalid domain availability response format for ${domain}`,
-            'Route53 Domains CheckDomainAvailability API',
-            validationResult.error
-        );
-    }
-
-    const validatedResponse = validationResult.data;
-
-    if (validatedResponse.Availability !== 'AVAILABLE') {
+    if (availabilityResponse.Availability !== 'AVAILABLE') {
         context.logger.error(
-            `The domain ${domain} is not available for purchase (Status: ${validatedResponse.Availability})\n\n` +
+            `The domain ${domain} is not available for purchase (Status: ${availabilityResponse.Availability})\n\n` +
             `For more information on the above status code, see these docs:\n` +
             `https://docs.aws.amazon.com/Route53/latest/APIReference/API_domains_CheckDomainAvailability.html`
         );
