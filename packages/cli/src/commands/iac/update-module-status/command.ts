@@ -1,6 +1,6 @@
 import { Command, Option } from "clipanion";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
-import { parseErrorHandler } from "@/util/error/parseErrorHandler";
+import { PanfactumZodError } from "@/util/error/error";
 import { DEPLOY_STATUS_SCHEMA, INIT_STATUS_SCHEMA } from "@/util/terragrunt/schemas";
 import { updateModuleStatus } from "@/util/terragrunt/updateModuleStatus";
 
@@ -34,20 +34,20 @@ export class UpdateModuleStatusCommand extends PanfactumCommand {
 
     let validatedInitStatus;
     if (initStatus) {
-      try {
-        validatedInitStatus = INIT_STATUS_SCHEMA.parse(initStatus)
-      } catch (error) {
-        throw parseErrorHandler({ error, errorMessage: "Invalid value for --init-status/-i", location: "--init-status/-i" })
+      const parseResult = INIT_STATUS_SCHEMA.safeParse(initStatus);
+      if (!parseResult.success) {
+        throw new PanfactumZodError("Invalid value for --init-status/-i", "--init-status/-i", parseResult.error);
       }
+      validatedInitStatus = parseResult.data;
     }
 
     let validatedDeployStatus;
     if (deployStatus) {
-      try {
-        validatedDeployStatus = DEPLOY_STATUS_SCHEMA.parse(deployStatus)
-      } catch (error) {
-        throw parseErrorHandler({ error, errorMessage: "Invalid value for --deploy-status/-d", location: "--deploy-status/-d" })
+      const parseResult = DEPLOY_STATUS_SCHEMA.safeParse(deployStatus);
+      if (!parseResult.success) {
+        throw new PanfactumZodError("Invalid value for --deploy-status/-d", "--deploy-status/-d", parseResult.error);
       }
+      validatedDeployStatus = parseResult.data;
     }
 
     await updateModuleStatus({ context, initStatus: validatedInitStatus, deployStatus: validatedDeployStatus, moduleDirectory: directory })

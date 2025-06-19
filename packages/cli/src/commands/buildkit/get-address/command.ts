@@ -5,6 +5,7 @@ import { Command, Option } from 'clipanion'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumZodError } from '@/util/error/error.js'
 
 export class GetAddressCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'get-address']]
@@ -36,7 +37,11 @@ export class GetAddressCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
-    const validatedArch = architectureSchema.parse(this.arch)
+    const parseResult = architectureSchema.safeParse(this.arch);
+    if (!parseResult.success) {
+      throw new PanfactumZodError('Invalid architecture', 'arch', parseResult.error);
+    }
+    const validatedArch = parseResult.data;
 
     const address = await getBuildKitAddress({
       arch: validatedArch,

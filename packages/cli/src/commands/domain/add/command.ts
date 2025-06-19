@@ -1,6 +1,5 @@
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
-import { ZodError } from "zod";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
 import { DOMAIN } from "@/util/config/schemas";
@@ -142,15 +141,11 @@ export class DomainAddCommand extends PanfactumCommand {
                 }
             })
         } else {
-            try {
-                newDomain = DOMAIN.parse(newDomain)
-            } catch (e) {
-                if (e instanceof ZodError) {
-                    throw new PanfactumZodError("Invalid domain format", "--domain", e)
-                } else {
-                    throw new CLIError("Failed to parse domain", e)
-                }
+            const parseResult = DOMAIN.safeParse(newDomain);
+            if (!parseResult.success) {
+                throw new PanfactumZodError("Invalid domain format", "--domain", parseResult.error);
             }
+            newDomain = parseResult.data;
         }
         context.logger.addIdentifier(newDomain)
 

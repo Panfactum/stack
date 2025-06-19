@@ -5,6 +5,7 @@ import { Command, Option } from 'clipanion'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumZodError } from '@/util/error/error.js'
 
 export class RecordBuildCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'record-build']]
@@ -32,7 +33,11 @@ export class RecordBuildCommand extends PanfactumCommand {
 
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
-    const validatedArch = architectureSchema.parse(this.arch)
+    const parseResult = architectureSchema.safeParse(this.arch);
+    if (!parseResult.success) {
+      throw new PanfactumZodError('Invalid architecture', 'arch', parseResult.error);
+    }
+    const validatedArch = parseResult.data;
 
     await recordBuildKitBuild({
       arch: validatedArch,
