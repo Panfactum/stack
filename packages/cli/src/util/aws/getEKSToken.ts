@@ -1,6 +1,3 @@
-// Utility to get EKS authentication tokens using AWS SDK with proper error handling
-// Uses AWS SDK for direct token generation with type safety
-
 import { Buffer } from 'node:buffer';
 import { URL } from 'node:url';
 import { Sha256 } from '@aws-crypto/sha256-js';
