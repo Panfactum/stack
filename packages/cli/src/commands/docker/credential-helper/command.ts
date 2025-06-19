@@ -1,23 +1,18 @@
 import { Command, Option } from 'clipanion'
+import { z } from 'zod'
 import { getBuildKitConfig } from '@/util/buildkit'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
-import { getECRToken } from '@/util/docker/getECRToken.ts'
-import { CLIError } from '@/util/error/error'
+import { getECRToken, parseECRToken } from '@/util/docker/getECRToken.ts'
+import { CLIError, PanfactumZodError } from '@/util/error/error'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
 import { execute } from '@/util/subprocess/execute.ts'
 import type { PanfactumContext } from '@/util/context/context'
 
-// Helper function to parse ECR authorization token
-function parseECRToken(token: string): { username: string; password: string } {
-  const decoded = globalThis.Buffer.from(token, 'base64').toString('utf8');
-  const [username, password] = decoded.split(':');
-  
-  if (!username || !password) {
-    throw new CLIError('Invalid token format received from ECR');
-  }
-  
-  return { username, password };
-}
+// Zod schemas for validation
+const dockerCredentialOutputSchema = z.object({
+  Username: z.string(),
+  Secret: z.string()
+})
 
 export class DockerCredentialHelperCommand extends PanfactumCommand {
   static override paths = [['docker', 'credential-helper']]
@@ -102,41 +97,54 @@ export class DockerCredentialHelperCommand extends PanfactumCommand {
     const awsProfile = await getAWSProfileForContext(context, buildkitConfig.cluster)
 
     // Get token from ECR (with caching)
-    try {
-      const token = await getECRToken({ context, registry, awsProfile })
-      const { username, password } = parseECRToken(token)
-
-      // Output in Docker credential helper format
-      this.context.stdout.write(JSON.stringify({
-        Username: username,
-        Secret: password,
-      }))
-    } catch (error) {
-      // Check if SSO login is needed
-      if (error instanceof Error && (error.message?.includes('SSO') || error.message?.includes('sso'))) {
-        // Try to login to SSO
-        if (awsProfile) {
-          await execute({
-            command: ['aws', 'sso', 'login', '--profile', awsProfile],
-            context,
-            workingDirectory: process.cwd(),
-          })
-          
-          // Retry getting token (skip cache to get fresh token after SSO login)
-          const token = await getECRToken({ context, registry, awsProfile, skipCache: true })
-          const { username, password } = parseECRToken(token)
-
-          this.context.stdout.write(JSON.stringify({
-            Username: username,
-            Secret: password,
-          }))
-        } else {
-          throw error
+    const token = await getECRToken({ context, registry, awsProfile })
+      .catch(async (error: unknown) => {
+        // Check if SSO login is needed
+        if (error instanceof Error && (error.message?.includes('SSO') || error.message?.includes('sso'))) {
+          // Try to login to SSO
+          if (awsProfile) {
+            await execute({
+              command: ['aws', 'sso', 'login', '--profile', awsProfile],
+              context,
+              workingDirectory: process.cwd(),
+            }).catch((ssoError: unknown) => {
+              throw new CLIError(
+                `Failed to login to AWS SSO for profile '${awsProfile}'`,
+                ssoError
+              )
+            })
+            
+            // Retry getting token (skip cache to get fresh token after SSO login)
+            return getECRToken({ context, registry, awsProfile, skipCache: true })
+              .catch((retryError: unknown) => {
+                throw new CLIError(
+                  `Failed to get ECR token after SSO login for registry '${registry}'`,
+                  retryError
+                )
+              })
+          }
         }
-      } else {
-        throw error
-      }
+        throw new CLIError(
+          `Failed to get ECR token for registry '${registry}'`,
+          error
+        )
+      })
+    
+    const { username, password } = parseECRToken(token)
+
+    // Validate output format before sending
+    const output = { Username: username, Secret: password }
+    const outputResult = dockerCredentialOutputSchema.safeParse(output)
+    if (!outputResult.success) {
+      throw new PanfactumZodError(
+        'Invalid Docker credential output format',
+        'Docker credential helper response',
+        outputResult.error
+      )
     }
+
+    // Output in Docker credential helper format
+    this.context.stdout.write(JSON.stringify(outputResult.data))
   }
 
   private async handleList() {
