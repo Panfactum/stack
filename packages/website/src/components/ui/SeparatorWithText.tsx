@@ -7,7 +7,7 @@ const SeparatorWithText: Component<{
 }> = (props) => {
   return (
     <div class={clsx("relative flex min-h-[16px] items-center", props.class)}>
-      <div class="border-primary h-px w-full flex-1 border-b" />
+      <div class="h-px w-full flex-1 border-b border-primary" />
       <Show when={props.text}>
         <p
           class="px-2 text-lg font-semibold"
@@ -16,7 +16,7 @@ const SeparatorWithText: Component<{
           {props.text}
         </p>
       </Show>
-      <div class="border-primary h-px w-full flex-1 border-b" />
+      <div class="h-px w-full flex-1 border-b border-primary" />
     </div>
   );
 };

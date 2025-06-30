@@ -90,7 +90,7 @@ Iff you use the default CIDR of `10.0.0/16`, your subnets will be automatically 
 | N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
 | N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
 
-[^5]: For more information on SLA levels, see this [guide](/stable-25-04/guides/deploying-workloads/high-availability).
+[^5]: For more information on SLA levels, see this [guide](/docs/stable-25-04/guides/deploying-workloads/high-availability).
 
 #### Custom Network Layout
 
@@ -100,7 +100,7 @@ for helping to divide your network.
 To configure the network, you will need to manually specify both the `subnets` and `nat_associations` inputs.
 
 <MarkdownAlert severity="warning">
-  You need *at least* one of each [subnet type](/stable-25-04/concepts/networking/aws-primitives) in at least three availability zones
+  You need *at least* one of each [subnet type](/docs/stable-25-04/concepts/networking/aws-primitives) in at least three availability zones
   for a highly available deployment (SLA target >= 2).
 
   You need *at least* two public subnets regardless of the SLA target in order to deploy Panfactum (EKS limitation).
@@ -108,7 +108,7 @@ To configure the network, you will need to manually specify both the `subnets` a
 
 ### Network Address Translation (NAT)
 
-If you are unfamiliar with NAT, you should review the [NAT concept documentation](/stable-25-04/concepts/networking/nat).
+If you are unfamiliar with NAT, you should review the [NAT concept documentation](/docs/stable-25-04/concepts/networking/nat).
 
 NAT is the one component of the VPC configuration that we have enhanced beyond the typical AWS-recommended setup.
 

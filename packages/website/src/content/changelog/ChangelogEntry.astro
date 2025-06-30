@@ -5,7 +5,7 @@ const hasAdditions = Astro.slots.has('additions');
 const hasFixes = Astro.slots.has('fixes');
 const hasAlerts = Astro.slots.has('alerts');
 ---
-<div class="mb-2 mt-1">
+<div class="mt-1 mb-2">
   {hasAlerts && (
     <slot name="alerts"/>
   )}

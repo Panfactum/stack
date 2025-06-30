@@ -12,12 +12,12 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 ## Background
 
 For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd,
-check out our [concept documentation.](/main/concepts/networking/cluster-networking#service-mesh)
+check out our [concept documentation.](/docs/main/concepts/networking/cluster-networking#service-mesh)
 
 ## Deploy Linkerd
 
 [Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes,
-and we provide a module for deploying it: [kube\_linkerd](/main/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+and we provide a module for deploying it: [kube\_linkerd](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
 
 This module not only deploys linkerd but also connects it to the certificate infrastructure that we
 provisioned in the previous section. It also installs linkerd-specific observability tooling that we

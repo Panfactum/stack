@@ -1,11 +1,11 @@
 
-import { makeModuleDir } from "@/components/layouts/primary/util/makeModuleDir.ts";
+import { makeModuleDir } from "@/components/layouts/docs/util/makeModuleDir.ts";
 
 import modules from "./modules.json";
 import {
   NavIcons,
   type TopLevelDocsSectionMetadata,
-} from "../../../components/layouts/primary/types.ts";
+} from "../../../components/layouts/docs/types.ts";
 
 export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
   {

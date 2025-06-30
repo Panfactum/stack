@@ -11,7 +11,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 <p class="subtitle">Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](/main/reference/infrastructure-modules/direct/aws/aws_eks) module.</p>
+using our [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.</p>
 
 ## A Quick Note
 
@@ -24,7 +24,7 @@ and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
     required to manage the control plane on your own, this is an incredible deal.
 
 <MarkdownAlert severity="info">
-  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/main/guides/bootstrapping/suspend-kubernetes-cluster)
+  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/main/guides/bootstrapping/suspend-kubernetes-cluster)
   to suspend resources and resume as you are setting up your cluster.
 </MarkdownAlert>
 
@@ -52,7 +52,7 @@ configured to download the image from the public registry *only if it does not a
 in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
 the initial deployment.
 
-We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/main/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
 
 However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
 
@@ -237,7 +237,7 @@ To download this metadata:
 3. Run `pf-update-kube --build` to dynamically generate a `cluster_info` file and download your cluster's CA certs.
 
 As you add additional clusters, you will need to update `config.yaml` and re-run `pf-update-kube --build`. More
-information about this file can be found [here](/main/reference/configuration/kubernetes).
+information about this file can be found [here](/docs/main/reference/configuration/kubernetes).
 
 ### Set up Kubeconfig
 
@@ -275,11 +275,11 @@ To generate your kubeconfig:
 4. Run `pf-update-kube` to generate your kubeconfig file.
 
 Remember that you will need to update your `config.user.yaml` and re-run `pf-update-kube` as you add additional clusters. More
-information about this file can be found [here](/main/reference/configuration/kubernetes).
+information about this file can be found [here](/docs/main/reference/configuration/kubernetes).
 
 <MarkdownAlert severity="warning">
   *Every* one of your users will need to set up their own `config.user.yaml` file, and we provide instructions
-  for them [here](/main/guides/getting-started/connect-to-infrastructure).
+  for them [here](/docs/main/guides/getting-started/connect-to-infrastructure).
 </MarkdownAlert>
 
 ### Verify Connection
@@ -333,7 +333,7 @@ to a single IaC paradigm, we are able to greatly simplify operations for users o
 
 In order to start using our Kubernetes modules, we must first configure the
 [Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
-some additional [terragrunt variables](/main/reference/configuration/terragrunt-variables).
+some additional [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables).
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 

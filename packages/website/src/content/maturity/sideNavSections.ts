@@ -3,7 +3,7 @@
 import {
   NavIcons,
   type TopLevelDocsSectionMetadata,
-} from "@/components/layouts/primary/types.ts";
+} from "@/components/layouts/docs/types";
 
 export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
   {

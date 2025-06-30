@@ -9,7 +9,7 @@ Learn how to manage storage for the workloads in your cluster.
 ## Stateful Workloads
 
 If you are trying to deploy a workload where disk state is saved across pod terminations, you should
-use the [kube\_stateful\_set](/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) module.
+use the [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) module.
 
 ## Storage Classes
 
@@ -20,7 +20,7 @@ which are temporarily "claimed" by workloads through [Persistent Volume Claims (
 The lifecycle of a PV is managed by a controller that implements the [Container Storage Interface (CSI)
 specification.](https://kubernetes-csi.github.io/docs/introduction.html) There are [many such drivers](https://kubernetes-csi.github.io/docs/drivers.html), and the Panfactum
 Stack installs the [AWS Elastic Block Store (EBS) CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver)
-as a part of the [bootstrapping guide.](/main/guides/bootstrapping/storage-interfaces)
+as a part of the [bootstrapping guide.](/docs/main/guides/bootstrapping/storage-interfaces)
 
 As you can have many drivers deployed to a single cluster, Kubernetes implements
 [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/) which are assigned to
@@ -35,7 +35,7 @@ The Panfactum Stack provides the following Storage Classes as a starting point:
   automatically when the underlying workload is deleted which is useful for databases where you do not want to accidentally lose data.
 
 You can create additional EBS-backed storage classes through the `extra_storage_classes` input to the
-[kube\_aws\_ebs\_csi](/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module.
+[kube\_aws\_ebs\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module.
 
 You can also install additional drivers and non-EBS storage classes, but you will need to write your
 own modules for these.

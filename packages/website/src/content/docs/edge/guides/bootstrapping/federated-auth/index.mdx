@@ -42,13 +42,13 @@ Let's get started.
   choose to keep your existing configuration. However, you will need to manually add your SSO roles
   as inputs to:
 
-  * [aws\_eks](/edge/reference/infrastructure-modules/direct/aws/aws_eks) to allow SSO authentication
+  * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to allow SSO authentication
     with the cluster KMS encryption key.
 
-  * sops keys (deployed with [aws\_kms\_encrypt\_key](/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key)) to allow SSO authentication
+  * sops keys (deployed with [aws\_kms\_encrypt\_key](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key)) to allow SSO authentication
     with the sops KMS encryption key.
 
-  * [kube\_vault](/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) to allow SSO authentication
+  * [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) to allow SSO authentication
     with the Vault KMS unseal key.
 </MarkdownAlert>
 
@@ -88,7 +88,7 @@ Let's do this now:
 ### Deploy AWS Provider in Authentik
 
 We have a module for configuring Authentik to work with Identity Center:
-[authentik\_aws\_sso](/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
+[authentik\_aws\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
 
 Let's deploy it now:
 
@@ -292,7 +292,7 @@ Let's deploy it now:
 
 We will now configure permissions in AWS Identity Center to allow your users access to accounts in your AWS
 organizations. Fortunately, AWS *does* expose APIs for this, so we can provide an infrastructure module
-to automatically set this up: [aws\_iam\_identity\_center\_permissions](/edge/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions).
+to automatically set this up: [aws\_iam\_identity\_center\_permissions](/docs/edge/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions).
 
 Let's deploy it now:
 
@@ -346,7 +346,7 @@ Let's deploy it now:
 
    :::
 
-3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](/edge/reference/rbac),
+3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](/docs/edge/reference/rbac),
    but you have the flexibility to choose what works best for your organization.
 
    1. Each top-level object is an AWS account that you have created. You will likely have different accounts than
@@ -355,7 +355,7 @@ Let's deploy it now:
    2. The top-level key (e.g., `production`) is for reference only. The `account_id` value determines the account.
 
    3. The remaining values determine which Authentik groups get assigned which roles in the specified account. For descriptions
-      of the roles, see this [reference document.](/edge/reference/rbac)
+      of the roles, see this [reference document.](/docs/edge/reference/rbac)
       You must have already allowed these groups access to AWS in the `authentik_aws_sso` module above.
 
 4. Run `pf-tf-init` to enable the required providers.
@@ -397,14 +397,14 @@ provisioned SSO credentials and roles and stop using your static root access key
 2. As AWS KMS keys are special resources that require explicit permission grants, you must re-apply
    **every** module that make use of KMS keys in order to pick up the new SSO roles. In this guide, that would be the following modules:
 
-   * sops keys deployed with the [aws\_kms\_encrypt\_key](/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) module
-   * Vault clusters deployed with [kube\_vaults](/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+   * sops keys deployed with the [aws\_kms\_encrypt\_key](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) module
+   * Vault clusters deployed with [kube\_vaults](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
 
 3. Run `pf-update-aws` to scaffold files in your `aws_dir` directory.
 
 4. Copy the generated `config.example.yaml` file to `config.yaml`.
 
-5. Set up `config.yaml` according to [these reference docs](/edge/reference/configuration/aws). Here is an example file:
+5. Set up `config.yaml` according to [these reference docs](/docs/edge/reference/configuration/aws). Here is an example file:
 
    ::: code-group labels=\[.aws/config.yaml]
 
@@ -459,12 +459,12 @@ provisioned SSO credentials and roles and stop using your static root access key
     credentials to fix.
 
 <MarkdownAlert severity="info">
-  In general, your [terragrunt variables](/edge/reference/configuration/terragrunt-variables)
+  In general, your [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables)
   for AWS profiles should use the `<environment>-superuser` roles as some modules
   will require superuser privileges to run. This is the default and should already have been configured earlier in the guide.
   Your organization's users can override this profile
   in their personal `environment.user.yaml` files if they need to run terragrunt but do not have `superuser`
-  access. See [this guide](/edge/guides/iac/deploying-modules#local-deployments) for more information.
+  access. See [this guide](/docs/edge/guides/iac/deploying-modules#local-deployments) for more information.
 </MarkdownAlert>
 
 ## Vault
@@ -476,7 +476,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 ### Deploy Vault Provider in Authentik
 
 We have a module for configuring Authentik to serve as the IdP for Vault clusters:
-[authentik\_vault\_sso](/edge/reference/infrastructure-modules/direct/authentik/authentik_vault_sso).
+[authentik\_vault\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_vault_sso).
 
 Let's deploy it now:
 
@@ -540,7 +540,7 @@ Let's deploy it now:
 
 ### Deploy Vault OIDC Login Configuration
 
-We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc).
+We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc).
 
 Let's deploy it now:
 
@@ -652,7 +652,7 @@ Let's deploy it now:
 ### Configure Developer Environment for OIDC Auth to Vault
 
 1. Remove your hardcoded `VAULT_ADDR` and `VAULT_TOKEN` token from your `.env` file. Make sure that you added the
-   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](/edge/guides/bootstrapping/inbound-networking#deploy-the-vault-ingress)
+   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](/docs/edge/guides/bootstrapping/inbound-networking#deploy-the-vault-ingress)
 
    ::: code-group labels=\[.env]
 

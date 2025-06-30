@@ -19,6 +19,87 @@
 
 - If you're having trouble with something, it's ok to stop and ask for help. Especially if it's something your human might be better at.
 
+## Tasks
+
+Occasionally, we will work through collaborating on task files that describe a concrete objective. Those task
+files use the following rules:
+
+- Open tasks can be found under `.claude/tasks`.
+
+- Every directory under `.claude/tasks` is an open task. The task name is the directory name. For example,
+  `.claude/tasks/[task_name]`.
+
+- Task files **MUST** have the following structure.
+
+  ```md
+  # [Task Name]
+
+  ## Objective
+
+  <User-provided description of the task objective. Ask clarifying questions to refine if needed.>
+
+  ## Goals
+
+  - [ ] 1.0 Parent Goal Title
+    - [ ] 1.1 [Sub-goal description 1.1]
+    - [ ] 1.2 [Sub-goal description 1.2]
+  - [ ] 2.0 Parent Goal Title
+    - [ ] 2.1 [Sub-goal description 2.1]
+  - [ ] 3.0 Parent Goal Title (may not require sub-goal if purely structural or configuration)
+
+  ## Implementation Details
+
+  ### Contraints
+
+  <A list of user-provied and AI-generated contraints for accomplishing the task objective.>
+
+  - Concise, but precise description of the constraint (e.g., "Create new components in separate files")
+  - Concise, but precise description of another constraint (e.g., "Use Kobalte for the slider")
+
+  ### Relevant Guides
+
+  <A list of AI-generated guide files that are necessary to follow when accomplishing the task objective.>
+
+  - `[/some/path]/CLAUDE.md`
+  - `[/some/other/path]/README.md`
+  - `[/some/path]/STYLEGUIDE.md`
+
+  ### Relevant Files
+
+  <A list of AI-generated files that are necessary to accomplishing the task objective.>
+
+  - `[file_name_1]` - (Edit) Brief description of why this file is relevant (e.g., Contains the main component for this feature).
+  - `[file_name_2]` - (Create) Brief description (e.g., API route handler for data submission).
+  - `[file_name_3]` - (Delete) Brief description (e.g., Utility functions needed for calculations).
+
+  ### Relevant Documentation
+
+  <A list of Context7 documentation sources that are relevant for accomplishing the task objective.>
+
+  - `[resolved_library_id]` - Brief description of why this documentation is relevant.
+
+  ## Discussion
+
+  <Clarifying questions that you might have for the user>
+
+  ### [Agent-provided question title]
+
+  _[Fully specified question from the agent]_
+
+  [User-provided answer]
+
+  ### [Another Agent-provided question title]
+
+  _[Another fully specified question from the agent]_
+
+  [Another user-provided answer]
+  ```
+
+- Goals should be checkboxes (`[ ]` or `[x]`). `[x]` indicates the goal has been completed.
+  **ALWAYS** update the goals as they are completed. **NEVER** work on goals that have already been completed.
+
+- Any relative paths contained in the Objective section of the `task.md` file are relative from that specific `task.md` file, **NOT** another package directory or the repository root.
+
 # Code Guidelines
 
 ## Guiding Principles
@@ -81,4 +162,6 @@ Use the following rules when making changes to `.sh` files:
 
 Use the following rules when making changes to `.ts` or `.tsx` files:
 
-- **NEVER use the `non-null assertion operator`**
+- **NEVER use the non-null assertion operator (`!`)**
+
+- **NEVER** use `any`. Use `unknown` if needed.

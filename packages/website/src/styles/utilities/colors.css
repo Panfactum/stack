@@ -1,0 +1,74 @@
+/*****************************************
+ * Background Colors
+ *****************************************/
+
+/* The default background color for the page */
+@utility bg-primary {
+    @apply bg-gray-dark-mode-950;
+    --primary-text-color: var(--color-gray-dark-mode-50);
+    --secondary-text-color: var(--color-gray-dark-mode-300);
+    --tertiary-text-color: var(--color-gray-dark-mode-300);
+    color: var(--primary-text-color);
+}
+
+/* Used to provide a subtle visual separation
+ * between sections of the page. 
+ */
+@utility bg-secondary {
+    @apply bg-gray-dark-mode-900;
+    --primary-text-color: var(--color-gray-dark-mode-50);
+    --secondary-text-color: var(--color-gray-dark-mode-300);
+    --tertiary-text-color: var(--color-gray-dark-mode-300);
+    color: var(--primary-text-color);
+}
+
+/* Used to for content that should be de-emphasized.*/
+@utility bg-tertiary {
+    @apply bg-gray-modern-900;
+    --primary-text-color: var(--color-gray-dark-mode-50);
+    --secondary-text-color: var(--color-gray-dark-mode-300);
+    --tertiary-text-color: var(--color-gray-dark-mode-300);
+    color: var(--primary-text-color);
+}
+
+/* Used to for content that should be emphasized. */
+@utility bg-accent {
+    @apply bg-brand-750;
+    --primary-text-color: var(--color-gray-dark-mode-50);
+    --secondary-text-color: var(--color-gray-dark-mode-300);
+    --tertiary-text-color: var(--color-gray-dark-mode-300);
+    color: var(--primary-text-color);
+}
+
+/*****************************************
+ * Text Colors
+ *****************************************/
+
+/* The default text color */
+@utility text-primary {
+    color: var(--primary-text-color);
+}
+
+/* Used for text that should be de-emphasized. */
+@utility text-secondary {
+    color: var(--secondary-text-color);
+}
+
+/* Used for text that should be significantly de-emphasized. */
+@utility text-tertiary {
+    @apply text-gray-dark-mode-200;
+}
+
+/*****************************************
+ * Border Colors
+ *****************************************/
+
+/* The default border color */
+@utility border-primary {
+    @apply border-gray-dark-mode-700;
+}
+
+/* A more subtle border effect */
+@utility border-secondary {
+    @apply border-gray-dark-mode-800;
+}

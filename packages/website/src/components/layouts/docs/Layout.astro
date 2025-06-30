@@ -1,0 +1,115 @@
+---
+import "./global.css";
+import CommonHead from "@/components/layouts/common/CommonHead.astro";
+import ToastRegion from "@/components/ui/ToastRegion";
+import SearchDialog from "@/components/ui/search/SearchDialog";
+
+import ArticleTableOfContents, {
+  type ArticleHeadingMetadata,
+} from "./ArticleTableOfContents.astro";
+import DocumentationArticle from "./DocumentationArticle";
+import { DOCS_NAV_LINKS } from "./links";
+import DocsSidebar from "./sidebar/DocsSidebar";
+import { type DocsMetadata } from "./types";
+import Header from "../common/Header.astro";
+import { NavItemWithPopup } from "../common/NavItemWithPopup";
+import { SolutionsNavItem } from "../common/SolutionsNavItem";
+
+
+const pathname = new URL(Astro.request.url).pathname;
+
+interface Props {
+  title: string;
+  description: string;
+  redirect?: string;
+  headings?: ArticleHeadingMetadata[];
+  metadata?: DocsMetadata;
+}
+
+const {
+  title,
+  description,
+  redirect,
+  headings = [],
+  metadata,
+} = Astro.props;
+---
+
+<html
+        lang="en"
+>
+  <CommonHead title={title} description={description} redirect={redirect} >
+    <meta name="generator" content={Astro.generator} />
+  </CommonHead>
+
+  <body
+    class="w-screen overflow-y-scroll bg-primary font-inter"
+    id="body"
+  >
+    <Header
+      hasBorder={true}
+      isFixed={true}
+      collapseLogoOnMobile={false}
+      links={DOCS_NAV_LINKS}
+    >
+    <Fragment slot="nav">
+      <SolutionsNavItem client:idle />
+      <NavItemWithPopup
+      title="Pricing"
+      action="/pricing"
+      saveEnabled={true}
+      client:idle
+      />
+      <NavItemWithPopup
+      title="Docs"
+      action="/docs/edge/guides"
+      saveEnabled={true}
+      client:idle
+      />
+      <NavItemWithPopup
+      title="Changelog"
+      action="/docs/changelog"
+      saveEnabled={true}
+      client:idle
+      />
+      <!-- <NavItemWithPopup
+      title="Blog"
+      action="/blog"
+      saveEnabled={true}
+      client:idle
+      />
+      <NavItemWithPopup
+      title="About"
+      action="/about"
+      saveEnabled={true}
+      client:idle
+      /> -->
+  </Fragment>
+  </Header> 
+
+
+    <div
+      class:list={[
+        `
+          mx-auto flex h-full w-screen flex-col items-start
+          lg:flex-row
+          xl:max-w-screen-3xl
+        `,
+        "min-h-[calc(100vh_-_var(--header-height))]"
+      ]}
+    >
+      {metadata && <DocsSidebar fullPath={pathname} metadata={metadata} client:load />}
+        <DocumentationArticle
+                showTOC={headings.length > 1}
+                client:load
+        >
+            <slot/>
+        </DocumentationArticle>
+      {headings.length > 1   && (<ArticleTableOfContents headings={headings} />)}
+    </div>
+    <SearchDialog fullPath={pathname} client:idle />
+    <ToastRegion client:idle/>
+  </body>
+</html>
+
+<script src="./scripts/copyHeaderLink.ts" />

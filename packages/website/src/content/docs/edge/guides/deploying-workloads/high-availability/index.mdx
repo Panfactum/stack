@@ -13,7 +13,7 @@ We provide the means to tune your infrastructure to choose the right balance bet
 and cost for each of your clusters and workloads. For example, you might prioritize cost savings
 in development / test environments while prioritizing availability in production environments.
 
-Panfactum modules will adjust their default behavior based on the `sla_target` [Terragrunt variable.](/edge/reference/configuration/terragrunt-variables#metadata) [^1] [^80]
+Panfactum modules will adjust their default behavior based on the `sla_target` [Terragrunt variable.](/docs/edge/reference/configuration/terragrunt-variables#metadata) [^1] [^80]
 That said, there are a handful of actions you must take to achieve any target *in addition to* setting the `sla_target` variable. We detail those tuning requirements below.
 
 [^80]: This default behavior can always be overridden by providing explicit inputs to any given module.
@@ -38,7 +38,7 @@ always be done as a best practice.
 Required Tuning:
 
 * Set `sla_target` to `1`.
-* [Set up liveness probes](/edge/guides/deploying-workloads/basics#liveness-and-readiness-probes) for your workloads to ensure that they will be restarted if they enter a failure state.
+* [Set up liveness probes](/docs/edge/guides/deploying-workloads/basics#liveness-and-readiness-probes) for your workloads to ensure that they will be restarted if they enter a failure state.
 * Ensure that all workloads implement request draining. [^3]
 * Ensure that all workloads can gracefully terminate in \< 90 seconds.
 

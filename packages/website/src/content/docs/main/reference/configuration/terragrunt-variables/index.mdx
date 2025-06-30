@@ -8,7 +8,7 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
   For a complete example, see [our reference infrastructure repository](https://github.com/Panfactum/reference-infrastructure).
 </MarkdownAlert>
 
-Your environments folder at `environments_dir` **must** have three levels of scoping for the [configuration-as-code](/main/concepts/iac#configuration-as-code):
+Your environments folder at `environments_dir` **must** have three levels of scoping for the [configuration-as-code](/docs/main/concepts/iac#configuration-as-code):
 
 * environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
 
@@ -159,4 +159,4 @@ The secondary is used in some Panfactum modules to configure things like backups
 | :-------------- | :----- | :-------------------------------------------------------------------- | :--------------- |
 | `authentik_url` | string | The `https` URL of the Authentik server the provider should connect to | `global.yaml`    |
 
-*To apply modules that use the Authentik provider, you will also need to have `AUTHENTIK_TOKEN` set in [your .env file.](/main/reference/configuration/dotenv)*
+*To apply modules that use the Authentik provider, you will also need to have `AUTHENTIK_TOKEN` set in [your .env file.](/docs/main/reference/configuration/dotenv)*

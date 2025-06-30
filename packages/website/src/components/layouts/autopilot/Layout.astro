@@ -1,0 +1,63 @@
+---
+// Autopilot layout component with second tier navigation support
+import CommonLayout from "../common/CommonLayout.astro";
+import Header from "../common/Header.astro";
+import { NavItemWithPopup } from "../common/NavItemWithPopup";
+import { ScrollBehavior } from "../common/ScrollBehavior.tsx";
+import { SolutionsNavItem } from "../common/SolutionsNavItem";
+import { PRIMARY_NAV_LINKS } from "../primary/links.tsx";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const {
+  title,
+  description,
+} = Astro.props;
+---
+
+<CommonLayout
+  title={title}
+  description={description}
+>
+    <Header
+      hasBorder={true}
+      isFixed={true}
+      collapseLogoOnMobile={false}
+      links={PRIMARY_NAV_LINKS}
+    >
+    <Fragment slot="nav">
+      <SolutionsNavItem client:idle />
+      <NavItemWithPopup
+      title="Pricing"
+      action="/pricing"
+      saveEnabled={true}
+      client:idle
+      />
+      <NavItemWithPopup
+      title="Docs"
+      action="/docs/edge/guides"
+      saveEnabled={true}
+      client:idle
+      />
+      <!-- <NavItemWithPopup
+      title="Blog"
+      action="/blog"
+      saveEnabled={true}
+      client:idle
+      />
+      <NavItemWithPopup
+      title="About"
+      action="/about"
+      saveEnabled={true}
+      client:idle
+      /> -->
+  </Fragment>
+  </Header> 
+    <div style="padding-top: var(--combined-header-height);" class="hidden md:block"></div>
+    <div style="padding-top: var(--header-height);" class="block md:hidden"></div>
+    <slot />
+    <ScrollBehavior client:load />
+</CommonLayout>

@@ -34,7 +34,10 @@ const NextSteps: Component = () => {
           Now that you have the core tooling installed, you can{" "}
           <a
             href="/docs/stable-25-04/guides/bootstrapping/installing-devshell#install-prerequisite-tooling"
-            class="text-primary underline hover:cursor-pointer"
+            class={`
+              text-primary underline
+              hover:cursor-pointer
+            `}
           >
             return to the bootstrapping guide.
           </a>

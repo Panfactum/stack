@@ -772,6 +772,7 @@ module "security_update_job" {
   burstable_nodes_enabled   = var.burstable_nodes_enabled
   controller_nodes_enabled  = var.controller_nodes_enabled
   node_image_cached_enabled = false
+  vpa_enabled               = var.vpa_enabled
 
   containers = [
     {

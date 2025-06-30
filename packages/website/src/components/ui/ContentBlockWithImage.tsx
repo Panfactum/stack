@@ -17,9 +17,15 @@ const ContentBlockWithImage: ParentComponent<{
   return (
     <div
       class={clsx(
-        "bg-primary border-primary flex w-full items-stretch overflow-hidden rounded-md border-2",
+        `
+          flex w-full items-stretch overflow-hidden rounded-md border-2
+          border-primary bg-gray-dark-mode-950 text-gray-dark-mode-50
+        `,
         props.type === ContentBlockType.HORIZONTAL
-          ? "flex-col sm:flex-row"
+          ? `
+            flex-col
+            sm:flex-row
+          `
           : "flex-col",
         props.class,
       )}
@@ -30,22 +36,35 @@ const ContentBlockWithImage: ParentComponent<{
             "flex flex-none items-center justify-center",
             props.bgColor,
             props.type === ContentBlockType.HORIZONTAL
-              ? "h-[200px] w-full sm:h-auto sm:w-1/3"
+              ? `
+                h-[200px] w-full
+                sm:h-auto sm:w-1/3
+              `
               : "h-[200px]",
           )}
         >
-          <div class="flex size-[94px] items-center justify-center rounded-full border-4 !text-gray-modern-400">
-            <div class="flex size-[72px] items-center justify-center rounded-full border-4 !text-gray-modern-400">
+          <div
+            class={`
+              flex size-[94px] items-center justify-center rounded-full border-4
+              !text-gray-modern-400
+            `}
+          >
+            <div
+              class={`
+                flex size-[72px] items-center justify-center rounded-full
+                border-4 !text-gray-modern-400
+              `}
+            >
               {props.image && <props.image />}
             </div>
           </div>
         </div>
       </Show>
       <div class="flex grow flex-col justify-start gap-2 p-5">
-        <p class="text-display-xs text-primary !m-0 font-semibold">
+        <p class="!m-0 text-display-xs font-semibold text-primary">
           {props.title}
         </p>
-        <p class="text-tertiary !m-0 text-sm">{props.content}</p>
+        <p class="!m-0 text-sm text-tertiary">{props.content}</p>
       </div>
       <div class="p-4">{props.children}</div>
     </div>

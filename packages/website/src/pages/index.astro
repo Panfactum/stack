@@ -1,3 +1,27 @@
 ---
-return Astro.redirect('/edge/guides/');
---- 
+import Layout from "@/components/layouts/primary/Layout.astro";
+
+import { CTASection } from "./_components/CTASection";
+import { HeroSection } from "./_components/HeroSection";
+import { InfrastructureProblemsSection } from "./_components/InfrastructureProblemsSection";
+import { MeetPanfactumSection } from "./_components/MeetPanfactumSection";
+import "@/components/layouts/docs/global.css";
+---
+
+<Layout title="Home" description="Home">
+    <div class="w-screen overflow-y-scroll bg-primary font-inter text-white">
+        {/* Hero Section */}
+        <HeroSection client:load />
+
+        {/* Infrastructure Problems Section */}
+        <InfrastructureProblemsSection client:load />
+
+        {/* Meet Panfactum Section */}
+        <MeetPanfactumSection client:load />
+
+        {/* CTA Section */}
+        <CTASection client:load />
+
+        {/* Footer will be rendered by Astro */}
+    </div>
+</Layout>

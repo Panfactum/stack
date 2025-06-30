@@ -46,7 +46,7 @@ credentials that a pod receives are valid for `vault_credential_lifetime_hours` 
 
 The below example show how to connect to the PostgreSQL cluster through 
 the read-write PgBouncer using dynamically rotated admin credentials by setting various
-environment variables in our [kube_deployment](/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+environment variables in our [kube_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
 module "database" {
@@ -81,7 +81,7 @@ You must provide an initial storage amount for the database with `pg_initial_sto
 of the underlying EBS volumes.
 
 Once the database is running, the PVC autoresizer
-(provided by [kube_pvc_autoresizer](/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
+(provided by [kube_pvc_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
 will automatically expand the EBS volumes once the free space
 drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
@@ -281,7 +281,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the 
-[kube_disruption_window_controller](/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) 
+[kube_disruption_window_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) 
 submodule.
 
 #### Custom PDBs

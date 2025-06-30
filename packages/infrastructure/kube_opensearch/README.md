@@ -32,7 +32,7 @@ credentials that a pod receives are valid for `vault_credential_lifetime_hours` 
 
 The below example show how to connect to the OpenSearch cluster
 using dynamically rotated admin credentials by mounting the client certificates 
-in our [kube_deployment](/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+in our [kube_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
 module "opensearch" {
@@ -92,7 +92,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the
-[kube_disruption_window_controller](/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+[kube_disruption_window_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
 submodule.
 
 #### Completely Disabling Voluntary Disruptions

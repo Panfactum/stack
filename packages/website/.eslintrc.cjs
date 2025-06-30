@@ -2,7 +2,8 @@ module.exports = {
   root: true,
   plugins: [
     "unused-imports",
-    "mdx"
+    "mdx",
+    "css-modules"
   ],
   extends: [
     "eslint:recommended",
@@ -11,15 +12,19 @@ module.exports = {
     "plugin:import/typescript",
     "plugin:jsx-a11y/recommended",
     "plugin:astro/recommended",
-    "plugin:tailwindcss/recommended",
+    "plugin:css-modules/recommended"
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
-    extraFileExtensions: ['.astro', '.mdx']
+    extraFileExtensions: ['.astro', '.mdx', '.css'],
+    ecmaFeatures: {
+      jsx: true,
+      ecmaVersion: "latest"
+    }
   },
   ignorePatterns: [
-    "*.js", "*.cjs", "*.mjs", "*.md", "*.png", "*.css", "**/*.mdx/*.ts",
+    "*.js", "*.cjs", "*.mjs", "*.md", "*.png", "**/*.mdx/*.ts",
     "**/*.mdx/*.tsx"
   ],
   rules: {
@@ -51,6 +56,16 @@ module.exports = {
         'astro:.*$',
         '.*?raw$'
       ]
+    }],
+    "better-tailwindcss/enforce-consistent-variable-syntax": "error",
+    "better-tailwindcss/no-unregistered-classes": ["error", {
+      "ignore": [
+        "content", // For the markdown content for articles
+        "masonry-item", // For the masonry layout library
+        "masonry-sizer", // For the masonry layout library
+        "group", // For tailwind groups
+        "subtitle" // For article subtitles
+      ]
     }]
   },
   settings: {
@@ -68,16 +83,9 @@ module.exports = {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"],
     },
-    tailwindcss: {
-      whitelist: [
-        "circling-icon",
-        "circling-icons",
-        "circling-planets",
-        "hero-icon",
-        "text-primary",
-        "toast"
-      ]
-    },
+    "better-tailwindcss": {
+      entryPoint: "src/styles/global.css"
+    }
   },
   overrides: [
     {
@@ -121,7 +129,8 @@ module.exports = {
       plugins: [
         "@typescript-eslint",
         "solid",
-        "prettier"
+        "prettier",
+        "better-tailwindcss"
       ],
       parser: "@typescript-eslint/parser",
       parserOptions: {
@@ -130,6 +139,9 @@ module.exports = {
           jsx: true,
         },
       },
+      extends: [
+        "plugin:better-tailwindcss/recommended-error"
+      ],
       rules: {
         // Prettier
         "prettier/prettier": "error",

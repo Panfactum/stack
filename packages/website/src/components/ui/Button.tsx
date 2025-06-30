@@ -25,7 +25,9 @@ const Button: ParentComponent<ButtonProps> = (props) => {
       as={"button"}
       {...props}
       class={clsx(
+        // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
         sizes[props.size ?? "md"],
+        // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
         variants[props.variant ?? "primary"],
         props.class,
       )}

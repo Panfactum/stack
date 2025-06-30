@@ -1,0 +1,65 @@
+---
+// Second tier navigation component for additional navigation beneath the primary header
+
+import SavedLink from "@/components/util/SavedLink.tsx";
+
+import type { SecondTierConfig } from "./types";
+
+interface Props {
+  config: SecondTierConfig;
+}
+
+const { config } = Astro.props;
+---
+
+<div 
+  data-second-tier-nav
+  class="hidden md:flex w-screen bg-secondary border-b border-primary fixed z-20"
+  style="top: var(--header-height); height: var(--second-tier-height);"
+>
+  <div class="mx-auto flex size-full grow basis-1 items-center justify-between px-4 max-w-screen-3xl">
+    <!-- Logo Section -->
+    <div class="flex h-full items-center">
+      {config.logo.href ? (
+        <a
+          href={config.logo.href}
+          aria-label={config.logo.alt}
+          class="flex h-full max-w-[200px] cursor-pointer items-center"
+          data-astro-prefetch="viewport"
+        >
+          <img 
+            src={config.logo.src} 
+            alt={config.logo.alt}
+            class="h-8 w-auto object-contain"
+            loading="eager"
+          />
+        </a>
+      ) : (
+        <div class="flex h-full max-w-[200px] items-center">
+          <img 
+            src={config.logo.src} 
+            alt={config.logo.alt}
+            class="h-8 w-auto object-contain"
+            loading="eager"
+          />
+        </div>
+      )}
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex gap-x-8" aria-label="Secondary">
+      {config.links.map((link) => (
+        <SavedLink
+          defaultHref={link.url}
+          id={`second-tier-${link.title}`}
+          data-astro-prefetch="viewport"
+          class="cursor-pointer bg-transparent text-sm font-medium hover:text-brand-600 text-primary"
+          saveEnabled={true}
+          client:idle
+        >
+          {link.title}
+        </SavedLink>
+      ))}
+    </nav>
+  </div>
+</div>

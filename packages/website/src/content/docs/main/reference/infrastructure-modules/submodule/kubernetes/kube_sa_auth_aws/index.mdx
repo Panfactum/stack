@@ -63,7 +63,7 @@ module "aws_permissions" {
 To mitigate credential exfiltration attacks,
 generated credentials may only be used by pods running inside the cluster's subnets. These
 subnets are subnets with the `kubernetes.io/cluster/<cluster_name>` tag set. This is automatically
-configured by the [aws\_eks](/main/reference/infrastructure-modules/submodule/aws/aws\_eks) module.
+configured by the [aws\_eks](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_eks) module.
 
 If you need to allow additional entities to use these credentials, you must manually
 add their CIDRs to the `ip_allow_list` input.

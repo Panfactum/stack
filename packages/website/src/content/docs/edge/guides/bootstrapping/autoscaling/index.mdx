@@ -28,7 +28,7 @@ In Kubernetes, there are three distinct flavors of autoscaling:
   and [Karpenter](https://karpenter.sh/).
 
 The Panfactum stack makes use of all three types of autoscaling. To learn more about autoscaling
-and resource optimization, see our [concept docs.](/edge/concepts/autoscaling)
+and resource optimization, see our [concept docs.](/docs/edge/concepts/autoscaling)
 
 ## Deploy Metrics Server
 
@@ -37,7 +37,7 @@ CPU and memory usage. Interestingly, this is not built-in to Kubernetes by defau
 powered by [an API extension](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/)
 provided by the [metrics-server](https://github.com/kubernetes-sigs/metrics-server) project.
 
-We provide a module to deploy the server: [kube\_metrics\_server](/edge/reference/infrastructure-modules/direct/kubernetes/kube_metrics_server).
+We provide a module to deploy the server: [kube\_metrics\_server](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_metrics_server).
 
 Let's deploy it now:
 
@@ -139,7 +139,7 @@ Now that we are capturing resource utilization data,
 we can use the vertical pod autoscaler to automatically rightsize your pod's CPU and memory
 [resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) based on historical usage.
 
-We provide a module to deploy the VPA: [kube\_vpa](/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa).
+We provide a module to deploy the VPA: [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa).
 
 Let's deploy it now:
 
@@ -260,7 +260,7 @@ performance, and better cost optimization. Specifically:
 
 * It scales extremely well with the ability to spin up and down 100s of nodes at a time.
 
-We provide an infrastructure module to deploy it: [kube\_karpenter](/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter).
+We provide an infrastructure module to deploy it: [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter).
 
 Let's deploy it now:
 
@@ -333,7 +333,7 @@ Karpenter requires some instructions about how to perform autoscaling such as wh
 to use for the underlying nodes. It looks for those instructions in [NodePool](https://karpenter.sh/docs/concepts/nodepools/) custom resources.
 
 The Panfactum stack comes with several classes of NodePools which are defined in
-the [kube\_karpenter\_node\_pools](/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) module.
+the [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) module.
 
 Let's deploy the NodePools now:
 
@@ -441,7 +441,7 @@ wasted resources. [^6]
 [^6]: [This article](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money) provides a
     great real world example of how this impacted a company running Kubernetes clusters in AWS.
 
-We provide an alternative scheduler in [kube\_scheduler](/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+We provide an alternative scheduler in [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
 (`panfactum`) that implements the bin-packing scheduling algorithm. Typically, this results in a 25-33% cost reduction.
 
 Let's deploy it now:
@@ -523,7 +523,7 @@ The built-in Kubernetes HPA has several limitations that KEDA allows you to miti
 * Cannot be combined with vertical autoscaling
 * Can only scale on internal metrics like CPU and memory (KEDA supports hundreds of additional metrics)
 
-We provide a module [kube\_keda](/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda) for deploying and managing KEDA.
+We provide a module [kube\_keda](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda) for deploying and managing KEDA.
 
 Let's deploy it now:
 

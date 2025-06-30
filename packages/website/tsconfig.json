@@ -22,6 +22,7 @@
     "src/**/*.mdx",
     "src/**/*.mdx/*.ts",
     "src/**/*.mdx/*.tsx",
-    ".astro/types.d.ts"
+    ".astro/types.d.ts",
+    "src/**/*.css"
   ],
 }

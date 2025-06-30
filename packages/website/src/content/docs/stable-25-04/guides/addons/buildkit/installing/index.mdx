@@ -39,7 +39,7 @@ In general, you should aim to achieve the following architecture: [^3]
 
 <MarkdownSVGImage src={BuildKitImg} alt="BuildKit deployment architecture" />
 
-[^3]: A more detailed architectural overview can be found [here](/stable-25-04/concepts/buildkit).
+[^3]: A more detailed architectural overview can be found [here](/docs/stable-25-04/concepts/buildkit).
 
 1. BuildKit should run in the *lowest* environment for the following reasons:
 
@@ -66,7 +66,7 @@ Once you have chosen the cluster you will deploy BuildKit to, you are ready for 
 
 ## Install the Module
 
-We provide a module, [kube\_buildkit](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_buildkit), for
+We provide a module, [kube\_buildkit](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_buildkit), for
 deploying the BuildKit servers.
 
 Let's deploy it now:
@@ -110,14 +110,14 @@ By default, the builders are sized at 2 vCPU / 8 GB RAM, but you can adjust thes
 We recommend pushing new container images to [AWS Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/) as this
 is the easiest way to consume images from within your Kubernetes clusters.
 
-We provide a module for configuring ECR with your image repositories: [aws\_ecr\_repos](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_ecr_repos). [^2]
+We provide a module for configuring ECR with your image repositories: [aws\_ecr\_repos](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_ecr_repos). [^2]
 
 Note that a *registry* is the domain name (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com`), a *repository* is a specific namespace
 for images in the registry (e.g., `my_image`), and a *tag* is an arbitrary identifier for *single* image in the repository.
 Together these form a unique image identifier (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com/my_image:some_tag`) which conveniently
 also specifies where to push and pull the image from.
 
-[^2]: We also supply [aws\_ecr\_public\_repos](/stable-25-04/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) for deploying
+[^2]: We also supply [aws\_ecr\_public\_repos](/docs/stable-25-04/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) for deploying
     [public repositories](https://docs.aws.amazon.com/AmazonECR/latest/public/public-repositories.html).
 
 Let's set up a test image repository, so we can demonstrate how to build images with BuildKit:
@@ -155,7 +155,7 @@ Let's set up a test image repository, so we can demonstrate how to build images 
 
 To connect your local tooling to both the BuildKit servers and your ECR repositories, you must add some additional
 configuration to your repository. Specifically, you must create a `<buildkit_dir>/config.yaml`
-([reference docs](/stable-25-04/reference/configuration/buildkit)).
+([reference docs](/docs/stable-25-04/reference/configuration/buildkit)).
 
 Let's do this now:
 
@@ -267,7 +267,7 @@ Let's test this out.
 
 BuildKit is now ready for your organization to use. We recommend taking a look at the following guides for putting it to use:
 
-* [Core techniques for building images](/stable-25-04/guides/addons/buildkit/building-images)
+* [Core techniques for building images](/docs/stable-25-04/guides/addons/buildkit/building-images)
 
 * Building images in CI pipelines (TODO)
 

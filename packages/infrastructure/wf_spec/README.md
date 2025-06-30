@@ -1,7 +1,7 @@
 # Argo Workflow Specification
 
 The primary purpose of this submodule is to create a Workflow spec (`workflow_spec` output) that ensures compatibility
-with the Panfactum deployment of Argo Workflows (deployed via [kube_argo](/main/reference/infrastructure-modules/direct/kubernetes/kube_argo))
+with the Panfactum deployment of Argo Workflows (deployed via [kube_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo))
 and applies sensible defaults for usage in the overall Panfactum Stack.
 
 In particular, this module takes care of the following:
@@ -24,7 +24,7 @@ Argo documentation:
 
 ## Usage
 
-For a basic introduction of how to use this module, see our [guide on creating Workflows](/main/guides/addons/workflow-engine/creating-workflows).
+For a basic introduction of how to use this module, see our [guide on creating Workflows](/docs/main/guides/addons/workflow-engine/creating-workflows).
 
 Below we cover some more advanced patterns that you will likely find useful when working with Workflows in the Panfactum Stack.
 
@@ -285,7 +285,7 @@ module "workflow_spec" {
 ```
 
 This can be helpful when you aim to reference a template defined on one Workflow from a completely separate Workflow
-as described [here](/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows). This ensures
+as described [here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows). This ensures
 that regardless of how a template is executed, it will have the same parameterization capabilities.
 
 
@@ -408,7 +408,7 @@ for the generated Workflows. The configuration is merged with `labels_from_param
 
 We make the Panfactum devShell available as a container image that can be run in a
 workflow. The specific image tag that is compatible with your version of the Panfactum stack can be sourced from the outputs of the
-[kube_constants](/main/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
+[kube_constants](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
 snippet shows an example:
 
 ```hcl
@@ -502,6 +502,6 @@ outlive the Workflow.
 
 A common pattern is to compose multiple smaller Workflows into a larger Workflow. We provide
 guidance on implementing that pattern
-[here](/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows).
+[here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows).
 
 

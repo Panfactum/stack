@@ -11,10 +11,10 @@ Deploy an instance of the [Argo Events](https://argoproj.github.io/argo-events/)
 ## Prerequisites
 
 * Deploying the components of the Event Bus requires that the Argo Events controller is running. This is done
-  via deploying the [Workflow Engine Stack Addon.](/edge/guides/addons/workflow-engine/installing)
+  via deploying the [Workflow Engine Stack Addon.](/docs/edge/guides/addons/workflow-engine/installing)
 
 * Deploying an Event Bus requires writing your own IaC. Be sure you have reviewed [our guide on how to do this in
-  the Panfactum stack.](/edge/guides/iac/first-party-modules)
+  the Panfactum stack.](/docs/edge/guides/iac/first-party-modules)
 
 ## Background
 
@@ -39,9 +39,9 @@ its [architecture](https://argoproj.github.io/argo-events/concepts/architecture/
 
 We offer three submodules for deploying these components:
 
-* [kube\_argo\_event\_source](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
-* [kube\_argo\_sensor](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
-* [kube\_argo\_event\_bus](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+* [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+* [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+* [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
 
 This particular addon has a few peculiarities:
 
@@ -177,9 +177,9 @@ module "sensor" {
 
 For more advanced patterns, see the documentation for each of the modules:
 
-* [kube\_argo\_event\_source](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
-* [kube\_argo\_sensor](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
-* [kube\_argo\_event\_bus](/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+* [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+* [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+* [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
 
 ## Sensor Utilities
 

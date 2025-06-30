@@ -10,12 +10,12 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 <MarkdownAlert severity="warning">
   If you're new to using infrastructure-as-code tooling professionally, you should review the
-  [concepts documentation](/stable-25-04/concepts/iac) before continuing.
+  [concepts documentation](/docs/stable-25-04/concepts/iac) before continuing.
 </MarkdownAlert>
 
 The Panfactum framework uses the open-source Terraform fork, [OpenTofu](https://opentofu.org/), to define the [100+
-infrastructure modules](/stable-25-04/reference/infrastructure-modules/overview) that comprise the Panfactum framework. [^1] We
-use a [configuration-as-code](/stable-25-04/concepts/iac#configuration-as-code) manager for Terraform / OpenTofu called [Terragrunt](https://terragrunt.gruntwork.io/)
+infrastructure modules](/docs/stable-25-04/reference/infrastructure-modules/overview) that comprise the Panfactum framework. [^1] We
+use a [configuration-as-code](/docs/stable-25-04/concepts/iac#configuration-as-code) manager for Terraform / OpenTofu called [Terragrunt](https://terragrunt.gruntwork.io/)
 to deploy each module.
 
 [^1]: To learn more about why Terraform was forked, see the [OpenTofu manifesto](https://opentofu.org/manifesto/).
@@ -62,21 +62,21 @@ We extend that pattern with one more rule:
 This is a **critically important** concept. Again, **one** branch will define exactly what is deployed across
 **all** environments.
 
-By default, this is the `main` branch. If you need to change it, make sure it is set as the `repo_primary_branch` (per the [docs](/stable-25-04/reference/configuration/repo-variables)).
+By default, this is the `main` branch. If you need to change it, make sure it is set as the `repo_primary_branch` (per the [docs](/docs/stable-25-04/reference/configuration/repo-variables)).
 
 ### Environments Directory
 
 We store all configuration-as-code for all environment in a directory in the repo we canonically call
 the "environments folder" or "environments directory." It defaults to `<REPO_ROOT>/environments`. [^66]
 
-[^66]: You can override this folder by setting `environments_dir` (per the [docs](/stable-25-04/reference/configuration/repo-variables)).
+[^66]: You can override this folder by setting `environments_dir` (per the [docs](/docs/stable-25-04/reference/configuration/repo-variables)).
 
 ## Configure Terragrunt Variables
 
 In order to begin deploying infrastructure modules, we must first configure Terragrunt.
 
 This is done by adding specific directories and files to `<REPO_ROOT>/environments`. Specifically,
-it must be set up to follow [these conventions](/stable-25-04/reference/configuration/terragrunt-variables).
+it must be set up to follow [these conventions](/docs/stable-25-04/reference/configuration/terragrunt-variables).
 
 We provide a convenience script to perform this setup: `pf-env-scaffold -e <env1,env2,...>`.
 
@@ -85,7 +85,7 @@ Run it now, specifying each environment (AWS account) you created in the prior s
 Once this completes, take a moment to validate that each `global.yaml`, `environment.yaml`, and `region.yaml` file
 contains the appropriate values. [^2]
 
-[^2]: See the [reference documentation](/stable-25-04/reference/configuration/terragrunt-variables) for more information on the available values.
+[^2]: See the [reference documentation](/docs/stable-25-04/reference/configuration/terragrunt-variables) for more information on the available values.
 
 ## Next Steps
 

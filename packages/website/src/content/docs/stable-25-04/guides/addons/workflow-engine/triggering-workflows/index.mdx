@@ -76,7 +76,7 @@ You can generate new Workflows from WorkflowTemplates directly from the Web UI:
 
 5. Select +Submit to create the Workflow.
 
-[^2]: Your administrator set this when [first installing Argo](/stable-25-04/guides/addons/workflow-engine/installing).
+[^2]: Your administrator set this when [first installing Argo](/docs/stable-25-04/guides/addons/workflow-engine/installing).
 
 ## From the CLI
 
@@ -98,7 +98,7 @@ To create a new Workflow from the above example WorkflowTemplate using the CLI:
 ## From an HTTP Request
 
 <MarkdownAlert severity="warning">
-  The Panfactum [kube\_argo](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_argo) does not create an Ingress for the Argo Workflow Server, so the HTTP API is only available
+  The Panfactum [kube\_argo](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_argo) does not create an Ingress for the Argo Workflow Server, so the HTTP API is only available
   from inside the cluster. Since authentication must be done via ServiceAccount token, it does not make sense to expose
   the server publicly. If you need to create a Workflow from an external event or trigger, see the next section regarding Argo Events.
 </MarkdownAlert>
@@ -108,7 +108,7 @@ the [REST API provided by the Argo Workflow Server.](https://argo-workflows.read
 
 You will need to use the [Access Token method for authentication](https://argo-workflows.readthedocs.io/en/latest/access-token/)
 by creating a ServiceAccount token as described in the linked guide. You can use our
-[kube\_sa\_auth\_workflow](/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_workflow)
+[kube\_sa\_auth\_workflow](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_workflow)
 submodule to assign the necessary permissions to the ServiceAccount.
 
 To create a new Workflow from the above example WorkflowTemplate by using `curl` to query the HTTP API, you would
@@ -135,7 +135,7 @@ curl -X POST "http://<your-argo-server>/api/v1/workflows/example-namespace/submi
 
 ## From Argo Events
 
-Using our [Event Bus Addon](/stable-25-04/guides/addons/event-bus/installing), you can create an Argo [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
+Using our [Event Bus Addon](/docs/stable-25-04/guides/addons/event-bus/installing), you can create an Argo [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
 that triggers new Workflows when the Event Bus receives certain types of events. This is the recommended way
 to create Workflows in response to events that occur **outside** the Kubernetes cluster [^1].
 
@@ -262,7 +262,7 @@ module "composed_workflow" {
 }
 ```
 
-For a real world example, see our guide on rolling deployments in your [CI / CD pipelines](/stable-25-04/guides/cicd/rolling-deployments).
+For a real world example, see our guide on rolling deployments in your [CI / CD pipelines](/docs/stable-25-04/guides/cicd/rolling-deployments).
 
 <MarkdownAlert severity="warning">
   Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template

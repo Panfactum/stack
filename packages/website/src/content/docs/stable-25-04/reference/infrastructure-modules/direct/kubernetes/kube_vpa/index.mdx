@@ -30,7 +30,7 @@ not set `history_length_hours` to greater than 1 week as this will cause signifi
 The VPA can use Prometheus as the source of its recommendations when setting pod resources.
 To enable this in the Panfactum stack:
 
-* Ensure you have deployed [kube\_monitoring](/stable-25-04/reference/infrastructure-modules/kubernetes/kube_monitoring).
+* Ensure you have deployed [kube\_monitoring](/docs/stable-25-04/reference/infrastructure-modules/kubernetes/kube_monitoring).
   Note that `kube_monitoring` **must** have been deployed for at least `history_length_hours`
   in order for the VPA to work properly.
 

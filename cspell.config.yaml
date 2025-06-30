@@ -222,6 +222,11 @@ words:
     "RRSIG",
     "subkeys",
     "descheduling",
+    "STYLEGUIDE",
+    "frontmatter",
+    "Kobalte",
+    "Nanostores",
+    "Unpic",
   ]
 languageSettings:
   - languageId:

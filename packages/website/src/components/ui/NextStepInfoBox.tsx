@@ -5,11 +5,16 @@ const NextStepInfoBox: ParentComponent<{
   content: string;
 }> = (props) => {
   return (
-    <div class="border-primary bg-primary rounded-md border p-4">
-      <p class="text-primary mb-0.5 mt-0 text-lg font-semibold">
+    <div
+      class={`
+        rounded-md border border-primary bg-gray-dark-mode-950 p-4
+        text-gray-dark-mode-50
+      `}
+    >
+      <p class="mt-0 mb-0.5 text-lg font-semibold text-primary">
         {props.title}
       </p>
-      <p class="text-tertiary mb-1 mt-0 text-sm">{props.content}</p>
+      <p class="mt-0 mb-1 text-sm text-tertiary">{props.content}</p>
       {props.children}
     </div>
   );

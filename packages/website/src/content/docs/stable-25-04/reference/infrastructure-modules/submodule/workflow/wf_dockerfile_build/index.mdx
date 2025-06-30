@@ -11,7 +11,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 <MarkdownAlert severity="warning">
-  This module will only run inside of clusters that have the [kube\_buildkit](/stable-25-04/guides/addons/buildkit/installing) addon deployed.
+  This module will only run inside of clusters that have the [kube\_buildkit](/docs/stable-25-04/guides/addons/buildkit/installing) addon deployed.
 </MarkdownAlert>
 
 This module creates an Argo [WorkflowTemplate](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/)
@@ -20,7 +20,7 @@ the account's ECR registry.
 
 In particular, generated Workflows will perform the following actions:
 
-* Check out the source code indicated by `code_repo` using our [standard checkout process](/stable-25-04/guides/cicd/checking-out-code).
+* Check out the source code indicated by `code_repo` using our [standard checkout process](/docs/stable-25-04/guides/cicd/checking-out-code).
 * Automatically configure authentication with the ECR registry for the account where the Workflow runs.
 * Scale-up the cluster's BuildKit instances if needed.
 * Submit both arm64 and amd64 builds to BuildKit using the indicated `dockerfile_path` and `build_context` (paths
@@ -70,12 +70,12 @@ The critical configuration values are:
 * `secrets`: (Optional) The [build secrets](https://docs.docker.com/build/building/secrets/) to set.
 
 <MarkdownAlert severity="info">
-  Make sure you review [our guide](/stable-25-04/guides/addons/buildkit/building-images) on how to optimize your Dockerfiles and build processes.
+  Make sure you review [our guide](/docs/stable-25-04/guides/addons/buildkit/building-images) on how to optimize your Dockerfiles and build processes.
 </MarkdownAlert>
 
 ### Authenticating with Private Code Repositories
 
-`git_username` and `git_password` can be used for authenticating with a private `code_repo`. See our [documentation](/stable-25-04/guides/cicd/checking-out-code)
+`git_username` and `git_password` can be used for authenticating with a private `code_repo`. See our [documentation](/docs/stable-25-04/guides/cicd/checking-out-code)
 for what values to provide. The only permissions needed by this Workflow is read access to the source code.
 
 ### Using Private Base Images
@@ -99,7 +99,7 @@ The containers running in this workflow only perform very basic orchestration op
 actually occur directly in the BuildKit instances.
 
 If you are finding you need to increase the resource requests or limits for your build processes, you
-will need to adjust the parameters of the [kube\_buildkit](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) module.
+will need to adjust the parameters of the [kube\_buildkit](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) module.
 
 ### Single Platform Images
 

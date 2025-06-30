@@ -190,7 +190,7 @@ We will first create the resource through the UI and then import it to configure
 
 #### 4. CICD (Optional)
 
-If you have CICD setup and are deploying infrastructure using the [wf_tf_deploy](/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) module,
+If you have CICD setup and are deploying infrastructure using the [wf_tf_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) module,
 you will also need to pass in the keys:
 
 ::: code-group labels=[infrastructure/cicd/deploy.hcl]
@@ -222,7 +222,7 @@ module "tf_deploy" {
 #### 5. Finish Authentik Setup
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
-the [Sync Authentik with the Atlas Settings](/main/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
+the [Sync Authentik with the Atlas Settings](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
 section.
 
 ### Disable SSO Bypass

@@ -41,8 +41,15 @@ const MarkdownGuideNav: Component<MarkdownGuideNavProps> = (props) => {
         />
       </div>
 
-      <Progress.Track class="bg-tertiary dark:bg-secondary h-2 rounded">
-        <Progress.Fill class="bg-accent h-full w-[var(--kb-progress-fill-width)] rounded" />
+      <Progress.Track
+        class={`
+          h-2 rounded bg-tertiary text-gray-dark-mode-50
+          dark:bg-gray-dark-mode-900
+        `}
+      >
+        <Progress.Fill
+          class={`h-full w-(--kb-progress-fill-width) rounded bg-accent`}
+        />
       </Progress.Track>
     </Progress>
   );

@@ -34,7 +34,7 @@ All storage classes created by this module have the following properties:
 - Uses encrypted volumes
 - Allows [volume expansions](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#csi-volume-expansion) and
 creates volumes that are eligible for autoresizing by the
-[PVC autoresizer](/main/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer)
+[PVC autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer)
 - Have a [volume binding mode](https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode) of `WaitForFirstConsumer`
 - Creates volumes that are named `{{ .PVCNamespace }}/{{ .PVCName }}` in AWS (via the `Name` tag)
 

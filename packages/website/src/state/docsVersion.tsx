@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { isServer } from "solid-js/web";
 
-import { getDocsPathComponents } from "@/components/layouts/primary/util/getDocsPathComponents";
+import { getDocsPathComponents } from "@/components/layouts/docs/util/getDocsPathComponents";
 
 /*
   The active docs version is determined by the following (in order of precendence):

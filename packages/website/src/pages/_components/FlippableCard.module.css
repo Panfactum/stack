@@ -1,0 +1,36 @@
+.flipContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s ease-in-out;
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.cardSide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 1rem;
+  /* Force GPU acceleration and preserve borders */
+  transform: translateZ(0.1px);
+  -webkit-transform: translateZ(0.1px);
+  /* Ensure borders stay visible during transform */
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.frontSide {
+  transform: rotateY(0deg);
+}
+
+.backSide {
+  transform: rotateY(180deg);
+}

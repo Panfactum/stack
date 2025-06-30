@@ -17,7 +17,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 In this and the following sections we will be deploying various systems for managing your network's cryptography.
 For a detailed discussion of the fundamental concepts and motivations, we *strongly* recommend reviewing
-our [concept docs on network cryptography](/edge/concepts/networking/cryptography) for the relevant background
+our [concept docs on network cryptography](/docs/edge/concepts/networking/cryptography) for the relevant background
 information.
 
 ## Deploy cert-manger
@@ -27,7 +27,7 @@ It handles the entire certificate lifecycle: provisioning, deployment, and renew
 with both public certificate authorities (e.g., [Let's Encrypt](https://letsencrypt.org/)) and private CAs
 (e.g., Vault).
 
-We provide a module for deploying cert-manager: [kube\_cert\_manager](/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
+We provide a module for deploying cert-manager: [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
 
 Let's deploy it now:
 
@@ -97,7 +97,7 @@ Creating certificates using cert-manager is a two-step process:
 
 You can read more about this process in the [cert-manager documentation here](https://cert-manager.io/docs/configuration/).
 
-We provide a module to set up the issuers required by the Panfactum stack: [kube\_cert\_issuers](/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers).
+We provide a module to set up the issuers required by the Panfactum stack: [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers).
 
 This module creates three different types of issuers:
 
@@ -159,8 +159,8 @@ Let's deploy it now:
       DNS challenge flow](https://letsencrypt.org/docs/challenge-types/). That means cert-manager
       needs access to our AWS Route53 zones that host our DNS records for the cluster's environment.
 
-   2. In the prior [DNS guide](/edge/guides/bootstrapping/dns), we configured DNS in the [aws\_registered\_domains](/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains)
-      and [aws\_delegated\_zones](/edge/reference/infrastructure-modules/direct/aws/aws_delegated_zones) modules
+   2. In the prior [DNS guide](/docs/edge/guides/bootstrapping/dns), we configured DNS in the [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains)
+      and [aws\_delegated\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_delegated_zones) modules
       under `production/global`. If you are setting up an environment **other than** production,
       we cannot reference them in terragrunt `dependency` blocks.
       Instead, we must copy the necessary values manually from the module outputs. [^2]
