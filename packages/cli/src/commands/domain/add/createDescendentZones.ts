@@ -4,6 +4,7 @@ import { z } from "zod";
 import awsDNSLinksModuleHCL from "@/templates/aws_dns_links.hcl" with { type: "file" };
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
+import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
 import { validateDomainConfig, validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
 import { CLIError } from "@/util/error/error";
 import { runTasks } from "@/util/listr/runTasks";
@@ -12,7 +13,6 @@ import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/task
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
-import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 

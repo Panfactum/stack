@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="wf_dockerfile_build" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_dockerfile_build" status="beta" type="submodule"/>
+
+<ModuleHeader name="wf_dockerfile_build" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_dockerfile_build" status="beta" type="submodule" />
 
 # Argo Workflow Template: Dockerfile Build Deployment
 
@@ -31,40 +32,42 @@ In particular, generated Workflows will perform the following actions:
 
 ## Arguments for Generated Workflows
 
-| Parameter      | Default            | Order | Description                                                                                                                                  |
-|----------------|--------------------|-------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `git_ref`      | `var.git_ref`      | 0     | The [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking out the `var.code_repo` for the build. |
+| Parameter | Default       | Order | Description                                                                                                                                  |
+| --------- | ------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `git_ref` | `var.git_ref` | 0     | The [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking out the `var.code_repo` for the build. |
 
 ## Usage
 
 Here is an example of using the module:
 
-    ::: code-group labels=[infrastructure/cicd/builder.tf]
-    ```hcl {7-12} "REPLACE_ME"
-    module "image_builder" {
-      source = "${var.pf_module_source}wf_dockerfile_build${var.pf_module_ref}"
+::: code-group labels=\[infrastructure/cicd/builder.tf]
 
-      name = "image-builder"
-      namespace = local.namespace
+```hcl {7-12} "REPLACE_ME"
+module "image_builder" {
+  source = "${var.pf_module_source}wf_dockerfile_build${var.pf_module_ref}"
 
-      code_repo = "github.com/example-org/service.git"
-      dockerfile_path = "./Dockerfile"
-      build_context = "."
-      image_repo = "example-service"
-      args = {}
-      secrets = {}
-    }
-    ```
-    :::  
+  name = "image-builder"
+  namespace = local.namespace
+
+  code_repo = "github.com/example-org/service.git"
+  dockerfile_path = "./Dockerfile"
+  build_context = "."
+  image_repo = "example-service"
+  args = {}
+  secrets = {}
+}
+```
+
+:::
 
 The critical configuration values are:
 
-- `code_repo`: The repository containing your Dockerfile and code to build.
-- `image_repo`: The AWS ECR repository where the container images will be pushed.
-- `dockerfile_path`: (Optional) A relative path from the root of the repo to your Dockerfile (or Containerfile).
-- `build_context`: (Optional) The [build context](https://docs.docker.com/build/building/context/) to submit to BuildKit.
-- `args`: (Optional) The [build arguments](https://docs.docker.com/build/guide/build-args/) to set.
-- `secrets`: (Optional) The [build secrets](https://docs.docker.com/build/building/secrets/) to set.
+* `code_repo`: The repository containing your Dockerfile and code to build.
+* `image_repo`: The AWS ECR repository where the container images will be pushed.
+* `dockerfile_path`: (Optional) A relative path from the root of the repo to your Dockerfile (or Containerfile).
+* `build_context`: (Optional) The [build context](https://docs.docker.com/build/building/context/) to submit to BuildKit.
+* `args`: (Optional) The [build arguments](https://docs.docker.com/build/guide/build-args/) to set.
+* `secrets`: (Optional) The [build secrets](https://docs.docker.com/build/building/secrets/) to set.
 
 <MarkdownAlert severity="info">
   Make sure you review [our guide](/docs/main/guides/addons/buildkit/building-images) on how to optimize your Dockerfiles and build processes.
@@ -96,13 +99,7 @@ The containers running in this workflow only perform very basic orchestration op
 actually occur directly in the BuildKit instances.
 
 If you are finding you need to increase the resource requests or limits for your build processes, you
-<<<<<<< HEAD
-will need to adjust the parameters of the [kube\_buildkit](/main/reference/infrastructure-modules/direct/kubernetes/kube\_buildkit) module.
-||||||| a3b739f2
-will need to adjust the parameters of the [kube\_buildkit](/main/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) module.
-=======
 will need to adjust the parameters of the [kube\_buildkit](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) module.
->>>>>>> main
 
 ### Single Platform Images
 
@@ -114,13 +111,13 @@ or `amd_builder_enabled` to `false`.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
