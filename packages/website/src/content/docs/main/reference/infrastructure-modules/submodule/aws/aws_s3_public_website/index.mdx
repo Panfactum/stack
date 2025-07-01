@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_s3_public_website" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_s3_public_website" status="beta" type="submodule"/>
+
+<ModuleHeader name="aws_s3_public_website" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_s3_public_website" status="beta" type="submodule" />
 
 # Public Files Hosted in S3 Bucket
 
@@ -12,8 +13,8 @@ public URL. The URL for each file is `https://{var.domain}/path/to/file/in/bucke
 
 Under the hood, this module passes most arguments to either
 
-- `aws_cdn` ([docs](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_cdn)); or
-- `aws_s3_private_bucket` ([docs](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_s3\_private\_bucket))
+* `aws_cdn` ([docs](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn)); or
+* `aws_s3_private_bucket` ([docs](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket))
 
 so see the documentation for those modules for more information about various input settings.
 
@@ -39,11 +40,11 @@ set `default_file_strict` to `false`.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -257,7 +258,7 @@ Default: `"/404.html"`
 
 ### path\_match\_behaviors
 
-Description: Similar to default\_cache\_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '*.jpg').
+Description: Similar to default\_cache\_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '\*.jpg').
 
 Type:
 

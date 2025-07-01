@@ -1,4 +1,12 @@
-@import "tailwindcss";
+/* 
+ This is not the normal way to import tailwind, 
+ but we specifically have to do this b/c @layer does not work with our css inliner (critical).
+ https://github.com/tailwindlabs/tailwindcss/discussions/13188
+*/
+@import "tailwindcss/theme.css";
+@import "tailwindcss/preflight.css";
+@import "tailwindcss/utilities.css";
+
 @import "./base.css";
 @import "./utilities/index.css";
 
@@ -215,4 +223,3 @@
 
 
 /* Animations */
-

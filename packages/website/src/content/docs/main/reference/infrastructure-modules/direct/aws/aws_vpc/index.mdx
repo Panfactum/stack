@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_vpc" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_vpc" status="stable" type="direct"/>
+
+<ModuleHeader name="aws_vpc" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_vpc" status="stable" type="direct" />
 
 # AWS Virtual Private Cloud (VPC)
 
@@ -11,20 +12,20 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module configures the following infrastructure resources for a Virtual Private Cloud:
 
-- Establishes a [VPC](https://aws.amazon.com/vpc/)
+* Establishes a [VPC](https://aws.amazon.com/vpc/)
 
-- Deploys [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) with associated [CIDR reservations](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-cidr-reservation.html) and [Route tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
+* Deploys [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) with associated [CIDR reservations](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-cidr-reservation.html) and [Route tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
 
-- [NAT](https://en.wikipedia.org/wiki/Network_address_translation) instances with static [Elastic IP](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html)
+* [NAT](https://en.wikipedia.org/wiki/Network_address_translation) instances with static [Elastic IP](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html)
   addresses associated and mapped correctly.
 
-- An [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow resources that get public IPs in the VPC to be accessible from the internet.
+* An [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow resources that get public IPs in the VPC to be accessible from the internet.
 
-- [VPC peering](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html) as required with resources outside the VPC.
+* [VPC peering](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html) as required with resources outside the VPC.
 
-- Full [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) with appropriate retention and tiering for compliance and cost management.
+* Full [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) with appropriate retention and tiering for compliance and cost management.
 
-- An [S3 Gateway endpoint](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) for free network
+* An [S3 Gateway endpoint](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) for free network
   traffic to/from AWS S3
 
 ## Usage
@@ -39,24 +40,24 @@ You want to ensure that you have *at least* 100 IPs available in each public sub
 in each private / isolated subnet. Choosing a large VPC CIDR gives you the most flexibility. [^1]
 
 [^1]: If you need to choose a smaller block for some reason
-(e.g., [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)),
-that is completely fine, but you will want to ensure that it isn't too small. However, a
-hard lower limit should be a `/19` network which would provide about 8,192 ($2^{32-19}$) IP addresses.
+    (e.g., [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)),
+    that is completely fine, but you will want to ensure that it isn't too small. However, a
+    hard lower limit should be a `/19` network which would provide about 8,192 ($2^{32-19}$) IP addresses.
 
 Iff you use the default CIDR of `10.0.0/16`, your subnets will be automatically configured as follows: [^2] [^3]
 
 [^2]: The public subnets are small because we will only deploy a handful of resources that can be directly
-reached from the public internet (e.g., load balancers). The private subnets are the largest because that is
-where the vast majority of the Kubernetes workloads will run.
+    reached from the public internet (e.g., load balancers). The private subnets are the largest because that is
+    where the vast majority of the Kubernetes workloads will run.
 
 [^3]: We reserve a few CIDR ranges so that you can
-provision extra subnets in the future should you need to. This can be an extremely helpful escape hatch that prevents
-you from needing to mutate existing subnets (causing a service disruption).
+    provision extra subnets in the future should you need to. This can be an extremely helpful escape hatch that prevents
+    you from needing to mutate existing subnets (causing a service disruption).
 
 #### SLA Level 1 [^5]
 
 | Name         | Type     | Availability Zone | CIDR            | Available IPs |
-|:-------------|:---------|:-----------------:|:----------------|:--------------|
+| :----------- | :------- | :---------------: | :-------------- | :------------ |
 | `PUBLIC_A`   | Public   |         A         | `10.0.0.0/24`   | 254           |
 | `PUBLIC_B`   | Public   |         B         | `10.0.1.0/24`   | 254           |
 | N/A          | Reserved |        N/A        | `10.0.2.0/24`   | 254           |
@@ -70,7 +71,7 @@ you from needing to mutate existing subnets (causing a service disruption).
 | N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
 | N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
 
-*We recommend the above _Reserved_ CIDR blocks in case you want upgrade your SLA target in the future*.
+*We recommend the above *Reserved* CIDR blocks in case you want upgrade your SLA target in the future*.
 
 #### SLA Level 2+
 
@@ -99,10 +100,10 @@ for helping to divide your network.
 To configure the network, you will need to manually specify both the `subnets` and `nat_associations` inputs.
 
 <MarkdownAlert severity="warning">
-    You need *at least* one of each [subnet type](/docs/main/concepts/networking/aws-primitives) in at least three availability zones
-    for a highly available deployment (SLA target >= 2).
+  You need *at least* one of each [subnet type](/docs/main/concepts/networking/aws-primitives) in at least three availability zones
+  for a highly available deployment (SLA target >= 2).
 
-    You need *at least* two public subnets regardless of the SLA target in order to deploy Panfactum (EKS limitation).
+  You need *at least* two public subnets regardless of the SLA target in order to deploy Panfactum (EKS limitation).
 </MarkdownAlert>
 
 ### Network Address Translation (NAT)
@@ -120,17 +121,17 @@ pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and
 
 This setup does come with some limitations:
 
-- _Outbound_ network bandwidth is limited to 5 Gbit/s per AZ (vs 25 Gbit/s for AWS NAT Gateways)
-- _Outbound_ network connectivity in each AZ is impacted by the health of a single EC2 node
+* *Outbound* network bandwidth is limited to 5 Gbit/s per AZ (vs 25 Gbit/s for AWS NAT Gateways)
+* *Outbound* network connectivity in each AZ is impacted by the health of a single EC2 node
 
 In practice, these limitations rarely impact an organization, especially as they only
-impact _outbound_ connections (not inbound traffic):
+impact *outbound* connections (not inbound traffic):
 
-- If you need > 5 Gbit/s of outbound public internet traffic, you would usually establish
+* If you need > 5 Gbit/s of outbound public internet traffic, you would usually establish
   a private network tunnel to the destination to improve throughput beyond even 25 Gbit/s.
-- The EC2 nodes are _extremely_ stable as NAT only relies on functionality that is
+* The EC2 nodes are *extremely* stable as NAT only relies on functionality that is
   native to the linux kernel (we have never seen a NAT node crash).
-- The primary downside  is that during NAT node upgrades,
+* The primary downside  is that during NAT node upgrades,
   outbound network connectivity will be temporarily
   suspended. This typically manifests as a brief (1-2 min) delay in outbound traffic. Upgrades
   are typically only necessary every 6 months, so you can still easily achieve high uptime
@@ -140,9 +141,9 @@ impact _outbound_ connections (not inbound traffic):
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
