@@ -5,7 +5,7 @@ directly to AWS.
 
 ## Pulling and Pushing Images Locally
 
-We cover this in the [BuildKit guide](/main/guides/addons/buildkit/installing).
+We cover this in the [BuildKit guide](/docs/main/guides/addons/buildkit/installing).
 
 ## Pulling and Pushing Images Across Accounts
 
@@ -17,7 +17,7 @@ image artifacts across environments rather than rebuilding for each environment.
 
 IAM users and roles in other accounts must still have the 
 [appropriate permissions to interact with ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html). 
-We provide this automatically for Kubernetes clusters deployed with the [aws_eks](/main/reference/infrastructure-modules/direct/aws/aws_eks)
+We provide this automatically for Kubernetes clusters deployed with the [aws_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks)
 module.
 
 ## Image Immutability

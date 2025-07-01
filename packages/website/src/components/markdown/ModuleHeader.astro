@@ -2,7 +2,7 @@
 import StatusChip, { type Status } from "./StatusChip.astro";
 import TypeChip, { type Type } from "./TypeChip.astro";
 import { replaceVersionPlaceholders } from "../../lib/versions";
-import GithubIcon from "../icons/github.svg";
+import { GithubIcon } from "../icons/GithubIcon.tsx";
 
 interface Props {
   status: Status;
@@ -16,12 +16,15 @@ const href = replaceVersionPlaceholders(sourceHref);
 ---
 
 <div
-  class="border-secondary mb-3 mt-1 flex flex-wrap gap-x-5 gap-y-2 border-b-2 border-solid py-1"
+  class="mt-1 mb-3 flex flex-wrap gap-x-5 gap-y-2 border-b-2 border-solid border-secondary py-1"
 >
   <div class="flex items-center gap-3">
     <code
       data-reference={name}
-      class="inline-block w-fit !text-sm font-medium sm:!text-base"
+      class={`
+        inline-block w-fit !text-sm font-medium
+        sm:!text-base
+      `}
     >
       {name}
     </code>
@@ -31,7 +34,7 @@ const href = replaceVersionPlaceholders(sourceHref);
     <StatusChip status={status} />
     <TypeChip type={type} />
     <a href={href} class="cursor-pointer">
-      <GithubIcon size="35" />
+      <GithubIcon size={35} />
     </a>
   </div>
 </div>

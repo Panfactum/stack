@@ -1,0 +1,111 @@
+/* Slide-in animations for ScaleSection content columns */
+
+/* Left column slide-in animation */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Right column slide-in animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Fade out animation for transitioning content */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Animation classes */
+.leftColumn {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.rightColumn {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+  animation-delay: 100ms; /* Slight delay for staggered effect */
+}
+
+/* Active state animations */
+.leftColumnActive {
+  animation-name: slideInLeft;
+}
+
+.rightColumnActive {
+  animation-name: slideInRight;
+}
+
+/* Inactive state - hidden */
+.leftColumnInactive {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.rightColumnInactive {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Transitioning state */
+.transitioning {
+  animation-name: fadeOut;
+  animation-duration: 200ms;
+}
+
+/* Tab panel wrapper */
+.tabPanel {
+  transition: opacity 300ms ease-in-out;
+}
+
+.tabPanelActive {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tabPanelInactive {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+/* Immediate transition for manual selection */
+.immediateTransition .leftColumn,
+.immediateTransition .rightColumn {
+  animation-duration: 0ms;
+  transition: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .leftColumn,
+  .rightColumn {
+    animation-duration: 300ms;
+  }
+  
+  .rightColumn {
+    animation-delay: 50ms;
+  }
+}

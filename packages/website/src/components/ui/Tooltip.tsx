@@ -41,7 +41,10 @@ const Tooltip: ParentComponent<TooltipProps> = (props) => {
       </KobalteTooltip.Trigger>
       <KobalteTooltip.Portal>
         <KobalteTooltip.Content
-          class="bg-secondary z-[200] max-w-[80vw] border-2 border-offWhite p-4"
+          class={`
+            z-[200] max-w-[80vw] border-2 border-offWhite bg-gray-dark-mode-900
+            p-4 text-gray-dark-mode-50
+          `}
           onPointerDownOutside={() => {
             setOpen(false);
             setClickOpen(false);

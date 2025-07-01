@@ -1,6 +1,225 @@
-@import "tailwindcss/base";
+/* 
+ This is not the normal way to import tailwind, 
+ but we specifically have to do this b/c @layer does not work with our css inliner (critical).
+ https://github.com/tailwindlabs/tailwindcss/discussions/13188
+*/
+@import "tailwindcss/theme.css";
+@import "tailwindcss/preflight.css";
+@import "tailwindcss/utilities.css";
+
 @import "./base.css";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-@import "./variables.css";
-@import "./utilities.css";
+@import "./utilities/index.css";
+
+/*************************************
+ Tailwind Theme
+ *************************************/
+@theme {
+    /* Breakpoints */
+    --breakpoint-sm: 40rem;
+    --breakpoint-md: 48rem;
+    --breakpoint-lg: 64rem;
+    --breakpoint-xl: 80rem;
+    --breakpoint-2xl: 96rem;
+    --breakpoint-3xl: 120rem;
+
+    /* Colors */
+    --color-black: #000000;
+    --color-white: #ececeb;
+    --color-transparent: #ffffff00;
+    --color-offWhite: #dcdcdc;
+
+    /* Gold Colors */
+    --color-gold-25: #fff3e0;
+    --color-gold-50: #ffe7bf;
+    --color-gold-100: #ffdb9e;
+    --color-gold-200: #ffd07d;
+    --color-gold-300: #ffc65c;
+    --color-gold-400: #faaf35;
+    --color-gold-500: #f3950f;
+    --color-gold-600: #c67510;
+    --color-gold-700: #985811;
+    --color-gold-800: #6d3e0f;
+    --color-gold-900: #44260c;
+    --color-gold-950: #1d1006;
+
+    /* Brand Colors */
+    --color-brand-25: #e9f7ff;
+    --color-brand-50: #e6f4fc;
+    --color-brand-100: #ceeaf8;
+    --color-brand-200: #9ad3f1;
+    --color-brand-300: #70bfeb;
+    --color-brand-400: #50a9e6;
+    --color-brand-500: #3b81b0;
+    --color-brand-550: #316d95;
+    --color-brand-600: #27597a;
+    --color-brand-650: #245371;
+    --color-brand-700: #224d69;
+    --color-brand-750: #1a3b50;
+    --color-brand-800: #153245;
+    --color-brand-900: #091a25;
+    --color-brand-950: #040e12;
+
+    /* Success Colors */
+    --color-success-25: #f6fef9;
+    --color-success-50: #ecfdf3;
+    --color-success-100: #dcfae6;
+    --color-success-200: #abefc6;
+    --color-success-300: #75e0a7;
+    --color-success-400: #47cd89;
+    --color-success-500: #17b26a;
+    --color-success-600: #079455;
+    --color-success-700: #067647;
+    --color-success-800: #085d3a;
+    --color-success-900: #074d31;
+    --color-success-950: #053321;
+
+    /* Error Colors */
+    --color-error-25: #fffbfa;
+    --color-error-50: #fef3f2;
+    --color-error-100: #fee4e2;
+    --color-error-200: #fecdca;
+    --color-error-300: #fda29b;
+    --color-error-400: #f97066;
+    --color-error-500: #f04438;
+    --color-error-600: #d92d20;
+    --color-error-700: #b42318;
+    --color-error-800: #912018;
+    --color-error-900: #7a271a;
+    --color-error-950: #55160c;
+
+    /* Warning Colors */
+    --color-warning-25: #fffcf5;
+    --color-warning-50: #fffaeb;
+    --color-warning-100: #fef0c7;
+    --color-warning-200: #fedf89;
+    --color-warning-300: #fec84b;
+    --color-warning-400: #fdb022;
+    --color-warning-500: #f79009;
+    --color-warning-600: #dc6803;
+    --color-warning-700: #b54708;
+    --color-warning-800: #93370d;
+    --color-warning-900: #7a2e0e;
+    --color-warning-950: #4e1d09;
+
+    /* Gray Dark Mode Colors */
+    --color-gray-dark-mode-25: #fafafa;
+    --color-gray-dark-mode-50: #f5f5f6;
+    --color-gray-dark-mode-100: #f0f1f1;
+    --color-gray-dark-mode-200: #ececed;
+    --color-gray-dark-mode-300: #cecfd2;
+    --color-gray-dark-mode-400: #94969c;
+    --color-gray-dark-mode-500: #85888e;
+    --color-gray-dark-mode-600: #61646c;
+    --color-gray-dark-mode-700: #333741;
+    --color-gray-dark-mode-800: #1f242f;
+    --color-gray-dark-mode-900: #161b26;
+    --color-gray-dark-mode-950: #0c111d;
+
+    /* Gray Light Mode Colors */
+    --color-gray-light-mode-25: #fcfdfd;
+    --color-gray-light-mode-50: #f9fafb;
+    --color-gray-light-mode-100: #f2f5f7;
+    --color-gray-light-mode-150: #ebeff1;
+    --color-gray-light-mode-200: #e4e9ec;
+    --color-gray-light-mode-300: #d0d8dd;
+    --color-gray-light-mode-400: #98a8b3;
+    --color-gray-light-mode-500: #667985;
+    --color-gray-light-mode-600: #475a67;
+    --color-gray-light-mode-700: #344754;
+    --color-gray-light-mode-800: #182630;
+    --color-gray-light-mode-900: #101e28;
+    --color-gray-light-mode-950: #0c161d;
+
+    /* Gray Warm Colors */
+    --color-gray-warm-25: #fdfdfc;
+    --color-gray-warm-50: #fafaf9;
+    --color-gray-warm-100: #f5f5f4;
+    --color-gray-warm-200: #e7e5e4;
+    --color-gray-warm-300: #d7d3d0;
+    --color-gray-warm-400: #a9a29d;
+    --color-gray-warm-500: #79716b;
+    --color-gray-warm-600: #57534e;
+    --color-gray-warm-700: #44403c;
+    --color-gray-warm-800: #292524;
+    --color-gray-warm-900: #1c1917;
+    --color-gray-warm-950: #171412;
+
+    /* Gray Modern Colors */
+    --color-gray-modern-25: #fcfcfd;
+    --color-gray-modern-50: #f8fafc;
+    --color-gray-modern-100: #eef2f6;
+    --color-gray-modern-200: #e3e8ef;
+    --color-gray-modern-300: #cdd5df;
+    --color-gray-modern-400: #9aa4b2;
+    --color-gray-modern-500: #697586;
+    --color-gray-modern-600: #4b5565;
+    --color-gray-modern-700: #364152;
+    --color-gray-modern-800: #202939;
+    --color-gray-modern-900: #111927;
+    --color-gray-modern-950: #0d121c;
+
+    /* Gray Neutral Colors */
+    --color-gray-neutral-25: #fcfcfd;
+    --color-gray-neutral-50: #f9fafb;
+    --color-gray-neutral-100: #f3f4f6;
+    --color-gray-neutral-200: #e5e7eb;
+    --color-gray-neutral-300: #d2d6db;
+    --color-gray-neutral-400: #9da4ae;
+    --color-gray-neutral-500: #6c737f;
+    --color-gray-neutral-600: #4d5761;
+    --color-gray-neutral-700: #384250;
+    --color-gray-neutral-800: #1f2a37;
+    --color-gray-neutral-900: #111927;
+    --color-gray-neutral-950: #0d121c;
+
+    /* Spacing */
+    --spacing-1\.5: 0.375rem;
+    --spacing-3\.5: 0.875rem;
+    --spacing-112: 28rem;
+    --spacing-128: 32rem;
+    --spacing-144: 36rem;
+    --spacing-168: 42rem;
+    --spacing-192: 48rem;
+    --spacing-224: 56rem;
+    --spacing-256: 64rem;
+    --spacing-288: 72rem;
+    --spacing-320: 80rem;
+    --spacing-1\/5: 20%;
+    --spacing-2\/5: 40%;
+    --spacing-3\/5: 50%;
+    --spacing-4\/5: 80%;
+    --spacing-1\/6: calc(100%/6);
+    --spacing-2\/6: calc(100%/6*2);
+    --spacing-3\/6: calc(100%/6*3);
+    --spacing-4\/6: calc(100%/6*4);
+    --spacing-5\/6: calc(100%/6*5);
+
+    /* Min-Width */
+    --min-width-sm: 480px;
+
+    /* Blur */
+    --blur-xs: 1px;
+
+    /* Z-Index */
+    --z-index-top-navigation: 50;
+
+    /* Font Families */
+    --font-inter: "Inter", sans-serif;
+    --font-machina: "neue-machina", sans-serif;
+    --font-montreal: "neue-montreal-mono", monospace;
+}
+
+/*************************************
+ Root Variables
+ *************************************/
+:root {
+    /* Layout Positioning */
+    --sidebar-width: 20rem;
+    --toc-width: 14rem;
+    --header-height: 4rem;
+    --second-tier-height: 3rem;
+    --combined-header-height: calc(var(--header-height) + var(--second-tier-height));
+}
+
+
+/* Animations */

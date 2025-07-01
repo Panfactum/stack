@@ -29,11 +29,21 @@ export function RootDocumentLandingPage() {
         possible on modern cloud hyperscalers like AWS.
       </p>
 
-      <p class="text-primary text-display-md mb-2 font-machina font-semibold tracking-tight">
+      <p
+        class={`
+          mb-2 font-machina text-display-md font-semibold tracking-tight
+          text-primary
+        `}
+      >
         Has your organization already setup a Panfactum Kubernetes Cluster?
       </p>
 
-      <div class="flex w-full flex-col items-stretch justify-stretch gap-4 md:flex-row">
+      <div
+        class={`
+          flex w-full flex-col items-stretch justify-stretch gap-4
+          md:flex-row
+        `}
+      >
         <ContentBlockWithImage
           title="No, we're new to Panfactum."
           content="The first step in using Panfactum is setting up the core infrastructure including your first Kubernetes cluster. We provide a comprehensive bootstrapping guide to take you through this process."

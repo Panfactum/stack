@@ -12,7 +12,7 @@ It includes:
 - Setup of [EKS Access Entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html).
 
 - A set of "controller" [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) with a static size for running cluster-critical controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution. 
-  Autoscaled nodes are deployed via our [kube_karpenter](/main/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
+  Autoscaled nodes are deployed via our [kube_karpenter](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
 
 - [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for both the cluster control plane and for the node groups.
     - The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic.
@@ -31,7 +31,7 @@ It includes:
 Control plane subnets are the subnets within which AWS will deploy the EKS-managed Kubernetes API servers.
 
 By default, the control plane subnets will be any subnet named `PUBLIC_A`, `PUBLIC_B`, or `PUBLIC_C` in the VPC indicated
-by the `vpc_id` input as these are the subnets created by the [aws_vpc](/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+by the `vpc_id` input as these are the subnets created by the [aws_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
 
 If you need to overwrite the default module behavior, you can specify `control_plane_subnets`. This input takes **at least 2** subnets (each in a different AZ).
 
@@ -44,11 +44,11 @@ If you need to overwrite the default module behavior, you can specify `control_p
 Node subnets are the subnets within which your actual workloads will run once deployed to the Kubernetes cluster.
 
 By default, the node subnets will be any subnet named `PRIVATE_A`, `PRIVATE_B`, or `PRIVATE_C` in the VPC indicated
-by the `vpc_id` input as these are the subnets created by the [aws_vpc](/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+by the `vpc_id` input as these are the subnets created by the [aws_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
 
 If you need to overwrite the default module behavior, you can specify `node_subnets`.
 
-For an [SLA target of level 2 or above](/main/guides/deploying-workloads/high-availability), you MUST provide **at least 3** subnets (each in a different AZ).
+For an [SLA target of level 2 or above](/docs/main/guides/deploying-workloads/high-availability), you MUST provide **at least 3** subnets (each in a different AZ).
 
 ### Overriding the Service CIDR
 
@@ -66,7 +66,7 @@ You will also need to choose a `dns_service_ip` which **must** be in the `servic
 
 #### Post-install Steps
 
-This module is intended to be installed as a part of [this guide](/main/guides/bootstrapping/kubernetes-cluster) which includes manual steps
+This module is intended to be installed as a part of [this guide](/docs/main/guides/bootstrapping/kubernetes-cluster) which includes manual steps
 that must be run after applying the module.
 
 ## RBAC
@@ -83,12 +83,12 @@ input variables), and the description of the intended permission level:
 | `pf:readers`            | Reader SSO Role                     | `var.reader_principal_arns`            | Read access to all resources (including secrets). ([AmazonEKSEditPolicy](https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html#access-policy-permissions-amazonekseditpolicy))                    |
 | `pf:restricted-readers` | RestrictedReader SSO Role           | `var.restricted_reader_principal_arns` | Read access to all resources (not including secrets). ([AmazonEKSViewPolicy](https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html#access-policy-permissions-amazoneksviewpolicy.json))           |
 
-The SSO roles are installed into each account via [aws_iam_identity_center_permissions](/main/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions)
+The SSO roles are installed into each account via [aws_iam_identity_center_permissions](/docs/main/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions)
 and are automatically discovered by this module. Users with access to a particular AWS IAM SSO role will have the corresponding permissions in all Panfactum clusters in
 that AWS account.
 
 You can explicitly grant additional AWS IAM principals (users and roles) access via the input variables outlined above (e.g., `var.superuser_principal_arns`).
 
 Note that extra permissions are given to the `pf:admins` and `pf:restricted-readers` Kubernetes groups
-in the [kube_policies](/main/reference/infrastructure-modules/direct/kubernetes/kube_policies). AWS doesn't install
+in the [kube_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies). AWS doesn't install
 permissions that cover CRDs, so we add them ourselves once the cluster is instantiated.

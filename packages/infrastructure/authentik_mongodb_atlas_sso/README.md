@@ -51,7 +51,7 @@ This module configures Authentik for integration with MongoDB Atlas.
 
 ### Setup MongoDB Atlas Identity Provider
 
-Please follow the steps defined in the [MongoDB Atlas Identity Provider](/main/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) and resume here. 
+Please follow the steps defined in the [MongoDB Atlas Identity Provider](/docs/main/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) and resume here. 
 
 ### Sync Authentik with the Atlas Settings
 

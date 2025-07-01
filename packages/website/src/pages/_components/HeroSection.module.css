@@ -1,0 +1,186 @@
+/* Animation keyframes for hero section */
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animateFadeUp {
+  animation: fade-up 0.8s ease forwards;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.testimonialScroll {
+  animation: scroll 80s linear infinite;
+}
+
+.testimonialScroll:hover {
+  animation-play-state: paused;
+}
+
+
+.gridBackground {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+  width: 100vw;
+  height: 140%;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 62px);
+  grid-template-rows: repeat(auto-fill, 62px);
+  overflow: visible;
+  will-change: opacity;
+  mask-image: linear-gradient(to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 40%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0) 80%);
+  -webkit-mask-image: linear-gradient(to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 40%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0) 80%);
+}
+
+.gridBackground::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    /* Grid lines */
+    linear-gradient(to right, color-mix(in srgb, var(--color-brand-400) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-brand-400) 10%, transparent) 1px, transparent 1px);
+  background-size: 62px 62px;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Moving dots animation */
+@keyframes moveHorizontal {
+  0% {
+    transform: translate3d(-62px, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(calc(100vw + 62px), 0, 0);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+    transform: translate3d(0, -62px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, calc(100% + 62px), 0);
+  }
+}
+
+.gridDot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-gold-800);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.8;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+  z-index: 2;
+}
+
+/* Dot trail effect - simplified for performance */
+.gridDot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0%;
+  width: var(--trail-length, 60px);
+  height: 4px;
+  background: linear-gradient(to left,
+      var(--color-gold-600) 0%,
+      transparent 100%);
+  transform: translate3d(0, -50%, 0);
+  opacity: 0.3;
+  border-radius: 1px;
+  will-change: transform;
+  z-index: -1;
+}
+
+.dotHorizontal {
+  top: calc(var(--dot-position) - 1px);
+  left: -62px;
+  animation: moveHorizontal var(--dot-speed) linear var(--dot-delay) infinite;
+}
+
+.gridBackground::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--color-brand-400) 36%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-brand-400) 36%, transparent) 1px, transparent 1px);
+  background-size: 62px 62px;
+  z-index: 2;
+  opacity: var(--grid-opacity, 0);
+  transition: opacity 0.3s ease;
+  mask-image: radial-gradient(circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.6) 30%,
+      rgba(0, 0, 0, 0.3) 60%,
+      rgba(0, 0, 0, 0.1) 80%,
+      rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: radial-gradient(circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.6) 30%,
+      rgba(0, 0, 0, 0.3) 60%,
+      rgba(0, 0, 0, 0.1) 80%,
+      rgba(0, 0, 0, 0) 100%);
+}
+
+
+.heroSection {
+  position: relative;
+  overflow: visible;
+}
+
+
+.heroSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 100%;
+  background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-brand-900) 50%, var(--color-gray-dark-mode-900) 50%) 0%,
+      color-mix(in srgb, var(--color-brand-900) 30%, var(--color-gray-dark-mode-900) 40%) 30%,
+      color-mix(in srgb, var(--color-brand-900) 20%, transparent) 55%,
+      transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}

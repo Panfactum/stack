@@ -14,7 +14,7 @@ disruptions after some time by setting `maxUnavailable` to `0`. The period where
 referred to as the *disruption window.*
 
 There may be many instances of this submodule running in the cluster and each is namespace-scoped. For example,
-we make use of this submodule in our database modules (e.g., [kube\_pg\_cluster](/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)).
+we make use of this submodule in our database modules (e.g., [kube\_pg\_cluster](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)).
 
 The controller will search for all PDBs in its namespace with the **label** `panfactum.com/voluntary-disruption-window-id` set to the
 `disruption_window_id` output from this module. Disruption windows will begin at the times indicated by the `cron_schedule` module input.

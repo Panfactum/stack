@@ -22,7 +22,7 @@ The [Reloader](https://github.com/stakater/Reloader) controller was developed by
 to address this gap. With this controller deployed in the cluster, changes to ConfigMaps or Secrets will trigger
 rolling upgrades on the resources that reference them.
 
-We provide a module to deploy this controller: [kube\_reloader](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_reloader).
+We provide a module to deploy this controller: [kube\_reloader](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_reloader).
 
 Let's deploy the Reloader now:
 
@@ -62,7 +62,7 @@ began a rolling upgrade.
 
 ## Node Image Caches
 
-While the pull-through image cache deployed in [earlier in this guide](/stable-25-04/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
+While the pull-through image cache deployed in [earlier in this guide](/docs/stable-25-04/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)
 will ensure that images are always available to your cluster, images must still be loaded from ECR onto a node before
 they can be used by a container. Typically, this happens just-in-time; when a pod is created, the node will attempt
 to pull the images used by the pod's containers.
@@ -71,12 +71,12 @@ This can add a noticeable delay to pod startup times as everything is blocked un
 are fully transferred, decompressed, and mounted. For most workloads, the extra 10-60 seconds does not matter, but
 for more critical workloads, we might want to minimize startup delays as much as possible.
 
-Fortunately, we can provide a solution to this problem, the [kube_node_image_cache_controller](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller).
+Fortunately, we can provide a solution to this problem, the [kube_node_image_cache_controller](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller).
 This controller will automatically ensure specified images are pre-pulled to every node, so that they will already be available if a pod needs the image in the future. [^22]
 
 [^22]: While many of our modules automatically specify images for the cache, you can specify additional images
-via the  [kube_node_image_cache](/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule. This
-is a *submodule* so you can use it many times inside [your own first-party infrastructure modules.](/stable-25-04/guides/iac/first-party-modules)
+via the  [kube_node_image_cache](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule. This
+is a *submodule* so you can use it many times inside [your own first-party infrastructure modules.](/docs/stable-25-04/guides/iac/first-party-modules)
 
 Let's deploy the node image cache controller now:
 
@@ -125,7 +125,7 @@ your storage volumes and call the volume expansion API as they near maximum capa
 [^6]: On AWS, volumes can only be expanded *once* every six hours, so you still must choose
     initial storage capacities and growth rates that reflect your predicted workload usage. This isn't completely hands-off.
 
-We provide a module to deploy it: [kube\_pvc\_autoresizer](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer).
+We provide a module to deploy it: [kube\_pvc\_autoresizer](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer).
 
 Let's deploy it now:
 
@@ -182,7 +182,7 @@ the Descheduler respects
 [PodDisruptionBudgets](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) which we provide for
 all Panfactum modules.
 
-We provide a module for the Descheduler: [kube\_descheduler](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_descheduler).
+We provide a module for the Descheduler: [kube\_descheduler](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_descheduler).
 
 Let's deploy it now:
 
@@ -230,8 +230,8 @@ In this section, we will add these capabilities.
 
 By default, the cluster's persistent data is stored on [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 backed by [AWS EBS volumes](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes.html). This is managed
-via the [kube\_aws\_ebs\_csi](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module we installed in
-[a prior section](/stable-25-04/guides/bootstrapping/storage-interfaces).
+via the [kube\_aws\_ebs\_csi](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module we installed in
+[a prior section](/docs/stable-25-04/guides/bootstrapping/storage-interfaces).
 
 EBS volumes support point-in-time snapshots that can be used to rollback data to a particular moment. We
 can enable the ability to create those snapshots
@@ -239,7 +239,7 @@ via the [external-snapshotter](https://github.com/kubernetes-csi/external-snapsh
 us to create [VolumeSnapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/)
 in Kubernetes that will in turn create EBS snapshots in AWS.
 
-We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_external_snapshotter).
+We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_external_snapshotter).
 
 Let's deploy it now:
 
@@ -281,7 +281,7 @@ custom resource to the cluster. A Backup enables the following functionality:
 * The ability to restore the cluster and its data from the Backup by creating a [Restore](https://velero.io/docs/v1.13/api-types/restore/)
 * The ability to regularly schedule (and garbage collect) Backups via a [Schedule](https://velero.io/docs/v1.13/api-types/schedule/)
 
-We provide a module to deploy this functionality: [kube\_velero](/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_velero).
+We provide a module to deploy this functionality: [kube\_velero](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_velero).
 
 This will create hourly backups of the cluster and its data that will allow you to rollback your entire
 cluster in the case of an emergency. [^4]

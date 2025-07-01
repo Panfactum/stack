@@ -107,7 +107,7 @@ variable "vpa_enabled" {
 variable "minimum_memory_mb" {
   description = "The minimum memory in MB to allocate to each OpenSearch node"
   type        = number
-  default     = 1000
+  default     = 4000
 
   validation {
     condition     = var.minimum_memory_mb >= 1000

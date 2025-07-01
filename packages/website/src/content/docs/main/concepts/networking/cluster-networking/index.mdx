@@ -106,7 +106,7 @@ networking stack:
 
 * Adds support for [cluster meshes](https://cilium.io/use-cases/cluster-mesh/)
 
-The Panfactum Stack's Cilium deployment ([kube\_cilium](/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium)) has a few enhancements over the default Cilium install:
+The Panfactum Stack's Cilium deployment ([kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium)) has a few enhancements over the default Cilium install:
 
 #### IP Address Management (IPAM)
 
@@ -196,7 +196,7 @@ In the Panfactum stack, we use [Linkerd](https://linkerd.io/) as our service mes
 * Extremely simple to setup and maintain relative to other options (looking at you, Istio)
 * Most of its functionality can be provided without needing to learn or implement new Kubernetes resource types
 
-You can see our implementation in the [kube\_linkerd](/main/reference/infrastructure-modules/direct/kubernetes/kube_linkerd) terraform module.
+You can see our implementation in the [kube\_linkerd](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_linkerd) terraform module.
 
 #### Native Sidecars
 
@@ -284,7 +284,7 @@ unique capabilities. The most popular are:
 * [HAProxy Controller](https://haproxy-ingress.github.io/docs/): Configures [HAProxy](https://www.haproxy.org/) to back your Ingress resources.
   Often used when support is needed for more niche networking protocols.
 
-In the Panfactum Stack, we use the Ingress-NGINX Controller ([kube\_ingress\_nginx](/main/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx))
+In the Panfactum Stack, we use the Ingress-NGINX Controller ([kube\_ingress\_nginx](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx))
 for the following reasons:
 
 * As another foundational part of the stack, we prioritize project longevity and licenses security.
@@ -303,7 +303,7 @@ Ultimately, inbound traffic to clusters in the Panfactum Stack looks like the fo
 <MarkdownSVGImage src={ingressSVG} alt="Inbound network diagram" />
 
 Which traffic gets routed to which services is controlled via [Ingress manifests](https://kubernetes.io/docs/concepts/services-networking/ingress/).
-We provide a submodule for defining Ingress manifests for our Ingress-NGINX controller: [kube\_ingress](/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress).
+We provide a submodule for defining Ingress manifests for our Ingress-NGINX controller: [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress).
 
 ## DNS
 
@@ -320,7 +320,7 @@ CoreDNS is extremely performant and provides one of the most stable implementati
 [Kubernetes DNS-Based Service Discovery specification.](https://github.com/kubernetes/dns/blob/master/docs/specification.md)
 This allows your workloads to connect to domains like `my-service.my-namespace.svc.cluster.local`.
 
-We provide a module for deploying CoreDNS to Panfactum Stack clusters, [kube\_core\_dns](/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns),
+We provide a module for deploying CoreDNS to Panfactum Stack clusters, [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns),
 which is set up in [the bootstrapping guide.](http://localhost:3000/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns) [^20]
 
 [^20]: Note that EKS also deploys CoreDNS to newly provisioned clusters. However, their implementation is lacking in several
@@ -339,9 +339,9 @@ Kubernetes maintains the [ExternalDNS](https://github.com/kubernetes-sigs/extern
 case. After deploying this controller to your cluster, when you create new load balancers or Ingress resources,
 the appropriate DNS records will automatically be created in your public DNS provider.
 
-In the Panfactum Stack, we provide the [kube\_external\_dns](/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
+In the Panfactum Stack, we provide the [kube\_external\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
 module which will provision DNS records in [AWS Route 53.](https://aws.amazon.com/route53/) The specific instructions
-for configuring this are covered in [the bootstrapping guide.](/main/guides/bootstrapping/inbound-networking#deploy-externaldns) [^21]
+for configuring this are covered in [the bootstrapping guide.](/docs/main/guides/bootstrapping/inbound-networking#deploy-externaldns) [^21]
 
 [^21]: If you host your DNS records in a system other than AWS Route 53, you will need to create your own deployment of
     ExternalDNS in order for DNS records to automatically sync with your cluster configuration. Fortunately, this
@@ -366,7 +366,7 @@ to accomplish this use the `kubectl` CLI.
 
 While this is handy, it has limited flexibility and suffers from reliability issues for long-lived tunnels. In response to these limitations,
 we provide SSH bastions in the Panfactum Stack that can be leveraged for [SSH tunneling](https://www.ssh.com/academy/ssh/tunneling-example):
-[kube\_bastion](/main/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
+[kube\_bastion](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
 
 These SSH bastions are integrated with the Vault clusters running in each cluster to provide out-of-the-box SSO. The Panfactum
 devShell provides a convenience command, `pf-tunnel`, that will automatically create the necessary SSH certificates
@@ -385,7 +385,7 @@ through the SSH bastion before being forwarded to `remotehost:80` [^32].
     need to be inside the cluster. For example, both `google.com:443` and `postgres.default.svc.cluster.local:5432` are valid remote
     addresses.
 
-For more information on SSH and why we chose this architecture over a VPN-based system, see [these concept docs.](/main/concepts/networking/cryptography#vpns)
+For more information on SSH and why we chose this architecture over a VPN-based system, see [these concept docs.](/docs/main/concepts/networking/cryptography#vpns)
 
 ## Network Security
 
@@ -434,7 +434,7 @@ network firewall. However, there are a few key differences:
 ### TLS
 
 Once connections are allowed via Network Policies,
-TLS and the associated [X.509 certificate infrastructure](/main/concepts/networking/cryptography#x.509-certificates)
+TLS and the associated [X.509 certificate infrastructure](/docs/main/concepts/networking/cryptography#x.509-certificates)
 are key to ensuring the resulting connection is encrypted and secure.
 
 There are two types are X.509 certificates commonly found inside a Kubernetes cluster: private and public. Private
@@ -444,7 +444,7 @@ the ingress controllers to establish TLS connections with remote clients.
 Regardless of public or private, certificate provisioning and lifecycle management is a complicated task. Fortunately,
 [cert-manager](https://cert-manager.io/) exists to take care of these complexities. While not a built-in Kubernetes
 component, it is the de-facto way to manage certificates in the Kubernetes ecosystem and is included in the Panfactum
-Stack via [kube\_cert\_manager](/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
+Stack via [kube\_cert\_manager](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
 
 #### Private Certificate Infrastructure
 
@@ -465,9 +465,9 @@ In the Panfactum Stack, public certificates are provisioned by [Let's Encrypt](h
 the [DNS-01 challenge](https://letsencrypt.org/docs/challenge-types/#dns-01-challenge) type.
 
 This is automatically completed whenever you create a new ingress via our
-[kube\_ingress](/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) submodule.
+[kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) submodule.
 
 <MarkdownAlert severity="warning">
   This certificate provisioning process will only work if you have set up DNS in accordance with our
-  [bootstrapping guide.](/main/guides/bootstrapping/dns)
+  [bootstrapping guide.](/docs/main/guides/bootstrapping/dns)
 </MarkdownAlert>

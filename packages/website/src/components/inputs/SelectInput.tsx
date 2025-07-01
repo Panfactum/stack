@@ -86,9 +86,17 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
           type="button"
           on:click={toggleIsOpen}
           class={clsx(
-            "border-primary flex w-full items-center justify-between rounded-md border px-4 py-2 text-sm",
-            "h-12 shadow focus:outline-none focus:ring-2",
-            background === "primary" ? "bg-transparent" : "bg-primary",
+            `
+              flex w-full items-center justify-between rounded-md border
+              border-primary px-4 py-2 text-sm
+            `,
+            `
+              h-12 shadow
+              focus:ring-2 focus:outline-none
+            `,
+            background === "primary"
+              ? "bg-transparent"
+              : "bg-gray-dark-mode-950 text-gray-dark-mode-50",
           )}
         >
           {selectedOption()}
@@ -111,7 +119,11 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
           <div
             ref={setSelectEl}
             class={clsx(
-              "border-primary bg-primary absolute right-0 z-10 mt-2 w-56 origin-top-right cursor-pointer border",
+              `
+                absolute right-0 z-10 mt-2 w-56 origin-top-right cursor-pointer
+                border border-primary bg-gray-dark-mode-950
+                text-gray-dark-mode-50
+              `,
               "rounded-md shadow-lg ring-1 ring-black",
             )}
           >
@@ -120,7 +132,10 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
                 {({ id, name }) => (
                   <div
                     on:click={createOnSelect(id)}
-                    class="block px-4 py-2 text-sm hover:font-semibold"
+                    class={`
+                      block px-4 py-2 text-sm
+                      hover:font-semibold
+                    `}
                   >
                     {name}
                   </div>

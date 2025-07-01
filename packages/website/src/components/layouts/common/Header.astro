@@ -1,0 +1,78 @@
+---
+import { AiFillGithub } from 'solid-icons/ai'
+
+import { DiscordIcon } from "@/components/icons/DiscordIcon.tsx";
+import { PanfactumLogoIcon } from "@/components/icons/PanfactumLogoIcon.tsx";
+import GetStartedButton from "@/components/ui/GetStartedButton.tsx";
+import SearchIconButton from "@/components/ui/search/SearchIconButton.tsx";
+import { DISCORD_URL, GITHUB_URL } from "@/lib/constants.ts";
+
+import MobileNav from "./MobileNav.tsx";
+import SecondTierNav from "./SecondTierNav.astro";
+import type { NavLink, SecondTierConfig } from "./types";
+
+interface Props {
+  hasBorder?: boolean;
+  background?: "primary" | "secondary" | "transparent";
+  isFixed?: boolean;
+  searchButtonEnabled?: boolean;
+  collapseLogoOnMobile?: boolean;
+  links: NavLink[];
+  secondTierConfig?: SecondTierConfig;
+}
+
+const {
+  hasBorder = false,
+  isFixed = false,
+  searchButtonEnabled = false,
+  links,
+  secondTierConfig,
+} = Astro.props;
+
+const pathname = new URL(Astro.request.url).pathname;
+---
+<div
+  data-primary-header
+  class:list={[
+    "flex h-(--header-height) w-screen flex-col overflow-hidden border-b bg-primary",
+    hasBorder ? "border-primary" : "border-transparent",
+    isFixed ? `
+      md:fixed
+      top-0 z-30
+    ` : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
+  ]}
+>
+    <div class="mx-auto flex size-full grow basis-1 items-center justify-between px-4 max-w-screen-3xl">
+        <div class="flex h-full items-center gap-8">
+            <a
+                href={ "/"}                     
+                aria-label={"Panfactum Framework Homepage"}
+                class="flex h-full max-w-[75%] cursor-pointer items-center md:w-[225px]"
+                data-astro-prefetch="viewport"
+            >
+              <PanfactumLogoIcon />
+            </a>
+            <nav class="ml-8 hidden gap-x-10 md:flex" aria-label="Primary">
+              <slot name="nav" />
+            </nav>
+        </div>
+        <div class="hidden items-center gap-x-8 md:flex">
+          <a aria-label="Github Repository" href={GITHUB_URL} class="hidden lg:inline-flex">
+              <AiFillGithub size={30} />
+          </a>
+          <a aria-label="Discord Server" href={DISCORD_URL} class="hidden lg:inline-flex">
+              <DiscordIcon class="size-7" />
+          </a>
+          <GetStartedButton size="sm" fullPath={pathname} />
+      </div>
+
+        <div class="flex items-center gap-2 md:hidden">
+          {searchButtonEnabled && <SearchIconButton client:idle />}
+            <MobileNav fullPath={pathname} links={links} client:idle />
+        </div>
+    </div>
+</div>
+
+{secondTierConfig && <SecondTierNav config={secondTierConfig} />}
+
+<script is:inline async src="https://server.fillout.com/embed/v1/"></script>

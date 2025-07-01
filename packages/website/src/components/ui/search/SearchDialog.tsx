@@ -128,35 +128,57 @@ const _SearchDialog: Component = () => {
     >
       <Dialog.Portal>
         <Dialog.Overlay
-          class={
-            "fixed inset-0 z-50 w-screen max-w-[100vw] bg-[#1F242F]/80 backdrop-blur-sm"
-          }
+          class={`
+            fixed inset-0 z-50 w-screen max-w-[100vw] bg-[#1F242F]/80
+            backdrop-blur-sm
+          `}
         />
-        <div class="fixed left-0 top-0 z-[100] w-full  max-w-[100vw]">
-          <Dialog.Content class="relative left-[calc(100%_/_12)] top-16 min-w-[calc(100%_/_6_*_5)] max-w-[calc(100%_/_6_*_5)] sm:left-[calc(100%_/_8)] sm:min-w-[75%] md:left-1/5 md:min-w-[60%] md:max-w-[60%] lg:left-1/4 lg:min-w-3/5 lg:max-w-3/5">
+        <div class="fixed top-0 left-0 z-[100] w-full max-w-[100vw]">
+          <Dialog.Content
+            class={`
+              relative top-16 left-[calc(100%_/_12)] max-w-[calc(100%_/_6_*_5)]
+              min-w-[calc(100%_/_6_*_5)]
+              sm:left-[calc(100%_/_8)] sm:min-w-[75%]
+              md:left-1/5 md:max-w-[60%] md:min-w-[60%]
+              lg:left-1/4 lg:max-w-3/5 lg:min-w-3/5
+            `}
+          >
             <Dialog.Title class={`sr-only`}>Search Panfactum Docs</Dialog.Title>
             <TextField
               name="search"
               value={query()}
               onChange={setQuery}
-              class="bg-primary flex h-12 w-full items-center overflow-hidden rounded-md pr-4 focus-within:shadow-lg dark:bg-gray-dark-mode-700"
+              class={`
+                flex h-12 w-full items-center overflow-hidden rounded-md
+                bg-gray-dark-mode-950 pr-4 text-gray-dark-mode-50
+                focus-within:shadow-lg
+                dark:bg-gray-dark-mode-700
+              `}
             >
               <TextField.Label class="sr-only">
                 Search Panfactum documentation
               </TextField.Label>
-              <div class=" grid h-full w-12 place-items-center">
+              <div class="grid h-full w-12 place-items-center">
                 <HiSolidMagnifyingGlass />
               </div>
               <TextField.Input
                 ref={setInputEl}
                 id="search"
-                class="bg-primary size-full border-0 pr-8 text-sm outline-none focus:border-0 focus:ring-0 dark:bg-gray-dark-mode-700 "
+                class={`
+                  size-full border-0 bg-gray-dark-mode-950 pr-8 text-sm
+                  text-gray-dark-mode-50 outline-none
+                  focus:border-0 focus:ring-0
+                  dark:bg-gray-dark-mode-700
+                `}
                 autocomplete="off"
                 role="searchbox"
               />
               <Show when={query()}>
                 <button
-                  class="bg-primary rounded-full   dark:bg-gray-dark-mode-700"
+                  class={`
+                    rounded-full bg-gray-dark-mode-950 text-gray-dark-mode-50
+                    dark:bg-gray-dark-mode-700
+                  `}
                   on:click={() => setQuery("")}
                 >
                   <IoCloseOutline />
@@ -164,9 +186,11 @@ const _SearchDialog: Component = () => {
               </Show>
             </TextField>
             <div
-              class={
-                "bg-primary mt-4 flex flex-col rounded-sm px-8 py-4 dark:bg-gray-dark-mode-700"
-              }
+              class={`
+                mt-4 flex flex-col rounded-sm bg-gray-dark-mode-950 px-8 py-4
+                text-gray-dark-mode-50
+                dark:bg-gray-dark-mode-700
+              `}
             >
               <For each={hits()} fallback={<h2>No Results</h2>}>
                 {(hit) => (
@@ -177,7 +201,7 @@ const _SearchDialog: Component = () => {
                     }}
                     class="cursor-pointer py-4"
                   >
-                    <h4 class=" font-bold">
+                    <h4 class="font-bold">
                       {Object.values(hit.hierarchy)
                         .filter(Boolean)
                         .slice(0, -1)
@@ -185,7 +209,7 @@ const _SearchDialog: Component = () => {
                     </h4>
                     {/* eslint-disable solid/no-innerhtml,jsx-a11y/heading-has-content */}
                     <h2
-                      class=" mb-3 font-bold"
+                      class="mb-3 font-bold"
                       innerHTML={hit._highlightResult?.headingText?.value}
                     />
                     {/* eslint-enable solid/no-innerhtml,jsx-a11y/heading-has-content */}

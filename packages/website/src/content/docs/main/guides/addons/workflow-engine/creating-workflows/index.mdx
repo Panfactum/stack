@@ -2,15 +2,15 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 # Creating Workflows
 
-<p class="subtitle">Demonstrate how to use the [wf\_spec](/main/reference/infrastructure-modules/submodule/workflow/wf_spec)
+<p class="subtitle">Demonstrate how to use the [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec)
 submodule to create Argo Workflow resources.</p>
 
 ## Prerequisites
 
 You should ensure you have completed the following guides before continuing:
 
-* [Installing the Argo Workflow Engine](/main/guides/addons/workflow-engine/installing)
-* [Developing First-party IaC Modules](/main/guides/iac/first-party-modules)
+* [Installing the Argo Workflow Engine](/docs/main/guides/addons/workflow-engine/installing)
+* [Developing First-party IaC Modules](/docs/main/guides/iac/first-party-modules)
 * [Argo's Getting Started Guide for Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/walk-through/)
 
 <MarkdownAlert severity="warning">
@@ -28,7 +28,7 @@ complexity compared to simpler but less robust tools. Building a Workflow from s
 endeavor due to the amount of configuration knobs available.
 
 We have created a submodule,
-[wf\_spec](/main/reference/infrastructure-modules/submodule/workflow/wf_spec), that aims to simplify the process
+[wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec), that aims to simplify the process
 by applying sane defaults that are compatible with the Panfactum Stack architecture.
 
 *wf* is shorthand for "workflow," but why *spec*?
@@ -169,7 +169,7 @@ You can also use the `default_resources` input of `wf_spec` to set a sensible de
 ### Advanced Workflow Patterns
 
 For more details and examples on common workflow patterns that you might wish to deploy,
-see the documentation for [wf\_spec](/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+see the documentation for [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
 
 ## Workflow Checklist
 
@@ -200,9 +200,9 @@ Below is a set of questions that we recommend asking when you create a Workflow 
     so you at least keep `spot_nodes_enabled` as `true`.
 
 [^4]: Running on `arm64` nodes will save about 20% of your workflow costs, so it might be worth it to create
-    a multi-platform image. See our [guide.](/main/guides/addons/buildkit/building-images)
+    a multi-platform image. See our [guide.](/docs/main/guides/addons/buildkit/building-images)
 
 ## Examples
 
 * The Argo project provides [100+ examples](https://github.com/argoproj/argo-workflows/tree/main/examples) of various Workflow patterns.
-* You provide many [prebuilt WorkflowTemplates](/main/guides/addons/workflow-engine/prebuilt-workflows) that you can examine for best practices.
+* You provide many [prebuilt WorkflowTemplates](/docs/main/guides/addons/workflow-engine/prebuilt-workflows) that you can examine for best practices.

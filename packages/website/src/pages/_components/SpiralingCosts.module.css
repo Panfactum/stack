@@ -1,0 +1,28 @@
+@keyframes growBar {
+  from {
+    height: 0px;
+  }
+
+  to {
+    height: var(--target-height);
+  }
+}
+
+.barAnimate {
+  height: 0px;
+  /* Initial height for Chrome */
+  animation: growBar var(--animation-duration) ease-out forwards;
+  animation-fill-mode: both;
+  /* Ensures Chrome respects the animation states */
+}
+
+.animationComplete {
+  animation: none;
+  height: var(--target-height) !important;
+  /* Set final height */
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animationComplete:hover {
+  height: calc(var(--target-height) + 10px) !important;
+}

@@ -106,6 +106,8 @@ import ChangelogEntry from "./ChangelogEntry.astro"
       2. Run `pf devshell sync`. This should complete successfully before proceeding.
 
       3. Run `terragrunt apply` on **all** modules (or `terragrunt run-all apply`).
+
+    * The default Kubernetes version has been updated to 1.31 from 1.30.
   </Fragment>
 
   <Fragment slot="additions">
@@ -123,6 +125,12 @@ import ChangelogEntry from "./ChangelogEntry.astro"
   </Fragment>
 
   <Fragment slot="fixes">
+
+    * Fixed Kubernetes RBAC issues:
+      * Addressed problem where EKS access entries were preventing permissions from being properly granted.
+      * Addressed issue where certain roles had been granted elevated permissions inappropriately.
+      * Updated the RBAC policies to incorporate new CRDs that have been added to the Panfactum cluster since the last stable release.
+
     * Fixed issue where AWS SSO sessions would not automatically sync across profiles, resulting in many unnecessary SSO login prompts. Moving forward,
       you will only need to login with SSO once and those credentials will be available for all AWS profiles.
 

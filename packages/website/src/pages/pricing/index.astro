@@ -1,0 +1,17 @@
+---
+// This file defines the pricing page for the Panfactum website
+// It displays a comparison table of the different pricing tiers
+
+import Layout from '@/components/layouts/primary/Layout.astro'
+
+import { PricingTable } from './_components/PricingTable.tsx'
+
+const pageTitle = 'Pricing'
+const pageDescription = 'Compare our pricing tiers and choose the best plan for your infrastructure needs'
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <div class="mx-auto max-w-[1200px] px-4 py-16">
+    <PricingTable />
+  </div>
+</Layout>

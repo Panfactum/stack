@@ -1,6 +1,6 @@
+import { clsx } from "clsx";
 import type { Component } from "solid-js";
 
-import Button from "@/components/ui/Button.tsx";
 import { DocsVersionProvider, useDocsVersion } from "@/state/docsVersion.tsx";
 
 interface GetStartedProps {
@@ -10,11 +10,29 @@ interface GetStartedProps {
 
 const _GetStartedButton: Component<GetStartedProps> = (props) => {
   const [version] = useDocsVersion();
+
+  const sizeClasses = {
+    sm: "px-4 py-2.5 text-sm",
+    md: "px-6 py-3 text-base",
+    lg: "px-8 py-4 text-lg",
+    xl: "px-10 py-5 text-xl",
+  };
+
   return (
-    <a href={`/docs/${version()}/guides`} class={props.class}>
-      <Button size={props.size} variant="primary" class="w-full">
-        Get Started
-      </Button>
+    <a
+      href={`/docs/${version()}/guides`}
+      class={clsx(
+        `
+          inline-block rounded-lg bg-brand-500 font-bold text-white
+          transition-colors
+          hover:bg-brand-700
+        `,
+        // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
+        sizeClasses[props.size || "md"],
+        props.class,
+      )}
+    >
+      Get Started
     </a>
   );
 };

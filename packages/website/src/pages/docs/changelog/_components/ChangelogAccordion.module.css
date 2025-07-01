@@ -1,0 +1,32 @@
+/* Animations for the changelog accordion */
+/* These animations handle the expand/collapse behavior of accordion items */
+
+@keyframes collapsibleDown {
+    from {
+        height: 0;
+    }
+    to {
+        height: var(--kb-collapsible-content-height);
+    }
+}
+
+@keyframes collapsibleUp {
+    from {
+        height: var(--kb-collapsible-content-height);
+    }
+    to {
+        height: 0;
+    }
+}
+
+.accordionContent {
+    overflow: hidden;
+}
+
+.accordionContent[data-expanded] {
+    animation: collapsibleDown 0.4s ease-out;
+}
+
+.accordionContent[data-closed] {
+    animation: collapsibleUp 0.4s ease-in;
+}

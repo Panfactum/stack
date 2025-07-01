@@ -9,8 +9,13 @@ interface ToastProps {
 
 const Toast: ParentComponent<ToastProps> = (props) => {
   return (
-    <KobalteToast toastId={props.id} class="toast [data-opened]">
-      <div class="bg-primary rounded-xl border-2 border-gray-light-mode-500 p-6">
+    <KobalteToast toastId={props.id}>
+      <div
+        class={`
+          rounded-xl border-2 border-gray-light-mode-500 bg-gray-dark-mode-950
+          p-6 text-gray-dark-mode-50
+        `}
+      >
         <div>
           <KobalteToast.Title>{props.title}</KobalteToast.Title>
           <Show when={props.description}>

@@ -343,18 +343,6 @@ resource "aws_eks_access_entry" "admin" {
   tags              = data.pf_aws_tags.tags.tags
 }
 
-resource "aws_eks_access_policy_association" "admin" {
-  for_each = local.admin_arns
-
-  cluster_name  = aws_eks_cluster.cluster.name
-  principal_arn = each.key
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
-  access_scope {
-    type = "cluster"
-  }
-  depends_on = [aws_eks_access_entry.admin]
-}
-
 // Reader access
 data "aws_iam_roles" "reader" {
   name_regex  = "AWSReservedSSO_Reader.*"
@@ -370,19 +358,6 @@ resource "aws_eks_access_entry" "reader" {
   kubernetes_groups = ["pf:readers"]
   tags              = data.pf_aws_tags.tags.tags
 }
-
-resource "aws_eks_access_policy_association" "reader" {
-  for_each = local.reader_arns
-
-  cluster_name  = aws_eks_cluster.cluster.name
-  principal_arn = each.key
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
-  access_scope {
-    type = "cluster"
-  }
-  depends_on = [aws_eks_access_entry.reader]
-}
-
 // Restricted reader access
 data "aws_iam_roles" "restricted_reader" {
   name_regex  = "AWSReservedSSO_RestrictedReader.*"
@@ -397,18 +372,6 @@ resource "aws_eks_access_entry" "restricted_reader" {
   principal_arn     = each.key
   kubernetes_groups = ["pf:restricted-readers"]
   tags              = data.pf_aws_tags.tags.tags
-}
-
-resource "aws_eks_access_policy_association" "restricted_reader" {
-  for_each = local.restricted_reader_arns
-
-  cluster_name  = aws_eks_cluster.cluster.name
-  principal_arn = each.key
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-  access_scope {
-    type = "cluster"
-  }
-  depends_on = [aws_eks_access_entry.restricted_reader]
 }
 
 ##########################################################################

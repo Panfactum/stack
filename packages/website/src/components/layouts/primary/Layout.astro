@@ -1,75 +1,62 @@
 ---
-import "./global.css";
-import CommonHead from "@/components/layouts/CommonHead.astro";
-import ToastRegion from "@/components/ui/ToastRegion";
-import SearchDialog from "@/components/ui/search/SearchDialog";
 
-import ArticleTableOfContents, {
-  type ArticleHeadingMetadata,
-} from "./ArticleTableOfContents.astro";
-import DocumentationArticle from "./DocumentationArticle";
-import Header from "./Header.astro";
-import DocsSidebar from "./sidebar/DocsSidebar";
-import { type DocsMetadata } from "./types";
-
-
-const pathname = new URL(Astro.request.url).pathname;
+import { PRIMARY_NAV_LINKS } from "./links.tsx";
+import CommonLayout from "../common/CommonLayout.astro";
+import Header from "../common/Header.astro";
+import { NavItemWithPopup } from "../common/NavItemWithPopup";
+import { SolutionsNavItem } from "../common/SolutionsNavItem";
+import type { SecondTierConfig } from "../common/types";
 
 interface Props {
-  hasBorder?: boolean;
   title: string;
   description: string;
-  redirect?: string;
-  headings?: ArticleHeadingMetadata[];
-  metadata?: DocsMetadata;
+  secondTierConfig?: SecondTierConfig;
 }
 
 const {
   title,
   description,
-  hasBorder = false,
-  redirect,
-  headings = [],
-  metadata,
+  secondTierConfig,
 } = Astro.props;
 ---
-
-<html
-        lang="en"
+<CommonLayout
+  title={title}
+  description={description}
 >
-  <CommonHead title={title} description={description} redirect={redirect} >
-    <meta name="generator" content={Astro.generator} />
-  </CommonHead>
-
-  <body
-    class="bg-primary text-primary w-screen overflow-y-scroll font-inter"
-    id="body"
-  >
     <Header
-      hasBorder={hasBorder}
-      background={"primary"}
+      hasBorder={true}
       isFixed={true}
       collapseLogoOnMobile={false}
-    />
-
-    <div
-      class:list={[
-        "mx-auto flex h-full w-screen flex-col items-start lg:flex-row xl:max-w-screen-3xl",
-        "min-h-[calc(100vh_-_var(--header-height))]"
-      ]}
+      links={PRIMARY_NAV_LINKS}
+      secondTierConfig={secondTierConfig}
     >
-      {metadata && <DocsSidebar fullPath={pathname} metadata={metadata} client:load />}
-        <DocumentationArticle
-                showTOC={headings.length > 1}
-                client:load
-        >
-            <slot/>
-        </DocumentationArticle>
-      {headings.length > 1   && (<ArticleTableOfContents headings={headings} />)}
-    </div>
-    <SearchDialog fullPath={pathname} client:idle />
-    <ToastRegion client:idle/>
-  </body>
-</html>
-
-<script src="./scripts/copyHeaderLink.ts" />
+      <Fragment slot="nav">
+          <SolutionsNavItem client:idle />
+          <NavItemWithPopup
+          title="Pricing"
+          action="/pricing"
+          saveEnabled={true}
+          client:idle
+          />
+          <NavItemWithPopup
+          title="Docs"
+          action="/docs/edge/guides"
+          saveEnabled={true}
+          client:idle
+          />
+          <!-- <NavItemWithPopup
+          title="Blog"
+          action="/blog"
+          saveEnabled={true}
+          client:idle
+          />
+          <NavItemWithPopup
+          title="About"
+          action="/about"
+          saveEnabled={true}
+          client:idle
+          /> -->
+      </Fragment>
+    </Header>
+    <slot />
+</CommonLayout>

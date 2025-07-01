@@ -22,7 +22,7 @@ const MarkdownGuideNavButton: Component<MarkdownGuidedNavButtonProps> = (
           {props.icon === "right" ? null : <FaSolidArrowLeft color="white" />}
           {props.text}
           {props.icon === "left" ? null : (
-            <FaSolidArrowLeft color="white" class="rotate-180 " />
+            <FaSolidArrowLeft color="white" class="rotate-180" />
           )}
         </a>
       </Button>

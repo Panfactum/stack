@@ -1,0 +1,27 @@
+---
+import Layout from "@/components/layouts/autopilot/Layout.astro";
+
+import { AutopilotHero } from "./_components/AutopilotHero";
+import { CompareSection } from "./_components/CompareSection";
+import { ScaleSection } from "./_components/ScaleSection";
+---
+
+<Layout 
+    title="Autopilot - Managed Infrastructure Services | Panfactum" 
+    description="Panfactum Autopilot provides fully managed cloud infrastructure services with expert monitoring, maintenance, and optimization."
+>
+    <div class="w-screen overflow-y-scroll bg-primary font-inter text-white">
+        {/* Hero Section */}
+        <AutopilotHero client:load />
+
+        {/* Features Section - TODO: Implement */}
+
+        {/* Scale Section */}
+        <ScaleSection client:load />
+
+        {/* How We Compare Section */}
+        <CompareSection client:load />
+
+        {/* CTA Section - TODO: Implement */}
+    </div>
+</Layout>

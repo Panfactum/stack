@@ -23,7 +23,7 @@ Vault serves several important purposes in the Panfactum stack:
 
 ## Deploy Vault
 
-We will use the [kube\_vault](/main/reference/infrastructure-modules/direct/kubernetes/kube_vault) infrastructure module to deploy
+We will use the [kube\_vault](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vault) infrastructure module to deploy
 Vault in a highly available manner using
 [it's integrated Raft storage backend](https://developer.hashicorp.com/vault/docs/configuration/storage/raft).
 
@@ -230,7 +230,7 @@ a remote terminal session to perform the initialization:
 One of the major benefits of Vault is that it can be [configured directly with OpenTofu (Terraform)](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
 alongside our other infrastructure components. The Panfactum stack includes several
 modules for working with Vault. In this section we will deploy some foundational configuration
-via the [vault\_core\_resources](/main/reference/infrastructure-modules/direct/vault/vault_core_resources) module.
+via the [vault\_core\_resources](/docs/main/reference/infrastructure-modules/direct/vault/vault_core_resources) module.
 
 ### Connect to Vault
 
@@ -299,7 +299,7 @@ Here is how we will work around this issue:
 
 ### Deploy Configuration Module
 
-Let's now deploy [vault\_core\_resources](/main/reference/infrastructure-modules/direct/vault/vault_core_resources):
+Let's now deploy [vault\_core\_resources](/docs/main/reference/infrastructure-modules/direct/vault/vault_core_resources):
 
 1. Before proceeding, remove `wait = false` from the `kube_vault` module. It is now expected that future `kube_vault` deployments should succeed.
 
@@ -390,7 +390,7 @@ automatic unsealing and automatic updating of the active service address.
 ### Verify Storage
 
 Each Vault node stores its data on EBS volumes provisioned by the AWS EBS CSI driver. Recall setting that up
-in the [prior section](/main/guides/bootstrapping/storage-interfaces).
+in the [prior section](/docs/main/guides/bootstrapping/storage-interfaces).
 
 Let's verify the volumes were provisioned:
 

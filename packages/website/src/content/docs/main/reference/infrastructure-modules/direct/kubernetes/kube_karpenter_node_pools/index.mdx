@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_karpenter_node_pools" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_karpenter_node_pools" status="stable" type="direct"/>
+
+<ModuleHeader name="kube_karpenter_node_pools" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_karpenter_node_pools" status="stable" type="direct" />
 
 # Karpenter NodePools
 
@@ -24,15 +25,15 @@ If you need larger nodes than the default set by this module, you will need to a
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -90,7 +91,7 @@ Description: The name of the AMI to use for the amd64 nodes that Karpenter creat
 
 Type: `string`
 
-Default: `"bottlerocket-aws-k8s-1.30-x86_64-v1.28.0-0ab4fab4"`
+Default: `"bottlerocket-aws-k8s-1.31-x86_64-v1.41.0-bc3ad241"`
 
 ### arm64\_node\_ami\_name
 
@@ -98,7 +99,7 @@ Description: The name of the AMI to use for the amd64 nodes that Karpenter creat
 
 Type: `string`
 
-Default: `"bottlerocket-aws-k8s-1.30-aarch64-v1.28.0-0ab4fab4"`
+Default: `"bottlerocket-aws-k8s-1.31-aarch64-v1.41.0-bc3ad241"`
 
 ### max\_node\_cpu
 

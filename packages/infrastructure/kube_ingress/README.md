@@ -13,9 +13,9 @@ Kubernetes Ingresses.
 It works as follows:
 
 1. For all domains in `domains`, ensure that a DNS record is configured to point to the domain to this cluster's NGINX
-  ingress controller (via [kube_external_dns](/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns))
+  ingress controller (via [kube_external_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns))
   and provide the ingress controller a TLS certificate for the domains
-  (via [kube_cert_manager](/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)).
+  (via [kube_cert_manager](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)).
 
 1. When the ingress controller receives a request to a domain in `domains`, first apply the rate limits and redirect rules.
 
@@ -32,7 +32,7 @@ initiating client.
 
 ### TLS Certificates
 
-[kube_cert_issuers](/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
+[kube_cert_issuers](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
 default cert for all covered domains and first-level subdomains (via [wildcard SANs](https://sectigostore.com/page/wildcard-san-certificates/)).
 This is stored at `cert-manager/ingress-tls`.
 
@@ -46,12 +46,12 @@ you can [submit a rate limits adjustment request](https://isrg.formstack.com/for
 ### CDN
 
 If you want to provide a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network) in front of the created Ingresses
-for performance and security improvements, see the [kube_aws_cdn](/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
+for performance and security improvements, see the [kube_aws_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
 
 **Additionally, this module must be deployed with `cdn_mode_enabled` set to `true`.**
 
 CDN configuration can be supplied via the `cdn` configuration field on each element of `ingress_configs`. The individual
-settings are described in more detail [here](/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
+settings are described in more detail [here](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
 
 ### Redirect Rules
 

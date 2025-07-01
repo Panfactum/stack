@@ -82,7 +82,7 @@ you from needing to mutate existing subnets (causing a service disruption).
 | N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
 | N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
 
-[^5]: For more information on SLA levels, see this [guide](/main/guides/deploying-workloads/high-availability).
+[^5]: For more information on SLA levels, see this [guide](/docs/main/guides/deploying-workloads/high-availability).
 
 #### Custom Network Layout
 
@@ -92,7 +92,7 @@ for helping to divide your network.
 To configure the network, you will need to manually specify both the `subnets` and `nat_associations` inputs.
 
 <MarkdownAlert severity="warning">
-    You need *at least* one of each [subnet type](/main/concepts/networking/aws-primitives) in at least three availability zones
+    You need *at least* one of each [subnet type](/docs/main/concepts/networking/aws-primitives) in at least three availability zones
     for a highly available deployment (SLA target >= 2).
 
     You need *at least* two public subnets regardless of the SLA target in order to deploy Panfactum (EKS limitation).
@@ -100,7 +100,7 @@ To configure the network, you will need to manually specify both the `subnets` a
 
 ### Network Address Translation (NAT)
 
-If you are unfamiliar with NAT, you should review the [NAT concept documentation](/main/concepts/networking/nat).
+If you are unfamiliar with NAT, you should review the [NAT concept documentation](/docs/main/concepts/networking/nat).
 
 NAT is the one component of the VPC configuration that we have enhanced beyond the typical AWS-recommended setup.
 

@@ -1,0 +1,41 @@
+/* CSS animations for SVG line drawing effect */
+/* Uses stroke-dasharray and stroke-dashoffset for path animation */
+
+.pathDraw {
+  stroke-dasharray: var(--path-length);
+  stroke-dashoffset: var(--path-length);
+  opacity: 0;
+}
+
+.pathDrawAnimate {
+  animation: drawPath var(--animation-duration) linear var(--animation-delay) forwards;
+  will-change: stroke-dashoffset, opacity;
+}
+
+@keyframes drawPath {
+  from {
+    stroke-dashoffset: var(--path-length);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.dotFadeIn {
+  opacity: 0;
+  animation: fadeIn 500ms ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

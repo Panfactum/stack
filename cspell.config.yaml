@@ -222,7 +222,12 @@ words:
     "RRSIG",
     "subkeys",
     "descheduling",
-    "nixfmt"
+    "nixfmt",
+    "STYLEGUIDE",
+    "frontmatter",
+    "Kobalte",
+    "Nanostores",
+    "Unpic",
   ]
 languageSettings:
   - languageId:

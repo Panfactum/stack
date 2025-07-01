@@ -1,7 +1,6 @@
 import mdx from "@astrojs/mdx";
 import solidJs from '@astrojs/solid-js';
 import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField } from "astro/config";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -15,8 +14,7 @@ import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
 import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.ts";
-import tailwindcss from 'tailwindcss'
-import tailwindcssNesting from 'tailwindcss/nesting'
+import tailwindcss from "@tailwindcss/vite";
 import autoprefixer from 'autoprefixer'
 import postcssImporter from 'postcss-import';
 import rehypeCodeGroup from "./src/lib/plugins/codeGroups.ts";
@@ -71,7 +69,6 @@ export default defineConfig({
   },
   integrations: [
     solidJs(),
-    tailwind({ applyBaseStyles: false }),
     expressiveCode({
       shiki: {
         bundledLangs: [
@@ -84,7 +81,24 @@ export default defineConfig({
         ]
       }
     }),
-    mdx(),
+    mdx({
+      syntaxHighlight: false,
+      remarkPlugins: [remarkGfm, remarkMath],
+      rehypePlugins: [
+        rehypeReplaceStrings,
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "append" }],
+        [
+          rehypeWrap,
+          { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
+        ],
+        rehypeCodeGroup,
+        rehypeKatex,
+      ],
+      shikiConfig: {
+        wrap: false,
+      },
+    }),
     sitemap(),
     criticalCSS({
       dimensions: [
@@ -119,27 +133,8 @@ export default defineConfig({
       Image: false // Image compression is tackled by the image service
     })
   ],
-  markdown: {
-    remarkPlugins: [remarkGfm, remarkMath],
-    rehypePlugins: [
-      rehypeReplaceStrings,
-      rehypeSlug,
-      [rehypeAutolinkHeadings, { behavior: "append" }],
-      [
-        rehypeWrap,
-        { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
-      ],
-      rehypeCodeGroup,
-      rehypeKatex,
-    ],
-    shikiConfig: {
-      wrap: false,
-    },
-  },
   experimental: {
-    svg: {
-      mode: 'inline'
-    }
+    svg: true
   },
   vite: {
     plugins: [visualizer({
@@ -151,7 +146,6 @@ export default defineConfig({
       // Be sure to keep them in sync.
       plugins: [
         postcssImporter(),
-        tailwindcssNesting(),
         tailwindcss(),
         autoprefixer(),
       ]

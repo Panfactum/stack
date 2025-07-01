@@ -11,9 +11,9 @@ Create a service deployment that automatically updates with a newly built image 
 
 ## Prerequisites
 
-* Review: [Developing a First-party IaC Module](/edge/guides/iac/first-party-modules)
+* Review: [Developing a First-party IaC Module](/docs/edge/guides/iac/first-party-modules)
 
-* Complete: [CI / CD Getting Started Guide](/edge/guides/cicd/getting-started)
+* Complete: [CI / CD Getting Started Guide](/docs/edge/guides/cicd/getting-started)
 
 * This guide assumes that you already have application code and a corresponding Dockerfile committed and pushed to your
   version control system.
@@ -33,9 +33,9 @@ We will demonstrate how to easily accomplish this using the Panfactum CI / CD sy
 ## Build and Push Image from Dockerfile
 
 First, you need to build and push an image based on the Dockerfile in your repository. We provide a submodule that will
-create a WorkflowTemplate that does this for you: [wf\_dockerfile\_build](/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+create a WorkflowTemplate that does this for you: [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
 
-Add this submodule to your CI / CD module that you created in the [Getting Started guide](/edge/guides/cicd/getting-started).
+Add this submodule to your CI / CD module that you created in the [Getting Started guide](/docs/edge/guides/cicd/getting-started).
 As an example of how this might look:
 
 ::: code-group labels=\[infrastructure/cicd/service.tf]
@@ -63,7 +63,7 @@ Before proceeding, ensure you have used the WorkflowTemplate to successfully cre
 
 <MarkdownAlert severity="info">
   It is possible that you might need to customize the module further if you are using a more complex repository setup
-  like a monorepo. See the [wf\_dockerfile\_build](/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+  like a monorepo. See the [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
   module for additional documentation.
 </MarkdownAlert>
 
@@ -334,11 +334,11 @@ we can pull it in the Workflows we create in the following step.
 ## Combine WorkflowTemplates
 
 Next, we must create a WorkflowTemplate the combines both the `wf_dockerfile_build` logic
-and the `wf_tf_deploy` logic (created in the [Getting Started guide](/edge/guides/cicd/getting-started#create-iac-deployment-workflowtemplate)).
+and the `wf_tf_deploy` logic (created in the [Getting Started guide](/docs/edge/guides/cicd/getting-started#create-iac-deployment-workflowtemplate)).
 This new WorkflowTemplate will reuse the existing WorkflowTemplates to first build the image and then deploy it.
 
 This composition pattern is described in our
-[guide for triggering Workflow](/edge/guides/addons/workflow-engine/triggering-workflows#template-references) and we provide an example below.
+[guide for triggering Workflow](/docs/edge/guides/addons/workflow-engine/triggering-workflows#template-references) and we provide an example below.
 The following snippets deserve an explanation:
 
 ::: code-group labels=\[infrastructure/cicd/service.tf]

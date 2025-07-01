@@ -230,7 +230,7 @@ you must set `cors_additional_allowed_origins`. Adding `"*"` to this input will 
 #### S3 Origins
 
 If you want to use an S3 bucket as the origin for this CloudFront distribution, you should use our
-[aws_s3_public_website](/main/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
+[aws_s3_public_website](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
 
 ### Number of PoPs
 

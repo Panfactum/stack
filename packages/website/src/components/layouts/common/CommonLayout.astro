@@ -1,0 +1,32 @@
+---
+import "@/styles/global.css";
+
+import CommonHead from "@/components/layouts/common/CommonHead.astro";
+import ToastRegion from "@/components/ui/ToastRegion";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const {
+  title,
+  description,
+} = Astro.props;
+---
+
+<html
+    lang="en"
+>
+  <CommonHead title={title} description={description}>
+    <meta name="generator" content={Astro.generator} />
+  </CommonHead>
+
+  <body
+    class="w-screen overflow-y-scroll bg-primary font-inter"
+    id="body"
+  >
+    <slot />
+    <ToastRegion client:idle/>
+  </body>
+</html>

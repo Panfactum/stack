@@ -1,0 +1,218 @@
+---
+import mdxRenderer from "@astrojs/mdx/server.js";
+import solidRenderer from "@astrojs/solid-js/server.js";
+import { experimental_AstroContainer } from 'astro/container';
+import { getCollection, render } from 'astro:content';
+
+import Layout from '@/components/layouts/docs/Layout.astro';
+import { DOCS_VERSIONS } from '@/lib/constants';
+
+import { ChangelogAccordion } from './_components/ChangelogAccordion';
+import type { ChangelogEntry } from './_components/ChangelogAccordion';
+import { getNameFromId } from './_components/getNameFromId';
+
+export const ENTRIES_PER_PAGE = 10;
+
+type ChangesCollection = Awaited<ReturnType<typeof getCollection<"changes">>>;
+export interface ChangelogPage {
+    pageNumber: number;
+    totalPages: number;
+    entries: ChangesCollection;
+}
+
+/**********************************************
+ * Page generation logic
+ **********************************************/
+
+/**
+ * Groups changelog entries into pages with a configurable number of entries per page
+ * 
+ * @param entries - Array of changelog entries to paginate
+ * @returns Array of pages, each containing up to ENTRIES_PER_PAGE entries
+ */
+export function paginateChangelog(entries: ChangesCollection): ChangelogPage[] {
+
+    // Sort entries by date from filename (newest first)
+    const sortedEntries = [...entries].sort((a, b) => {
+        return b.id.localeCompare(a.id);
+    });
+
+    // Group entries into pages based on ENTRIES_PER_PAGE
+    const pages: ChangelogPage[] = [];
+
+    for (let i = 0; i < sortedEntries.length; i += ENTRIES_PER_PAGE) {
+        const pageEntries: ChangesCollection = [];
+        
+        // Add entries up to the configured amount or until we run out
+        for (let j = 0; j < ENTRIES_PER_PAGE && i + j < sortedEntries.length; j++) {
+            pageEntries.push(sortedEntries[i + j]);
+        }
+
+        pages.push({
+            pageNumber: Math.floor(i / ENTRIES_PER_PAGE),
+            totalPages: Math.ceil(sortedEntries.length / ENTRIES_PER_PAGE),
+            entries: pageEntries
+        });
+    }
+
+    return pages;
+} 
+
+export async function getStaticPaths() {
+
+  const allChanges = await getCollection('changes');
+
+  // Edge Releases - List
+
+  const allEdgeEntries = allChanges.filter(entry => entry.id.startsWith('edge'));
+  
+  const edgeListPages =  paginateChangelog(allEdgeEntries).map((page) => ({
+    params: { page: `edge/${page.pageNumber.toString()}` },
+    props: { page }
+  }));
+
+
+  // Stable Releases - Lists - Get all stable entries and group them by version
+  const stableEntries = allChanges.filter(entry => entry.id.startsWith('stable'));
+  const stableGroups = stableEntries.reduce((groups, entry) => {
+    const version = entry.id.slice(6, 11);
+    if (!groups[version]) {
+      groups[version] = [];
+    }
+    groups[version].push(entry);
+    return groups;
+  }, {} as Record<string, ChangesCollection>);
+
+  const stablePages = Object.entries(stableGroups).map(([version, entries]) => {
+    return paginateChangelog(entries).map((page) => ({
+      params: { page: `stable-${version}/${page.pageNumber.toString()}` },
+      props: { page }
+    }));
+  }).flat(1)
+
+  // Unreleased - Individual
+  const unreleasedEntries = allChanges.filter(entry => entry.id.startsWith('main'));
+  const unreleasedPages = unreleasedEntries.map((page) => ({
+    params: { page: `${page.id}/0` },
+    props: { page }
+  }));
+
+  // All pages
+  const individualPages = allChanges.map((page) => ({
+    params: { page: page.id },
+    props: { page }
+  }));
+
+  return [...edgeListPages, ...stablePages, ...unreleasedPages, ...individualPages];
+}
+
+/**********************************************
+ * Individual page rendering
+ * 
+ * This is a bit complicated because we need to support two different page types:
+ * 
+ * 1. A list of entries (/changelog/<release_channel>/<page_number>: /changelog/edge/0)
+ * 2. A single entry (/changelog/<release_tag>: /changelog/edge.25-05-22)
+ * 
+ * This is needed for linkability of the changelog entries since the list of entries is paginated
+ * and thus the content changes. We want the ability to link to a specific entry without having
+ * to know the page number.
+ * 
+ * We can detect which type of page we are rendering by checking if the page has an "entries" property.
+ * Depending on the type of page, basically everything about how we render the page is different.
+ **********************************************/
+const { page } = Astro.props;
+
+const sections = DOCS_VERSIONS.map((version) => ({  
+        text: version.label,
+        path: `/${version.slug}/0`
+      }))
+
+let renderedEntries: ChangelogEntry[] = [];
+let title;
+let label;
+let versionFromPath = "";
+let Content;
+if("entries" in page) {
+  const pagePath = Astro.params.page;
+  const pathComponents = pagePath.split('/');
+  versionFromPath = pathComponents[0];
+  label = DOCS_VERSIONS.find((version) => version.slug === versionFromPath)?.label ?? "";
+  title = `${label} Changelog Entries - Page ${page.pageNumber}`
+
+  //const renderers = await loadRenderers([solid.getContainerRenderer(), mdx.getContainerRenderer()]);
+  const container = await experimental_AstroContainer.create();
+  container.addServerRenderer({renderer: solidRenderer, name: "astrojs/solid-js"});
+  container.addServerRenderer({renderer: mdxRenderer, name: "astrojs/mdx"});
+
+  renderedEntries = await Promise.all(
+    page.entries.map(async (entry) => {
+      const { Content } = await render(entry);
+      return {
+        id: entry.id,
+        content: await container.renderToString(Content),
+        summary: entry.data.summary,
+        skip: entry.data.skip
+      };
+    })
+  );
+} else {
+  title = `Changelog - ${getNameFromId(page.id)}`
+  Content = (await render(page)).Content;
+}
+---
+
+<Layout
+  title={title}
+  description={title}
+  metadata={[
+    {
+      text: "Changelog",
+      path: "/changelog",
+      sub: sections
+    }
+  ]}
+>
+{"entries" in page ? (
+<h1>{label} Release List</h1>
+<ChangelogAccordion client:load entries={renderedEntries} />
+
+<div class="my-8 flex items-center justify-between">
+  <div class="flex w-40 justify-start">
+    {page.pageNumber > 0 ? (
+      <a href={`/changelog/${versionFromPath}/${page.pageNumber - 1}`} class={`
+        rounded px-4 py-2 text-nowrap no-underline transition-colors
+      `}>← Previous</a>
+    ) : <div></div>}
+  </div>
+  
+  <div class="flex justify-center space-x-2">
+    {Array.from({ length: page.totalPages }).map((_, i) => (
+      <a 
+        href={`/changelog/${versionFromPath}/${i}`} 
+        class={`
+          flex size-8 items-center justify-center rounded
+          ${i === page.pageNumber ? `text-white` : ''}
+          no-underline transition-colors
+        `}
+      >
+        {i + 1}
+      </a>
+    ))}
+  </div>
+  
+  <div class="flex w-24 justify-end">
+    {page.pageNumber < page.totalPages - 1 ? (
+      <a href={`/changelog/${versionFromPath}/${page.pageNumber + 1}`} class={`
+        rounded px-4 py-2 text-nowrap no-underline transition-colors
+      `}>Next →</a>
+    ) : <div></div>}
+  </div>
+</div>
+) : (
+  <>
+  <h1>{title}</h1>
+  {Content && <Content />}
+  </>
+)}
+</Layout>

@@ -1,13 +1,51 @@
 locals {
-  resource_rows    = [for row in split("\n", file("${path.module}/resources.txt")) : split(" ", row) if length(row) > 1]
+  resource_rows = [for row in split("\n", file("${path.module}/resources.txt")) : split(" ", row) if length(row) > 1]
+
+  // These are resources where read access should be explicitly granted
+  // because they can contain sensitive information
   secret_resources = ["secrets"]
+
+  // These are resources where write access should be explicitly granted
+  // because they can be misused to bypass RBAC and/or cause cluster failures
+  sensitive_resources = [
+
+    // Can be misused to escalate privileges
+    "clusterroles",
+    "clusterrolebindings",
+    "roles",
+    "rolebindings",
+
+    // Can be misused to bypass RBAC and can cause cluster failures
+    "apiservices",
+    "validatingadmissionpolicies",
+    "mutatingwebhookconfigurations",
+    "validatingadmissionpolicybindings",
+    "validatingwebhookconfigurations",
+
+    // Can cause DOS if misconfigured
+    "flowschemas",
+    "prioritylevelconfigurations",
+
+    // Can break cluster functionality if changed
+    "customresourcedefinitions",
+
+    // Can be used to bypass RBAC and cause cluster failures if misconfigured
+    "clustercleanuppolicies",
+    "clusterpolicies",
+    "policyexceptions"
+  ]
   non_secret_resources = { for row in local.resource_rows : row[1] => {
     resources = tolist(setsubtract(toset(split(",", row[0])), toset(local.secret_resources)))
     api_group = row[1]
   } }
 
+  non_sensitive_resources = { for k, v in { for row in local.resource_rows : row[1] => {
+    resources = tolist(setsubtract(toset(split(",", row[0])), toset(concat(local.secret_resources, local.sensitive_resources))))
+    api_group = row[1]
+  } } : k => v if length(v.resources) > 0 }
+
   all_verbs  = ["get", "list", "watch", "create", "delete", "patch", "update"]
-  read_verbs = ["get", "list", "watch", "create", "delete", "patch", "update"]
+  read_verbs = ["get", "list", "watch"]
   list_verbs = ["list"]
 }
 
@@ -17,47 +55,71 @@ resource "kubernetes_cluster_role" "admins" {
     labels = data.pf_kube_labels.labels.labels
   }
   dynamic "rule" {
-    for_each = local.non_secret_resources
+    for_each = local.non_sensitive_resources
     content {
       api_groups = [rule.value.api_group, ""]
       resources  = rule.value.resources
       verbs      = local.all_verbs
     }
   }
+
   rule {
     api_groups = [""]
-    resources  = ["nodes", "namespaces", "pods", "configmaps", "services", "roles", "secrets"]
-    verbs      = local.all_verbs
-  }
-  rule {
-    api_groups = ["apps"]
-    resources = [
-      "daemonsets",
-      "deployments",
-      "replicasets",
-      "statefulsets",
-    ]
-    verbs = local.all_verbs
-  }
-  rule {
-    api_groups = ["policy"]
-    resources  = ["poddisruptionbudgets", "poddisruptionbudgets/status"]
+    resources  = ["pods/log", "pods/exec", "pods/attach", "secrets"]
     verbs      = local.all_verbs
   }
   rule {
     api_groups = ["networking.k8s.io"]
-    resources  = ["ingresses", "ingresses/status", "networkpolicies"]
-    verbs      = local.all_verbs
-  }
-  rule {
-    api_groups = ["metrics.k8s.io"]
-    resources  = ["pods", "nodes"]
+    resources  = ["ingresses/status"]
     verbs      = local.all_verbs
   }
   rule {
     api_groups = ["rbac.authorization.k8s.io"]
-    resources  = ["clusterroles", "clusterrolebindings"]
+    resources  = ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
     verbs      = local.read_verbs
+  }
+
+  rule {
+    api_groups = ["apiregistration.k8s.io"]
+    resources  = ["apiservices"]
+    verbs      = local.read_verbs
+  }
+  rule {
+    api_groups = ["flowcontrol.apiserver.k8s.io"]
+    resources = [
+      "flowschemas",
+      "prioritylevelconfigurations"
+    ]
+    verbs = local.read_verbs
+  }
+
+  rule {
+    api_groups = ["admissionregistration.k8s.io"]
+    resources = [
+      "validatingadmissionpolicies",
+      "mutatingwebhookconfigurations",
+      "validatingadmissionpolicybindings",
+      "validatingwebhookconfigurations"
+    ]
+    verbs = local.read_verbs
+  }
+
+  rule {
+    api_groups = ["apiextensions.k8s.io"]
+    resources = [
+      "customresourcedefinitions",
+    ]
+    verbs = local.read_verbs
+  }
+
+  rule {
+    api_groups = ["kyverno.io"]
+    resources = [
+      "clustercleanuppolicies",
+      "clusterpolicies",
+      "policyexceptions"
+    ]
+    verbs = local.read_verbs
   }
 }
 

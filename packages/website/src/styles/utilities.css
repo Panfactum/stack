@@ -4,34 +4,7 @@ This file contextualizes those variables for usage in various places throughout
 the website.
  */
 
-@layer utilities {
-  /****************************************************
-  **************   Font Sizes    **********************
-  *****************************************************/
 
-  .text-display-2xl {
-    @apply text-6xl md:text-7xl lg:text-8xl;
-  }
-
-  .text-display-xl {
-    @apply text-4xl md:text-5xl lg:text-5xl;
-  }
-
-  .text-display-lg {
-    @apply text-3xl md:text-4xl lg:text-4xl;
-  }
-
-  .text-display-md {
-    @apply text-xl md:text-2xl lg:text-3xl;
-  }
-
-  .text-display-sm {
-    @apply text-lg md:text-xl lg:text-2xl;
-  }
-
-  .text-display-xs {
-    @apply text-base md:text-lg lg:text-xl;
-  }
 
   /****************************************************
   **************   Background Colors    ***************
@@ -77,31 +50,19 @@ the website.
     @apply text-primary-on-dark;
   }
 
-  .bg-secondary
-    .text-secondary:not(
-      .bg-secondary :is(.bg-primary, .bg-tertiary) .text-secondary
-    ) {
+  .bg-secondary .text-secondary:not(.bg-secondary :is(.bg-primary, .bg-tertiary) .text-secondary) {
     @apply text-secondary-on-dark;
   }
 
-  .bg-secondary
-    .text-tertiary:not(
-      .bg-secondary :is(.bg-primary, .bg-tertiary) .text-tertiary
-    ) {
+  .bg-secondary .text-tertiary:not(.bg-secondary :is(.bg-primary, .bg-tertiary) .text-tertiary) {
     @apply text-tertiary-on-dark;
   }
 
-  .bg-secondary
-    .btn-primary:not(
-      .bg-secondary :is(.bg-primary, .bg-tertiary) .btn-primary
-    ) {
+  .bg-secondary .btn-primary:not(.bg-secondary :is(.bg-primary, .bg-tertiary) .btn-primary) {
     @apply btn-primary-on-dark;
   }
 
-  .bg-secondary
-    .btn-secondary:not(
-      .bg-secondary :is(.bg-primary, .bg-tertiary) .btn-secondary
-    ) {
+  .bg-secondary .btn-secondary:not(.bg-secondary :is(.bg-primary, .bg-tertiary) .btn-secondary) {
     @apply btn-secondary-on-dark;
   }
 
@@ -113,31 +74,19 @@ the website.
     @apply text-primary-on-light;
   }
 
-  .bg-tertiary
-    .text-secondary:not(
-      .bg-tertiary :is(.bg-secondary, .bg-primary) .text-secondary
-    ) {
+  .bg-tertiary .text-secondary:not(.bg-tertiary :is(.bg-secondary, .bg-primary) .text-secondary) {
     @apply text-secondary-on-light;
   }
 
-  .bg-tertiary
-    .text-tertiary:not(
-      .bg-tertiary :is(.bg-secondary, .bg-primary) .text-tertiary
-    ) {
+  .bg-tertiary .text-tertiary:not(.bg-tertiary :is(.bg-secondary, .bg-primary) .text-tertiary) {
     @apply text-tertiary-on-light;
   }
 
-  .bg-tertiary
-    .btn-primary:not(
-      .bg-tertiary :is(.bg-primary, .bg-secondary) .btn-primary
-    ) {
+  .bg-tertiary .btn-primary:not(.bg-tertiary :is(.bg-primary, .bg-secondary) .btn-primary) {
     @apply btn-primary-on-light;
   }
 
-  .bg-tertiary
-    .btn-secondary:not(
-      .bg-tertiary :is(.bg-primary, .bg-secondary) .btn-secondary
-    ) {
+  .bg-tertiary .btn-secondary:not(.bg-tertiary :is(.bg-primary, .bg-secondary) .btn-secondary) {
     @apply btn-secondary-on-light;
   }
 
@@ -271,7 +220,7 @@ the website.
   }
 
   .btn-secondary-on-light {
-    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-light-mode-300 dark:bg-gray-dark-mode-900 dark:hover:bg-gray-dark-mode-800 ring-1 ring-gray-dark-mode-300  dark:ring-gray-warm-800;
+    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-light-mode-300 dark:bg-gray-dark-mode-900 dark:hover:bg-gray-dark-mode-800 ring-1 ring-gray-dark-mode-300 dark:ring-gray-warm-800;
   }
 
   .btn-secondary-on-dark {
@@ -317,7 +266,7 @@ the website.
   /****************************************************
   **************   Extra    ***************
   *****************************************************/
-  .grid-background {
+  /* .grid-background {
     inset: 0;
     pointer-events: none;
     position: absolute;
@@ -330,5 +279,5 @@ the website.
     
     mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
     -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
-  }
+  } */
 }

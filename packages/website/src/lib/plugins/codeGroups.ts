@@ -1,3 +1,4 @@
+/* eslint-disable better-tailwindcss/no-unregistered-classes */
 import type { Element, Root } from "hast";
 import { toString as hastToString } from "hast-util-to-string";
 import type { Plugin } from "unified";

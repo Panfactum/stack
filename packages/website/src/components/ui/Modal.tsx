@@ -16,7 +16,10 @@ const Modal: ParentComponent<ModalProps> = (props) => {
       <div
         id={`${props.id}-modal`}
         class={clsx(
-          "fixed start-0 top-0 z-50 size-full overflow-y-auto overflow-x-hidden transition-all duration-200 ease-in-out",
+          `
+            fixed start-0 top-0 z-50 size-full overflow-x-hidden overflow-y-auto
+            transition-all duration-200 ease-in-out
+          `,
           "flex items-center justify-center",
           props.open ? "block" : "hidden",
         )}
@@ -38,23 +41,38 @@ const Modal: ParentComponent<ModalProps> = (props) => {
         />
         <div
           class={clsx(
-            " flex flex-col items-center gap-4",
-            "relative max-h-[80vh] max-w-[80vw] overflow-x-hidden overflow-y-scroll",
+            "flex flex-col items-center gap-4",
+            `
+              relative max-h-[80vh] max-w-[80vw] overflow-x-hidden
+              overflow-y-scroll
+            `,
             "transition-all duration-200 ease-in-out",
-            "bg-primary pointer-events-auto rounded-xl border shadow-sm",
+            `
+              pointer-events-auto rounded-xl border bg-gray-dark-mode-950
+              text-gray-dark-mode-50 shadow-sm
+            `,
             "p-4",
             props.open ? "opacity-100" : "opacity-50",
           )}
         >
-          <div class="flex w-full items-center justify-between gap-6 border-b-2 border-b-gray-warm-400 pb-1">
+          <div
+            class={`
+              flex w-full items-center justify-between gap-6 border-b-2
+              border-b-gray-warm-400 pb-1
+            `}
+          >
             <h3
-              class="text-display-md self-end font-machina"
+              class="self-end font-machina text-display-md"
               id={`${props.id}-modal-label`}
             >
               {props.title}
             </h3>
             <button
-              class=" relative -right-2 -top-2 cursor-pointer rounded bg-gray-warm-300 px-2 py-0.5 font-bold text-black hover:bg-gray-warm-400"
+              class={`
+                relative -top-2 -right-2 cursor-pointer rounded bg-gray-warm-300
+                px-2 py-0.5 font-bold text-black
+                hover:bg-gray-warm-400
+              `}
               on:click={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

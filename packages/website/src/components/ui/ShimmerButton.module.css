@@ -1,0 +1,115 @@
+/* Shimmer button animation styles */
+@keyframes shimmer-rotate {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+@keyframes glow-shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+.shimmerBorder {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.shimmerBorder::before {
+  content: "";
+  position: absolute;
+  inset: -2px -2px -1px -2px;
+  z-index: -1;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--color-gold-400) 70%, transparent) 25%,
+      color-mix(in srgb, var(--color-gold-400) 70%, transparent) 50%,
+      transparent 75%,
+      transparent 100%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: shimmer-rotate 2s infinite linear;
+  transform: translateZ(0);
+  will-change: background-position;
+  transition: opacity 0.3s ease;
+}
+
+.shimmerBorder::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -2;
+  border-radius: 10px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--color-gold-400) 60%, transparent) 25%,
+      color-mix(in srgb, var(--color-gold-400) 60%, transparent) 50%,
+      transparent 75%,
+      transparent 100%);
+  background-size: 200% 100%;
+  filter: blur(3px);
+  animation: glow-shimmer 2s infinite linear;
+  transform: translateZ(0);
+  will-change: background-position;
+}
+
+/* Button background */
+.shimmerBorder>span {
+  display: block;
+  position: relative;
+  background: var(--color-brand-500);
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.shimmerBorder:hover>span {
+  background: var(--color-brand-500);
+}
+
+.shimmerBorder:hover::before {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+/* Add a new element for the solid border on hover */
+.shimmerBorder>span::before {
+  content: "";
+  position: absolute;
+  inset: -2px -2px -1px -2px;
+  z-index: -1;
+  background: var(--color-gold-400);
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+.shimmerBorder:hover>span::before {
+  opacity: 0.7;
+}
+
+.shimmerBorder:hover::after {
+  background: var(--color-gold-400);
+  filter: blur(8px);
+  opacity: 0.4;
+  animation: none;
+}
+
+/* Ensure the shimmer doesn't affect other elements */
+.shimmerBorder {
+  isolation: isolate;
+  z-index: 10;
+  position: relative;
+  overflow: visible !important;
+}
