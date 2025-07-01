@@ -2,7 +2,7 @@
 import net from 'net'
 import { CLIError } from '@/util/error/error'
 
-interface WaitForPortOptions {
+interface IWaitForPortOptions {
   port: number
   host?: string
   maxAttempts?: number
@@ -14,7 +14,7 @@ export async function waitForPort({
   host = '127.0.0.1',
   maxAttempts = 30,
   retryDelay = 1000
-}: WaitForPortOptions): Promise<void> {
+}: IWaitForPortOptions): Promise<void> {
   for (let i = 0; i < maxAttempts; i++) {
     const connected = await new Promise<boolean>((resolve) => {
       const socket = net.createConnection(port, host)

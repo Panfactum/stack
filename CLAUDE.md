@@ -100,6 +100,8 @@ files use the following rules:
 
 - Any relative paths contained in the Objective section of the `task.md` file are relative from that specific `task.md` file, **NOT** another package directory or the repository root.
 
+- If you need to create temporary files for a task, **ALWAYS store temporary files in the task's directory (example: `.claude/tasks/[task]/some_file.md`)**.
+
 # Code Guidelines
 
 ## Guiding Principles

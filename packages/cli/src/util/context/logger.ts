@@ -1,3 +1,6 @@
+// This file provides the Logger class for formatted console output in the Panfactum CLI
+// It handles text styling, line wrapping, user prompts, and terminal formatting
+
 import { Writable } from "node:stream";
 import { input, confirm, search, checkbox, select, password } from "@inquirer/prompts";
 import pc from "picocolors";
@@ -6,14 +9,35 @@ import { breakpoints } from "./teminal-columns/breakpoints";
 import { terminalColumns } from "./teminal-columns/terminalColumns";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
+/** Maximum width for terminal output formatting */
 const MAX_WIDTH = 100
 
+/**
+ * Configuration for Inquirer theme settings
+ */
+interface IInquirerThemeConfig {
+  /** Optional task wrapper for context */
+  task?: PanfactumTaskWrapper;
+  /** Whether to place answer on same line as question */
+  answerSameLine?: boolean;
+}
 
-
-// This allows use to use multiline JS strings
-// with proper indentation and formatting when primpted to the user.
-// This reduces having to put \n characters all over the codebase
-// and makes things much easier to edit and read
+/**
+ * Removes common leading indentation from multi-line strings
+ * 
+ * @remarks
+ * This function allows using multiline JS template strings with proper
+ * indentation in the source code while producing clean output. It:
+ * - Removes common leading whitespace from all lines
+ * - Trims surrounding newlines
+ * - Joins single-newline separated lines into one line
+ * - Preserves double newlines as paragraph breaks
+ * 
+ * @param text - The multi-line string to dedent
+ * @returns The dedented string
+ * 
+ * @internal
+ */
 function dedent(text: string) {
   const lines = text.split(`\n`);
   const nonEmptyLines = lines.filter(line => line.match(/\S/));
@@ -30,12 +54,35 @@ function dedent(text: string) {
 }
 
 
+/**
+ * Available color styles for text formatting
+ */
 type ColorStyle = "default" | "warning" | "important" | "question" | "error" | "success" | "subtle"
 
+/**
+ * Configuration for highlighting specific phrases in text
+ */
 type HighlightsConfig = {
+  /** Phrases to highlight with important style */
   highlights?: string[],
+  /** Phrases to highlight with subtle style */
   lowlights?: string[],
+  /** Phrases to highlight with error style */
   badlights?: string[]
+}
+
+/**
+ * Interface for applyColors method configuration
+ */
+interface IApplyColorsConfig extends HighlightsConfig {
+  /** Color style to apply to the text */
+  style?: ColorStyle;
+  /** Whether to apply bold formatting */
+  bold?: boolean;
+  /** Whether to disable automatic highlighting */
+  highlighterDisabled?: boolean;
+  /** Whether to dedent the text */
+  dedent?: boolean;
 }
 
 const DEFAULT_BREAKPOINTS = breakpoints({
@@ -43,6 +90,36 @@ const DEFAULT_BREAKPOINTS = breakpoints({
   ">= 0": [{ width: 0, preprocess: () => "" }, "auto"]
 })
 
+/**
+ * Panfactum CLI logger for formatted console output
+ * 
+ * @remarks
+ * The Logger class provides a comprehensive set of methods for:
+ * - Formatted console output with consistent styling
+ * - Interactive prompts with Inquirer.js integration
+ * - Automatic text wrapping and terminal width handling
+ * - Color highlighting with context-aware styling
+ * - Integration with Listr task runners
+ * - Debug logging capabilities
+ * 
+ * The logger maintains a list of "identifiers" (important strings like
+ * environment names) that are automatically highlighted in all output.
+ * 
+ * @example
+ * ```typescript
+ * const logger = new Logger(process.stderr, true);
+ * logger.addIdentifier("production");
+ * logger.info("Deploying to production environment");
+ * // "production" will be automatically highlighted
+ * 
+ * const name = await logger.input({
+ *   message: "What is your name?",
+ *   default: "Anonymous"
+ * });
+ * ```
+ * 
+ * @see {@link PanfactumContext} - Context object that includes a logger instance
+ */
 export class Logger {
   private stream: Writable;
   private debugEnabled: boolean;
@@ -56,52 +133,86 @@ export class Logger {
     this.debugEnabled = debugEnabled;
   }
 
-  ///////////////////////////////////////////////////////
-  // Debug utility
-  //
-  // This captures debug 'events' which are essentially
-  // any marker that we want to capture in crash logs
-  // but don't want to show to the user directly in the
-  // interactive prompts.
-  //////////////////////////////////////////////////////
-
-  public debug(action: string, _?: { [k: string]: unknown }) {
+  /**
+   * Logs debug information when debug mode is enabled
+   * 
+   * @remarks
+   * Debug events are captured for crash logs but not shown
+   * to users during normal operation. They're only visible
+   * when the --debug flag is passed to the CLI.
+   * 
+   * @param action - The debug action or event to log
+   * @param _ - Optional metadata associated with the event
+   * 
+   * @internal
+   */
+  public debug(action: string, _?: Record<string, unknown>) {
     if (this.debugEnabled) {
       this.stream.write(action)
     }
   }
 
-  ///////////////////////////////////////////////////////
-  // Colors
-  //////////////////////////////////////////////////////
-
-  // An 'identifier' is a specific named object (e.g., environment, account, domain, etc.)
-  // that we want to have highlighted in all user-facing log messsages.
-  // This utility reduces the amount of boilerplate that we have to add
-  // in our logging
+  /**
+   * Adds a string to be automatically highlighted in all logger output
+   * 
+   * @remarks
+   * Identifiers are important strings (like environment names, account IDs,
+   * or domain names) that should be visually distinct in all log messages.
+   * Once added, these strings will be automatically highlighted whenever
+   * they appear in logger output.
+   * 
+   * @param str - The identifier string to highlight
+   * 
+   * @example
+   * ```typescript
+   * logger.addIdentifier("prod-cluster");
+   * logger.info("Connecting to prod-cluster");
+   * // "prod-cluster" will be highlighted
+   * ```
+   */
   public addIdentifier(str: string) {
     this.identifiers.push(str)
   }
 
+  /**
+   * Removes a string from the automatic highlighting list
+   * 
+   * @param str - The identifier string to stop highlighting
+   */
   public removeIdentifier(str: string) {
     this.identifiers = this.identifiers.filter(identifier => identifier !== str)
   }
 
-  // This provides some pretty advanced coloring functionality
-  //   - Applies our standard color styles to the text
-  //   - Applies style-aware highlights and downlights
-  //   - Automatically adds highlights to our important strings (e.g., identifiers)
-  //   - Resolves ambiguities that can often occur
-  //      - Conflicting highlights
-  //      - Highlight and primary style conflicts
-  //      - Conflicts between our automatic highlights and function parameter highlights
-
-  public applyColors(str: string, config?: {
-    style?: ColorStyle
-    bold?: boolean,
-    highlighterDisabled?: boolean;
-    dedent?: boolean;
-  } & HighlightsConfig) {
+  /**
+   * Applies color styling and highlighting to text
+   * 
+   * @remarks
+   * This method provides advanced text coloring with:
+   * - Standard color styles (error, warning, success, etc.)
+   * - Context-aware highlighting of specific phrases
+   * - Automatic highlighting of registered identifiers
+   * - Conflict resolution for overlapping highlights
+   * - Optional text dedenting
+   * 
+   * Highlights are applied with priority:
+   * 1. Explicit highlights/lowlights/badlights from config
+   * 2. Automatic identifier highlights
+   * 3. Longer phrases take precedence over shorter ones at the same position
+   * 
+   * @param str - The text to style
+   * @param config - Configuration for styling and highlighting
+   * @returns The styled text with ANSI color codes
+   * 
+   * @example
+   * ```typescript
+   * const styled = logger.applyColors("Deploy to production failed", {
+   *   style: "error",
+   *   highlights: ["production"],
+   *   badlights: ["failed"]
+   * });
+   * ```
+   */
+  public applyColors(str: string, config?: IApplyColorsConfig) {
     const {
       style = "default",
       bold,
@@ -216,6 +327,20 @@ export class Logger {
     return resultStr;
   }
 
+  /**
+   * Gets the color function for a given style
+   * 
+   * @remarks
+   * Returns a function that applies ANSI color codes for the specified style.
+   * When highlighting within an already-styled context, the baseStyle parameter
+   * ensures highlights are visible against the background color.
+   * 
+   * @param style - The color style to apply
+   * @param baseStyle - The base style context (for nested highlighting)
+   * @returns Function that applies the color to a string
+   * 
+   * @internal
+   */
   public getColorFn(style: ColorStyle, baseStyle?: ColorStyle) {
 
     switch (style) {
@@ -259,17 +384,19 @@ export class Logger {
     }
   }
 
-  ///////////////////////////////////////////////////////
-  // Logging utilities
-  //
-  // These function print user-facing logs with a few extra
-  // features:
-  //
-  //    - Automatic styling
-  //    - Automatic line wraps
-  //    - Iconography
-  //////////////////////////////////////////////////////
-
+  /**
+   * Logs an informational message with an info icon
+   * 
+   * @param str - The message to log
+   * @param config - Optional highlighting configuration
+   * 
+   * @example
+   * ```typescript
+   * logger.info("Deployment completed successfully", {
+   *   highlights: ["successfully"]
+   * });
+   * ```
+   */
   public info(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("🛈", { style: "important" }),
@@ -278,6 +405,12 @@ export class Logger {
     this.stream.write("\n\n")
   }
 
+  /**
+   * Logs a warning message with a warning icon
+   * 
+   * @param str - The warning message to log
+   * @param config - Optional highlighting configuration
+   */
   public warn(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors(" ❗", { style: "warning" }),
@@ -286,6 +419,12 @@ export class Logger {
     this.stream.write("\n\n")
   }
 
+  /**
+   * Logs a success message with a checkmark icon
+   * 
+   * @param str - The success message to log
+   * @param config - Optional highlighting configuration
+   */
   public success(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("✓", { style: "success" }),
@@ -294,6 +433,12 @@ export class Logger {
     this.stream.write("\n\n")
   }
 
+  /**
+   * Logs an error message with an error icon
+   * 
+   * @param str - The error message to log
+   * @param config - Optional highlighting configuration
+   */
   public error(str: string, config?: HighlightsConfig) {
     this.stream.write(terminalColumns([[
       this.applyColors("🆇", { style: "error" }),
@@ -302,6 +447,12 @@ export class Logger {
     this.stream.write("\n\n")
   }
 
+  /**
+   * Writes styled text without an icon prefix
+   * 
+   * @param str - The text to write
+   * @param config - Styling and highlighting configuration
+   */
   public write(str: string, config?: HighlightsConfig & { style?: ColorStyle, removeIndent?: boolean }) {
     this.stream.write(terminalColumns([[
       "",
@@ -310,28 +461,31 @@ export class Logger {
     this.stream.write("\n\n")
   }
 
+  /**
+   * Writes raw text without any formatting or line wrapping
+   * 
+   * @param str - The raw text to write
+   */
   public writeRaw(str: string) {
     this.stream.write(str)
     this.stream.write("\n\n")
   }
 
+  /**
+   * Writes a single newline to create vertical spacing
+   */
   public line() {
     this.stream.write("\n")
   }
 
-  //////////////////////////////////////////////////////
-  // Inquirer Prompt Wrappers
-  //
-  // A few enhancements over the default prompts:
-  //
-  //   - Color styling is automatically applied
-  //   - Line spacing is automatically added
-  //   - Listr integration is provided
-  //   - Debugging automatically added
-  //   - Added the ability to provide explainer text prior to the
-  //     the question line (and provides Listr integration)
-  ///////////////////////////////////////////////////////
-
+  /**
+   * Prints explanatory text before a prompt
+   * 
+   * @param explainer - The explanatory text or configuration
+   * @param task - Optional Listr task for output integration
+   * 
+   * @internal
+   */
   private printExplainer(explainer?: string | { message: string } & HighlightsConfig, task?: PanfactumTaskWrapper) {
     if (explainer) {
       if (task) {
@@ -356,7 +510,7 @@ export class Logger {
       this.applyColors(message.message, { style: "question", ...message })
   }
 
-  private getDefaultInquirerTheme(config?: { task?: PanfactumTaskWrapper, answerSameLine?: boolean }) {
+  private getDefaultInquirerTheme(config?: IInquirerThemeConfig) {
     const { answerSameLine = false, task } = config || {};
 
     return task ? {
@@ -376,11 +530,35 @@ export class Logger {
     }
   }
 
+  /**
+   * Prompts for text input with enhanced styling and validation
+   * 
+   * @remarks
+   * Wraps Inquirer's input prompt with:
+   * - Automatic color styling
+   * - Optional explainer text before the question
+   * - Validation with styled error messages
+   * - Listr task integration
+   * - Automatic line spacing
+   * 
+   * @param config - Input prompt configuration
+   * @returns Promise resolving to the user's input
+   * 
+   * @example
+   * ```typescript
+   * const name = await logger.input({
+   *   message: "What is your project name?",
+   *   default: "my-project",
+   *   validate: (value) => value.length > 0 || "Name is required",
+   *   explainer: "This will be used as the directory name"
+   * });
+   * ```
+   */
   public input = (config: {
     message: string | { message: string } & HighlightsConfig;
     default?: string;
     required?: boolean;
-    transformer?: (value: string, { isFinal }: { isFinal: boolean; }) => string;
+    transformer?: (value: string, context: { isFinal: boolean }) => string;
     validate?: (value: string) => boolean | string | Promise<string | boolean>;
     explainer?: string | { message: string } & HighlightsConfig;
     task?: PanfactumTaskWrapper
@@ -409,6 +587,12 @@ export class Logger {
       input(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
+  /**
+   * Prompts for password input with masking
+   * 
+   * @param config - Password prompt configuration
+   * @returns Promise resolving to the user's password
+   */
   public password = (config: {
     message: string | { message: string } & HighlightsConfig;
     default?: string;
@@ -443,6 +627,25 @@ export class Logger {
       password(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
+  /**
+   * Prompts for selection from a list of choices
+   * 
+   * @param config - Select prompt configuration
+   * @returns Promise resolving to the selected value
+   * 
+   * @example
+   * ```typescript
+   * const env = await logger.select({
+   *   message: "Select environment",
+   *   choices: [
+   *     { name: "Production", value: "prod" },
+   *     { name: "Staging", value: "stage" },
+   *     { name: "Development", value: "dev" }
+   *   ],
+   *   default: "dev"
+   * });
+   * ```
+   */
   public select = <T>(config: {
     message: string | { message: string } & HighlightsConfig;
     choices: Array<{ name: string; value: T; description?: string, disabled?: boolean | string }>;
@@ -465,6 +668,12 @@ export class Logger {
       select<T>(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
+  /**
+   * Prompts for multiple selections with checkboxes
+   * 
+   * @param config - Checkbox prompt configuration
+   * @returns Promise resolving to array of selected values
+   */
   public checkbox = <T>(config: {
     message: string | { message: string } & HighlightsConfig;
     choices: Array<{ name: string; value: T; checked?: boolean; disabled?: boolean | string }>;
@@ -497,6 +706,12 @@ export class Logger {
       checkbox<T>(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
+  /**
+   * Prompts with searchable/filterable list of choices
+   * 
+   * @param config - Search prompt configuration
+   * @returns Promise resolving to the selected value
+   */
   public search = <T>(config: {
     message: string | { message: string } & HighlightsConfig;
     source: (term: string | undefined) => Promise<Array<{ name: string; value: T }>> | Array<{ name: string; value: T }>;
@@ -529,6 +744,20 @@ export class Logger {
       search<T>(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
+  /**
+   * Prompts for yes/no confirmation
+   * 
+   * @param config - Confirm prompt configuration
+   * @returns Promise resolving to boolean
+   * 
+   * @example
+   * ```typescript
+   * const proceed = await logger.confirm({
+   *   message: "Do you want to continue?",
+   *   default: true
+   * });
+   * ```
+   */
   public confirm = (config: {
     message: string | { message: string } & HighlightsConfig;
     default?: boolean;
@@ -551,10 +780,13 @@ export class Logger {
   }
 
 
-  //////////////////////////////////////////////////////
-  // Helpful standard logs
-  /////////////////////////////////////////////////////
-
+  /**
+   * Displays a standardized crash message with help resources
+   * 
+   * @remarks
+   * Shows links to Discord for support and GitHub for bug reports.
+   * Called automatically when the CLI encounters a fatal error.
+   */
   public crashMessage() {
     this.error(`
       Get Help ==================================================
@@ -565,6 +797,9 @@ export class Logger {
     `)
   }
 
+  /**
+   * Displays the Panfactum ASCII art logo
+   */
   public showLogo() {
     this.writeRaw(
       `

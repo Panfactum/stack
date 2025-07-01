@@ -1,3 +1,6 @@
+// This file defines the wf git-checkout command for CI/CD repository operations
+// It provides optimized git checkout functionality for workflow environments
+
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
@@ -5,6 +8,62 @@ import { CLIError } from '@/util/error/error'
 import { getCommitHash } from '@/util/git/getCommitHash.ts'
 import { execute } from '@/util/subprocess/execute.ts'
 
+/**
+ * CLI command for efficient git repository checkout in CI/CD workflows
+ * 
+ * @remarks
+ * This command provides an optimized git checkout process specifically
+ * designed for CI/CD environments. It prioritizes speed and reliability
+ * while handling authentication and large file support.
+ * 
+ * Key optimizations:
+ * - Shallow cloning (depth=1) for minimal data transfer
+ * - Direct commit checkout to avoid branch synchronization
+ * - Automatic Git LFS support for binary assets
+ * - Credential persistence for subsequent operations
+ * - Protection bypass for container environments
+ * 
+ * The command workflow:
+ * 1. Shallow clone the repository
+ * 2. Configure authentication for future operations
+ * 3. Resolve git reference to exact commit SHA
+ * 4. Fetch and checkout the specific commit
+ * 5. Initialize Git LFS and pull large files
+ * 
+ * Security features:
+ * - Supports token-based authentication
+ * - Credentials stored only in local git config
+ * - No credentials logged or exposed
+ * - Compatible with GitHub, GitLab, Bitbucket
+ * 
+ * This command is typically used by:
+ * - Panfactum workflow containers
+ * - CI/CD pipeline steps
+ * - Automated deployment processes
+ * - Build environments
+ * 
+ * @example
+ * ```bash
+ * # Checkout public repository
+ * pf wf git-checkout --repo github.com/panfactum/stack --checkout main
+ * 
+ * # Checkout with GitHub token
+ * pf wf git-checkout \
+ *   --repo github.com/org/private-repo \
+ *   --checkout v1.2.3 \
+ *   --username git \
+ *   --password $GITHUB_TOKEN
+ * 
+ * # Checkout to custom directory
+ * pf wf git-checkout \
+ *   --repo gitlab.com/team/project \
+ *   --checkout feature/new-feature \
+ *   source-code
+ * ```
+ * 
+ * @see {@link getCommitHash} - For reference resolution
+ * @see {@link execute} - For git command execution
+ */
 export class WorkflowGitCheckoutCommand extends PanfactumCommand {
   static override paths = [['wf', 'git-checkout']]
 
@@ -33,26 +92,82 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
     ],
   })
 
+  /**
+   * Repository URL without protocol scheme
+   * 
+   * @remarks
+   * Format: domain/org/repo (e.g., github.com/org/repo)
+   * Protocol (https://) is added automatically.
+   */
   repoUrl = Option.String('-r,--repo', {
     description: 'Repository URL without protocol (e.g., github.com/org/repo)',
     required: true,
   })
 
+  /**
+   * Git reference to checkout
+   * 
+   * @remarks
+   * Supports branches, tags, or commit SHAs.
+   * Will be resolved to exact commit SHA for reliability.
+   */
   ref = Option.String('-c,--checkout', { 
     description: 'Git reference to checkout (branch, tag, or commit)',
     required: true,
   })
   
+  /**
+   * Git username for authentication
+   * 
+   * @remarks
+   * Typically 'git' for token-based auth.
+   * Required when accessing private repositories.
+   */
   username = Option.String('-u,--username', {
     description: 'Git username for authentication',
   })
 
+  /**
+   * Git password or access token
+   * 
+   * @remarks
+   * Use personal access tokens or CI tokens.
+   * Required when username is provided.
+   */
   password = Option.String('-p,--password', {
     description: 'Git password or token for authentication',
   })
 
+  /**
+   * Target directory for checkout
+   * 
+   * @remarks
+   * Defaults to 'repo' if not specified.
+   * Directory will be created if it doesn't exist.
+   */
   directory = Option.String({ required: false })
 
+  /**
+   * Executes the optimized git checkout workflow
+   * 
+   * @remarks
+   * Performs a series of git operations optimized for CI/CD:
+   * - Validates authentication parameters
+   * - Clones with minimal history
+   * - Configures credentials for future operations
+   * - Resolves references to commit SHAs
+   * - Checks out exact commit
+   * - Initializes Git LFS support
+   * 
+   * The process is displayed with progress indicators
+   * and detailed error reporting on failures.
+   * 
+   * @throws {@link CLIError}
+   * Throws when username provided without password
+   * 
+   * @throws {@link CLISubprocessError}
+   * Throws when git operations fail
+   */
   async execute() {
     const { context } = this
     let commitSha = ''

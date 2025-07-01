@@ -1,3 +1,6 @@
+// This command enables voluntary disruptions for pods during maintenance windows
+// It's part of the deprecated kube command group
+
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
@@ -5,6 +8,37 @@ import { getPDBsByWindowId } from '@/util/kube/getPDBs';
 import { PDB_ANNOTATIONS } from '@/util/kube/pdbConstants';
 import { execute } from '@/util/subprocess/execute';
 
+/**
+ * Command for enabling voluntary disruptions for Kubernetes PDBs
+ * 
+ * @deprecated This command is part of the deprecated 'kube' command group.
+ * Consider using the newer cluster management commands.
+ * 
+ * @remarks
+ * This command enables voluntary disruptions for Pod Disruption Budgets (PDBs)
+ * during scheduled maintenance windows. It:
+ * 
+ * - Identifies PDBs by window ID annotation
+ * - Restores maxUnavailable from annotations
+ * - Marks disruption window start time
+ * - Allows pod evictions during maintenance
+ * 
+ * The command works with the PDB annotation system:
+ * - `panfactum.com/maintenance-window-id`: Links PDBs to windows
+ * - `panfactum.com/original-max-unavailable`: Stores original value
+ * - `panfactum.com/disruption-window-start`: Tracks timing
+ * 
+ * @example
+ * ```bash
+ * # Enable disruptions for maintenance window
+ * pf kube enable-disruptions -n production -w maintenance-2024
+ * 
+ * # Check PDB status after enabling
+ * kubectl get pdb -n production
+ * ```
+ * 
+ * @see {@link K8sDisruptionsDisableCommand} - For disabling disruptions after maintenance
+ */
 export class K8sDisruptionsEnableCommand extends PanfactumCommand {
   static override paths = [['kube', 'enable-disruptions']];
 
@@ -19,9 +53,27 @@ and marks the start time of the disruption window.`,
     ]
   });
 
+  /** 
+   * Kubernetes namespace containing the PDBs to enable disruptions for
+   */
   namespace = Option.String('-n,--namespace', { required: true });
+  
+  /** 
+   * Maintenance window ID identifying which PDBs to process
+   */
   windowId = Option.String('-w,--window-id', { required: true });
 
+  /**
+   * Executes the disruption enablement process
+   * 
+   * @remarks
+   * This method finds all PDBs with the specified window ID annotation
+   * and enables disruptions by restoring the original maxUnavailable
+   * value and marking the disruption window start time.
+   * 
+   * @throws {@link CLIError}
+   * Throws when kubectl operations fail or PDBs are not found
+   */
   async execute() {
 
     const enableDisruptions = async (pdb: string, maxUnavailable: number): Promise<void> => {

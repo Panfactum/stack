@@ -100,7 +100,7 @@ export async function setupVaultSSO(
     }
 
 
-    interface Context {
+    interface IContext {
         client_id: string;
         oidc_discovery_url: string;
         oidc_redirect_uris: string[];
@@ -108,7 +108,7 @@ export async function setupVaultSSO(
     }
 
 
-    const tasks = mainTask.newListr<Context>([
+    const tasks = mainTask.newListr<IContext>([
         {
             title: "Verify access",
             task: async () => {
@@ -181,7 +181,7 @@ export async function setupVaultSSO(
                 })
             },
         },
-        await buildDeployModuleTask<Context>({
+        await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy Vault OIDC",
             context,
             environment,

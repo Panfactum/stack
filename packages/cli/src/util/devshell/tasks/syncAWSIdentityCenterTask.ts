@@ -24,15 +24,22 @@ const IAM_IDENTIY_CENTER_OUTPUT_SCHEMA = z.object({
     })
 })
 
-interface TaskContext {
+interface ITaskContext {
     identiyCenterConfig?: z.infer<typeof IAM_IDENTIY_CENTER_OUTPUT_SCHEMA>
     profiles: { [profile: string]: { accountId: string; roleName: string; } }
 }
 
-export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
-    context: PanfactumContext,
-    startURL?: string
-}): Promise<ListrTask<T>> {
+/**
+ * Interface for buildSyncAWSIdentityCenterTask function input
+ */
+interface IBuildSyncAWSIdentityCenterTaskInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Optional AWS SSO start URL */
+  startURL?: string;
+}
+
+export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuildSyncAWSIdentityCenterTaskInput): Promise<ListrTask<T>> {
     const { context, startURL } = inputs;
 
     const modulePath = join(
@@ -42,7 +49,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
         MODULES.IAM_IDENTIY_CENTER_PERMISSIONS
     )
 
-    if (! await directoryExists(modulePath)) {
+    if (! await directoryExists({ path: modulePath })) {
         return {
             title: context.logger.applyColors("Skipped AWS Identity Center Sync Not deployed", { lowlights: ["Not deployed"] }),
             skip: true,
@@ -59,7 +66,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
     return {
         title: "Sync AWS Identity Center",
         task: async (_, parentTask) => {
-            const subtasks = parentTask.newListr<TaskContext>([], {
+            const subtasks = parentTask.newListr<ITaskContext>([], {
                 ctx: {
                     profiles: {}
                 }
@@ -126,7 +133,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                     }
 
                     let config;
-                    if (await fileExists(configFilePath)) {
+                    if (await fileExists({ filePath: configFilePath })) {
                         try {
                             const awsConfigFile = Bun.file(configFilePath);
                             const originalAWSConfig = parse(await awsConfigFile.text());
@@ -162,7 +169,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
                 enabled: (ctx) => ctx.identiyCenterConfig !== undefined,
                 task: async (ctx, task) => {
                     const credentialsFilePath = join(context.repoVariables.aws_dir, "credentials")
-                    if (await fileExists(credentialsFilePath)) {
+                    if (await fileExists({ filePath: credentialsFilePath })) {
                         let credentials;
                         try {
                             const awsCredentialsFile = Bun.file(credentialsFilePath);
@@ -188,7 +195,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: {
     }
 }
 
-async function getSSOConfig(ssoRegion: string, context: PanfactumContext, task: ListrTaskWrapper<TaskContext, typeof DefaultRenderer, typeof SimpleRenderer>) {
+async function getSSOConfig(ssoRegion: string, context: PanfactumContext, task: ListrTaskWrapper<ITaskContext, typeof DefaultRenderer, typeof SimpleRenderer>) {
     task.stdout().write("It looks like this is your first time setting up AWS SSO.\n" +
         "We need to collect your AWS Access Portal URL.\n" +
         "You can set/find it by following these instructions: https://docs.aws.amazon.com/singlesignon/latest/userguide/howtochangeURL.html\n" +

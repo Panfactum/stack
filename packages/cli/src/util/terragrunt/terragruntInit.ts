@@ -1,22 +1,83 @@
+// This file provides utilities for initializing Terragrunt modules
+// It runs terragrunt init and sets up provider locks for cross-platform compatibility
+
 import { join } from "node:path";
 import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function terragruntInit({
-  context,
-  env,
-  environment,
-  region,
-  module,
-  onLogLine,
-}: {
+/**
+ * Input parameters for Terragrunt initialization
+ */
+interface ITerragruntInitInput {
+  /** Panfactum context for configuration */
   context: PanfactumContext;
+  /** Additional environment variables for Terragrunt */
   env?: Record<string, string | undefined>;
+  /** Name of the environment */
   environment: string;
+  /** Name of the region */
   region: string;
+  /** Name of the module to initialize */
   module: string;
+  /** Callback for streaming log output */
   onLogLine?: (line: string) => void;
-}) {
+}
+
+/**
+ * Initializes a Terragrunt module for deployment
+ * 
+ * @remarks
+ * This function performs a complete Terragrunt initialization process:
+ * 
+ * 1. **Module Initialization**: Runs `terragrunt init -upgrade` to:
+ *    - Download required Terraform providers
+ *    - Initialize backend configuration
+ *    - Upgrade to latest provider versions
+ *    - Set up module dependencies
+ * 
+ * 2. **Provider Lock Generation**: Runs `terragrunt providers lock` to:
+ *    - Generate provider checksums for all platforms
+ *    - Ensure consistent provider versions across teams
+ *    - Support Linux (amd64/arm64) and macOS (amd64/arm64)
+ *    - Create .terraform.lock.hcl file
+ * 
+ * The function uses several Terragrunt flags:
+ * - `--terragrunt-non-interactive`: Prevents interactive prompts
+ * - `--terragrunt-no-color`: Disables color output for cleaner logs
+ * - `--terragrunt-provider-cache`: Uses shared provider cache
+ * 
+ * This initialization is required before:
+ * - Running terragrunt plan or apply
+ * - Updating module configurations
+ * - Switching between environments
+ * 
+ * @param input - Configuration for the initialization process
+ * 
+ * @example
+ * ```typescript
+ * await terragruntInit({
+ *   context,
+ *   environment: 'production',
+ *   region: 'us-east-1',
+ *   module: 'aws_vpc',
+ *   onLogLine: (line) => console.log(`[INIT] ${line}`)
+ * });
+ * ```
+ * 
+ * @throws {@link CLISubprocessError}
+ * Throws when Terragrunt init fails
+ * 
+ * @throws {@link CLISubprocessError}
+ * Throws when provider lock generation fails
+ * 
+ * @see {@link execute} - For running Terragrunt commands
+ * @see {@link terragruntApply} - For deploying after initialization
+ * @see {@link updateModuleStatus} - For tracking init status
+ */
+export async function terragruntInit(
+  input: ITerragruntInitInput
+): Promise<void> {
+  const { context, env, environment, region, module, onLogLine } = input;
   const workingDirectory = join(
     context.repoVariables.environments_dir,
     environment,

@@ -1,3 +1,6 @@
+// This file provides functionality to update Panfactum configuration files
+// It supports both repository-wide and user-specific configuration updates
+
 import { join } from "node:path";
 import { stringify, parse } from "yaml";
 import { type z } from "zod";
@@ -7,20 +10,75 @@ import { REPO_CONFIG_FILE, REPO_USER_CONFIG_FILE } from "./constants";
 import { PANFACTUM_YAML_SCHEMA } from "./schemas";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Schema for partial updates to Panfactum configuration
+ * 
+ * @remarks
+ * All fields are optional, allowing updates to specific configuration
+ * values without requiring the entire configuration object.
+ */
 const OPTIONAL_PANFACTUM_YAML_SCHEMA = PANFACTUM_YAML_SCHEMA.partial();
 
-interface UpsertRepoVariablesInput {
+/**
+ * Input parameters for updating repository variables
+ */
+interface IUpsertRepoVariablesInput {
+    /** Panfactum context containing current configuration */
     context: PanfactumContext;
+    /** Configuration values to update */
     values: z.infer<typeof OPTIONAL_PANFACTUM_YAML_SCHEMA>;
+    /** Whether to update user-specific config (true) or repo config (false) */
     user?: boolean;
 }
 
-export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
+/**
+ * Updates repository configuration variables in YAML files
+ * 
+ * @remarks
+ * This function performs a merge update of configuration values:
+ * 1. Validates the provided values against the schema
+ * 2. Reads the existing configuration file (if it exists)
+ * 3. Merges new values with existing ones (new values override)
+ * 4. Writes the updated configuration back to the file
+ * 5. Updates the in-memory context with the new values
+ * 
+ * The function can update either the main repository configuration
+ * (panfactum.yaml) or user-specific configuration (panfactum.user.yaml)
+ * based on the `user` parameter.
+ * 
+ * @param input - Configuration update parameters
+ * 
+ * @example
+ * ```typescript
+ * await upsertRepoVariables({
+ *   context,
+ *   values: {
+ *     repo_name: "my-new-repo",
+ *     environments_dir: "custom-envs"
+ *   },
+ *   user: false  // Update repo config
+ * });
+ * ```
+ * 
+ * @throws {@link PanfactumZodError}
+ * Throws when provided values don't match the schema
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to read or write configuration files
+ * 
+ * @throws {@link CLIError}
+ * Throws when existing configuration has invalid YAML syntax
+ * 
+ * @see {@link PANFACTUM_YAML_SCHEMA} - Schema for configuration validation
+ * @see {@link writeFile} - For atomic file writing
+ */
+export async function upsertRepoVariables(input: IUpsertRepoVariablesInput): Promise<void> {
     const { values, context, user } = input;
 
     /////////////////////////////////////////////
     // Update panfactum.yaml
     /////////////////////////////////////////////
+    // YAML serialization options for consistent output
     const yamlOpts = {
         doubleQuotedAsJSON: true,
     }
@@ -76,6 +134,7 @@ export async function upsertRepoVariables(input: UpsertRepoVariablesInput) {
     /////////////////////////////////////////////
     // Update the context
     /////////////////////////////////////////////
+    // Update in-memory context to reflect the changes
     Object.entries(values).forEach(([key, val]) => {
         context.repoVariables[key as keyof z.infer<typeof PANFACTUM_YAML_SCHEMA>] = val
     })

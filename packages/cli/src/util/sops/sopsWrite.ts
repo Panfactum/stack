@@ -5,22 +5,28 @@ import { removeFile } from "@/util/fs/removeFile";
 import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
-
-interface Input {
+/**
+ * Interface for sopsWrite function inputs
+ */
+interface ISopsWriteInputs {
+  /** Values to write to the SOPS file */
   values: { [key: string]: unknown };
+  /** Path to the SOPS file */
   filePath: string;
+  /** Panfactum context for logging and configuration */
   context: PanfactumContext;
+  /** Whether to overwrite existing file */
   overwrite?: boolean;
 }
 
-export const sopsWrite = async (input: Input) => {
+export const sopsWrite = async (input: ISopsWriteInputs) => {
   const { values, filePath, context, overwrite } = input;
 
-  if (await fileExists(filePath)) {
+  if (await fileExists({ filePath })) {
     if (!overwrite) {
       throw new CLIError(`File already exists at ${filePath}. Use overwrite=true if you want to overwrite it without error.`)
     }
-    await removeFile(filePath);
+    await removeFile({ filePath });
   }
 
   try {

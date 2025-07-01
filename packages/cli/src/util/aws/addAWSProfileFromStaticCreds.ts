@@ -1,3 +1,6 @@
+// This file provides utilities for adding AWS profiles with static credentials
+// It manages AWS config and credentials files in INI format
+
 import { join } from "node:path"
 import { stringify, parse } from 'ini'
 import { CLIError } from "@/util/error/error";
@@ -5,7 +8,61 @@ import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumContext, creds: { secretAccessKey: string, accessKeyId: string }, profile: string }) {
+/**
+ * AWS static credentials
+ */
+interface IAWSStaticCredentials {
+  /** AWS secret access key */
+  secretAccessKey: string;
+  /** AWS access key ID */
+  accessKeyId: string;
+}
+
+/**
+ * Input parameters for adding an AWS profile with static credentials
+ */
+interface IAddAWSProfileFromStaticCredsInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** AWS credentials to store */
+  creds: IAWSStaticCredentials;
+  /** Profile name to create or update */
+  profile: string;
+}
+
+/**
+ * Adds or updates an AWS profile with static credentials
+ * 
+ * @remarks
+ * This function manages both the AWS config and credentials files,
+ * creating them if they don't exist or updating existing profiles.
+ * The config file is updated with default output format and region,
+ * while the credentials file stores the access keys.
+ * 
+ * @param inputs - Configuration including context, credentials, and profile name
+ * 
+ * @example
+ * ```typescript
+ * await addAWSProfileFromStaticCreds({
+ *   context,
+ *   creds: {
+ *     accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+ *     secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+ *   },
+ *   profile: 'dev-environment'
+ * });
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to read existing AWS config files
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to write AWS config or credentials files
+ * 
+ * @see {@link fileExists} - For checking file existence
+ * @see {@link writeFile} - For writing INI files
+ */
+export async function addAWSProfileFromStaticCreds(inputs: IAddAWSProfileFromStaticCredsInput): Promise<void> {
     const {
         context,
         creds: {
@@ -34,7 +91,7 @@ export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumC
         }
     }
 
-    if (await fileExists(configFilePath)) {
+    if (await fileExists({ filePath: configFilePath })) {
         try {
             const awsConfigFile = Bun.file(configFilePath);
             const originalAWSConfig = parse(await awsConfigFile.text());
@@ -50,7 +107,7 @@ export async function addAWSProfileFromStaticCreds(inputs: { context: PanfactumC
         config = configUpdate
     }
 
-    if (await fileExists(credentialsFilePath)) {
+    if (await fileExists({ filePath: credentialsFilePath })) {
         try {
             const awsCredentialsFile = Bun.file(credentialsFilePath);
             const originalAWSCredentials = parse(await awsCredentialsFile.text());

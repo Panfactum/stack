@@ -11,9 +11,25 @@ import type { DomainConfigs } from "./types";
 import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
-export async function getZonesTask<T extends {}>(inputs: {
-    context: PanfactumContext
-}): Promise<{ task: ListrTask<T>, domainConfigs: DomainConfigs }> {
+/**
+ * Interface for getZonesTask function input
+ */
+interface IGetZonesTaskInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+}
+
+/**
+ * Interface for getZonesTask function output
+ */
+interface IGetZonesTaskOutput<T extends {}> {
+  /** Listr task for DNS zone retrieval */
+  task: ListrTask<T>;
+  /** Domain configurations retrieved from DNS zones */
+  domainConfigs: DomainConfigs;
+}
+
+export async function getZonesTask<T extends {}>(inputs: IGetZonesTaskInput): Promise<IGetZonesTaskOutput<T>> {
 
     const { context } = inputs;
 

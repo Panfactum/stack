@@ -6,12 +6,21 @@ import type { z } from "zod";
 
 type SlaTarget = z.infer<typeof PANFACTUM_CONFIG_SCHEMA.shape.sla_target>;
 
-export async function setSLA(inputs: {
+/**
+ * Interface for setSLA function inputs
+ */
+interface ISetSLAInputs {
+  /** SLA target level to set */
   slaTarget: SlaTarget;
+  /** Panfactum context for logging and configuration */
   context: PanfactumContext;
+  /** Environment name */
   environment: string;
+  /** Region name */
   region: string;
-}): Promise<NonNullable<SlaTarget>> {
+}
+
+export async function setSLA(inputs: ISetSLAInputs): Promise<NonNullable<SlaTarget>> {
   const { slaTarget, context, environment, region } = inputs;
 
   const regionConfig = await getConfigValuesFromFile({

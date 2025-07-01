@@ -2,7 +2,25 @@ import { getEnvironments } from "@/util/config/getEnvironments";
 import { ENVIRONMENT_NAME_SCHEMA } from "./common";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getEnvironment(inputs: { context: PanfactumContext }) {
+/**
+ * Interface for getEnvironment function inputs
+ */
+interface IGetEnvironmentInputs {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+}
+
+/**
+ * Interface for getEnvironment function output
+ */
+interface IGetEnvironmentOutput {
+    /** Name of the environment to create */
+    name: string;
+    /** Whether the environment was partially deployed already */
+    partiallyDeployed: boolean;
+}
+
+export async function getEnvironment(inputs: IGetEnvironmentInputs): Promise<IGetEnvironmentOutput> {
     const { context } = inputs;
 
     const environments = await getEnvironments(context)

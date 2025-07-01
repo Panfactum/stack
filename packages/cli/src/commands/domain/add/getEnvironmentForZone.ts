@@ -1,15 +1,24 @@
-import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
+import { getEnvironments, type IEnvironmentMeta } from "@/util/config/getEnvironments";
 import { CLIError } from "@/util/error/error";
 import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getEnvironmentForZone(inputs: {
-    context: PanfactumContext,
-    domain: string,
-    shouldBeProduction?: boolean
-    environmentMeta?: EnvironmentMeta
-}): Promise<EnvironmentMeta> {
-    const { context, domain, shouldBeProduction, environmentMeta } = inputs;
+/**
+ * Interface for getEnvironmentForZone function inputs
+ */
+interface IGetEnvironmentForZoneInput {
+    /** Panfactum context for operations */
+    context: PanfactumContext;
+    /** Domain name for environment selection */
+    domain: string;
+    /** Whether the environment should be production */
+    shouldBeProduction?: boolean;
+    /** Pre-selected environment metadata */
+    environmentMeta?: IEnvironmentMeta;
+}
+
+export async function getEnvironmentForZone(input: IGetEnvironmentForZoneInput): Promise<IEnvironmentMeta> {
+    const { context, domain, shouldBeProduction, environmentMeta } = input;
 
     if (environmentMeta) {
         if (!environmentMeta.name.includes("prod") && shouldBeProduction) {

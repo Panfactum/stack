@@ -5,11 +5,29 @@ import { getSTSClient } from "@/util/aws/clients/getSTSClient";
 import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function checkAdminPermissions(inputs: { context: PanfactumContext, profile: string }): Promise<{
-    status: "success" | "invalidUsername" | "missingAdministratorAccess" | "invalidCredentials",
+/**
+ * Interface for checkAdminPermissions function inputs
+ */
+interface ICheckAdminPermissionsInputs {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** AWS profile to check for admin permissions */
+    profile: string;
+}
+
+/**
+ * Interface for checkAdminPermissions function output
+ */
+interface ICheckAdminPermissionsOutput {
+    /** Status of the permission check */
+    status: "success" | "invalidUsername" | "missingAdministratorAccess" | "invalidCredentials";
+    /** AWS username if successfully retrieved */
     username?: string;
+    /** AWS account ID if successfully retrieved */
     accountId?: string;
-}> {
+}
+
+export async function checkAdminPermissions(inputs: ICheckAdminPermissionsInputs): Promise<ICheckAdminPermissionsOutput> {
     const stsClient = await getSTSClient(inputs)
         .catch((error: unknown) => {
             throw new CLIError(

@@ -15,7 +15,7 @@ import {
 import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
-interface TaskContext {
+interface ITaskContext {
     clusterInfo: {
         caData: string;
         url: string;
@@ -36,11 +36,17 @@ export const EKS_MODULE_OUTPUT_SCHEMA = z.object({
     cluster_region: z.object({ value: z.string() }),
 });
 
-// TODO: Verify access to each cluster...
-export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
+/**
+ * Interface for buildSyncKubeClustersTask function inputs
+ */
+interface IBuildSyncKubeClustersTaskInput {
+    /** Panfactum context for operations */
     context: PanfactumContext;
-}): Promise<ListrTask<T>> {
-    const { context } = inputs;
+}
+
+// TODO: Verify access to each cluster...
+export async function buildSyncKubeClustersTask<T extends {}>(input: IBuildSyncKubeClustersTaskInput): Promise<ListrTask<T>> {
+    const { context } = input;
 
     return {
         title: "Sync Kubernetes clusters credentials",
@@ -69,8 +75,8 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
                 return;
             }
 
-            await createDirectory(kubeDir);
-            const subtasks = parentTask.newListr<TaskContext>([], {
+            await createDirectory({ dirPath: kubeDir });
+            const subtasks = parentTask.newListr<ITaskContext>([], {
                 ctx: {
                     clusterInfo: [],
                 },
@@ -85,7 +91,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(inputs: {
                     const subsubtasks = subtask.newListr([], { concurrent: true })
                     eksHCLPaths.forEach((eksHCLPath) => {
                         const moduleDirectory = dirname(eksHCLPath);
-                        const clusterId = getLastPathSegments(moduleDirectory, 3);
+                        const clusterId = getLastPathSegments({ path: moduleDirectory, lastSegments: 3 });
                         subsubtasks.add({
                             title: context.logger.applyColors(`Retrieve cluster info ${clusterId}`, {
                                 lowlights: [clusterId],

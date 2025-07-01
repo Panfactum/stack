@@ -1,3 +1,6 @@
+// This file provides utilities for concatenating multiple ReadableStreams into a single stream
+// It handles sequential stream processing with proper error handling
+
 import { ReadableStream } from "node:stream/web";
 
 export const concatStreams = (streams: ReadableStream[]) => {

@@ -3,14 +3,22 @@ import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsCli
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
-import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { IEnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getDomainPrice(inputs: {
-    context: PanfactumContext;
-    env: EnvironmentMeta;
-    tld: string;
-}): Promise<number> {
+/**
+ * Interface for getDomainPrice function inputs
+ */
+interface IGetDomainPriceInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Environment metadata for AWS profile lookup */
+  env: IEnvironmentMeta;
+  /** Top-level domain to get pricing for */
+  tld: string;
+}
+
+export async function getDomainPrice(inputs: IGetDomainPriceInputs): Promise<number> {
     const { context, env, tld } = inputs;
 
     const { aws_profile: profile } = await getPanfactumConfig({ context, directory: env.path });

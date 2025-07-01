@@ -1,3 +1,6 @@
+// This file provides utilities for updating Panfactum configuration files
+// It supports both plain and encrypted (SOPS) YAML files at various hierarchy levels
+
 import { join } from "node:path"
 import { stringify } from "yaml";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
@@ -9,35 +12,121 @@ import { sopsWrite } from "../sops/sopsWrite";
 import type { TGConfigFile } from "./schemas";
 import type { PanfactumContext } from "@/util/context/context";
 
-type BaseUpsertInput = {
+/**
+ * Base input for all configuration update operations
+ */
+interface IBaseUpsertInput {
+    /** Whether to write to encrypted (.secret.yaml) file */
     secret?: boolean;
+    /** Panfactum context for configuration access */
     context: PanfactumContext;
+    /** Configuration values to write/merge */
     values: TGConfigFile;
-};
+}
 
-type FilepathUpsertInput = BaseUpsertInput & {
+/**
+ * Input for updating configuration at a specific file path
+ */
+interface IFilepathUpsertInput extends IBaseUpsertInput {
+    /** Direct path to the configuration file */
     filePath: string;
-};
+}
 
-type EnvironmentUpsertInput = BaseUpsertInput & {
+/**
+ * Input for updating environment-level configuration
+ */
+interface IEnvironmentUpsertInput extends IBaseUpsertInput {
+    /** Environment name to update */
     environment: string;
-};
+}
 
-type RegionUpsertInput = EnvironmentUpsertInput & {
+/**
+ * Input for updating region-level configuration
+ */
+interface IRegionUpsertInput extends IEnvironmentUpsertInput {
+    /** Region name within the environment */
     region: string;
-};
+}
 
-type ModuleUpsertInput = RegionUpsertInput & {
+/**
+ * Input for updating module-level configuration
+ */
+interface IModuleUpsertInput extends IRegionUpsertInput {
+    /** Module name within the region */
     module: string;
-};
+}
 
+/**
+ * Union type for all configuration update variants
+ */
 type UpsertInput =
-    | EnvironmentUpsertInput
-    | RegionUpsertInput
-    | ModuleUpsertInput
-    | FilepathUpsertInput;
+    | IEnvironmentUpsertInput
+    | IRegionUpsertInput
+    | IModuleUpsertInput
+    | IFilepathUpsertInput;
 
-export async function upsertConfigValues(input: UpsertInput) {
+/**
+ * Updates configuration values in Panfactum YAML files
+ * 
+ * @remarks
+ * This function performs intelligent merging of configuration values:
+ * 
+ * 1. Determines the correct file path based on the hierarchy level
+ * 2. Reads existing configuration from the file (if it exists)
+ * 3. Merges new values with existing ones:
+ *    - Simple values are replaced
+ *    - Objects like `extra_inputs`, `extra_tags`, and `domains` are deep merged
+ * 4. Writes the result back to the file
+ * 
+ * The function handles both plain YAML files and encrypted files (using SOPS).
+ * It automatically creates parent directories if they don't exist.
+ * 
+ * File naming convention:
+ * - Global: `environments/global.yaml` or `global.secret.yaml`
+ * - Environment: `environments/{env}/environment.yaml`
+ * - Region: `environments/{env}/{region}/region.yaml`
+ * - Module: `environments/{env}/{region}/{module}/module.yaml`
+ * 
+ * The function intelligently handles cases where environment/region/module
+ * names don't match their directory names by looking up the actual paths.
+ * 
+ * @param input - Configuration specifying what and where to update
+ * 
+ * @example
+ * ```typescript
+ * // Update module configuration
+ * await upsertConfigValues({
+ *   context,
+ *   environment: 'production',
+ *   region: 'us-east-1',
+ *   module: 'vpc',
+ *   values: {
+ *     extra_tags: {
+ *       CostCenter: 'Engineering'
+ *     }
+ *   }
+ * });
+ * 
+ * // Update encrypted environment config
+ * await upsertConfigValues({
+ *   context,
+ *   environment: 'staging',
+ *   secret: true,
+ *   values: {
+ *     aws_account_id: '987654321098',
+ *     vault_token: 'secret-token'
+ *   }
+ * });
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to write configuration to the file system
+ * 
+ * @see {@link getConfigValuesFromFile} - For reading existing configuration
+ * @see {@link sopsWrite} - For writing encrypted files
+ * @see {@link writeFile} - For writing plain YAML files
+ */
+export async function upsertConfigValues(input: UpsertInput): Promise<void> {
     const { values, context, secret } = input;
 
     // Determine the file name to write to based on the

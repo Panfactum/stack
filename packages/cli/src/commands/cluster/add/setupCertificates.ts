@@ -11,18 +11,18 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupCertificates(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, clusterPath, context, domains, environment, region } = options;
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
-  interface Context {
+  interface IContext {
     alertEmail?: string;
     route53Zones?: string[];
     productionEnvironment?: boolean;
@@ -31,7 +31,7 @@ export async function setupCertificates(
     kubeContext?: string;
   }
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async (ctx) => {
@@ -121,7 +121,7 @@ export async function setupCertificates(
     {
       task: async (ctx, parentTask) => {
         return parentTask.newListr([
-          await buildDeployModuleTask<Context>({
+          await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy Certificate Infrastructure",
             context,
             env: {
@@ -166,7 +166,7 @@ export async function setupCertificates(
     {
       task: async (ctx, parentTask) => {
         return parentTask.newListr([
-          await buildDeployModuleTask<Context>({
+          await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy The First Certificate",
             context,
             env: {

@@ -13,17 +13,27 @@ type JSONValue =
     | JSONValue[]
     | { [key: string]: JSONValue };
 
-// todo: wtf is this?
-export async function upsertPFYAMLFile(inputs: {
+/**
+ * Interface for upsertPFYAMLFile function inputs
+ */
+interface IUpsertPFYAMLFileInput {
+    /** Panfactum context for operations */
     context: PanfactumContext;
+    /** Environment name where the module resides */
     environment: string;
+    /** Region name where the module resides */
     region: string;
+    /** Module name to update */
     module: string;
+    /** Key-value pairs to update in the .pf.yaml file */
     updates: Record<string, JSONValue>;
+    /** Real module name if different from module parameter */
     realModuleName?: string;
-}) {
-    const { context, environment, region, module, realModuleName, updates } =
-        inputs;
+}
+
+// todo: wtf is this?
+export async function upsertPFYAMLFile(input: IUpsertPFYAMLFileInput) {
+    const { context, environment, region, module, realModuleName, updates } = input;
 
     const moduleDir = join(
         context.repoVariables.environments_dir,
@@ -33,7 +43,7 @@ export async function upsertPFYAMLFile(inputs: {
     );
 
     const pfYAMLPath = join(moduleDir, ".pf.yaml");
-    if (await fileExists(pfYAMLPath)) {
+    if (await fileExists({ filePath: pfYAMLPath })) {
         const originalPf = await readYAMLFile({
             filePath: pfYAMLPath,
             context,

@@ -8,13 +8,21 @@ import type { DomainConfigs } from "./tasks/types";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
+ * Interface for getDomains function inputs
+ */
+interface IGetDomainsInputs {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+}
+
+/**
  * Finds all environment.yaml files in the environments directory, extracts domains data,
  * and merges them into a single object.
  * 
  * @param inputs - Object containing the context
  * @returns A record of domain names to their configuration (DomainConfigs)
  */
-export async function getDomains(inputs: { context: PanfactumContext }): Promise<DomainConfigs> {
+export async function getDomains(inputs: IGetDomainsInputs): Promise<DomainConfigs> {
     const { context } = inputs;
     const environmentsDir = context.repoVariables.environments_dir;
 

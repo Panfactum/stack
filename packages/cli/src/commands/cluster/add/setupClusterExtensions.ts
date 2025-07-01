@@ -23,11 +23,11 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupClusterExtensions(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } =
@@ -65,12 +65,12 @@ export async function setupClusterExtensions(
     return eksPfData.deploy_status === "success" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
   }
 
-  interface Context {
+  interface IContext {
     vaultProxyPid?: number;
     vaultProxyPort?: number;
   }
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async () => {

@@ -5,11 +5,45 @@ import { AWS_PHONE_NUMBER_SCHEMA, COUNTRY_CODES } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-export async function getPrimaryContactInfo(inputs: {
-    context: PanfactumContext,
-    parentTask: PanfactumTaskWrapper
-    profile: string;
-}) {
+/**
+ * Interface for getPrimaryContactInfo function inputs
+ */
+interface IGetPrimaryContactInfoInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Parent task for UI interaction */
+  parentTask: PanfactumTaskWrapper;
+  /** AWS profile for account access */
+  profile: string;
+}
+
+/**
+ * Interface for contact information return type
+ */
+interface IContactInfo {
+  /** Country code for the contact */
+  countryCode: string;
+  /** Postal code */
+  postalCode: string;
+  /** State or region */
+  state: string;
+  /** City name */
+  city: string;
+  /** Primary address line */
+  address1: string;
+  /** Secondary address line (optional) */
+  address2?: string;
+  /** Email address */
+  email: string;
+  /** Organization name (optional) */
+  orgName?: string;
+  /** Full name of contact */
+  fullName: string;
+  /** Phone number */
+  phoneNumber: string;
+}
+
+export async function getPrimaryContactInfo(inputs: IGetPrimaryContactInfoInputs): Promise<IContactInfo> {
 
     const { context, parentTask, profile } = inputs;
 
@@ -181,21 +215,36 @@ export async function getPrimaryContactInfo(inputs: {
 }
 
 /**
+ * Interface for existing contact information return type
+ */
+interface IExistingContactInfo {
+  /** Full name (optional) */
+  fullName?: string;
+  /** Organization name (optional) */
+  organizationName?: string;
+  /** Email address (optional) */
+  email?: string;
+  /** Phone number (optional) */
+  phoneNumber?: string;
+  /** Primary address line (optional) */
+  addressLine1?: string;
+  /** Secondary address line (optional) */
+  addressLine2?: string;
+  /** City name (optional) */
+  city?: string;
+  /** State or region (optional) */
+  state?: string;
+  /** Country code (optional) */
+  countryCode?: string;
+  /** Postal code (optional) */
+  zipCode?: string;
+}
+
+/**
  * Retrieves primary contact information from AWS account using the Account API so that 
  * we can use it as defaults for the account setup
  */
-async function getExistingContactInfo(profile: string, context: PanfactumContext): Promise<{
-    fullName?: string;
-    organizationName?: string;
-    email?: string;
-    phoneNumber?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    city?: string;
-    state?: string;
-    countryCode?: string;
-    zipCode?: string;
-}> {
+async function getExistingContactInfo(profile: string, context: PanfactumContext): Promise<IExistingContactInfo> {
     // Create an AccountClient
     const accountClient = await getAccountClient({ context, profile })
 

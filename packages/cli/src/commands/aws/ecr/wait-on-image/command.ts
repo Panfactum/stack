@@ -1,3 +1,6 @@
+// This command waits for a container image to be available in AWS ECR
+// It's designed to be used as a Terragrunt pre-hook
+
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
 import { checkImageExists } from '@/util/aws/checkImageExists';
@@ -6,6 +9,46 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import { CLIError } from '@/util/error/error';
 
+/**
+ * Command for waiting on container images in AWS ECR
+ * 
+ * @remarks
+ * This command polls AWS ECR until a specified container image becomes
+ * available or a timeout is reached. It's primarily designed as a
+ * Terragrunt pre-hook to ensure container images are built and pushed
+ * before infrastructure deployment.
+ * 
+ * Key features:
+ * - Polls ECR repository for image availability
+ * - Configurable timeout (default 300 seconds)
+ * - Validates ECR registry format and AWS credentials
+ * - Provides progress updates during wait
+ * 
+ * Use cases:
+ * - CI/CD pipelines with image dependencies
+ * - Terragrunt pre-hooks for container deployments
+ * - Ensuring images exist before ECS/EKS deployments
+ * - Coordinating multi-stage build processes
+ * 
+ * The command expects images in ECR format:
+ * `{account-id}.dkr.ecr.{region}.amazonaws.com/{repository}:{tag}`
+ * 
+ * @example
+ * ```bash
+ * # Wait for image with default timeout
+ * pf aws ecr wait-on-image 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
+ * 
+ * # Wait with custom timeout (10 minutes)
+ * pf aws ecr wait-on-image 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp:v1.0 --timeout 600
+ * 
+ * # Use in Terragrunt hook
+ * before_hook "wait_for_image" {
+ *   commands = ["pf aws ecr wait-on-image ${var.image_uri}"]
+ * }
+ * ```
+ * 
+ * @see {@link checkImageExists} - Utility for checking ECR image existence
+ */
 export class AwsEcrWaitOnImageCommand extends PanfactumCommand {
   static override paths = [['aws', 'ecr', 'wait-on-image']];
 
@@ -20,12 +63,36 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     ]
   });
 
+  /**
+   * ECR image URI to wait for
+   * 
+   * @remarks
+   * Must be in format: {account-id}.dkr.ecr.{region}.amazonaws.com/{repository}:{tag}
+   */
   image = Option.String({ required: true });
+  
+  /**
+   * Maximum time to wait for image in seconds
+   * 
+   * @remarks
+   * Defaults to 300 seconds (5 minutes). The command polls every 30 seconds.
+   */
   timeout = Option.String('--timeout', '300', {
     description: 'Timeout in seconds (default: 300)',
   });
 
-  async execute() {
+  /**
+   * Executes the wait-on-image command
+   * 
+   * @remarks
+   * Parses the ECR image URI, validates its components, and polls ECR
+   * until the image is found or timeout is reached. The polling interval
+   * is fixed at 30 seconds.
+   * 
+   * @throws {@link CLIError}
+   * Throws when image format is invalid or image is not found within timeout
+   */
+  async execute(): Promise<void> {
     // Parse the image specifier
     const imageParts = this.image.split(':');
     if (imageParts.length !== 2) {
@@ -91,7 +158,14 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
     this.context.logger.info(`Waiting up to ${timeoutSeconds} seconds for image ${this.image} to be found.`);
 
     while (elapsed < timeoutSeconds) {
-      const imageExists = await checkImageExists(accountId, repoName, tag, region, selectedRegion.awsProfile, this.context);
+      const imageExists = await checkImageExists({
+        accountId,
+        repoName,
+        tag,
+        region,
+        profile: selectedRegion.awsProfile,
+        context: this.context
+      });
       
       if (imageExists) {
         this.context.logger.success(`Found ${this.image}.`);

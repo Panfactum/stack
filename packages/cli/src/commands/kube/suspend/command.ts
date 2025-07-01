@@ -36,8 +36,44 @@ import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
 import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
 import { execute } from '@/util/subprocess/execute.ts'
 import { parseJson } from '@/util/zod/parseJson'
-import type { EKSClusterInfo, AutoScalingGroup } from '@/util/eks/types.ts'
+import type { IEKSClusterInfo, IAutoScalingGroup } from '@/util/eks/types.ts'
 
+/**
+ * Command for suspending an EKS cluster to save costs
+ * 
+ * @deprecated This command is part of the deprecated 'kube' command group.
+ * Consider using the newer cluster management commands.
+ * 
+ * @remarks
+ * This command suspends an EKS cluster by performing comprehensive
+ * shutdown operations to minimize AWS costs while preserving the
+ * cluster configuration for later restoration:
+ * 
+ * - Tags cluster as suspended with extended certificate expiration
+ * - Scales all node groups to zero instances
+ * - Terminates running EC2 instances
+ * - Removes load balancers to avoid charges
+ * - Preserves cluster state for resumption
+ * 
+ * **WARNING**: This makes the cluster completely unavailable!
+ * 
+ * Cost savings:
+ * - Eliminates EC2 instance charges
+ * - Removes load balancer charges
+ * - Reduces NAT gateway usage
+ * - Retains only EKS control plane costs
+ * 
+ * @example
+ * ```bash
+ * # Suspend production cluster
+ * pf kube cluster-suspend --kube-context production-eks
+ * 
+ * # Interactive cluster selection
+ * pf kube cluster-suspend
+ * ```
+ * 
+ * @see {@link K8sClusterResumeCommand} - For restoring suspended clusters
+ */
 export class K8sClusterSuspendCommand extends PanfactumCommand {
   static override paths = [['kube', 'cluster-suspend']]
 
@@ -100,15 +136,15 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       throw new CLIError(`AWS region for context '${selectedContext.name}' not found in any configured region.`)
     }
 
-    const awsProfile: string = await getAWSProfileForContext(context, selectedContext.name)
+    const awsProfile: string = await getAWSProfileForContext({ context, kubeContext: selectedContext.name })
     const autoScalingClient = await getAutoScalingClient({ context, profile: awsProfile, region: awsRegion })
     const eksClient = await getEKSClient({ context, profile: awsProfile, region: awsRegion })
     const ec2Client = await getEC2Client({ context, profile: awsProfile, region: awsRegion })
     const elbv2Client = await getELBv2Client({ context, profile: awsProfile, region: awsRegion })
 
-    let clusterInfo: EKSClusterInfo
+    let clusterInfo: IEKSClusterInfo
     let nodeGroups: string[] = []
-    let autoScalingGroups: AutoScalingGroup[] = []
+    let autoScalingGroups: IAutoScalingGroup[] = []
 
     // Confirm dangerous operation
     const confirmed = await context.logger.confirm({
@@ -121,15 +157,15 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
       return
     }
 
-    interface Context {
+    interface IContext {
       clusterAlreadySuspended?: boolean;
     }
 
-    const tasks = new Listr<Context>([
+    const tasks = new Listr<IContext>([
       {
         title: 'Validating AWS access',
         task: async () => {
-          await validateRootProfile(awsProfile, context)
+          await validateRootProfile({ profile: awsProfile, context })
         },
       },
       {

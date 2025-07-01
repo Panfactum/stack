@@ -6,10 +6,16 @@ import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
 import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
-export async function syncDomainsTask<T extends {}>(inputs: {
+/**
+ * Interface for syncDomainsTask function inputs
+ */
+interface ISyncDomainsTaskInput {
+    /** Panfactum context for operations */
     context: PanfactumContext;
-}): Promise<ListrTask<T>> {
-    const { context } = inputs;
+}
+
+export async function syncDomainsTask<T extends {}>(input: ISyncDomainsTaskInput): Promise<ListrTask<T>> {
+    const { context } = input;
 
     return {
         title: "Sync domains",

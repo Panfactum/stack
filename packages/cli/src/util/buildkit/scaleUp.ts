@@ -1,3 +1,6 @@
+// This file provides utilities for scaling up BuildKit StatefulSets
+// It ensures BuildKit pods are available before starting builds
+
 import { z } from 'zod'
 import { CLIError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
@@ -6,25 +9,96 @@ import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX
 import { recordBuildKitBuild } from './recordBuild.js'
 import type { PanfactumContext } from '@/util/context/context.js'
 
-// Zod schemas for kubectl output validation
-const replicaCountSchema = z.string().regex(/^\d+$/, 'Replica count must be a non-negative integer').transform(Number)
+/**
+ * Zod schema for validating Kubernetes replica counts
+ */
+const replicaCountSchema = z.string()
+  .regex(/^\d+$/, 'Replica count must be a non-negative integer')
+  .transform(Number)
+  .describe('Kubernetes StatefulSet replica count')
 
-export interface ScaleUpOptions {
+/**
+ * Input parameters for scaling up BuildKit StatefulSets
+ */
+export interface IScaleUpBuildKitInput {
+  /** Panfactum context for configuration and logging */
   context: PanfactumContext
+  /** Architectures to scale up (defaults to all) */
   architectures?: Architecture[]
+  /** Kubernetes context to use */
   kubectlContext?: string
+  /** Whether to wait for pods to become ready */
   wait?: boolean
+  /** Maximum time to wait for scale-up (default: 600 seconds) */
   timeoutSeconds?: number
 }
 
-export async function scaleUpBuildKit(options: ScaleUpOptions): Promise<void> {
+/**
+ * Scales up BuildKit StatefulSets to ensure build capacity is available
+ * 
+ * @remarks
+ * This function manages BuildKit StatefulSet scaling to ensure build
+ * infrastructure is ready before attempting builds. It's designed to:
+ * 
+ * - **Prevent cold starts**: Ensure pods are running before builds begin
+ * - **Support auto-scaling**: Work with cluster auto-scaling policies
+ * - **Handle multiple architectures**: Scale amd64 and arm64 independently
+ * - **Provide reliability**: Wait for pods to be fully ready
+ * 
+ * The scaling process:
+ * 1. Checks current replica count for each architecture
+ * 2. Scales from 0 to 1 replica if needed
+ * 3. Records a build timestamp to prevent immediate scale-down
+ * 4. Optionally waits for pods to become available
+ * 
+ * Common use cases:
+ * - Pre-build preparation in CI/CD pipelines
+ * - Ensuring capacity before large build operations
+ * - Recovering from scale-to-zero events
+ * - Multi-architecture build preparation
+ * 
+ * @param input - Configuration for the scale-up operation
+ * 
+ * @example
+ * ```typescript
+ * // Scale up all architectures and wait
+ * await scaleUpBuildKit({
+ *   context,
+ *   wait: true,
+ *   timeoutSeconds: 300
+ * });
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * // Scale up only amd64 architecture
+ * await scaleUpBuildKit({
+ *   context,
+ *   architectures: ['amd64'],
+ *   kubectlContext: 'production'
+ * });
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when timeout is exceeded while waiting for pods
+ * 
+ * @throws {@link PanfactumZodError}
+ * Throws when kubectl returns invalid replica counts
+ * 
+ * @throws {@link CLISubprocessError}
+ * Throws when kubectl commands fail
+ * 
+ * @see {@link recordBuildKitBuild} - For preventing immediate scale-down
+ * @see {@link architectures} - Available architecture options
+ */
+export async function scaleUpBuildKit(input: IScaleUpBuildKitInput): Promise<void> {
   const {
     context,
     architectures: archsToScale = architectures,
     kubectlContext,
     wait = false,
     timeoutSeconds = 600
-  } = options
+  } = input;
 
   // Scale up each architecture in parallel
   await Promise.all(archsToScale.map(arch => scaleUp(arch, context, kubectlContext)))
@@ -39,6 +113,14 @@ export async function scaleUpBuildKit(options: ScaleUpOptions): Promise<void> {
   }
 }
 
+/**
+ * Scales up a single BuildKit StatefulSet for a specific architecture
+ * 
+ * @internal
+ * @param arch - Target architecture
+ * @param context - Panfactum context
+ * @param kubectlContext - Optional Kubernetes context
+ */
 async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlContext?: string): Promise<void> {
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
   const contextArgs = getKubectlContextArgs(kubectlContext)
@@ -91,6 +173,16 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
   await recordBuildKitBuild({ arch, kubectlContext, context })
 }
 
+/**
+ * Waits for a BuildKit StatefulSet to have available replicas
+ * 
+ * @internal
+ * @param arch - Target architecture
+ * @param context - Panfactum context
+ * @param kubectlContext - Optional Kubernetes context
+ * @param startTime - Start time for timeout calculation
+ * @param timeoutSeconds - Maximum wait time
+ */
 async function waitForScaleUp(
   arch: Architecture, 
   context: PanfactumContext, 

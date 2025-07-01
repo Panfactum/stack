@@ -2,6 +2,16 @@ import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
+ * Interface for isRegistered function inputs
+ */
+interface IIsRegisteredInputs {
+    /** Domain name to check for registration status */
+    domain: string;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+}
+
+/**
  * Note that this is more of a heuristic than an absolute truth as there isn't a realtime updated
  * global database of registered domains.
  * 
@@ -20,7 +30,7 @@ import type { PanfactumContext } from "@/util/context/context";
  * 
  * - `domain` is expected to be an apex domain, and this function will not perform any checks for that
  */
-export async function isRegistered(inputs: { domain: string, context: PanfactumContext }): Promise<boolean> {
+export async function isRegistered(inputs: IIsRegisteredInputs): Promise<boolean> {
     const { domain, context } = inputs;
 
     // First: If the domain has nameservers, it is definitely registered.

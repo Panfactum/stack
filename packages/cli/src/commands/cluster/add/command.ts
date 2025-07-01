@@ -1,3 +1,6 @@
+// This command orchestrates the installation of a complete Panfactum Kubernetes cluster
+// It manages the sequential deployment of all required infrastructure components
+
 import { join } from "node:path";
 import { GetServiceQuotaCommand } from "@aws-sdk/client-service-quotas";
 import { Glob } from "bun";
@@ -29,19 +32,37 @@ import { setupLinkerd } from "./setupLinkerd";
 import { setupPolicyController } from "./setupPolicyController";
 import { setupVault } from "./setupVault";
 import { setupVPC } from "./setupVPC.ts";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-const SETUP_STEPS: Array<{
+/**
+ * Interface for cluster setup step configuration
+ */
+interface ISetupStep {
+  /** Display label for the setup step */
   label: string;
+  /** Unique identifier for the step */
   id: string;
+  /** Setup function that returns a Listr task set */
   setup: (
-    options: InstallClusterStepOptions,
+    options: IInstallClusterStepOptions,
     mainTask: PanfactumTaskWrapper
   ) => Promise<Listr>;
+  /** Whether this step has been completed */
   completed: boolean;
-  lastModule: MODULES; // Used to determine if the step has been completed
-}> = [
+  /** The last module deployed in this step (used for completion detection) */
+  lastModule: MODULES;
+}
+
+/**
+ * Configuration for all cluster setup steps
+ * 
+ * @remarks
+ * These steps must be executed in order as each depends on the previous.
+ * The system tracks completion by checking the deployment status of the
+ * last module in each step.
+ */
+const SETUP_STEPS: Array<ISetupStep> = [
     {
       label: "AWS VPC",
       id: "setupVPC",
@@ -121,17 +142,121 @@ const SETUP_STEPS: Array<{
     },
   ];
 
+/**
+ * Command for installing a complete Panfactum Kubernetes cluster
+ * 
+ * @remarks
+ * This command orchestrates the installation of a production-ready
+ * Kubernetes cluster with all Panfactum components. It handles:
+ * 
+ * - Environment and region selection
+ * - AWS service quota validation
+ * - SLA target configuration
+ * - Domain name setup
+ * - Sequential deployment of all cluster components
+ * - Progress tracking and resumable installations
+ * 
+ * Key features:
+ * - Interactive configuration collection
+ * - Automated AWS resource provisioning
+ * - Checkpointing for failure recovery
+ * - Parallel module deployment where possible
+ * - Comprehensive error handling
+ * 
+ * The installation includes:
+ * 1. AWS VPC with proper networking
+ * 2. EKS cluster with managed node groups
+ * 3. Internal networking (CoreDNS, Cilium)
+ * 4. Policy controller (Kyverno)
+ * 5. CSI drivers for storage
+ * 6. HashiCorp Vault for secrets
+ * 7. Certificate management
+ * 8. Service mesh (Linkerd)
+ * 9. Ingress controller (NGINX)
+ * 10. Autoscaling components
+ * 11. Additional cluster extensions
+ * 
+ * Prerequisites:
+ * - At least one deployed environment
+ * - AWS credentials with sufficient permissions
+ * - Domain configured in the environment
+ * - Sufficient AWS vCPU quota (minimum 16)
+ * 
+ * The command is idempotent and can be re-run to:
+ * - Resume failed installations
+ * - Skip already completed steps
+ * - Update configuration
+ * 
+ * @example
+ * ```bash
+ * # Start interactive cluster installation
+ * pf cluster add
+ * 
+ * # Follow prompts to:
+ * # 1. Select environment
+ * # 2. Select region
+ * # 3. Confirm SLA target
+ * # 4. Configure cluster domain
+ * ```
+ * 
+ * @see {@link setSLA} - For SLA configuration
+ * @see {@link setupVPC} - For VPC setup
+ * @see {@link setupEKS} - For EKS cluster creation
+ */
 export class ClusterAddCommand extends PanfactumCommand {
   static override paths = [["cluster", "add"]];
 
   static override usage = Command.Usage({
     description: "Install a Panfactum cluster",
     category: 'Cluster',
-    details:
-      "This command sets up a new Panfactum cluster including collecting configuration options and setting up all standard components.",
-    examples: [["Start cluster installation", "pf cluster add"]],
+    details: `
+Sets up a new production-ready Kubernetes cluster with all Panfactum components.
+
+This command:
+1. Guides you through cluster configuration
+2. Validates AWS prerequisites
+3. Deploys all required infrastructure
+4. Configures networking and security
+5. Installs cluster extensions
+
+The installation is resumable - if it fails, simply run again to continue.
+Already completed steps will be automatically skipped.
+    `,
+    examples: [
+      [
+        "Start cluster installation",
+        "pf cluster add"
+      ],
+      [
+        "Resume interrupted installation",
+        "pf cluster add  # Automatically skips completed steps"
+      ]
+    ],
   });
 
+  /**
+   * Executes the cluster installation process
+   * 
+   * @remarks
+   * This method orchestrates the entire cluster installation:
+   * 
+   * 1. **Environment Selection**: Lists deployed environments
+   * 2. **Region Selection**: Shows available regions without clusters
+   * 3. **Configuration Loading**: Loads region-specific settings
+   * 4. **Quota Validation**: Ensures AWS vCPU quota is sufficient
+   * 5. **SLA Configuration**: Sets performance targets
+   * 6. **Domain Setup**: Configures unique cluster subdomain
+   * 7. **Progress Tracking**: Checks completed steps via module status
+   * 8. **Sequential Deployment**: Runs each setup step in order
+   * 9. **Success Feedback**: Provides next steps and warnings
+   * 
+   * The method includes comprehensive error handling and ensures
+   * all background processes are cleaned up on failure.
+   * 
+   * @throws {@link CLIError}
+   * Throws when no environments exist, no regions available,
+   * missing configuration, insufficient quota, or deployment fails
+   */
   async execute() {
     this.context.logger.info("Starting Panfactum cluster installation process")
 
@@ -328,7 +453,7 @@ export class ClusterAddCommand extends PanfactumCommand {
 
     const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });
 
-    const options: InstallClusterStepOptions = {
+    const options: IInstallClusterStepOptions = {
       awsProfile,
       context: this.context,
       environment,

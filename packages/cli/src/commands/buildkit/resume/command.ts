@@ -8,6 +8,44 @@ import { PanfactumZodError } from '@/util/error/error.js'
 // Zod schemas for input validation
 const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive integer').transform(Number)
 
+/**
+ * Command for scaling up BuildKit instances from zero replicas
+ * 
+ * @remarks
+ * This command resumes BuildKit services by scaling their StatefulSets from
+ * 0 to their configured replica counts. It's designed to be used before
+ * starting builds to ensure BuildKit pods are available and ready.
+ * 
+ * Key features:
+ * - Scales up all architectures or specific ones
+ * - Optional wait for readiness with configurable timeout
+ * - Graceful handling of already-running instances
+ * - Multi-architecture BuildKit support (AMD64/ARM64)
+ * 
+ * The command is essential for:
+ * - Resuming BuildKit after suspension for cost savings
+ * - Preparing build infrastructure before CI/CD pipelines
+ * - Ensuring build capacity is available when needed
+ * - Managing BuildKit lifecycle in development environments
+ * 
+ * @example
+ * ```bash
+ * # Scale up all BuildKit architectures
+ * pf buildkit scale up
+ * 
+ * # Scale up only AMD64 BuildKit and wait for readiness
+ * pf buildkit scale up --only amd64 --wait
+ * 
+ * # Scale up with custom timeout
+ * pf buildkit scale up --wait --timeout 300
+ * 
+ * # Use with specific kubectl context
+ * pf buildkit scale up --context staging --wait
+ * ```
+ * 
+ * @see {@link scaleUpBuildKit} - Core scaling logic
+ * @see {@link BuildkitScaleDownCommand} - For suspending BuildKit
+ */
 export default class BuildkitScaleUpCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'scale', 'up']]
 
@@ -32,6 +70,22 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
     description: 'The kubectl context to use for interacting with Kubernetes'
   })
 
+  /**
+   * Executes the BuildKit scale-up command
+   * 
+   * @remarks
+   * Validates input parameters, determines target architectures, and scales
+   * up the appropriate BuildKit StatefulSets. Optionally waits for pods to
+   * become ready if the --wait flag is specified.
+   * 
+   * @returns Exit code (0 for success, 1 for failure)
+   * 
+   * @throws {@link PanfactumZodError}
+   * Throws when architecture or timeout parameters are invalid
+   * 
+   * @throws {@link CLIError}
+   * Throws when scaling operations fail or timeout during readiness wait
+   */
   async execute(): Promise<number> {
     // Validate architecture if provided and get properly typed value
     let architectures: Architecture[] | undefined

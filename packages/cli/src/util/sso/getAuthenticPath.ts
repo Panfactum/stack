@@ -5,7 +5,7 @@ import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import type { PanfactumContext } from "@/util/context/context";
 
-interface AuthenticLocation {
+interface IAuthenticLocation {
     path: string;
     environmentName: string;
     regionName: string;
@@ -15,7 +15,7 @@ interface AuthenticLocation {
  * Finds the location where kube_authentik module is installed in a Panfactum setup.
  * Internal function that returns full location information.
  */
-export async function findAuthentikLocation(context: PanfactumContext): Promise<AuthenticLocation | null> {
+export async function findAuthentikLocation(context: PanfactumContext): Promise<IAuthenticLocation | null> {
     const environments = await getEnvironments(context);
     
     for (const environment of environments) {

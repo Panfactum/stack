@@ -1,3 +1,6 @@
+// This file provides utilities for generating EKS authentication tokens
+// It creates presigned STS GetCallerIdentity requests for Kubernetes authentication
+
 import { Buffer } from 'node:buffer';
 import { URL } from 'node:url';
 import { Sha256 } from '@aws-crypto/sha256-js';
@@ -7,24 +10,72 @@ import { CLIError } from '../error/error';
 import { getSTSClient } from './clients/getSTSClient';
 import type { PanfactumContext } from '@/util/context/context';
 
-export interface EKSTokenResponse {
+/**
+ * EKS token response matching Kubernetes ExecCredential format
+ */
+export interface IEKSTokenResponse {
+  /** Resource kind - always 'ExecCredential' */
   kind: string;
+  /** API version for client authentication */
   apiVersion: string;
+  /** Empty spec object */
   spec: Record<string, never>;
+  /** Token status with expiration and value */
   status: {
+    /** ISO timestamp when the token expires */
     expirationTimestamp: string;
+    /** Base64-encoded presigned URL token */
     token: string;
   };
 }
 
-export interface GetEKSTokenParams {
+/**
+ * Input parameters for generating an EKS token
+ */
+export interface IGetEKSTokenParams {
+  /** Panfactum context for logging and configuration */
   context: PanfactumContext;
+  /** Name of the EKS cluster */
   clusterName: string;
+  /** AWS region where the cluster is located */
   region: string;
+  /** AWS profile to use for authentication */
   awsProfile: string;
 }
 
-export async function getEKSToken(params: GetEKSTokenParams): Promise<EKSTokenResponse> {
+/**
+ * Generates an EKS authentication token for kubectl access
+ * 
+ * @remarks
+ * This function creates a Kubernetes-compatible authentication token for EKS
+ * by generating a presigned STS GetCallerIdentity request. The token follows
+ * the 'k8s-aws-v1' format expected by the AWS IAM Authenticator for Kubernetes.
+ * The generated token expires after 15 minutes, matching AWS CLI behavior.
+ * 
+ * @param params - Configuration including context, cluster name, region, and profile
+ * @returns EKS token response in Kubernetes ExecCredential format
+ * 
+ * @example
+ * ```typescript
+ * const token = await getEKSToken({
+ *   context,
+ *   clusterName: 'production-cluster',
+ *   region: 'us-east-1',
+ *   awsProfile: 'prod-admin'
+ * });
+ * console.log(`Token expires at: ${token.status.expirationTimestamp}`);
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to create STS client or retrieve AWS credentials
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to sign the STS request
+ * 
+ * @see {@link getSTSClient} - For STS client creation
+ * @see https://github.com/kubernetes-sigs/aws-iam-authenticator - AWS IAM Authenticator documentation
+ */
+export async function getEKSToken(params: IGetEKSTokenParams): Promise<IEKSTokenResponse> {
   const { context, clusterName, region, awsProfile } = params;
   
   context.logger.debug('Getting EKS authentication token', { clusterName, region, profile: awsProfile });

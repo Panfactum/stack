@@ -2,7 +2,17 @@ import { failsafeOpen } from "@/util/browser/failsafeOpen";
 import { getAdminAccessCredentials } from "./getAdminAccessCredentials";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getNewIAMUserCredentials(inputs: { context: PanfactumContext, environment: string }) {
+/**
+ * Interface for getNewIAMUserCredentials function inputs
+ */
+interface IGetNewIAMUserCredentialsInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Environment name for user creation */
+  environment: string;
+}
+
+export async function getNewIAMUserCredentials(inputs: IGetNewIAMUserCredentialsInputs) {
     const { context, environment } = inputs;
 
     const username = `${environment}-superuser`

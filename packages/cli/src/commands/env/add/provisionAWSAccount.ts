@@ -23,33 +23,47 @@ import { getAccountEmail } from "./getAccountEmail";
 import { getNewAccountAlias } from "./getNewAccountAlias";
 import type { PanfactumContext } from "@/util/context/context"
 
+/**
+ * Interface for provisionAWSAccount function inputs
+ */
+interface IProvisionAWSAccountInputs {
+  /** AWS profile name to be created for the environment */
+  environmentProfile: string;
+  /** Name of the environment being provisioned */
+  environmentName: string;
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+}
 
-export async function provisionAWSAccount(inputs: {
-    environmentProfile: string;
-    environmentName: string;
-    context: PanfactumContext
-}): Promise<{
-    newAccountName: string; // The account name for the environment
-    alreadyProvisioned: boolean; // Whether the provisioning was skipped b/c the account was already created
-}> {
+/**
+ * Interface for provisionAWSAccount function output
+ */
+interface IProvisionAWSAccountOutput {
+  /** The account name for the environment */
+  newAccountName: string;
+  /** Whether the provisioning was skipped because the account was already created */
+  alreadyProvisioned: boolean;
+}
+
+export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): Promise<IProvisionAWSAccountOutput> {
 
     const { context, environmentName, environmentProfile } = inputs
 
 
     const orgModulePath = join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, MODULES.AWS_ORGANIZATION)
     const orgModuleYAMLPath = join(orgModulePath, "module.yaml")
-    interface TaskContext {
+    interface ITaskContext {
         newAccountName?: string;
         newAccountId?: string;
     }
-    const tasks = new Listr<TaskContext>([], {
+    const tasks = new Listr<ITaskContext>([], {
         ctx: {}
     })
 
     ////////////////////////////////////////////////////////////////
     // Ensure that AWS Org is installed
     ////////////////////////////////////////////////////////////////
-    if (! await directoryExists(orgModulePath)) {
+    if (! await directoryExists({ path: orgModulePath })) {
         throw new CLIError("This Panfactum installation does not have an AWS Organization deployed. Cannot automatically provision AWS account.")
     }
 
@@ -103,13 +117,13 @@ export async function provisionAWSAccount(inputs: {
         },
         task: async (parentContext, parentTask) => {
 
-            interface ProvisionAccountCtx {
+            interface IProvisionAccountCtx {
                 newAccountName?: string,
                 newAccountEmail?: string,
                 existingEmails: string[]
             }
 
-            return parentTask.newListr<ProvisionAccountCtx>([
+            return parentTask.newListr<IProvisionAccountCtx>([
                 {
                     title: "Verify access",
                     task: async () => {
@@ -360,7 +374,7 @@ export async function provisionAWSAccount(inputs: {
                             throw new CLIError('New account name is undefined. This should never happen.')
                         }
                         return parentTask.newListr([
-                            await buildDeployModuleTask<ProvisionAccountCtx>({
+                            await buildDeployModuleTask<IProvisionAccountCtx>({
                                 context,
                                 environment: MANAGEMENT_ENVIRONMENT,
                                 region: GLOBAL_REGION,
@@ -402,12 +416,12 @@ export async function provisionAWSAccount(inputs: {
     ////////////////////////////////////////////////////////////////
 
 
-    interface BootstrapUserTaskCtx {
+    interface IBootstrapUserTaskCtx {
         iamClient?: IAMClient;
         accessKeyId?: string
         secretAccessKey?: string;
     }
-    const boostrapUserTaskCtx: BootstrapUserTaskCtx = {}
+    const boostrapUserTaskCtx: IBootstrapUserTaskCtx = {}
     const adminUsername = `${environmentName}-superuser`;
     tasks.add({
         title: "Provision bootstrap user for new account",
@@ -419,7 +433,7 @@ export async function provisionAWSAccount(inputs: {
             }
         },
         task: async (parentContext, parentTask) => {
-            return parentTask.newListr<BootstrapUserTaskCtx>([
+            return parentTask.newListr<IBootstrapUserTaskCtx>([
                 {
                     title: "Retrieve new AWS account ID",
                     task: async (_, task) => {

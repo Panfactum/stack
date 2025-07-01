@@ -1,27 +1,54 @@
+// This file provides the core subprocess execution utility for the Panfactum CLI
+// It handles command execution with retries, streaming output, and error handling
+
 import { ReadableStreamDefaultReader } from "node:stream/web";
 import { CLISubprocessError } from "@/util/error/error";
 import { concatStreams } from "@/util/streams/concatStreams";
 import { addBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Function type for determining if a subprocess execution was successful
+ * 
+ * @param results - The execution results to evaluate
+ * @returns True if the execution should be considered successful
+ */
 type IsSuccessFn = (results: {
+  /** Standard output from the subprocess */
   stdout: string;
+  /** Standard error from the subprocess */
   stderr: string;
+  /** Exit code from the subprocess */
   exitCode: number;
 }) => boolean;
 
-export interface ExecInputs {
+/**
+ * Input parameters for executing a subprocess command
+ */
+export interface IExecuteInput {
+  /** Command and arguments to execute */
   command: string[];
+  /** Panfactum context for logging and configuration */
   context: PanfactumContext;
+  /** Directory to execute the command in */
   workingDirectory: string;
+  /** Custom error message if execution fails */
   errorMessage?: string;
+  /** Environment variables to pass to the subprocess */
   env?: Record<string, string | undefined>;
+  /** Number of times to retry on failure (default: 0) */
   retries?: number;
+  /** Delay in milliseconds between retries (default: 5000) */
   retryDelay?: number;
+  /** Callback invoked for each stdout line */
   onStdOutNewline?: (line: string, runNum: number) => void;
+  /** Callback invoked for each stderr line */
   onStdErrNewline?: (line: string, runNum: number) => void;
-  retryCallback?: (attemptNumber: number, lastResults: ExecReturn) => void;
+  /** Callback invoked before each retry attempt */
+  retryCallback?: (attemptNumber: number, lastResults: IExecuteOutput) => void;
+  /** Custom function to determine if execution was successful */
   isSuccess?: IsSuccessFn;
+  /** Input stream for the subprocess */
   stdin?:
   | globalThis.Request
   | globalThis.ReadableStream
@@ -30,20 +57,78 @@ export interface ExecInputs {
   | number
   | "inherit"
   | null;
+  /** Whether to run the process in the background */
   background?: boolean;
+  /** Description for background process tracking */
   backgroundDescription?: string;
 }
 
-export interface ExecReturn {
+
+/**
+ * Output from subprocess execution
+ */
+export interface IExecuteOutput {
+  /** Standard output from the subprocess */
   stdout: string;
+  /** Standard error from the subprocess */
   stderr: string;
+  /** Exit code from the subprocess */
   exitCode: number;
+  /** Process ID of the subprocess */
   pid: number;
 }
 
+
+/**
+ * Default success check - considers exit code 0 as success
+ */
 const defaultIsSuccess: IsSuccessFn = ({ exitCode }) => exitCode === 0;
 
-export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
+/**
+ * Executes a subprocess command with comprehensive error handling and retry logic
+ * 
+ * @remarks
+ * This is the primary subprocess execution utility in the Panfactum CLI. It provides:
+ * - Automatic retry logic with configurable delays
+ * - Real-time streaming of stdout/stderr with line callbacks
+ * - Background process support with PID tracking
+ * - Custom success determination logic
+ * - Comprehensive error messages with subprocess logs
+ * 
+ * @param inputs - Configuration for subprocess execution
+ * @returns Execution results including stdout, stderr, exit code, and PID
+ * 
+ * @example
+ * ```typescript
+ * const result = await execute({
+ *   command: ['terraform', 'apply'],
+ *   context,
+ *   workingDirectory: '/path/to/module',
+ *   retries: 3,
+ *   retryDelay: 10000
+ * });
+ * console.log(result.stdout);
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * // Execute with real-time output streaming
+ * await execute({
+ *   command: ['npm', 'install'],
+ *   context,
+ *   workingDirectory: process.cwd(),
+ *   onStdOutNewline: (line) => console.log(`[npm] ${line}`),
+ *   onStdErrNewline: (line) => console.error(`[npm error] ${line}`)
+ * });
+ * ```
+ * 
+ * @throws {@link CLISubprocessError}
+ * Throws when the subprocess fails to spawn or execute successfully
+ * 
+ * @see {@link IExecuteInput} - For detailed parameter documentation
+ * @see {@link IExecuteOutput} - For output format
+ */
+export async function execute(inputs: IExecuteInput): Promise<IExecuteOutput> {
   const {
     command,
     context,
@@ -180,6 +265,15 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
   );
 }
 
+/**
+ * Creates a processor for streaming text output line by line
+ * 
+ * @internal
+ * @param reader - Stream reader for text data
+ * @param processLine - Callback for each complete line
+ * @param runNum - Current run number for retry tracking
+ * @returns Async processor function
+ */
 const createTextOutputProcessor = (
   reader: ReadableStreamDefaultReader,
   processLine: (line: string, runNum: number) => void,

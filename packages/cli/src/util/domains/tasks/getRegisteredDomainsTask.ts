@@ -21,10 +21,25 @@ const REGISTERED_DOMAINS_MODULE_OUTPUT_SCHEMA = z.object({
     })
 })
 
+/**
+ * Interface for getRegisteredDomainsTask function input
+ */
+interface IGetRegisteredDomainsTaskInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+}
 
-export async function getRegisteredDomainsTask<T extends {}>(inputs: {
-    context: PanfactumContext
-}): Promise<{ task: ListrTask<T>, domainConfigs: DomainConfigs }> {
+/**
+ * Interface for getRegisteredDomainsTask function output
+ */
+interface IGetRegisteredDomainsTaskOutput<T extends {}> {
+  /** Listr task for registered domain retrieval */
+  task: ListrTask<T>;
+  /** Domain configurations retrieved from registered domains */
+  domainConfigs: DomainConfigs;
+}
+
+export async function getRegisteredDomainsTask<T extends {}>(inputs: IGetRegisteredDomainsTaskInput): Promise<IGetRegisteredDomainsTaskOutput<T>> {
     const { context } = inputs;
     const domainConfigs: DomainConfigs = {}
     const { environments_dir: environmentsDir } = inputs.context.repoVariables;

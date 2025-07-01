@@ -7,6 +7,38 @@ import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { PanfactumZodError } from '@/util/error/error.js'
 
+/**
+ * Command for retrieving BuildKit pod addresses with load balancing
+ * 
+ * @remarks
+ * This command finds and returns the address of the least-used BuildKit pod
+ * for a specific CPU architecture. It helps distribute build workloads across
+ * multiple BuildKit instances by selecting pods with the lowest CPU usage.
+ * 
+ * The command supports both AMD64 and ARM64 architectures and can return
+ * addresses with or without the TCP protocol prefix for different use cases.
+ * 
+ * Key features:
+ * - Load balancing across BuildKit instances
+ * - Architecture-specific pod selection
+ * - Optional protocol prefix omission
+ * - Kubernetes context customization
+ * 
+ * @example
+ * ```bash
+ * # Get AMD64 BuildKit address
+ * pf buildkit get-address --arch amd64
+ * 
+ * # Get ARM64 address without protocol prefix
+ * pf buildkit get-address --arch arm64 --omit-protocol
+ * 
+ * # Use with specific kubectl context
+ * pf buildkit get-address --arch amd64 --context production
+ * ```
+ * 
+ * @see {@link getBuildKitAddress} - Core address retrieval logic
+ * @see {@link architectureSchema} - Architecture validation schema
+ */
 export class GetAddressCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'get-address']]
 
@@ -35,6 +67,22 @@ export class GetAddressCommand extends PanfactumCommand {
     description: 'The kubectl context to use for interacting with Kubernetes'
   })
 
+  /**
+   * Executes the BuildKit address retrieval command
+   * 
+   * @remarks
+   * Validates the architecture parameter, retrieves the least-used BuildKit
+   * pod address, and outputs it to stdout. The command performs load balancing
+   * by selecting pods with the lowest CPU usage.
+   * 
+   * @returns Exit code (0 for success, 1 for failure)
+   * 
+   * @throws {@link PanfactumZodError}
+   * Throws when the architecture parameter is invalid (not amd64 or arm64)
+   * 
+   * @throws {@link CLIError}
+   * Throws when unable to connect to Kubernetes or retrieve BuildKit addresses
+   */
   async execute(): Promise<number> {
     // Validate and get properly typed architecture
     const parseResult = architectureSchema.safeParse(this.arch);

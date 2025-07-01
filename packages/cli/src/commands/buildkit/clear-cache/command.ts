@@ -1,3 +1,6 @@
+// This file defines the clear-cache command for BuildKit cache management
+// It removes unused persistent volumes and prunes build caches from running pods
+
 import { Option } from 'clipanion'
 import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
@@ -7,6 +10,44 @@ import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 import { parseJson } from '@/util/zod/parseJson.js'
 
+/**
+ * CLI command for clearing BuildKit caches and unused storage
+ * 
+ * @remarks
+ * This command performs comprehensive BuildKit cache cleanup to reclaim
+ * storage space and resolve build issues. It operates in two phases:
+ * 
+ * 1. **Persistent Volume Cleanup**: Removes PVCs not attached to any pod
+ * 2. **Pod Cache Pruning**: Clears build caches from all running BuildKit pods
+ * 
+ * Cache cleanup is necessary for:
+ * - Freeing disk space consumed by old build layers
+ * - Resolving corrupted cache issues
+ * - Removing sensitive data from build caches
+ * - Periodic maintenance of build infrastructure
+ * 
+ * The command safely handles:
+ * - Detection of PVCs in use vs orphaned
+ * - Only pruning caches in running pods
+ * - Graceful error handling for pod operations
+ * - Multi-region BuildKit deployments
+ * 
+ * @example
+ * ```bash
+ * # Clear caches in current kubectl context
+ * pf buildkit clear-cache
+ * 
+ * # Clear caches in specific cluster
+ * pf buildkit clear-cache --context production-cluster
+ * 
+ * # Typical workflow after cache issues
+ * pf buildkit clear-cache
+ * pf buildkit build --dockerfile ./Dockerfile --tag myapp:latest
+ * ```
+ * 
+ * @see {@link BUILDKIT_NAMESPACE} - Kubernetes namespace for BuildKit
+ * @see {@link execute} - For running kubectl commands
+ */
 export default class BuildkitClearCacheCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'clear-cache']]
 
@@ -15,10 +56,24 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
     category: 'BuildKit',
   })
 
+  /** Kubernetes context for cluster selection */
   kubectlContext = Option.String('--context', {
     description: 'The kubectl context to use for interacting with Kubernetes'
   })
 
+  /**
+   * Executes the cache clearing operation
+   * 
+   * @remarks
+   * Performs a two-phase cleanup:
+   * 1. Deletes PVCs not attached to any pods
+   * 2. Prunes caches in all running BuildKit pods
+   * 
+   * @returns Exit code (0 for success, 1 for errors)
+   * 
+   * @throws {@link CLISubprocessError}
+   * Throws when kubectl commands fail
+   */
   async execute(): Promise<number> {
     // Validate context if provided
     if (this.kubectlContext) {
@@ -40,6 +95,15 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
     return 0
   }
 
+  /**
+   * Deletes PersistentVolumeClaims not attached to any pods
+   * 
+   * @remarks
+   * Identifies orphaned PVCs by comparing all PVCs in the namespace
+   * against volumes mounted in pods. Safely deletes only unused PVCs.
+   * 
+   * @private
+   */
   private async deleteUnusedPVCs(): Promise<void> {
     const contextArgs = getKubectlContextArgs(this.kubectlContext)
     
@@ -89,15 +153,16 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
       spec: z.object({
         volumes: z.array(z.object({
           persistentVolumeClaim: z.object({
-            claimName: z.string()
-          }).optional()
-        })).optional()
-      })
-    })
+            /** Name of the PVC referenced by this volume */
+            claimName: z.string().describe('PVC name')
+          }).optional().describe('PVC volume source')
+        }).describe('Pod volume')).optional().describe('Pod volumes')
+      }).describe('Pod specification')
+    }).describe('Kubernetes pod structure')
     
     const podsDataSchema = z.object({
-      items: z.array(podSchema)
-    })
+      items: z.array(podSchema).describe('List of pods')
+    }).describe('Kubernetes pod list response')
     
     const podsData = parseJson(podsDataSchema, podsResult.stdout)
 
@@ -132,6 +197,15 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
     }
   }
 
+  /**
+   * Prunes build caches from all running BuildKit pods
+   * 
+   * @remarks
+   * Executes buildctl prune command in each running BuildKit pod
+   * to clear all cached layers and intermediate build artifacts.
+   * 
+   * @private
+   */
   private async prunePodCaches(): Promise<void> {
     const contextArgs = getKubectlContextArgs(this.kubectlContext)
     

@@ -1,13 +1,21 @@
-import { type EnvironmentMeta } from "@/util/config/getEnvironments";
+import { type IEnvironmentMeta } from "@/util/config/getEnvironments";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getEnvironmentsForSubzones(inputs: {
-    context: PanfactumContext,
-    ancestorDomain: string;
-    possibleEnvironments: EnvironmentMeta[]
-}) {
+/**
+ * Interface for getEnvironmentsForSubzones function inputs
+ */
+interface IGetEnvironmentsForSubzonesInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Ancestor domain name for subzone creation */
+  ancestorDomain: string;
+  /** Available environments for subzone selection */
+  possibleEnvironments: IEnvironmentMeta[];
+}
+
+export async function getEnvironmentsForSubzones(inputs: IGetEnvironmentsForSubzonesInputs): Promise<IEnvironmentMeta[]> {
     const { context, possibleEnvironments, ancestorDomain } = inputs;
 
     const environmentsForSubzones = await context.logger.checkbox({

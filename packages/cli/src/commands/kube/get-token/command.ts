@@ -6,6 +6,30 @@ import { getEKSToken } from '@/util/aws/getEKSToken.ts'
 import { PanfactumCommand } from '@/util/command/panfactumCommand'
 import { CLIError } from '@/util/error/error'
 
+/**
+ * Command for retrieving EKS authentication tokens
+ * 
+ * @deprecated This command is part of the deprecated 'kube' command group.
+ * Consider using the newer cluster management commands.
+ * 
+ * @remarks
+ * This command retrieves an EKS authentication token for kubectl access
+ * with automatic AWS SSO login when needed. It:
+ * 
+ * - Generates EKS cluster authentication tokens
+ * - Handles AWS SSO login automatically
+ * - Works with kubectl authentication flows
+ * - Outputs tokens in the expected format
+ * 
+ * @example
+ * ```bash
+ * # Get token for production cluster
+ * pf kube get-token --cluster-name production-eks --region us-west-2
+ * 
+ * # Use with kubectl (typically configured automatically)
+ * kubectl get pods --token=$(pf kube get-token --cluster production)
+ * ```
+ */
 export default class K8sGetTokenCommand extends PanfactumCommand {
   static override paths = [['kube', 'get-token']]
 

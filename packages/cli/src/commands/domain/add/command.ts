@@ -1,7 +1,10 @@
+// This file defines the domain add command for connecting domains to Panfactum
+// It handles domain registration, DNS zone creation, and environment linking
+
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
-import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
+import { getEnvironments, type IEnvironmentMeta } from "@/util/config/getEnvironments";
 import { DOMAIN } from "@/util/config/schemas";
 import { getDomains } from "@/util/domains/getDomains";
 import { isRegistered } from "@/util/domains/isRegistered";
@@ -13,6 +16,55 @@ import { getEnvironmentForZone } from "./getEnvironmentForZone";
 import { manualZoneSetup } from "./manualZoneSetup";
 import { registerDomain } from "./registerDomain";
 
+/**
+ * CLI command for adding domains to Panfactum environments
+ * 
+ * @remarks
+ * This command manages the complex process of connecting domains to the
+ * Panfactum infrastructure. It handles multiple scenarios including:
+ * 
+ * 1. **Domain Registration**: Purchase new domains through AWS Route53
+ * 2. **Existing Domain Import**: Connect already-owned domains
+ * 3. **Subdomain Creation**: Automatically create environment-specific subdomains
+ * 4. **DNS Zone Setup**: Deploy and configure Route53 hosted zones
+ * 5. **Cross-Environment Linking**: Connect subdomains across environments
+ * 
+ * Domain architecture in Panfactum:
+ * - Domains belong to specific environments for security isolation
+ * - Workloads can only use domains from their environment
+ * - Subdomains can be automatically created (e.g., dev.example.com)
+ * - DNS and TLS certificates are automatically managed
+ * 
+ * The command intelligently detects:
+ * - Whether a domain is already registered
+ * - If it's an apex domain or subdomain
+ * - Existing Panfactum configurations
+ * - Parent domain relationships
+ * 
+ * Security considerations:
+ * - Environment isolation prevents cross-environment domain access
+ * - DNS zones are deployed in the selected environment
+ * - Proper domain ownership verification
+ * 
+ * @example
+ * ```bash
+ * # Interactive domain addition
+ * pf domain add
+ * 
+ * # Add specific domain to production
+ * pf domain add --domain example.com --environment production
+ * 
+ * # Add subdomain to development
+ * pf domain add --domain dev.example.com --environment development
+ * 
+ * # Force domain as registered (skip detection)
+ * pf domain add --domain example.com --force-is-registered
+ * ```
+ * 
+ * @see {@link getDomains} - For listing existing domain configurations
+ * @see {@link isRegistered} - For checking domain registration status
+ * @see {@link registerDomain} - For purchasing domains through AWS
+ */
 export class DomainAddCommand extends PanfactumCommand {
     static override paths = [["domain", "add"]];
 
@@ -64,21 +116,50 @@ export class DomainAddCommand extends PanfactumCommand {
     });
 
 
+    /** Target environment for the domain */
     environment: string | undefined = Option.String("--environment,-e", {
         description: "The environment to which the domain will be added",
         arity: 1
     });
 
+    /** Domain name to add (e.g., example.com or sub.example.com) */
     domain: string | undefined = Option.String("--domain,-d", {
         description: "The domain to add to the Panfactum installation",
         arity: 1
     });
 
+    /** Skip domain registration detection */
     forceIsRegistered: boolean | undefined = Option.Boolean("--force-is-registered", {
         description: "Overrides built-in heuristic for determining whether the provided domain is already registered",
 
     })
 
+    /**
+     * Executes the domain addition process
+     * 
+     * @remarks
+     * This method orchestrates a complex workflow that adapts based on:
+     * - Domain type (apex vs subdomain)
+     * - Registration status
+     * - Existing Panfactum configurations
+     * - User choices throughout the process
+     * 
+     * The workflow includes:
+     * 1. Validation of environment and domain format
+     * 2. Fetching public suffix list for TLD detection
+     * 3. Checking existing configurations
+     * 4. Domain registration or import
+     * 5. DNS zone creation and delegation
+     * 6. Environment subdomain setup
+     * 
+     * @returns Exit code (0 for success, 1 for errors)
+     * 
+     * @throws {@link CLIError}
+     * Throws when environment doesn't exist or domain is invalid
+     * 
+     * @throws {@link PanfactumZodError}
+     * Throws when domain format validation fails
+     */
     async execute() {
         const { context, environment, domain, forceIsRegistered = false } = this
 
@@ -87,7 +168,7 @@ export class DomainAddCommand extends PanfactumCommand {
         /////////////////////////////////////////////////////////////////////////
         // Validations
         /////////////////////////////////////////////////////////////////////////
-        let environmentMeta: EnvironmentMeta | undefined;
+        let environmentMeta: IEnvironmentMeta | undefined;
         const environments = await getEnvironments(context)
         if (environment) {
             const environmentMetaIndex = environments.findIndex(actualEnv => actualEnv.name === environment)

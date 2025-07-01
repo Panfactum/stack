@@ -11,23 +11,32 @@ import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
-import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { IEnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 
-interface TaskContext {
+interface ITaskContext {
     nameServers: string[]
 }
 
-export async function manualZoneSetup(inputs: {
-    context: PanfactumContext,
+/**
+ * Interface for manualZoneSetup function input
+ */
+interface IManualZoneSetupInput {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** Domain name to set up */
     domain: string;
-    env: EnvironmentMeta;
+    /** Environment metadata for domain association */
+    env: IEnvironmentMeta;
+    /** Whether this is an apex domain */
     isApex?: boolean;
-}): Promise<DomainConfig> {
+}
+
+export async function manualZoneSetup(inputs: IManualZoneSetupInput): Promise<DomainConfig> {
 
     const { context, domain, env, isApex } = inputs;
 
-    const tasks = new Listr<TaskContext>([], { rendererOptions: { collapseErrors: false } })
+    const tasks = new Listr<ITaskContext>([], { rendererOptions: { collapseErrors: false } })
     const domainConfig: Partial<DomainConfig> = {
         env,
         domain,

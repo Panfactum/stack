@@ -5,7 +5,7 @@ import authentikAwsSSOWithSCIM from "@/templates/authentik_aws_sso_with_scim.hcl
 import awsIamIdentityCenterPermissions from "@/templates/aws_iam_identity_center_permissions.hcl";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
-import { getEnvironments, type EnvironmentMeta } from "@/util/config/getEnvironments";
+import { getEnvironments, type IEnvironmentMeta } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { removeFile } from "@/util/fs/removeFile";
@@ -38,11 +38,44 @@ const DEVELOPMENT_ENVIRONMENT_ACCESS = {
     billing_admin_groups: ["billing_admins"]
 }
 
-export async function setupFederatedAuth(
-    context: PanfactumContext,
-    mainTask: PanfactumTaskWrapper,
-    regionPath: string
-) {
+/**
+ * Interface for setupFederatedAuth function inputs
+ */
+interface ISetupFederatedAuthInput {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** Listr task wrapper for managing subtasks */
+    mainTask: PanfactumTaskWrapper;
+    /** Path to the region directory where federated auth will be configured */
+    regionPath: string;
+}
+
+/**
+ * Sets up federated authentication between Authentik and AWS
+ * 
+ * @remarks
+ * This function configures AWS IAM Identity Center integration with
+ * Authentik, enabling SSO access to AWS accounts and services. It:
+ * 
+ * - Configures AWS IAM Identity Center permissions
+ * - Sets up Authentik AWS SSO provider
+ * - Maps user groups to AWS roles and permissions
+ * - Enables SCIM provisioning for user synchronization
+ * 
+ * The setup process includes environment-specific access controls:
+ * - Management: Superuser and restricted reader access
+ * - Production: Tiered access (superuser, admin, reader, restricted)
+ * - Development: Broader access for engineers
+ * 
+ * @param input - Configuration for federated auth setup
+ * @throws {@link CLIError}
+ * Throws when region path is invalid or required configuration is missing
+ * 
+ * @throws {@link CLIError}
+ * Throws when AWS Identity Center or Authentik configuration fails
+ */
+export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
+    const { context, mainTask, regionPath } = input;
     const config = await getPanfactumConfig({
         context,
         directory: regionPath,
@@ -75,7 +108,7 @@ export async function setupFederatedAuth(
     );
     const clusterPath = path.join(environmentPath, region);
 
-    interface Context {
+    interface IContext {
         awsAcsUrl?: string;
         awsSignInUrl?: string;
         awsIssuer?: string;
@@ -90,7 +123,7 @@ export async function setupFederatedAuth(
         }>;
     }
 
-    const tasks = mainTask.newListr<Context>([
+    const tasks = mainTask.newListr<IContext>([
         {
             title: "Verify access",
             task: async () => {
@@ -196,8 +229,8 @@ export async function setupFederatedAuth(
                 return !!authentikAwsSSOPfYAMLFileData?.first_applied
             },
             task: async (_, task) => {
-                return task.newListr<Context>([
-                    await buildDeployModuleTask<Context>({
+                return task.newListr<IContext>([
+                    await buildDeployModuleTask<IContext>({
                         taskTitle: "Deploy Authentik AWS SSO",
                         context,
                         environment,
@@ -328,10 +361,10 @@ export async function setupFederatedAuth(
                 // Delete the terragrunt.hcl file for the Authentik AWS SSO module
                 // We do this to write a new one with the local from secrets.yaml in the next step
                 const terragruntFilePath = join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "terragrunt.hcl");
-                await removeFile(terragruntFilePath)
+                await removeFile({ filePath: terragruntFilePath })
             }
         },
-        await buildDeployModuleTask<Context>({
+        await buildDeployModuleTask<IContext>({
             taskTitle: "Update Authentik AWS SSO with SCIM",
             context,
             environment,
@@ -397,7 +430,7 @@ export async function setupFederatedAuth(
             // todo: @seth needs skip logic
             task: async (ctx, task) => {
                 const environments = await getEnvironments(context);
-                const environmentsWithAWSAccountId: Array<EnvironmentMeta & { aws_account_id: string }> = [];
+                const environmentsWithAWSAccountId: Array<IEnvironmentMeta & { aws_account_id: string }> = [];
                 for (const environment of environments) {
                     const data = await readYAMLFile({
                         filePath: join(environment.path, "environment.yaml"),
@@ -456,7 +489,7 @@ export async function setupFederatedAuth(
                 }
             }
         },
-        await buildDeployModuleTask<Context>({
+        await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy IAM Identity Center Permissions",
             context,
             environment: MANAGEMENT_ENVIRONMENT,
@@ -478,7 +511,7 @@ export async function setupFederatedAuth(
                 }),
             },
         }),
-        await buildDeployModuleTask<Context>({
+        await buildDeployModuleTask<IContext>({
             taskTitle: "Updating EKS to use AWS SSO",
             context,
             environment,

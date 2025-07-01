@@ -8,6 +8,45 @@ import { PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
 
+/**
+ * Command for scaling down BuildKit instances to zero replicas
+ * 
+ * @remarks
+ * This command suspends BuildKit services by scaling their StatefulSets down
+ * to 0 replicas, effectively stopping all BuildKit pods. This is useful for
+ * cost optimization when builds are not actively needed.
+ * 
+ * Key features:
+ * - Scales down all BuildKit architectures to 0 replicas
+ * - Optional timeout-based suspension (only scale down after inactivity)
+ * - Preserves persistent volumes and configuration
+ * - Graceful handling of already-suspended instances
+ * 
+ * The command supports intelligent scaling decisions by checking the last
+ * build timestamp annotation and only scaling down if sufficient time has
+ * elapsed since the last build activity.
+ * 
+ * Use cases:
+ * - Cost optimization during periods of inactivity
+ * - Scheduled maintenance windows
+ * - Resource cleanup in development environments
+ * - Automated scaling based on usage patterns
+ * 
+ * @example
+ * ```bash
+ * # Immediately suspend all BuildKit instances
+ * pf buildkit suspend
+ * 
+ * # Only suspend if no builds in the last 30 minutes (1800 seconds)
+ * pf buildkit suspend --timeout 1800
+ * 
+ * # Use with specific kubectl context
+ * pf buildkit suspend --context production --timeout 3600
+ * ```
+ * 
+ * @see {@link BuildkitScaleUpCommand} - For resuming BuildKit
+ * @see {@link getLastBuildTime} - For checking build activity
+ */
 export default class BuildkitScaleDownCommand extends PanfactumCommand {
   static override paths = [['buildkit', 'suspend']]
 
@@ -24,6 +63,22 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
     description: 'The kubectl context to use for interacting with Kubernetes'
   })
 
+  /**
+   * Executes the BuildKit suspension command
+   * 
+   * @remarks
+   * Validates timeout parameters, checks last build timestamps (if timeout specified),
+   * and scales down BuildKit StatefulSets to 0 replicas. The command operates across
+   * all configured regions and architectures.
+   * 
+   * @returns Exit code (0 for success, 1 for failure)
+   * 
+   * @throws {@link PanfactumZodError}
+   * Throws when timeout parameter is invalid (not a positive integer)
+   * 
+   * @throws {@link CLIError}
+   * Throws when scaling operations fail or Kubernetes connectivity issues occur
+   */
   async execute(): Promise<number> {
     // Validate timeout if provided
     let timeoutSeconds: number | undefined

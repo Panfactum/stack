@@ -11,7 +11,7 @@ Guidelines for managing goal lists in task files to track progress on completing
 ## Task Implementation
 - **Load background information**: **BEFORE** executing the goals, load the relevant background information
   1. Read the content from every Relevant Guide.
-  2. Load Relevant Documentation resources using context7  
+  2. If there is documentation in `docs/`, load it. Otherwise, load Relevant Documentation resources using context7.
 
 - **One parent goal at a time:** Do **NOT** start the next parent goal until you ask the user for permission and they say “yes” or "y"
 
@@ -30,6 +30,9 @@ Guidelines for managing goal lists in task files to track progress on completing
 2. **Maintain the “Relevant Files” section:**
    - List every file created or modified.
    - Give each file a one‑line description of its purpose.
+
+3. **Save downloaded documentation:**
+   - For any downloaded documentation, save it to `docs/[docs_name].md` inside the task folder.
 
 ## AI Instructions
  

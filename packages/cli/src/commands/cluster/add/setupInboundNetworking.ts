@@ -1,5 +1,7 @@
 import { join } from "node:path";
 import { z } from "zod";
+
+declare const fetch: typeof globalThis.fetch;
 import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
 import kubeNginxIngressTerragruntHcl from "@/templates/kube_ingress_nginx_terragrunt.hcl" with { type: "file" };
@@ -16,11 +18,11 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupInboundNetworking(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const {
@@ -34,14 +36,14 @@ export async function setupInboundNetworking(
 
   const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
 
-  interface Context {
+  interface IContext {
     kubeContext?: string;
     vaultDomain?: string;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
   }
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async (ctx) => {
@@ -90,7 +92,7 @@ export async function setupInboundNetworking(
     },
     {
       task: async (ctx, task) => {
-        return task.newListr<Context>(
+        return task.newListr<IContext>(
           [
             await buildDeployModuleTask({
               taskTitle: "Deploy AWS Load Balancer Controller",

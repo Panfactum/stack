@@ -1,4 +1,28 @@
 #!/usr/bin/env bun
+
+/**
+ * @fileoverview Main entry point for the Panfactum CLI
+ * 
+ * This file bootstraps the Panfactum command-line interface, registering
+ * all commands and handling global lifecycle events. It sets up the
+ * Clipanion CLI framework with proper context and error handling.
+ * 
+ * Key responsibilities:
+ * - Command registration and routing
+ * - Context initialization with repository variables
+ * - Signal handling for graceful shutdown
+ * - Background process cleanup
+ * - Analytics tracking initialization
+ * - Global error handling
+ * 
+ * The CLI follows a plugin architecture where each command is a separate
+ * class that extends PanfactumCommand. Commands are organized by category
+ * (aws, cluster, domain, etc.) for better discoverability.
+ * 
+ * @see {@link PanfactumCommand} - Base class for all commands
+ * @see {@link createPanfactumContext} - Context initialization
+ */
+
 import { Builtins, Cli, type BaseContext } from "clipanion";
 import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
@@ -19,7 +43,6 @@ import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DockerCredentialHelperCommand } from "./commands/docker/credential-helper/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
 import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
-import { EnvironmentInstallCommand } from "./commands/env/add/command.ts";
 import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
 import DeleteLocksCommand from "./commands/iac/delete-locks/command.ts";
 import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/command.ts";
@@ -72,7 +95,6 @@ cli.register(RecordBuildCommand)
 cli.register(BuildkitScaleDownCommand)
 cli.register(BuildkitScaleUpCommand)
 cli.register(BuildkitTunnelCommand)
-cli.register(EnvironmentInstallCommand)
 cli.register(EnvironmentRemoveCommand)
 cli.register(DomainAddCommand)
 cli.register(DomainRemoveCommand)
@@ -95,11 +117,30 @@ cli.register(K8sClusterSuspendCommand)
 cli.register(K8sClusterResumeCommand)
 cli.register(WorkflowGitCheckoutCommand)
 
-// Global state to track if cleanup has been done
+/**
+ * Global state to track cleanup completion
+ * 
+ * @internal
+ */
 let cleanupDone = false;
+
+/**
+ * Global reference to the Panfactum context for cleanup
+ * 
+ * @internal
+ */
 let panfactumContextInstance: PanfactumContext | null = null;
 
-// Cleanup function
+/**
+ * Performs cleanup operations before CLI termination
+ * 
+ * @remarks
+ * Ensures all background processes are terminated and analytics
+ * are flushed before the process exits. This prevents zombie
+ * processes and ensures data is not lost.
+ * 
+ * @internal
+ */
 const cleanup = async () => {
   if (!cleanupDone && panfactumContextInstance) {
     cleanupDone = true;
@@ -108,7 +149,14 @@ const cleanup = async () => {
   }
 };
 
-// Register signal handlers for graceful shutdown
+/**
+ * Signal handler registration for graceful shutdown
+ * 
+ * @remarks
+ * Registers handlers for SIGINT (Ctrl+C) and SIGTERM signals
+ * to ensure proper cleanup before process termination. Uses
+ * standard exit codes for signal-based termination.
+ */
 process.on('SIGINT', async () => {
   await cleanup();
   process.exit(130); // Standard exit code for SIGINT
@@ -127,6 +175,21 @@ process.on('exit', () => {
   }
 });
 
+/**
+ * Main CLI execution block
+ * 
+ * @remarks
+ * This block handles the complete CLI lifecycle:
+ * 1. Parses command-line arguments
+ * 2. Creates Panfactum context with repository variables
+ * 3. Tracks command usage for analytics
+ * 4. Executes the requested command
+ * 5. Handles errors gracefully
+ * 6. Ensures cleanup on all exit paths
+ * 
+ * The try-catch-finally structure ensures that cleanup
+ * always occurs, even on unexpected errors.
+ */
 try {
   const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
   const panfactumContext = await createPanfactumContext(

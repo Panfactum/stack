@@ -1,4 +1,4 @@
-export interface EKSClusterInfo {
+export interface IEKSClusterInfo {
   name: string
   arn: string
   status: string
@@ -10,7 +10,7 @@ export interface EKSClusterInfo {
   tags?: Record<string, string>
 }
 
-export interface AutoScalingGroup {
+export interface IAutoScalingGroup {
   name: string
   minSize: number
   maxSize: number

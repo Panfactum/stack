@@ -16,7 +16,7 @@ import {
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { clusterReset } from "../reset/clusterReset";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const CLUSTER_NAME = z
@@ -46,13 +46,13 @@ const clusterNameFormatter = (input: string): string => {
 };
 
 export async function setupEKS(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, clusterPath, context, environment, region, awsRegion, slaTarget } =
     options;
 
-  interface Context {
+  interface IContext {
     clusterName?: string;
     clusterDescription?: string;
     callerArn?: string;
@@ -60,7 +60,7 @@ export async function setupEKS(
   }
 
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async (ctx) => {
@@ -147,7 +147,7 @@ export async function setupEKS(
 
       },
     },
-    await buildDeployModuleTask<Context>({
+    await buildDeployModuleTask<IContext>({
       taskTitle: "Deploy EKS",
       context,
       environment,

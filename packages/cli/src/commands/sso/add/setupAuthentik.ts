@@ -24,11 +24,41 @@ import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-export async function setupAuthentik(
-    context: PanfactumContext,
-    mainTask: PanfactumTaskWrapper,
-    regionPath: string
-) {
+/**
+ * Interface for setupAuthentik function inputs
+ */
+interface ISetupAuthentikInput {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** Listr task wrapper for managing subtasks */
+    mainTask: PanfactumTaskWrapper;
+    /** Path to the region directory where Authentik will be deployed */
+    regionPath: string;
+}
+
+/**
+ * Sets up Authentik SSO infrastructure in a Panfactum environment
+ * 
+ * @remarks
+ * This function orchestrates the complete Authentik deployment including:
+ * - AWS SES domain configuration for email notifications
+ * - Authentik core service deployment
+ * - Initial user and admin setup
+ * - SSL certificate configuration
+ * 
+ * The process involves multiple Terragrunt modules and requires user
+ * interaction to complete the initial Authentik configuration through
+ * the web interface.
+ * 
+ * @param input - Configuration for Authentik setup
+ * @throws {@link CLIError}
+ * Throws when region path is invalid or required configuration is missing
+ * 
+ * @throws {@link CLIError}
+ * Throws when Terragrunt deployments fail
+ */
+export async function setupAuthentik(input: ISetupAuthentikInput) {
+    const { context, mainTask, regionPath } = input;
     const config = await getPanfactumConfig({
         context,
         directory: regionPath,
@@ -70,7 +100,7 @@ export async function setupAuthentik(
     const clusterPath = path.join(environmentPath, region);
     const authentikSecretsPath = join(clusterPath, "region.secrets.yaml")
 
-    interface Context {
+    interface IContext {
         ancestorDomain?: string;
         authentikRootEmail?: string;
         authentikAdminEmail?: string;
@@ -78,7 +108,7 @@ export async function setupAuthentik(
         orgName?: string;
     }
 
-    const tasks = mainTask.newListr<Context>([
+    const tasks = mainTask.newListr<IContext>([
         {
             title: "Verify access",
             task: async () => {
@@ -256,7 +286,7 @@ export async function setupAuthentik(
                 }
             }
         },
-        await buildDeployModuleTask<Context>({
+        await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy AWS SES Domain",
             context,
             env: {
@@ -274,7 +304,7 @@ export async function setupAuthentik(
             },
             skipIfAlreadyApplied: true,
         }),
-        await buildDeployModuleTask<Context>({
+        await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy Authentik",
             context,
             env: {
@@ -442,7 +472,7 @@ export async function setupAuthentik(
                 }
 
                 // FIX: @seth - NEVER read to the config files directly
-                if (await fileExists(path.join(context.repoVariables.environments_dir, "global.yaml"))) {
+                if (await fileExists({ filePath: path.join(context.repoVariables.environments_dir, "global.yaml") })) {
                     // FIX: @seth - NEVER read to the config files directly
                     const originalGlobalConfig = await readYAMLFile({
                         filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
@@ -554,7 +584,7 @@ spec:
                 await bunFile.delete()
 
                 return parentTask.newListr([
-                    await buildDeployModuleTask<Context>({
+                    await buildDeployModuleTask<IContext>({
                         taskTitle: "Deploy Authentik Core Resources",
                         context,
                         environment,

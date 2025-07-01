@@ -2,9 +2,9 @@
 
 - **ALWAYS review @README.md**
 
-- **ALWAYS review @STYLE_GUIDE.md**
+- **ALWAYS review @STYLEGUIDE.md**
 
-- **ALWAYS use TSDoc style comments for documenting function code.**
+- **ALWAYS use TSDoc style comments for documenting function code and constants.**
 
 - **BEFORE writing or analyzing any TSDoc comments, you MUST use Context7 to get the updated TSDoc schema instructions.**
 
@@ -14,5 +14,4 @@
 
 - **NEVER disable eslint rules** without first confirming with me.
 
-- Do NOT write TSDoc comments that describe input object parameters such as `@param inputs.context`. This is not valid
-  TSDoc syntax.
+- When you need to lint individual files, **ALWAYS run `bun eslint --fix [file_path]**. Never use any other method as those are not supported. 

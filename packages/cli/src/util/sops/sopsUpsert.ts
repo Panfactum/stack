@@ -6,17 +6,23 @@ import { sopsDecrypt } from "./sopsDecrypt";
 import { sopsWrite } from "./sopsWrite";
 import type { PanfactumContext } from "@/util/context/context";
 
-interface Input {
+/**
+ * Interface for sopsUpsert function inputs
+ */
+interface ISopsUpsertInputs {
+  /** Values to upsert in the SOPS file */
   values: { [key: string]: string | string[] | undefined };
+  /** Path to the SOPS file */
   filePath: string;
+  /** Panfactum context for logging and configuration */
   context: PanfactumContext;
 }
 
-export const sopsUpsert = async (input: Input) => {
+export const sopsUpsert = async (input: ISopsUpsertInputs) => {
   const { values, filePath, context } = input;
 
-  if (!(await fileExists(filePath))) {
-    await createDirectory(dirname(filePath));
+  if (!(await fileExists({ filePath }))) {
+    await createDirectory({ dirPath: dirname(filePath) });
     await sopsWrite(input);
   } else {
     const existingData = await sopsDecrypt({

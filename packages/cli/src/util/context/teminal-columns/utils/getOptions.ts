@@ -4,14 +4,19 @@ import type {
 	ColumnMetasArray,
 } from '../types';
 
-type InternalOptions = {
+/**
+ * Interface for getOptions function output
+ */
+interface IGetOptionsOutput {
+	/** Column metadata array for terminal display */
 	columns: ColumnMetasArray;
+	/** Number of columns available in stdout */
 	stdoutColumns: number;
-};
+}
 
 export const getOptions = (
 	options?: Options | OptionsFunction,
-): InternalOptions => {
+): IGetOptionsOutput => {
 	const stdoutColumns = process.stdout.columns ?? Number.POSITIVE_INFINITY;
 
 	if (typeof options === 'function') {

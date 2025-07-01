@@ -1,15 +1,51 @@
+// This file contains Zod schemas for validating AWS-related data
+// It includes schemas for credentials, regions, account IDs, and API responses
+
 import { z } from "zod";
 
+/**
+ * Schema for validating AWS Secret Access Keys
+ * 
+ * @remarks
+ * AWS Secret Access Keys are exactly 40 characters long and contain only
+ * alphanumeric characters, forward slashes, plus signs, and equals signs.
+ * 
+ * @example
+ * ```typescript
+ * const validKey = AWS_SECRET_KEY_SCHEMA.parse('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
+ * ```
+ */
 export const AWS_SECRET_KEY_SCHEMA = z.string().regex(
     /^[A-Za-z0-9/+=]{40}$/,
     "Invalid AWS Secret Access Key. AWS Secret Access Keys are 40 characters long and contain only alphanumeric characters, forward slashes, plus signs and equals signs."
-);
+).describe("AWS Secret Access Key validation");
 
+/**
+ * Schema for validating AWS Access Key IDs
+ * 
+ * @remarks
+ * AWS Access Key IDs are exactly 20 characters long and always start with 'AKIA'
+ * followed by 16 uppercase alphanumeric characters.
+ * 
+ * @example
+ * ```typescript
+ * const validId = AWS_ACCESS_KEY_ID_SCHEMA.parse('AKIAIOSFODNN7EXAMPLE');
+ * ```
+ */
 export const AWS_ACCESS_KEY_ID_SCHEMA = z.string().regex(
     /^AKIA[A-Z0-9]{16}$/,
     "Invalid AWS Access Key ID. AWS Access Key IDs are 20 characters and start with 'AKIA'"
-)
+).describe("AWS Access Key ID validation")
 
+/**
+ * List of supported AWS regions
+ * 
+ * @remarks
+ * This list excludes certain regions that have compatibility issues:
+ * - us-west-1: Cannot run 3 AZs (SLA 3 unavailable)
+ * - af-south-1: S3 issues that break the installer
+ * - us-gov-*: Service restrictions not tested for framework compatibility
+ */
 export const AWS_REGIONS = [
     "us-east-1",
     "us-east-2",
@@ -44,22 +80,78 @@ export const AWS_REGIONS = [
     //"us-gov-west-1",
 ] as const;
 
+/**
+ * Schema for validating AWS region strings
+ * 
+ * @remarks
+ * Validates that a string is one of the supported AWS regions.
+ * This is an optional field that defaults to undefined.
+ * 
+ * @example
+ * ```typescript
+ * const region = AWS_REGION_SCHEMA.parse('us-east-1');
+ * ```
+ */
 export const AWS_REGION_SCHEMA = z
     .string()
     .refine((region) => (AWS_REGIONS as readonly string[]).includes(region), {
         message: "Not a valid AWS region",
     })
-    .optional();
+    .optional()
+    .describe("AWS region validation");
 
+/**
+ * Schema for validating AWS Account IDs
+ * 
+ * @remarks
+ * AWS Account IDs are exactly 12 numeric digits.
+ * 
+ * @example
+ * ```typescript
+ * const accountId = AWS_ACCOUNT_ID_SCHEMA.parse('123456789012');
+ * ```
+ */
 export const AWS_ACCOUNT_ID_SCHEMA = z
     .string()
-    .regex(/^\d{12}$/, "AWS Account ID must be exactly 12 digits");
+    .regex(/^\d{12}$/, "AWS Account ID must be exactly 12 digits")
+    .describe("AWS Account ID validation");
 
+/**
+ * Schema for validating ECR registry URLs
+ * 
+ * @remarks
+ * ECR registry URLs follow the format: accountId.dkr.ecr.region.amazonaws.com
+ * where accountId is 12 digits and region is a valid AWS region.
+ * 
+ * @example
+ * ```typescript
+ * const registry = ECR_REGISTRY_SCHEMA.parse('123456789012.dkr.ecr.us-east-1.amazonaws.com');
+ * ```
+ */
 export const ECR_REGISTRY_SCHEMA = z
     .string()
-    .regex(/^\d{12}\.dkr\.ecr\.[a-z0-9-]+\.amazonaws\.com$/, "Invalid ECR registry format. Expected: accountId.dkr.ecr.region.amazonaws.com");
+    .regex(/^\d{12}\.dkr\.ecr\.[a-z0-9-]+\.amazonaws\.com$/, "Invalid ECR registry format. Expected: accountId.dkr.ecr.region.amazonaws.com")
+    .describe("ECR registry URL validation");
 
 
+/**
+ * Schema for validating S3 bucket names
+ * 
+ * @remarks
+ * S3 bucket names must follow strict naming conventions:
+ * - 3-63 characters long
+ * - Only lowercase letters, numbers, periods, and hyphens
+ * - Must start and end with a letter or number
+ * - Cannot look like IP addresses or have adjacent periods
+ * - Cannot have certain reserved prefixes or suffixes
+ * 
+ * @example
+ * ```typescript
+ * const bucketName = BUCKET_NAME_SCHEMA.parse('my-valid-bucket-name');
+ * ```
+ * 
+ * @see https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
+ */
 export const BUCKET_NAME_SCHEMA = z.string()
     .max(63, "S3 bucket names must be less than 64 characters long")
     .min(3, "S3 bucket names must be at least three characters")
@@ -72,11 +164,40 @@ export const BUCKET_NAME_SCHEMA = z.string()
         const ipv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
         return !ipv4Regex.test(val);
     }, "S3 bucket names must not be formatted as IP addresses")
+    .describe("S3 bucket name validation")
 
+/**
+ * Schema for validating AWS account phone numbers
+ * 
+ * @remarks
+ * Phone numbers must be in international format with country code,
+ * area code, exchange code, and local code separated by hyphens.
+ * 
+ * @example
+ * ```typescript
+ * const phone = AWS_PHONE_NUMBER_SCHEMA.parse('+1 555-555-5555');
+ * ```
+ */
 export const AWS_PHONE_NUMBER_SCHEMA = z
     .string()
     .regex(/^\+\d{1,3} \d{1,4}-\d{1,4}-[\d-]{4,20}$/, "Phone numbers must be in the format +[country dialing code] [area code]-[exchange-code]-[local-code], e.g., +1 555-555-5555")
+    .describe("AWS account phone number validation")
 
+/**
+ * Schema for validating AWS account aliases
+ * 
+ * @remarks
+ * Account aliases must follow these rules:
+ * - 3-32 characters long
+ * - Only lowercase letters, numbers, and hyphens
+ * - Cannot start/end with hyphens or have consecutive hyphens
+ * - Cannot be a 12-digit number (to avoid confusion with account IDs)
+ * 
+ * @example
+ * ```typescript
+ * const alias = AWS_ACCOUNT_ALIAS_SCHEMA.parse('my-company-prod');
+ * ```
+ */
 export const AWS_ACCOUNT_ALIAS_SCHEMA = z
     .string()
     .min(3, "Account names/aliases must be at least three characters")
@@ -85,11 +206,24 @@ export const AWS_ACCOUNT_ALIAS_SCHEMA = z
     .refine(val => !val.includes('--'), "Account names/aliases cannot contain consecutive hyphens")
     .refine(val => !val.startsWith('-') && !val.endsWith('-'), "Account names/aliases cannot start or end with a hyphen")
     .refine(val => !/^\d{12}$/.test(val), "Account names/aliases cannot be a 12-digit number")
+    .describe("AWS account alias validation")
 
 // AWS CLI and kubectl output validation schemas
 // Used across multiple k8s cluster commands to ensure consistency and reduce duplication
 
-// AWS EKS describe-cluster response schema
+/**
+ * Schema for AWS EKS describe-cluster command response
+ * 
+ * @remarks
+ * Validates the JSON output from `aws eks describe-cluster` command.
+ * Contains cluster metadata, endpoint, and certificate authority data.
+ * 
+ * @example
+ * ```typescript
+ * const clusterInfo = EKS_DESCRIBE_CLUSTER_SCHEMA.parse(eksResponse);
+ * console.log(clusterInfo.cluster.endpoint);
+ * ```
+ */
 export const EKS_DESCRIBE_CLUSTER_SCHEMA = z.object({
   cluster: z.object({
     name: z.string(),
@@ -103,13 +237,40 @@ export const EKS_DESCRIBE_CLUSTER_SCHEMA = z.object({
     tags: z.record(z.string()).optional()
   })
 })
+.describe("AWS EKS describe-cluster response validation")
 
-// AWS EKS list-nodegroups response schema
+/**
+ * Schema for AWS EKS list-nodegroups command response
+ * 
+ * @remarks
+ * Validates the JSON output from `aws eks list-nodegroups` command.
+ * Contains an optional array of node group names.
+ * 
+ * @example
+ * ```typescript
+ * const nodeGroups = EKS_LIST_NODEGROUPS_SCHEMA.parse(listResponse);
+ * console.log(nodeGroups.nodegroups?.length ?? 0);
+ * ```
+ */
 export const EKS_LIST_NODEGROUPS_SCHEMA = z.object({
   nodegroups: z.array(z.string()).optional()
 })
+.describe("AWS EKS list-nodegroups response validation")
 
-// Kubernetes resources list schema (kubectl get -o json)
+/**
+ * Schema for Kubernetes resources list (kubectl get -o json)
+ * 
+ * @remarks
+ * Generic schema for validating Kubernetes resource lists returned
+ * by kubectl commands with JSON output. Matches the standard
+ * Kubernetes list format with items array.
+ * 
+ * @example
+ * ```typescript
+ * const resources = KUBERNETES_ITEMS_SCHEMA.parse(kubectlOutput);
+ * resources.items?.forEach(item => console.log(item.metadata.name));
+ * ```
+ */
 export const KUBERNETES_ITEMS_SCHEMA = z.object({
   items: z.array(z.object({
     metadata: z.object({
@@ -118,6 +279,20 @@ export const KUBERNETES_ITEMS_SCHEMA = z.object({
   })).optional()
 })
 
+/**
+ * Schema for Kubernetes certificate resources (kubectl get certificate -o json)
+ * 
+ * @remarks
+ * Validates the JSON output from `kubectl get certificate -o json` commands.
+ * Used for cert-manager certificate resource validation including issuer
+ * references and metadata.
+ * 
+ * @example
+ * ```typescript
+ * const certs = CERTIFICATE_ITEMS_SCHEMA.parse(kubectlOutput);
+ * certs.items?.forEach(cert => console.log(cert.spec?.issuerRef?.name));
+ * ```
+ */
 export const CERTIFICATE_ITEMS_SCHEMA = z.object({
   items: z.array(z.object({
     metadata: z.object({
@@ -132,16 +307,44 @@ export const CERTIFICATE_ITEMS_SCHEMA = z.object({
   })).optional()
 })
 
-// AWS Auto Scaling Groups with tags (for resume operations)
+/**
+ * Schema for AWS Auto Scaling Groups with tag information
+ * 
+ * @remarks
+ * Validates the JSON output from AWS Auto Scaling Group describe operations
+ * that include tag data. Used for cluster resume operations to identify
+ * and filter ASGs based on their tags.
+ * 
+ * @example
+ * ```typescript
+ * const asgs = AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA.parse(describeASGsOutput);
+ * asgs.forEach(asg => console.log(`ASG: ${asg.AutoScalingGroupName}`));
+ * ```
+ */
 export const AUTO_SCALING_GROUPS_WITH_TAGS_SCHEMA = z.array(z.object({
   AutoScalingGroupName: z.string(),
   Tags: z.array(z.object({
     Key: z.string(),
     Value: z.string()
   }))
-}))
+})).describe("Auto Scaling Groups with their associated tags");
 
-// AWS Auto Scaling Groups with sizing info (for suspend operations)
+/**
+ * Schema for AWS Auto Scaling Groups with capacity information
+ * 
+ * @remarks
+ * Validates Auto Scaling Group data that includes sizing information
+ * (min, max, desired capacity). Used for cluster suspend operations
+ * to store and restore ASG sizes.
+ * 
+ * @example
+ * ```typescript
+ * const asgs = AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA.parse(describeASGsOutput);
+ * asgs.forEach(asg => {
+ *   console.log(`ASG ${asg.AutoScalingGroupName}: min=${asg.MinSize}, max=${asg.MaxSize}`);
+ * });
+ * ```
+ */
 export const AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA = z.array(z.object({
   AutoScalingGroupName: z.string(),
   MinSize: z.number(),
@@ -149,13 +352,44 @@ export const AUTO_SCALING_GROUPS_WITH_SIZING_SCHEMA = z.array(z.object({
   DesiredCapacity: z.number()
 }))
 
-// AWS EC2 instances query response (nested arrays from Reservations[*].Instances[*].InstanceId)
-export const EC2_INSTANCES_SCHEMA = z.array(z.array(z.string()))
+/**
+ * Schema for validating AWS EC2 instances query response
+ * 
+ * @remarks
+ * This schema validates the nested array structure returned by AWS CLI queries
+ * using the format: `Reservations[*].Instances[*].InstanceId`. The result is
+ * an array of arrays where each inner array contains instance IDs from a
+ * single reservation.
+ * 
+ * @example
+ * ```typescript
+ * // Query: aws ec2 describe-instances --query "Reservations[*].Instances[*].InstanceId"
+ * const queryResult = [["i-1234567890abcdef0"], ["i-0987654321fedcba0", "i-abcdef1234567890"]];
+ * const validated = EC2_INSTANCES_SCHEMA.parse(queryResult);
+ * ```
+ */
+export const EC2_INSTANCES_SCHEMA = z.array(
+  z.array(z.string().describe("EC2 instance ID")).describe("Instance IDs from a reservation")
+).describe("AWS EC2 instances query response (nested arrays)");
 
-// AWS ELBv2 load balancers response schema
+/**
+ * Schema for validating AWS ELBv2 load balancers API response
+ * 
+ * @remarks
+ * This schema validates the response from AWS ELBv2 describe-load-balancers
+ * API calls. It ensures the response contains an array of load balancer
+ * objects with the required ARN field.
+ * 
+ * @example
+ * ```typescript
+ * const response = await elbv2Client.send(new DescribeLoadBalancersCommand({}));
+ * const validated = LOAD_BALANCERS_SCHEMA.parse(response.LoadBalancers);
+ * ```
+ */
 export const LOAD_BALANCERS_SCHEMA = z.array(z.object({
-  LoadBalancerArn: z.string()
-}))
+  /** AWS ARN of the load balancer */
+  LoadBalancerArn: z.string().describe("Load balancer ARN")
+}).describe("Load balancer configuration")).describe("AWS ELBv2 load balancers API response");
 
 export const COUNTRY_CODES = [
     { value: 'US', name: 'United States (US)' },

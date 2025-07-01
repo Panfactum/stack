@@ -3,8 +3,17 @@ import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { AWS_ACCESS_KEY_ID_SCHEMA, AWS_SECRET_KEY_SCHEMA } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Interface for getAdminAccessCredentials function output
+ */
+export interface IGetAdminAccessCredentialsOutput {
+  /** AWS access key ID */
+  accessKeyId: string;
+  /** AWS secret access key */
+  secretAccessKey: string;
+}
 
-export async function getAdminAccessCredentials(context: PanfactumContext): Promise<{ accessKeyId: string, secretAccessKey: string }> {
+export async function getAdminAccessCredentials(context: PanfactumContext): Promise<IGetAdminAccessCredentialsOutput> {
     let accessKeyId: string;
     let secretAccessKey: string;
     let username = ""

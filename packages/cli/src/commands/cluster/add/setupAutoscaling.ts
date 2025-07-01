@@ -11,22 +11,22 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupAutoscaling(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, region, slaTarget } =
     options;
 
-  interface Context {
+  interface IContext {
     vaultProxyPid?: number;
     vaultProxyPort?: number;
   }
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async () => {

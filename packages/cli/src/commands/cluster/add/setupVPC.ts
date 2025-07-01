@@ -11,7 +11,7 @@ import {
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { parseJson } from "@/util/zod/parseJson";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const DESCRIBE_VPCS_SCHEMA = z.object({
@@ -37,19 +37,19 @@ const VPC_NAME = z
   );
 
 export async function setupVPC(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region, awsRegion } = options;
 
-  interface Context {
+  interface IContext {
     vpcName?: string;
     vpcDescription?: string;
     dockerHubUsername?: string;
     githubUsername?: string;
   }
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async () => {
@@ -144,13 +144,13 @@ export async function setupVPC(
     {
       title: "Deploy the Modules",
       task: async (ctx, parentTask) => {
-        return parentTask.newListr<Context>(
+        return parentTask.newListr<IContext>(
           [
             {
               task: async (ctx, parentTask) => {
-                return parentTask.newListr<Context>(
+                return parentTask.newListr<IContext>(
                   [
-                    await buildDeployModuleTask<Context>({
+                    await buildDeployModuleTask<IContext>({
                       taskTitle: "Deploy VPC",
                       context,
                       environment,

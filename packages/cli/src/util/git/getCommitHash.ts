@@ -1,3 +1,6 @@
+// This file provides utilities for resolving Git references to commit hashes
+// It supports branches, tags, and commit SHAs from local and remote repositories
+
 import { mkdtemp, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,21 +9,61 @@ import { CLIError, PanfactumZodError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import type { PanfactumContext } from '@/util/context/context';
 
-// Schemas for validating git command outputs
-const GIT_SHA_SCHEMA = z.string().regex(/^[0-9a-f]{40}$/i, 'Invalid git SHA format');
-const GIT_OUTPUT_SCHEMA = z.string().min(1, 'Git command returned empty output');
-const GIT_LS_REMOTE_SCHEMA = z.string().regex(/^[0-9a-f]{40}\t/, 'Invalid git ls-remote output format');
+/**
+ * Schema for validating 40-character Git SHA hashes
+ * 
+ * @remarks
+ * Git commit SHAs are always 40 hexadecimal characters.
+ * This schema ensures we have a valid full-length SHA.
+ */
+const GIT_SHA_SCHEMA = z.string().regex(/^[0-9a-f]{40}$/i, 'Invalid git SHA format')
+  .describe("Git commit SHA validation");
 
-export interface GetCommitHashOptions {
+/**
+ * Schema for validating non-empty Git command output
+ */
+const GIT_OUTPUT_SCHEMA = z.string().min(1, 'Git command returned empty output')
+  .describe("Non-empty git command output");
+
+/**
+ * Schema for validating git ls-remote output format
+ * 
+ * @remarks
+ * Git ls-remote returns lines in format: "SHA\tref_name"
+ * This schema validates the SHA portion exists.
+ */
+const GIT_LS_REMOTE_SCHEMA = z.string().regex(/^[0-9a-f]{40}\t/, 'Invalid git ls-remote output format')
+  .describe("Git ls-remote output validation");
+
+/**
+ * Options for resolving Git references to commit hashes
+ */
+export interface IGetCommitHashOptions {
+  /** Git repository URL or 'origin' for current repo's origin (default: 'origin') */
   repo?: string;
+  /** Git reference (branch, tag, commit SHA) to resolve */
   ref?: string;
+  /** Skip verification that commit exists in remote (default: false) */
   noVerify?: boolean;
+  /** Panfactum context for command execution */
   context: PanfactumContext;
+  /** Directory containing the Git repository */
   workingDirectory: string;
 }
 
 /**
  * Gets the current HEAD commit SHA from the local repository
+ * 
+ * @internal
+ * @param context - Panfactum context for command execution
+ * @param workingDirectory - Git repository directory
+ * @returns Current HEAD commit SHA
+ * 
+ * @throws {@link CLIError}
+ * Throws when git rev-parse fails
+ * 
+ * @throws {@link PanfactumZodError}
+ * Throws when output is not a valid SHA
  */
 async function getCurrentHead(context: PanfactumContext, workingDirectory: string): Promise<string> {
   const { stdout } = await execute({
@@ -174,11 +217,73 @@ async function resolveRefWithLsRemote(ref: string, repo: string, context: Panfac
 }
 
 /**
- * Resolves git references (branches, tags, commits) to commit SHA hashes
- * @param options - Options for resolving the commit hash
- * @returns The resolved commit SHA
+ * Resolves Git references to their full commit SHA hashes
+ * 
+ * @remarks
+ * This function provides a flexible way to resolve various Git references
+ * (branches, tags, short SHAs) to their full 40-character commit hashes.
+ * It supports both local repositories and custom remote repositories.
+ * 
+ * Key features:
+ * - **Reference Resolution**: Converts branches/tags to commit SHAs
+ * - **SHA Validation**: Verifies commit exists in the repository
+ * - **Remote Support**: Works with custom Git repositories
+ * - **Special Cases**: Handles empty repos and local-only refs
+ * 
+ * Resolution process:
+ * 1. If ref is "local", returns "local" (special case)
+ * 2. If no ref provided, returns current HEAD
+ * 3. If ref is already a 40-char SHA, validates and returns it
+ * 4. Otherwise, resolves the ref to its commit SHA
+ * 
+ * Common use cases:
+ * - Pinning module versions to specific commits
+ * - Validating user-provided Git references
+ * - Ensuring reproducible deployments
+ * - Cross-repository module references
+ * 
+ * @param options - Configuration for commit hash resolution
+ * @returns Resolved 40-character commit SHA or "local"
+ * 
+ * @example
+ * ```typescript
+ * // Get current HEAD commit
+ * const currentCommit = await getCommitHash({
+ *   context,
+ *   workingDirectory: '/path/to/repo'
+ * });
+ * 
+ * // Resolve a branch to its commit
+ * const mainCommit = await getCommitHash({
+ *   context,
+ *   workingDirectory: '/path/to/repo',
+ *   ref: 'main'
+ * });
+ * 
+ * // Resolve from custom repository
+ * const externalCommit = await getCommitHash({
+ *   context,
+ *   workingDirectory: '/path/to/repo',
+ *   repo: 'https://github.com/example/repo.git',
+ *   ref: 'v1.2.3'
+ * });
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when Git commands fail or references can't be resolved
+ * 
+ * @throws {@link CLIError}
+ * Throws when specifying empty ref with custom repo (ambiguous)
+ * 
+ * @throws {@link CLIError}
+ * Throws when commit doesn't exist in specified repository
+ * 
+ * @throws {@link PanfactumZodError}
+ * Throws when Git output doesn't match expected format
+ * 
+ * @see {@link execute} - For running Git commands
  */
-export async function getCommitHash(options: GetCommitHashOptions): Promise<string> {
+export async function getCommitHash(options: IGetCommitHashOptions): Promise<string> {
   const { repo = 'origin', ref, noVerify = false, context, workingDirectory } = options;
 
   // Special case: local ref

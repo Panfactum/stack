@@ -2,11 +2,11 @@ import awsEbsCsiDriverTerragruntHcl from "@/templates/kube_aws_ebs_csi_terragrun
 import { getIdentity } from "@/util/aws/getIdentity";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupCSIDrivers(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, region } = options;

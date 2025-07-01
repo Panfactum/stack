@@ -15,8 +15,14 @@ import { terragruntImport } from "../terragruntImport";
 import { terragruntInit } from "../terragruntInit";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Helper for definining input updates that are properly typed
+ * DO NOT CHANGE!!!!!!!
+ */
 export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
+    /** Zod schema for input validation */
     schema: T;
+    /** Function to update old input with new context */
     update: (oldInput: z.infer<T> | undefined, ctx: C) => z.infer<T>;
 }) {
     return config;
@@ -26,40 +32,62 @@ type InputUpdates<T extends {}> = {
     [inputName: string]: ReturnType<typeof defineInputUpdate<z.ZodType, T>>;
 }
 
-export async function buildDeployModuleTask<T extends {}>(inputs: {
+
+/**
+ * Interface for buildDeployModuleTask function inputs
+ */
+interface IBuildDeployModuleTaskInput<T extends {}> {
+    /** Panfactum context for operations */
     context: PanfactumContext;
+    /** Environment variables for the deployment */
     env?: Record<string, string | undefined>;
+    /** Environment name */
     environment: string;
+    /** Region name */
     region: string;
+    /** Module name to deploy */
     module: string;
-    forceInitModule?: boolean; // should init force run (even if it looks unnecessary)
-    hclIfMissing?: string; // contents of the HCL file to create if the module doesn't already exist
+    /** Force module initialization even if it appears unnecessary */
+    forceInitModule?: boolean;
+    /** HCL file contents to create if module doesn't exist */
+    hclIfMissing?: string;
+    /** Custom task title */
     taskTitle?: string;
-    realModuleName?: string; // if the `module` string is different from the Panfactum module to actually deploy (e.g., `sops` => `aws_kms_encryption_key`)
+    /** Real module name if different from module parameter */
+    realModuleName?: string;
+    /** Resource imports configuration */
     imports?: {
         [resourcePath: string]: {
             resourceId: string | undefined | ((ctx: T) => Promise<string | undefined>);
         };
     };
+    /** Input updates to apply during deployment */
     inputUpdates?: InputUpdates<T>;
+    /** Input updates to apply after deployment */
     postDeployInputUpdates?: InputUpdates<T>;
+    /** Skip deployment if already applied */
     skipIfAlreadyApplied?: boolean;
+    /** Warning message about deployment time */
     etaWarningMessage?: string;
-}): Promise<ListrTask<T>> {
+}
+
+export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployModuleTaskInput<T>): Promise<ListrTask<T>> {
     const {
         hclIfMissing,
         context,
         environment,
         region,
         module,
+        forceInitModule,
+        taskTitle,
         realModuleName,
-        imports = {},
-        inputUpdates = {},
-        postDeployInputUpdates = {},
-        forceInitModule = false,
-        taskTitle = "Deploy module",
-        skipIfAlreadyApplied = false,
-    } = inputs;
+        imports,
+        inputUpdates,
+        postDeployInputUpdates,
+        skipIfAlreadyApplied,
+        etaWarningMessage,
+        env
+    } = input;
 
     const moduleDir = join(
         context.repoVariables.environments_dir,
@@ -71,6 +99,16 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
     const moduleYAMLPath = join(moduleDir, "module.yaml");
 
     const status = await getModuleStatus({ context, environment, region, module })
+
+    // Base inputs object for terragrunt function calls
+    const inputs = {
+        context,
+        environment,
+        region,
+        module,
+        env,
+        etaWarningMessage
+    };
 
     const updateModuleYAML = async (updates: InputUpdates<T>, ctx: T) => {
         for (const input of Object.keys(updates)) {
@@ -87,7 +125,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             }
         }
 
-        if (await fileExists(moduleYAMLPath)) {
+        if (await fileExists({ filePath: moduleYAMLPath })) {
             const inputSchemas = Object.fromEntries(
                 Object.entries(updates).map(([input, { schema }]) => [
                     input,
@@ -162,7 +200,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             // If the terragrunt.hcl is missing, then add it
             //////////////////////////////////////////////////////////////
 
-            if (!(await fileExists(moduleHCLPath))) {
+            if (!(await fileExists({ filePath: moduleHCLPath }))) {
                 if (!hclIfMissing) {
                     throw new CLIError(
                         `No module exists at ${moduleHCLPath} and no fallback terragrunt.hcl was provided.`
@@ -171,7 +209,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                 subtasks.add({
                     title: "Create the terragrunt.hcl",
                     task: async () => {
-                        await createDirectory(moduleDir);
+                        await createDirectory({ dirPath: moduleDir });
                         await writeFile({
                             context,
                             filePath: moduleHCLPath,
@@ -184,11 +222,11 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             // If needed, update the module inputs via the module.yaml file
             //////////////////////////////////////////////////////////////
-            if (Object.keys(inputUpdates).length > 0 || realModuleName) {
+            if ((inputUpdates && Object.keys(inputUpdates).length > 0) || realModuleName) {
                 subtasks.add({
                     title: "Update module inputs",
                     task: async (_, task) => {
-                        await updateModuleYAML(inputUpdates, ctx)
+                        await updateModuleYAML(inputUpdates || {}, ctx)
                         task.title = "Updated module inputs";
                     },
                 });
@@ -220,7 +258,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             // If needed, import the resource before running apply
             //////////////////////////////////////////////////////////////
             subtasks.add(
-                Object.entries(imports).map(
+                Object.entries(imports || {}).map(
                     ([resourcePath, { resourceId }]) => {
                         return {
                             title: context.logger.applyColors(`Import ${resourcePath}`),
@@ -267,7 +305,7 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
                 task: async (_, task) => {
                     // todo: accept eta minutes vs free form string
                     // todo: this should be persistent, ensure it does not disappear until completion
-                    task.title = `Applying - Planning changes${inputs.etaWarningMessage ? ` (${inputs.etaWarningMessage})` : ""}`;
+                    task.title = `Applying - Planning changes${etaWarningMessage ? ` (${etaWarningMessage})` : ""}`;
                     let deltas = 0;
                     let deltaCounter = 0;
                     let changeCounter = 0;
@@ -327,11 +365,11 @@ export async function buildDeployModuleTask<T extends {}>(inputs: {
             //////////////////////////////////////////////////////////////
             // If needed, update the module inputs again
             //////////////////////////////////////////////////////////////
-            if (Object.keys(postDeployInputUpdates).length > 0) {
+            if (postDeployInputUpdates && Object.keys(postDeployInputUpdates).length > 0) {
                 subtasks.add({
                     title: "Post-deploy input updates",
                     task: async () => {
-                        await updateModuleYAML(postDeployInputUpdates, ctx)
+                        await updateModuleYAML(postDeployInputUpdates || {}, ctx)
                     },
                 });
             }

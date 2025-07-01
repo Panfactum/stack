@@ -9,22 +9,22 @@ import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 export async function setupLinkerd(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region } = options;
 
-  interface Context {
+  interface IContext {
     kubeContext?: string;
     vaultProxyPid?: number;
     vaultProxyPort?: number;
   }
 
-  const tasks = mainTask.newListr<Context>([
+  const tasks = mainTask.newListr<IContext>([
     {
       title: "Verify access",
       task: async (ctx) => {
@@ -56,7 +56,7 @@ export async function setupLinkerd(
     },
     {
       task: async (ctx, task) => {
-        return task.newListr<Context>(
+        return task.newListr<IContext>(
           [
             await buildDeployModuleTask({
               taskTitle: "Deploy Linkerd Service Mesh",

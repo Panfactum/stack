@@ -3,10 +3,24 @@ import { getRoute53DomainsClient } from "@/util/aws/clients/getRoute53DomainsCli
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
-import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { IEnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function isDomainAvailableFromAWS(inputs: { context: PanfactumContext, env: EnvironmentMeta, domain: string, tld: string }): Promise<boolean> {
+/**
+ * Interface for isDomainAvailableFromAWS function inputs
+ */
+interface IIsDomainAvailableFromAWSInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Environment metadata for AWS profile lookup */
+  env: IEnvironmentMeta;
+  /** Domain name to check availability for */
+  domain: string;
+  /** Top-level domain (TLD) for validation */
+  tld: string;
+}
+
+export async function isDomainAvailableFromAWS(inputs: IIsDomainAvailableFromAWSInputs): Promise<boolean> {
     const { context, env, domain, tld } = inputs;
     const { aws_profile: profile } = await getPanfactumConfig({ context, directory: env.path })
     if (!profile) {

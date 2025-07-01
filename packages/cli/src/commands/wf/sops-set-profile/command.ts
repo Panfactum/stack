@@ -1,3 +1,6 @@
+// This file defines the wf sops-set-profile command for SOPS file management
+// It updates AWS profiles in SOPS-encrypted files for CI/CD workflows
+
 import { Glob } from 'bun';
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
@@ -6,13 +9,70 @@ import { CLIError } from '@/util/error/error';
 import { readYAMLFile } from '@/util/yaml/readYAMLFile';
 import { writeYAMLFile } from '@/util/yaml/writeYAMLFile';
 
-interface UpdateResult {
+/**
+ * Interface representing the result of a SOPS file update operation
+ */
+interface IUpdateResult {
+  /** Path to the file that was processed */
   filePath: string;
+  /** Status of the update operation */
   status: 'updated' | 'skipped' | 'error';
+  /** Reason for skipping or error */
   reason?: string;
+  /** Error object if status is 'error' */
   error?: Error;
 }
 
+/**
+ * CLI command for updating AWS profiles in SOPS-encrypted files
+ * 
+ * @remarks
+ * This command bulk-updates AWS profile references in SOPS metadata across
+ * multiple encrypted files. It's designed for CI/CD environments where
+ * different AWS profiles are needed for KMS access.
+ * 
+ * SOPS (Secrets OPerationS) is a tool for managing encrypted secrets
+ * that integrates with AWS KMS, GCP KMS, Azure Key Vault, and PGP.
+ * This command specifically targets the AWS KMS configuration.
+ * 
+ * Key features:
+ * - Recursive directory scanning for YAML files
+ * - Safe SOPS metadata updates without decryption
+ * - Batch processing with detailed reporting
+ * - Non-destructive (preserves all other content)
+ * - Error handling with detailed diagnostics
+ * 
+ * Use cases:
+ * - CI/CD pipelines with environment-specific profiles
+ * - Migrating encrypted files between AWS accounts
+ * - Standardizing profile names across repositories
+ * - Automating profile updates during deployments
+ * 
+ * The command only modifies the SOPS metadata section,
+ * specifically the aws_profile field in KMS configurations.
+ * The encrypted data itself remains unchanged.
+ * 
+ * @example
+ * ```bash
+ * # Update all SOPS files in current directory
+ * pf wf sops-set-profile . development
+ * 
+ * # Update files in specific environment directory
+ * pf wf sops-set-profile environments/staging ci-staging-profile
+ * 
+ * # Use in CI pipeline
+ * export CI_AWS_PROFILE=$(pf config get | jq -r .aws_profile)
+ * pf wf sops-set-profile . "$CI_AWS_PROFILE"
+ * 
+ * # Typical workflow usage
+ * cd /workspace
+ * pf wf sops-set-profile . workflow-role
+ * sops decrypt secrets.yaml > decrypted.yaml
+ * ```
+ * 
+ * @see {@link readYAMLFile} - For safe YAML parsing
+ * @see {@link writeYAMLFile} - For preserving YAML structure
+ */
 export class SopsSetProfileCommand extends PanfactumCommand {
   static override paths = [['wf', 'sops-set-profile']];
 
@@ -27,11 +87,48 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
     ]
   });
 
+  /**
+   * Directory to search for SOPS files
+   * 
+   * @remarks
+   * Searches recursively for all .yaml files.
+   * Use absolute or relative paths.
+   */
   directory = Option.String({ required: true });
+  
+  /**
+   * AWS profile name to set
+   * 
+   * @remarks
+   * Must match a configured AWS profile.
+   * Replaces existing aws_profile values in SOPS metadata.
+   */
   profile = Option.String({ required: true });
 
+  /**
+   * Executes the SOPS profile update process
+   * 
+   * @remarks
+   * This method:
+   * 1. Recursively finds all YAML files in the directory
+   * 2. Checks each file for SOPS encryption metadata
+   * 3. Updates aws_profile in KMS configurations
+   * 4. Saves modified files preserving structure
+   * 5. Reports detailed results and summary
+   * 
+   * The process is idempotent - running multiple times
+   * with the same profile has no additional effect.
+   * 
+   * @throws {@link CLIError}
+   * Throws when one or more files fail to update
+   */
   async execute() {
-    const updateSopsFile = async (filePath: string): Promise<UpdateResult> => {
+    /**
+     * Updates AWS profile in a single SOPS file
+     * 
+     * @internal
+     */
+    const updateSopsFile = async (filePath: string): Promise<IUpdateResult> => {
       try {
         const sopsFileSchema = z.object({
           sops: z.object({

@@ -9,7 +9,7 @@ import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntApplyAll } from "@/util/terragrunt/terragruntApplyAll";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import type { FeatureEnableOptions } from "./command";
+import type { IFeatureEnableOptions } from "./command";
 
 const DOCKERHUB_USERNAME = z
   .string()
@@ -32,14 +32,14 @@ const GITHUB_USERNAME = z
 
 
 
-export async function setupECR({context, clusterPath, region, environment}: FeatureEnableOptions) {
+export async function setupECR({context, clusterPath, region, environment}: IFeatureEnableOptions) {
 
-  interface Context {
+  interface IContext {
     dockerHubUsername?: string;
     githubUsername?: string;
   }
 
-  const tasks = new Listr<Context>([
+  const tasks = new Listr<IContext>([
     {
       title: "Get ECR configuration",
       task: async (ctx, task) => {
@@ -197,7 +197,7 @@ export async function setupECR({context, clusterPath, region, environment}: Feat
         }
       }
     },
-    await buildDeployModuleTask<Context>({
+    await buildDeployModuleTask<IContext>({
       taskTitle: "Deploy ECR Pull Through Cache",
       context,
       environment,

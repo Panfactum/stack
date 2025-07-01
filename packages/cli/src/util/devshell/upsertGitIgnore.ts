@@ -4,17 +4,29 @@ import { writeFile } from "../fs/writeFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
+ * Interface for upsertGitIgnore function inputs
+ */
+interface IUpsertGitIgnoreInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Array of lines to add to the .gitignore file */
+  lines: string[];
+  /** Path to the .gitignore file */
+  path: string;
+}
+
+/**
  * Updates a .gitignore file by adding the specified lines.
  * Creates the file if it doesn't exist and ensures there are no duplicate lines.
  * @param inputs - Object containing context, path to the .gitignore file, and lines to add
  */
-export async function upsertGitIgnore(inputs: { context: PanfactumContext, lines: string[], path: string }) {
+export async function upsertGitIgnore(inputs: IUpsertGitIgnoreInputs) {
     const { context, lines, path } = inputs;
 
     let existingLines: string[] = [];
 
     // Check if the file exists and read it if it does
-    if (await fileExists(path)) {
+    if (await fileExists({ filePath: path })) {
         const fileContent = await Bun.file(path).text();
         existingLines = fileContent.split('\n').map(line => line.trim()).filter(line => line !== '');
     }

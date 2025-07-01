@@ -12,8 +12,19 @@ import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Interface for updateIAMIdentityCenter function inputs
+ */
+interface IUpdateIAMIdentityCenterInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** AWS profile for the environment being configured */
+  environmentProfile: string;
+  /** Name of the environment being configured */
+  environmentName: string;
+}
 
-interface TaskContext {
+interface ITaskContext {
     accountId?: string;
     superuserGroups: string[];
     adminGroups: string[];
@@ -22,11 +33,7 @@ interface TaskContext {
     billingAdminGroups: string[];
 }
 
-export async function updateIAMIdentityCenter(inputs: {
-    context: PanfactumContext,
-    environmentProfile: string,
-    environmentName: string
-}) {
+export async function updateIAMIdentityCenter(inputs: IUpdateIAMIdentityCenterInputs) {
 
     const { context, environmentProfile, environmentName } = inputs;
 
@@ -72,7 +79,7 @@ export async function updateIAMIdentityCenter(inputs: {
     // Run the tasks
     /////////////////////////////////////////////////////////////////////
 
-    const tasks = new Listr<TaskContext>([
+    const tasks = new Listr<ITaskContext>([
         {
             title: context.logger.applyColors(`Retrieve AWS account ID for ${environmentName} environment`),
             task: async (ctx, task) => {
@@ -169,7 +176,7 @@ export async function updateIAMIdentityCenter(inputs: {
                 }
             }
         },
-        await buildDeployModuleTask<TaskContext>({
+        await buildDeployModuleTask<ITaskContext>({
             context,
             environment: MANAGEMENT_ENVIRONMENT,
             region: GLOBAL_REGION,

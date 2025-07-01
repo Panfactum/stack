@@ -1,3 +1,6 @@
+// This file provides utilities for updating Terragrunt module status files
+// It tracks initialization and deployment states for modules
+
 import { join } from "node:path"
 import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist";
@@ -9,19 +12,78 @@ import { MODULE_STATUS_FILE_SCHEMA, type DEPLOY_STATUS_SCHEMA, type INIT_STATUS_
 import type { PanfactumContext } from "@/util/context/context";
 import type { z } from "zod"
 
-type Inputs = {
+/**
+ * Input parameters for updating module status
+ */
+interface IUpdateModuleStatusInput {
+    /** Full path to the module directory */
     moduleDirectory: string;
+    /** Panfactum context for configuration */
     context: PanfactumContext;
-    initStatus?: z.infer<typeof INIT_STATUS_SCHEMA>,
-    deployStatus?: z.infer<typeof DEPLOY_STATUS_SCHEMA>
+    /** New initialization status (optional) */
+    initStatus?: z.infer<typeof INIT_STATUS_SCHEMA>;
+    /** New deployment status (optional) */
+    deployStatus?: z.infer<typeof DEPLOY_STATUS_SCHEMA>;
 }
 
-export async function updateModuleStatus(inputs: Inputs) {
-    const { initStatus, deployStatus, moduleDirectory, context } = inputs;
+/**
+ * Updates the status file for a Terragrunt module
+ * 
+ * @remarks
+ * This function maintains the module.status.yaml file that tracks:
+ * - Initialization status (uninited, running, success, error)
+ * - Deployment status (undeployed, running, success, error)
+ * 
+ * The function performs several validations:
+ * 1. Ensures the module directory exists
+ * 2. Verifies terragrunt.hcl is present (indicates valid module)
+ * 3. Preserves existing status values when only updating one field
+ * 
+ * Status updates are atomic - the entire file is rewritten to ensure
+ * consistency. This prevents partial updates that could leave the
+ * status file in an invalid state.
+ * 
+ * Common usage patterns:
+ * - Set status to "running" before operations
+ * - Update to "success" or "error" after completion
+ * - Query status before starting new operations
+ * 
+ * @param input - Parameters including directory and new status values
+ * 
+ * @example
+ * ```typescript
+ * // Mark initialization as running
+ * await updateModuleStatus({
+ *   moduleDirectory: '/environments/prod/us-east-1/aws_vpc',
+ *   context,
+ *   initStatus: 'running'
+ * });
+ * 
+ * // After successful deployment
+ * await updateModuleStatus({
+ *   moduleDirectory: '/environments/prod/us-east-1/aws_vpc',
+ *   context,
+ *   initStatus: 'success',
+ *   deployStatus: 'success'
+ * });
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when the module directory doesn't exist
+ * 
+ * @throws {@link CLIError}
+ * Throws when terragrunt.hcl is missing from the module directory
+ * 
+ * @see {@link getModuleStatus} - For reading current module status
+ * @see {@link MODULE_STATUS_FILE} - The status file name constant
+ * @see {@link MODULE_STATUS_FILE_SCHEMA} - Schema for status validation
+ */
+export async function updateModuleStatus(input: IUpdateModuleStatusInput): Promise<void> {
+    const { initStatus, deployStatus, moduleDirectory, context } = input;
 
-    if (! await directoryExists(moduleDirectory)) {
+    if (! await directoryExists({ path: moduleDirectory })) {
         throw new CLIError(`Cannot update the status of a module with non-existant directory ${moduleDirectory}`)
-    } else if (! await fileExists(join(moduleDirectory, "terragrunt.hcl"))) {
+    } else if (! await fileExists({ filePath: join(moduleDirectory, "terragrunt.hcl") })) {
         throw new CLIError(`${moduleDirectory} does not have the appropriate terragrunt.hcl configuration`)
     }
 

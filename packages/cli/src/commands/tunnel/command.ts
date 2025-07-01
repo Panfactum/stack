@@ -1,3 +1,6 @@
+// This file defines the tunnel command for creating secure SSH tunnels
+// It provides local access to internal Kubernetes services through bastion hosts
+
 import { input } from '@inquirer/prompts';
 import { Option } from 'clipanion';
 import { z } from 'zod';
@@ -7,15 +10,34 @@ import {CLIError, PanfactumZodError} from '@/util/error/error';
 import { getKubeContextsFromConfig } from "@/util/kube/getKubeContextsFromConfig.ts";
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel';
 
-// Zod schema for port validation
+/**
+ * Zod schema for validating port numbers
+ * 
+ * @remarks
+ * Ensures ports are within the user-accessible range (1024-65535).
+ * Ports below 1024 require root privileges.
+ */
 const portSchema = z.string()
   .regex(/^\d+$/, 'Port must be a number')
   .transform(Number)
   .refine((port) => port >= 1024 && port <= 65535, {
     message: 'Port must be between 1024 and 65535'
-  });
+  })
+  .describe('Port number validation for user-accessible range');
 
-// Zod schema for remote address validation (hostname:port format)
+/**
+ * Zod schema for validating remote address format
+ * 
+ * @remarks
+ * Validates hostname:port format for tunnel destinations.
+ * Supports both service names and FQDNs.
+ * 
+ * @example
+ * Valid formats:
+ * - service.namespace:8080
+ * - grafana.monitoring:3000
+ * - internal-api.default.svc.cluster.local:443
+ */
 const remoteAddressSchema = z.string()
   .regex(/^.+:\d+$/, 'Remote address must include both hostname and port (e.g., example.com:443)')
   .refine((address) => {
@@ -26,8 +48,61 @@ const remoteAddressSchema = z.string()
     return hostname!.length > 0 && !isNaN(port) && port > 0 && port <= 65535;
   }, {
     message: 'Remote address must have a valid hostname and port number (1-65535)'
-  });
+  })
+  .describe('Remote address validation in hostname:port format');
 
+/**
+ * CLI command for establishing SSH tunnels to internal services
+ * 
+ * @remarks
+ * This command creates secure SSH tunnels through bastion hosts to access
+ * internal Kubernetes services during local development. It's essential for
+ * accessing services that aren't exposed publicly.
+ * 
+ * Key features:
+ * - Secure SSH tunneling through bastion hosts
+ * - Automatic credential management via Vault
+ * - Interactive or non-interactive operation
+ * - Support for any TCP-based service
+ * - Graceful cleanup on termination
+ * 
+ * Common use cases:
+ * - Accessing internal dashboards (Grafana, ArgoCD, etc.)
+ * - Database connections for local development
+ * - API debugging without public exposure
+ * - Service-to-service communication testing
+ * 
+ * The tunnel establishes:
+ * 1. SSH connection to bastion host
+ * 2. Port forward from bastion to internal service
+ * 3. Local port binding for application access
+ * 
+ * Security considerations:
+ * - Uses temporary SSH credentials from Vault
+ * - All traffic encrypted through SSH
+ * - Bastion hosts provide audit logging
+ * - No permanent credentials stored locally
+ * 
+ * @example
+ * ```bash
+ * # Interactive tunnel creation
+ * pf tunnel
+ * 
+ * # Tunnel to ArgoCD UI
+ * pf tunnel --cluster prod-primary --remote-address argo-server.argo:2746 --local-port 8080
+ * # Access at http://localhost:8080
+ * 
+ * # Tunnel to Grafana
+ * pf tunnel --cluster staging --remote-address grafana.monitoring:3000
+ * 
+ * # Database connection
+ * pf tunnel --cluster dev --remote-address postgres.database:5432 --local-port 5432
+ * # Connect with: psql -h localhost -p 5432
+ * ```
+ * 
+ * @see {@link createSSHTunnel} - Core tunnel creation logic
+ * @see {@link getKubeContextsFromConfig} - For cluster discovery
+ */
 export default class TunnelCommand extends PanfactumCommand {
   static override paths = [['tunnel']];
 
@@ -45,16 +120,62 @@ export default class TunnelCommand extends PanfactumCommand {
     ],
   });
 
+  /**
+   * Kubernetes cluster name to tunnel through
+   * 
+   * @remarks
+   * Must match a configured cluster with an available bastion host.
+   * If not provided, will prompt with available options.
+   */
   cluster = Option.String('--cluster', {
     description: 'Name of the Cluster to tunnel through',
   });
+  
+  /**
+   * Remote service address in hostname:port format
+   * 
+   * @remarks
+   * Can be a Kubernetes service name or FQDN.
+   * Format: service.namespace:port or full.domain.name:port
+   */
   remoteAddress = Option.String('--remote-address,-r', {
     description: 'Remote address to tunnel to (e.g., service.namespace:port)',
   });
+  
+  /**
+   * Local port to bind the tunnel to
+   * 
+   * @remarks
+   * Must be between 1024-65535. If not provided, will prompt.
+   * Choose a port that doesn't conflict with local services.
+   */
   localPort = Option.String('--local-port,-l', {
     description: 'Local port to bind to (optional, will prompt if not provided)',
   });
 
+  /**
+   * Executes the tunnel creation process
+   * 
+   * @remarks
+   * This method:
+   * 1. Validates or prompts for cluster selection
+   * 2. Verifies bastion availability
+   * 3. Validates or prompts for remote address
+   * 4. Determines local port binding
+   * 5. Establishes SSH tunnel through bastion
+   * 6. Maintains tunnel until interrupted
+   * 
+   * The tunnel remains active until manually terminated with Ctrl+C.
+   * All cleanup is handled automatically on termination.
+   * 
+   * @returns Promise that never resolves (waits for termination)
+   * 
+   * @throws {@link CLIError}
+   * Throws when cluster not found or has no bastion
+   * 
+   * @throws {@link PanfactumZodError}
+   * Throws when address or port validation fails
+   */
   override async execute(): Promise<number> {
     // Get kube contexts if needed
     const kubeContexts = await getKubeContextsFromConfig(this.context);

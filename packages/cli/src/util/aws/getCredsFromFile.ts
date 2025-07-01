@@ -1,3 +1,6 @@
+// This file provides utilities for reading AWS credentials from the credentials file
+// It handles both static and temporary (session-based) credentials
+
 import { join } from "node:path"
 import { parse } from "ini"
 import { z } from "zod"
@@ -6,21 +9,70 @@ import { fileExists } from "@/util/fs/fileExists"
 import { AWS_ACCESS_KEY_ID_SCHEMA, AWS_SECRET_KEY_SCHEMA } from "./schemas"
 import type { PanfactumContext } from "@/util/context/context"
 
-type CredsPayload = {
+/**
+ * Interface for getCredsFromFile function output - AWS credentials payload
+ */
+interface IGetCredsFromFileOutput {
+    /** AWS access key ID */
     accessKeyId: string;
+    /** AWS secret access key */
     secretAccessKey: string;
-} | {
-    accessKeyId: string;
-    secretAccessKey: string;
-    sessionToken: string;
+    /** AWS session token for temporary credentials (only present for temporary credentials) */
+    sessionToken?: string;
 }
 
-export async function getCredsFromFile(inputs: { context: PanfactumContext, profile: string }): Promise<CredsPayload | undefined> {
+/**
+ * Input parameters for getting credentials from file
+ */
+interface IGetCredsFromFileInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** AWS profile name to retrieve credentials for */
+  profile: string;
+}
+
+/**
+ * Retrieves AWS credentials from the credentials file for a specific profile
+ * 
+ * @remarks
+ * This function reads and parses the AWS credentials file, extracting
+ * credentials for the specified profile. It supports both static credentials
+ * (access key and secret) and temporary credentials (with session token).
+ * The function validates the credentials format using Zod schemas to ensure
+ * they meet AWS requirements.
+ * 
+ * @param inputs - Configuration including context and profile name
+ * @returns Credentials payload if found, undefined if profile doesn't exist
+ * 
+ * @example
+ * ```typescript
+ * const creds = await getCredsFromFile({
+ *   context,
+ *   profile: 'production'
+ * });
+ * if (creds) {
+ *   console.log(`Found credentials for profile`);
+ *   if ('sessionToken' in creds) {
+ *     console.log('Using temporary credentials');
+ *   }
+ * }
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to read the credentials file
+ * 
+ * @throws {@link PanfactumZodError}
+ * Throws when credentials format is invalid or doesn't match schema
+ * 
+ * @see {@link AWS_ACCESS_KEY_ID_SCHEMA} - For access key validation
+ * @see {@link AWS_SECRET_KEY_SCHEMA} - For secret key validation
+ */
+export async function getCredsFromFile(inputs: IGetCredsFromFileInput): Promise<IGetCredsFromFileOutput | undefined> {
     const { context, profile } = inputs
 
     const credsFilePath = join(context.repoVariables.aws_dir, "credentials")
 
-    if (!await fileExists(credsFilePath)) {
+    if (!await fileExists({ filePath: credsFilePath })) {
         return undefined
     }
 

@@ -20,7 +20,7 @@ import {
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { parseJson } from "@/util/zod/parseJson";
-import type { InstallClusterStepOptions } from "./common";
+import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const RECOVER_KEYS_SCHEMA = z.object({
@@ -60,7 +60,7 @@ const UNSEAL_OUTPUT_SCHEMA = z.object({
 });
 
 export async function setupVault(
-  options: InstallClusterStepOptions,
+  options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
 ) {
   const { awsProfile, context, environment, clusterPath, region, kubeConfigContext } =
@@ -82,7 +82,7 @@ export async function setupVault(
   let vaultRootToken: string | undefined;
   let vaultRecoveryKeys: string[] | undefined;
 
-  if (await fileExists(join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml"))) {
+  if (await fileExists({ filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml") })) {
     const vaultRecovery = await sopsDecrypt({
       filePath: join(clusterPath, MODULES.KUBE_VAULT, "recovery.yaml"),
       context,
@@ -101,7 +101,7 @@ export async function setupVault(
   }
 
 
-  interface VaultContext {
+  interface IVaultContext {
     kubeContext?: string;
     rootToken?: string;
     vaultProxyPid?: number;
@@ -109,7 +109,7 @@ export async function setupVault(
     recoveryKeys?: string[];
   }
 
-  const tasks = mainTask.newListr<VaultContext>([
+  const tasks = mainTask.newListr<IVaultContext>([
     {
       title: "Verify access",
       task: async (ctx) => {
@@ -364,7 +364,7 @@ export async function setupVault(
     },
     {
       task: async (ctx, task) => {
-        return task.newListr<VaultContext>(
+        return task.newListr<IVaultContext>(
           [
             await buildDeployModuleTask({
               taskTitle: "Deploy Vault Core Resources",

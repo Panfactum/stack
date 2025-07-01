@@ -8,7 +8,7 @@ export async function findFolder(
 ): Promise<string | null> {
     // Check if the current directory is the one we're looking for
     const targetPath = path.join(dir, folderName);
-    if (await directoryExists(targetPath)) {
+    if (await directoryExists({ path: targetPath })) {
         return targetPath;
     }
 

@@ -19,9 +19,37 @@ import { execute } from '@/util/subprocess/execute.ts'
 import {MODULES} from "@/util/terragrunt/constants.ts";
 import {buildDeployModuleTask} from "@/util/terragrunt/tasks/deployModuleTask.ts";
 import { parseJson } from '@/util/zod/parseJson'
-import type { EKSClusterInfo } from '@/util/eks/types.ts'
+import type { IEKSClusterInfo } from '@/util/eks/types.ts'
 
-
+/**
+ * Command for resuming a suspended EKS cluster
+ * 
+ * @deprecated This command is part of the deprecated 'kube' command group.
+ * Consider using the newer cluster management commands.
+ * 
+ * @remarks
+ * This command restores a previously suspended EKS cluster to full
+ * operational state by reversing the suspension process:
+ * 
+ * - Scales node groups back to original sizes
+ * - Waits for instances to become ready
+ * - Removes suspension tags
+ * - Restores cluster networking
+ * 
+ * The resume process automatically detects the original node group
+ * configurations and restores them to their pre-suspension state.
+ * 
+ * @example
+ * ```bash
+ * # Resume production cluster
+ * pf kube cluster-resume --kube-context production-eks
+ * 
+ * # Interactive cluster selection
+ * pf kube cluster-resume
+ * ```
+ * 
+ * @see {@link K8sClusterSuspendCommand} - For suspending clusters
+ */
 export class K8sClusterResumeCommand extends PanfactumCommand {
   static override paths = [['kube', 'cluster-resume']]
 
@@ -82,17 +110,17 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
       throw new CLIError(`AWS region for context '${selectedContext.name}' not found in any configured region.`)
     }
 
-    const awsProfile: string = await getAWSProfileForContext(context, selectedContext.name)
+    const awsProfile: string = await getAWSProfileForContext({ context, kubeContext: selectedContext.name })
     const autoScalingClient = await getAutoScalingClient({ context, profile: awsProfile, region: awsRegion })
     const eksClient = await getEKSClient({ context, profile: awsProfile, region: awsRegion })
 
-    let clusterInfo: EKSClusterInfo
+    let clusterInfo: IEKSClusterInfo
 
     const tasks = new Listr([
       {
         title: 'Validating AWS access',
         task: async () => {
-          await validateRootProfile(awsProfile, context)
+          await validateRootProfile({ profile: awsProfile, context })
         },
       },
       {

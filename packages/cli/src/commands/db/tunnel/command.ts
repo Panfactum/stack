@@ -1,3 +1,6 @@
+// This file defines the db tunnel command for creating secure database connections
+// It establishes SSH tunnels with temporary Vault-managed credentials
+
 import { Option, Command } from 'clipanion'
 import { z } from 'zod'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
@@ -13,14 +16,66 @@ import { execute } from '@/util/subprocess/execute.ts'
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
 import { getVaultToken } from '@/util/vault/getVaultToken'
 
-// Zod schema for port validation
+/**
+ * Zod schema for validating port numbers
+ */
 const portSchema = z.string()
   .regex(/^\d+$/, 'Port must be a number')
   .transform(Number)
   .refine((port) => port >= 1 && port <= 65535, {
     message: 'Port must be between 1 and 65535'
   })
+  .describe('TCP port number validation')
 
+/**
+ * CLI command for creating secure tunnels to databases
+ * 
+ * @remarks
+ * This command establishes secure connections to databases deployed in
+ * Kubernetes clusters. It combines several security features:
+ * 
+ * 1. **SSH Tunneling**: Uses bastion hosts for secure network access
+ * 2. **Temporary Credentials**: Retrieves short-lived credentials from Vault
+ * 3. **Role-Based Access**: Supports different permission levels
+ * 4. **Multi-Database Support**: Works with PostgreSQL, Redis, and NATS
+ * 
+ * The command workflow:
+ * 1. Lists available databases in the cluster
+ * 2. Prompts for database and role selection
+ * 3. Retrieves temporary credentials from Vault
+ * 4. Establishes SSH tunnel through bastion
+ * 5. Provides connection details for local access
+ * 
+ * Security features:
+ * - Credentials auto-expire based on Vault policy
+ * - Automatic credential revocation on disconnect
+ * - No permanent credentials stored locally
+ * - All traffic encrypted through SSH tunnel
+ * 
+ * Supported databases:
+ * - **PostgreSQL**: Full SQL database access
+ * - **Redis**: Key-value store operations
+ * - **NATS**: Message streaming with TLS certificates
+ * 
+ * @example
+ * ```bash
+ * # Interactive database selection
+ * pf db tunnel
+ * 
+ * # Connect to PostgreSQL databases only
+ * pf db tunnel --type postgresql
+ * 
+ * # Use specific local port
+ * pf db tunnel --port 5432
+ * 
+ * # In another terminal, connect with psql
+ * psql "postgresql://temp-user:temp-pass@localhost:5432/postgres"
+ * ```
+ * 
+ * @see {@link listDatabases} - For database discovery
+ * @see {@link getTempCredentials} - For credential generation
+ * @see {@link createSSHTunnel} - For tunnel establishment
+ */
 export class DbTunnelCommand extends PanfactumCommand {
   static override paths = [['db', 'tunnel']]
 
@@ -43,14 +98,43 @@ export class DbTunnelCommand extends PanfactumCommand {
     ],
   })
 
+  /** Database type filter (postgresql, redis, or nats) */
   type = Option.String('--type', {
     description: 'Filter by database type',
   })
 
+  /** Local port for tunnel endpoint */
   port = Option.String('--port', {
     description: 'Local port to use for tunnel (default: auto-detect)',
   })
 
+  /**
+   * Executes the database tunnel creation
+   * 
+   * @remarks
+   * This method orchestrates the complete tunnel setup process.
+   * It runs indefinitely until interrupted, maintaining the tunnel
+   * and credentials throughout the session.
+   * 
+   * The process includes:
+   * - Region selection with bastion availability check
+   * - Configuration validation
+   * - Interactive database and role selection
+   * - Credential retrieval and tunnel creation
+   * - Connection detail display
+   * - Cleanup handling on termination
+   * 
+   * @returns Promise that never resolves (waits for termination)
+   * 
+   * @throws {@link CLIError}
+   * Throws when configuration is missing or invalid
+   * 
+   * @throws {@link CLIError}
+   * Throws when no databases are found
+   * 
+   * @throws {@link PanfactumZodError}
+   * Throws when input validation fails
+   */
   async execute(): Promise<number | void> {
     const { context } = this
 
@@ -114,7 +198,7 @@ export class DbTunnelCommand extends PanfactumCommand {
 
     // Step 1: Find databases
     context.logger.info('Finding databases...')
-    const databases = await listDatabases(context, validatedType)
+    const databases = await listDatabases({ context, type: validatedType })
     
     if (databases.length === 0) {
       throw new CLIError('No databases found matching the criteria')
@@ -151,20 +235,20 @@ export class DbTunnelCommand extends PanfactumCommand {
     const validatedRole = roleResult.data
 
     // Get local port
-    const localPort = validatedPort ?? await getOpenPort()
+    const localPort = validatedPort ?? await getOpenPort({})
 
     // Step 2: Get temporary credentials
-    const vaultRole = getVaultRole(selectedDb, validatedRole)
+    const vaultRole = getVaultRole({ database: selectedDb, role: validatedRole })
 
 
-    const credentials = await getTempCredentials(
-      context, 
-      config.vault_addr, 
+    const credentials = await getTempCredentials({
+      context,
+      vaultAddress: config.vault_addr,
       vaultRole,
-      selectedDb.type,
-      selectedDb.name,
-      selectedDb.namespace
-    )
+      databaseType: selectedDb.type,
+      databaseName: selectedDb.name,
+      databaseNamespace: selectedDb.namespace
+    })
 
     // Step 3: Create tunnel
     // Use the service from annotations if available, otherwise construct it

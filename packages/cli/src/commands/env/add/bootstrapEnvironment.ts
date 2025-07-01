@@ -34,14 +34,23 @@ import { getNewAccountAlias } from "./getNewAccountAlias";
 import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Interface for bootstrapEnvironment function inputs
+ */
+interface IBootstrapEnvironmentInputs {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Name of the environment to bootstrap */
+  environmentName: string;
+  /** Optional AWS profile to use for the environment */
+  environmentProfile?: string;
+  /** Optional new account name/alias to set */
+  newAccountName?: string;
+  /** Whether this is resuming a previously failed bootstrap operation */
+  resuming?: boolean;
+}
 
-export async function bootstrapEnvironment(inputs: {
-    context: PanfactumContext,
-    environmentName: string;
-    environmentProfile?: string
-    newAccountName?: string;
-    resuming?: boolean;
-}) {
+export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) {
 
     const { context, environmentName, environmentProfile, newAccountName, resuming } = inputs
 
@@ -52,7 +61,7 @@ export async function bootstrapEnvironment(inputs: {
     const directory = join(context.repoVariables.environments_dir, environmentName)
     const existingConfig = await getPanfactumConfig({ context, directory })
 
-    interface TaskCtx {
+    interface ITaskCtx {
         version?: string,
         profile?: string,
         primaryRegion?: string,
@@ -63,7 +72,7 @@ export async function bootstrapEnvironment(inputs: {
         newAccountName?: string;
     }
 
-    const tasks = new Listr<TaskCtx>([], {
+    const tasks = new Listr<ITaskCtx>([], {
         ctx: {
             profile: environmentProfile ?? existingConfig.aws_profile,
             newAccountName
@@ -80,7 +89,7 @@ export async function bootstrapEnvironment(inputs: {
     tasks.add({
         title: "Clear cache",
         task: async () => {
-            await removeDirectory(join(context.repoVariables.repo_root, ".terragrunt-cache"))
+            await removeDirectory({ dirPath: join(context.repoVariables.repo_root, ".terragrunt-cache") })
         }
     })
 
@@ -89,9 +98,9 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: context.logger.applyColors(`Create IaC directory for ${environmentName}`),
-        skip: await directoryExists(directory),
+        skip: await directoryExists({ path: directory }),
         task: async () => {
-            await createDirectory(directory)
+            await createDirectory({ dirPath: directory })
         }
     })
 
@@ -103,7 +112,7 @@ export async function bootstrapEnvironment(inputs: {
         skip: existingConfig.pf_stack_version !== undefined,
         task: async (ctx, task) => {
             const flakeFilePath = join(context.repoVariables.repo_root, "flake.nix")
-            if (!await fileExists(flakeFilePath)) {
+            if (!await fileExists({ filePath: flakeFilePath })) {
                 throw new CLIError("No flake.nix found at repo root")
             }
             const flakeContents = await Bun.file(flakeFilePath).text().catch((error) => {
@@ -540,7 +549,7 @@ export async function bootstrapEnvironment(inputs: {
     // Generate the bootstrap resources
     //////////////////////////////////////////////////////////////
     tasks.add(
-        await buildDeployModuleTask<TaskCtx>({
+        await buildDeployModuleTask<ITaskCtx>({
             context,
             environment: environmentName,
             region: GLOBAL_REGION,
@@ -564,7 +573,7 @@ export async function bootstrapEnvironment(inputs: {
     //////////////////////////////////////////////////////////////
 
     tasks.add(
-        await buildDeployModuleTask<TaskCtx>({
+        await buildDeployModuleTask<ITaskCtx>({
             context,
             environment: environmentName,
             region: GLOBAL_REGION,
@@ -589,7 +598,7 @@ export async function bootstrapEnvironment(inputs: {
         title: "Add encryption keys to DevShell",
         skip: async (ctx) => {
             const sopsFilePath = join(context.repoVariables.repo_root, ".sops.yaml")
-            if (await fileExists(sopsFilePath)) {
+            if (await fileExists({ filePath: sopsFilePath })) {
                 const fileContent = await Bun.file(sopsFilePath).text();
                 const { creation_rules: rules } = parse(fileContent) as { creation_rules?: Array<{ aws_profile?: string }> }
                 if (rules) {
@@ -622,7 +631,7 @@ export async function bootstrapEnvironment(inputs: {
             }
             context.logger.debug("New encrpytion config: " + JSON.stringify(newCreationRule))
 
-            if (await fileExists(sopsFilePath)) {
+            if (await fileExists({ filePath: sopsFilePath })) {
                 const fileContent = await Bun.file(sopsFilePath).text();
                 const existingConfig = parse(fileContent) as { creation_rules?: unknown[] }
                 await writeFile({
@@ -702,7 +711,7 @@ export async function bootstrapEnvironment(inputs: {
                     throw new CLIError("Cannot create organization if no AWS profile is provided.")
                 }
 
-                interface OrgCreateTaskContext {
+                interface IOrgCreateTaskContext {
                     primaryContactInfo?: {
                         fullName: string;
                         organizationName?: string;
@@ -717,7 +726,7 @@ export async function bootstrapEnvironment(inputs: {
                     },
                     orgId?: string;
                 }
-                return parentTask.newListr<OrgCreateTaskContext>([
+                return parentTask.newListr<IOrgCreateTaskContext>([
                     {
                         title: "Collect AWS contact information",
                         task: async (ctx, task) => {
@@ -730,7 +739,7 @@ export async function bootstrapEnvironment(inputs: {
                     },
 
                     // TODO: Ensure that the original organizaiton features are preserved
-                    await buildDeployModuleTask<OrgCreateTaskContext>({
+                    await buildDeployModuleTask<IOrgCreateTaskContext>({
                         context,
                         environment: MANAGEMENT_ENVIRONMENT,
                         region: GLOBAL_REGION,
@@ -807,7 +816,7 @@ export async function bootstrapEnvironment(inputs: {
         })
     } else {
         tasks.add(
-            await buildDeployModuleTask<TaskCtx>({
+            await buildDeployModuleTask<ITaskCtx>({
                 context,
                 environment: environmentName,
                 region: GLOBAL_REGION,

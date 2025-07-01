@@ -1,0 +1,17 @@
+{
+    "mcpServers": {
+        "playwright": {
+            "command": "npx",
+            "args": [
+                "@playwright/mcp",
+                "--isolated"
+            ]
+        },
+        "git": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-git"
+            ]
+        }
+    }
+}

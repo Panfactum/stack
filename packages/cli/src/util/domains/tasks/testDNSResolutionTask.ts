@@ -3,26 +3,36 @@ import { getIdentity } from "@/util/aws/getIdentity"
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig"
 import { CLIError } from "@/util/error/error"
 import { execute } from "@/util/subprocess/execute"
-import type { EnvironmentMeta } from "@/util/config/getEnvironments"
+import type { IEnvironmentMeta } from "@/util/config/getEnvironments"
 import type { PanfactumContext } from "@/util/context/context"
 import type { ListrTask } from "listr2"
 
-export async function testDNSResolutionTask<T extends {}>(inputs: {
-    context: PanfactumContext,
-    zones: {
-        [domain: string]: {
-            env: EnvironmentMeta,
-            zoneId?: string;
-            verifyDNSSEC?: boolean;
-        }
+/**
+ * Interface for testDNSResolutionTask function input
+ */
+interface ITestDNSResolutionTaskInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Zone configurations mapped by domain name */
+  zones: {
+    [domain: string]: {
+      /** Environment metadata for the zone */
+      env: IEnvironmentMeta;
+      /** Optional zone ID for the DNS zone */
+      zoneId?: string;
+      /** Whether to verify DNSSEC for this zone */
+      verifyDNSSEC?: boolean;
     }
-}): Promise<ListrTask<T>> {
+  }
+}
+
+export async function testDNSResolutionTask<T extends {}>(inputs: ITestDNSResolutionTaskInput): Promise<ListrTask<T>> {
     const { context, zones } = inputs
     return {
         title: "Test DNS resolution",
         task: async (_, parentTask) => {
             const subtasks = parentTask.newListr([], { concurrent: false })
-            interface ConnectTask { nameServers?: string[] }
+            interface IConnectTask { nameServers?: string[] }
             for (const [domain, config] of Object.entries(zones)) {
                 subtasks.add({
                     title: context.logger.applyColors(
@@ -40,7 +50,7 @@ export async function testDNSResolutionTask<T extends {}>(inputs: {
                             return
                         }
 
-                        const subsubtasks = parentTask.newListr<ConnectTask>([])
+                        const subsubtasks = parentTask.newListr<IConnectTask>([])
 
                         // Generate two random 8 character strings for testing
                         const randomString1 = Math.random().toString(36).substring(2, 10);

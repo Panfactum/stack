@@ -1,17 +1,59 @@
+// This file provides utilities for sending AWS Systems Manager commands to EC2 instances
+// It includes retry logic for handling transient failures
+
 import { SendCommandCommand } from "@aws-sdk/client-ssm";
 import { getSSMClient } from "@/util/aws/clients/getSSMClient.ts";
 import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context.ts";
 
 /**
- * Send an SSM command to an instance with retry logic
+ * Input parameters for sending an SSM command
  */
-export async function sendSSMCommand(
-  instanceId: string,
-  awsProfile: string,
-  awsRegion: string,
-  context: PanfactumContext
-): Promise<string> {
+interface ISendSSMCommandInput {
+  /** EC2 instance ID to send the command to */
+  instanceId: string;
+  /** AWS profile to use for authentication */
+  awsProfile: string;
+  /** AWS region where the instance is located */
+  awsRegion: string;
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+}
+
+/**
+ * Sends an SSM command to retrieve the public IP of an EC2 instance
+ * 
+ * @remarks
+ * This function sends a shell command via AWS Systems Manager to determine
+ * the public IP address of an EC2 instance. It uses the 'ifconfig.me' service
+ * to retrieve the external IP. The function includes retry logic with up to
+ * 20 attempts to handle transient SSM connectivity issues.
+ * 
+ * @param input - Configuration including instance ID and AWS credentials
+ * @returns SSM command ID for tracking command execution
+ * 
+ * @example
+ * ```typescript
+ * const commandId = await sendSSMCommand({
+ *   instanceId: 'i-0123456789abcdef0',
+ *   awsProfile: 'production',
+ *   awsRegion: 'us-east-1',
+ *   context
+ * });
+ * console.log(`Command sent with ID: ${commandId}`);
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when no command ID is returned from SSM
+ * 
+ * @throws {@link CLIError}
+ * Throws when SSM command fails after all retry attempts
+ * 
+ * @see {@link getSSMClient} - For SSM client creation
+ * @see {@link getSSMCommandOutput} - For retrieving command results
+ */
+export async function sendSSMCommand(input: ISendSSMCommandInput): Promise<string> {
+  const { instanceId, awsProfile, awsRegion, context } = input;
   let ssmRetries = 0;
   const maxSSMRetries = 20;
 

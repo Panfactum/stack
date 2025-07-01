@@ -1,3 +1,6 @@
+// This command adds new environments to the Panfactum stack
+// It handles AWS account provisioning and environment bootstrapping
+
 import { join } from "node:path";
 import { Command } from "clipanion";
 import pc from "picocolors"
@@ -12,6 +15,7 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { bootstrapEnvironment } from "./bootstrapEnvironment";
 import { checkAdminPermissions } from "./checkAdminPermissions";
+import { type IGetAdminAccessCredentialsOutput } from "./getAdminAccessCredentials";
 import { getEnvironment } from "./getEnvironment";
 import { getNewAccountAdminAccess } from "./getNewAccountAdminAccess";
 import { getNewIAMUserCredentials } from "./getNewIAMUserCredentials";
@@ -24,8 +28,79 @@ import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
 import { updateIAMIdentityCenter } from "./updateIAMIdentityCenter";
 import { isEnvironmentDeployed } from "../../../util/config/isEnvironmentDeployed";
 
+/**
+ * Default AWS profile name for management account access
+ */
 const DEFAULT_MANAGEMENT_PROFILE = "management-superuser"
 
+/**
+ * Command for adding new environments to the Panfactum stack
+ * 
+ * @remarks
+ * This command orchestrates the creation of new Panfactum environments,
+ * which are the top-level containers for infrastructure and workloads.
+ * It handles:
+ * 
+ * - AWS Organization setup (if first environment)
+ * - AWS account provisioning
+ * - Environment bootstrapping
+ * - IAM Identity Center integration
+ * - Infrastructure-as-code scaffolding
+ * 
+ * Key concepts:
+ * - **Environments**: Strict isolation boundaries for workloads
+ * - **Management Environment**: Special environment for org-wide settings
+ * - **Regions**: Datacenters within environments
+ * - **AWS Mapping**: 1:1 environment to AWS account relationship
+ * 
+ * The command supports multiple scenarios:
+ * 1. **First-time setup**: Creates AWS Organization and management environment
+ * 2. **Additional environments**: Leverages existing org for automation
+ * 3. **Standalone mode**: Works without AWS Organization
+ * 4. **Resume capability**: Can continue interrupted setups
+ * 
+ * Workflow:
+ * 1. Detects existing setup state
+ * 2. Prompts for AWS Organization creation (if needed)
+ * 3. Sets up management environment (if needed)
+ * 4. Collects environment name
+ * 5. Provisions AWS account
+ * 6. Bootstraps environment with IaC
+ * 7. Integrates with IAM Identity Center
+ * 
+ * Prerequisites:
+ * - AWS credentials with appropriate permissions
+ * - Panfactum devshell environment
+ * - Git repository for IaC
+ * 
+ * The command creates:
+ * - AWS account (if using Organizations)
+ * - IAM users and policies
+ * - S3 state buckets
+ * - DynamoDB lock tables
+ * - Initial Terragrunt configuration
+ * - Environment directory structure
+ * 
+ * @example
+ * ```bash
+ * # First environment (creates management env)
+ * pf env add
+ * # Follow prompts to set up AWS Organization
+ * # Then create production environment
+ * 
+ * # Additional environments
+ * pf env add
+ * # Enter "development" when prompted
+ * 
+ * # Resume interrupted setup
+ * pf env add
+ * # Automatically detects and resumes
+ * ```
+ * 
+ * @see {@link bootstrapEnvironment} - Environment bootstrapping logic
+ * @see {@link provisionAWSAccount} - AWS account creation
+ * @see {@link updateIAMIdentityCenter} - SSO integration
+ */
 export class EnvironmentInstallCommand extends PanfactumCommand {
     static override paths = [["env", "add"]];
 
@@ -110,6 +185,45 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         `
     });
 
+    /**
+     * Executes the environment addition process
+     * 
+     * @remarks
+     * This method manages a complex workflow that adapts based on:
+     * - Whether this is the first environment
+     * - Whether AWS Organization exists
+     * - Whether setup was previously interrupted
+     * - User choices about organization management
+     * 
+     * The execution flow:
+     * 
+     * 1. **State Detection**:
+     *    - Checks for existing environments
+     *    - Detects partial deployments
+     *    - Identifies management profile
+     * 
+     * 2. **Management Setup** (if needed):
+     *    - Prompts for AWS Organization creation
+     *    - Collects management account credentials
+     *    - Bootstraps management environment
+     * 
+     * 3. **Environment Creation**:
+     *    - Collects environment name
+     *    - Provisions AWS account (auto or manual)
+     *    - Adds AWS profile
+     *    - Bootstraps environment
+     * 
+     * 4. **Post-Setup**:
+     *    - Integrates with IAM Identity Center
+     *    - Provides next steps guidance
+     * 
+     * The method includes extensive error handling and
+     * resume capabilities for interrupted installations.
+     * 
+     * @throws {@link CLIError}
+     * Throws when AWS credentials are invalid, permissions
+     * are insufficient, or environment setup fails
+     */
     async execute() {
         const { context } = this
         context.logger.addIdentifier(MANAGEMENT_ENVIRONMENT)
@@ -119,7 +233,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
         let _hasDeployedAWSOrg = await isEnvironmentDeployed({ context, environment: MANAGEMENT_ENVIRONMENT })
         let _hasManagementProfile = (await getAWSProfiles(context)).includes(DEFAULT_MANAGEMENT_PROFILE)
         let _resumingManagementSetup = false;
-        let managementAccountCreds: { secretAccessKey: string, accessKeyId: string } | undefined;
+        let managementAccountCreds: IGetAdminAccessCredentialsOutput | undefined;
         context.logger.line()
 
         if (_hasManagementProfile && !_hasDeployedAWSOrg) {
@@ -146,10 +260,10 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                It looks like you are installing your first Panfactum environment!
                There will be a few preliminary questions to ensure that setup goes smoothly...
             `)
-            if (await hasExistingAWSOrg(context)) {
+            if (await hasExistingAWSOrg({ context })) {
                 _hasExistingAWSOrg = true
-                if (await shouldPanfactumManageAWSOrg(context)) {
-                    await hasAccessToManagementAccount(context);
+                if (await shouldPanfactumManageAWSOrg({ context })) {
+                    await hasAccessToManagementAccount({ context });
                     managementAccountCreds = await getNewIAMUserCredentials({ environment: MANAGEMENT_ENVIRONMENT, context })
                 }
             } else {
@@ -177,12 +291,12 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             //
             // However, we still let them opt-out of this.
             //////////////////////////////////////////////////////////////////////////////////////////
-            if (await hasExistingAWSOrg(context)) {
+            if (await hasExistingAWSOrg({ context })) {
                 _hasExistingAWSOrg = true
-                if (await shouldPanfactumManageAWSOrg(context)) {
-                    managementAccountCreds = await getRootAccountAdminAccess(context)
+                if (await shouldPanfactumManageAWSOrg({ context })) {
+                    managementAccountCreds = await getRootAccountAdminAccess({ context })
                 }
-            } else if (await shouldCreateAWSOrg(context)) {
+            } else if (await shouldCreateAWSOrg({ context })) {
                 managementAccountCreds = await getNewAccountAdminAccess({
                     context,
                     type: "management",
@@ -254,7 +368,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             // environments were created WITHOUT an AWS organization. Those need to be
             // imported.
 
-            const managementFolder = getLastPathSegments(join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT), 2)
+            const managementFolder = getLastPathSegments({ path: join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT), lastSegments: 2 })
             context.logger.success(`
                 The AWS Organization has now been configured and its settings are 
                 stored in the ${MANAGEMENT_ENVIRONMENT} environment (${managementFolder}). The ${MANAGEMENT_ENVIRONMENT}
@@ -362,7 +476,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             })
         }
 
-        const newDirectory = getRelativeFromRoot(context, join(context.repoVariables.environments_dir, environmentName))
+        const newDirectory = getRelativeFromRoot({ context, path: join(context.repoVariables.environments_dir, environmentName) })
         context.logger.success(`
             The ${environmentName} environment has been successfully set up.
             

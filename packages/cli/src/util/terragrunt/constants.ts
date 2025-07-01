@@ -1,5 +1,6 @@
-export const MANAGEMENT_ENVIRONMENT = "management"
-export const GLOBAL_REGION = "global"
+// This file defines constants used throughout the Terragrunt integration
+// It includes module names, file paths, and configuration values
+
 import panfactumHCL from "@/files/terragrunt/panfactum.hcl" with { type: "file" };
 import authentikTftpl from "@/files/terragrunt/providers/authentik.tftpl" with { type: "file" };
 import authentikOverrideHCL from "@/files/terragrunt/providers/authentik_override.tf" with { type: "file" };
@@ -19,6 +20,58 @@ import timeTf from "@/files/terragrunt/providers/time.tf" with { type: "file" };
 import tlsTf from "@/files/terragrunt/providers/tls.tf" with { type: "file" };
 import vaultTftpl from "@/files/terragrunt/providers/vault.tftpl" with { type: "file" };
 
+/**
+ * Name of the special management environment
+ * 
+ * @remarks
+ * The management environment is a special environment in Panfactum that
+ * contains resources that manage all other environments. This includes
+ * bootstrapping resources, identity management, and cross-environment
+ * configuration.
+ */
+export const MANAGEMENT_ENVIRONMENT = "management"
+
+/**
+ * Name of the special global region
+ * 
+ * @remarks
+ * The global region is used for resources that aren't tied to a specific
+ * AWS region, such as IAM roles, CloudFront distributions, and Route53
+ * hosted zones. These resources are typically deployed to us-east-1
+ * but are accessible globally.
+ */
+export const GLOBAL_REGION = "global"
+
+/**
+ * Enumeration of all Panfactum infrastructure modules
+ * 
+ * @remarks
+ * This enum provides type-safe references to all available Panfactum
+ * modules. These module names correspond to directories in the
+ * infrastructure package and are used when:
+ * - Creating new module instances
+ * - Referencing module outputs
+ * - Checking module deployment status
+ * - Managing module dependencies
+ * 
+ * Modules are organized by category:
+ * - AWS infrastructure modules (aws_*)
+ * - Kubernetes cluster modules (kube_*)
+ * - Vault configuration modules (vault_*)
+ * - Authentication modules (authentik_*)
+ * - Bootstrap and utility modules
+ * 
+ * @example
+ * ```typescript
+ * // Check if deploying a Kubernetes module
+ * if (moduleName.startsWith('kube_')) {
+ *   await ensureClusterExists();
+ * }
+ * 
+ * // Reference a specific module
+ * const vpcModule = MODULES.AWS_VPC;
+ * ```
+ */
 export enum MODULES {
     IAM_IDENTIY_CENTER_PERMISSIONS = "aws_iam_identity_center_permissions",
     AWS_ORGANIZATION = "aws_organization",
@@ -68,6 +121,28 @@ export enum MODULES {
     VAULT_AUTH_OIDC = "vault_auth_oidc"
 }
 
+/**
+ * List of Terragrunt configuration files to be copied to module directories
+ * 
+ * @remarks
+ * These files are bundled with the CLI and are copied to each module
+ * directory during initialization. They include:
+ * - panfactum.hcl: Core Terragrunt configuration
+ * - Provider configurations: Templates and overrides for various providers
+ * 
+ * The files are organized as:
+ * - .tftpl files: Template files that get processed by Terragrunt
+ * - .tf files: Static Terraform configuration files
+ * - .hcl files: Terragrunt configuration files
+ * 
+ * @example
+ * ```typescript
+ * // Copy all Terragrunt files to a module directory
+ * for (const file of TERRAGRUNT_FILES) {
+ *   await copyFile(file.contentPath, join(moduleDir, file.path));
+ * }
+ * ```
+ */
 export const TERRAGRUNT_FILES = [
     { path: "panfactum.hcl", contentPath: panfactumHCL },
     { path: "providers/authentik_override.tf", contentPath: authentikOverrideHCL },
@@ -89,4 +164,20 @@ export const TERRAGRUNT_FILES = [
     { path: "providers/helm.tftpl", contentPath: helmTftpl }
 ] as const
 
+/**
+ * Filename for module status tracking
+ * 
+ * @remarks
+ * This file is created in each module directory to track the deployment
+ * status and metadata of the module. It stores information such as:
+ * - Module version
+ * - Last deployment timestamp
+ * - Deployment hash
+ * - Module outputs
+ * 
+ * The file is used to:
+ * - Detect when modules need updates
+ * - Track deployment history
+ * - Cache module outputs for faster access
+ */
 export const MODULE_STATUS_FILE = "module.status.yaml"

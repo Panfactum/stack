@@ -1,9 +1,59 @@
+// This file defines the db get-creds command for retrieving database credentials
+// It interfaces with Vault's database secrets engine for dynamic credentials
+
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { vaultRoles } from '@/util/db/types';
 import { CLIError } from '@/util/error/error';
 import { getDBCreds, getDbCredsFormatted } from '@/util/vault/getDBCreds.ts';
 
+/**
+ * CLI command for retrieving database credentials from Vault
+ * 
+ * @remarks
+ * This command provides access to dynamically generated database credentials
+ * through HashiCorp Vault's database secrets engine. It supports multiple
+ * database roles and output formats for different use cases.
+ * 
+ * Key features:
+ * - Dynamic credential generation with limited TTL
+ * - Role-based access control (reader, admin, superuser)
+ * - Multiple output formats (text/JSON)
+ * - Automatic Vault authentication
+ * - Interactive role selection
+ * 
+ * Security considerations:
+ * - Credentials are temporary and auto-expire
+ * - Each request generates unique credentials
+ * - Credentials are tied to Vault audit logs
+ * - Supports principle of least privilege
+ * 
+ * The command integrates with Vault's database secrets engine which:
+ * - Manages database user lifecycle
+ * - Rotates credentials automatically
+ * - Provides break-glass access patterns
+ * - Ensures credential uniqueness
+ * 
+ * @example
+ * ```bash
+ * # Interactive role selection
+ * pf db get-creds
+ * 
+ * # Get admin credentials
+ * pf db get-creds --role admin
+ * 
+ * # Get credentials as JSON for scripting
+ * CREDS=$(pf db get-creds --role reader --json)
+ * USERNAME=$(echo $CREDS | jq -r .username)
+ * PASSWORD=$(echo $CREDS | jq -r .password)
+ * 
+ * # Use with specific Vault instance
+ * pf db get-creds --role superuser --vault-address https://vault.prod.example.com
+ * ```
+ * 
+ * @see {@link getDBCreds} - Core credential retrieval logic
+ * @see {@link getDbCredsFormatted} - Formatted output generation
+ */
 export class GetDbCredsCommand extends PanfactumCommand {
   static override paths = [['db', 'get-creds']];
 
@@ -24,18 +74,62 @@ export class GetDbCredsCommand extends PanfactumCommand {
     ],
   });
 
+  /**
+   * Database role to request credentials for
+   * 
+   * @remarks
+   * Available roles:
+   * - reader: Read-only database access
+   * - admin: Administrative database access
+   * - superuser: Full database privileges
+   */
   role = Option.String('-r,--role', {
     description: 'The database role to request credentials for',
   });
 
+  /**
+   * Vault server address override
+   * 
+   * @remarks
+   * Defaults to VAULT_ADDR environment variable if not specified.
+   * Useful for accessing different Vault instances.
+   */
   vaultAddress = Option.String('-a,--vault-address', {
     description: 'The Vault address to connect to (defaults to VAULT_ADDR if not set)',
   });
 
+  /**
+   * JSON output format flag
+   * 
+   * @remarks
+   * When enabled, outputs credentials as JSON for programmatic use.
+   * Default format mimics Vault CLI output for human readability.
+   */
   json = Option.Boolean('-j,--json', false, {
     description: 'Output credentials in JSON format instead of table format',
   });
 
+  /**
+   * Executes the database credential retrieval
+   * 
+   * @remarks
+   * This method:
+   * 1. Prompts for role selection if not provided
+   * 2. Authenticates with Vault
+   * 3. Requests dynamic database credentials
+   * 4. Formats output based on JSON flag
+   * 
+   * The credentials returned include:
+   * - Username: Dynamically generated database user
+   * - Password: Secure random password
+   * - TTL: Time until credentials expire
+   * - Connection details: Host, port, database name
+   * 
+   * @returns Exit code (0 for success)
+   * 
+   * @throws {@link CLIError}
+   * Throws when Vault authentication fails or credential generation fails
+   */
   async execute() {
     try {
       // Prompt for role if not provided

@@ -29,6 +29,7 @@
     upx # compressing go binaries
     bunPkgs.bun # bun runtime
     bun2nix.bin # utility for building nix derivations from bun projects
+    uv # Installing python utilities
 
     ####################################
     # Version Control

@@ -1,21 +1,64 @@
+// This file provides utilities for retrieving AWS Systems Manager command output
+// It handles polling for command completion and error reporting
+
 import { GetCommandInvocationCommand } from "@aws-sdk/client-ssm";
 import { CLISubprocessError, CLIError } from "@/util/error/error";
 import { getSSMClient } from "./clients/getSSMClient";
 import type { PanfactumContext } from "@/util/context/context";
 
-interface Inputs {
+/**
+ * Input parameters for getting SSM command output
+ */
+interface IGetSSMCommandOutputInput {
+  /** SSM command ID to retrieve output for */
   commandId: string;
+  /** EC2 instance ID where the command was executed */
   instanceId: string;
+  /** AWS profile to use for authentication */
   awsProfile: string;
+  /** AWS region where the command was executed */
   awsRegion: string;
+  /** Panfactum context for logging and configuration */
   context: PanfactumContext;
 }
 
 /**
- * Get the output from an SSM command execution
- * Checks command status first, and if failed, throws error with stderr content
+ * Retrieves the output from an SSM command execution
+ * 
+ * @remarks
+ * This function polls AWS Systems Manager for command completion status
+ * and returns the standard output. If the command fails, it throws an
+ * error with the standard error content. The function handles polling
+ * with retry logic to wait for command completion.
+ * 
+ * @param inputs - Configuration including command ID, instance ID, and AWS credentials
+ * @returns Standard output content from the command execution
+ * 
+ * @example
+ * ```typescript
+ * const output = await getSSMCommandOutput({
+ *   commandId: 'cmd-12345',
+ *   instanceId: 'i-0123456789abcdef0',
+ *   awsProfile: 'production',
+ *   awsRegion: 'us-east-1',
+ *   context
+ * });
+ * console.log('Command output:', output);
+ * ```
+ * 
+ * @throws {@link CLISubprocessError}
+ * Throws when the SSM command execution fails with stderr content
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to retrieve command invocation details
+ * 
+ * @throws {@link CLIError}
+ * Throws when command doesn't complete within 30 second timeout
+ * 
+ * @see {@link getSSMClient} - For SSM client creation
+ * @see {@link sendSSMCommand} - For sending SSM commands
  */
-export const getSSMCommandOutput = async (inputs: Inputs): Promise<string> => {
+export const getSSMCommandOutput = async (inputs: IGetSSMCommandOutputInput): Promise<string> => {
   const result = await getSSMCommandInvocation(inputs);
 
   if (result.Status === "Failed") {
@@ -30,10 +73,25 @@ export const getSSMCommandOutput = async (inputs: Inputs): Promise<string> => {
 };
 
 /**
- * Get the complete SSM command invocation details
- * Uses retry logic to wait for command completion
+ * Internal SSM command invocation result
  */
-async function getSSMCommandInvocation(inputs: Inputs) {
+interface ISSMCommandInvocationResult {
+  /** Command execution status */
+  Status: string;
+  /** Standard output content */
+  StandardOutputContent: string;
+  /** Standard error content */
+  StandardErrorContent: string;
+}
+
+/**
+ * Gets the complete SSM command invocation details with retry logic
+ * 
+ * @internal
+ * @param inputs - Configuration for retrieving command details
+ * @returns Command execution status and output/error content
+ */
+async function getSSMCommandInvocation(inputs: IGetSSMCommandOutputInput): Promise<ISSMCommandInvocationResult> {
   const { awsRegion, awsProfile, instanceId, commandId, context } = inputs;
   
   let retries = 0;

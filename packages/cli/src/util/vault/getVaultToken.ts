@@ -1,30 +1,93 @@
+// This file provides utilities for obtaining and managing HashiCorp Vault authentication tokens
+// It handles token caching, validation, and OIDC-based authentication
+
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
 import { execute } from '@/util/subprocess/execute';
 import { parseJson } from '@/util/zod/parseJson';
 import type { PanfactumContext } from '@/util/context/context';
 
-// Zod schema for Vault token lookup response
+/**
+ * Schema for Vault token lookup response
+ * 
+ * @remarks
+ * Validates the structure returned by `vault token lookup -format=json`.
+ * The ttl field is coerced to a number for easier comparison since
+ * Vault may return it as a string in some versions.
+ */
 const VAULT_TOKEN_LOOKUP_SCHEMA = z.object({
   data: z.object({
-    ttl: z.coerce.number() // Convert string to number automatically
+    /** Time to live in seconds (coerced from string if needed) */
+    ttl: z.coerce.number()
   }).passthrough()
-}).passthrough();
+}).passthrough()
+  .describe("Vault token lookup response schema");
 
-export interface GetVaultTokenOptions {
+/**
+ * Options for retrieving a Vault authentication token
+ */
+export interface IGetVaultTokenOptions {
+  /** Vault server address (optional, uses VAULT_ADDR env if not provided) */
   address?: string;
+  /** Whether to suppress errors and warnings */
   silent?: boolean;
+  /** Panfactum context for configuration and environment */
   context: PanfactumContext;
 }
 
 /**
- * Get a Vault authentication token, handling token refresh when needed
+ * Retrieves a valid HashiCorp Vault authentication token
  * 
- * @param options Configuration options
- * @returns Vault token string
- * @throws CLIError if token cannot be obtained (unless silent mode is enabled)
+ * @remarks
+ * This function manages Vault authentication tokens with intelligent caching
+ * and automatic renewal. It follows this process:
+ * 
+ * 1. **Environment Check**: First checks for VAULT_TOKEN in environment
+ * 2. **Token Cache**: Attempts to retrieve cached token via `vault print token`
+ * 3. **TTL Validation**: Checks if cached token has >30 minutes remaining
+ * 4. **OIDC Login**: Performs fresh OIDC login if no valid token exists
+ * 
+ * Token management features:
+ * - Reuses existing tokens when possible to avoid unnecessary logins
+ * - Automatically refreshes tokens with <30 minutes TTL
+ * - Handles Terragrunt placeholder values gracefully
+ * - Supports silent mode for non-interactive environments
+ * 
+ * The function integrates with Vault's credential helper system,
+ * which caches tokens securely on the local system.
+ * 
+ * @param options - Configuration for token retrieval
+ * @returns Valid Vault authentication token
+ * 
+ * @example
+ * ```typescript
+ * // Get token using environment configuration
+ * const token = await getVaultToken({
+ *   context,
+ *   silent: false
+ * });
+ * 
+ * // Get token for specific Vault instance
+ * const token = await getVaultToken({
+ *   context,
+ *   address: 'https://vault.example.com',
+ *   silent: true
+ * });
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when VAULT_ADDR is not set and no address provided
+ * 
+ * @throws {@link CLIError}
+ * Throws when Vault provider is enabled but not configured (unless silent)
+ * 
+ * @throws {@link CLIError}
+ * Throws when OIDC login fails
+ * 
+ * @see {@link performOIDCLogin} - Handles the OIDC authentication flow
+ * @see {@link execute} - For running vault CLI commands
  */
-export async function getVaultToken(options: GetVaultTokenOptions): Promise<string> {
+export async function getVaultToken(options: IGetVaultTokenOptions): Promise<string> {
   const { address, silent = false, context } = options;
 
   try {
@@ -106,7 +169,20 @@ export async function getVaultToken(options: GetVaultTokenOptions): Promise<stri
 }
 
 /**
- * Perform OIDC login to get a new Vault token
+ * Performs OIDC login to obtain a new Vault token
+ * 
+ * @internal
+ * @remarks
+ * This function executes `vault login -method=oidc` to authenticate
+ * via OpenID Connect. The OIDC method typically opens a browser
+ * window for the user to authenticate with their identity provider.
+ * 
+ * @param env - Environment variables including VAULT_ADDR
+ * @param context - Panfactum context for command execution
+ * @returns New Vault authentication token
+ * 
+ * @throws {@link CLIError}
+ * Throws when OIDC login fails or returns empty token
  */
 async function performOIDCLogin(env: Record<string, string | undefined>, context: PanfactumContext): Promise<string> {
   try {

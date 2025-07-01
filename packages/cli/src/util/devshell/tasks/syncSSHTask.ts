@@ -10,7 +10,7 @@ import { MODULES } from "@/util/terragrunt/constants";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import type { PanfactumContext } from "@/util/context/context";
 
-interface TaskContext {
+interface ITaskContext {
     bastionInfo: {
         domain: string;
         publicKey: string;
@@ -19,9 +19,18 @@ interface TaskContext {
     }[]
 }
 
-export async function buildSyncSSHTask<T extends {}>(inputs: { context: PanfactumContext, exitOnError?: false }): Promise<ListrTask<T>> {
+/**
+ * Interface for buildSyncSSHTask function inputs
+ */
+interface IBuildSyncSSHTaskInput {
+    /** Panfactum context for operations */
+    context: PanfactumContext;
+    /** Whether to exit on error (defaults to false) */
+    exitOnError?: false;
+}
 
-    const { context, exitOnError = false } = inputs;
+export async function buildSyncSSHTask<T extends {}>(input: IBuildSyncSSHTaskInput): Promise<ListrTask<T>> {
+    const { context, exitOnError = false } = input;
 
 
     const BASTION_MODULE_OUTPUT_SCHEMA = z.object({
@@ -67,8 +76,8 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
                 return
             }
 
-            await createDirectory(sshDir)
-            const subtasks = parentTask.newListr<TaskContext>([], {
+            await createDirectory({ dirPath: sshDir })
+            const subtasks = parentTask.newListr<ITaskContext>([], {
                 ctx: {
                     bastionInfo: []
                 },
@@ -86,7 +95,7 @@ export async function buildSyncSSHTask<T extends {}>(inputs: { context: Panfactu
                     const subsubtasks = subtask.newListr([], { concurrent: true })
                     bastionHCLPaths.forEach((bastionHCLPath) => {
                         const moduleDirectory = dirname(bastionHCLPath);
-                        const bastionId = getLastPathSegments(moduleDirectory, 3);
+                        const bastionId = getLastPathSegments({ path: moduleDirectory, lastSegments: 3 });
                         subsubtasks.add({
                             title: context.logger.applyColors(`Retrieve bastion info ${bastionId}`, { lowlights: [bastionId] }),
                             task: async (ctx, task) => {

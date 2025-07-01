@@ -7,8 +7,15 @@ import { upsertGitIgnore } from "../upsertGitIgnore";
 import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
+/**
+ * Interface for syncStandardFilesTask function input
+ */
+interface ISyncStandardFilesTaskInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+}
 
-export async function syncStandardFilesTask<T extends {}>(inputs: { context: PanfactumContext }): Promise<ListrTask<T>> {
+export async function syncStandardFilesTask<T extends {}>(inputs: ISyncStandardFilesTaskInput): Promise<ListrTask<T>> {
     const { context } = inputs;
 
     return {

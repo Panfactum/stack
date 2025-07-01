@@ -6,13 +6,41 @@ import { manualZoneSetup } from "./manualZoneSetup";
 import type { PanfactumContext } from "@/util/context/context";
 import type { DomainConfigs } from "@/util/domains/tasks/types";
 
-export async function createEnvironmentSubzones(inputs: {
-    context: PanfactumContext,
+/**
+ * Interface for createEnvironmentSubzones function inputs
+ */
+interface ICreateEnvironmentSubzonesInput {
+    /** Panfactum context for operations */
+    context: PanfactumContext;
+    /** Existing domain configurations to update */
     existingDomainConfigs: DomainConfigs;
+    /** Root domain name for subzone creation */
     domain: string;
-}) {
+}
 
-    const { context, domain, existingDomainConfigs } = inputs;
+/**
+ * Creates environment-specific DNS subzones for a domain
+ * 
+ * @remarks
+ * This function creates dedicated DNS subzones for each Panfactum environment,
+ * enabling environment isolation and subdomain management. For example:
+ * - dev.example.com for development environment
+ * - staging.example.com for staging environment  
+ * - prod.example.com for production environment
+ * 
+ * The process includes:
+ * - Environment enumeration and filtering
+ * - DNS zone delegation setup
+ * - Cross-environment DNS configuration
+ * - Terraform module deployment for each subzone
+ * 
+ * @param input - Configuration for subzone creation
+ * 
+ * @throws {@link CLIError}
+ * Throws when environment discovery or DNS zone creation fails
+ */
+export async function createEnvironmentSubzones(input: ICreateEnvironmentSubzonesInput) {
+    const { context, domain, existingDomainConfigs } = input;
     const ancestorDomainConfig = existingDomainConfigs[domain]
     const environments = await getEnvironments(context);
 

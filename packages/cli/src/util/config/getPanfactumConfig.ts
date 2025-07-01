@@ -1,3 +1,6 @@
+// This file provides utilities for loading hierarchical Panfactum configuration
+// It merges configuration from multiple levels (global, environment, region, module)
+
 import { dirname, join } from "node:path";
 import { z } from "zod";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
@@ -6,15 +9,41 @@ import { getVaultToken } from "@/util/vault/getVaultToken";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
+/**
+ * Base configuration values from files
+ */
 type InputValues = z.infer<typeof PANFACTUM_CONFIG_SCHEMA>;
-type OutputValues = InputValues & {
-  environment_dir?: string; // the environment directory name (as might differ from the environment name)
-  region_dir?: string; // the region directory name (as might differ from region name)
-  module_dir?: string; // the module directory name (as might differ from actual module name)
-};
 
-// WARNING: The order here is extremely important
-// DO NOT CHANGE unless you know exactly what you are doing
+/**
+ * Extended configuration with computed directory values
+ */
+interface IOutputValues extends InputValues {
+  /** The environment directory name (may differ from environment name) */
+  environment_dir?: string;
+  /** The region directory name (may differ from region name) */
+  region_dir?: string;
+  /** The module directory name (may differ from module name) */
+  module_dir?: string;
+}
+
+/**
+ * Configuration file search order
+ * 
+ * @remarks
+ * WARNING: The order here is extremely important for proper precedence.
+ * DO NOT CHANGE unless you know exactly what you are doing.
+ * 
+ * Files are processed in order, with later files overriding earlier ones:
+ * 1. Global configs (shared across all environments)
+ * 2. Environment configs (environment-specific overrides)
+ * 3. Region configs (region-specific overrides)
+ * 4. Module configs (module-specific overrides)
+ * 
+ * Within each level:
+ * - Base config (.yaml) is loaded first
+ * - Secrets (.secrets.yaml) override base
+ * - User config (.user.yaml) overrides both
+ */
 const CONFIG_FILES = [
   "global.yaml",
   "global.secrets.yaml",
@@ -30,13 +59,71 @@ const CONFIG_FILES = [
   "module.user.yaml",
 ] as const;
 
+/**
+ * Input parameters for getting Panfactum configuration
+ */
+interface IGetPanfactumConfigInput {
+  /** Panfactum context for configuration access */
+  context: PanfactumContext;
+  /** Directory to start searching from (defaults to current working directory) */
+  directory?: string;
+}
+
+/**
+ * Loads and merges Panfactum configuration from the hierarchy of config files
+ * 
+ * @remarks
+ * This function implements Panfactum's hierarchical configuration system by:
+ * 
+ * 1. Starting from the given directory and walking up to the repo root
+ * 2. Searching for all configuration files at each level
+ * 3. Merging configurations with proper precedence (later overrides earlier)
+ * 4. Computing default values based on directory structure
+ * 5. Adding computed values like directory names
+ * 6. Fetching Vault tokens if in a region context
+ * 
+ * The configuration hierarchy allows:
+ * - Global defaults in `environments/global.yaml`
+ * - Environment overrides in `environments/{env}/environment.yaml`
+ * - Region overrides in `environments/{env}/{region}/region.yaml`
+ * - Module overrides in `environments/{env}/{region}/{module}/module.yaml`
+ * 
+ * Special handling for:
+ * - `extra_tags`, `extra_inputs`, and `domains` are merged (not replaced)
+ * - AWS secondary accounts default to primary if not specified
+ * - Vault configuration is loaded when in a region directory
+ * - Directory names are inferred from the path structure
+ * 
+ * @param input - Configuration parameters
+ * @returns Merged configuration with all defaults and computed values
+ * 
+ * @example
+ * ```typescript
+ * // Get config for current directory
+ * const config = await getPanfactumConfig({ context });
+ * 
+ * // Get config for specific module
+ * const moduleConfig = await getPanfactumConfig({
+ *   context,
+ *   directory: '/repo/environments/prod/us-east-1/vpc'
+ * });
+ * 
+ * console.log(`Environment: ${moduleConfig.environment}`);
+ * console.log(`Region: ${moduleConfig.region}`);
+ * console.log(`Module: ${moduleConfig.module}`);
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when directory is not an absolute path
+ * 
+ * @see {@link getConfigValuesFromFile} - For reading individual config files
+ * @see {@link PANFACTUM_CONFIG_SCHEMA} - Schema for configuration validation
+ * @see {@link getVaultToken} - For fetching Vault authentication
+ */
 export const getPanfactumConfig = async ({
   context,
   directory = process.cwd(),
-}: {
-  context: PanfactumContext;
-  directory?: string;
-}): Promise<OutputValues> => {
+}: IGetPanfactumConfigInput): Promise<IOutputValues> => {
 
   // Get the actual file contents for each config file
   const configFileValues: Partial<{
@@ -65,7 +152,7 @@ export const getPanfactumConfig = async ({
   await Promise.all(searchPromises);
 
   // Merge all the values
-  let values: Partial<OutputValues> = {};
+  let values: Partial<IOutputValues> = {};
   for (const fileName of CONFIG_FILES) {
     const toMerge = configFileValues[fileName];
     if (toMerge) {
@@ -170,5 +257,5 @@ export const getPanfactumConfig = async ({
       : '@@TERRAGRUNT_INVALID@@';
   }
 
-  return values as OutputValues;
+  return values as IOutputValues;
 }

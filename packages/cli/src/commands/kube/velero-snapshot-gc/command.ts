@@ -4,13 +4,41 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { execute } from '@/util/subprocess/execute';
 import { parseJson } from '@/util/zod/parseJson';
 
-interface VolumeSnapshot {
+interface IVolumeSnapshot {
   namespace: string;
   name: string;
   backupName: string | null;
   snapshotContentName: string | null;
 }
 
+/**
+ * Command for cleaning up orphaned Velero volume snapshots
+ * 
+ * @deprecated This command is part of the deprecated 'kube' command group.
+ * Consider using the newer cluster management commands.
+ * 
+ * @remarks
+ * This command identifies and removes orphaned VolumeSnapshots and
+ * VolumeSnapshotContents that are no longer associated with active
+ * Velero backups. It helps:
+ * 
+ * - Reduce storage costs from orphaned snapshots
+ * - Clean up failed backup artifacts
+ * - Maintain snapshot hygiene
+ * - Prevent accumulation of unused resources
+ * 
+ * The command safely identifies snapshots that lack corresponding
+ * Velero backup objects and removes them after confirmation.
+ * 
+ * @example
+ * ```bash
+ * # Clean up orphaned snapshots
+ * pf k8s velero snapshot-gc
+ * 
+ * # Run with specific kube context
+ * pf k8s velero snapshot-gc --kube-context production
+ * ```
+ */
 export class K8sVeleroSnapshotGcCommand extends PanfactumCommand {
   static override paths = [['k8s', 'velero', 'snapshot-gc']];
 
@@ -33,7 +61,7 @@ Velero backups, cleaning up cloud storage resources.`,
         .catch(() => false);
     };
 
-    const getVolumeSnapshots = async (): Promise<VolumeSnapshot[]> => {
+    const getVolumeSnapshots = async (): Promise<IVolumeSnapshot[]> => {
       const result = await execute({
         command: ['kubectl', 'get', 'volumesnapshot', '-o', 'json', '-A'],
         context: this.context,
@@ -63,7 +91,7 @@ Velero backups, cleaning up cloud storage resources.`,
 
     this.context.logger.info('Finding VolumeSnapshots...');
     const snapshots = await getVolumeSnapshots();
-    const toDelete: VolumeSnapshot[] = [];
+    const toDelete: IVolumeSnapshot[] = [];
 
     this.context.logger.info('Checking for orphaned snapshots...');
     for (const snapshot of snapshots) {

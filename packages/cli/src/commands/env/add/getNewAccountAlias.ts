@@ -2,12 +2,21 @@ import { AWS_ACCOUNT_ALIAS_SCHEMA } from "@/util/aws/schemas";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
-export async function getNewAccountAlias(inputs: {
-    context: PanfactumContext,
-    defaultAlias?: string;
-    task: PanfactumTaskWrapper;
-    denylist?: string[];
-}) {
+/**
+ * Interface for getNewAccountAlias function input
+ */
+interface IGetNewAccountAliasInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Default alias to suggest */
+  defaultAlias?: string;
+  /** Task wrapper for interaction */
+  task: PanfactumTaskWrapper;
+  /** List of names that are not allowed */
+  denylist?: string[];
+}
+
+export async function getNewAccountAlias(inputs: IGetNewAccountAliasInput) {
     const { context, task, defaultAlias, denylist = [] } = inputs;
     return context.logger.input({
         explainer: {

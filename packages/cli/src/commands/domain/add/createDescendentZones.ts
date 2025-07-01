@@ -13,14 +13,22 @@ import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/task
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
-import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { IEnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function createDescendentZones(inputs: {
-    context: PanfactumContext,
-    ancestorZone: DomainConfig,
-    descendentZones: { [domain: string]: { env: EnvironmentMeta } }
-}): Promise<DomainConfigs> {
+/**
+ * Interface for createDescendentZones function input
+ */
+interface ICreateDescendentZonesInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Ancestor zone configuration */
+  ancestorZone: DomainConfig;
+  /** Descendent zones mapped by domain name */
+  descendentZones: { [domain: string]: { env: IEnvironmentMeta } };
+}
+
+export async function createDescendentZones(inputs: ICreateDescendentZonesInput): Promise<DomainConfigs> {
 
     const { context, ancestorZone, descendentZones } = inputs;
 
@@ -43,7 +51,7 @@ export async function createDescendentZones(inputs: {
         task: async (_, grandParentTask) => {
             const subtasks = grandParentTask.newListr([])
 
-            interface ConnectTask { nameServers?: string[], dsRecord?: string }
+            interface IConnectTask { nameServers?: string[], dsRecord?: string }
             for (const [domain, config] of Object.entries(descendentZones)) {
                 subtasks.add({
                     title: context.logger.applyColors(
@@ -55,7 +63,7 @@ export async function createDescendentZones(inputs: {
                         }
                     ),
                     task: async (_, parentTask) => {
-                        const subsubtasks = parentTask.newListr<ConnectTask>([])
+                        const subsubtasks = parentTask.newListr<IConnectTask>([])
 
                         ///////////////////////////////////////////////
                         // Deploy descendent zone
@@ -128,7 +136,7 @@ export async function createDescendentZones(inputs: {
                         // Link to parent
                         ///////////////////////////////////////////////
                         subsubtasks.add(
-                            await buildDeployModuleTask<ConnectTask>({
+                            await buildDeployModuleTask<IConnectTask>({
                                 context,
                                 environment: ancestorZone.env.name,
                                 region: GLOBAL_REGION,

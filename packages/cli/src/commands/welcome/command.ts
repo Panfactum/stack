@@ -1,3 +1,6 @@
+// This command displays the DevShell welcome screen for new users
+// It's part of the deprecated welcome command group
+
 import { randomUUID } from "crypto";
 import { join } from "node:path";
 import { Command } from "clipanion";
@@ -7,18 +10,112 @@ import { upsertRepoVariables } from "@/util/context/upsertRepoVariables";
 import { fileExists } from "@/util/fs/fileExists";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
 
+/**
+ * Command for displaying the DevShell welcome screen
+ * 
+ * @deprecated This command is part of the deprecated 'welcome' command group.
+ * The welcome functionality may be integrated elsewhere in the future.
+ * 
+ * @remarks
+ * This command provides an onboarding experience for new Panfactum users.
+ * It serves multiple purposes:
+ * 
+ * - First-time setup detection
+ * - Welcome message with getting started guide
+ * - Concept introduction for IaC and Panfactum
+ * - Installation tracking for analytics
+ * - User and installation ID generation
+ * 
+ * The command has three states:
+ * 1. **Pre-installation**: Minimal message during setup
+ * 2. **First run**: Full welcome screen with documentation
+ * 3. **Subsequent runs**: No output (already welcomed)
+ * 
+ * Key features:
+ * - Detects DevShell initialization state
+ * - Displays comprehensive onboarding information
+ * - Generates unique IDs for tracking
+ * - Provides quick-start command examples
+ * - Explains core Panfactum concepts
+ * 
+ * The welcome screen covers:
+ * - DevShell capabilities
+ * - Getting started steps
+ * - Infrastructure-as-Code concepts
+ * - Environment/Region/Module structure
+ * - Kubernetes cluster features
+ * - Help resources
+ * 
+ * @example
+ * ```bash
+ * # Display welcome screen (first time)
+ * pf welcome
+ * 
+ * # No output on subsequent runs
+ * pf welcome
+ * ```
+ * 
+ * @see {@link upsertRepoVariables} - For storing installation IDs
+ */
 export class WelcomeCommand extends PanfactumCommand {
     static override paths = [["welcome"]];
 
     static override usage = Command.Usage({
         description: "Displays the welcome screen for the DevShell",
         category: 'Welcome',
+        details: `
+[DEPRECATED] This command is part of the deprecated 'welcome' command group.
+
+Displays an onboarding welcome screen for new Panfactum users.
+This command is typically run automatically when entering the DevShell
+for the first time.
+
+The welcome screen provides:
+• Getting started instructions
+• Core concept explanations  
+• Quick-start command examples
+• Help and support resources
+        `,
+        examples: [
+            [
+                'Display welcome screen',
+                'pf welcome'
+            ]
+        ]
     });
 
+    /**
+     * Executes the welcome command
+     * 
+     * @remarks
+     * This method determines the appropriate welcome behavior:
+     * 
+     * 1. **No .envrc**: DevShell is being set up (installer phase)
+     * 2. **No installation_id**: First run after installation
+     * 3. **Has installation_id**: Already welcomed (no action)
+     * 
+     * On first run, it:
+     * - Shows the Panfactum logo
+     * - Displays comprehensive welcome text
+     * - Generates installation and user IDs
+     * - Tracks the installation event
+     * - Saves IDs for future detection
+     * 
+     * The welcome text includes:
+     * - DevShell introduction
+     * - Getting started commands
+     * - Core concepts explanation
+     * - Help resources
+     * 
+     * Analytics tracking helps understand:
+     * - New installation rates
+     * - Repository metadata
+     * - User engagement
+     */
     async execute() {
         const { context } = this;
 
-        if (! await fileExists(join(context.repoVariables.repo_root, ".envrc"))) {
+        if (! await fileExists({ filePath: join(context.repoVariables.repo_root, ".envrc") })) {
             // This occurs in the installer script
 
             context.logger.info("DevShell setup for the first time.")
@@ -71,7 +168,7 @@ export class WelcomeCommand extends PanfactumCommand {
                 defaults, it is ultimately designed to be hackable so you can make the installation your own.
     
                 ${pc.bold(pc.underline("Environments / Regions / Modules"))}: All IaC ${pc.italic("configuration")}
-                (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.environments_dir)}`))}
+                (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot({ context, path: context.repoVariables.environments_dir })}`))}
                 directory of this repository. That directory has three levels of nesting: 
                 ${pc.blue("environment")}/${pc.yellow("region")}/${pc.green("module")} (e.g., production/us-east-2/aws_eks).
     
@@ -86,7 +183,7 @@ export class WelcomeCommand extends PanfactumCommand {
                 A ${pc.green("module")} is an atomic set of deployable infrastructure. Besides the DevShell, Panfactum
                 provides many turn-key infrastructure modules to make getting started easy. You will likely also want to
                 use our submodules to
-                write your own first-party IaC modules in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot(context, context.repoVariables.iac_dir)}`))}
+                write your own first-party IaC modules in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot({ context, path: context.repoVariables.iac_dir })}`))}
                 directoy of this repository.
     
                 The single source of truth for the configuration of all of your modules, regions, and environments lives

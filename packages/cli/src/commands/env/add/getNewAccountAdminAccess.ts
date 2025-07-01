@@ -3,11 +3,19 @@ import { MANAGEMENT_ENVIRONMENT } from "@/util/terragrunt/constants";
 import { getNewIAMUserCredentials } from "./getNewIAMUserCredentials";
 import type { PanfactumContext } from "@/util/context/context";
 
-export async function getNewAccountAdminAccess(inputs: {
-    context: PanfactumContext,
-    type: "management" | "standalone" | "manual-org",
-    environment: string;
-}) {
+/**
+ * Interface for getNewAccountAdminAccess function input
+ */
+interface IGetNewAccountAdminAccessInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** Type of account setup */
+  type: "management" | "standalone" | "manual-org";
+  /** Environment name being set up */
+  environment: string;
+}
+
+export async function getNewAccountAdminAccess(inputs: IGetNewAccountAdminAccessInput) {
     const { context, type, environment } = inputs
 
     const newAccountURL = "https://signin.aws.amazon.com/signup?request_type=register"

@@ -1,4 +1,7 @@
-import { GetCallerIdentityCommand } from "@aws-sdk/client-sts";
+// This file provides utilities for retrieving AWS identity information
+// It includes automatic SSO login handling for expired credentials
+
+import { GetCallerIdentityCommand, type GetCallerIdentityCommandOutput } from "@aws-sdk/client-sts";
 import { CLIError } from "@/util/error/error";
 import { execute } from "@/util/subprocess/execute";
 import { getSTSClient } from "./clients/getSTSClient";
@@ -6,13 +9,48 @@ import { getCredsFromFile } from "./getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
- * Fetches the AWS identity for a given profile.
- * If SSO sign-in is needed, will attempt to handle the sign-in process automatically.
- * 
- * @param input - Object containing context and profile name
- * @returns The AWS identity information from STS
+ * Input parameters for getting AWS identity
  */
-export async function getIdentity(input: { context: PanfactumContext, profile: string }) {
+interface IGetIdentityInput {
+  /** Panfactum context for logging and configuration */
+  context: PanfactumContext;
+  /** AWS profile name to use */
+  profile: string;
+}
+
+/**
+ * Fetches the AWS identity for a given profile with automatic SSO handling
+ * 
+ * @remarks
+ * This function retrieves AWS caller identity information using STS.
+ * If SSO credentials are expired, it will automatically attempt to:
+ * 1. Log out of the expired SSO session
+ * 2. Log back in to SSO
+ * 3. Retry the identity request
+ * 
+ * The function includes retry logic with 5-second delays to handle
+ * eventual consistency when new IAM users are created.
+ * 
+ * @param input - Configuration including context and profile name
+ * @returns AWS identity information from STS GetCallerIdentity
+ * 
+ * @example
+ * ```typescript
+ * const identity = await getIdentity({
+ *   context,
+ *   profile: 'production'
+ * });
+ * console.log(`Account: ${identity.Account}`);
+ * console.log(`User ARN: ${identity.Arn}`);
+ * ```
+ * 
+ * @throws {@link CLIError}
+ * Throws when unable to retrieve identity after retries and SSO attempts
+ * 
+ * @see {@link getSTSClient} - For STS client creation
+ * @see {@link getCredsFromFile} - For credential file loading
+ */
+export async function getIdentity(input: IGetIdentityInput): Promise<GetCallerIdentityCommandOutput> {
     const { context, profile } = input;
 
     const stsClient = await getSTSClient({ context, profile });

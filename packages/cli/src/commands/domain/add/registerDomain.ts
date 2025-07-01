@@ -25,7 +25,7 @@ import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { getDomainPrice } from "./getDomainPrice";
 import { isDomainAvailableFromAWS } from "./isDomainAvailableFromAWS";
 import { REGISTERED_DOMAINS_MODULE_OUTPUT_SCHEMA } from "./types";
-import type { EnvironmentMeta } from "@/util/config/getEnvironments";
+import type { IEnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 
 // Constants for validation
@@ -49,13 +49,47 @@ const CONTACT_INFO_SCHEMA = z.object({
     country_code: z.string().length(2).optional().catch(undefined)
 })
 
-export async function registerDomain(inputs: {
-    domain: string,
-    env: EnvironmentMeta,
-    context: PanfactumContext,
-    tld: string
-}): Promise<DomainConfig> {
-    const { context, env, domain, tld } = inputs;
+/**
+ * Interface for registerDomain function inputs
+ */
+interface IRegisterDomainInput {
+    /** Domain name to register */
+    domain: string;
+    /** Environment metadata for domain association */
+    env: IEnvironmentMeta;
+    /** Panfactum context for operations */
+    context: PanfactumContext;
+    /** Top-level domain extension */
+    tld: string;
+}
+
+/**
+ * Registers a new domain through AWS Route53 Domains
+ * 
+ * @remarks
+ * This function handles the complete domain registration process including:
+ * - AWS account contact information validation
+ * - Domain availability verification
+ * - Domain purchase through Route53 Domains
+ * - DNS zone creation and configuration
+ * - Terraform module deployment for domain management
+ * 
+ * The registration process involves multiple AWS services:
+ * - Route53 Domains for registration
+ * - Route53 for DNS zone management
+ * - Account API for contact information
+ * 
+ * @param input - Configuration for domain registration
+ * @returns Domain configuration object for further processing
+ * 
+ * @throws {@link CLIError}
+ * Throws when domain registration fails or required contact information is missing
+ * 
+ * @throws {@link CLIError}
+ * Throws when domain is already registered or unavailable
+ */
+export async function registerDomain(input: IRegisterDomainInput): Promise<DomainConfig> {
+    const { context, env, domain, tld } = input;
 
     const domainConfig: Partial<DomainConfig> = {
         domain,
@@ -114,7 +148,7 @@ export async function registerDomain(inputs: {
 
     let contactInfo: z.infer<typeof CONTACT_INFO_SCHEMA> = {}
     const registeredDomainsModuleYAMLPath = join(env.path, GLOBAL_REGION, MODULES.AWS_REGISTERED_DOMAINS, "module.yaml")
-    if (await fileExists(registeredDomainsModuleYAMLPath)) {
+    if (await fileExists({ filePath: registeredDomainsModuleYAMLPath })) {
         const moduleConfig = await readYAMLFile({
             context,
             filePath: registeredDomainsModuleYAMLPath,
@@ -137,13 +171,13 @@ export async function registerDomain(inputs: {
         !contactInfo.organization_name ||
         !contactInfo.country_code
 
-    interface TaskContext {
+    interface ITaskContext {
         contactInfo: typeof contactInfo,
         opId?: string;
         zoneId?: string;
     }
 
-    const tasks = new Listr<TaskContext>([], {
+    const tasks = new Listr<ITaskContext>([], {
         ctx: { contactInfo },
         rendererOptions: {
             collapseErrors: false
@@ -442,7 +476,7 @@ export async function registerDomain(inputs: {
                         error
                     );
                 });
-                
+
                 const { Status: status, Message: message, StatusFlag: flag } = response;
 
                 // 1) Handle terminal statuses first:
@@ -523,7 +557,7 @@ export async function registerDomain(inputs: {
                         error
                     );
                 });
-            
+
             const hostedZones = response.HostedZones ?? []
 
             if (!hostedZones.length ||
@@ -548,7 +582,7 @@ export async function registerDomain(inputs: {
     // Update Terragrunt Module
     //////////////////////////////////////////////////////////
     tasks.add(
-        await buildDeployModuleTask<TaskContext>({
+        await buildDeployModuleTask<ITaskContext>({
             context,
             module: MODULES.AWS_REGISTERED_DOMAINS,
             environment: env.name,
@@ -657,28 +691,43 @@ export async function registerDomain(inputs: {
 
 
 /**
+ * Interface for getPrimaryContactDefaults function output
+ */
+interface IGetPrimaryContactDefaultsOutput {
+    /** Full name of the contact */
+    fullName?: string;
+    /** Organization or company name */
+    organizationName?: string;
+    /** Email address */
+    email?: string;
+    /** Phone number in formatted string */
+    phoneNumber?: string;
+    /** Primary address line */
+    addressLine1?: string;
+    /** Secondary address line */
+    addressLine2?: string;
+    /** City name */
+    city?: string;
+    /** State or region */
+    state?: string;
+    /** Country code */
+    countryCode?: string;
+    /** Postal/ZIP code */
+    zipCode?: string;
+}
+
+/**
  * Retrieves primary contact information from AWS account using the Account API so that 
  * we can use it as defaults for the domain registration info (if needed)
  */
-async function getPrimaryContactDefaults(profile: string, context: PanfactumContext): Promise<{
-    fullName?: string;
-    organizationName?: string;
-    email?: string;
-    phoneNumber?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    city?: string;
-    state?: string;
-    countryCode?: string;
-    zipCode?: string;
-} | null> {
+async function getPrimaryContactDefaults(profile: string, context: PanfactumContext): Promise<IGetPrimaryContactDefaultsOutput | null> {
     const accountClient = await getAccountClient({ context, profile })
         .catch((error: unknown) => {
             // If we can't create the client, just log and continue
             context.logger.debug(`Could not create account client: ${error instanceof Error ? error.message : String(error)}`);
             return null;
         });
-    
+
     if (!accountClient) {
         return null;
     }
@@ -693,7 +742,7 @@ async function getPrimaryContactDefaults(profile: string, context: PanfactumCont
             context.logger.debug(`Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);
             return null;
         });
-    
+
     if (!response) {
         return null;
     }

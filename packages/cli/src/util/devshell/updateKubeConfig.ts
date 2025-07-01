@@ -47,8 +47,15 @@ export const CLUSTERS_FILE_SCHEMA = z.record(z.string(), z.object({
     caData: z.string()
 }))
 
+/**
+ * Interface for updateKubeConfig function inputs
+ */
+interface IUpdateKubeConfigInputs {
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+}
 
-export async function updateKubeConfig(inputs: { context: PanfactumContext }) {
+export async function updateKubeConfig(inputs: IUpdateKubeConfigInputs) {
     const { context } = inputs;
 
     const { kube_dir: kubeDir } = context.repoVariables
