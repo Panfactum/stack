@@ -61,7 +61,7 @@ export async function getDomains(inputs: IGetDomainsInputs): Promise<DomainConfi
                         recordManagerRoleARN: config.record_manager_role_arn,
                         env: {
                             name: environment,
-                            path: envDir,
+                            path: envPath,
                             deployed
                         }
                     };

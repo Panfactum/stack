@@ -219,7 +219,7 @@ try {
   }
 
   await cli.runExit(proc, panfactumContext);
-} catch(error: unknown) {
+} catch (error: unknown) {
   if (error instanceof Error) {
     globalThis.console.error(error.message)
   } else {

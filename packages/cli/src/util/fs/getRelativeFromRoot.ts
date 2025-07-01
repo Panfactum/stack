@@ -1,6 +1,7 @@
 // This file provides utilities for converting absolute paths to relative paths from repository root
 // It helps normalize file paths for consistent display and logging
 
+import { relative } from "node:path";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -53,5 +54,20 @@ interface IGetRelativeFromRootInput {
  * ```
  */
 export function getRelativeFromRoot({ context, path }: IGetRelativeFromRootInput): string {
-    return path.replace(new RegExp(`^${context.repoVariables.repo_root}/?`), '');
+    const repoRoot = context.repoVariables.repo_root;
+    
+    // Normalize repo root by removing trailing slash
+    const normalizedRepoRoot = repoRoot.endsWith('/') ? repoRoot.slice(0, -1) : repoRoot;
+    
+    // Check if the path starts with the repo root
+    if (path === normalizedRepoRoot || path === normalizedRepoRoot + '/') {
+        return '';
+    }
+    
+    if (path.startsWith(normalizedRepoRoot + '/')) {
+        return path.slice(normalizedRepoRoot.length + 1);
+    }
+    
+    // Path is not within the repo root - return relative path
+    return relative(normalizedRepoRoot, path);
 }

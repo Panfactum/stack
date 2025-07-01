@@ -117,6 +117,7 @@ export async function getModuleStatus(
         context,
         filePath: join(moduleDir, MODULE_STATUS_FILE),
         throwOnEmpty: false,
+        throwOnMissing: false,
         validationSchema: MODULE_STATUS_FILE_SCHEMA
     });
 

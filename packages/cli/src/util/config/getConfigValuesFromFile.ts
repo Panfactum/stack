@@ -160,11 +160,14 @@ export async function getConfigValuesFromFile(input: ConfigInput): Promise<TGCon
         sopsDecrypt({
             context,
             filePath,
+            throwOnMissing: false,
             validationSchema: PANFACTUM_CONFIG_SCHEMA
         }) :
         readYAMLFile({
             context,
             filePath,
+            throwOnEmpty: false,
+            throwOnMissing: false,
             validationSchema: PANFACTUM_CONFIG_SCHEMA,
         });
 }
