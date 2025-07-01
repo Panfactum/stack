@@ -1,9 +1,9 @@
 import { dirname, basename, join } from "node:path";
 import { Glob } from "bun";
+import { asyncIterMap } from "@/util/asyncIterMap";
+import { CLIError } from "@/util/error/error";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
-import { asyncIterMap } from "../asyncIterMap";
 import { isEnvironmentDeployed } from "./isEnvironmentDeployed";
-import { CLIError } from "../error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 export interface EnvironmentMeta {
@@ -11,6 +11,7 @@ export interface EnvironmentMeta {
     name: string; // Name of the environment
     subdomain?: string; // The subdomain assigned to the environment
     deployed: boolean; // True iff the environment has been fully configured; false if in a partially deployed state
+    awsProfile?: string; // Optional AWS profile for the environment
 }
 
 export async function getEnvironments(context: PanfactumContext): Promise<Array<EnvironmentMeta>> {
@@ -19,13 +20,15 @@ export async function getEnvironments(context: PanfactumContext): Promise<Array<
         const filePath = join(context.repoVariables.environments_dir, path)
         const envPath = dirname(filePath);
         try {
-            const { environment, environment_subdomain: subdomain } = await getConfigValuesFromFile({ filePath, context }) || {}
+            const { environment, environment_subdomain: subdomain, aws_profile: awsProfile } = await getConfigValuesFromFile({ filePath, context }) || {}
             const name = environment ?? basename(envPath);
+
             return {
                 name,
                 path: envPath,
                 subdomain,
-                deployed: await isEnvironmentDeployed({ context, environment: name })
+                deployed: await isEnvironmentDeployed({ context, environment: name }),
+                awsProfile
             }
         } catch (e) {
             throw new CLIError("Unable to get environments", e)

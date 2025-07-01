@@ -1,5 +1,5 @@
 import { IAMClient } from "@aws-sdk/client-iam";
-import { getCredsFromFile } from "../getCredsFromFile";
+import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function getIAMClient(inputs: { context: PanfactumContext, profile: string; }) {

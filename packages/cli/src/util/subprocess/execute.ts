@@ -1,6 +1,7 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
-import { CLISubprocessError } from "../error/error";
-import { concatStreams } from "../streams/concatStreams";
+import { CLISubprocessError } from "@/util/error/error";
+import { concatStreams } from "@/util/streams/concatStreams";
+import { addBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
 import type { PanfactumContext } from "@/util/context/context";
 
 type IsSuccessFn = (results: {
@@ -9,7 +10,7 @@ type IsSuccessFn = (results: {
   exitCode: number;
 }) => boolean;
 
-interface ExecInputs {
+export interface ExecInputs {
   command: string[];
   context: PanfactumContext;
   workingDirectory: string;
@@ -29,12 +30,15 @@ interface ExecInputs {
   | number
   | "inherit"
   | null;
+  background?: boolean;
+  backgroundDescription?: string;
 }
 
-interface ExecReturn {
+export interface ExecReturn {
   stdout: string;
   stderr: string;
   exitCode: number;
+  pid: number;
 }
 
 const defaultIsSuccess: IsSuccessFn = ({ exitCode }) => exitCode === 0;
@@ -53,7 +57,13 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     onStdErrNewline,
     isSuccess = defaultIsSuccess,
     stdin = null,
+    background = false,
+    backgroundDescription,
   } = inputs;
+  
+  // Background processes always ignore output, foreground processes always pipe
+  const stdoutOption = background ? "ignore" : "pipe";
+  const stderrOption = background ? "ignore" : "pipe";
   let logsBuffer = "";
   for (let i = 0; i < retries + 1; i++) {
     let proc;
@@ -61,8 +71,8 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       proc = Bun.spawn(command, {
         cwd: workingDirectory,
         env,
-        stdout: "pipe",
-        stderr: "pipe",
+        stdout: stdoutOption,
+        stderr: stderrOption,
         stdin,
       });
     } catch (e) {
@@ -72,11 +82,28 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
         workingDirectory,
       });
     }
-
+    
+    // For background processes, return immediately with PID
+    if (background) {
+      // Track the background process
+      addBackgroundProcess({
+        pid: proc.pid,
+        command: command.join(' '),
+        description: backgroundDescription
+      });
+      
+      return {
+        stdout: "",
+        stderr: "",
+        exitCode: 0,
+        pid: proc.pid,
+      };
+    }
+    
     // eslint-disable-next-line prefer-const
-    let [stdoutForMerge, stdoutForCapture] = proc.stdout.tee();
+    let [stdoutForMerge, stdoutForCapture] = proc.stdout!.tee();
     // eslint-disable-next-line prefer-const
-    let [stderrForMerge, stderrForCapture] = proc.stderr.tee();
+    let [stderrForMerge, stderrForCapture] = proc.stderr!.tee();
 
     let stdoutCallbackPromise = Promise.resolve();
     let stderrCallbackPromise = Promise.resolve();
@@ -128,6 +155,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
       exitCode,
       stderr: stderr.trim(),
       stdout: stdout.trim(),
+      pid: proc.pid,
     };
     if (isSuccess(retValue)) {
       return retValue;
@@ -138,9 +166,7 @@ export async function execute(inputs: ExecInputs): Promise<ExecReturn> {
     }
 
     if (retries > 0) {
-      await new Promise((resolve) => {
-        globalThis.setTimeout(resolve, retryDelay);
-      });
+      await Bun.sleep(retryDelay);
     }
   }
 

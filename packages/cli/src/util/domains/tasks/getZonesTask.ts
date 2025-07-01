@@ -3,10 +3,10 @@ import { Glob } from "bun";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { isEnvironmentDeployed } from "@/util/config/isEnvironmentDeployed";
+import { CLIError } from "@/util/error/error";
+import { MODULES } from "@/util/terragrunt/constants";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { getRegisteredDomainsTask } from "./getRegisteredDomainsTask";
-import { CLIError } from "../../error/error";
-import { MODULES } from "../../terragrunt/constants";
-import { terragruntOutput } from "../../terragrunt/terragruntOutput";
 import type { DomainConfigs } from "./types";
 import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
@@ -58,41 +58,47 @@ export async function getZonesTask<T extends {}>(inputs: {
                         for (const hclPath of domainModuleHCLPaths) {
                             const moduleDirectory = dirname(hclPath);
                             const { environment_dir: envDir, region_dir: regionDir, environment } = await getPanfactumConfig({ context, directory: moduleDirectory })
-                            if (!envDir) {
-                                throw new CLIError("Module is not in a valid environment directory.")
-                            } else if (!regionDir) {
-                                throw new CLIError("Module is not in a valid region directory.")
-                            } else if (!environment) {
-                                throw new CLIError("Environment is unknown")
+
+                            if (!envDir || !regionDir || !environment) {
+                                if (!envDir) {
+                                    throw new CLIError("Module is not in a valid environment directory.")
+                                } else if (!regionDir) {
+                                    throw new CLIError("Module is not in a valid region directory.")
+                                } else if (!environment) {
+                                    throw new CLIError("Environment is unknown")
+                                }
                             }
+
+
                             subsubtasks.add({
                                 title: `Get ${environment} zones`,
                                 task: async (_, task) => {
-                                    try {
-                                        const deployed = await isEnvironmentDeployed({ context, environment })
-                                        const moduleOutput = await terragruntOutput({
-                                            context,
-                                            environment: envDir,
-                                            region: regionDir,
-                                            module: MODULES.AWS_DNS_ZONES,
-                                            validationSchema: DNS_ZONES_MODULE_OUTPUT_SCHEMA,
-                                        });
+                                    const deployed = await isEnvironmentDeployed({ context, environment })
+                                    const moduleOutput = await terragruntOutput({
+                                        context,
+                                        environment: envDir,
+                                        region: regionDir,
+                                        module: MODULES.AWS_DNS_ZONES,
+                                        validationSchema: DNS_ZONES_MODULE_OUTPUT_SCHEMA,
+                                    }).catch(() => {
+                                        task.skip(context.logger.applyColors(`Get ${environment} zones Failure`, { badlights: ["Failure"] }))
+                                        parentTask.title = context.logger.applyColors(`Retrieve DNS zone info Partial failure`, { badlights: ["Partial failure"] })
+                                        return null;
+                                    });
 
+                                    if (moduleOutput) {
                                         Object.entries(moduleOutput.zones.value).forEach(([domain, { zone_id: zoneId }]) => {
                                             dnsZoneDomainConfigs[domain] = {
                                                 domain,
                                                 zoneId,
                                                 recordManagerRoleARN: moduleOutput.record_manager_role_arn.value,
                                                 env: {
-                                                    name: environment!,
+                                                    name: environment,
                                                     path: envDir,
                                                     deployed
                                                 },
                                             }
                                         })
-                                    } catch {
-                                        task.skip(context.logger.applyColors(`Get ${environment} zones Failure`, { badlights: ["Failure"] }))
-                                        parentTask.title = context.logger.applyColors(`Retrieve DNS zone info Partial failure`, { badlights: ["Partial failure"] })
                                     }
                                 }
                             })

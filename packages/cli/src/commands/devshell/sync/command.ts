@@ -13,6 +13,7 @@ export class DevShellUpdateCommand extends PanfactumCommand {
 
   static override usage = Command.Usage({
     description: "Syncs the DevShell configuration with live infrastructure",
+    category: 'Devshell',
     details:
       "Synchronizes the live infrastructure with configuration settings in your repository that control the DevShell's behavior.",
     examples: [["Update", "pf devshell update"]],

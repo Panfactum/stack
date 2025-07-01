@@ -6,7 +6,8 @@ export class DomainRemoveCommand extends PanfactumCommand {
     static override paths = [["domain", "remove"]];
 
     static override usage = Command.Usage({
-        description: "Disconnects a domain from the Panfactum framework installation"
+        description: "Disconnects a domain from the Panfactum framework installation",
+        category: 'Domain',
     });
 
 

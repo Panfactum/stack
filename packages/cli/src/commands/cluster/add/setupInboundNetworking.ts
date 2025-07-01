@@ -226,7 +226,7 @@ export async function setupInboundNetworking(
           try {
             let statusStr = `${attempts + 1}/${maxAttempts}`
             task.title = context.logger.applyColors(`Polling Vault health endpoint ${statusStr}`, { lowlights: [statusStr] });
-            const response = await Bun.fetch(`https://${data.extra_inputs.vault_domain}/v1/sys/health`);
+            const response = await fetch(`https://${data.extra_inputs.vault_domain}/v1/sys/health`);
 
             if (response.status === 200) {
               task.title = context.logger.applyColors("Vault health check successful");

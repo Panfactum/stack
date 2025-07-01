@@ -4,12 +4,12 @@ import { DefaultRenderer, ListrTaskWrapper, SimpleRenderer, type ListrTask } fro
 import pc from "picocolors";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { CLIError } from "@/util/error/error";
 import { directoryExists } from "@/util/fs/directoryExist";
-import { CLIError } from "../../error/error";
-import { fileExists } from "../../fs/fileExists";
-import { writeFile } from "../../fs/writeFile";
-import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "../../terragrunt/constants";
-import { terragruntOutput } from "../../terragrunt/terragruntOutput";
+import { fileExists } from "@/util/fs/fileExists";
+import { writeFile } from "@/util/fs/writeFile";
+import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import type { PanfactumContext } from "@/util/context/context";
 
 const IAM_IDENTIY_CENTER_OUTPUT_SCHEMA = z.object({

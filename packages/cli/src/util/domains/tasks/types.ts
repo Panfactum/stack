@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PanfactumZodError } from "@/util/error/error";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 
 export type DomainConfig = {
@@ -20,7 +21,15 @@ const DOMAIN_CONFIG_SCHEMA = z.object({
 });
 
 export function validateDomainConfig(config: unknown): DomainConfig {
-    return DOMAIN_CONFIG_SCHEMA.parse(config);
+    const parseResult = DOMAIN_CONFIG_SCHEMA.safeParse(config);
+    if (!parseResult.success) {
+        throw new PanfactumZodError(
+            'Invalid domain config',
+            'domain configuration',
+            parseResult.error
+        );
+    }
+    return parseResult.data;
 }
 
 
@@ -29,7 +38,15 @@ export type DomainConfigs = { [domain: string]: DomainConfig }
 const DOMAIN_CONFIGS_SCHEMA = z.record(z.string(), DOMAIN_CONFIG_SCHEMA)
 
 export function validateDomainConfigs(config: unknown): DomainConfigs {
-    return DOMAIN_CONFIGS_SCHEMA.parse(config);
+    const parseResult = DOMAIN_CONFIGS_SCHEMA.safeParse(config);
+    if (!parseResult.success) {
+        throw new PanfactumZodError(
+            'Invalid domain configs',
+            'domain configuration',
+            parseResult.error
+        );
+    }
+    return parseResult.data;
 }
 
 

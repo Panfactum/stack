@@ -1,3 +1,4 @@
+import { CLIError } from '@/util/error/error';
 import type {
     InternalColumnMeta,
     ColumnMetasArray,
@@ -56,7 +57,7 @@ const initColumns = (
             continue;
         }
 
-        throw new Error(`Invalid column width: ${JSON.stringify(columnWidth)}`);
+        throw new CLIError(`Invalid column width: ${JSON.stringify(columnWidth)}`);
     }
 
     return columns;

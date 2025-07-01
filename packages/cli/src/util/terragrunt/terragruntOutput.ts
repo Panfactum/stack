@@ -1,9 +1,9 @@
 import { join } from "node:path"
-import { z, ZodError } from "zod";
+import { z } from "zod";
+import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { getIdentity } from "../aws/getIdentity";
-import { CLIError, PanfactumZodError } from "../error/error";
-import { execute } from "../subprocess/execute";
+import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 export const terragruntOutput = async <T extends z.ZodType<object>>({
@@ -49,20 +49,26 @@ export const terragruntOutput = async <T extends z.ZodType<object>>({
     errorMessage: "Failed to get outputs from infrastructure module",
   });
 
+  // Parse JSON output
+  let parsedOutput: unknown;
   try {
-    return validationSchema.parse(JSON.parse(stdout)) as z.infer<T>;
-  } catch (e) {
-    if (e instanceof ZodError) {
-      throw new PanfactumZodError(
-        `Unexpected outputs from infrastructure module`,
-        workingDirectory,
-        e
-      );
-    } else {
-      throw new CLIError(
-        `Unable to parse outputs from infrastructure module at ${workingDirectory}.`,
-        e
-      );
-    }
+    parsedOutput = JSON.parse(stdout);
+  } catch (error) {
+    throw new CLIError(
+      `Invalid JSON output from infrastructure module at ${workingDirectory}`,
+      error
+    );
   }
+
+  // Validate output structure
+  const parseResult = validationSchema.safeParse(parsedOutput);
+  if (!parseResult.success) {
+    throw new PanfactumZodError(
+      `Unexpected outputs from infrastructure module`,
+      workingDirectory,
+      parseResult.error
+    );
+  }
+
+  return parseResult.data as z.infer<T>;
 };

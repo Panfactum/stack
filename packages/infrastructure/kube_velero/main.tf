@@ -438,7 +438,7 @@ module "snapshot_gc" {
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
-      "/bin/pf-velero-snapshot-gc"
+      "pf", "kube", "velero-snapshot-gc"
     ]
     minimum_memory = 50
   }]

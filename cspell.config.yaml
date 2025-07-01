@@ -222,6 +222,7 @@ words:
     "RRSIG",
     "subkeys",
     "descheduling",
+    "nixfmt",
     "STYLEGUIDE",
     "frontmatter",
     "Kobalte",

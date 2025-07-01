@@ -9,6 +9,7 @@ export class ConfigGetCommand extends PanfactumCommand {
 
     static override usage = Command.Usage({
         description: "Gets the Panfactum configuration",
+        category: 'Config',
         details:
             "Returns the Panfactum configuration",
     });

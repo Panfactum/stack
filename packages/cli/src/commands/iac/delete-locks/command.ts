@@ -1,0 +1,159 @@
+import { hostname, userInfo } from 'os';
+import { ScanCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
+import { Option } from 'clipanion';
+import { z } from 'zod';
+import { getDynamoDBClient } from '@/util/aws/clients/getDynamoDBClient';
+import { getIdentity } from '@/util/aws/getIdentity';
+import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { getPanfactumConfig } from '@/util/config/getPanfactumConfig';
+import { CLIError } from '@/util/error/error';
+import { parseJson } from '@/util/zod/parseJson';
+
+export default class DeleteLocksCommand extends PanfactumCommand {
+  static override paths = [['iac', 'delete-locks']];
+
+  static override usage = PanfactumCommand.Usage({
+    description: 'Release all Terraform/OpenTofu state locks held by a user',
+    category: 'Infrastructure as Code',
+    details: `
+      This command releases all Terraform/OpenTofu state locks in the indicated DynamoDB lock table 
+      that are held by the indicated user. This is useful when locks are stuck due to interrupted 
+      terraform operations.
+    `,
+    examples: [
+      ['Release all your locks using defaults', '$0 iac delete-locks'],
+      ['Release locks for specific user', '$0 iac delete-locks --who "john@workstation"'],
+      ['Use specific AWS profile and table', '$0 iac delete-locks --profile prod --table my-locks'],
+    ],
+  });
+
+  profile = Option.String('--profile', {
+    description: 'AWS profile to use (defaults to tf_state_profile from config)',
+  });
+
+  table = Option.String('--table', {
+    description: 'DynamoDB lock table name (defaults to tf_state_lock_table from config)',
+  });
+
+  region = Option.String('--region', {
+    description: 'AWS region where lock table is located (defaults to tf_state_region from config)',
+  });
+
+  who = Option.String('--who', {
+    description: 'Owner of locks to release (defaults to $(whoami)@$(hostname))',
+  });
+
+  override async execute(): Promise<number> {
+    // Get config from current directory context
+    const config = await getPanfactumConfig({ 
+      context: this.context, 
+      directory: process.cwd() 
+    });
+
+      // Determine values from options or config
+      const awsProfile = this.profile || config.tf_state_profile;
+      const lockTable = this.table || config.tf_state_lock_table;
+      const awsRegion = this.region || config.tf_state_region;
+      const lockOwner = this.who || `${userInfo().username}@${hostname()}`;
+
+      // Validate required values
+      if (!awsProfile) {
+        throw new CLIError(
+          'Unable to derive AWS profile from current context. Retry with --profile.'
+        );
+      }
+      if (!lockTable) {
+        throw new CLIError(
+          'Unable to derive lock table from current context. Retry with --table.'
+        );
+      }
+      if (!awsRegion) {
+        throw new CLIError(
+          'Unable to derive AWS region from current context. Retry with --region.'
+        );
+      }
+
+      // Verify AWS credentials
+      await getIdentity({ context: this.context, profile: awsProfile });
+
+      this.context.logger.info(
+        `Releasing locks held by ${lockOwner} from ${lockTable} in ${awsRegion} using the ${awsProfile} AWS profile...`
+      );
+
+      // Initialize DynamoDB client with AWS profile
+      const dynamoClient = await getDynamoDBClient({
+        context: this.context,
+        profile: awsProfile,
+        region: awsRegion
+      });
+
+      // Scan for locks held by the specified user
+      const scanCommand = new ScanCommand({
+        TableName: lockTable,
+        ScanFilter: {
+          Info: {
+            ComparisonOperator: 'NOT_NULL'
+          }
+        }
+      });
+
+      const scanResult = await dynamoClient.send(scanCommand);
+      
+      if (!scanResult.Items || scanResult.Items.length === 0) {
+        this.context.logger.info('No locks found in the table.');
+        return 0;
+      }
+
+      // Filter locks by owner
+      const lockInfoSchema = z.object({
+        ID: z.string().optional(),
+        Operation: z.string().optional(),
+        Info: z.string().optional(),
+        Who: z.string().optional(),
+        Version: z.string().optional(),
+        Created: z.string().optional(),
+        Path: z.string().optional()
+      });
+      
+      const locksToDelete = scanResult.Items.filter(item => {
+        const infoValue = item['Info']?.S;
+        if (!infoValue) return false;
+        
+        try {
+          const info = parseJson(lockInfoSchema, infoValue);
+          return info.Who === lockOwner;
+        } catch {
+          return false;
+        }
+      });
+
+      if (locksToDelete.length === 0) {
+        this.context.logger.info(`No locks found for user: ${lockOwner}`);
+        return 0;
+      }
+
+      // Delete locks in parallel
+      const deletePromises = locksToDelete
+        .filter(lock => lock['LockID']?.S)
+        .map(async lock => {
+          const lockId = lock['LockID']?.S;
+          if (!lockId) return; // This shouldn't happen due to filter above, but satisfies TypeScript
+          
+          this.context.logger.info(`Deleting lock with ID: ${lockId}`);
+          
+          const deleteCommand = new DeleteItemCommand({
+            TableName: lockTable,
+            Key: {
+              LockID: { S: lockId }
+            }
+          });
+
+          return dynamoClient.send(deleteCommand);
+        });
+
+      await Promise.all(deletePromises);
+
+      this.context.logger.info(`Successfully released ${locksToDelete.length} lock(s).`);
+      return 0;
+  }
+}

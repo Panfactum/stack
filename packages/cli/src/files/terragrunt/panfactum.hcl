@@ -62,14 +62,14 @@ locals {
   use_local_pf_modules = local.pf_stack_version == "local"
 
   # Long commit sha for the specific branch / tag / commit specified
-  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
+  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "util", "get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
 
   # The absolute path on the machine to the local copy of the Panfactum modules
   # If pf_stack_local_path isn't set, we assume that the we are in the reference repository (note that we use get_repo_root() vs local.repo_root to get the actual git repo root)
   pf_stack_local_absolute_path = lookup(local.vars, "pf_stack_local_path", get_repo_root())
 
   # This is used for cache invalidation since we cannot use git refs for the local copy
-  pf_stack_local_ref = local.use_local_pf_modules ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", local.use_local_pf_modules ? "${local.pf_stack_local_absolute_path}/packages/infrastructure" : "") : ""
+  pf_stack_local_ref = local.use_local_pf_modules ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "util", "get-module-hash", local.use_local_pf_modules ? "${local.pf_stack_local_absolute_path}/packages/infrastructure" : "") : ""
 
   # We can either choose to use relative or absolute file paths for sourcing local module versions
   # We default to using relative b/c this adds enhanced cache invalidation logic
@@ -111,7 +111,7 @@ locals {
   version = lookup(local.vars, "version", local.primary_branch)
 
   # Long commit sha for the specific branch / tag / commit specified
-  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.version}")
+  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf", "util", "get-commit-hash", "--ref=${local.version}")
 
   # Whether to use the local copy of the first-party IaC rather than download from the remote git repo
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
@@ -129,21 +129,8 @@ locals {
   # Vault Token Sourcing
   ############################################################################################
 
-  # We have customized the retrieval of the Vault token in order to handle all the various scenarios for how modules
-  # can be applied
-  // todo: this can be done in pf config get
-  vault_address = local.is_ci ? get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
-  // todo: do a lookup on vault_token and fallback to run command
-  use_local_vault_token = try(local.vars.vault_token != null && local.vars.vault_token != "", false)
-  // todo: pf-get-vault-token can be occuring in the pf config get command instead
-  vault_token = local.use_local_vault_token ? local.vars.vault_token : (
-    run_cmd(
-      "--terragrunt-global-cache", "--terragrunt-quiet",
-      "pf-get-vault-token",
-      "--address", local.vault_address,
-      local.enable_vault && !local.use_local_vault_token ? "" : "--noop"
-    )
-  )
+  vault_address = local.vars.vault_addr
+  vault_token   = local.vars.vault_token
 
   ############################################################################################
   # Kubernetes Connection

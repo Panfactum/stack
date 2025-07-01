@@ -6,7 +6,7 @@ set -eo pipefail
 # Step 1: Checkout the repo
 #####################################################
 cd /code
-pf-wf-git-checkout \
+pf wf git-checkout \
   -r "$REPO" \
   -c "$GIT_REF" \
   -u "$GIT_USERNAME" \
@@ -41,7 +41,7 @@ export VAULT_TOKEN
 #####################################################
 # Step 5: Update sops-encrypted files so the runner can decrypt them
 #####################################################
-pf-sops-set-profile --directory . --profile ci
+pf wf sops-set-profile --directory . --profile ci
 
 #####################################################
 # Step 6: Use terragrunt to deploy the IaC

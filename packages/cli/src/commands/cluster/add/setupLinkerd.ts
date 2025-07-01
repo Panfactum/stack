@@ -39,11 +39,15 @@ export async function setupLinkerd(
     {
       title: "Start Vault Proxy",
       task: async (ctx) => {
+        if (!ctx.kubeContext) {
+          throw new CLIError("Kube context not found");
+        }
+
         const { pid, port } = await startVaultProxy({
           env: {
             ...process.env,
           },
-          kubeContext: ctx.kubeContext!,
+          kubeContext: ctx.kubeContext,
           modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
         });
         ctx.vaultProxyPid = pid;
@@ -88,7 +92,7 @@ export async function setupLinkerd(
           errorMessage: "Linkerd control plane checks failed",
           isSuccess: ({ exitCode, stdout }) =>
             exitCode === 0 ||
-            (stdout as string).includes("Status check results are √"),
+            stdout.includes("Status check results are √"),
           env: {
             ...process.env,
             VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,

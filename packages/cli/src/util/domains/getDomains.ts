@@ -1,9 +1,9 @@
 import { join, dirname } from "node:path";
 import { Glob } from "bun";
+import { asyncIterMap } from "@/util/asyncIterMap";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { asyncIterMap } from "../asyncIterMap";
-import { isEnvironmentDeployed } from "../config/isEnvironmentDeployed";
-import { CLIError } from "../error/error";
+import { isEnvironmentDeployed } from "@/util/config/isEnvironmentDeployed";
+import { CLIError } from "@/util/error/error";
 import type { DomainConfigs } from "./tasks/types";
 import type { PanfactumContext } from "@/util/context/context";
 

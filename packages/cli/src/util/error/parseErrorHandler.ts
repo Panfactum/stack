@@ -11,10 +11,10 @@ export function parseErrorHandler({
   errorMessage: string;
   nonZodErrorMessage?: string;
   location: string;
-}) {
+}): PanfactumZodError | CLIError {
   if (error instanceof ZodError) {
-    throw new PanfactumZodError(errorMessage, location, error);
+    return new PanfactumZodError(errorMessage, location, error);
   } else {
-    throw new CLIError(nonZodErrorMessage ?? errorMessage, error);
+    return new CLIError(nonZodErrorMessage ?? errorMessage, error);
   }
 }

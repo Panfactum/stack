@@ -77,12 +77,10 @@ export async function updateIAMIdentityCenter(inputs: {
             title: context.logger.applyColors(`Retrieve AWS account ID for ${environmentName} environment`),
             task: async (ctx, task) => {
                 task.title = context.logger.applyColors(`Retrieving AWS account ID for ${environmentName} environment`)
-                try {
-                    const identity = await getIdentity({ context, profile: environmentProfile })
-                    ctx.accountId = identity.Account
-                } catch (e) {
+                const identity = await getIdentity({ context, profile: environmentProfile }).catch((e) => {
                     throw new CLIError(`Was not able to get identity for environment's profile '${environmentProfile}'`, e)
-                }
+                })
+                ctx.accountId = identity.Account
                 if (!ctx.accountId) {
                     throw new CLIError(`Was not able to get identity for environment's profile '${environmentProfile}'`)
                 }
@@ -213,20 +211,17 @@ export async function updateIAMIdentityCenter(inputs: {
             title: context.logger.applyColors(`Revoke static IAM credentials ${creds?.accessKeyId}`, { lowlights: [creds!.accessKeyId] }),
             enabled: () => Boolean(creds?.accessKeyId),
             task: async () => {
-                try {
-                    const iamClient = new IAMClient({
-                        region: "us-east-1",
-                        credentials: creds
-                    })
+                const iamClient = new IAMClient({
+                    region: "us-east-1",
+                    credentials: creds
+                })
 
-                    // Delete the access key
-                    await iamClient.send(new DeleteAccessKeyCommand({
-                        AccessKeyId: creds!.accessKeyId
-                    }))
-
-                } catch (error) {
+                // Delete the access key
+                await iamClient.send(new DeleteAccessKeyCommand({
+                    AccessKeyId: creds!.accessKeyId
+                })).catch((error) => {
                     throw new CLIError(`Failed to revoke IAM access key ${creds!.accessKeyId}`, error)
-                }
+                })
             }
         }
     ], {

@@ -13,6 +13,7 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import {getPanfactumConfig} from "@/util/config/getPanfactumConfig.ts";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { BASTION_SUBDOMAIN } from "@/util/domains/consts";
+import { CLIError } from "@/util/error/error";
 import {findAuthentikLocation} from "@/util/sso/getAuthenticPath.ts";
 import {setupVaultSSO} from "@/util/sso/tasks/setupVaultSSO.ts";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -38,7 +39,7 @@ export async function setupClusterExtensions(
   });
 
   if (config.kube_domain === undefined) {
-    throw new Error("Kube domain is not set in the config.");
+    throw new CLIError("Kube domain is not set in the config.");
   }
 
   const bastionDomain = `${BASTION_SUBDOMAIN}.${config.kube_domain}`;

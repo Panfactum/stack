@@ -11,7 +11,8 @@ export class WelcomeCommand extends PanfactumCommand {
     static override paths = [["welcome"]];
 
     static override usage = Command.Usage({
-        description: "Displays the welcome screen for the DevShell"
+        description: "Displays the welcome screen for the DevShell",
+        category: 'Welcome',
     });
 
     async execute() {

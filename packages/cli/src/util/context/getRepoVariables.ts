@@ -1,6 +1,7 @@
 import { join, resolve } from "node:path";
 import yaml from "yaml";
 import { z } from "zod";
+import { CLIError, PanfactumZodError } from '@/util/error/error';
 import { REPO_CONFIG_FILE, REPO_USER_CONFIG_FILE } from "./constants";
 import { getRoot } from "./getRoot";
 import { PANFACTUM_YAML_SCHEMA } from "./schemas";
@@ -22,24 +23,55 @@ export const getRepoVariables = async (cwd: string): Promise<RepoVariables> => {
   //####################################################################
   const configFile = join(repoRootPath, REPO_CONFIG_FILE);
   if (!(await Bun.file(configFile).exists())) {
-    throw new Error(`Repo configuration file does not exist at ${configFile}`);
+    throw new CLIError(`Repo configuration file does not exist at ${configFile}`);
   }
 
   const userConfigFile = join(repoRootPath, REPO_USER_CONFIG_FILE);
 
-  const fileContent = await Bun.file(configFile).text();
-  let values = yaml.parse(fileContent);
+  const fileContent = await Bun.file(configFile).text()
+    .catch((error: unknown) => {
+      throw new CLIError(`Failed to read repo configuration file at ${configFile}`, error);
+    });
+  
+  let values: unknown;
+  try {
+    values = yaml.parse(fileContent);
+  } catch (error) {
+    throw new CLIError(`Invalid YAML syntax in repo configuration file at ${configFile}`, error);
+  }
 
   if ((await Bun.file(userConfigFile).exists())) {
-    const userFileContent = await Bun.file(userConfigFile).text();
-    values = { ...values, ...yaml.parse(userFileContent) };
+    const userFileContent = await Bun.file(userConfigFile).text()
+      .catch((error: unknown) => {
+        throw new CLIError(`Failed to read user configuration file at ${userConfigFile}`, error);
+      });
+    
+    let userValues: unknown;
+    try {
+      userValues = yaml.parse(userFileContent);
+    } catch (error) {
+      throw new CLIError(`Invalid YAML syntax in user configuration file at ${userConfigFile}`, error);
+    }
+    
+    // Ensure both values are objects before spreading
+    if (typeof values === 'object' && values !== null && typeof userValues === 'object' && userValues !== null) {
+      values = { ...values, ...userValues };
+    }
   }
 
   //####################################################################
   // Step 3: Validate required variables & set defaults
   //####################################################################
-  // todo: add zod error handler
-  const validatedValues: RepoVariables = { ...PANFACTUM_YAML_SCHEMA.parse(values), ...{ repo_root: repoRootPath } };
+  const parseResult = PANFACTUM_YAML_SCHEMA.safeParse(values);
+  if (!parseResult.success) {
+    throw new PanfactumZodError(
+      `Invalid configuration in repo config file`,
+      configFile,
+      parseResult.error
+    );
+  }
+  
+  const validatedValues: RepoVariables = { ...parseResult.data, repo_root: repoRootPath };
 
   //####################################################################
   // Step 4: Save the relative IaC dir (needed for panfactum.hcl)

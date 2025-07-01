@@ -13,7 +13,7 @@ else
   REPO="https://$CODE_REPO"
 fi
 
-COMMIT_HASH=$(pf-get-commit-hash --repo "$REPO" --ref "$GIT_REF" --no-verify)
+COMMIT_HASH=$(pf util get-commit-hash --repo "$REPO" --ref "$GIT_REF" --no-verify)
 echo "$COMMIT_HASH" >/tmp/commit-hash
 
 TAG="${IMAGE_TAG_PREFIX:+$IMAGE_TAG_PREFIX-}$COMMIT_HASH"

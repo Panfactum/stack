@@ -1,6 +1,6 @@
 import { join } from "node:path"
-import { CLIError } from "../error/error";
-import { execute } from "../subprocess/execute";
+import { CLIError } from "@/util/error/error";
+import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 export async function terragruntImport({

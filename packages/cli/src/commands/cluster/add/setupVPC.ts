@@ -1,9 +1,8 @@
 import path from "node:path";
 import { z } from "zod";
-import { vpcNetworkTest } from "@/commands/aws/vpcNetworkTest/vpcNetworkTest";
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { parseErrorHandler } from "@/util/error/parseErrorHandler";
+import { vpcNetworkTest } from "@/util/aws/vpcNetworkTest";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
@@ -11,6 +10,7 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { parseJson } from "@/util/zod/parseJson";
 import type { InstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -114,20 +114,9 @@ export async function setupVPC(
                 context: context,
                 workingDirectory: clusterPath,
               });
-              let vpcList;
-              try {
-                const vpc = JSON.parse(stdout);
-                vpcList = DESCRIBE_VPCS_SCHEMA.parse(vpc);
-              } catch (error) {
-                parseErrorHandler({
-                  error,
-                  errorMessage:
-                    "Failed checking if VPC name is already in use.",
-                  location: vpcListCommand.join(" "),
-                });
-              }
+              const vpcList = parseJson(DESCRIBE_VPCS_SCHEMA, stdout);
 
-              if (vpcList?.Vpcs.length && vpcList.Vpcs.length > 0) {
+              if (vpcList.Vpcs.length > 0) {
                 return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;
               } else {
                 return true;

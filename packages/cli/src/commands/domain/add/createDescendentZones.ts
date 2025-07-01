@@ -1,18 +1,18 @@
 import { Listr } from "listr2";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 
 import awsDNSLinksModuleHCL from "@/templates/aws_dns_links.hcl" with { type: "file" };
 import awsDNSZonesModuleHCL from "@/templates/aws_dns_zones.hcl" with { type: "file" };
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
+import { testDNSResolutionTask } from "@/util/domains/tasks/testDNSResolutionTask";
 import { validateDomainConfig, validateDomainConfigs, type DomainConfig, type DomainConfigs } from "@/util/domains/tasks/types";
-import { CLIError, PanfactumZodError } from "@/util/error/error";
+import { CLIError } from "@/util/error/error";
 import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 
 import { DNS_ZONES_MODULE_OUTPUT_SCHEMA } from "./types";
-import { testDNSResolutionTask } from "../../../util/domains/tasks/testDNSResolutionTask";
 import type { EnvironmentMeta } from "@/util/config/getEnvironments";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -219,14 +219,6 @@ export async function createDescendentZones(inputs: {
         errorMessage: "Failed to create descendent DNS zones"
     })
 
-    try {
-        return validateDomainConfigs(domainConfigs)
-    } catch (e) {
-        if (e instanceof ZodError) {
-            throw new PanfactumZodError("Failed to parse domain configs", "createDescendentZones", e)
-        } else {
-            throw new CLIError("Failed to parse dependent zones", e)
-        }
-    }
+    return validateDomainConfigs(domainConfigs)
 
 }

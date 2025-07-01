@@ -1,14 +1,15 @@
 import path from "node:path";
 import { z } from "zod";
+import { getSSMCommandOutput } from "@/util/aws/getSSMCommandOutput.ts";
+import { scaleASG } from "@/util/aws/scaleASG.ts";
+import { sendSSMCommand } from "@/util/aws/sendSSMCommand.ts";
+import { waitForASGInstance } from "@/util/aws/waitForASGInstance.ts";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { checkConnection } from "@/util/network/checkConnection";
-import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
-import { getSSMCommandOutput } from "../../../util/aws/getSSMCommandOutput";
-import { scaleASG } from "../../../util/aws/scaleASG";
-import { terragruntOutput } from "../../../util/terragrunt/terragruntOutput";
-import type { PanfactumContext } from "../../../util/context/context";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput.ts";
+import type { PanfactumContext } from "@/util/context/context.ts";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 const AWS_VPC_MODULE_OUTPUTS = z.object({
@@ -93,64 +94,16 @@ export const vpcNetworkTest = async ({
       task.output = context.logger.applyColors("Waiting for instance to be created", {
         style: "subtle",
       });
-      const { stdout: instanceId } = await execute({
-        command: [
-          "aws",
-          "--region",
-          awsRegion,
-          "--profile",
-          awsProfile,
-          "autoscaling",
-          "describe-auto-scaling-groups",
-          "--auto-scaling-group-names",
-          asg,
-          "--query",
-          "AutoScalingGroups[0].Instances[0].InstanceId",
-          "--output",
-          "text",
-        ],
-        context,
-        workingDirectory: process.cwd(),
-        errorMessage: "Failed to get instance ID",
-        retries: 10,
-        retryDelay: 10000,
-        isSuccess({ stdout }) {
-          return stdout !== "None" && stdout !== "";
-        },
-      });
+      
+      const instanceId = await waitForASGInstance(asg, awsProfile, awsRegion, context);
 
       // Step 3: Run the network test
       task.output = context.logger.applyColors(
         `Waiting for instance ${instanceId} to become ready`,
         { style: "subtle" }
       );
-      const { stdout: commandId } = await execute({
-        command: [
-          "aws",
-          "--region",
-          awsRegion,
-          "--profile",
-          awsProfile,
-          "ssm",
-          "send-command",
-          "--instance-ids",
-          instanceId,
-          "--document-name",
-          "AWS-RunShellScript",
-          "--comment",
-          "Get Public IP",
-          "--parameters",
-          'commands=["curl -m 10 ifconfig.me"]',
-          "--query",
-          "Command.CommandId",
-          "--output",
-          "text",
-        ],
-        context,
-        workingDirectory: process.cwd(),
-        errorMessage: `Failed to execute SSM command`,
-        retries: 20,
-      });
+      
+      const commandId = await sendSSMCommand(instanceId, awsProfile, awsRegion, context);
 
       // Step 4: Get the result of the network test
       task.output = context.logger.applyColors("Waiting for test to complete", {
