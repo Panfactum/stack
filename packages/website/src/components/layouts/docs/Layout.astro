@@ -1,7 +1,5 @@
 ---
 import "./global.css";
-import CommonHead from "@/components/layouts/common/CommonHead.astro";
-import ToastRegion from "@/components/ui/ToastRegion";
 import SearchDialog from "@/components/ui/search/SearchDialog";
 
 import ArticleTableOfContents, {
@@ -14,6 +12,7 @@ import { type DocsMetadata } from "./types";
 import Header from "../common/Header.astro";
 import { NavItemWithPopup } from "../common/NavItemWithPopup";
 import { SolutionsNavItem } from "../common/SolutionsNavItem";
+import CommonLayout from "../common/CommonLayout.astro";
 
 
 const pathname = new URL(Astro.request.url).pathname;
@@ -21,7 +20,6 @@ const pathname = new URL(Astro.request.url).pathname;
 interface Props {
   title: string;
   description: string;
-  redirect?: string;
   headings?: ArticleHeadingMetadata[];
   metadata?: DocsMetadata;
 }
@@ -29,23 +27,15 @@ interface Props {
 const {
   title,
   description,
-  redirect,
   headings = [],
   metadata,
 } = Astro.props;
 ---
 
-<html
-        lang="en"
+<CommonLayout
+  title={title}
+  description={description}
 >
-  <CommonHead title={title} description={description} redirect={redirect} >
-    <meta name="generator" content={Astro.generator} />
-  </CommonHead>
-
-  <body
-    class="w-screen overflow-y-scroll bg-primary font-inter"
-    id="body"
-  >
     <Header
       hasBorder={true}
       isFixed={true}
@@ -87,7 +77,6 @@ const {
   </Fragment>
   </Header> 
 
-
     <div
       class:list={[
         `
@@ -108,8 +97,5 @@ const {
       {headings.length > 1   && (<ArticleTableOfContents headings={headings} />)}
     </div>
     <SearchDialog fullPath={pathname} client:idle />
-    <ToastRegion client:idle/>
-  </body>
-</html>
-
+</CommonLayout>
 <script src="./scripts/copyHeaderLink.ts" />

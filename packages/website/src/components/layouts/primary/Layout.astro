@@ -19,9 +19,6 @@ const {
   secondTierConfig,
 } = Astro.props;
 ---
-<div>
-    
-</div>
 <CommonLayout
   title={title}
   description={description}
@@ -33,33 +30,33 @@ const {
       links={PRIMARY_NAV_LINKS}
       secondTierConfig={secondTierConfig}
     >
-    <Fragment slot="nav">
-        <SolutionsNavItem client:idle />
-        <NavItemWithPopup
-        title="Pricing"
-        action="/pricing"
-        saveEnabled={true}
-        client:idle
-        />
-        <NavItemWithPopup
-        title="Docs"
-        action="/docs/edge/guides"
-        saveEnabled={true}
-        client:idle
-        />
-        <!-- <NavItemWithPopup
-        title="Blog"
-        action="/blog"
-        saveEnabled={true}
-        client:idle
-        />
-        <NavItemWithPopup
-        title="About"
-        action="/about"
-        saveEnabled={true}
-        client:idle
-        /> -->
-    </Fragment>
+      <Fragment slot="nav">
+          <SolutionsNavItem client:idle />
+          <NavItemWithPopup
+          title="Pricing"
+          action="/pricing"
+          saveEnabled={true}
+          client:idle
+          />
+          <NavItemWithPopup
+          title="Docs"
+          action="/docs/edge/guides"
+          saveEnabled={true}
+          client:idle
+          />
+          <!-- <NavItemWithPopup
+          title="Blog"
+          action="/blog"
+          saveEnabled={true}
+          client:idle
+          />
+          <NavItemWithPopup
+          title="About"
+          action="/about"
+          saveEnabled={true}
+          client:idle
+          /> -->
+      </Fragment>
     </Header>
     <slot />
 </CommonLayout>
