@@ -12,22 +12,22 @@ import type { PanfactumContext } from "@/util/context/context";
  * AWS static credentials
  */
 interface IAWSStaticCredentials {
-  /** AWS secret access key */
-  secretAccessKey: string;
-  /** AWS access key ID */
-  accessKeyId: string;
+    /** AWS secret access key */
+    secretAccessKey: string;
+    /** AWS access key ID */
+    accessKeyId: string;
 }
 
 /**
  * Input parameters for adding an AWS profile with static credentials
  */
 interface IAddAWSProfileFromStaticCredsInput {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
-  /** AWS credentials to store */
-  creds: IAWSStaticCredentials;
-  /** Profile name to create or update */
-  profile: string;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** AWS credentials to store */
+    creds: IAWSStaticCredentials;
+    /** Profile name to create or update */
+    profile: string;
 }
 
 /**
@@ -72,8 +72,8 @@ export async function addAWSProfileFromStaticCreds(inputs: IAddAWSProfileFromSta
         profile
     } = inputs;
 
-    const configFilePath = join(context.repoVariables.aws_dir, "config")
-    const credentialsFilePath = join(context.repoVariables.aws_dir, "credentials")
+    const configFilePath = join(context.devshellConfig.aws_dir, "config")
+    const credentialsFilePath = join(context.devshellConfig.aws_dir, "credentials")
 
     let config, credentials;
 

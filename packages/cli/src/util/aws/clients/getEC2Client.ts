@@ -1,8 +1,8 @@
 // This file provides a factory function for creating AWS EC2 clients
-// It handles credential loading from files to work around AWS SDK issues
+// It uses the generic createAWSClient factory to reduce code duplication
 
 import { EC2Client } from '@aws-sdk/client-ec2'
-import { getCredsFromFile } from '@/util/aws/getCredsFromFile'
+import { createAWSClient } from './createAWSClient'
 import type { PanfactumContext } from '@/util/context/context'
 
 /**
@@ -21,9 +21,9 @@ interface IGetEC2ClientInput {
  * Creates an AWS EC2 client with proper credential handling
  * 
  * @remarks
- * This function creates an EC2Client with a workaround for AWS SDK bug
- * https://github.com/aws/aws-sdk-js-v3/issues/6872 by loading credentials
- * from files when a profile is specified.
+ * This function creates an EC2Client using the centralized createAWSClient factory,
+ * which handles the AWS SDK bug workaround and credential loading consistently
+ * across all AWS service clients.
  * 
  * @param params - Configuration for the EC2 client
  * @returns Configured AWS EC2 client
@@ -39,25 +39,15 @@ interface IGetEC2ClientInput {
  * const instances = await ec2Client.send(new DescribeInstancesCommand({}));
  * ```
  * 
- * @see {@link getCredsFromFile} - For credential file loading
+ * @see {@link createAWSClient} - Generic AWS client factory
  * @see {@link EC2Client} - AWS SDK EC2 client documentation
  */
 export const getEC2Client = async (params: IGetEC2ClientInput): Promise<EC2Client> => {
-  const { context, profile, region = 'us-east-1' } = params
-
-  // This is necessary due to this bug
-  // https://github.com/aws/aws-sdk-js-v3/issues/6872
-  const credentials = profile ? await getCredsFromFile({ context, profile }) : undefined
-
-  if (credentials) {
-    return new EC2Client({
-      credentials,
-      region
-    })
-  } else {
-    return new EC2Client({
-      profile,
-      region
-    })
-  }
+  return createAWSClient(
+    {
+      clientClass: EC2Client,
+      defaultRegion: 'us-east-1'
+    },
+    params
+  )
 }

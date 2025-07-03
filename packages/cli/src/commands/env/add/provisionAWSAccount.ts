@@ -11,7 +11,7 @@ import { getAWSProfiles } from "@/util/aws/getAWSProfiles";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
-import { directoryExists } from "@/util/fs/directoryExist"
+import { directoryExists } from "@/util/fs/directoryExists"
 import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
@@ -27,22 +27,22 @@ import type { PanfactumContext } from "@/util/context/context"
  * Interface for provisionAWSAccount function inputs
  */
 interface IProvisionAWSAccountInputs {
-  /** AWS profile name to be created for the environment */
-  environmentProfile: string;
-  /** Name of the environment being provisioned */
-  environmentName: string;
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
+    /** AWS profile name to be created for the environment */
+    environmentProfile: string;
+    /** Name of the environment being provisioned */
+    environmentName: string;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
 }
 
 /**
  * Interface for provisionAWSAccount function output
  */
 interface IProvisionAWSAccountOutput {
-  /** The account name for the environment */
-  newAccountName: string;
-  /** Whether the provisioning was skipped because the account was already created */
-  alreadyProvisioned: boolean;
+    /** The account name for the environment */
+    newAccountName: string;
+    /** Whether the provisioning was skipped because the account was already created */
+    alreadyProvisioned: boolean;
 }
 
 export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): Promise<IProvisionAWSAccountOutput> {
@@ -50,7 +50,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
     const { context, environmentName, environmentProfile } = inputs
 
 
-    const orgModulePath = join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, MODULES.AWS_ORGANIZATION)
+    const orgModulePath = join(context.devshellConfig.environments_dir, MANAGEMENT_ENVIRONMENT, GLOBAL_REGION, MODULES.AWS_ORGANIZATION)
     const orgModuleYAMLPath = join(orgModulePath, "module.yaml")
     interface ITaskContext {
         newAccountName?: string;

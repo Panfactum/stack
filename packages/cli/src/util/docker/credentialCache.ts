@@ -47,7 +47,7 @@ const CACHE_TTL = 4 * 60 * 60 * 1000
  * @returns Path to creds.json file
  */
 async function getCredsFilePath(context: PanfactumContext): Promise<string> {
-  const buildkitDir = context.repoVariables.buildkit_dir
+  const buildkitDir = context.devshellConfig.buildkit_dir
   return join(buildkitDir, 'creds.json')
 }
 
@@ -60,7 +60,7 @@ async function getCredsFilePath(context: PanfactumContext): Promise<string> {
  */
 async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile> {
   const credsFile = await getCredsFilePath(context)
-  
+
   const result = await readJSONFile({
     context,
     filePath: credsFile,
@@ -68,7 +68,7 @@ async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile
     throwOnMissing: false,
     throwOnEmpty: false
   })
-  
+
   return result || {}
 }
 
@@ -81,8 +81,8 @@ async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile
  */
 async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile): Promise<void> {
   const credsFile = await getCredsFilePath(context)
-  const buildkitDir = context.repoVariables.buildkit_dir
-  
+  const buildkitDir = context.devshellConfig.buildkit_dir
+
   // Ensure buildkit directory exists
   await createDirectory({ dirPath: buildkitDir })
     .catch((error: unknown) => {
@@ -91,7 +91,7 @@ async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile)
         error
       )
     })
-  
+
   // Write credentials file
   await writeFile({
     context,
@@ -166,20 +166,20 @@ export async function getCachedCredential(
   input: IGetCachedCredentialInput
 ): Promise<string | null> {
   const { context, registry } = input;
-  
+
   const creds = await readCredsFile(context)
   const cached = creds[registry]
-  
+
   if (!cached) {
     return null
   }
-  
+
   // Check if credential is expired
   const expiresTimestamp = parseInt(cached.expires, 10)
   if (isNaN(expiresTimestamp)) {
     throw new CLIError(`Invalid expiration timestamp for cached credential: ${cached.expires}`)
   }
-  
+
   const now = Date.now()
   if (now >= expiresTimestamp) {
     // Credential is expired, remove it
@@ -187,7 +187,7 @@ export async function getCachedCredential(
     await writeCredsFile(context, creds)
     return null
   }
-  
+
   return cached.token
 }
 
@@ -253,14 +253,14 @@ export async function setCachedCredential(
   input: ISetCachedCredentialInput
 ): Promise<void> {
   const { context, registry, token } = input;
-  
+
   const creds = await readCredsFile(context)
   const expiresAt = Date.now() + CACHE_TTL
-  
+
   creds[registry] = {
     token,
     expires: expiresAt.toString()
   }
-  
+
   await writeCredsFile(context, creds)
 }

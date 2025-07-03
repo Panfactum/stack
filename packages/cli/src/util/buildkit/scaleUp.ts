@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { CLIError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
+import { sleep } from '@/util/util/sleep'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from './constants.js'
 import { recordBuildKitBuild } from './recordBuild.js'
 import type { PanfactumContext } from '@/util/context/context.js'
@@ -234,6 +235,6 @@ async function waitForScaleUp(
     context.logger.info(`${arch}: Waiting ${remainingSeconds} seconds for at least one BuildKit replica to become available...`)
     
     // Sleep for 10 seconds
-    await Bun.sleep(10000)
+    await sleep(10000)
   }
 }

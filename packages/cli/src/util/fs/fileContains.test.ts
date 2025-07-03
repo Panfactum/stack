@@ -1,8 +1,8 @@
-import { writeFile as fsWriteFile, rm, mkdir } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile as fsWriteFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { test, expect, mock } from "bun:test";
+import { test, expect, mock, describe } from "bun:test";
 import { CLIError } from "@/util/error/error";
+import { createTestDir } from "@/util/test/createTestDir";
 import { fileContains } from "./fileContains";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -12,12 +12,12 @@ const createMockContext = (): PanfactumContext => ({
     }
 } as unknown as PanfactumContext);
 
-test("returns true when pattern is found", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-1`);
+describe("fileContains", () => {
+  test("returns true when pattern is found", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "test.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "line 1\nline with pattern\nline 3");
 
         const result = await fileContains({
@@ -32,11 +32,10 @@ test("returns true when pattern is found", async () => {
 });
 
 test("returns false when pattern is not found", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-2`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "test.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "line 1\nline 2\nline 3");
 
         const result = await fileContains({
@@ -51,7 +50,7 @@ test("returns false when pattern is not found", async () => {
 });
 
 test("returns false when file does not exist and throwIfMissing is false", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-3`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "nonexistent.txt");
 
     const result = await fileContains({
@@ -64,7 +63,7 @@ test("returns false when file does not exist and throwIfMissing is false", async
 });
 
 test("throws CLIError when file does not exist and throwIfMissing is true", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-4`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "nonexistent.txt");
 
     await expect(fileContains({
@@ -81,12 +80,11 @@ test("throws CLIError when file does not exist and throwIfMissing is true", asyn
 });
 
 test("works with context parameter", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-5`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "test.txt");
     const mockContext = createMockContext();
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "test line");
 
         const result = await fileContains({
@@ -102,11 +100,10 @@ test("works with context parameter", async () => {
 });
 
 test("handles complex regex patterns", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-6`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "test.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "user@example.com\ninvalid-email");
 
         const result = await fileContains({
@@ -121,11 +118,10 @@ test("handles complex regex patterns", async () => {
 });
 
 test("handles large files efficiently", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-7`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "large.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         
         // Create a large file with pattern near the beginning
         const lines = ["This line has the target pattern"];
@@ -150,11 +146,10 @@ test("handles large files efficiently", async () => {
 });
 
 test("handles files with different line endings", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-8`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "mixed-endings.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         
         // Mix of Unix (\n) and Windows (\r\n) line endings
         await fsWriteFile(filePath, "line1\r\nline2 with pattern\nline3\r\n");
@@ -171,11 +166,10 @@ test("handles files with different line endings", async () => {
 });
 
 test("handles empty files", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-9`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "empty.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "");
 
         const result = await fileContains({
@@ -190,11 +184,10 @@ test("handles empty files", async () => {
 });
 
 test("handles files with only newlines", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-10`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "newlines.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "\n\n\n\n");
 
         const result = await fileContains({
@@ -209,11 +202,10 @@ test("handles files with only newlines", async () => {
 });
 
 test("handles multiline patterns", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-11`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "multiline.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "start\nmiddle\nend");
 
         const result = await fileContains({
@@ -228,11 +220,10 @@ test("handles multiline patterns", async () => {
 });
 
 test("handles special characters in file content", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-12`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "special.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "Special chars: $@#%^&*(){}[]|\\<>?\"':;`~");
 
         const result = await fileContains({
@@ -247,11 +238,10 @@ test("handles special characters in file content", async () => {
 });
 
 test("handles unicode content", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-13`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "unicode.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "Hello 世界 🌍 emoji test 🚀");
 
         const result = await fileContains({
@@ -266,11 +256,10 @@ test("handles unicode content", async () => {
 });
 
 test("returns false for pattern at end of file without trailing newline", async () => {
-    const testDir = join(tmpdir(), `fileContains-test-${Date.now()}-14`);
+    const { path: testDir } = await createTestDir({ functionName: "fileContains" });
     const filePath = join(testDir, "no-trailing-newline.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         // Write without trailing newline
         await fsWriteFile(filePath, "line1\nline2\nlast line with pattern", "utf-8");
 
@@ -295,4 +284,5 @@ test("handles permission errors gracefully", async () => {
         regex: /test/,
         throwIfMissing: true
     })).rejects.toThrow(CLIError);
+});
 });

@@ -3,6 +3,7 @@
 
 import { GetCommandInvocationCommand } from "@aws-sdk/client-ssm";
 import { CLISubprocessError, CLIError } from "@/util/error/error";
+import { sleep } from "@/util/util/sleep";
 import { getSSMClient } from "./clients/getSSMClient";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -133,7 +134,7 @@ async function getSSMCommandInvocation(inputs: IGetSSMCommandOutputInput): Promi
     
     // Wait before next retry if we haven't reached max retries
     if (retries < maxRetries) {
-      await Bun.sleep(retryDelay);
+      await sleep(retryDelay);
     }
   }
 

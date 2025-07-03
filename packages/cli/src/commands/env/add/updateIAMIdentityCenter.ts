@@ -16,12 +16,12 @@ import type { PanfactumContext } from "@/util/context/context";
  * Interface for updateIAMIdentityCenter function inputs
  */
 interface IUpdateIAMIdentityCenterInputs {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
-  /** AWS profile for the environment being configured */
-  environmentProfile: string;
-  /** Name of the environment being configured */
-  environmentName: string;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** AWS profile for the environment being configured */
+    environmentProfile: string;
+    /** Name of the environment being configured */
+    environmentName: string;
 }
 
 interface ITaskContext {
@@ -38,7 +38,7 @@ export async function updateIAMIdentityCenter(inputs: IUpdateIAMIdentityCenterIn
     const { context, environmentProfile, environmentName } = inputs;
 
     const modulePath = join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         MANAGEMENT_ENVIRONMENT,
         GLOBAL_REGION,
         MODULES.IAM_IDENTIY_CENTER_PERMISSIONS

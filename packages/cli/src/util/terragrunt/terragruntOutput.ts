@@ -97,7 +97,7 @@ export const terragruntOutput = async <T extends z.ZodType<object>>(
   input: ITerragruntOutputInput<T>
 ): Promise<z.infer<T>> => {
   const { awsProfile, context, env, environment, region, module, validationSchema } = input;
-  const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
+  const workingDirectory = join(context.devshellConfig.environments_dir, environment, region, module)
 
   let profileToUse = awsProfile;
   if (!profileToUse) {

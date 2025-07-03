@@ -10,8 +10,8 @@ import type { PanfactumContext } from "@/util/context/context";
  * Options for getting AWS profiles
  */
 interface IGetAWSProfilesOptions {
-  /** Whether to throw an error if the config file is missing */
-  throwOnMissingConfig?: boolean;
+    /** Whether to throw an error if the config file is missing */
+    throwOnMissingConfig?: boolean;
 }
 
 /**
@@ -51,7 +51,7 @@ interface IGetAWSProfilesOptions {
  */
 export async function getAWSProfiles(context: PanfactumContext, opts: IGetAWSProfilesOptions = {}): Promise<string[]> {
 
-    const configFilePath = join(context.repoVariables.aws_dir, "config")
+    const configFilePath = join(context.devshellConfig.aws_dir, "config")
 
     // Handles missing config file
     if (! await fileExists({ filePath: configFilePath })) {

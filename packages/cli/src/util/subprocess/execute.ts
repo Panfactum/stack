@@ -4,7 +4,7 @@
 import { ReadableStreamDefaultReader } from "node:stream/web";
 import { CLISubprocessError } from "@/util/error/error";
 import { concatStreams } from "@/util/streams/concatStreams";
-import { addBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
+import { sleep } from "@/util/util/sleep";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -171,7 +171,7 @@ export async function execute(inputs: IExecuteInput): Promise<IExecuteOutput> {
     // For background processes, return immediately with PID
     if (background) {
       // Track the background process
-      addBackgroundProcess({
+      context.backgroundProcessManager.addProcess({
         pid: proc.pid,
         command: command.join(' '),
         description: backgroundDescription
@@ -219,7 +219,7 @@ export async function execute(inputs: IExecuteInput): Promise<IExecuteOutput> {
 
     const stdoutPromise = new globalThis.Response(stdoutForCapture).text();
     const stderrPromise = new globalThis.Response(stderrForCapture).text();
-    const mergedOutputStreams = concatStreams([stdoutForMerge, stderrForMerge]);
+    const mergedOutputStreams = concatStreams({ streams: [stdoutForMerge, stderrForMerge] });
     const mergedOutputStreamsPromise = new globalThis.Response(
       mergedOutputStreams
     ).text();
@@ -251,7 +251,7 @@ export async function execute(inputs: IExecuteInput): Promise<IExecuteOutput> {
     }
 
     if (retries > 0) {
-      await Bun.sleep(retryDelay);
+      await sleep(retryDelay);
     }
   }
 

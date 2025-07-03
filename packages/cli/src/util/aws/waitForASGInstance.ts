@@ -4,6 +4,7 @@
 import { DescribeAutoScalingGroupsCommand } from "@aws-sdk/client-auto-scaling";
 import { getAutoScalingClient } from "@/util/aws/clients/getAutoScalingClient.ts";
 import { CLIError } from "@/util/error/error";
+import { sleep } from "@/util/util/sleep";
 import type { PanfactumContext } from "@/util/context/context.ts";
 
 /**
@@ -82,7 +83,7 @@ export async function waitForASGInstance(input: IWaitForASGInstanceInput): Promi
     
     // Wait before next retry if we haven't reached max retries
     if (retries < maxRetries) {
-      await Bun.sleep(retryDelay);
+      await sleep(retryDelay);
     }
   }
   

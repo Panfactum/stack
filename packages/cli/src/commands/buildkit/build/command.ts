@@ -6,12 +6,11 @@ import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { CLIError } from '@/util/error/error.js'
-import { directoryExists } from '@/util/fs/directoryExist.js'
+import { directoryExists } from '@/util/fs/directoryExists.js'
 import { fileExists } from '@/util/fs/fileExists.js'
 import { getOpenPorts } from '@/util/network/getOpenPorts.js'
-import { waitForPort } from '@/util/network/waitForPort.js'
+import { waitForConnection } from '@/util/network/waitForConnection.js'
 import { execute } from '@/util/subprocess/execute.js'
-import { killBackgroundProcess } from '@/util/subprocess/killBackgroundProcess.js'
 import type { IBuildKitConfig } from '@/util/buildkit/constants.js'
 
 
@@ -157,7 +156,7 @@ Any additional arguments after -- are passed directly to buildctl.
    * @internal
    */
   private armTunnelPid?: number
-  
+
   /**
    * Process ID of the AMD64 tunnel
    * @internal
@@ -203,9 +202,9 @@ Any additional arguments after -- are passed directly to buildctl.
     const config = await getBuildKitConfig({ context: this.context })
 
     // Set up cleanup handler
-    process.on('SIGINT', () => this.cleanup())
-    process.on('SIGTERM', () => this.cleanup())
-    process.on('exit', () => this.cleanup())
+    process.on('SIGINT', () => { this.cleanup() })
+    process.on('SIGTERM', () => { this.cleanup() })
+    process.on('exit', () => { this.cleanup() })
 
     try {
       // Start tunnels for both architectures
@@ -229,7 +228,7 @@ Any additional arguments after -- are passed directly to buildctl.
         background: true,
         backgroundDescription: 'BuildKit ARM64 tunnel on port ' + armPort
       })
-      
+
       this.armTunnelPid = armTunnelResult.pid
 
       // Start AMD tunnel
@@ -246,12 +245,12 @@ Any additional arguments after -- are passed directly to buildctl.
         background: true,
         backgroundDescription: 'BuildKit AMD64 tunnel on port ' + amdPort
       })
-      
+
       this.amdTunnelPid = amdTunnelResult.pid
 
       // Wait for tunnels to be ready
-      await waitForPort({ port: armPort })
-      await waitForPort({ port: amdPort })
+      await waitForConnection({ ip: '127.0.0.1', port: armPort })
+      await waitForConnection({ ip: '127.0.0.1', port: amdPort })
 
       // Run parallel builds
       const [armResult, amdResult] = await Promise.all([
@@ -278,7 +277,7 @@ Any additional arguments after -- are passed directly to buildctl.
 
       return 0
     } finally {
-      this.cleanup()
+      await this.cleanup()
     }
   }
 
@@ -357,18 +356,16 @@ Any additional arguments after -- are passed directly to buildctl.
    * 
    * @internal
    */
-  private cleanup(): void {
+  private async cleanup(): Promise<void> {
     // Kill tunnel processes using the centralized utility
     if (this.armTunnelPid) {
-      killBackgroundProcess({ 
-        pid: this.armTunnelPid, 
-        context: this.context 
+      await this.context.backgroundProcessManager.killProcess({
+        pid: this.armTunnelPid
       })
     }
     if (this.amdTunnelPid) {
-      killBackgroundProcess({ 
-        pid: this.amdTunnelPid, 
-        context: this.context 
+      await this.context.backgroundProcessManager.killProcess({
+        pid: this.amdTunnelPid
       })
     }
   }

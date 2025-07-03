@@ -1,9 +1,11 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
-import { test, expect, mock } from "bun:test";
+import { test, expect, mock, describe, beforeEach, afterEach, spyOn } from "bun:test";
 import yaml from "yaml";
+import * as getPanfactumConfigModule from "@/util/config/getPanfactumConfig";
+import * as isEnvironmentDeployedModule from "@/util/config/isEnvironmentDeployed";
 import { CLIError } from "@/util/error/error";
+import { createTestDir } from "@/util/test/createTestDir";
 import { getDomains } from "./getDomains";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -14,32 +16,6 @@ const ENVIRONMENT_YAML = "environment.yaml";
 const GLOBAL_YAML = "global.yaml";
 const REGION_YAML = "region.yaml";
 
-// Mock isEnvironmentDeployed to avoid dependency on complex config loading
-const isEnvironmentDeployedMock = mock((_inputs: { context: PanfactumContext; environment: string }) => Promise.resolve(false));
-mock.module("@/util/config/isEnvironmentDeployed", () => ({
-    isEnvironmentDeployed: isEnvironmentDeployedMock
-}));
-
-// Mock getPanfactumConfig to read from our test YAML files
-mock.module("@/util/config/getPanfactumConfig", () => ({
-    getPanfactumConfig: mock(async ({ directory }: { directory: string }) => {
-        const envYamlPath = join(directory, ENVIRONMENT_YAML);
-        try {
-            const content = await Bun.file(envYamlPath).text();
-            const parsed = yaml.parse(content) as Record<string, unknown>;
-            return {
-                ...parsed,
-                environment_dir: dirname(envYamlPath).split("/").pop(),
-                tf_state_region: US_EAST_1
-            };
-        } catch {
-            return {
-                tf_state_region: US_EAST_1
-            };
-        }
-    })
-}));
-
 // Helper to create a mock context
 const createMockContext = (environmentsDir: string): PanfactumContext => ({
     logger: {
@@ -48,7 +24,7 @@ const createMockContext = (environmentsDir: string): PanfactumContext => ({
         warn: mock(() => {}),
         error: mock(() => {})
     },
-    repoVariables: {
+    devshellConfig: {
         environments_dir: environmentsDir,
         repo_root: dirname(environmentsDir), // Set repo root to parent of environments dir
         repo_name: "test-repo",
@@ -94,8 +70,69 @@ const createGlobalYaml = () => {
     });
 };
 
-test("returns empty object when no environment.yaml files exist", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+// Helper to normalize paths in snapshots (replace dynamic temp paths with placeholders)
+const normalizeSnapshot = (result: Record<string, unknown>): Record<string, unknown> => {
+    const normalized = JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
+    
+    // Replace dynamic paths with stable placeholders
+    const replacePath = (obj: unknown): unknown => {
+        if (obj && typeof obj === 'object') {
+            if (Array.isArray(obj)) {
+                return obj.map(replacePath);
+            }
+            
+            const newObj: Record<string, unknown> = {};
+            for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+                if (key === 'path' && typeof value === 'string') {
+                    // Replace temp directory paths with a stable placeholder
+                    newObj[key] = value.replace(/^.*\/getDomains-[^/]+/, '<temp-dir>');
+                } else {
+                    newObj[key] = replacePath(value);
+                }
+            }
+            return newObj;
+        }
+        return obj;
+    };
+    
+    return replacePath(normalized) as Record<string, unknown>;
+};
+
+describe("getDomains", () => {
+  let isEnvironmentDeployedMock: ReturnType<typeof spyOn<typeof isEnvironmentDeployedModule, "isEnvironmentDeployed">>;
+  let getPanfactumConfigMock: ReturnType<typeof spyOn<typeof getPanfactumConfigModule, "getPanfactumConfig">>;
+
+  beforeEach(() => {
+    // Create spies for module functions
+    isEnvironmentDeployedMock = spyOn(isEnvironmentDeployedModule, "isEnvironmentDeployed");
+    isEnvironmentDeployedMock.mockResolvedValue(false);
+    
+    getPanfactumConfigMock = spyOn(getPanfactumConfigModule, "getPanfactumConfig");
+    getPanfactumConfigMock.mockImplementation(async (input) => {
+      const directory = input.directory || "";
+      const envYamlPath = join(directory, ENVIRONMENT_YAML);
+      try {
+        const content = await Bun.file(envYamlPath).text();
+        const parsed = yaml.parse(content) as Record<string, unknown>;
+        return {
+          ...parsed,
+          environment_dir: dirname(envYamlPath).split("/").pop(),
+          tf_state_region: US_EAST_1
+        };
+      } catch {
+        return {
+          tf_state_region: US_EAST_1
+        };
+      }
+    });
+  });
+
+  afterEach(() => {
+    // Restore the mocked module functions
+    mock.restore();
+  });
+  test("returns empty object when no environment.yaml files exist", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     
     try {
@@ -111,14 +148,14 @@ test("returns empty object when no environment.yaml files exist", async () => {
         
         const result = await getDomains({ context });
         
-        expect(result).toEqual({});
+        expect(result).toMatchInlineSnapshot(`{}`)
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("extracts domains from single environment", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("extracts domains from single environment", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const prodDir = join(environmentsDir, "production");
     
@@ -160,34 +197,39 @@ test("extracts domains from single environment", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(Object.keys(result)).toHaveLength(2);
-        expect(result["example.com"]).toEqual({
-            domain: "example.com",
-            zoneId: "Z1234567890ABC",
-            recordManagerRoleARN: `arn:aws:iam::${AWS_ACCOUNT_ID}:role/DNSManager`,
-            env: {
-                name: "production",
-                path: prodDir,
-                deployed: false // Will be false as isEnvironmentDeployed will fail in test
+        // Normalize paths before snapshot
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "api.example.com": {
+                "domain": "api.example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "production",
+                  "path": "<temp-dir>/environments/production",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/DNSManager",
+                "zoneId": "Z0987654321XYZ",
+              },
+              "example.com": {
+                "domain": "example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "production",
+                  "path": "<temp-dir>/environments/production",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/DNSManager",
+                "zoneId": "Z1234567890ABC",
+              },
             }
-        });
-        expect(result["api.example.com"]).toEqual({
-            domain: "api.example.com",
-            zoneId: "Z0987654321XYZ",
-            recordManagerRoleARN: `arn:aws:iam::${AWS_ACCOUNT_ID}:role/DNSManager`,
-            env: {
-                name: "production",
-                path: prodDir,
-                deployed: false
-            }
-        });
+        `);
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("merges domains from multiple environments", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("merges domains from multiple environments", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const prodDir = join(environmentsDir, "production");
     const stagingDir = join(environmentsDir, "staging");
@@ -247,16 +289,38 @@ test("merges domains from multiple environments", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(Object.keys(result)).toHaveLength(2);
-        expect(result["example.com"]?.env.name).toBe("production");
-        expect(result["staging.example.com"]?.env.name).toBe("staging");
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "example.com": {
+                "domain": "example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "production",
+                  "path": "<temp-dir>/environments/production",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/ProdDNS",
+                "zoneId": "Z1111111111111",
+              },
+              "staging.example.com": {
+                "domain": "staging.example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "staging",
+                  "path": "<temp-dir>/environments/staging",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/StagingDNS",
+                "zoneId": "Z2222222222222",
+              },
+            }
+        `);
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("handles environment.yaml without domains", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("handles environment.yaml without domains", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const devDir = join(environmentsDir, "development");
     
@@ -287,14 +351,14 @@ test("handles environment.yaml without domains", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(result).toEqual({});
+        expect(result).toMatchInlineSnapshot(`{}`)
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("throws CLIError when environment name is missing", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("throws CLIError when environment name is missing", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const envDir = join(environmentsDir, "broken");
     
@@ -327,12 +391,12 @@ test("throws CLIError when environment name is missing", async () => {
         await expect(getDomains({ context })).rejects.toThrow(CLIError);
         await expect(getDomains({ context })).rejects.toThrow("Unknown environment");
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("processes nested environment directories", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("processes nested environment directories", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const nestedDir = join(environmentsDir, "group1", "subgroup", "prod");
     
@@ -369,17 +433,28 @@ test("processes nested environment directories", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(Object.keys(result)).toHaveLength(1);
-        expect(result["nested.example.com"]).toBeDefined();
-        expect(result["nested.example.com"]?.env.name).toBe("nested-prod");
-        expect(result["nested.example.com"]?.env.path).toBe(nestedDir);
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "nested.example.com": {
+                "domain": "nested.example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "nested-prod",
+                  "path": "<temp-dir>/environments/group1/subgroup/prod",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/NestedDNS",
+                "zoneId": "Z4444444444444",
+              },
+            }
+        `);
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("handles domain with special characters in config", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("handles domain with special characters in config", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const envDir = join(environmentsDir, "special");
     
@@ -416,15 +491,28 @@ test("handles domain with special characters in config", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(result["my-special-domain.example.com"]).toBeDefined();
-        expect(result["my-special-domain.example.com"]?.domain).toBe("my-special-domain.example.com");
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "my-special-domain.example.com": {
+                "domain": "my-special-domain.example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "special-env",
+                  "path": "<temp-dir>/environments/special",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/SpecialDNS",
+                "zoneId": "Z5555555555555",
+              },
+            }
+        `);
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("handles multiple domains in same environment", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("handles multiple domains in same environment", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const multiDir = join(environmentsDir, "multi");
     
@@ -469,22 +557,48 @@ test("handles multiple domains in same environment", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(Object.keys(result)).toHaveLength(3);
-        expect(result["domain1.com"]).toBeDefined();
-        expect(result["domain2.com"]).toBeDefined();
-        expect(result["subdomain.domain1.com"]).toBeDefined();
-        
-        // All should share same environment
-        expect(result["domain1.com"]?.env.name).toBe("multi-domain");
-        expect(result["domain2.com"]?.env.name).toBe("multi-domain");
-        expect(result["subdomain.domain1.com"]?.env.name).toBe("multi-domain");
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "domain1.com": {
+                "domain": "domain1.com",
+                "env": {
+                  "deployed": false,
+                  "name": "multi-domain",
+                  "path": "<temp-dir>/environments/multi",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/DNS1",
+                "zoneId": "Z6666666666666",
+              },
+              "domain2.com": {
+                "domain": "domain2.com",
+                "env": {
+                  "deployed": false,
+                  "name": "multi-domain",
+                  "path": "<temp-dir>/environments/multi",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/DNS2",
+                "zoneId": "Z7777777777777",
+              },
+              "subdomain.domain1.com": {
+                "domain": "subdomain.domain1.com",
+                "env": {
+                  "deployed": false,
+                  "name": "multi-domain",
+                  "path": "<temp-dir>/environments/multi",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/DNS3",
+                "zoneId": "Z8888888888888",
+              },
+            }
+        `);
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("ignores non-environment.yaml files", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("ignores non-environment.yaml files", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const envDir = join(environmentsDir, "test");
     
@@ -527,16 +641,28 @@ test("ignores non-environment.yaml files", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        // Should only find the one domain from environment.yaml
-        expect(Object.keys(result)).toHaveLength(1);
-        expect(result["test.com"]).toBeDefined();
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "test.com": {
+                "domain": "test.com",
+                "env": {
+                  "deployed": false,
+                  "name": "test",
+                  "path": "<temp-dir>/environments/test",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/TestDNS",
+                "zoneId": "Z9999999999999",
+              },
+            }
+        `);
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("handles empty domains object in environment.yaml", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("handles empty domains object in environment.yaml", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const emptyDir = join(environmentsDir, "empty");
     
@@ -568,14 +694,14 @@ test("handles empty domains object in environment.yaml", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        expect(result).toEqual({});
+        expect(result).toMatchInlineSnapshot(`{}`)
     } finally {
-        await rm(testDir, { recursive: true, force: true });
+      await rm(testDir, { recursive: true, force: true });
     }
-});
+  });
 
-test("updates deployed status based on isEnvironmentDeployed", async () => {
-    const testDir = join(tmpdir(), `getDomains-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  test("updates deployed status based on isEnvironmentDeployed", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "getDomains" });
     const environmentsDir = join(testDir, "environments");
     const prodDir = join(environmentsDir, "production");
     const stagingDir = join(environmentsDir, "staging");
@@ -640,11 +766,31 @@ test("updates deployed status based on isEnvironmentDeployed", async () => {
         const context = createMockContext(environmentsDir);
         const result = await getDomains({ context });
         
-        // Verify that production domain has deployed: true
-        expect(result["example.com"]?.env.deployed).toBe(true);
-        
-        // Verify that staging domain has deployed: false
-        expect(result["staging.example.com"]?.env.deployed).toBe(false);
+        const normalized = normalizeSnapshot(result);
+        expect(normalized).toMatchInlineSnapshot(`
+            {
+              "example.com": {
+                "domain": "example.com",
+                "env": {
+                  "deployed": true,
+                  "name": "production",
+                  "path": "<temp-dir>/environments/production",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/ProdDNS",
+                "zoneId": "Z1111111111111",
+              },
+              "staging.example.com": {
+                "domain": "staging.example.com",
+                "env": {
+                  "deployed": false,
+                  "name": "staging",
+                  "path": "<temp-dir>/environments/staging",
+                },
+                "recordManagerRoleARN": "arn:aws:iam::123456789012:role/StagingDNS",
+                "zoneId": "Z2222222222222",
+              },
+            }
+        `);
         
         // Verify that isEnvironmentDeployed was called with correct arguments
         expect(isEnvironmentDeployedMock).toHaveBeenCalledWith({
@@ -660,4 +806,5 @@ test("updates deployed status based on isEnvironmentDeployed", async () => {
         isEnvironmentDeployedMock.mockImplementation((_inputs: { context: PanfactumContext; environment: string }) => Promise.resolve(false));
         await rm(testDir, { recursive: true, force: true });
     }
+  });
 });

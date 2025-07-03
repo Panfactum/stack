@@ -5,7 +5,6 @@ import { fileExists } from '@/util/fs/fileExists.js';
 import { removeFile } from '@/util/fs/removeFile.js';
 import { writeFile } from '@/util/fs/writeFile.js';
 import { execute } from '@/util/subprocess/execute.js';
-import { killBackgroundProcess } from '@/util/subprocess/killBackgroundProcess.js';
 import { getVaultToken } from '@/util/vault/getVaultToken.js';
 import type { PanfactumContext } from '@/util/context/context.js';
 
@@ -85,7 +84,7 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
   } = options;
 
   // Get SSH directory from context
-  const sshDir = context.repoVariables.ssh_dir;
+  const sshDir = context.devshellConfig.ssh_dir;
 
   // Read connection info to get bastion details
   const connectionInfoFile = join(sshDir, 'connection_info');
@@ -261,9 +260,9 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
       error
     );
   });
-  
+
   const signedKey = result.stdout;
-  
+
   if (!signedKey || signedKey.trim().length === 0) {
     throw new CLIError(
       `Vault returned empty signed key for ${bastionName}`
@@ -285,7 +284,7 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
 
   // Establish tunnel using execute with background mode
   const knownHostsFile = join(sshDir, 'known_hosts');
-  
+
   const tunnelResult = await execute({
     command: [
       'autossh',
@@ -334,9 +333,8 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
     bastionName,
     close: async () => {
       context.logger.info('Closing tunnel...');
-      killBackgroundProcess({
+      await context.backgroundProcessManager.killProcess({
         pid: tunnelResult.pid,
-        context,
         killChildren: true
       });
     }

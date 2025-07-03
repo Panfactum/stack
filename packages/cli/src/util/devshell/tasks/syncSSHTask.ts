@@ -59,7 +59,7 @@ export async function buildSyncSSHTask<T extends {}>(input: IBuildSyncSSHTaskInp
         title: "Sync SSH bastion connection info",
         task: async (_, parentTask) => {
 
-            const { ssh_dir: sshDir, environments_dir: environmentsDir } = context.repoVariables;
+            const { ssh_dir: sshDir, environments_dir: environmentsDir } = context.devshellConfig;
 
 
             ///////////////////////////////////////////////////////

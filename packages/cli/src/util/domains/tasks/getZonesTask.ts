@@ -15,25 +15,25 @@ import type { ListrTask } from "listr2";
  * Interface for getZonesTask function input
  */
 interface IGetZonesTaskInput {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
 }
 
 /**
  * Interface for getZonesTask function output
  */
 interface IGetZonesTaskOutput<T extends {}> {
-  /** Listr task for DNS zone retrieval */
-  task: ListrTask<T>;
-  /** Domain configurations retrieved from DNS zones */
-  domainConfigs: DomainConfigs;
+    /** Listr task for DNS zone retrieval */
+    task: ListrTask<T>;
+    /** Domain configurations retrieved from DNS zones */
+    domainConfigs: DomainConfigs;
 }
 
 export async function getZonesTask<T extends {}>(inputs: IGetZonesTaskInput): Promise<IGetZonesTaskOutput<T>> {
 
     const { context } = inputs;
 
-    const { environments_dir: environmentsDir } = inputs.context.repoVariables;
+    const { environments_dir: environmentsDir } = inputs.context.devshellConfig;
     const domainConfigs: DomainConfigs = {}
     return {
         domainConfigs,

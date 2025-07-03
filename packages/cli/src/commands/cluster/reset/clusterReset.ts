@@ -4,8 +4,8 @@
 import { z } from "zod";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
+import { parseJson } from "@/util/json/parseJson";
 import { execute } from "@/util/subprocess/execute";
-import { parseJson } from "@/util/zod/parseJson";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 

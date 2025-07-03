@@ -4,8 +4,8 @@
 import { Option, Command } from 'clipanion'
 import { z } from 'zod'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
-import {getAllRegions} from "@/util/config/getAllRegions.ts";
-import {getPanfactumConfig} from "@/util/config/getPanfactumConfig.ts";
+import { getAllRegions } from "@/util/config/getAllRegions.ts";
+import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { getTempCredentials } from '@/util/db/getTempCredentials.ts'
 import { getVaultRole } from '@/util/db/getVaultRole.ts'
 import { listDatabases } from '@/util/db/listDatabases.ts'
@@ -199,7 +199,7 @@ export class DbTunnelCommand extends PanfactumCommand {
     // Step 1: Find databases
     context.logger.info('Finding databases...')
     const databases = await listDatabases({ context, type: validatedType })
-    
+
     if (databases.length === 0) {
       throw new CLIError('No databases found matching the criteria')
     }
@@ -252,8 +252,8 @@ export class DbTunnelCommand extends PanfactumCommand {
 
     // Step 3: Create tunnel
     // Use the service from annotations if available, otherwise construct it
-    const serviceName = selectedDb.annotations?.['panfactum.com/service'] || 
-      (selectedDb.type === 'postgresql' 
+    const serviceName = selectedDb.annotations?.['panfactum.com/service'] ||
+      (selectedDb.type === 'postgresql'
         ? `${selectedDb.namespace}.${selectedDb.name}-rw`
         : `${selectedDb.namespace}.${selectedDb.name}`)
 
@@ -264,14 +264,14 @@ export class DbTunnelCommand extends PanfactumCommand {
   Database: ${selectedDb.name}\n
   Type: ${selectedDb.type}\n
   Namespace: ${selectedDb.namespace}`);
-    
-    
+
+
     let connectionDetails = ''
     if (selectedDb.type === 'nats') {
-      const {ca, cert, key} = credentials.certs || {};
+      const { ca, cert, key } = credentials.certs || {};
 
       connectionDetails = `
-  Credentials saved to ${context.repoVariables.nats_dir} and will expire based on your vault_credential_lifetime_hours(default: 16 hours).
+  Credentials saved to ${context.devshellConfig.nats_dir} and will expire based on your vault_credential_lifetime_hours(default: 16 hours).
 
   To connect using the NATS CLI, set the following environment variables:
 
@@ -293,7 +293,7 @@ export class DbTunnelCommand extends PanfactumCommand {
   
   Password: ${credentials.password}`
     }
-    
+
     context.logger.info(`${connectionDetails}`)
 
     let connectionString = ''
@@ -330,10 +330,10 @@ export class DbTunnelCommand extends PanfactumCommand {
           command: ['vault', 'lease', 'revoke', credentials.leaseId],
           context,
           workingDirectory: process.cwd(),
-          env: { 
+          env: {
             ...process.env,
             VAULT_ADDR: config.vault_addr,
-            VAULT_TOKEN: vaultToken 
+            VAULT_TOKEN: vaultToken
           },
         }).catch((error) => {
           // Log cleanup errors but don't throw

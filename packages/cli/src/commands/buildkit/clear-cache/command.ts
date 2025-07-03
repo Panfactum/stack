@@ -6,9 +6,9 @@ import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
+import { parseJson } from '@/util/json/parseJson'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { execute } from '@/util/subprocess/execute.js'
-import { parseJson } from '@/util/zod/parseJson.js'
 
 /**
  * CLI command for clearing BuildKit caches and unused storage

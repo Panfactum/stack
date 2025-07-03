@@ -3,6 +3,7 @@ import { z } from "zod";
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { vpcNetworkTest } from "@/util/aws/vpcNetworkTest";
+import { parseJson } from "@/util/json/parseJson";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
@@ -10,7 +11,6 @@ import {
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
-import { parseJson } from "@/util/zod/parseJson";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 

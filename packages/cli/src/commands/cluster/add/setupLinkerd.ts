@@ -4,10 +4,9 @@ import kubeLinkerdTerragruntHcl from "@/templates/kube_linkerd_terragrunt.hcl" w
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { execute } from "@/util/subprocess/execute";
-import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
-import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
+import { startVaultProxy } from "@/util/vault/startVaultProxy";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -44,6 +43,7 @@ export async function setupLinkerd(
         }
 
         const { pid, port } = await startVaultProxy({
+          context,
           env: {
             ...process.env,
           },
@@ -113,7 +113,7 @@ export async function setupLinkerd(
       title: "Stop Vault Proxy",
       task: async (ctx) => {
         if (ctx.vaultProxyPid) {
-          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
         }
       },
     },

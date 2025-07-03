@@ -325,7 +325,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             // then it is possible that they messed with the AWS profile or credentials
             // and broke them, so we need to validate that they work
             const checkStatus = await checkAdminPermissions({ context, profile: DEFAULT_MANAGEMENT_PROFILE })
-            const awsConfigFile = join(context.repoVariables.aws_dir, "config")
+            const awsConfigFile = join(context.devshellConfig.aws_dir, "config")
             if (checkStatus.status === "missingAdministratorAccess") {
                 context.logger.error(`
                     The AWS profile ${DEFAULT_MANAGEMENT_PROFILE} in ${awsConfigFile}
@@ -336,7 +336,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
                 `, { highlights: [DEFAULT_MANAGEMENT_PROFILE, awsConfigFile, checkStatus.username ?? "", checkStatus.accountId ?? "", "AdministratorAccess"] })
                 throw new CLIError(`The ${DEFAULT_MANAGEMENT_PROFILE} AWS profile does not have the AdministratorAccess policy.`)
             } else if (checkStatus.status === "invalidCredentials") {
-                const credentialsFile = join(context.repoVariables.aws_dir, "credentials")
+                const credentialsFile = join(context.devshellConfig.aws_dir, "credentials")
                 context.logger.error(`
                     The AWS profile ${DEFAULT_MANAGEMENT_PROFILE} in ${awsConfigFile}
                     does not have valid credentials.
@@ -368,7 +368,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             // environments were created WITHOUT an AWS organization. Those need to be
             // imported.
 
-            const managementFolder = getLastPathSegments({ path: join(context.repoVariables.environments_dir, MANAGEMENT_ENVIRONMENT), lastSegments: 2 })
+            const managementFolder = getLastPathSegments({ path: join(context.devshellConfig.environments_dir, MANAGEMENT_ENVIRONMENT), lastSegments: 2 })
             context.logger.success(`
                 The AWS Organization has now been configured and its settings are 
                 stored in the ${MANAGEMENT_ENVIRONMENT} environment (${managementFolder}). The ${MANAGEMENT_ENVIRONMENT}
@@ -476,7 +476,7 @@ export class EnvironmentInstallCommand extends PanfactumCommand {
             })
         }
 
-        const newDirectory = getRelativeFromRoot({ context, path: join(context.repoVariables.environments_dir, environmentName) })
+        const newDirectory = getRelativeFromRoot({ context, path: join(context.devshellConfig.environments_dir, environmentName) })
         context.logger.success(`
             The ${environmentName} environment has been successfully set up.
             

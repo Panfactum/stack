@@ -8,10 +8,8 @@ import { getLastPathSegments } from "@/util/fs/getLastPathSegments";
 import { MODULES } from "@/util/terragrunt/constants";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import {
-    updateKubeConfig,
-    type CLUSTERS_FILE_SCHEMA,
-} from "../updateKubeConfig";
+import { CLUSTERS_FILE_SCHEMA } from "../../kube/schemas";
+import { updateKubeConfig } from "../../kube/updateKubeConfig";
 import type { PanfactumContext } from "@/util/context/context";
 import type { ListrTask } from "listr2";
 
@@ -52,7 +50,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(input: IBuildSyncK
         title: "Sync Kubernetes clusters credentials",
         task: async (_, parentTask) => {
             const { kube_dir: kubeDir, environments_dir: environmentsDir } =
-                context.repoVariables;
+                context.devshellConfig;
             const clustersYAMLPath = join(kubeDir, "clusters.yaml");
             const kubeConfigPath = join(kubeDir, "config");
 

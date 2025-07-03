@@ -9,7 +9,7 @@
  * 
  * Key responsibilities:
  * - Command registration and routing
- * - Context initialization with repository variables
+ * - Context initialization with devshell configuration
  * - Signal handling for graceful shutdown
  * - Background process cleanup
  * - Analytics tracking initialization
@@ -63,7 +63,6 @@ import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.t
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
 import { phClient } from "./util/posthog/tracking.ts";
-import { killAllBackgroundProcesses } from "./util/subprocess/killBackgroundProcess.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
 // Create a CLI instance
@@ -122,7 +121,7 @@ cli.register(WorkflowGitCheckoutCommand)
  * 
  * @internal
  */
-let cleanupDone = false;
+let cleanupStarted = false;
 
 /**
  * Global reference to the Panfactum context for cleanup
@@ -142,9 +141,11 @@ let panfactumContextInstance: PanfactumContext | null = null;
  * @internal
  */
 const cleanup = async () => {
-  if (!cleanupDone && panfactumContextInstance) {
-    cleanupDone = true;
-    killAllBackgroundProcesses({ context: panfactumContextInstance });
+  if (!cleanupStarted) {
+    cleanupStarted = true;
+    if (panfactumContextInstance) {
+      await panfactumContextInstance.backgroundProcessManager.killAllProcesses();
+    }
     await phClient.shutdown();
   }
 };
@@ -169,9 +170,11 @@ process.on('SIGTERM', async () => {
 
 process.on('exit', () => {
   // Synchronous cleanup if needed
-  if (!cleanupDone && panfactumContextInstance) {
-    cleanupDone = true;
-    killAllBackgroundProcesses({ context: panfactumContextInstance });
+  if (!cleanupStarted && panfactumContextInstance) {
+    cleanupStarted = true;
+    // Note: exit handler must be synchronous, but killAllProcesses is async
+    // The async cleanup in signal handlers should handle most cases
+    panfactumContextInstance.backgroundProcessManager.killAllProcesses();
   }
 });
 
@@ -181,7 +184,7 @@ process.on('exit', () => {
  * @remarks
  * This block handles the complete CLI lifecycle:
  * 1. Parses command-line arguments
- * 2. Creates Panfactum context with repository variables
+ * 2. Creates Panfactum context with devshell configuration
  * 3. Tracks command usage for analytics
  * 4. Executes the requested command
  * 5. Handles errors gracefully
@@ -203,11 +206,11 @@ try {
   // Store context for cleanup
   panfactumContextInstance = panfactumContext;
 
-  const { repoVariables } = panfactumContext
-  if (repoVariables.user_id) {
+  const { devshellConfig } = panfactumContext
+  if (devshellConfig.user_id) {
     phClient.captureImmediate({
       event: 'cli-start',
-      distinctId: repoVariables.user_id,
+      distinctId: devshellConfig.user_id,
       // todo: pass in sub command level command arguments
       properties: {
         path: proc.path.join(" "),

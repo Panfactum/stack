@@ -1,8 +1,8 @@
 import { Command } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { parseJson } from '@/util/json/parseJson';
 import { execute } from '@/util/subprocess/execute';
-import { parseJson } from '@/util/zod/parseJson';
 
 interface IVolumeSnapshot {
   namespace: string;

@@ -4,8 +4,8 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { z } from 'zod'
+import { parseJson } from '@/util/json/parseJson'
 import { getVaultToken } from '@/util/vault/getVaultToken'
-import { parseJson } from '@/util/zod/parseJson'
 import { execute } from '../subprocess/execute'
 import type { IDatabaseCredentials, DatabaseType } from './types'
 import type { PanfactumContext } from '@/util/context/context'
@@ -100,7 +100,7 @@ export async function getTempCredentials(
   const { context, vaultAddress, vaultRole, databaseType, databaseName, databaseNamespace } = input;
   // Get vault token
   const vaultToken = await getVaultToken({ context, address: vaultAddress }) // Will use default from env
-  
+
   if (databaseType === 'nats' && databaseName && databaseNamespace) {
     // NATS uses PKI certificates
     // Remove 'db/creds/' prefix if present, as NATS uses pki/internal/issue path
@@ -109,14 +109,14 @@ export async function getTempCredentials(
     const { stdout } = await execute({
       command: ['vault', 'write', '-format=json', `pki/internal/issue/${roleNameOnly}`, `common_name=${commonName}`],
       context,
-      workingDirectory: context.repoVariables.repo_root,
+      workingDirectory: context.devshellConfig.repo_root,
       env: {
         ...process.env,
         VAULT_TOKEN: vaultToken,
         VAULT_ADDR: vaultAddress,
       },
     })
-    
+
     // Define schema for vault PKI response
     const vaultPKIResponseSchema = z.object({
       data: z.object({
@@ -130,22 +130,22 @@ export async function getTempCredentials(
       /** Vault lease ID for certificate lifecycle */
       lease_id: z.string().describe('Vault lease identifier')
     }).describe('Vault PKI certificate response');
-    
+
     // Parse and validate JSON response
     const result = parseJson(vaultPKIResponseSchema, stdout)
-    
+
     // Write certificates to files
-    const natsDir = context.repoVariables.nats_dir
+    const natsDir = context.devshellConfig.nats_dir
     mkdirSync(natsDir, { recursive: true })
-    
+
     const caFile = join(natsDir, `${databaseName}.${databaseNamespace}.ca.crt`)
     const certFile = join(natsDir, `${databaseName}.${databaseNamespace}.tls.crt`)
     const keyFile = join(natsDir, `${databaseName}.${databaseNamespace}.tls.key`)
-    
+
     writeFileSync(caFile, result.data.issuing_ca)
     writeFileSync(certFile, result.data.certificate)
     writeFileSync(keyFile, result.data.private_key)
-    
+
     // Return placeholder credentials with certificate paths
     return {
       username: 'nats-cert',
@@ -162,14 +162,14 @@ export async function getTempCredentials(
     const { stdout } = await execute({
       command: ['vault', 'read', '-format=json', vaultRole],
       context,
-      workingDirectory: context.repoVariables.repo_root,
+      workingDirectory: context.devshellConfig.repo_root,
       env: {
         ...process.env,
         VAULT_TOKEN: vaultToken,
         VAULT_ADDR: vaultAddress,
       },
     })
-    
+
     // Define schema for vault database credentials response
     const vaultCredsResponseSchema = z.object({
       data: z.object({
@@ -181,10 +181,10 @@ export async function getTempCredentials(
       /** Vault lease ID for credential lifecycle */
       lease_id: z.string().describe('Vault lease identifier')
     }).describe('Vault database credentials response');
-    
+
     // Parse and validate JSON response
     const result = parseJson(vaultCredsResponseSchema, stdout)
-    
+
     return {
       username: result.data.username,
       password: result.data.password,

@@ -1,16 +1,16 @@
 import { writeFile as fsWriteFile, access, mkdir, rm, chmod } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
-import { test, expect } from "bun:test";
+import { test, expect, describe } from "bun:test";
 import { CLIError } from "@/util/error/error";
+import { createTestDir } from "@/util/test/createTestDir";
 import { removeFile } from "./removeFile";
 
-test("removes file successfully", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+describe("removeFile", () => {
+  test("removes file successfully", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "test.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "test content");
         
         // Verify file exists
@@ -27,7 +27,7 @@ test("removes file successfully", async () => {
 });
 
 test("removes file with complex path", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "deep", "nested", "path", "report.pdf");
     
     try {
@@ -48,7 +48,7 @@ test("removes file with complex path", async () => {
 });
 
 test("handles non-existent file gracefully due to force flag", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "nonexistent.txt");
     
     // Should not throw when trying to remove a non-existent file
@@ -63,7 +63,7 @@ test("throws CLIError when rm fails due to permissions", async () => {
         return;
     }
     
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const protectedDir = join(testDir, "protected");
     const filePath = join(protectedDir, "file.txt");
     
@@ -84,11 +84,10 @@ test("throws CLIError when rm fails due to permissions", async () => {
 });
 
 test("handles relative paths", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "relative.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "test content");
         
         // Change to test directory
@@ -108,11 +107,10 @@ test("handles relative paths", async () => {
 });
 
 test("handles paths with special characters", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "file with spaces & symbols!.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "test content");
         
         // Verify file exists
@@ -129,7 +127,7 @@ test("handles paths with special characters", async () => {
 });
 
 test("handles different file extensions", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const files = [
         "config.yaml",
         "script.sh",
@@ -138,7 +136,6 @@ test("handles different file extensions", async () => {
     ];
     
     try {
-        await mkdir(testDir, { recursive: true });
         
         // Create all files
         for (const file of files) {
@@ -159,11 +156,10 @@ test("handles different file extensions", async () => {
 });
 
 test("handles files without extensions", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "Makefile");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "test content");
         
         // Verify file exists
@@ -180,7 +176,7 @@ test("handles files without extensions", async () => {
 });
 
 test("handles very long file paths", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const longPath = join(testDir, "very", "long", "path", "with", "many", "nested", 
                          "directories", "containing", "a", "file", "with", "a", 
                          "very", "long", "name.txt");
@@ -218,11 +214,10 @@ test("includes file path in error message", async () => {
 });
 
 test("removes multiple files in sequence", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const files = ["file1.txt", "file2.txt", "file3.txt"];
     
     try {
-        await mkdir(testDir, { recursive: true });
         
         // Create all files
         for (const file of files) {
@@ -245,11 +240,10 @@ test("removes multiple files in sequence", async () => {
 });
 
 test("handles empty file removal", async () => {
-    const testDir = join(tmpdir(), `removeFile-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeFile" });
     const filePath = join(testDir, "empty.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await fsWriteFile(filePath, "");
         
         // Verify file exists
@@ -263,4 +257,5 @@ test("handles empty file removal", async () => {
     } finally {
         await rm(testDir, { recursive: true, force: true });
     }
+});
 });

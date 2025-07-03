@@ -90,7 +90,7 @@ export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployMod
     } = input;
 
     const moduleDir = join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         environment,
         region,
         module

@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getAllRegions } from "@/util/config/getAllRegions.ts";
 import {CLIError, PanfactumZodError} from '@/util/error/error';
-import { getKubeContextsFromConfig } from "@/util/kube/getKubeContextsFromConfig.ts";
+import { getKubeContexts } from "@/util/kube/getKubeContexts.ts";
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel';
 
 /**
@@ -178,7 +178,7 @@ export default class TunnelCommand extends PanfactumCommand {
    */
   override async execute(): Promise<number> {
     // Get kube contexts if needed
-    const kubeContexts = await getKubeContextsFromConfig(this.context);
+    const kubeContexts = await getKubeContexts(this.context);
 
       // Get the kube context - either from option or prompt
       const selectedKubeContext = this.cluster

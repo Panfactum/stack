@@ -87,7 +87,7 @@ interface ITerragruntInitAllInput {
 export async function terragruntInitAll(input: ITerragruntInitAllInput) {
   const { context, environment, region } = input;
 
-  const workingDirectory = join(context.repoVariables.environments_dir, environment, region ?? "")
+  const workingDirectory = join(context.devshellConfig.environments_dir, environment, region ?? "")
 
 
   // Step 1: Init the module and upgrade it's modules

@@ -8,6 +8,7 @@ import { AWS_ACCOUNT_ID_SCHEMA, AWS_REGION_SCHEMA } from '@/util/aws/schemas';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import { CLIError } from '@/util/error/error';
+import { sleep } from '@/util/util/sleep';
 
 /**
  * Command for waiting on container images in AWS ECR
@@ -174,7 +175,7 @@ This is designed as a Terragrunt pre-hook to ensure container images are built a
 
       if (elapsed + intervalSeconds < timeoutSeconds) {
         this.context.logger.write('Still waiting...');
-        await Bun.sleep(intervalSeconds * 1000);
+        await sleep(intervalSeconds * 1000);
       }
       
       elapsed += intervalSeconds;

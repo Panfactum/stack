@@ -7,19 +7,18 @@ import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
+import { parseJson } from "@/util/json/parseJson";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { execute } from "@/util/subprocess/execute";
-import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
-import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { startVaultProxy } from "@/util/vault/startVaultProxy";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
-import { parseJson } from "@/util/zod/parseJson";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -354,6 +353,7 @@ export async function setupVault(
           ...process.env,
         };
         const { pid, port } = await startVaultProxy({
+          context,
           env,
           modulePath,
           kubeContext: ctx.kubeContext,
@@ -390,7 +390,7 @@ export async function setupVault(
       title: "Stop Vault Proxy",
       task: async (ctx) => {
         if (ctx.vaultProxyPid) {
-          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
         }
       },
     },

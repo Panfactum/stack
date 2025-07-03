@@ -57,9 +57,17 @@ interface IModuleUpsertInput extends IRegionUpsertInput {
 }
 
 /**
+ * Input for updating global configuration
+ */
+interface IGlobalUpsertInput extends IBaseUpsertInput {
+    // No additional fields needed for global config
+}
+
+/**
  * Union type for all configuration update variants
  */
 type UpsertInput =
+    | IGlobalUpsertInput
     | IEnvironmentUpsertInput
     | IRegionUpsertInput
     | IModuleUpsertInput
@@ -142,7 +150,7 @@ export async function upsertConfigValues(input: UpsertInput): Promise<void> {
         const fileName = `module${suffix}`
         const envMeta = (await getEnvironments(context)).find(env => env.name === environment)
         if (!envMeta) {
-            filePath = join(context.repoVariables.environments_dir, environment, region, module, fileName)
+            filePath = join(context.devshellConfig.environments_dir, environment, region, module, fileName)
         } else {
             const regionMeta = (await getRegions(context, envMeta.path)).find(r => r.name === region)
             if (!regionMeta) {
@@ -156,7 +164,7 @@ export async function upsertConfigValues(input: UpsertInput): Promise<void> {
         const fileName = `region${suffix}`
         const envMeta = (await getEnvironments(context)).find(env => env.name === environment)
         if (!envMeta) {
-            filePath = join(context.repoVariables.environments_dir, environment, region, fileName)
+            filePath = join(context.devshellConfig.environments_dir, environment, region, fileName)
         } else {
             const regionMeta = (await getRegions(context, envMeta.path)).find(r => r.name === region)
             if (!regionMeta) {
@@ -170,12 +178,12 @@ export async function upsertConfigValues(input: UpsertInput): Promise<void> {
         const fileName = `environment${suffix}`
         const envMeta = (await getEnvironments(context)).find(env => env.name === environment)
         if (!envMeta) {
-            filePath = join(context.repoVariables.environments_dir, environment, fileName)
+            filePath = join(context.devshellConfig.environments_dir, environment, fileName)
         } else {
             filePath = join(envMeta.path, fileName)
         }
     } else {
-        filePath = join(context.repoVariables.environments_dir, `global${suffix}`)
+        filePath = join(context.devshellConfig.environments_dir, `global${suffix}`)
     }
 
     // Get the existing values

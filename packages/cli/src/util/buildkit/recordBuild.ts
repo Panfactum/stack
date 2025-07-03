@@ -97,6 +97,6 @@ export async function recordBuildKitBuild(
       '--overwrite'
     ],
     context,
-    workingDirectory: context.repoVariables.repo_root
+    workingDirectory: context.devshellConfig.repo_root
   })
 }

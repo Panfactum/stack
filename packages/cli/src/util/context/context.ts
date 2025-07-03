@@ -1,8 +1,9 @@
 // This file defines the Panfactum context object that is passed to all CLI commands
 // It extends Clipanion's base context with Panfactum-specific functionality
 
+import { getDevshellConfig } from "@/util/devshell/getDevshellConfig";
 import { phClient } from "@/util/posthog/tracking";
-import { getRepoVariables } from "./getRepoVariables";
+import { BackgroundProcessManager } from "@/util/subprocess/BackgroundProcessManager";
 import { Logger } from "./logger";
 import type { BaseContext } from "clipanion";
 
@@ -12,7 +13,7 @@ import type { BaseContext } from "clipanion";
  * @remarks
  * This context extends Clipanion's BaseContext with additional properties
  * needed throughout the Panfactum CLI:
- * - Repository configuration variables
+ * - Devshell configuration variables
  * - Custom logger instance for formatted output
  * - Analytics tracking client
  * 
@@ -20,12 +21,14 @@ import type { BaseContext } from "clipanion";
  * providing a consistent interface for accessing common functionality.
  */
 export type PanfactumContext = BaseContext & {
-  /** Repository configuration variables loaded from the filesystem */
-  repoVariables: Awaited<ReturnType<typeof getRepoVariables>>;
+  /** Devshell configuration variables loaded from the filesystem */
+  devshellConfig: Awaited<ReturnType<typeof getDevshellConfig>>;
   /** Logger instance for formatted console output */
   logger: Logger;
   /** PostHog analytics client for usage tracking */
   track: typeof phClient;
+  /** Background process manager for tracking and controlling spawned processes */
+  backgroundProcessManager: BackgroundProcessManager;
 };
 
 /**
@@ -43,7 +46,7 @@ interface ICreatePanfactumContextOptions {
  * 
  * @remarks
  * This function initializes the Panfactum context by:
- * 1. Loading repository variables from the filesystem
+ * 1. Loading devshell configuration from the filesystem
  * 2. Creating a logger instance with the appropriate debug level
  * 3. Attaching the analytics tracking client
  * 
@@ -63,19 +66,27 @@ interface ICreatePanfactumContextOptions {
  * ```
  * 
  * @see {@link PanfactumContext} - The context type definition
- * @see {@link getRepoVariables} - For repository configuration loading
+ * @see {@link getDevshellConfig} - For devshell configuration loading
  * @see {@link Logger} - For logging functionality
  */
 export const createPanfactumContext = async (
   context: BaseContext,
   opts: ICreatePanfactumContextOptions
 ): Promise<PanfactumContext> => {
-  const repoVariables = await getRepoVariables(opts.cwd);
+  const devshellConfig = await getDevshellConfig(opts.cwd);
+  const logger = new Logger(context.stderr, opts.debugEnabled);
 
-  return {
+  // Create the context first, then initialize the background process manager
+  const panfactumContext = {
     ...context,
-    repoVariables,
-    logger: new Logger(context.stderr, opts.debugEnabled),
-    track: phClient
-  };
+    devshellConfig,
+    logger,
+    track: phClient,
+    backgroundProcessManager: null as unknown as BackgroundProcessManager // Temporary placeholder
+  } as PanfactumContext;
+
+  // Initialize the background process manager with the context
+  panfactumContext.backgroundProcessManager = new BackgroundProcessManager(panfactumContext);
+
+  return panfactumContext;
 };

@@ -52,9 +52,17 @@ interface IModuleConfigInput extends IRegionConfigInput {
 }
 
 /**
+ * Configuration input for global config
+ */
+interface IGlobalConfigInput extends IBaseConfigInput {
+    // No additional fields needed for global config
+}
+
+/**
  * Union type for all configuration input variants
  */
 type ConfigInput =
+    | IGlobalConfigInput
     | IEnvironmentConfigInput
     | IRegionConfigInput
     | IModuleConfigInput
@@ -153,7 +161,7 @@ export async function getConfigValuesFromFile(input: ConfigInput): Promise<TGCon
         }
         filePath = join(envMeta.path, `environment${suffix}`)
     } else {
-        filePath = join(context.repoVariables.environments_dir, `global${suffix}`)
+        filePath = join(context.devshellConfig.environments_dir, `global${suffix}`)
     }
 
     return secret ?

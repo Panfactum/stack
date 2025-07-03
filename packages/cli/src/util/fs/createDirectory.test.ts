@@ -1,17 +1,16 @@
 import { access, rm, stat, chmod } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "bun:test";
+import { test, expect, describe } from "bun:test";
 import { CLIError } from "@/util/error/error";
+import { createTestDir } from "@/util/test/createTestDir";
 import { createDirectory } from "./createDirectory";
 
-test("creates directory successfully", async () => {
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+describe("createDirectory", () => {
+  test("creates directory successfully", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const dirPath = join(testDir, "newdir");
     
     try {
-        // Create parent directory
-        await createDirectory({ dirPath: testDir });
         
         // Create the actual test directory
         await createDirectory({ dirPath });
@@ -26,7 +25,7 @@ test("creates directory successfully", async () => {
 });
 
 test("creates nested directory successfully", async () => {
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const nestedPath = join(testDir, "level1", "level2", "level3", "deep");
     
     try {
@@ -53,13 +52,12 @@ test("throws CLIError when mkdir fails", async () => {
         return;
     }
     
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const protectedDir = join(testDir, "protected");
     const targetDir = join(protectedDir, "cannotcreate");
     
     try {
-        // Create base directory
-        await createDirectory({ dirPath: testDir });
+        // Create protected directory
         await createDirectory({ dirPath: protectedDir });
         
         // Make directory read-only to prevent subdirectory creation
@@ -76,12 +74,11 @@ test("throws CLIError when mkdir fails", async () => {
 });
 
 test("handles relative paths", async () => {
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const originalCwd = process.cwd();
     
     try {
-        // Create and change to test directory
-        await createDirectory({ dirPath: testDir });
+        // Change to test directory
         process.chdir(testDir);
         
         // Create directory using relative path
@@ -101,7 +98,7 @@ test("handles relative paths", async () => {
 });
 
 test("handles directory that already exists", async () => {
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const dirPath = join(testDir, "existing");
     
     try {
@@ -124,7 +121,7 @@ test("handles directory that already exists", async () => {
 });
 
 test("creates directory with spaces and special characters", async () => {
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const dirPath = join(testDir, "dir with spaces & symbols!");
     
     try {
@@ -140,7 +137,7 @@ test("creates directory with spaces and special characters", async () => {
 });
 
 test("creates very long path", async () => {
-    const testDir = join(tmpdir(), `createDirectory-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    const { path: testDir } = await createTestDir({ functionName: "createDirectory" });
     const longPath = join(
         testDir,
         "very", "long", "path", "with", "many", "nested",
@@ -162,4 +159,5 @@ test("creates very long path", async () => {
 test("handles empty directory path gracefully", async () => {
     // Empty path should throw an error
     await expect(createDirectory({ dirPath: "" })).rejects.toThrow();
+});
 });

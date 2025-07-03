@@ -12,6 +12,7 @@ All commands are run from the root of the project (`packages/cli`), from a termi
 | `bun run check` | Runs the typechecker    |
 | `bun run lint` | Checks for linting errors (read-only) |
 | `bun run lint:fix` | Auto-fix lint errors (some errors won't be autofixable)    |
+| `bun test` | Runs the unit tests    |
 
 ## General Architecture
 

@@ -30,10 +30,13 @@ import { CLIError } from '@/util/error/error';
  * @throws {@link CLIError}
  * Throws when the git command fails for any reason
  * 
- * @see {@link getRepoVariables} - Uses this to locate configuration files
+ * @see {@link getDevshellConfig} - Uses this to locate configuration files
  */
 export async function getRoot(cwd: string): Promise<string> {
-  const proc = Bun.spawn(["git", "rev-parse", "--show-toplevel"], {cwd})
+  const proc = Bun.spawn(["git", "rev-parse", "--show-toplevel"], {
+    cwd,
+    stderr: "pipe"
+  })
 
   const exitCode = await proc.exited;
   if (exitCode !== 0) {

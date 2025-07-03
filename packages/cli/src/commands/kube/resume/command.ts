@@ -13,12 +13,13 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getAllRegions } from '@/util/config/getAllRegions';
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
+import { parseJson } from '@/util/json/parseJson'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
-import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
+import {getKubeContexts} from "@/util/kube/getKubeContexts.ts";
 import { execute } from '@/util/subprocess/execute.ts'
 import {MODULES} from "@/util/terragrunt/constants.ts";
 import {buildDeployModuleTask} from "@/util/terragrunt/tasks/deployModuleTask.ts";
-import { parseJson } from '@/util/zod/parseJson'
+import { sleep } from '@/util/util/sleep'
 import type { IEKSClusterInfo } from '@/util/eks/types.ts'
 
 /**
@@ -81,7 +82,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
 
   async execute() {
     const { context } = this
-    const kubeContexts = await getKubeContextsFromConfig(context)
+    const kubeContexts = await getKubeContexts(context)
 
     const selectedContext = this.kubeContext
       ? kubeContexts.find(context => context.name === this.kubeContext)
@@ -202,7 +203,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           }
           
           // Wait for NAT instances to be ready
-          await Bun.sleep(30000)
+          await sleep(30000)
         },
       },
       {
@@ -375,7 +376,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
             }
 
             context.logger.debug(`Pod status: ${podStatus || 'not found'}. Waiting...`)
-            await Bun.sleep(interval * 1000)
+            await sleep(interval * 1000)
             elapsed += interval
           }
 

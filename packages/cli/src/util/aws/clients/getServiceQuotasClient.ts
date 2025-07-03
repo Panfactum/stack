@@ -1,8 +1,8 @@
 // This file provides a factory function for creating AWS Service Quotas clients
-// It handles credential loading from files to work around AWS SDK issues
+// It uses the generic AWS client factory for consistent credential handling
 
 import { ServiceQuotasClient } from "@aws-sdk/client-service-quotas";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { createAWSClient } from "@/util/aws/clients/createAWSClient";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -21,9 +21,9 @@ interface IGetServiceQuotasClientInput {
  * Creates an AWS Service Quotas client with proper credential handling
  * 
  * @remarks
- * This function creates a ServiceQuotasClient with a workaround for AWS SDK bug
- * https://github.com/aws/aws-sdk-js-v3/issues/6872 by loading credentials
- * from files when a profile is specified.
+ * This function creates a ServiceQuotasClient using the generic AWS client factory
+ * which handles credential loading and works around AWS SDK bug
+ * https://github.com/aws/aws-sdk-js-v3/issues/6872.
  * 
  * @param inputs - Configuration for the Service Quotas client
  * @returns Configured AWS Service Quotas client
@@ -41,26 +41,12 @@ interface IGetServiceQuotasClientInput {
  * }));
  * ```
  * 
- * @see {@link getCredsFromFile} - For credential file loading
+ * @see {@link createAWSClient} - Generic AWS client factory
  * @see {@link ServiceQuotasClient} - AWS SDK Service Quotas client documentation
  */
 export async function getServiceQuotasClient(inputs: IGetServiceQuotasClientInput): Promise<ServiceQuotasClient> {
-    const { context, profile, region } = inputs;
-
-    // This is necessary due to this bug
-    // https://github.com/aws/aws-sdk-js-v3/issues/6872
-    const credentials = await getCredsFromFile({ context, profile })
-
-    if (credentials) {
-        return new ServiceQuotasClient({
-            credentials,
-            region
-        });
-    } else {
-        return new ServiceQuotasClient({
-            profile,
-            region
-        });
-    }
-
+    return createAWSClient({
+        clientClass: ServiceQuotasClient
+        // No defaultRegion - Service Quotas requires explicit region specification
+    }, inputs);
 }

@@ -16,7 +16,6 @@ import { getRegions } from "@/util/config/getRegions";
 import { SUBDOMAIN } from "@/util/config/schemas";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
-import { killAllBackgroundProcesses } from "@/util/subprocess/killBackgroundProcess";
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
@@ -479,7 +478,7 @@ Already completed steps will be automatically skipped.
     try {
       await tasks.run();
     } catch (e) {
-      killAllBackgroundProcesses({ context: this.context });
+      await this.context.backgroundProcessManager.killAllProcesses();
       throw new CLIError("Failed to Install Cluster", e);
     }
 

@@ -14,7 +14,7 @@ interface IGetModuleDirectoryInput {
     region: string;
     /** Name of the module */
     module: string;
-    /** Panfactum context for accessing repository variables */
+    /** Panfactum context for accessing devshell configuration */
     context: PanfactumContext;
 }
 
@@ -57,5 +57,5 @@ export function getModuleDirectory(
     input: IGetModuleDirectoryInput
 ): string {
     const { environment, region, module, context } = input;
-    return join(context.repoVariables.environments_dir, environment, region, module)
+    return join(context.devshellConfig.environments_dir, environment, region, module)
 }

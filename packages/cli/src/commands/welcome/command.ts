@@ -6,9 +6,10 @@ import { join } from "node:path";
 import { Command } from "clipanion";
 import pc from "picocolors";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
-import { upsertRepoVariables } from "@/util/context/upsertRepoVariables";
+import { upsertDevshellConfig } from "@/util/devshell/upsertDevshellConfig";
 import { fileExists } from "@/util/fs/fileExists";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
+import { sleep } from "@/util/util/sleep";
 
 /**
  * Command for displaying the DevShell welcome screen
@@ -55,7 +56,7 @@ import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
  * pf welcome
  * ```
  * 
- * @see {@link upsertRepoVariables} - For storing installation IDs
+ * @see {@link upsertDevshellConfig} - For storing installation IDs
  */
 export class WelcomeCommand extends PanfactumCommand {
     static override paths = [["welcome"]];
@@ -115,12 +116,12 @@ The welcome screen provides:
     async execute() {
         const { context } = this;
 
-        if (! await fileExists({ filePath: join(context.repoVariables.repo_root, ".envrc") })) {
+        if (! await fileExists({ filePath: join(context.devshellConfig.repo_root, ".envrc") })) {
             // This occurs in the installer script
 
             context.logger.info("DevShell setup for the first time.")
 
-        } else if (!context.repoVariables.installation_id) {
+        } else if (!context.devshellConfig.installation_id) {
             // This occurs immediately after the installer script
 
             context.logger.showLogo()
@@ -168,7 +169,7 @@ The welcome screen provides:
                 defaults, it is ultimately designed to be hackable so you can make the installation your own.
     
                 ${pc.bold(pc.underline("Environments / Regions / Modules"))}: All IaC ${pc.italic("configuration")}
-                (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot({ context, path: context.repoVariables.environments_dir })}`))}
+                (configuration-as-code) will be stored in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot({ context, path: context.devshellConfig.environments_dir })}`))}
                 directory of this repository. That directory has three levels of nesting: 
                 ${pc.blue("environment")}/${pc.yellow("region")}/${pc.green("module")} (e.g., production/us-east-2/aws_eks).
     
@@ -183,11 +184,11 @@ The welcome screen provides:
                 A ${pc.green("module")} is an atomic set of deployable infrastructure. Besides the DevShell, Panfactum
                 provides many turn-key infrastructure modules to make getting started easy. You will likely also want to
                 use our submodules to
-                write your own first-party IaC modules in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot({ context, path: context.repoVariables.iac_dir })}`))}
+                write your own first-party IaC modules in the ${pc.bold(pc.whiteBright(`./${getRelativeFromRoot({ context, path: context.devshellConfig.iac_dir })}`))}
                 directoy of this repository.
     
                 The single source of truth for the configuration of all of your modules, regions, and environments lives
-                on the ${pc.bold(pc.whiteBright(context.repoVariables.repo_primary_branch))} branch of this repository. The framework
+                on the ${pc.bold(pc.whiteBright(context.devshellConfig.repo_primary_branch))} branch of this repository. The framework
                 comes with standard CI/CD modules that enable you to keep that configuration synchronized with all of your
                 live systems.
     
@@ -216,14 +217,14 @@ The welcome screen provides:
             // todo: handle when userId is not set but installation Id exists
             const userId = randomUUID()
 
-            await upsertRepoVariables({
+            await upsertDevshellConfig({
                 context,
                 values: {
                     installation_id: installationId,
                 }
             })
 
-            await upsertRepoVariables({
+            await upsertDevshellConfig({
                 context,
                 values: {
                     user_id: userId,
@@ -232,8 +233,8 @@ The welcome screen provides:
             })
 
             const groupProperties = {
-                name: this.context.repoVariables.repo_name,
-                repo_url: this.context.repoVariables.repo_url,
+                name: this.context.devshellConfig.repo_name,
+                repo_url: this.context.devshellConfig.repo_url,
                 date_installed: new Date().toISOString(),
             }
 
@@ -255,7 +256,7 @@ The welcome screen provides:
 
             // delay and double flush required to ensure the group is created before the capture
             await this.context.track.flush()
-            await Bun.sleep(1000);
+            await sleep(1000);
             await this.context.track.flush()
         }
     } // todo: we want to capture when the devshell is initialized

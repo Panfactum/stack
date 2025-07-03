@@ -49,7 +49,7 @@ export async function setupVaultSSO(
     }
 
     const environmentPath = join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         environment
     );
     const clusterPath = join(environmentPath, region);
@@ -176,7 +176,7 @@ export async function setupVaultSSO(
                     values: {
                         client_secret: outputs.client_secret.value,
                     },
-                    filePath: join(context.repoVariables.environments_dir, environment, region, MODULES.VAULT_AUTH_OIDC, "secrets.yaml"),
+                    filePath: join(context.devshellConfig.environments_dir, environment, region, MODULES.VAULT_AUTH_OIDC, "secrets.yaml"),
                     context,
                 })
             },

@@ -94,11 +94,11 @@ interface IVPCNetworkTestInput {
  */
 export const vpcNetworkTest = async (input: IVPCNetworkTestInput): Promise<void> => {
   const { awsProfile, context, environment, region, task } = input;
-  
+
   //####################################################################
   // Step 0: Validation
   //####################################################################
-  const awsDir = context.repoVariables.aws_dir;
+  const awsDir = context.devshellConfig.aws_dir;
   const awsConfigFile = path.join(awsDir, "config");
 
   if (!(await fileExists({ filePath: awsConfigFile }))) {
@@ -149,7 +149,7 @@ export const vpcNetworkTest = async (input: IVPCNetworkTestInput): Promise<void>
       task.output = context.logger.applyColors("Waiting for instance to be created", {
         style: "subtle",
       });
-      
+
       const instanceId = await waitForASGInstance({ asg, awsProfile, awsRegion, context });
 
       // Step 3: Run the network test
@@ -157,7 +157,7 @@ export const vpcNetworkTest = async (input: IVPCNetworkTestInput): Promise<void>
         `Waiting for instance ${instanceId} to become ready`,
         { style: "subtle" }
       );
-      
+
       const commandId = await sendSSMCommand({ instanceId, awsProfile, awsRegion, context });
 
       // Step 4: Get the result of the network test

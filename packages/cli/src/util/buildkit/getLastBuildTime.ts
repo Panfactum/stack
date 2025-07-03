@@ -3,8 +3,8 @@
 
 import { z } from 'zod'
 import { CLIError } from '@/util/error/error.js'
+import { parseJson } from '@/util/json/parseJson'
 import { execute } from '@/util/subprocess/execute.js'
-import { parseJson } from '@/util/zod/parseJson.js'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
@@ -118,7 +118,7 @@ export async function getLastBuildTime(
       '-o=json'
     ],
     context,
-    workingDirectory: context.repoVariables.repo_root
+    workingDirectory: context.devshellConfig.repo_root
   }).catch((error: unknown) => {
     throw new CLIError(
       `Failed to get statefulset ${statefulsetName} for BuildKit ${arch}`,
@@ -129,7 +129,7 @@ export async function getLastBuildTime(
   const statefulSet = parseJson(statefulSetSchema, result.stdout)
 
   const lastBuild = statefulSet.metadata.annotations?.[BUILDKIT_LAST_BUILD_ANNOTATION_KEY]
-  
+
   if (!lastBuild) {
     return null
   }
@@ -138,6 +138,6 @@ export async function getLastBuildTime(
   if (isNaN(timestamp)) {
     throw new CLIError(`Invalid timestamp format in BuildKit annotation: ${lastBuild}`)
   }
-  
+
   return timestamp
 }

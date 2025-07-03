@@ -57,7 +57,7 @@ export async function syncDomainsTask<T extends {}>(input: ISyncDomainsTaskInput
                     await Promise.all(Object.entries(updates).map(([path, domains]) => {
                         return upsertConfigValues({
                             context,
-                            filePath: join(context.repoVariables.environments_dir, path, "environment.yaml"),
+                            filePath: join(context.devshellConfig.environments_dir, path, "environment.yaml"),
                             values: {
                                 domains
                             }

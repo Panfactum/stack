@@ -32,10 +32,10 @@ import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
 import { CLIError } from '@/util/error/error'
+import { parseJson } from '@/util/json/parseJson'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
-import {getKubeContextsFromConfig} from "@/util/kube/getKubeContextsFromConfig.ts";
+import {getKubeContexts} from "@/util/kube/getKubeContexts.ts";
 import { execute } from '@/util/subprocess/execute.ts'
-import { parseJson } from '@/util/zod/parseJson'
 import type { IEKSClusterInfo, IAutoScalingGroup } from '@/util/eks/types.ts'
 
 /**
@@ -107,7 +107,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
 
   async execute() {
     const { context } = this
-    const kubeContexts = await getKubeContextsFromConfig(context)
+    const kubeContexts = await getKubeContexts(context)
 
     const selectedContext = this.kubeContext
       ? kubeContexts.find(context => context.name === this.kubeContext)

@@ -3,7 +3,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { directoryExists } from "./directoryExist";
+import { directoryExists } from "./directoryExists";
 
 /**
  * Recursively searches for a folder with the specified name within a directory tree

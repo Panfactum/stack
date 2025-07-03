@@ -3,7 +3,7 @@
 
 import { join } from "node:path"
 import { CLIError } from "@/util/error/error";
-import { directoryExists } from "@/util/fs/directoryExist";
+import { directoryExists } from "@/util/fs/directoryExists";
 import { fileExists } from "@/util/fs/fileExists";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";

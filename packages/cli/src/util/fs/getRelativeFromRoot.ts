@@ -8,10 +8,10 @@ import type { PanfactumContext } from "@/util/context/context";
  * Input parameters for getting relative path from repository root
  */
 interface IGetRelativeFromRootInput {
-  /** Panfactum context containing repository root information */
-  context: PanfactumContext;
-  /** Absolute path to convert to relative path */
-  path: string;
+    /** Panfactum context containing repository root information */
+    context: PanfactumContext;
+    /** Absolute path to convert to relative path */
+    path: string;
 }
 
 /**
@@ -54,20 +54,20 @@ interface IGetRelativeFromRootInput {
  * ```
  */
 export function getRelativeFromRoot({ context, path }: IGetRelativeFromRootInput): string {
-    const repoRoot = context.repoVariables.repo_root;
-    
+    const repoRoot = context.devshellConfig.repo_root;
+
     // Normalize repo root by removing trailing slash
     const normalizedRepoRoot = repoRoot.endsWith('/') ? repoRoot.slice(0, -1) : repoRoot;
-    
+
     // Check if the path starts with the repo root
     if (path === normalizedRepoRoot || path === normalizedRepoRoot + '/') {
         return '';
     }
-    
+
     if (path.startsWith(normalizedRepoRoot + '/')) {
         return path.slice(normalizedRepoRoot.length + 1);
     }
-    
+
     // Path is not within the repo root - return relative path
     return relative(normalizedRepoRoot, path);
 }

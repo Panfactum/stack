@@ -80,7 +80,7 @@ export async function terragruntApply(
 ): Promise<void> {
   const { context, env, environment, region, module, onLogLine } = input;
   const workingDirectory = join(
-    context.repoVariables.environments_dir,
+    context.devshellConfig.environments_dir,
     environment,
     region,
     module

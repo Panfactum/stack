@@ -1,8 +1,8 @@
 // This file provides a factory function for creating AWS ECR clients
-// It handles credential loading from files to work around AWS SDK issues
+// It uses the generic createAWSClient factory to reduce code duplication
 
 import { ECRClient } from "@aws-sdk/client-ecr";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { createAWSClient } from "./createAWSClient";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -21,9 +21,9 @@ interface IGetECRClientInput {
  * Creates an AWS ECR (Elastic Container Registry) client with proper credential handling
  * 
  * @remarks
- * This function creates an ECRClient with a workaround for AWS SDK bug
- * https://github.com/aws/aws-sdk-js-v3/issues/6872 by loading credentials
- * from files when a profile is specified.
+ * This function creates an ECRClient using the centralized createAWSClient factory,
+ * which handles the AWS SDK bug workaround and credential loading consistently
+ * across all AWS service clients.
  * 
  * @param inputs - Configuration for the ECR client
  * @returns Configured AWS ECR client
@@ -41,25 +41,15 @@ interface IGetECRClientInput {
  * );
  * ```
  * 
- * @see {@link getCredsFromFile} - For credential file loading
+ * @see {@link createAWSClient} - Generic AWS client factory
  * @see {@link ECRClient} - AWS SDK ECR client documentation
  */
 export async function getECRClient(inputs: IGetECRClientInput): Promise<ECRClient> {
-  const { context, profile, region } = inputs;
-
-  // This is necessary due to this bug
-  // https://github.com/aws/aws-sdk-js-v3/issues/6872
-  const credentials = await getCredsFromFile({ context, profile });
-
-  if (credentials) {
-    return new ECRClient({
-      credentials,
-      region
-    });
-  } else {
-    return new ECRClient({
-      profile,
-      region
-    });
-  }
+  return createAWSClient(
+    {
+      clientClass: ECRClient,
+      defaultRegion: undefined // Region is required for ECR
+    },
+    inputs
+  );
 }

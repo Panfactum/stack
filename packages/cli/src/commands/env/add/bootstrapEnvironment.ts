@@ -22,7 +22,7 @@ import { getRegions } from "@/util/config/getRegions";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { CLIError } from "@/util/error/error";
 import { createDirectory } from "@/util/fs/createDirectory";
-import { directoryExists } from "@/util/fs/directoryExist";
+import { directoryExists } from "@/util/fs/directoryExists";
 import { fileExists } from "@/util/fs/fileExists";
 import { removeDirectory } from "@/util/fs/removeDirectory";
 import { writeFile } from "@/util/fs/writeFile";
@@ -38,16 +38,16 @@ import type { PanfactumContext } from "@/util/context/context";
  * Interface for bootstrapEnvironment function inputs
  */
 interface IBootstrapEnvironmentInputs {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
-  /** Name of the environment to bootstrap */
-  environmentName: string;
-  /** Optional AWS profile to use for the environment */
-  environmentProfile?: string;
-  /** Optional new account name/alias to set */
-  newAccountName?: string;
-  /** Whether this is resuming a previously failed bootstrap operation */
-  resuming?: boolean;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** Name of the environment to bootstrap */
+    environmentName: string;
+    /** Optional AWS profile to use for the environment */
+    environmentProfile?: string;
+    /** Optional new account name/alias to set */
+    newAccountName?: string;
+    /** Whether this is resuming a previously failed bootstrap operation */
+    resuming?: boolean;
 }
 
 export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) {
@@ -58,7 +58,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
         context.logger.info(`Now that the AWS account for ${environmentName} is provisioned, the installer will prepare it for configuration via infrastructure-as-code.`)
     }
 
-    const directory = join(context.repoVariables.environments_dir, environmentName)
+    const directory = join(context.devshellConfig.environments_dir, environmentName)
     const existingConfig = await getPanfactumConfig({ context, directory })
 
     interface ITaskCtx {
@@ -89,7 +89,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
     tasks.add({
         title: "Clear cache",
         task: async () => {
-            await removeDirectory({ dirPath: join(context.repoVariables.repo_root, ".terragrunt-cache") })
+            await removeDirectory({ dirPath: join(context.devshellConfig.repo_root, ".terragrunt-cache") })
         }
     })
 
@@ -111,7 +111,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
         title: `Getting Panfactum version to deploy`,
         skip: existingConfig.pf_stack_version !== undefined,
         task: async (ctx, task) => {
-            const flakeFilePath = join(context.repoVariables.repo_root, "flake.nix")
+            const flakeFilePath = join(context.devshellConfig.repo_root, "flake.nix")
             if (!await fileExists({ filePath: flakeFilePath })) {
                 throw new CLIError("No flake.nix found at repo root")
             }
@@ -350,14 +350,14 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
             while (retryCount < maxRetries) {
                 const attemptPhrase = `attempt ${retryCount + 1}/${maxRetries}`
                 task.title = context.logger.applyColors(`Activating S3 service ${attemptPhrase}`, { lowlights: [attemptPhrase] });
-                
+
                 let createError: unknown = null;
                 await s3Client.send(new CreateBucketCommand({
                     Bucket: dummyBucketName
                 })).catch((error) => {
                     createError = error;
                 });
-                
+
                 if (!createError) {
                     bucketCreated = true;
                     break;
@@ -386,15 +386,15 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     const deleteResult = await s3Client.send(new DeleteBucketCommand({
                         Bucket: dummyBucketName
                     })).then(() => true)
-                       .catch((error) => {
-                           context.logger.debug(`Failed to delete test bucket on attempt ${deleteRetries + 1}: ${error}`);
-                           return false;
-                       });
-                    
+                        .catch((error) => {
+                            context.logger.debug(`Failed to delete test bucket on attempt ${deleteRetries + 1}: ${error}`);
+                            return false;
+                        });
+
                     if (deleteResult) {
                         break;
                     }
-                    
+
                     deleteRetries++;
                     if (deleteRetries >= maxDeleteRetries) {
                         context.logger.error(`Failed to delete dummy bucket ${dummyBucketName} after ${maxDeleteRetries} attempts`);
@@ -450,19 +450,19 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     const available = await s3Client.send(new HeadBucketCommand({
                         Bucket: proposedBucketName
                     }))
-                      .then(() => false)
-                      .catch((error) => {
-                        if (error instanceof Error && error.name === 'NotFound') {
-                            return true;
-                        }
+                        .then(() => false)
+                        .catch((error) => {
+                            if (error instanceof Error && error.name === 'NotFound') {
+                                return true;
+                            }
 
-                        if (headBucketRetries >= maxHeadBucketRetries) {
-                            throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
-                        }
+                            if (headBucketRetries >= maxHeadBucketRetries) {
+                                throw new CLIError(`Failed to check if S3 bucket '${proposedBucketName}' exists`, error);
+                            }
 
-                        return undefined;
-                      });
-                    
+                            return undefined;
+                        });
+
                     if (available === true) {
                         ctx.bucketName = proposedBucketName;
                         ctx.locktableName = proposedBucketName;
@@ -592,12 +592,12 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
     )
 
     //////////////////////////////////////////////////////////////
-    // Update the repository's sops configuration
+    // Update the devshell's sops configuration
     //////////////////////////////////////////////////////////////
     tasks.add({
         title: "Add encryption keys to DevShell",
         skip: async (ctx) => {
-            const sopsFilePath = join(context.repoVariables.repo_root, ".sops.yaml")
+            const sopsFilePath = join(context.devshellConfig.repo_root, ".sops.yaml")
             if (await fileExists({ filePath: sopsFilePath })) {
                 const fileContent = await Bun.file(sopsFilePath).text();
                 const { creation_rules: rules } = parse(fileContent) as { creation_rules?: Array<{ aws_profile?: string }> }
@@ -623,7 +623,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                 })
             });
 
-            const sopsFilePath = join(context.repoVariables.repo_root, ".sops.yaml")
+            const sopsFilePath = join(context.devshellConfig.repo_root, ".sops.yaml")
             const newCreationRule = {
                 path_regex: `.*/${environmentName}/.*`,
                 aws_profile: ctx.profile!,
@@ -852,7 +852,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                                     return null;
                                 }
                             });
-                            
+
                             return role ? `arn:aws:iam::${ctx.accountId!}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot` : undefined
                         }
                     }

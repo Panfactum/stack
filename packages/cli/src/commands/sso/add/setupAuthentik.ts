@@ -94,7 +94,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
     }
 
     const environmentPath = path.join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         environment
     );
     const clusterPath = path.join(environmentPath, region);
@@ -371,7 +371,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
 
 
                 const moduleDir = join(
-                    context.repoVariables.environments_dir,
+                    context.devshellConfig.environments_dir,
                     environment,
                     region,
                     MODULES.KUBE_AUTHENTIK
@@ -429,7 +429,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             skip: async () => {
                 // FIX: @seth - NEVER read to the config files directly
                 const originalGlobalConfig = await readYAMLFile({
-                    filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                    filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
                     context,
                     validationSchema: z.object({
                         authentik_url: z.string().optional(),
@@ -472,10 +472,10 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 }
 
                 // FIX: @seth - NEVER read to the config files directly
-                if (await fileExists({ filePath: path.join(context.repoVariables.environments_dir, "global.yaml") })) {
+                if (await fileExists({ filePath: path.join(context.devshellConfig.environments_dir, "global.yaml") })) {
                     // FIX: @seth - NEVER read to the config files directly
                     const originalGlobalConfig = await readYAMLFile({
-                        filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
                         context,
                         validationSchema: z.object({
                             authentik_url: z.string().optional(),
@@ -488,7 +488,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                     // FIX: @seth - NEVER write to the config files directly
                     await writeYAMLFile({
                         context,
-                        filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
                         values: newGlobalConfig,
                         overwrite: true,
                     })
@@ -496,7 +496,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                     // FIX: @seth - NEVER write to the config files directly
                     await writeYAMLFile({
                         context,
-                        filePath: path.join(context.repoVariables.environments_dir, "global.yaml"),
+                        filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
                         values: {
                             authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
                         }

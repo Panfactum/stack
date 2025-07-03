@@ -36,7 +36,7 @@ export async function upsertPFYAMLFile(input: IUpsertPFYAMLFileInput) {
     const { context, environment, region, module, realModuleName, updates } = input;
 
     const moduleDir = join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         environment,
         region,
         module

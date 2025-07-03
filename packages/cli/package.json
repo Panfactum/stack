@@ -67,7 +67,6 @@
     "string-width": "^7.2.0",
     "terminal-columns": "^2.0.0",
     "terminal-link": "^4.0.0",
-    "tree-kill": "^1.2.2",
     "typanion": "^3.14.0",
     "wrap-ansi": "^9.0.0",
     "yaml": "^2.7.0",

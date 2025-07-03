@@ -1,13 +1,13 @@
-// This file defines Zod schemas for validating Panfactum configuration files
+// This file defines Zod schemas for validating Panfactum devshell configuration files
 // These schemas ensure configuration files meet all required constraints
 
 import { z } from "zod";
 
 /**
- * Schema for validating panfactum.yaml configuration files
+ * Schema for validating panfactum.yaml devshell configuration files
  * 
  * @remarks
- * This schema validates the main Panfactum repository configuration file.
+ * This schema validates the main Panfactum devshell configuration file.
  * It ensures all required fields are present and validates the format of
  * repository URLs and directory paths.
  * 
@@ -20,7 +20,7 @@ import { z } from "zod";
  * 
  * @example
  * ```typescript
- * const config = PANFACTUM_YAML_SCHEMA.parse({
+ * const config = PANFACTUM_DEVSHELL_SCHEMA.parse({
  *   repo_name: "my-infrastructure",
  *   repo_primary_branch: "main",
  *   repo_url: "git::https://github.com/myorg/infrastructure.git",
@@ -29,9 +29,9 @@ import { z } from "zod";
  * });
  * ```
  * 
- * @see {@link getRepoVariables} - Uses this schema to validate config files
+ * @see {@link getDevshellConfig} - Uses this schema to validate config files
  */
-export const PANFACTUM_YAML_SCHEMA = z
+export const PANFACTUM_DEVSHELL_SCHEMA = z
     .object({
         // Required fields
         /** Name of the repository - used for identification and display */
@@ -161,4 +161,4 @@ export const PANFACTUM_YAML_SCHEMA = z
         user_id: z.string().uuid().optional()
             .describe("UUID for tracking unique Panfactum users")
     })
-    .describe("Panfactum repository configuration schema")
+    .describe("Panfactum devshell configuration schema")

@@ -9,7 +9,7 @@
     "check-dependency-version-consistency": "4.1.0"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "1.0.38",
+    "@anthropic-ai/claude-code": "1.0.41",
     "@playwright/mcp": "0.0.29"
   }
 }

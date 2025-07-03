@@ -1,8 +1,8 @@
 // This file provides a factory function for creating AWS Account clients
-// It handles credential loading from files to work around AWS SDK issues
+// It uses the generic createAWSClient factory to reduce code duplication
 
 import { AccountClient } from "@aws-sdk/client-account";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { createAWSClient } from "./createAWSClient";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -19,10 +19,10 @@ interface IGetAccountClientInput {
  * Creates an AWS Account client with proper credential handling
  * 
  * @remarks
- * This function creates an AccountClient with a workaround for AWS SDK bug
- * https://github.com/aws/aws-sdk-js-v3/issues/6872 by loading credentials
- * from files when a profile is specified. The Account client is always
- * created with the us-east-1 region as Account API operations are global.
+ * This function creates an AccountClient using the centralized createAWSClient factory,
+ * which handles the AWS SDK bug workaround and credential loading consistently
+ * across all AWS service clients. The Account client is always created with the
+ * us-east-1 region as Account API operations are global.
  * 
  * @param inputs - Configuration for the Account client
  * @returns Configured AWS Account client
@@ -39,26 +39,19 @@ interface IGetAccountClientInput {
  * );
  * ```
  * 
- * @see {@link getCredsFromFile} - For credential file loading
+ * @see {@link createAWSClient} - Generic AWS client factory
  * @see {@link AccountClient} - AWS SDK Account client documentation
  */
 export async function getAccountClient(inputs: IGetAccountClientInput): Promise<AccountClient> {
-    const { context, profile } = inputs;
-
-    // This is necessary due to this bug
-    // https://github.com/aws/aws-sdk-js-v3/issues/6872
-    const credentials = await getCredsFromFile({ context, profile });
-
-    if (credentials) {
-        return new AccountClient({
-            credentials,
-            region: "us-east-1"
-        });
-    } else {
-        return new AccountClient({
-            profile,
-            region: "us-east-1"
-        });
+  return createAWSClient(
+    {
+      clientClass: AccountClient,
+      defaultRegion: "us-east-1"
+    },
+    {
+      context: inputs.context,
+      profile: inputs.profile,
+      region: "us-east-1" // Account operations are global, always use us-east-1
     }
-
+  );
 }

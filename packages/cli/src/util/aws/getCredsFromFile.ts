@@ -25,10 +25,10 @@ interface IGetCredsFromFileOutput {
  * Input parameters for getting credentials from file
  */
 interface IGetCredsFromFileInput {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
-  /** AWS profile name to retrieve credentials for */
-  profile: string;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** AWS profile name to retrieve credentials for */
+    profile: string;
 }
 
 /**
@@ -70,7 +70,7 @@ interface IGetCredsFromFileInput {
 export async function getCredsFromFile(inputs: IGetCredsFromFileInput): Promise<IGetCredsFromFileOutput | undefined> {
     const { context, profile } = inputs
 
-    const credsFilePath = join(context.repoVariables.aws_dir, "credentials")
+    const credsFilePath = join(context.devshellConfig.aws_dir, "credentials")
 
     if (!await fileExists({ filePath: credsFilePath })) {
         return undefined
@@ -81,7 +81,7 @@ export async function getCredsFromFile(inputs: IGetCredsFromFileInput): Promise<
         .catch((error: unknown) => {
             throw new CLIError(`Unable to read credentials file at ${credsFilePath}`, error)
         })
-    
+
     const parsedCredentials = parse(fileContent)
 
     // Validate the credentials structure

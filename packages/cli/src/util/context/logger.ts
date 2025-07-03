@@ -4,6 +4,7 @@
 import { Writable } from "node:stream";
 import { input, confirm, search, checkbox, select, password } from "@inquirer/prompts";
 import pc from "picocolors";
+import { dedent } from "@/util/util/dedent";
 import { ListrInquirerPromptAdapter } from "./listrInquirerPromptAdapter";
 import { breakpoints } from "./teminal-columns/breakpoints";
 import { terminalColumns } from "./teminal-columns/terminalColumns";
@@ -22,36 +23,6 @@ interface IInquirerThemeConfig {
   answerSameLine?: boolean;
 }
 
-/**
- * Removes common leading indentation from multi-line strings
- * 
- * @remarks
- * This function allows using multiline JS template strings with proper
- * indentation in the source code while producing clean output. It:
- * - Removes common leading whitespace from all lines
- * - Trims surrounding newlines
- * - Joins single-newline separated lines into one line
- * - Preserves double newlines as paragraph breaks
- * 
- * @param text - The multi-line string to dedent
- * @returns The dedented string
- * 
- * @internal
- */
-function dedent(text: string) {
-  const lines = text.split(`\n`);
-  const nonEmptyLines = lines.filter(line => line.match(/\S/));
-
-  const indent = nonEmptyLines.length > 0 ? nonEmptyLines.reduce((minLength, line) => Math.min(minLength, line.length - line.trimStart().length), Number.MAX_VALUE) : 0;
-
-  return lines
-    .map(line => line.slice(indent).trimEnd())
-    .join(`\n`)
-    .replace(/^\n+|\n+$/g, ``)   // Remove surrounding newlines, since they got added for JS formatting
-    .replace(/([^\n])\n([^\n])/g, '$1 $2')
-    .replace(/^\n([^\n])/g, '$1')  // Handle single newline at the start
-    .replace(/([^\n])\n$/g, '$1'); // Handle single newline at the end
-}
 
 
 /**
@@ -161,6 +132,8 @@ export class Logger {
    * Once added, these strings will be automatically highlighted whenever
    * they appear in logger output.
    * 
+   * Empty strings are ignored to prevent highlighting issues.
+   * 
    * @param str - The identifier string to highlight
    * 
    * @example
@@ -171,7 +144,9 @@ export class Logger {
    * ```
    */
   public addIdentifier(str: string) {
-    this.identifiers.push(str)
+    if (str.trim().length > 0) {
+      this.identifiers.push(str)
+    }
   }
 
   /**
@@ -213,6 +188,16 @@ export class Logger {
    * ```
    */
   public applyColors(str: string, config?: IApplyColorsConfig) {
+    // Handle null/undefined gracefully
+    if (str === null || str === undefined) {
+      str = String(str);
+    }
+
+    // Return empty strings immediately without applying any color styling
+    if (str === "") {
+      return str;
+    }
+
     const {
       style = "default",
       bold,

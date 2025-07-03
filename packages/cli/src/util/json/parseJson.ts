@@ -68,8 +68,11 @@ import { CLIError, PanfactumZodError } from "@/util/error/error";
 export function parseJson<T>(schema: z.ZodType<T>, jsonString: string): T {
   let parsed: unknown;
   
+  // Remove BOM if present
+  const cleanedJsonString = jsonString.replace(/^\uFEFF/, '');
+  
   try {
-    parsed = JSON.parse(jsonString);
+    parsed = JSON.parse(cleanedJsonString);
   } catch (error) {
     throw new CLIError("Failed to parse JSON", error);
   }

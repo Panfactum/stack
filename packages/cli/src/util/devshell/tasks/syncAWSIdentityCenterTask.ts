@@ -5,7 +5,7 @@ import pc from "picocolors";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
-import { directoryExists } from "@/util/fs/directoryExist";
+import { directoryExists } from "@/util/fs/directoryExists";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
@@ -33,17 +33,17 @@ interface ITaskContext {
  * Interface for buildSyncAWSIdentityCenterTask function input
  */
 interface IBuildSyncAWSIdentityCenterTaskInput {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
-  /** Optional AWS SSO start URL */
-  startURL?: string;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
+    /** Optional AWS SSO start URL */
+    startURL?: string;
 }
 
 export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuildSyncAWSIdentityCenterTaskInput): Promise<ListrTask<T>> {
     const { context, startURL } = inputs;
 
     const modulePath = join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         MANAGEMENT_ENVIRONMENT,
         GLOBAL_REGION,
         MODULES.IAM_IDENTIY_CENTER_PERMISSIONS
@@ -121,7 +121,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuil
                     }))
 
 
-                    const configFilePath = join(context.repoVariables.aws_dir, "config")
+                    const configFilePath = join(context.devshellConfig.aws_dir, "config")
 
                     let ssoSessionSSO;
                     if (startURL) {
@@ -168,7 +168,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuil
                 title: "Removing old static crdentials",
                 enabled: (ctx) => ctx.identiyCenterConfig !== undefined,
                 task: async (ctx, task) => {
-                    const credentialsFilePath = join(context.repoVariables.aws_dir, "credentials")
+                    const credentialsFilePath = join(context.devshellConfig.aws_dir, "credentials")
                     if (await fileExists({ filePath: credentialsFilePath })) {
                         let credentials;
                         try {

@@ -3,6 +3,7 @@
 
 import { dirname, join } from "node:path";
 import { z } from "zod";
+import { CONFIG_FILE_PRECEDENCE } from "@/util/config/constants";
 import { PANFACTUM_CONFIG_SCHEMA } from "@/util/config/schemas";
 import { CLIError } from "@/util/error/error";
 import { getVaultToken } from "@/util/vault/getVaultToken";
@@ -26,38 +27,6 @@ interface IOutputValues extends InputValues {
   module_dir?: string;
 }
 
-/**
- * Configuration file search order
- * 
- * @remarks
- * WARNING: The order here is extremely important for proper precedence.
- * DO NOT CHANGE unless you know exactly what you are doing.
- * 
- * Files are processed in order, with later files overriding earlier ones:
- * 1. Global configs (shared across all environments)
- * 2. Environment configs (environment-specific overrides)
- * 3. Region configs (region-specific overrides)
- * 4. Module configs (module-specific overrides)
- * 
- * Within each level:
- * - Base config (.yaml) is loaded first
- * - Secrets (.secrets.yaml) override base
- * - User config (.user.yaml) overrides both
- */
-const CONFIG_FILES = [
-  "global.yaml",
-  "global.secrets.yaml",
-  "global.user.yaml",
-  "environment.yaml",
-  "environment.secrets.yaml",
-  "environment.user.yaml",
-  "region.yaml",
-  "region.secrets.yaml",
-  "region.user.yaml",
-  "module.yaml",
-  "module.secrets.yaml",
-  "module.user.yaml",
-] as const;
 
 /**
  * Input parameters for getting Panfactum configuration
@@ -127,7 +96,7 @@ export const getPanfactumConfig = async ({
 
   // Get the actual file contents for each config file
   const configFileValues: Partial<{
-    [fileName in (typeof CONFIG_FILES)[number]]: InputValues;
+    [fileName in (typeof CONFIG_FILE_PRECEDENCE)[number]]: InputValues;
   }> = {};
   const searchPromises: Array<Promise<void>> = [];
 
@@ -135,8 +104,8 @@ export const getPanfactumConfig = async ({
     throw new CLIError(`getPanfactumConfig must be called with an absolute path. Given '${directory}'`)
   }
   let currentDir = directory;
-  while (currentDir !== context.repoVariables.repo_root && currentDir !== "/" && currentDir !== ".") {
-    CONFIG_FILES.forEach((fileName) => {
+  while (currentDir !== context.devshellConfig.repo_root && currentDir !== "/" && currentDir !== ".") {
+    CONFIG_FILE_PRECEDENCE.forEach((fileName) => {
       searchPromises.push(
         (async () => {
           const filePath = join(currentDir, fileName);
@@ -153,7 +122,7 @@ export const getPanfactumConfig = async ({
 
   // Merge all the values
   let values: Partial<IOutputValues> = {};
-  for (const fileName of CONFIG_FILES) {
+  for (const fileName of CONFIG_FILE_PRECEDENCE) {
     const toMerge = configFileValues[fileName];
     if (toMerge) {
       values = {
@@ -176,10 +145,10 @@ export const getPanfactumConfig = async ({
   }
 
   // Provide defaults
-  const inEnvDir = directory.startsWith(context.repoVariables.environments_dir);
+  const inEnvDir = directory.startsWith(context.devshellConfig.environments_dir);
   const parts = inEnvDir
     ? directory
-      .substring(context.repoVariables.environments_dir.length + 1)
+      .substring(context.devshellConfig.environments_dir.length + 1)
       .split("/")
     : [];
   if (values.tf_state_account_id === undefined) {
@@ -250,10 +219,10 @@ export const getPanfactumConfig = async ({
       values.vault_token
         ? values.vault_token
         : await getVaultToken({
-            context,
-            address: values.vault_addr,
-            silent: true,
-          }).catch(() => '@@TERRAGRUNT_INVALID@@')
+          context,
+          address: values.vault_addr,
+          silent: true,
+        }).catch(() => '@@TERRAGRUNT_INVALID@@')
       : '@@TERRAGRUNT_INVALID@@';
   }
 

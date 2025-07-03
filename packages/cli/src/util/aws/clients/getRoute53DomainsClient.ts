@@ -1,8 +1,8 @@
 // This file provides a factory function for creating AWS Route 53 Domains clients
-// It handles credential loading from files to work around AWS SDK issues
+// It uses the generic AWS client factory for consistent credential handling
 
 import { Route53DomainsClient } from "@aws-sdk/client-route-53-domains";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { createAWSClient } from "@/util/aws/clients/createAWSClient";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -21,9 +21,9 @@ interface IGetRoute53DomainsClientInput {
  * Creates an AWS Route 53 Domains client with proper credential handling
  * 
  * @remarks
- * This function creates a Route53DomainsClient with a workaround for AWS SDK bug
- * https://github.com/aws/aws-sdk-js-v3/issues/6872 by loading credentials
- * from files when a profile is specified.
+ * This function creates a Route53DomainsClient using the generic AWS client factory
+ * which handles credential loading and works around AWS SDK bug
+ * https://github.com/aws/aws-sdk-js-v3/issues/6872.
  * 
  * Note: Route 53 Domains is only available in us-east-1
  * 
@@ -40,26 +40,12 @@ interface IGetRoute53DomainsClientInput {
  * const domains = await domainsClient.send(new ListDomainsCommand({}));
  * ```
  * 
- * @see {@link getCredsFromFile} - For credential file loading
+ * @see {@link createAWSClient} - Generic AWS client factory
  * @see {@link Route53DomainsClient} - AWS SDK Route 53 Domains client documentation
  */
 export async function getRoute53DomainsClient(inputs: IGetRoute53DomainsClientInput): Promise<Route53DomainsClient> {
-    const { context, profile, region = "us-east-1" } = inputs;
-
-    // This is necessary due to this bug
-    // https://github.com/aws/aws-sdk-js-v3/issues/6872
-    const credentials = await getCredsFromFile({ context, profile })
-
-    if (credentials) {
-        return new Route53DomainsClient({
-            credentials,
-            region
-        });
-    } else {
-        return new Route53DomainsClient({
-            profile,
-            region
-        });
-    }
-
+    return createAWSClient({
+        clientClass: Route53DomainsClient,
+        defaultRegion: "us-east-1"
+    }, inputs);
 }

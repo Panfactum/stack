@@ -1,9 +1,9 @@
 import { join, dirname } from "node:path";
 import { Glob } from "bun";
-import { asyncIterMap } from "@/util/asyncIterMap";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { isEnvironmentDeployed } from "@/util/config/isEnvironmentDeployed";
 import { CLIError } from "@/util/error/error";
+import { asyncIterMap } from "@/util/util/asyncIterMap";
 import type { DomainConfigs } from "./tasks/types";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -24,7 +24,7 @@ interface IGetDomainsInputs {
  */
 export async function getDomains(inputs: IGetDomainsInputs): Promise<DomainConfigs> {
     const { context } = inputs;
-    const environmentsDir = context.repoVariables.environments_dir;
+    const environmentsDir = context.devshellConfig.environments_dir;
 
     // Create a glob pattern to find all environment.yaml files in any subdirectory
     const glob = new Glob("**/environment.yaml");

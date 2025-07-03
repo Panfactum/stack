@@ -12234,17 +12234,6 @@ let
         hash = "sha256-Fkrh6zLOo1NVG7x/k1jcquT/q75l7DepLKRkqVcKKgo=";
       };
     };
-    "tree-kill" = {
-      out_path = "tree-kill";
-      binaries = {
-        "tree-kill" = "../tree-kill/cli.js";
-      };
-      pkg = fetchurl {
-        name = "tree-kill@1.2.2";
-        url = "https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz";
-        hash = "sha256-ShiGM6bD858S3Kizi9aCCB5JlFn28H82KZbT6GDmYGE=";
-      };
-    };
     "ts-api-utils" = {
       out_path = "ts-api-utils";
       binaries =

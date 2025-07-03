@@ -94,7 +94,7 @@ export async function getBuildKitAddress(
 ): Promise<string> {
   const { arch, kubectlContext, omitProtocol = false, context } = input;
 
-  const workingDirectory = context.repoVariables.repo_root
+  const workingDirectory = context.devshellConfig.repo_root
 
   // Get running pods filtered by architecture
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
@@ -164,7 +164,7 @@ export async function getBuildKitAddress(
   }
   podMetrics.sort((a: IPodMetric, b: IPodMetric) => a.cpuUsage - b.cpuUsage)
   const selectedPod = podMetrics[0]?.pod
-  
+
   if (!selectedPod) {
     throw new CLIError('No pod available')
   }

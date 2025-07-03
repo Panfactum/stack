@@ -1,8 +1,8 @@
 import { readFile, rm, access } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
-import { test, expect, mock } from "bun:test";
+import { test, expect, mock, describe } from "bun:test";
 import { CLIError } from "@/util/error/error";
+import { createTestDir } from "@/util/test/createTestDir";
 import { writeFile } from "./writeFile";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -12,8 +12,9 @@ const createMockContext = (): PanfactumContext => ({
     }
 } as unknown as PanfactumContext);
 
-test("writes file successfully", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-1`);
+describe("writeFile", () => {
+  test("writes file successfully", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "test.txt");
     const context = createMockContext();
 
@@ -34,7 +35,7 @@ test("writes file successfully", async () => {
 });
 
 test("creates nested directories", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-2`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "deep", "nested", "path", "file.txt");
     const context = createMockContext();
 
@@ -56,7 +57,7 @@ test("creates nested directories", async () => {
 });
 
 test("throws CLIError when file exists and overwrite is false", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-3`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "existing.txt");
     const context = createMockContext();
 
@@ -93,7 +94,7 @@ test("throws CLIError when file exists and overwrite is false", async () => {
 });
 
 test("overwrites file when overwrite is true", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-4`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "existing.txt");
     const context = createMockContext();
 
@@ -122,7 +123,7 @@ test("overwrites file when overwrite is true", async () => {
 });
 
 test("defaults overwrite to false", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-5`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "existing.txt");
     const context = createMockContext();
 
@@ -148,18 +149,13 @@ test("defaults overwrite to false", async () => {
 });
 
 test("handles relative paths", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-6`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const context = createMockContext();
 
     // Change to test directory
     const originalCwd = process.cwd();
     try {
-        // Create the test directory first using writeFile itself
-        await writeFile({
-            context,
-            filePath: join(testDir, ".gitkeep"),
-            contents: ""
-        });
+        // Change to test directory
         process.chdir(testDir);
 
         await writeFile({
@@ -177,7 +173,7 @@ test("handles relative paths", async () => {
 });
 
 test("handles empty content", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-7`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "empty.txt");
     const context = createMockContext();
 
@@ -196,7 +192,7 @@ test("handles empty content", async () => {
 });
 
 test("handles large content", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-8`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "large.txt");
     const largeContent = "x".repeat(10000);
     const context = createMockContext();
@@ -217,7 +213,7 @@ test("handles large content", async () => {
 });
 
 test("handles special characters in content", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-9`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "special.txt");
     const specialContent = "Hello\nWorld\t🌍\u{1F680}";
     const context = createMockContext();
@@ -237,7 +233,7 @@ test("handles special characters in content", async () => {
 });
 
 test("handles paths with spaces and special characters", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-10`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "path with spaces", "special & chars!", "file.txt");
     const context = createMockContext();
 
@@ -256,7 +252,7 @@ test("handles paths with spaces and special characters", async () => {
 });
 
 test("handles multiple writes to different files", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-11`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const context = createMockContext();
 
     try {
@@ -303,7 +299,7 @@ test("throws CLIError when disk is full", async () => {
 });
 
 test("preserves file permissions when overwriting", async () => {
-    const testDir = join(tmpdir(), `writeFile-test-${Date.now()}-12`);
+    const { path: testDir } = await createTestDir({ functionName: "writeFile" });
     const filePath = join(testDir, "perms.txt");
     const context = createMockContext();
 
@@ -328,4 +324,5 @@ test("preserves file permissions when overwriting", async () => {
     } finally {
         await rm(testDir, { recursive: true, force: true });
     }
+});
 });

@@ -1,14 +1,16 @@
 // This file provides utilities for creating Vault proxy connections
 // It manages kubectl port-forward processes for Vault access
 
-import { createServer } from "net";
 import { CLISubprocessError } from "@/util/error/error";
-import { addBackgroundProcess } from "./killBackgroundProcess";
+import { getOpenPort } from "@/util/network/getOpenPort";
+import type { PanfactumContext } from "@/util/context/context";
 
 /**
  * Input parameters for starting a Vault proxy
  */
 interface IStartVaultProxyInput {
+  /** Panfactum context for logging and process management */
+  context: PanfactumContext;
   /** Environment variables for the kubectl process */
   env?: Record<string, string | undefined>;
   /** Kubernetes context to use */
@@ -51,11 +53,11 @@ interface IStartVaultProxyOutput {
  * @throws {@link CLISubprocessError}
  * Throws when the kubectl port-forward process fails to start
  * 
- * @see {@link addBackgroundProcess} - For process tracking
+ * @see {@link BackgroundProcessManager} - For process tracking
  */
 export async function startVaultProxy(input: IStartVaultProxyInput): Promise<IStartVaultProxyOutput> {
-  const { env, kubeContext, modulePath } = input;
-  const openPort = await findAvailablePort(8200);
+  const { context, env, kubeContext, modulePath } = input;
+  const openPort = await getOpenPort({ startPort: 8200 });
   const command = [
     "kubectl",
     "port-forward",
@@ -87,7 +89,7 @@ export async function startVaultProxy(input: IStartVaultProxyInput): Promise<ISt
     );
   }
 
-  addBackgroundProcess({
+  context.backgroundProcessManager.addProcess({
     pid: proc.pid,
     command: command.join(' '),
     description: `Vault proxy for ${modulePath} on port ${openPort}`
@@ -96,58 +98,3 @@ export async function startVaultProxy(input: IStartVaultProxyInput): Promise<ISt
   return { pid: proc.pid, port: openPort };
 }
 
-/**
- * Finds an available network port within a range
- * 
- * @internal
- * @param startPort - Starting port number to check
- * @param endPort - Ending port number (default: startPort + 1000)
- * @returns First available port found
- * 
- * @throws {@link CLISubprocessError}
- * Throws when no available ports are found in the range
- */
-async function findAvailablePort(
-  startPort: number,
-  endPort: number = startPort + 1000
-): Promise<number> {
-  for (let port = startPort; port <= endPort; port++) {
-    const isAvailable = await isPortAvailable(port);
-    if (isAvailable) {
-      return port;
-    }
-  }
-  throw new CLISubprocessError(
-    `No available ports found between ${startPort} and ${endPort}`,
-    {
-      command: "findAvailablePort",
-      subprocessLogs: `No available ports found between ${startPort} and ${endPort}`,
-      workingDirectory: process.cwd(),
-    }
-  );
-}
-
-/**
- * Checks if a specific port is available for binding
- * 
- * @internal
- * @param port - Port number to check
- * @returns True if the port is available, false otherwise
- */
-function isPortAvailable(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const server = createServer();
-
-    server.once("error", () => {
-      resolve(false);
-    });
-
-    server.once("listening", () => {
-      server.close(() => {
-        resolve(true);
-      });
-    });
-
-    server.listen(port);
-  });
-}

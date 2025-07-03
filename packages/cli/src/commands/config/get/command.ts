@@ -1,5 +1,5 @@
 // This file defines the config get command for retrieving Panfactum configuration
-// It merges environment, region, and repository configurations for debugging
+// It merges environment, region, and devshell configurations for debugging
 
 import { resolve } from "node:path";
 import { Command, Option } from "clipanion";
@@ -20,7 +20,7 @@ import { getPanfactumConfig } from "../../../util/config/getPanfactumConfig";
  * 1. User-specific overrides (*.user.yaml)
  * 2. Environment configuration (global.yaml, environment.yaml)
  * 3. Region configuration (region.yaml)
- * 4. Repository variables (panfactum.yaml)
+ * 4. Devshell configuration (panfactum.yaml)
  * 
  * The output includes:
  * - AWS profiles and regions
@@ -75,7 +75,7 @@ export class ConfigGetCommand extends PanfactumCommand {
      * @remarks
      * Loads and merges all applicable configuration files for the
      * specified directory, then outputs the result as formatted JSON.
-     * The output includes both Panfactum config and repository variables.
+     * The output includes both Panfactum config and devshell variables.
      * 
      * @returns Exit code (0 for success)
      * 
@@ -85,13 +85,13 @@ export class ConfigGetCommand extends PanfactumCommand {
     async execute() {
         const directory = this.directory ? resolve(this.directory) : process.cwd()
 
-        if (!directory.startsWith(this.context.repoVariables.repo_root)) {
+        if (!directory.startsWith(this.context.devshellConfig.repo_root)) {
             throw new CLIError(`Provided directory ${directory} is not inside the repository.`)
         }
 
         const mergedConfig = {
             ...await getPanfactumConfig({ context: this.context, directory }),
-            ...this.context.repoVariables
+            ...this.context.devshellConfig
         }
         this.context.stdout.write(JSON.stringify(mergedConfig, undefined, 4))
         return 0

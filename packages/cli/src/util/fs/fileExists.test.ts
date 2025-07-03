@@ -1,17 +1,15 @@
 import { writeFile, rm, mkdir } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "bun:test";
+import { test, expect, describe } from "bun:test";
+import { createTestDir } from "@/util/test/createTestDir";
 import { fileExists } from "./fileExists";
 
-let testCounter = 0;
-
-test("returns true when file exists", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+describe("fileExists", () => {
+  test("returns true when file exists", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const filePath = join(testDir, "test-file.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await writeFile(filePath, "test content");
 
         const result = await fileExists({ filePath });
@@ -23,11 +21,10 @@ test("returns true when file exists", async () => {
 });
 
 test("returns false when file does not exist", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const filePath = join(testDir, "nonexistent.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
 
         const result = await fileExists({ filePath });
 
@@ -38,11 +35,10 @@ test("returns false when file does not exist", async () => {
 });
 
 test("handles relative paths", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const originalCwd = process.cwd();
     
     try {
-        await mkdir(testDir, { recursive: true });
         await writeFile(join(testDir, "relative-file.txt"), "test content");
         process.chdir(testDir);
 
@@ -56,11 +52,10 @@ test("handles relative paths", async () => {
 });
 
 test("handles paths with special characters", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const specialPath = join(testDir, "file with spaces & symbols!.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await writeFile(specialPath, "test content");
 
         const result = await fileExists({ filePath: specialPath });
@@ -72,7 +67,7 @@ test("handles paths with special characters", async () => {
 });
 
 test("returns false for directories", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const subDir = join(testDir, "subdirectory");
     
     try {
@@ -88,7 +83,7 @@ test("returns false for directories", async () => {
 });
 
 test("handles deeply nested files", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const deepPath = join(testDir, "level1", "level2", "level3", "deep-file.txt");
     
     try {
@@ -104,11 +99,10 @@ test("handles deeply nested files", async () => {
 });
 
 test("handles empty files", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const emptyFile = join(testDir, "empty.txt");
     
     try {
-        await mkdir(testDir, { recursive: true });
         await writeFile(emptyFile, "");
 
         const result = await fileExists({ filePath: emptyFile });
@@ -120,7 +114,7 @@ test("handles empty files", async () => {
 });
 
 test("handles file in parent directory", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     const subDir = join(testDir, "subdir");
     const fileInParent = join(testDir, "parent-file.txt");
     const originalCwd = process.cwd();
@@ -143,10 +137,9 @@ test("handles file in parent directory", async () => {
 });
 
 test("handles files with various extensions", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     
     try {
-        await mkdir(testDir, { recursive: true });
         
         const files = [
             "file.txt",
@@ -173,10 +166,9 @@ test("handles files with various extensions", async () => {
 });
 
 test("handles multiple file existence checks", async () => {
-    const testDir = join(tmpdir(), `fileExists-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "fileExists" });
     
     try {
-        await mkdir(testDir, { recursive: true });
         
         // Create some files
         const files = [
@@ -199,4 +191,5 @@ test("handles multiple file existence checks", async () => {
     } finally {
         await rm(testDir, { recursive: true, force: true });
     }
+});
 });

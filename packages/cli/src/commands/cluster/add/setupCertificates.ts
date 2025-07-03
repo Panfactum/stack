@@ -3,13 +3,12 @@ import { z } from "zod";
 import kubeCertificatesTemplate from "@/templates/kube_certificates.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
-import { killBackgroundProcess } from "@/util/subprocess/killBackgroundProcess";
-import { startVaultProxy } from "@/util/subprocess/vaultProxy";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { startVaultProxy } from "@/util/vault/startVaultProxy";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -108,6 +107,7 @@ export async function setupCertificates(
       title: "Start Vault Proxy",
       task: async (ctx) => {
         const { pid, port } = await startVaultProxy({
+          context,
           env: {
             ...process.env,
           },
@@ -191,7 +191,7 @@ export async function setupCertificates(
       title: "Stop Vault Proxy",
       task: async (ctx) => {
         if (ctx.vaultProxyPid) {
-          killBackgroundProcess({ pid: ctx.vaultProxyPid, context });
+          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
         }
       },
     },

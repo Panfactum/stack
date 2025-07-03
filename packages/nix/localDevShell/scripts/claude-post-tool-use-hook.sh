@@ -33,8 +33,8 @@ fi
 # Change to the CLI package directory and run ESLint
 cd "$REPO_ROOT/packages/cli"
 
-# Run bun eslint --fix on the target file
-if bun eslint --fix "$file_path" >&2; then
+# Run bun eslinton the target file
+if bun eslint "$file_path" >&2; then
   # ESLint succeeded
   exit 0
 else

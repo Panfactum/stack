@@ -8,7 +8,8 @@
 
   <details>
   <summary>Good</summary>
-    ```tsx
+
+    ```typescript
     interface IFooInput {
       baz: string;
     }
@@ -25,7 +26,8 @@
 
   <details>
   <summary>Bad: Do not define inline interfaces</summary>
-  ```tsx
+
+  ```typescript
   function foo(input: {baz: string}): {bar: string} {
     return {bar: input.baz}
   }
@@ -43,6 +45,9 @@
   - `ReadableStream`
   - `Blob`
 
+- **NEVER use `Bun.sleep` and instead use our internal `sleep` method.** Bun.sleep
+  causes issues with `--bytecode` compilation.
+
 
 ## TSDoc Rules
 
@@ -52,7 +57,8 @@
 
   <details>
   <summary>Good: Exported Function</summary>
-  ```tsx
+
+  ```typescript
   /**
   * Interface for input parameters to the example function
   */
@@ -125,7 +131,8 @@
 
   <details>
   <summary>Good: Internal Function</summary>
-  ```tsx
+
+  ```typescript
   /**
   * Example internal utility function with lighter documentation
   * 
@@ -142,7 +149,8 @@
 
   <details>
   <summary>Good: Zod Schema</summary>
-  ```tsx
+
+  ```typescript
   import { z } from 'zod';
 
   /**
@@ -176,7 +184,8 @@
 
   <details>
   <summary>Good: Class</summary>
-  ```tsx
+
+  ```typescript
   /**
   * Example class with TSDoc documentation
   */
@@ -239,7 +248,8 @@
 
   <details>
   <summary>Good</summary>
-  ```tsx
+
+  ```typescript
   /**
    * @throws {@link FooError}
    * Throws a FooError
@@ -249,7 +259,8 @@
 
   <details>
   <summary>Bad: Missing `@link`</summary>
-  ```tsx
+
+  ```typescript
   /**
    * @throws {@link FooError}
    * Throws a FooError
@@ -260,11 +271,189 @@
 
   <details>
   <summary>Bad: Missing reference</summary>
-  ```tsx
+
+  ```typescript
   /**
    * @throws {@link FooError}
    * Throws a FooError
    */
+  ```
+  </details>
+
+## Testing
+
+- Test files MUST be named `[original_file].test.ts` where `[oringal_file].ts` contains the code that is being tested.
+
+- **When testing object return values, always use [inline snapshots](https://bun.sh/docs/test/snapshots).**
+  All inline snapshots MUST be properly indented with one additional level (4 spaces) from the `expect` statement.
+
+  <details>
+  <summary>Good</summary>
+
+  ```typescript
+  test('respects stream order', async () => {
+    const createNumberStream = (start: number, count: number) => {      
+    const numbers: number[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      numbers.push(value);
+    }
+
+    expect(numbers).toMatchInlineSnapshot(`
+      [
+        0,
+        1,
+        2,
+        10,
+        11,
+        12,
+        20,
+        21,
+        22,
+      ]
+    `);
+  });
+  ```
+  </details>
+
+  <details>
+  <summary>Bad: Indentation does not match the containing code block</summary>
+
+  ```typescript
+  test('respects stream order', async () => {
+    const createNumberStream = (start: number, count: number) => {      
+    const numbers: number[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      numbers.push(value);
+    }
+
+    expect(numbers).toMatchInlineSnapshot(`
+  [
+    0,
+    1,
+    2,
+    10,
+    11,
+    12,
+    20,
+    21,
+    22,
+  ]
+  `);
+  });
+  ```
+  </details>
+
+- **Tests should create the relevant external files that need to be tested against.** Filesystem IO should never be mocked. Make sure
+  that test files are always cleaned up.
+  
+  <details>
+  <summary>Good</summary>
+
+  ```typescript
+  import { writeFile, mkdir, rm } from "node:fs/promises";
+  import { join, dirname } from "node:path";
+  import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+  import { createTestDir } from "@/util/test/createTestDir";
+
+  let testDir: string;
+
+  beforeEach(async () => {
+    const result = await createTestDir({ functionName: "getAWSProfileForContext" });
+    testDir = result.path;
+  });
+
+  afterEach(async () => {
+    // Clean up test directory
+    if (testDir) {
+      await rm(testDir, { recursive: true, force: true });
+    }
+  });
+  ```
+  </details>
+
+- **ALWAYS wrap `test` calls in a `describe` function**
+
+  <details>
+  <summary>Good</summary>
+
+  ```typescript
+  describe("[function_name]", () => {
+    test("[test description]", async () => {
+      // [test implementation]
+    });
+  })
+  ```
+  </details>
+
+
+- Use the following utility functions in `packages/cli/src/util/test/` when writing tests:
+
+  - `createTestDir`: Create a temporary directory where you write / read from the local filesystem.
+
+- **NEVER create global module mocks in the test files.** This can conflicts with tests in other files in the same test run.
+
+
+  <details>
+  <summary>Good: Use spyOn for scoped mocking</summary>
+
+  ```typescript
+  import { describe, expect, test, beforeEach, afterEach, spyOn, mock } from "bun:test";
+  import * as getPanfactumConfigModule from "@/util/config/getPanfactumConfig";
+  import * as readYAMLFileModule from "@/util/yaml/readYAMLFile";
+
+  describe("myFunction", () => {
+    let getPanfactumConfigMock: ReturnType<typeof spyOn<typeof getPanfactumConfigModule, "getPanfactumConfig">>;
+    let readYAMLFileMock: ReturnType<typeof spyOn<typeof readYAMLFileModule, "readYAMLFile">>;
+
+    beforeEach(() => {
+      // Create spies for module functions
+      getPanfactumConfigMock = spyOn(getPanfactumConfigModule, "getPanfactumConfig");
+      readYAMLFileMock = spyOn(readYAMLFileModule, "readYAMLFile");
+
+    });
+
+    afterEach(() => {
+      // Restore the mocked module functions
+      mock.restore();
+    });
+
+    test("should work with mocked functions", async () => {
+
+      // Set up the mocked return values
+      getPanfactumConfigMock.mockResolvedValue({
+        aws_profile: "test-profile",
+        aws_region: "us-east-1"
+      });
+      readYAMLFileMock.mockResolvedValue(null);
+
+      // Your test implementation
+      expect(getPanfactumConfigMock).toHaveBeenCalled();
+    });
+  });
+  ```
+  </details>
+
+  <details>
+  <summary>Bad: Global module mocks</summary>
+
+  ```typescript
+  import { describe, expect, test, mock, beforeEach, afterEach } from "bun:test";
+
+  mock.module("@/util/config/getPanfactumConfig", () => ({
+      getPanfactumConfig: getPanfactumConfigMock
+  }));
+
+  mock.module("@/util/yaml/readYAMLFile", () => ({
+      readYAMLFile: readYAMLFileMock
+  }));
+
+  mock.module("@/util/yaml/writeYAMLFile", () => ({
+      writeYAMLFile: writeYAMLFileMock
+  }));
   ```
   </details>
 
@@ -274,6 +463,7 @@
 
   <details>
   <summary>Good: Use `CLIError` to throw errors</summary>
+
   ```typescript
   throw new CLIError('User-friendly message', { 
     cause: originalError 
@@ -284,6 +474,7 @@
 
   <details>
   <summary>Bad: Do not use `Error` to throw errors</summary>
+
   ```typescript
   throw new Error('User-friendly message');
   ```
@@ -294,6 +485,7 @@
 
   <details>
   <summary>Good: Example of proper error message logging</summary>
+
   ```typescript
   context.logger.error(`
       The AWS profile ${DEFAULT_MANAGEMENT_PROFILE} in ${awsConfigFile}
@@ -306,6 +498,7 @@
 
   <details>
   <summary>Good: Example of user prompt</summary>
+
   ```typescript
   await context.logger.select({
     explainer: `
@@ -334,13 +527,15 @@
 
   <details>
   <summary>Bad: Do not use console.log</summary>
+
   ```typescript
   console.log('Some message');
   ```
   </details>
 
-    <details>
+  <details>
   <summary>Bad: Do not use inquirer directly</summary>
+
   ```typescript
   import { select } from "@inquirer/prompts";
 
@@ -373,6 +568,7 @@
 
   <details>
   <summary>Good</summary>
+
   ```typescript
   import { z } from 'zod';
 
@@ -392,21 +588,169 @@
 
 ### File Reading / Writing
 
+- Unless a format-specific alternative exists (e.g., yaml files, etc.), **ALWAYS use the utilities in `packages/cli/src/util/fs` for filesystem operations**
+  instead of using the Bun or Node.js `node:fs/promises` methods directly. We include very specific error and logging logic that we want to run at every IO boundary.
+
+  <details>
+  <summary>Good: Use utilities from `packages/cli/src/util/fs`</summary>
+
+  ```typescript
+  import { directoryExists } from "@/util/fs/directoryExists";
+  import { fileExists } from "@/util/fs/fileExists";
+  import { createDirectory } from "@/util/fs/createDirectory";
+  import { removeDirectory } from "@/util/fs/removeDirectory";
+  import { removeFile } from "@/util/fs/removeFile";
+  import { writeFile } from "@/util/fs/writeFile";
+  import { readFile } from "@/util/fs/readFile";
+  import { findFolder } from "@/util/fs/findFolder";
+
+  interface IMyFunctionInput {
+    context: PanfactumContext;
+    configPath: string;
+    outputDir: string;
+  }
+
+  export async function myFunction(input: IMyFunctionInput) {
+    const { context, configPath, outputDir } = input;
+
+    // Check if file exists
+    const configExists = await fileExists({ context, filePath: configPath });
+    if (!configExists) {
+      throw new CLIError(`Config file not found: ${configPath}`);
+    }
+
+    // Check if directory exists
+    const outputExists = await directoryExists({ context, dirPath: outputDir });
+    if (!outputExists) {
+      // Create directory if it doesn't exist
+      await createDirectory({ context, dirPath: outputDir });
+    }
+
+    // Read and process file
+    const configContent = await readFile({ context, filePath: configPath });
+    const processedContent = processConfig(configContent);
+
+    // Write processed content
+    await writeFile({
+      context,
+      filePath: join(outputDir, 'processed-config.json'),
+      content: processedContent
+    });
+  }
+  ```
+  </details>
+
+  <details>
+  <summary>Bad: Do not use Node.js or Bun filesystem methods directly</summary>
+
+  ```typescript
+  import { existsSync, writeFileSync, readFileSync, mkdirSync } from "node:fs";
+  import { join } from "node:path";
+
+  // Bad: Direct filesystem operations without proper error handling
+  export async function myFunction(configPath: string, outputDir: string) {
+    if (!existsSync(configPath)) {
+      throw new Error(`Config file not found: ${configPath}`);
+    }
+
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true });
+    }
+
+    const configContent = readFileSync(configPath, 'utf8');
+    const processedContent = processConfig(configContent);
+    writeFileSync(join(outputDir, 'processed-config.json'), processedContent);
+  }
+  ```
+  </details>
+
+  <details>
+  <summary>Bad: Do not use Bun.file or Bun.write directly</summary>
+
+  ```typescript
+  // Bad: Using Bun filesystem methods without proper error handling
+  export async function myFunction(configPath: string, outputDir: string) {
+    const configFile = Bun.file(configPath);
+    const exists = await configFile.exists();
+    
+    if (!exists) {
+      throw new Error(`Config file not found: ${configPath}`);
+    }
+
+    const configContent = await configFile.text();
+    const processedContent = processConfig(configContent);
+    
+    await Bun.write(join(outputDir, 'processed-config.json'), processedContent);
+  }
+  ```
+  </details>
+
 #### YAML
 
-- **ALWAYS use the utilities in `packages/cli/src/util/yaml` to read and write from YAML files**.
+- **ALWAYS use the utilities in `packages/cli/src/util/yaml` to read and write from YAML files**. Never use the raw Node.js or Bun file utilities.
+
+  <details>
+  <summary>Good</summary>
+
+  ```typescript
+  import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+  import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
+
+  import { z } from "zod";
+
+  const ConfigSchema = z.object({
+    name: z.string(),
+    version: z.string()
+  });
+
+  const config = await readYAMLFile({
+    context,
+    filePath: "/path/to/config.yaml",
+    validationSchema: ConfigSchema,
+    throwOnMissing: false,
+    throwOnEmpty: false
+  });
+
+  await writeYAMLFile({
+    context,
+    filePath: "/path/to/output.yaml",
+    values: config,
+    overwrite: true
+  });
+  ```
+  </details>
+
+  <details>
+  <summary>Bad: Do not use raw Node.js or Bun file utilities</summary>
+
+  ```typescript
+  import { readFileSync } from "node:fs";
+  import { parse } from "yaml";
+
+  // Bad: Direct file reading without validation or error handling
+  const content = readFileSync("/path/to/config.yaml", "utf8");
+  const config = parse(content);
+  ```
+  </details>
+
+  <details>
+  <summary>Bad: Do not use Bun.file directly</summary>
+
+  ```typescript
+  import { parse } from "yaml";
+
+  // Bad: Using Bun.file without proper validation
+  const file = Bun.file("/path/to/config.yaml");
+  const content = await file.text();
+  const config = parse(content);
+  ```
+  </details>
 
 - **YAML keys written to files must be in snake_case**, not camelCase. However, they can transformed to camelCase when used inside the CLI functions.
 
 #### SOPS-encrypted Files
 
 - **ALWAYS use the utilities in `packages/cli/src/util/sops` to read and write from sops-encrypted files**.
-
-#### Other
-
-- Unless a format-specific alternative exists (e.g., yaml files, etc.), **ALWAYS use the utilities in `packages/cli/src/util/fs` for filesystem operations**
-  instead of using the Bun APIs directly. We include very specific error and logging logic that we want to run at every IO boundary.
-
 
 ## Subprocess Execution
 
@@ -420,6 +764,7 @@
 
   <details>
   <summary>Good</summary>
+
   ```typescript
   import { execute } from '@/util/subprocess/execute';
 
@@ -434,6 +779,7 @@
 
   <details>
   <summary>Bad: Never use these</summary>
+
   ```typescript
   execSync('vault token lookup -format=json');
   spawn('vault', ['token', 'lookup']);
@@ -448,6 +794,7 @@
 
   <details>
   <summary>Good</summary>
+
   ```typescript
   import { getSTSClient } from '@/util/aws/clients/getSTSClient';
 
@@ -459,6 +806,7 @@
 
   <details>
   <summary>Bad: Uses `aws` CLI</summary>
+
   ```typescript
     const result = await execute({
       command: ['aws', 'sts', 'get-caller-identity'],
@@ -472,6 +820,7 @@
 
   <details>
   <summary>Good</summary>
+
   ```typescript
   import { UpdateAutoScalingGroupCommand } from "@aws-sdk/client-auto-scaling";
   import { getAutoScalingClient } from "@util/aws/clients/getAutoScalingClient";
@@ -494,6 +843,7 @@
 
   <details>
   <summary>Bad: Creates the client directly</summary>
+
   ```typescript
   import { UpdateAutoScalingGroupCommand, AutoScalingClient } from "@aws-sdk/client-auto-scaling";
   import { getAutoScalingClient } from "@util/aws/clients/getAutoScalingClient";

@@ -4,6 +4,7 @@
 import { z } from "zod";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
+import { parseJson } from "./parseJson";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -108,7 +109,7 @@ interface IReadJSONFileInput<T extends z.ZodType<object>> {
  * Throws when parsed data doesn't match the schema
  * 
  * @see {@link readYAMLFile} - Similar function for YAML files
- * @see {@link parseJson} - For parsing JSON strings
+ * @see {@link parseJson} - Used internally for parsing and validation
  */
 export const readJSONFile = async <T extends z.ZodType<object>>(
     input: IReadJSONFileInput<T>
@@ -139,20 +140,20 @@ export const readJSONFile = async <T extends z.ZodType<object>>(
         return null;
     }
 
-    // Parse JSON
-    let parsedJson: unknown;
-    try {
-        parsedJson = JSON.parse(fileContent);
-    } catch (error) {
-        throw new CLIError(`Invalid JSON syntax in file at ${filePath}`, error);
-    }
-
-    // Validate with schema
+    // Parse and validate JSON using parseJson
     context.logger.debug(`Validating JSON`, { filePath });
-    const parseResult = validationSchema.safeParse(parsedJson);
-    if (!parseResult.success) {
-        throw new PanfactumZodError("Invalid values in JSON file", filePath, parseResult.error);
+    try {
+        return parseJson(validationSchema, fileContent);
+    } catch (error) {
+        if (error instanceof CLIError && !(error instanceof PanfactumZodError)) {
+            // Re-throw with more specific file context for JSON syntax errors
+            throw new CLIError(`Invalid JSON syntax in file at ${filePath}`, error);
+        }
+        // PanfactumZodError should be re-thrown as-is, but with file context
+        if (error instanceof PanfactumZodError) {
+            throw new PanfactumZodError("Invalid values in JSON file", filePath, error.validationError);
+        }
+        // Unexpected error type
+        throw error;
     }
-
-    return parseResult.data as z.infer<T>;
 };

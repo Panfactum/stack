@@ -3,8 +3,8 @@
 
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
+import { parseJson } from '@/util/json/parseJson';
 import { execute } from '@/util/subprocess/execute';
-import { parseJson } from '@/util/zod/parseJson';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
@@ -93,7 +93,7 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
   try {
     // Set vault address
     const vaultAddr = address;
-    
+
     if (!vaultAddr) {
       throw new CLIError('VAULT_ADDR is not set. Either set the env variable or use the --address flag.');
     }
@@ -120,7 +120,7 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
       const result = await execute({
         command: ['vault', 'print', 'token'],
         context,
-        workingDirectory: context.repoVariables.repo_root,
+        workingDirectory: context.devshellConfig.repo_root,
         env
       });
       existingToken = result.stdout.trim();
@@ -134,10 +134,10 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
         const lookupResult = await execute({
           command: ['vault', 'token', 'lookup', '-format=json'],
           context,
-          workingDirectory: context.repoVariables.repo_root,
+          workingDirectory: context.devshellConfig.repo_root,
           env: { ...env, VAULT_TOKEN: existingToken }
         });
-        
+
         const lookupData = parseJson(VAULT_TOKEN_LOOKUP_SCHEMA, lookupResult.stdout);
         const ttl = lookupData.data.ttl; // Now already a number from Zod coercion
 
@@ -163,7 +163,7 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
         console.error('Warning: getVaultToken failed, but exiting with 0 as --silent is enabled.');
       }
     }
-    
+
     throw error;
   }
 }
@@ -189,7 +189,7 @@ async function performOIDCLogin(env: Record<string, string | undefined>, context
     const result = await execute({
       command: ['vault', 'login', '-method=oidc', '-field=token'],
       context,
-      workingDirectory: context.repoVariables.repo_root,
+      workingDirectory: context.devshellConfig.repo_root,
       env
     });
 

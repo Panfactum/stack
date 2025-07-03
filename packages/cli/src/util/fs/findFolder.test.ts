@@ -1,7 +1,7 @@
 import { mkdir, writeFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "bun:test";
+import { test, expect, describe } from "bun:test";
+import { createTestDir } from "@/util/test/createTestDir";
 import { findFolder } from "./findFolder";
 
 // Helper to create a test directory structure
@@ -19,10 +19,10 @@ async function createTestStructure(basePath: string) {
     await writeFile(join(basePath, "src", "index.js"), "test");
 }
 
-test("returns folder path when found in current directory", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-1`);
+describe("findFolder", () => {
+  test("returns folder path when found in current directory", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
         await mkdir(join(testDir, "targetFolder"), { recursive: true });
 
         const result = await findFolder(testDir, "targetFolder");
@@ -34,9 +34,8 @@ test("returns folder path when found in current directory", async () => {
 });
 
 test("returns folder path when found in subdirectory", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-2`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
         await mkdir(join(testDir, "subdir"), { recursive: true });
         await mkdir(join(testDir, "subdir", "targetFolder"), { recursive: true });
 
@@ -49,7 +48,7 @@ test("returns folder path when found in subdirectory", async () => {
 });
 
 test("returns null when folder is not found", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-3`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
         await createTestStructure(testDir);
 
@@ -62,9 +61,8 @@ test("returns null when folder is not found", async () => {
 });
 
 test("skips hidden directories", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-4`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
         await mkdir(join(testDir, ".hidden"), { recursive: true });
         await mkdir(join(testDir, ".hidden", "targetFolder"), { recursive: true });
         await mkdir(join(testDir, "visible"), { recursive: true });
@@ -79,9 +77,8 @@ test("skips hidden directories", async () => {
 });
 
 test("recursively searches nested directories", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-5`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
         await mkdir(join(testDir, "level1", "level2"), { recursive: true });
         await mkdir(join(testDir, "level1", "level2", "targetFolder"), { recursive: true });
 
@@ -94,9 +91,8 @@ test("recursively searches nested directories", async () => {
 });
 
 test("handles empty directories", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-6`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
 
         const result = await findFolder(testDir, "target");
 
@@ -107,9 +103,8 @@ test("handles empty directories", async () => {
 });
 
 test("stops at first match found", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-7`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
         await mkdir(join(testDir, "dir1"), { recursive: true });
         await mkdir(join(testDir, "dir1", "targetFolder"), { recursive: true });
         await mkdir(join(testDir, "dir2"), { recursive: true });
@@ -125,7 +120,7 @@ test("stops at first match found", async () => {
 });
 
 test("handles mixed files and directories", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-8`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
         await createTestStructure(testDir);
         await mkdir(join(testDir, "docs", "targetFolder"), { recursive: true });
@@ -139,9 +134,8 @@ test("handles mixed files and directories", async () => {
 });
 
 test("finds hidden folders when specifically searched for", async () => {
-    const testDir = join(tmpdir(), `findFolder-test-${Date.now()}-9`);
+    const { path: testDir } = await createTestDir({ functionName: "findFolder" });
     try {
-        await mkdir(testDir, { recursive: true });
         await mkdir(join(testDir, ".panfactum"), { recursive: true });
 
         // When searching for a hidden folder by name, it should be found at the top level
@@ -151,4 +145,5 @@ test("finds hidden folders when specifically searched for", async () => {
     } finally {
         await rm(testDir, { recursive: true, force: true });
     }
+});
 });

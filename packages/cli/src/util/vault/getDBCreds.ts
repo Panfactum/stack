@@ -3,10 +3,10 @@
 
 import { z } from 'zod';
 import { CLIError } from '@/util/error/error';
+import { parseJson } from '@/util/json/parseJson';
 import { execute } from '@/util/subprocess/execute';
-import { parseJson } from '@/util/zod/parseJson';
 import { getVaultToken } from './getVaultToken';
-import type {PanfactumContext} from "@/util/context/context.ts";
+import type { PanfactumContext } from "@/util/context/context.ts";
 
 /**
  * Schema for Vault database credentials response
@@ -137,7 +137,7 @@ export async function getDBCreds(options: IGetDbCredsOptions): Promise<IDbCreden
   const { stdout } = await execute({
     command: ['vault', 'read', '-format=json', `db/creds/${role}`],
     context,
-    workingDirectory: context.repoVariables.repo_root,
+    workingDirectory: context.devshellConfig.repo_root,
     env
   }).catch((error: unknown) => {
     throw new CLIError(`Failed to get database credentials for role '${role}'`, error);
@@ -217,7 +217,7 @@ function parseVaultResponse(output: string): IDbCredentials {
  */
 export async function getDbCredsFormatted(options: IGetDbCredsOptions): Promise<string> {
   const creds = await getDBCreds(options);
-  
+
   // Format output similar to vault read command
   const lines = [
     `Key                Value`,

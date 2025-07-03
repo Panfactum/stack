@@ -103,7 +103,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
     }
 
     const environmentPath = path.join(
-        context.repoVariables.environments_dir,
+        context.devshellConfig.environments_dir,
         environment
     );
     const clusterPath = path.join(environmentPath, region);
@@ -220,10 +220,10 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                     filePath: path.join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, ".pf.yaml"),
                     context,
                     validationSchema: z
-                      .object({
-                          first_applied: z.boolean().optional(),
-                      })
-                      .passthrough(),
+                        .object({
+                            first_applied: z.boolean().optional(),
+                        })
+                        .passthrough(),
                 })
 
                 return !!authentikAwsSSOPfYAMLFileData?.first_applied
@@ -235,7 +235,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                         context,
                         environment,
                         region,
-                        env: {...context.env},
+                        env: { ...context.env },
                         skipIfAlreadyApplied: true,
                         module: MODULES.AUTHENTIK_AWS_SSO,
                         hclIfMissing: await Bun.file(authentikAwsSSO).text(),

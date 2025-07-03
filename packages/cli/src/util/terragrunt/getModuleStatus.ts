@@ -3,7 +3,7 @@
 
 import { join } from "node:path"
 import { z } from "zod";
-import { directoryExists } from "@/util/fs/directoryExist";
+import { directoryExists } from "@/util/fs/directoryExists";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { MODULE_STATUS_FILE } from "./constants";
 import { MODULE_STATUS_FILE_SCHEMA, type DEPLOY_STATUS_SCHEMA, type INIT_STATUS_SCHEMA } from "./schemas";
@@ -89,7 +89,7 @@ export async function getModuleStatus(
 ): Promise<IModuleStatus> {
 
     const { context, environment, region, module } = input;
-    const envDir = join(context.repoVariables.environments_dir, environment)
+    const envDir = join(context.devshellConfig.environments_dir, environment)
     const regionDir = join(envDir, region)
     const moduleDir = join(regionDir, module)
 

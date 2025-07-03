@@ -11,8 +11,8 @@ import type { ListrTask } from "listr2";
  * Interface for syncStandardFilesTask function input
  */
 interface ISyncStandardFilesTaskInput {
-  /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
+    /** Panfactum context for logging and configuration */
+    context: PanfactumContext;
 }
 
 export async function syncStandardFilesTask<T extends {}>(inputs: ISyncStandardFilesTaskInput): Promise<ListrTask<T>> {
@@ -27,7 +27,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: ISyncStandardF
             subtasks.add({
                 title: "Update HCL files",
                 task: async () => {
-                    const environmentsDir = context.repoVariables.environments_dir;
+                    const environmentsDir = context.devshellConfig.environments_dir;
                     await Promise.all(TERRAGRUNT_FILES.map(async ({ path, contentPath }) => {
                         const filePath = join(environmentsDir, path);
                         await writeFile({ context, filePath: filePath, contents: await Bun.file(contentPath).text(), overwrite: true })
@@ -40,27 +40,27 @@ export async function syncStandardFilesTask<T extends {}>(inputs: ISyncStandardF
                 task: async () => {
                     await Promise.all([
                         upsertGitIgnore({
-                            path: join(context.repoVariables.environments_dir, ".gitignore"),
+                            path: join(context.devshellConfig.environments_dir, ".gitignore"),
                             context,
                             lines: EXPECTED_GITIGNORE_CONTENTS.environments
                         }),
                         upsertGitIgnore({
-                            path: join(context.repoVariables.aws_dir, ".gitignore"),
+                            path: join(context.devshellConfig.aws_dir, ".gitignore"),
                             context,
                             lines: EXPECTED_GITIGNORE_CONTENTS.aws
                         }),
                         upsertGitIgnore({
-                            path: join(context.repoVariables.ssh_dir, ".gitignore"),
+                            path: join(context.devshellConfig.ssh_dir, ".gitignore"),
                             context,
                             lines: EXPECTED_GITIGNORE_CONTENTS.ssh
                         }),
                         upsertGitIgnore({
-                            path: join(context.repoVariables.kube_dir, ".gitignore"),
+                            path: join(context.devshellConfig.kube_dir, ".gitignore"),
                             context,
                             lines: EXPECTED_GITIGNORE_CONTENTS.kube
                         }),
                         upsertGitIgnore({
-                            path: join(context.repoVariables.repo_root, ".gitignore"),
+                            path: join(context.devshellConfig.repo_root, ".gitignore"),
                             context,
                             lines: EXPECTED_GITIGNORE_CONTENTS.root
                         })
@@ -73,7 +73,7 @@ export async function syncStandardFilesTask<T extends {}>(inputs: ISyncStandardF
                 task: async () => {
                     await writeFile({
                         context,
-                        filePath: join(context.repoVariables.repo_root, ".envrc"),
+                        filePath: join(context.devshellConfig.repo_root, ".envrc"),
                         contents: await Bun.file(envRCPath).text(),
                         overwrite: true
                     })

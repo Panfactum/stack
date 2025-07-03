@@ -79,8 +79,8 @@ interface IGetBuildKitConfigInput {
  */
 export async function getBuildKitConfig(input: IGetBuildKitConfigInput): Promise<IBuildKitConfig> {
   const { context } = input;
-  const repoVars = context.repoVariables
-  const buildkitDir = repoVars.buildkit_dir
+  const devshellConfig = context.devshellConfig
+  const buildkitDir = devshellConfig.buildkit_dir
   const configPath = join(buildkitDir, 'buildkit.json')
 
   const config = await readJSONFile({

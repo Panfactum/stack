@@ -4,6 +4,7 @@
 import { SendCommandCommand } from "@aws-sdk/client-ssm";
 import { getSSMClient } from "@/util/aws/clients/getSSMClient.ts";
 import { CLIError } from "@/util/error/error";
+import { sleep } from "@/util/util/sleep";
 import type { PanfactumContext } from "@/util/context/context.ts";
 
 /**
@@ -81,7 +82,7 @@ export async function sendSSMCommand(input: ISendSSMCommandInput): Promise<strin
       return result.Command.CommandId;
     } catch (error) {
       if (ssmRetries < maxSSMRetries - 1) {
-        await Bun.sleep(1000);
+        await sleep(1000);
         ssmRetries++;
       } else {
         throw new CLIError("Failed to execute SSM command", { cause: error });

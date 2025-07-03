@@ -1,8 +1,8 @@
 // This file provides utilities for finding available network ports on the local system
 // It searches through port ranges to locate unused ports for services
 
-import net from 'net';
 import { CLIError } from '@/util/error/error';
+import { isPortAvailable } from '@/util/network/isPortAvailable';
 
 /**
  * Input parameters for finding an open port
@@ -67,12 +67,11 @@ interface IGetOpenPortInput {
  * @throws {@link CLIError}
  * Throws when no available ports are found in the specified range
  * 
- * @see {@link checkPort} - Internal port availability checker
- * @see {@link net} - Node.js networking module used for port binding
+ * @see {@link isPortAvailable} - Port availability checker
  */
 export async function getOpenPort({ startPort = 30000, endPort = 32767 }: IGetOpenPortInput = {}): Promise<number> {
   for (let port = startPort; port <= endPort; port++) {
-    const isAvailable = await checkPort(port);
+    const isAvailable = await isPortAvailable(port);
     if (isAvailable) {
       return port;
     }
@@ -81,31 +80,3 @@ export async function getOpenPort({ startPort = 30000, endPort = 32767 }: IGetOp
   throw new CLIError(`No open ports found between ${startPort} and ${endPort}`);
 }
 
-/**
- * Checks if a specific port is available by attempting to bind to it
- * 
- * @internal
- * @param port - The port number to check
- * @returns Promise resolving to true if the port is available for binding
- * 
- * @remarks
- * This internal function creates a temporary TCP server and attempts to
- * bind it to the specified port. If the bind succeeds, the port is available.
- * The server is immediately closed after successful binding.
- */
-function checkPort(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const server = net.createServer();
-
-    server.once('error', () => {
-      resolve(false);
-    });
-
-    server.once('listening', () => {
-      server.close();
-      resolve(true);
-    });
-
-    server.listen(port);
-  });
-}

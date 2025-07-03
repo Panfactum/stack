@@ -70,7 +70,7 @@ export async function terragruntApplyAll(input: ITerragruntApplyAllInput): Promi
     onLogLine
   } = input;
   const workingDirectory = join(
-    context.repoVariables.environments_dir,
+    context.devshellConfig.environments_dir,
     environment,
     region
   );

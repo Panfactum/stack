@@ -3,8 +3,8 @@
 
 import { dirname, basename, join } from "node:path";
 import { Glob } from "bun";
-import { asyncIterMap } from "@/util/asyncIterMap";
 import { CLIError } from "@/util/error/error";
+import { asyncIterMap } from "@/util/util/asyncIterMap";
 import { getConfigValuesFromFile } from "./getConfigValuesFromFile";
 import { isEnvironmentDeployed } from "./isEnvironmentDeployed";
 import type { PanfactumContext } from "@/util/context/context";
@@ -70,8 +70,8 @@ export interface IEnvironmentMeta {
  */
 export async function getEnvironments(context: PanfactumContext): Promise<Array<IEnvironmentMeta>> {
     const glob = new Glob("*/environment.yaml");
-    return asyncIterMap(glob.scan({ cwd: context.repoVariables.environments_dir }), async path => {
-        const filePath = join(context.repoVariables.environments_dir, path)
+    return asyncIterMap(glob.scan({ cwd: context.devshellConfig.environments_dir }), async path => {
+        const filePath = join(context.devshellConfig.environments_dir, path)
         const envPath = dirname(filePath);
         try {
             const { environment, environment_subdomain: subdomain, aws_profile: awsProfile } = await getConfigValuesFromFile({ filePath, context }) || {}

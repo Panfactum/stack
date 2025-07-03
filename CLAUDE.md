@@ -166,4 +166,6 @@ Use the following rules when making changes to `.ts` or `.tsx` files:
 
 - **NEVER use the non-null assertion operator (`!`)**
 
-- **NEVER** use `any`. Use `unknown` if needed.
+- **NEVER use `any`.** Use `unknown` if needed.
+
+- **NEVER use `@ts-nocheck`** unless explicitly prompting to omit typechecking.

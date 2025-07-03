@@ -1,8 +1,8 @@
 // This file provides a factory function for creating AWS STS clients
-// It handles credential loading from files to work around AWS SDK issues
+// It uses the generic AWS client factory for consistent credential handling
 
 import { STSClient } from "@aws-sdk/client-sts";
-import { getCredsFromFile } from "@/util/aws/getCredsFromFile";
+import { createAWSClient } from "@/util/aws/clients/createAWSClient";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -21,9 +21,9 @@ interface IGetSTSClientInput {
  * Creates an AWS STS client with proper credential handling
  * 
  * @remarks
- * This function creates an STSClient with a workaround for AWS SDK bug
- * https://github.com/aws/aws-sdk-js-v3/issues/6872 by loading credentials
- * from files when a profile is specified.
+ * This function creates an STSClient using the generic AWS client factory
+ * which handles credential loading and works around AWS SDK bug
+ * https://github.com/aws/aws-sdk-js-v3/issues/6872.
  * 
  * @param inputs - Configuration for the STS client
  * @returns Configured AWS STS client
@@ -39,25 +39,12 @@ interface IGetSTSClientInput {
  * const identity = await stsClient.send(new GetCallerIdentityCommand({}));
  * ```
  * 
- * @see {@link getCredsFromFile} - For credential file loading
+ * @see {@link createAWSClient} - Generic AWS client factory
  * @see {@link STSClient} - AWS SDK STS client documentation
  */
 export async function getSTSClient(inputs: IGetSTSClientInput): Promise<STSClient> {
-  const { context, profile, region = "us-east-1" } = inputs;
-
-  // This is necessary due to this bug
-  // https://github.com/aws/aws-sdk-js-v3/issues/6872
-  const credentials = profile ? await getCredsFromFile({ context, profile }) : undefined;
-
-  if (credentials) {
-    return new STSClient({
-      credentials,
-      region
-    });
-  } else {
-    return new STSClient({
-      profile: profile || undefined,
-      region
-    });
-  }
+  return createAWSClient({
+    clientClass: STSClient,
+    defaultRegion: "us-east-1"
+  }, inputs);
 }

@@ -1,51 +1,10 @@
 import { join } from "node:path"
-import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { KUBE_CONFIG_SCHEMA, CLUSTERS_FILE_SCHEMA } from "./schemas";
 import { CLIError } from "../error/error";
 import { readYAMLFile } from "../yaml/readYAMLFile";
 import { writeYAMLFile } from "../yaml/writeYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
-
-const KUBE_CONFIG_SCHEMA = z.object({
-    apiVersion: z.literal("v1"),
-    kind: z.literal("Config"),
-    "current-context": z.string().optional(),
-    preferences: z.object({}).passthrough().optional(),
-    clusters: z.array(z.object({
-        name: z.string(),
-        cluster: z.object({
-            "certificate-authority-data": z.string().optional(),
-            server: z.string().optional()
-        }).passthrough()
-    }).passthrough()).default([]),
-    users: z.array(z.object({
-        name: z.string(),
-        user: z.object({
-            exec: z.object({
-                apiVersion: z.string(),
-                args: z.array(z.string()).optional(),
-                command: z.string(),
-                env: z.union([z.null(), z.array(z.object({ name: z.string(), value: z.string() }))]).default(null),
-                interactiveMode: z.string().default("IfAvailable"),
-                provideClusterInfo: z.boolean().default(false)
-            }).passthrough()
-        }).passthrough()
-    }).passthrough()).default([]),
-    contexts: z.array(z.object({
-        name: z.string(),
-        context: z.object({
-            cluster: z.string(),
-            user: z.string()
-        }).passthrough()
-    }).passthrough()).default([]),
-}).passthrough()
-
-export const CLUSTERS_FILE_SCHEMA = z.record(z.string(), z.object({
-    url: z.string(),
-    envDir: z.string(),
-    regionDir: z.string(),
-    caData: z.string()
-}))
 
 /**
  * Interface for updateKubeConfig function inputs
@@ -58,7 +17,7 @@ interface IUpdateKubeConfigInputs {
 export async function updateKubeConfig(inputs: IUpdateKubeConfigInputs) {
     const { context } = inputs;
 
-    const { kube_dir: kubeDir } = context.repoVariables
+    const { kube_dir: kubeDir } = context.devshellConfig
     const kubeConfigFilePath = join(kubeDir, "config");
     const clustersFilePath = join(kubeDir, "clusters.yaml")
 
@@ -93,7 +52,7 @@ export async function updateKubeConfig(inputs: IUpdateKubeConfigInputs) {
     const newUsers = await Promise.all(Object.entries(clusterInfo).map(async ([name, { regionDir, envDir }]) => {
         const { aws_profile: profile, aws_region: region } = await getPanfactumConfig({
             context,
-            directory: join(context.repoVariables.environments_dir, envDir, regionDir)
+            directory: join(context.devshellConfig.environments_dir, envDir, regionDir)
         })
 
         if (!profile) {

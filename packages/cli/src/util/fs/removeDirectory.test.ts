@@ -1,13 +1,12 @@
 import { mkdir, writeFile, rm, access } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "bun:test";
+import { test, expect, describe } from "bun:test";
+import { createTestDir } from "@/util/test/createTestDir";
 import { removeDirectory } from "./removeDirectory";
 
-let testCounter = 0;
-
-test("removes directory successfully", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+describe("removeDirectory", () => {
+  test("removes directory successfully", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const targetDir = join(testDir, "target");
     
     try {
@@ -27,7 +26,7 @@ test("removes directory successfully", async () => {
 });
 
 test("removes nested directory successfully", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const nestedDir = join(testDir, "nested", "deep", "directory");
     
     try {
@@ -50,12 +49,10 @@ test("removes nested directory successfully", async () => {
 });
 
 test("handles non-existent directory gracefully due to force flag", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const nonExistentDir = join(testDir, "nonexistent");
     
     try {
-        // Ensure parent exists but target doesn't
-        await mkdir(testDir, { recursive: true });
         
         // Should not throw when removing non-existent directory
         await removeDirectory({ dirPath: nonExistentDir });
@@ -68,7 +65,7 @@ test("handles non-existent directory gracefully due to force flag", async () => 
 });
 
 test("handles relative paths", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const originalCwd = process.cwd();
     
     try {
@@ -90,7 +87,7 @@ test("handles relative paths", async () => {
 });
 
 test("handles paths with special characters", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const specialPath = join(testDir, "dir with spaces & symbols!");
     
     try {
@@ -110,7 +107,7 @@ test("handles paths with special characters", async () => {
 });
 
 test("removes directory with contents", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const dirWithFiles = join(testDir, "directory-with-files");
     
     try {
@@ -138,7 +135,7 @@ test("removes directory with contents", async () => {
 });
 
 test("handles very long paths", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const longPath = join(
         testDir,
         "very", "long", "path", "with", "many", "nested", 
@@ -163,7 +160,7 @@ test("handles very long paths", async () => {
 });
 
 test("removes directory with hidden files", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const dirWithHidden = join(testDir, "with-hidden");
     
     try {
@@ -184,7 +181,7 @@ test("removes directory with hidden files", async () => {
 });
 
 test("handles empty directories", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     const emptyDir = join(testDir, "empty");
     
     try {
@@ -204,7 +201,7 @@ test("handles empty directories", async () => {
 });
 
 test("removes multiple directories in sequence", async () => {
-    const testDir = join(tmpdir(), `removeDirectory-test-${Date.now()}-${++testCounter}`);
+    const { path: testDir } = await createTestDir({ functionName: "removeDirectory" });
     
     try {
         // Create multiple directories
@@ -227,4 +224,5 @@ test("removes multiple directories in sequence", async () => {
     } finally {
         await rm(testDir, { recursive: true, force: true });
     }
+});
 });

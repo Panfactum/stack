@@ -10,7 +10,7 @@ import { getIdentity } from '@/util/aws/getIdentity';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { getPanfactumConfig } from '@/util/config/getPanfactumConfig';
 import { CLIError } from '@/util/error/error';
-import { parseJson } from '@/util/zod/parseJson';
+import { parseJson } from '@/util/json/parseJson';
 
 /**
  * Command for releasing stuck Terraform/OpenTofu state locks

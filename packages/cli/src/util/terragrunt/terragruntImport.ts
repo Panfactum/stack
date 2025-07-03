@@ -90,18 +90,18 @@ interface ITerragruntImportInput {
  */
 export async function terragruntImport(input: ITerragruntImportInput): Promise<void> {
   const {
-  context,
-  environment,
-  region,
-  module,
-  resourceId,
-  resourcePath,
-  throwOnExists,
-  onLogLine
+    context,
+    environment,
+    region,
+    module,
+    resourceId,
+    resourcePath,
+    throwOnExists,
+    onLogLine
   } = input;
 
 
-  const workingDirectory = join(context.repoVariables.environments_dir, environment, region, module)
+  const workingDirectory = join(context.devshellConfig.environments_dir, environment, region, module)
 
   // Step 1: Check if it already imported
   const { exitCode } = await execute({
