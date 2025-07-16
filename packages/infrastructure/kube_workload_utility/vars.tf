@@ -76,6 +76,12 @@ variable "controller_nodes_enabled" {
   default     = false
 }
 
+variable "workflow_nodes_required" {
+  description = "Whether the pods must be scheduled on nodes that can only run workflows. This may be useful to prevent disruption of long-running, non-resumable workflows."
+  type        = bool
+  default     = false
+}
+
 variable "extra_tolerations" {
   description = "Extra tolerations to add to the pods"
   type = list(object({

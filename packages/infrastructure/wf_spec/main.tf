@@ -485,6 +485,7 @@ module "util" {
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   arm_nodes_enabled                    = var.arm_nodes_enabled
+  workflow_nodes_required              = var.workflow_nodes_required
   instance_type_anti_affinity_required = false
   az_anti_affinity_required            = false
   host_anti_affinity_required          = false

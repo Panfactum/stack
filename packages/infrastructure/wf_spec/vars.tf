@@ -428,4 +428,11 @@ variable "labels_from" {
   default     = {}
 }
 
+variable "workflow_nodes_required" {
+  description = "Whether the pods must be scheduled on nodes that can only run workflows. This may be useful to prevent disruption of long-running, non-resumable workflows."
+  type        = bool
+  default     = false
+}
+
+
 

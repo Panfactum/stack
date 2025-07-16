@@ -1111,6 +1111,14 @@ Type: `number`
 
 Default: `3600`
 
+### workflow\_nodes\_required
+
+Description: Whether the pods must be scheduled on nodes that can only run workflows. This may be useful to prevent disruption of long-running, non-resumable workflows.
+
+Type: `bool`
+
+Default: `false`
+
 ### workflow\_parallelism
 
 Description: Number of concurrent instances of this Workflow allowed to be running at any given time

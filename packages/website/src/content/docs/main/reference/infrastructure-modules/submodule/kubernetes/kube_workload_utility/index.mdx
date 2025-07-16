@@ -207,6 +207,14 @@ Type: `bool`
 
 Default: `true`
 
+### workflow\_nodes\_required
+
+Description: Whether the pods must be scheduled on nodes that can only run workflows. This may be useful to prevent disruption of long-running, non-resumable workflows.
+
+Type: `bool`
+
+Default: `false`
+
 ### workload\_name
 
 Description: The name of the workload. Used by observability platform for grouping pods.

@@ -59,6 +59,9 @@ locals {
     var.node_requirements,
     var.controller_nodes_required ? {
       "panfactum.com/class" = ["controller"]
+    } : null,
+    var.workflow_nodes_required ? {
+      "panfactum.com/workflow-only" = ["true"]
     } : null
   )
   affinity = { for k, v in {
@@ -153,6 +156,12 @@ locals {
     value    = "true"
     effect   = "NoSchedule"
   }
+  workflow_node_toleration = {
+    key      = "workflow"
+    operator = "Equal"
+    value    = "true"
+    effect   = "NoSchedule"
+  }
   cilium_toleration = {
     key      = module.constants.cilium_taint.key
     operator = "Exists"
@@ -168,6 +177,7 @@ locals {
     var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
     var.arm_nodes_enabled ? [local.arm_node_toleration] : [],
     var.controller_nodes_enabled || var.controller_nodes_required ? [local.controller_node_toleration] : [],
+    var.workflow_nodes_required ? [local.workflow_node_toleration] : [],
     var.linkerd_required ? [] : [local.linkerd_toleration],
     var.cilium_required ? [] : [local.cilium_toleration],
     [for toleration in var.extra_tolerations : { for k, v in toleration : k => v if v != null }]
