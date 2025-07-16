@@ -86,3 +86,9 @@ variable "amd64_node_ami_name" {
   type        = string
   default     = "bottlerocket-aws-k8s-1.31-x86_64-v1.41.0-bc3ad241"
 }
+
+variable "default_termination_grace_period" {
+  description = "The default termination grace period for on-demand nodes."
+  type        = string
+  default     = "1h0m0s"
+}

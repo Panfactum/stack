@@ -3,8 +3,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="aws_kms_encrypt_key" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_kms_encrypt_key" status="stable" type="submodule" />
+<ModuleHeader name="aws_kms_encrypt_key" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_kms_encrypt_key" status="stable" type="submodule"/>
 
 # AWS KMS Encryption Key
 
@@ -15,9 +14,9 @@ users and administrators of the key.
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -110,8 +109,8 @@ Description: n/a
 ## Usage
 
 1. The keys provisioned by this module must be manually deleted as deletion prevention in terraform
-   is enabled.
-2. This is a multi-region module so it requires the secondary aws provider to be enabled. This is to keep everything in sync.
+    is enabled.
+1. This is a multi-region module so it requires the secondary aws provider to be enabled. This is to keep everything in sync.
 
 {/* eslint-enable import/order */}
 

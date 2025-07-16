@@ -138,6 +138,29 @@ locals {
     ]
   )
 
+  any_capacity_type_requirements = [{
+    key = "karpenter.sh/capacity-type"
+    operator : "In"
+    values : ["spot", "on-demand"]
+  }]
+
+  on_demand_capacity_type_requirements = [{
+    key = "karpenter.sh/capacity-type"
+    operator : "In"
+    values : ["on-demand"]
+  }]
+  amd64_requirements = [{
+    key      = "kubernetes.io/arch"
+    operator = "In"
+    values   = ["amd64"]
+  }]
+
+  any_arch_requirements = [{
+    key      = "kubernetes.io/arch"
+    operator = "In"
+    values   = ["amd64", "arm64"]
+  }]
+
   spot_taints = [
     {
       key    = "spot"
@@ -160,6 +183,14 @@ locals {
   arm_taints = [
     {
       key    = "arm64"
+      value  = "true"
+      effect = "NoSchedule"
+    }
+  ]
+
+  workflow_taints = [
+    {
+      key    = "workflow"
       value  = "true"
       effect = "NoSchedule"
     }
@@ -227,6 +258,43 @@ locals {
   }
 
   node_labels = merge(var.node_labels)
+
+  burstable_node_labels = {
+    "panfactum.com/class" = "burstable"
+  }
+
+  spot_node_labels = {
+    "panfactum.com/class" = "spot"
+  }
+
+  worker_node_labels = {
+    "panfactum.com/class" = "worker"
+  }
+
+  workflow_node_labels = {
+    "panfactum.com/workflow-only" = "true"
+  }
+
+  burstable_node_class_ref = {
+    group = "karpenter.k8s.aws"
+    kind  = "EC2NodeClass"
+    name  = kubectl_manifest.burstable_node_class.name
+  }
+
+  spot_node_class_ref = {
+    group = "karpenter.k8s.aws"
+    kind  = "EC2NodeClass"
+    name  = kubectl_manifest.spot_node_class.name
+  }
+
+  worker_node_class_ref = {
+    group = "karpenter.k8s.aws"
+    kind  = "EC2NodeClass"
+    name  = kubectl_manifest.default_node_class.name
+  }
+
+  spot_grace_period      = "2m0s"
+  on_demand_grace_period = "1h0m0s"
 }
 
 data "pf_kube_labels" "labels" {
@@ -436,36 +504,60 @@ resource "kubectl_manifest" "burstable_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(local.node_labels, {
-            "panfactum.com/ami-name" = var.amd64_node_ami_name
-            "panfactum.com/ami-id"   = data.aws_ami.amd64_ami.id
-            "panfactum.com/class"    = "burstable"
-          })
+          labels = merge(local.node_labels, local.burstable_node_labels)
         }
         spec = {
-          nodeClassRef = {
-            group = "karpenter.k8s.aws"
-            kind  = "EC2NodeClass"
-            name  = kubectl_manifest.burstable_node_class.name
-          }
+          nodeClassRef  = local.burstable_node_class_ref
           taints        = local.burstable_taints
           startupTaints = local.startup_taints
           requirements = concat(
             local.burstable_requirements,
-            [
-              {
-                key = "karpenter.sh/capacity-type"
-                operator : "In"
-                values : ["spot", "on-demand"]
-              },
-              {
-                key      = "kubernetes.io/arch"
-                operator = "In"
-                values   = ["amd64"]
-              },
-            ]
+            local.any_capacity_type_requirements,
+            local.amd64_requirements
           )
-          terminationGracePeriod = "2m0s"
+          terminationGracePeriod = local.spot_grace_period
+          expireAfter            = local.expire_after
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 25
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "kubectl_manifest" "wf_burstable_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "wf-${random_id.burstable_node_pool_name.hex}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(
+            local.node_labels,
+            local.burstable_node_labels,
+            local.workflow_node_labels
+          )
+        }
+        spec = {
+          nodeClassRef  = local.burstable_node_class_ref
+          taints        = concat(local.burstable_taints, local.workflow_taints)
+          startupTaints = local.startup_taints
+          requirements = concat(
+            local.burstable_requirements,
+            local.any_capacity_type_requirements,
+            local.amd64_requirements
+          )
+          terminationGracePeriod = local.spot_grace_period
           expireAfter            = local.expire_after
         }
       }
@@ -491,6 +583,7 @@ resource "random_id" "burstable_arm_node_pool_name" {
     create_before_destroy = true
   }
 }
+
 resource "kubectl_manifest" "burstable_arm_node_pool" {
   yaml_body = yamlencode({
     apiVersion = "karpenter.sh/v1"
@@ -502,18 +595,10 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(local.node_labels, {
-            "panfactum.com/ami-name" = var.arm64_node_ami_name
-            "panfactum.com/ami-id"   = data.aws_ami.arm64_ami.id
-            "panfactum.com/class"    = "burstable"
-          })
+          labels = merge(local.node_labels, local.burstable_node_labels)
         }
         spec = {
-          nodeClassRef = {
-            group = "karpenter.k8s.aws"
-            kind  = "EC2NodeClass"
-            name  = kubectl_manifest.burstable_node_class.name
-          }
+          nodeClassRef = local.burstable_node_class_ref
           taints = concat(
             local.burstable_taints,
             local.arm_taints
@@ -521,20 +606,56 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
           startupTaints = local.startup_taints
           requirements = concat(
             local.burstable_requirements,
-            [
-              {
-                key = "karpenter.sh/capacity-type"
-                operator : "In"
-                values : ["spot", "on-demand"]
-              },
-              {
-                key      = "kubernetes.io/arch"
-                operator = "In"
-                values   = ["arm64", "amd64"]
-              },
-            ]
+            local.any_capacity_type_requirements,
+            local.any_arch_requirements
           )
-          terminationGracePeriod = "2m0s"
+          terminationGracePeriod = local.spot_grace_period
+          expireAfter            = local.expire_after
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 30
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "kubectl_manifest" "wf_burstable_arm_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "wf-${random_id.burstable_arm_node_pool_name.hex}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(
+            local.node_labels,
+            local.burstable_node_labels,
+            local.workflow_node_labels
+          )
+        }
+        spec = {
+          nodeClassRef = local.burstable_node_class_ref
+          taints = concat(
+            local.burstable_taints,
+            local.arm_taints,
+            local.workflow_taints
+          )
+          startupTaints = local.startup_taints
+          requirements = concat(
+            local.burstable_requirements,
+            local.any_capacity_type_requirements,
+            local.any_arch_requirements
+          )
+          terminationGracePeriod = local.spot_grace_period
           expireAfter            = local.expire_after
         }
       }
@@ -571,36 +692,60 @@ resource "kubectl_manifest" "spot_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(local.node_labels, {
-            "panfactum.com/ami-name" = var.amd64_node_ami_name
-            "panfactum.com/ami-id"   = data.aws_ami.amd64_ami.id
-            "panfactum.com/class"    = "spot"
-          })
+          labels = merge(local.node_labels, local.spot_node_labels)
         }
         spec = {
-          nodeClassRef = {
-            group = "karpenter.k8s.aws"
-            kind  = "EC2NodeClass"
-            name  = kubectl_manifest.spot_node_class.name
-          }
+          nodeClassRef  = local.spot_node_class_ref
           taints        = local.spot_taints
           startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
-            [
-              {
-                key = "karpenter.sh/capacity-type"
-                operator : "In"
-                values : ["spot", "on-demand"]
-              },
-              {
-                key      = "kubernetes.io/arch"
-                operator = "In"
-                values   = ["amd64"]
-              },
-            ]
+            local.any_capacity_type_requirements,
+            local.amd64_requirements
           )
-          terminationGracePeriod = "2m0s"
+          terminationGracePeriod = local.spot_grace_period
+          expireAfter            = local.expire_after
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 15
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "kubectl_manifest" "wf_spot_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "wf-${random_id.spot_node_pool_name.hex}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(
+            local.node_labels,
+            local.spot_node_labels,
+            local.workflow_node_labels
+          )
+        }
+        spec = {
+          nodeClassRef  = local.spot_node_class_ref
+          taints        = concat(local.spot_taints, local.workflow_taints)
+          startupTaints = local.startup_taints
+          requirements = concat(
+            local.non_burstable_requirements,
+            local.any_capacity_type_requirements,
+            local.amd64_requirements
+          )
+          terminationGracePeriod = local.spot_grace_period
           expireAfter            = local.expire_after
         }
       }
@@ -637,18 +782,10 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(local.node_labels, {
-            "panfactum.com/ami-name" = var.arm64_node_ami_name
-            "panfactum.com/ami-id"   = data.aws_ami.arm64_ami.id
-            "panfactum.com/class"    = "spot"
-          })
+          labels = merge(local.node_labels, local.spot_node_labels)
         }
         spec = {
-          nodeClassRef = {
-            group = "karpenter.k8s.aws"
-            kind  = "EC2NodeClass"
-            name  = kubectl_manifest.spot_node_class.name
-          }
+          nodeClassRef = local.spot_node_class_ref
           taints = concat(
             local.spot_taints,
             local.arm_taints
@@ -656,20 +793,56 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
           startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
-            [
-              {
-                key = "karpenter.sh/capacity-type"
-                operator : "In"
-                values : ["spot", "on-demand"]
-              },
-              {
-                key      = "kubernetes.io/arch"
-                operator = "In"
-                values   = ["arm64", "amd64"]
-              },
-            ]
+            local.any_capacity_type_requirements,
+            local.any_arch_requirements
           )
-          terminationGracePeriod = "2m0s"
+          terminationGracePeriod = local.spot_grace_period
+          expireAfter            = local.expire_after
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 20
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "kubectl_manifest" "wf_spot_arm_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "wf-${random_id.spot_arm_node_pool_name.hex}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(
+            local.node_labels,
+            local.spot_node_labels,
+            local.workflow_node_labels
+          )
+        }
+        spec = {
+          nodeClassRef = local.spot_node_class_ref
+          taints = concat(
+            local.spot_taints,
+            local.arm_taints,
+            local.workflow_taints
+          )
+          startupTaints = local.startup_taints
+          requirements = concat(
+            local.non_burstable_requirements,
+            local.any_capacity_type_requirements,
+            local.any_arch_requirements
+          )
+          terminationGracePeriod = local.spot_grace_period
           expireAfter            = local.expire_after
         }
       }
@@ -706,36 +879,60 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(local.node_labels, {
-            "panfactum.com/ami-name" = var.arm64_node_ami_name
-            "panfactum.com/ami-id"   = data.aws_ami.arm64_ami.id
-            "panfactum.com/class"    = "worker"
-          })
+          labels = merge(local.node_labels, local.worker_node_labels)
         }
         spec = {
-          nodeClassRef = {
-            group = "karpenter.k8s.aws"
-            kind  = "EC2NodeClass"
-            name  = kubectl_manifest.default_node_class.name
-          }
+          nodeClassRef  = local.worker_node_class_ref
           taints        = local.arm_taints
           startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
-            [
-              {
-                key = "karpenter.sh/capacity-type"
-                operator : "In"
-                values : ["on-demand"]
-              },
-              {
-                key      = "kubernetes.io/arch"
-                operator = "In"
-                values   = ["arm64"]
-              },
-            ]
+            local.on_demand_capacity_type_requirements,
+            local.any_arch_requirements
           )
-          terminationGracePeriod = "1h0m0s"
+          terminationGracePeriod = var.default_termination_grace_period
+          expireAfter            = local.expire_after
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 10
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "kubectl_manifest" "wf_on_demand_arm_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "wf-${random_id.on_demand_arm_node_pool_name.hex}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(
+            local.node_labels,
+            local.worker_node_labels,
+            local.workflow_node_labels
+          )
+        }
+        spec = {
+          nodeClassRef  = local.worker_node_class_ref
+          taints        = concat(local.arm_taints, local.workflow_taints)
+          startupTaints = local.startup_taints
+          requirements = concat(
+            local.non_burstable_requirements,
+            local.on_demand_capacity_type_requirements,
+            local.any_arch_requirements
+          )
+          terminationGracePeriod = var.default_termination_grace_period
           expireAfter            = local.expire_after
         }
       }
@@ -772,35 +969,60 @@ resource "kubectl_manifest" "on_demand_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(local.node_labels, {
-            "panfactum.com/ami-name" = var.amd64_node_ami_name
-            "panfactum.com/ami-id"   = data.aws_ami.amd64_ami.id
-            "panfactum.com/class"    = "worker"
-          })
+          labels = merge(local.node_labels, local.worker_node_labels)
         }
         spec = {
-          nodeClassRef = {
-            group = "karpenter.k8s.aws"
-            kind  = "EC2NodeClass"
-            name  = kubectl_manifest.default_node_class.name
-          }
+          nodeClassRef  = local.worker_node_class_ref
           startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
-            [
-              {
-                key = "karpenter.sh/capacity-type"
-                operator : "In"
-                values : ["on-demand"]
-              },
-              {
-                key      = "kubernetes.io/arch"
-                operator = "In"
-                values   = ["amd64"]
-              },
-            ]
+            local.on_demand_capacity_type_requirements,
+            local.amd64_requirements
           )
-          terminationGracePeriod = "1h0m0s"
+          terminationGracePeriod = var.default_termination_grace_period
+          expireAfter            = local.expire_after
+        }
+      }
+      disruption = local.disruption_policy
+
+      // This should have the lowest preference
+      weight = 5
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "kubectl_manifest" "wf_on_demand_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "wf-${random_id.on_demand_node_pool_name.hex}"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(
+            local.node_labels,
+            local.worker_node_labels,
+            local.workflow_node_labels
+          )
+        }
+        spec = {
+          nodeClassRef  = local.worker_node_class_ref
+          taints        = local.workflow_taints
+          startupTaints = local.startup_taints
+          requirements = concat(
+            local.non_burstable_requirements,
+            local.on_demand_capacity_type_requirements,
+            local.amd64_requirements
+          )
+          terminationGracePeriod = var.default_termination_grace_period
           expireAfter            = local.expire_after
         }
       }

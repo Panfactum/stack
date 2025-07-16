@@ -3,8 +3,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_airbyte" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_airbyte" status="alpha" type="direct" />
+<ModuleHeader name="kube_airbyte" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_airbyte" status="alpha" type="direct"/>
 
 # Airbyte
 
@@ -17,8 +16,8 @@ This module only deploys the core Airbyte engine components required for the pla
 To install connectors:
 
 1. After deployment, log in to the Airbyte UI using the credentials provided
-2. Navigate to the "Sources" or "Destinations" section
-3. Search for and install the required connectors from the catalog
+1. Navigate to the "Sources" or "Destinations" section
+1. Search for and install the required connectors from the catalog
 
 For custom connector development, this module includes the Connector Builder Server component, which provides a development environment for creating and testing custom connectors to meet specialized integration needs.
 
@@ -27,43 +26,39 @@ If you need to pre-install specific connectors or automate connector configurati
 ## Usage
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_airbyte`.
+1. Add a `terragrunt.hcl` file to the directory that looks like this:
 
-2. Add a `terragrunt.hcl` file to the directory that looks like this:
+    ::: code-group labels=[kube\_airbyte/terragrunt.hcl]
+    ```hcl collapse={1-9} "REPLACE_ME"
+    include "panfactum" {
+        path   = find_in_parent_folders("panfactum.hcl")
+        expose = true
+    }
 
-   ::: code-group labels=\[kube\_airbyte/terragrunt.hcl]
+    terraform {
+        source = include.panfactum.locals.pf_stack_source
+    }
 
-   ```hcl collapse={1-9} "REPLACE_ME"
-   include "panfactum" {
-       path   = find_in_parent_folders("panfactum.hcl")
-       expose = true
-   }
+    dependency "vault" {
+        config_path = "../kube_vault"
+    }
 
-   terraform {
-       source = include.panfactum.locals.pf_stack_source
-   }
+    inputs = {
+        vault_domain = dependency.vault.outputs.vault_domain
 
-   dependency "vault" {
-       config_path = "../kube_vault"
-   }
+        # Must be domain available to the cluster
+        # Example: airbyte.prod.panfactum.com
+        domain       = "REPLACE_ME"
 
-   inputs = {
-       vault_domain = dependency.vault.outputs.vault_domain
+        # Must be an email address that you have access to
+        # Example: james@panfactum.com
+        admin_email  = "REPLACE_ME"
+    }
+    ```
+    :::  
 
-       # Must be domain available to the cluster
-       # Example: airbyte.prod.panfactum.com
-       domain       = "REPLACE_ME"
-
-       # Must be an email address that you have access to
-       # Example: james@panfactum.com
-       admin_email  = "REPLACE_ME"
-   }
-   ```
-
-   :::
-
-3. Run `pf-tf-init` to enable the required providers
-
-4. Run `terragrunt apply`.
+1. Run `pf-tf-init` to enable the required providers
+1. Run `terragrunt apply`.
 
 ## Authentication
 
@@ -73,17 +68,17 @@ The module uses Vault for authentication when ingress is enabled, providing secu
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 

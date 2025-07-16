@@ -3,8 +3,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_vault_proxy" status="stable" type="submodule" />
+<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_vault_proxy" status="stable" type="submodule"/>
 
 # Vault OAuth2 Proxy
 
@@ -15,7 +14,7 @@ that requires authentication with the cluster's Vault instance.
 
 ### Setup
 
-This module is intended to be used in conjunction with the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+This module is intended to be used in conjunction with the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_ingress)
 module. `domain` should be set to a domain used in `kube_ingress` and the `upstream_ingress_annotations` output
 should be passed to the `extra_annotations` input of `kube_ingress`.
 
@@ -31,24 +30,24 @@ the whole process adds very little overhead.
 There are a few means to validate users. Each of these can be used simultaneously, and a user must meet **all**
 the constraints to be authorized.
 
-* **allowed\_email\_domains**: Email domains that are allowed (sourced from Authentik)
-* **allowed\_vault\_roles**: The user's role in the cluster's Vault instance (one of `rbac-superusers`, `rbac-admins`, `rbac-readers`, `rbac-restricted-readers`)
+- **allowed\_email\_domains**: Email domains that are allowed (sourced from Authentik)
+- **allowed\_vault\_roles**: The user's role in the cluster's Vault instance (one of `rbac-superusers`, `rbac-admins`, `rbac-readers`, `rbac-restricted-readers`)
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
