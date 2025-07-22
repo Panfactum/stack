@@ -386,6 +386,9 @@ resource "kubernetes_manifest" "postgres_cluster" {
           source = var.pg_recovery_directory
           recoveryTarget = var.pg_recovery_target_time != null ? {
             targetTime = var.pg_recovery_target_time
+            } : var.pg_recovery_target_immediate != null ? {
+            backendID       = var.pg_recovery_target_immediate
+            targetImmediate = true
           } : null
         } : k => v if v != null } : null
         initdb = !var.pg_recovery_mode_enabled ? {
