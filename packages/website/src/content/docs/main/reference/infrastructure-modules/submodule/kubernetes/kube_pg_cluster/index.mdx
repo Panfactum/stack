@@ -635,6 +635,14 @@ Type: `bool`
 
 Default: `false`
 
+### pg\_recovery\_target\_immediate
+
+Description: Name of the base backup directory to immediately stop at. When restoring from an online backup, this means the point where taking the backup ended.
+
+Type: `string`
+
+Default: `null`
+
 ### pg\_recovery\_target\_time
 
 Description: If provided, will recover the database to the indicated target time in RFC 3339 format rather than to the latest data.
