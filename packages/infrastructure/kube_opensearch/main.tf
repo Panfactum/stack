@@ -194,7 +194,7 @@ locals {
 
   })
 
-  opensearch_yml = yamlencode(merge({
+  opensearch_yml = yamlencode(merge({ for k, v in {
     "cluster.name" = local.cluster_name
     "network.host" = "0.0.0.0"
 
@@ -207,8 +207,9 @@ locals {
     "node.roles" = ["cluster_manager", "ingest", "data", "remote_cluster_client"]
 
     // Bootstrapping
-    "discovery.seed_hosts"                  = ["${local.cluster_name}-headless"]
-    "cluster.initial_cluster_manager_nodes" = [for i in range(var.replica_count) : "${local.cluster_name}-${i}"]
+    "discovery.type"                        = var.replica_count == 1 ? "single-node" : null
+    "discovery.seed_hosts"                  = var.replica_count == 1 ? null : ["${local.cluster_name}-headless"]
+    "cluster.initial_cluster_manager_nodes" = var.replica_count == 1 ? null : [for i in range(var.replica_count) : "${local.cluster_name}-${i}"]
     "bootstrap.memory_lock"                 = true // prevents swapping
 
 
@@ -311,7 +312,7 @@ locals {
     "cluster.search.request.slowlog.threshold.warn"  = var.slow_request_log_thresholds.warn
     "cluster.search.request.slowlog.threshold.info"  = var.slow_request_log_thresholds.info
     "cluster.search.request.slowlog.level"           = var.log_level
-  }, var.extra_cluster_settings))
+  } : k => v if v != null }, var.extra_cluster_settings))
 
   security_hash = md5("${local.role_mappings}${local.security_config}")
 
@@ -474,6 +475,8 @@ resource "kubectl_manifest" "cluster_issuer" {
   })
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [kubernetes_role_binding.vault_issuer]
 }
 
 
@@ -754,7 +757,8 @@ module "opensearch" {
 
   depends_on = [
     module.node_certs,
-    module.client_certs
+    module.client_certs,
+    module.aws_creds
   ]
 }
 

@@ -67,11 +67,6 @@ variable "replica_count" {
   description = "The number of OpenSearch replicas to deploy"
   type        = number
   default     = 3
-
-  validation {
-    condition     = var.replica_count >= 3
-    error_message = "You must use at least three replicas for high-availability"
-  }
 }
 
 variable "spot_nodes_enabled" {

@@ -49,8 +49,7 @@ resource "aws_iam_user" "user" {
 }
 
 resource "aws_iam_user_policy" "user" {
-  count  = var.iam_policy_json != null ? 1 : 0
-  policy = var.iam_policy_json
+  policy = coalesce(var.iam_policy_json, "{}")
   user   = aws_iam_user.user.name
 }
 
