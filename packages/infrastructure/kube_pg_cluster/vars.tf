@@ -542,6 +542,12 @@ variable "pg_recovery_bucket" {
   default     = null
 }
 
+variable "pg_recovery_target_immediate" {
+  description = "Name of the base backup directory to immediately stop at. When restoring from an online backup, this means the point where taking the backup ended."
+  type        = string
+  default     = null
+}
+
 
 variable "pg_backup_directory" {
   description = "The name of the directory in the backup bucket containing the backups files."
