@@ -280,7 +280,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       }
     }
     spec = { for k, v in {
-      imageName             = "${module.pull_through.github_registry}/cloudnative-pg/postgresql:${var.pg_version}"
+      imageName             = var.pg_custom_image != null ? var.pg_custom_image : "${module.pull_through.github_registry}/cloudnative-pg/postgresql:${var.pg_version}"
       instances             = var.pg_instances
       minSyncReplicas       = var.pg_sync_replication_enabled ? var.pg_instances - 1 : 0
       primaryUpdateStrategy = "unsupervised"

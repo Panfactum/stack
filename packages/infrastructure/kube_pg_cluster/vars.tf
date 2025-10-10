@@ -14,6 +14,27 @@ variable "pg_version" {
   default     = "16.6-13"
 }
 
+variable "pg_custom_image" {
+  description = <<-EOT
+    Custom PostgreSQL container image to use instead of the default CloudNativePG image.
+    
+    This allows you to use:
+    - Pre-built CNPG images with extensions (e.g., 'ghcr.io/cloudnative-pg/postgis:17')
+    - Custom-built images with your own extensions (e.g., 'myregistry.io/postgres:16.9-custom')
+    
+    When set, this overrides the 'pg_version' variable for image selection.
+    The image must be compatible with CloudNativePG requirements.
+    
+    Note: Custom images bypass the ECR pull through cache. Ensure your cluster
+    has appropriate image pull secrets and registry access configured.
+    
+    Example building custom image with pgvector:
+    See https://cloudnative-pg.io/blog/building-images-bake/
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "pg_instances" {
   description = "The number of instances to deploy in the postgres cluster"
   type        = number
