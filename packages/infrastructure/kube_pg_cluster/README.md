@@ -16,6 +16,104 @@ The default value for `pg_version` is the one that we test in our clusters, so w
     automatically when `pg_version` is changed.
 </MarkdownAlert>
 
+### Custom PostgreSQL Images with Extensions
+
+If you need PostgreSQL extensions (like pgvector, PostGIS, timescaledb, etc.), you can use a custom
+PostgreSQL container image instead of the default CNPG image.
+
+#### Using Pre-built CNPG Images
+
+CloudNativePG provides pre-built images with popular extensions:
+
+```hcl
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+  
+  pg_custom_image = "ghcr.io/cloudnative-pg/postgis:17"
+  # pg_version is ignored when pg_custom_image is set
+  
+  ...
+}
+```
+
+#### Building Your Own Custom Image
+
+For custom extension combinations, build your own image using Docker Bake:
+
+1. **Create a `bake.hcl` file:**
+
+```hcl
+extensions = [
+  "pgvector",
+  "pg-stat-kcache",
+]
+
+target "myimage" {
+  dockerfile-inline = <<EOT
+ARG BASE_IMAGE="ghcr.io/cloudnative-pg/postgresql:16.9-standard-bookworm"
+FROM $BASE_IMAGE AS myimage
+ARG EXTENSIONS
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends $EXTENSIONS && \
+    apt-get purge -y --auto-remove && \
+    rm -rf /var/lib/apt/lists/*
+USER 26
+EOT
+
+  matrix = {
+    pgVersion = ["16.9"]
+  }
+  # ... rest of config
+}
+```
+
+2. **Build and push the image:**
+
+```bash
+registry=myregistry.io/myteam docker buildx bake \
+  -f docker-bake.hcl \
+  -f cwd://bake.hcl \
+  "https://github.com/cloudnative-pg/postgres-containers.git" \
+  myimage --push
+```
+
+3. **Use the custom image:**
+
+```hcl
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+  
+  pg_custom_image = "myregistry.io/myteam/postgresql:16.9-custom"
+  
+  ...
+}
+```
+
+<MarkdownAlert severity="info">
+  For detailed instructions on building custom images, see the 
+  [CNPG blog post on Docker Bake](https://cloudnative-pg.io/blog/building-images-bake/).
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+  Custom images bypass the ECR pull through cache. Ensure:
+  - Your image is accessible from your Kubernetes cluster
+  - Proper image pull secrets are configured if using private registries
+  - The image is compatible with CloudNativePG (includes required PostgreSQL executables)
+</MarkdownAlert>
+
+#### Available Extensions
+
+Common Debian package extensions you can install:
+- `postgresql-NN-pgvector` - Vector similarity search
+- `postgresql-NN-postgis-3` - Geographic objects support  
+- `postgresql-NN-cron` - Job scheduler
+- `postgresql-NN-partman` - Partition management
+- `postgresql-NN-pg-stat-kcache` - Kernel statistics
+- And many more from [apt.postgresql.org](https://apt.postgresql.org/)
+
+Replace `NN` with your PostgreSQL major version (e.g., `16`, `17`).
+
 ### Credentials
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
