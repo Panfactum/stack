@@ -390,12 +390,33 @@ resource "kubernetes_manifest" "postgres_cluster" {
       bootstrap = { for k, v in {
         recovery = var.pg_recovery_mode_enabled ? { for k, v in {
           source = var.pg_recovery_directory
-          recoveryTarget = var.pg_recovery_target_time != null ? {
-            targetTime = var.pg_recovery_target_time
-            } : var.pg_recovery_target_immediate != null ? {
-            backupID        = var.pg_recovery_target_immediate
-            targetImmediate = true
-          } : null
+          # Note: The Terraform kubernetes provider requires ALL recoveryTarget fields to be set,
+          # even though the CloudNativePG CRD itself marks all fields as optional. This is a
+          # Terraform provider schema validation issue, not a CloudNativePG requirement.
+          # We must use merge() with all fields set to null to satisfy the provider's type system.
+          recoveryTarget = var.pg_recovery_target_time != null ? merge(
+            {
+              backupID        = null
+              exclusive       = null
+              targetImmediate = null
+              targetLSN       = null
+              targetName      = null
+              targetTLI       = null
+              targetTime      = var.pg_recovery_target_time
+              targetXID       = null
+            }
+            ) : var.pg_recovery_target_immediate != null ? merge(
+            {
+              backupID        = var.pg_recovery_target_immediate
+              exclusive       = null
+              targetImmediate = true
+              targetLSN       = null
+              targetName      = null
+              targetTLI       = null
+              targetTime      = null
+              targetXID       = null
+            }
+          ) : null
         } : k => v if v != null } : null
         initdb = !var.pg_recovery_mode_enabled ? {
           postInitSQL = [
