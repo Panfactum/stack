@@ -151,10 +151,16 @@ data "aws_iam_policy_document" "s3_access" {
   statement {
     effect  = "Allow"
     actions = ["s3:*"]
-    resources = [
-      module.s3_bucket.bucket_arn,
-      "${module.s3_bucket.bucket_arn}/*"
-    ]
+    resources = tolist(toset(concat(
+      [
+        module.s3_bucket.bucket_arn,
+        "${module.s3_bucket.bucket_arn}/*"
+      ],
+      var.pg_recovery_bucket != null ? [
+        "arn:aws:s3:::${var.pg_recovery_bucket}",
+        "arn:aws:s3:::${var.pg_recovery_bucket}/*"
+      ] : []
+    )))
   }
 }
 
@@ -387,7 +393,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
           recoveryTarget = var.pg_recovery_target_time != null ? {
             targetTime = var.pg_recovery_target_time
             } : var.pg_recovery_target_immediate != null ? {
-            backendID       = var.pg_recovery_target_immediate
+            backupID        = var.pg_recovery_target_immediate
             targetImmediate = true
           } : null
         } : k => v if v != null } : null
