@@ -564,7 +564,16 @@ variable "pg_recovery_bucket" {
 }
 
 variable "pg_recovery_target_immediate" {
-  description = "Name of the base backup directory to immediately stop at. When restoring from an online backup, this means the point where taking the backup ended."
+  description = <<-EOT
+    The backup ID (timestamp) to recover to. Sets CloudNativePG's recoveryTarget.backupID
+    and recoveryTarget.targetImmediate=true to stop recovery at the end of the specified backup
+    without replaying additional WAL files.
+
+    Format: YYYYMMDDTHHmmss (e.g., '20251015T121455')
+
+    Requires pg_recovery_mode_enabled=true and pg_recovery_directory to be set.
+    This is mutually exclusive with pg_recovery_target_time.
+  EOT
   type        = string
   default     = null
 }

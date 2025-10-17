@@ -359,6 +359,132 @@ provided by the `backup_bucket_name` output. This can save space as that old bac
   This can be useful if you are trying to set up a new forked database from running system.
 </MarkdownAlert>
 
+#### Recovering from an Alternate Backup Bucket
+
+You can recover a PostgreSQL cluster from backups stored in a different S3 bucket by using the `pg_recovery_bucket` variable.
+This is particularly useful for:
+
+- **Forking production data to staging/development environments**
+- **Cross-account disaster recovery scenarios**
+- **Migrating databases between clusters**
+
+**Example Configuration:**
+
+```hcl
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+
+  pg_recovery_mode_enabled = true
+  pg_recovery_bucket      = "prod-pg-cluster-backup-a1b2c3d4"
+  pg_recovery_directory   = "backups/cluster-prod"
+  pg_backup_directory     = "backups-from-prod-recovery"  # Different from source
+
+  ...
+}
+```
+
+<MarkdownAlert severity="warning">
+  **Required: Production Bucket Policy**
+
+  The production S3 bucket must grant read access to the IAM role of the recovering cluster.
+  Add the following policy to your **production backup bucket**:
+
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "ReadOnlyAccessForDevelopment",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::123456789012:root"
+        },
+        "Action": [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:ListBucket",
+          "s3:ListBucketVersions"
+        ],
+        "Resource": [
+          "arn:aws:s3:::prod-pg-cluster-backup-a1b2c3d4/*",
+          "arn:aws:s3:::prod-pg-cluster-backup-a1b2c3d4"
+        ]
+      },
+      {
+        "Sid": "FullAccessForProduction",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::987654321098:root"
+        },
+        "Action": "s3:*",
+        "Resource": [
+          "arn:aws:s3:::prod-pg-cluster-backup-a1b2c3d4/*",
+          "arn:aws:s3:::prod-pg-cluster-backup-a1b2c3d4"
+        ]
+      },
+      {
+        "Sid": "DenyWriteFromDevelopment",
+        "Effect": "Deny",
+        "Principal": {
+          "AWS": "arn:aws:iam::123456789012:root"
+        },
+        "Action": [
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+          "s3:PutObject",
+          "s3:PutObjectAcl",
+          "s3:AbortMultipartUpload"
+        ],
+        "Resource": "arn:aws:s3:::prod-pg-cluster-backup-a1b2c3d4/*"
+      }
+    ]
+  }
+  ```
+
+  Replace:
+  - `123456789012` with your development/staging AWS account ID
+  - `987654321098` with your production AWS account ID
+  - `prod-pg-cluster-backup-a1b2c3d4` with your actual production bucket name
+</MarkdownAlert>
+
+#### Recovery to a Specific Backup Point
+
+Instead of recovering to a specific timestamp with `pg_recovery_target_time`, you can recover to the end of a specific base backup
+using `pg_recovery_target_immediate`. This stops recovery at the point where the backup ended, without replaying any additional WAL files.
+
+**When to use `pg_recovery_target_immediate`:**
+
+- You want a clean snapshot from a known backup point
+- You want to avoid replaying WAL files (faster recovery)
+- You're testing disaster recovery procedures with a specific backup
+
+**Example Configuration:**
+
+```hcl
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+
+  pg_recovery_mode_enabled     = true
+  pg_recovery_bucket           = "prod-pg-cluster-backup-a1b2c3d4"
+  pg_recovery_directory        = "backups/cluster-prod"
+  pg_recovery_target_immediate = "20251015T121455"  # Backup ID timestamp
+  pg_backup_directory          = "backups-from-specific-point"
+
+  ...
+}
+```
+
+<MarkdownAlert severity="info">
+  The `pg_recovery_target_immediate` value must be a backup ID in the format `YYYYMMDDTHHmmss` (e.g., `20251015T121455`).
+  You can find available backup IDs by running:
+
+  ```bash
+  kubectl cnpg backup list -n <namespace> <cluster-name>
+  ```
+
+  Or by inspecting the backup directory structure in your S3 bucket.
+</MarkdownAlert>
+
 ### Disruptions
 
 By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically
