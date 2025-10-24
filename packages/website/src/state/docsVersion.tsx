@@ -41,10 +41,10 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
   const setDocsVersion = (newVersion: string) => {
     if (!isServer) {
       const pathname = window.location.pathname;
-      if (pathname.startsWith(`/${_docsVersion()}`)) {
-        const suffix = pathname.substring(`/${_docsVersion()}`.length);
+      if (pathname.startsWith(`/docs/${_docsVersion()}`)) {
+        const suffix = pathname.substring(`/docs/${_docsVersion()}`.length);
         /* eslint-disable-next-line @typescript-eslint/no-unsafe-call */
-        void navigate(`/${newVersion}${suffix}`);
+        void navigate(`/docs/${newVersion}${suffix}`);
       }
       setTimeout(() => {
         window.localStorage.setItem(STATE_KEY, newVersion);
