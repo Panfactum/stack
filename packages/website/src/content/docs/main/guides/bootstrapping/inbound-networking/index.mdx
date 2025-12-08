@@ -24,7 +24,7 @@ synchronizing DNS records from internal [Service](https://kubernetes.io/docs/con
 and [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources
 to external DNS servers like AWS Route53.
 
-We provide a module to deploy it: [kube\_external\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
+We provide a module to deploy it: [kube\_external\_dns](/docs/main/modules/kube_external_dns/overview)
 
 Let's deploy it now:
 
@@ -79,7 +79,7 @@ Kubernetes nodes. AWS load balancers are the perfect gateways:
 
 * Support for [PROXY protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) to preserve IP headers
 
-We provide a module to deploy it: [kube\_aws\_lb\_controller](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
+We provide a module to deploy it: [kube\_aws\_lb\_controller](/docs/main/modules/kube_aws_lb_controller/overview)
 
 Let's deploy it now:
 
@@ -148,7 +148,7 @@ costs.
 The most popular ingress controller for Kubernetes is the [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/)
 which uses [NGINX](https://www.nginx.com/) as the underlying proxy.
 
-We provide a module to deploy it: [kube\_ingress\_nginx](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress_nginx).
+We provide a module to deploy it: [kube\_ingress\_nginx](/docs/main/modules/kube_ingress_nginx/overview).
 
 ### Deploy the NGINX-Ingress Controller
 
@@ -337,7 +337,7 @@ Let's set that up now:
    can verify this either directly via the command line (`curl -I <your_vault_address>`) or using a site such
    as [https://securityheaders.com](https://securityheaders.com).
 
-   This is accomplished by our [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+   This is accomplished by our [kube\_ingress](/docs/main/modules/kube_ingress/overview)
    module. `kube_vault` uses it internally, and you can use it directly in your projects.
 
 8. Finally, you no longer need to use the finicky `kubectl port-forward` to connect with Vault. Let's update the address in your
@@ -376,7 +376,7 @@ message format](https://www.postgresql.org/docs/current/protocol.html). [^1]
     is prone to service disruptions as pods restart and move around the cluster. The bastion will use the highly available
     service infrastructure to ensure connections are preserved even if the underlying pod changes.
 
-We provide a bastion deployment module: [kube\_bastion](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
+We provide a bastion deployment module: [kube\_bastion](/docs/main/modules/kube_bastion/overview).
 
 This host uses certificate authentication with Vault so that you do not need to manually manage static SSH keys
 unlike SSH setups you might have used in the past. We will see that in action in a moment.

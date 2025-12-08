@@ -1,0 +1,107 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### active
+
+Description: The status of the identity provider in MongoDB Atlas. Setting to false will disable the identity provider and SSO will not function.
+
+Type: `bool`
+
+Default: `true`
+
+### associated\_domains
+
+Description: The domains associated with the identity provider
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_role\_mappings
+
+Description: Extra authentik roles to map to MongoDB Atlas roles. `{<panfactum role> => [<mongodb role>, ...]}`
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### federation\_settings\_id
+
+Description: The IDP ID from MongoDB Atlas
+
+Type: `string`
+
+Default: n/a
+
+### idp\_id
+
+Description: The IDP ID from MongoDB Atlas
+
+Type: `string`
+
+Default: n/a
+
+### issuer\_url
+
+Description: The issuer URL
+
+Type: `string`
+
+Default: n/a
+
+### name
+
+Description: The name of the identity provider
+
+Type: `string`
+
+Default: `"Panfactum Authentik Integration"`
+
+### organization\_id
+
+Description: ID of the MongoDB Atlas organization
+
+Type: `string`
+
+Default: n/a
+
+### sso\_debug\_enabled
+
+Description: Enable SSO debug. This allows users to login with a password bypassing the SSO flow.
+
+Type: `bool`
+
+Default: `false`
+
+### sso\_url
+
+Description: The SSO URL
+
+Type: `string`
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### acs\_url
+
+Description: Assertion consumer service URL to which the IdP sends the SAML response
+
+## Providers
+
+The following providers are needed by this module:
+
+- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
+
+- [mongodbatlas](https://registry.terraform.io/providers/panfactum/mongodbatlas/1.26.1/docs) (1.26.1)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

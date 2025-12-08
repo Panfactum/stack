@@ -1,0 +1,65 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### audience
+
+Description: The audience claim in the ServiceAccount JWT
+
+Type: `string`
+
+Default: `null`
+
+### service\_account
+
+Description: The name of the service account that should be able to assume the AWS permissions.
+
+Type: `string`
+
+Default: n/a
+
+### service\_account\_namespace
+
+Description: The namespace of the service account.
+
+Type: `string`
+
+Default: n/a
+
+### token\_ttl\_seconds
+
+Description: The maximum token lifetime in seconds
+
+Type: `number`
+
+Default: `28800`
+
+### vault\_policy\_hcl
+
+Description: The HCL of the policy document to assign to this Vault role.
+
+Type: `string`
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### role\_name
+
+Description: The name of the Vault auth role
+
+## Providers
+
+The following providers are needed by this module:
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

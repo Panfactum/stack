@@ -379,7 +379,7 @@ resource "kubectl_manifest" "linkerd_cni_policy" {
                     terminationGracePeriodSeconds = 10 // Accelerates node shutdown
 
                     # module.aws_pull_through is required as this isn't guaranteed to go through the global pod mutator
-                    image = "${module.aws_pull_through.docker_hub_registry}/bitnami/kubectl:${data.kubectl_server_version.version.major}.${data.kubectl_server_version.version.minor}"
+                    image = "${module.aws_pull_through.docker_hub_registry}/bitnamilegacy/kubectl:${data.kubectl_server_version.version.major}.${data.kubectl_server_version.version.minor}"
                     command = [
                       "bash",
                       "-c",

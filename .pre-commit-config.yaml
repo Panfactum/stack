@@ -55,15 +55,6 @@ repos:
         description: "Runs tofu fmt on the infrastructure code"
         fail_fast: false
 
-      - id: tf-generate-docs
-        name: Generate Terraform Docs
-        entry: generate-tf-docs
-        language: system
-        files: ^packages/infrastructure/
-        pass_filenames: false
-        description: "Generates the IaC docs for the website"
-        fail_fast: true
-
       - id: typecheck-website
         name: Typecheck Website
         entry: precommit-typecheck-website
@@ -99,3 +90,12 @@ repos:
         pass_filenames: true
         description: "Runs linting for the CLI code"
         fail_fast: true
+
+      - id: generate-tf-reference
+        name: Generate Terraform Reference
+        entry: precommit-generate-tf-reference
+        language: system
+        files: ^packages/infrastructure/[^/]+/
+        pass_filenames: true
+        description: "Generates terraform reference docs for changed modules"
+        fail_fast: false

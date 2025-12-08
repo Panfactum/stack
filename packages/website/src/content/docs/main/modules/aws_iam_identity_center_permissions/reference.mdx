@@ -1,0 +1,54 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### account\_access\_configuration
+
+Description: Configuration for assigning access to various AWS accounts via Identity Center
+
+Type:
+
+```hcl
+map(object({
+    account_id               = string
+    superuser_groups         = list(string)
+    admin_groups             = optional(list(string), [])
+    reader_groups            = optional(list(string), [])
+    restricted_reader_groups = optional(list(string), [])
+    billing_admin_groups     = optional(list(string), [])
+  }))
+```
+
+Default: n/a
+
+### session\_duration\_hours
+
+Description: The number of hours that AWS sessions will last. This is NOT the time before needing to re-authenticate with your IdP, but rather the amount of time that AWS session tokens last before expiring.
+
+Type: `number`
+
+Default: `12`
+
+## Outputs
+
+The following outputs are exported:
+
+### cli\_config
+
+Description: To be used by the 'pf-aws-update --build' script
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -1,0 +1,50 @@
+---
+summary: Overview of Panfactum infrastructure modules available for deployment
+---
+
+# Infrastructure Modules
+
+Panfactum provides a comprehensive library of battle-tested infrastructure modules designed to accelerate your cloud infrastructure deployment. Each module encapsulates infrastructure best practices, security configurations, and operational patterns into reusable components.
+
+## What are Infrastructure Modules?
+
+Infrastructure modules are pre-built, composable units of infrastructure-as-code that handle specific capabilities in your cloud environment. Rather than building everything from scratch, you can leverage these modules to rapidly deploy production-ready infrastructure that follows industry best practices.
+
+Each module includes:
+
+- **Terraform/OpenTofu configuration** - Declarative infrastructure definitions
+- **Comprehensive documentation** - Usage examples and configuration options
+- **Production-ready defaults** - Sensible configurations that work out of the box
+- **Security hardening** - Built-in security best practices and compliance patterns
+- **Observability integration** - Monitoring, logging, and alerting capabilities
+
+## Module Categories
+
+Our modules span several key categories:
+
+### AWS Infrastructure
+
+Modules for managing AWS resources including VPCs, EKS clusters, DNS zones, ECR repositories, S3 buckets, and more. These modules handle the foundational AWS infrastructure needed to run your applications.
+
+### Kubernetes Workloads
+
+A rich set of modules for deploying and managing applications on Kubernetes, including deployments, stateful sets, cron jobs, and more. These modules provide standardized patterns for running workloads with proper resource management, autoscaling, and high availability.
+
+### Platform Services
+
+Critical platform services like Vault for secrets management, Authentik for identity and access management, certificate management, service mesh, observability stacks, and CI/CD infrastructure.
+
+### Workflow Orchestration
+
+Modules for Argo Workflows, event buses, and other workflow automation tools to power your CI/CD pipelines and data processing workflows.
+
+## Getting Started
+
+Browse the modules in the sidebar to find the infrastructure components you need. Each module page includes:
+
+- Overview of what the module provides
+- Configuration variables and their usage
+- Output values you can reference
+- Examples and integration patterns
+
+For guidance on deploying modules, see the [Infrastructure-as-Code guide](/docs/main/guides/iac/deploying-modules).

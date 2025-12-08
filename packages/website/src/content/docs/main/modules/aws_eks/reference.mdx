@@ -1,0 +1,251 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### bootstrap\_cluster\_creator\_admin\_privileges
+
+Description: Whether to give cluster admin privileges to the cluster creator implicitly. Cannot be changed after cluster creation. For backwards compatibility purposes only.
+
+Type: `bool`
+
+Default: `false`
+
+### bootstrap\_mode\_enabled
+
+Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled.
+
+Type: `bool`
+
+Default: `false`
+
+### cluster\_description
+
+Description: The purpose of the EKS cluster.
+
+Type: `string`
+
+Default: n/a
+
+### cluster\_name
+
+Description: The name of the EKS cluster resource.
+
+Type: `string`
+
+Default: n/a
+
+### control\_plane\_logging
+
+Description: Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)
+
+Type: `set(string)`
+
+Default: `[]`
+
+### control\_plane\_subnets
+
+Description: List of subnet names for the control plane. Must be in at least two different availability zones.
+
+Type: `set(string)`
+
+Default: `[]`
+
+### dns\_service\_ip
+
+Description: The IP address of the cluster's DNS service. Must be inside the service\_cidr range.
+
+Type: `string`
+
+Default: `"172.20.0.10"`
+
+### enable\_public\_access
+
+Description: Whether the cluster control plane should be available from the public internet.
+
+Type: `bool`
+
+Default: `true`
+
+### extended\_support\_enabled
+
+Description: Whether to enable extended support for EOL Kubernetes versions.
+
+Type: `bool`
+
+Default: `true`
+
+### extra\_admin\_principal\_arns
+
+Description: Grants read-write access to most resources (not included top-level cluster configuration) to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_reader\_principal\_arns
+
+Description: Grants read access to all resources (including secrets) to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_restricted\_reader\_principal\_arns
+
+Description: Grants read access to all resources (not including secrets) to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_superuser\_principal\_arns
+
+Description: Grants read-write access to all resources to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### kube\_version
+
+Description: Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied.
+
+Type: `string`
+
+Default: `"1.32"`
+
+### node\_ami\_name
+
+Description: The name of the AMI to use for the controller nodes.
+
+Type: `string`
+
+Default: `"bottlerocket-aws-k8s-1.32-aarch64-v1.51.0-47438798"`
+
+### node\_ebs\_volume\_size\_gb
+
+Description: The size of the EBS volume in GiB to use for each node.
+
+Type: `number`
+
+Default: `40`
+
+### node\_security\_groups
+
+Description: Names of security groups allowed to communicate directly with the cluster nodes.
+
+Type: `set(string)`
+
+Default: `[]`
+
+### node\_subnets
+
+Description: List of names for subnets that controller nodes should be deployed to
+
+Type: `list(string)`
+
+Default: n/a
+
+### public\_access\_cidrs
+
+Description: IP address ranges that can access the public control plane API endpoint.
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "0.0.0.0/0"
+]
+```
+
+### root\_user\_access\_entry\_enabled
+
+Description: Whether to enable the root user access entry
+
+Type: `bool`
+
+Default: `true`
+
+### service\_cidr
+
+Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
+
+Type: `string`
+
+Default: `"172.20.0.0/16"`
+
+### spot\_nodes\_enabled
+
+Description: Whether to create spot instances instead of on-demand instances
+
+Type: `bool`
+
+Default: `true`
+
+### vpc\_id
+
+Description: The id for the VPC that the cluster should be deployed into
+
+Type: `string`
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### cluster\_ca\_data
+
+Description: The CA certificate for the Kubernetes API server
+
+### cluster\_name
+
+Description: The name of the EKS cluster
+
+### cluster\_region
+
+Description: The AWS region to which the EKS cluster is deployed
+
+### cluster\_url
+
+Description: The URL for the Kubernetes API server
+
+### dns\_service\_ip
+
+Description: The IP address of the cluster's DNS service.
+
+### node\_instance\_profile
+
+Description: The instance profile assigned to controller nodes
+
+### node\_role\_arn
+
+Description: The ARN of the role assigned to controller nodes
+
+### node\_security\_group\_id
+
+Description: ID of the security group assigned to controller nodes
+
+### user\_data
+
+Description: The user data file provided to the controller nodes
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

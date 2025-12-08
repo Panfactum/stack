@@ -1,0 +1,101 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### admin\_groups
+
+Description: Groups that should have read and write access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### client\_id
+
+Description: The client id for the OIDC authentication
+
+Type: `string`
+
+Default: n/a
+
+### client\_secret
+
+Description: The client secret for the OIDC authentication
+
+Type: `string`
+
+Default: n/a
+
+### oidc\_discovery\_url
+
+Description: The discover url for OIDC authentication
+
+Type: `string`
+
+Default: n/a
+
+### oidc\_issuer
+
+Description: The bound issuer for OIDC authentication to Vault
+
+Type: `string`
+
+Default: n/a
+
+### oidc\_redirect\_uris
+
+Description: The allowed redirect URIs for OIDC authentication
+
+Type: `list(string)`
+
+Default: n/a
+
+### reader\_groups
+
+Description: Groups that should have read-only access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### restricted\_reader\_groups
+
+Description: Groups that should have restricted read-only access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### superuser\_groups
+
+Description: Groups that should have superuser access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### token\_lifetime\_hours
+
+Description: Number of hours before generated tokens expire
+
+Type: `number`
+
+Default: `12`
+
+## Outputs
+
+No outputs.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

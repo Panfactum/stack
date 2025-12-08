@@ -1,0 +1,113 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### allowed\_groups
+
+Description: Only members of these groups can access AWS
+
+Type: `set(string)`
+
+Default: `[]`
+
+### authentik\_domain
+
+Description: The domain name of the authentik instance
+
+Type: `string`
+
+Default: n/a
+
+### authentik\_namespace
+
+Description: The kubernetes namespace where Authentik is deployed
+
+Type: `string`
+
+Default: n/a
+
+### media\_configmap
+
+Description: The configmap holding the static media that Authentik will use
+
+Type: `string`
+
+Default: n/a
+
+### organization\_name
+
+Description: The name of your organization
+
+Type: `string`
+
+Default: n/a
+
+### ui\_description
+
+Description: The description to display in the Authentik web dashboard
+
+Type: `string`
+
+Default: `"Zoho"`
+
+### ui\_group
+
+Description: The section in the Authentik web dashboard that this will appear in
+
+Type: `string`
+
+Default: `"Admin"`
+
+### zoho\_acs\_url
+
+Description: The ACS url provided by Zoho when configuring an external identity provider
+
+Type: `string`
+
+Default: n/a
+
+### zoho\_issuer
+
+Description: The issuer provided by Zoho when configuring an external identity provider
+
+Type: `string`
+
+Default: `"zoho.com"`
+
+### zoho\_sign\_in\_url
+
+Description: The sign-in url provided by Zoho when configuring an external identity provider
+
+Type: `string`
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### saml\_metadata
+
+Description: n/a
+
+## Providers
+
+The following providers are needed by this module:
+
+- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

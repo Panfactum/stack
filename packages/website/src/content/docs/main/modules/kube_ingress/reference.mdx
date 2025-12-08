@@ -1,0 +1,934 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### body\_size\_limit\_mb
+
+Description: The maximum body size in MB
+
+Type: `number`
+
+Default: `null`
+
+### cdn\_mode\_enabled
+
+Description: Whether a CDN should be used in front of the ingresses
+
+Type: `bool`
+
+Default: `false`
+
+### cors\_allow\_credentials
+
+Description: Whether to set the 'Access-Control-Allow-Credentials' header to 'true'
+
+Type: `bool`
+
+Default: `true`
+
+### cors\_allowed\_headers
+
+Description: Extra headers to allow on CORS requests
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "DNT",
+  "Keep-Alive",
+  "User-Agent",
+  "X-Requested-With",
+  "If-Modified-Since",
+  "Cache-Control",
+  "Content-Disposition",
+  "Content-Type",
+  "Range",
+  "Authorization",
+  "Cookies",
+  "Referrer",
+  "Accept",
+  "sec-ch-ua",
+  "sec-ch-ua-mobile",
+  "sec-ch-ua-platform",
+  "X-Suggested-File-Name",
+  "Cookie"
+]
+```
+
+### cors\_allowed\_methods
+
+Description: The methods to allow on CORS requests
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "GET",
+  "HEAD",
+  "POST",
+  "OPTIONS",
+  "PUT",
+  "PATCH",
+  "DELETE"
+]
+```
+
+### cors\_allowed\_origins\_any
+
+Description: Whether to allow any origin on CORS requests
+
+Type: `bool`
+
+Default: `false`
+
+### cors\_allowed\_origins\_self
+
+Description: Whether the ingress domains should be allowed origins on CORS requests
+
+Type: `bool`
+
+Default: `true`
+
+### cors\_allowed\_origins\_sibling\_domains
+
+Description: Whether sibling domains of the ingress domains should be allowed origins on CORS requests
+
+Type: `bool`
+
+Default: `true`
+
+### cors\_allowed\_origins\_subdomains
+
+Description: Whether subdomains of the ingress domains should be allowed origins on CORS requests
+
+Type: `bool`
+
+Default: `true`
+
+### cors\_enabled
+
+Description: Whether to enable CORS response handling in NGINX
+
+Type: `bool`
+
+Default: `false`
+
+### cors\_exposed\_headers
+
+Description: The extra headers to expose in CORS responses
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "Content-Encoding",
+  "Date",
+  "Location",
+  "X-Frame-Options",
+  "X-Content-Type-Options",
+  "Permissions-Policy",
+  "X-XSS-Protection",
+  "Vary",
+  "Cross-Origin-Response-Policy",
+  "Cross-Origin-Opener-Policy",
+  "Cross-Origin-Embedder-Policy",
+  "Content-Security-Policy",
+  "Referrer-Policy"
+]
+```
+
+### cors\_extra\_allowed\_origins
+
+Description: Extra origins allowed on CORS requests
+
+Type: `list(string)`
+
+Default: `[]`
+
+### cors\_max\_age\_seconds
+
+Description: Controls how long the CORS preflight requests are allowed to be cached
+
+Type: `number`
+
+Default: `86400`
+
+### cors\_native\_handling\_enabled
+
+Description: Whether to use the native NGINX-ingress annotations to handle cors rather than the Panfactum logic
+
+Type: `bool`
+
+Default: `false`
+
+### cross\_origin\_embedder\_policy
+
+Description: The value for the Cross-Origin-Embedder-Policy header
+
+Type: `string`
+
+Default: `"require-corp"`
+
+### cross\_origin\_isolation\_enabled
+
+Description: Whether to enable the Cross-Origin-Opener-Policy header
+
+Type: `bool`
+
+Default: `false`
+
+### cross\_origin\_opener\_policy
+
+Description: The value for the Cross-Origin-Opener-Policy header
+
+Type: `string`
+
+Default: `"same-origin"`
+
+### cross\_origin\_resource\_policy
+
+Description: The value for the Cross-Origin-Resource-Policy header
+
+Type: `string`
+
+Default: `"same-site"`
+
+### csp\_base\_uri
+
+Description: The base-uri content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_connect\_src
+
+Description: The connect-src content security policy
+
+Type: `string`
+
+Default: `"'self' ws:"`
+
+### csp\_default\_src
+
+Description: The default-src content security policy
+
+Type: `string`
+
+Default: `"'self'"`
+
+### csp\_enabled
+
+Description: Whether the Content-Security-Policy header should be added to responses
+
+Type: `bool`
+
+Default: `false`
+
+### csp\_fenced\_frame\_src
+
+Description: The fenced-frame-src content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_font\_src
+
+Description: The font-src content security policy
+
+Type: `string`
+
+Default: `"'self' https: data:"`
+
+### csp\_form\_action
+
+Description: The form-action content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_frame\_ancestors
+
+Description: The frame-ancestors content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_frame\_src
+
+Description: The frame-src content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_img\_src
+
+Description: The img-src content security policy
+
+Type: `string`
+
+Default: `"'self' data:"`
+
+### csp\_manifest\_src
+
+Description: The manifest-src content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_media\_src
+
+Description: The media-src content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_non\_html
+
+Description: The full content security policy for non-HTML responses
+
+Type: `string`
+
+Default: `"default-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests"`
+
+### csp\_object\_src
+
+Description: The object-src content security policy
+
+Type: `string`
+
+Default: `"'none'"`
+
+### csp\_override
+
+Description: Whether to override the Content-Security-Response header if set from the upstream server
+
+Type: `bool`
+
+Default: `false`
+
+### csp\_report\_to
+
+Description: The report-to content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_report\_uri
+
+Description: The report-uri content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_sandbox
+
+Description: The sandbox content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_script\_src
+
+Description: The script-src content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_script\_src\_elem
+
+Description: The script-src-elem content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_style\_src
+
+Description: The style-src content security policy
+
+Type: `string`
+
+Default: `"'self'"`
+
+### csp\_style\_src\_attr
+
+Description: The style-src-attr content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_style\_src\_elem
+
+Description: The style-src-elem content security policy
+
+Type: `string`
+
+Default: `null`
+
+### csp\_worker\_src
+
+Description: The worker-src content security policy
+
+Type: `string`
+
+Default: `null`
+
+### domains
+
+Description: Which domains the generated ingresses will listen on
+
+Type: `list(string)`
+
+Default: n/a
+
+### extra\_annotations
+
+Description: Extra annotations to add to all the ingress objects
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_configuration\_snippet
+
+Description: An extra NGINX configuration snippet to add to the route handlers
+
+Type: `string`
+
+Default: `""`
+
+### extra\_response\_headers
+
+Description: A key-value mapping of extra headers to add to every response
+
+Type: `map(string)`
+
+Default: `{}`
+
+### generate\_cert\_enabled
+
+Description: Whether to generate a new cert for these ingresses. In most cases this is unnecessary as the default cert for cluster provides sufficient coverage. However, this may be necessary for nested subdomains.
+
+Type: `bool`
+
+Default: `false`
+
+### idle\_timeout\_seconds
+
+Description: The idle timeout in seconds
+
+Type: `number`
+
+Default: `null`
+
+### ingress\_configs
+
+Description: A list of ingress names to the configuration to use for the ingress
+
+Type:
+
+```hcl
+list(object({
+
+    # This ingress matches all incoming requests on the indicated domains that have the indicated path prefixes
+    path_prefix   = optional(string, "/")
+    remove_prefix = optional(bool, false) # True iff the the path_prefix should be stripped before forwarding on to upstream service
+
+    # The backing Kubernetes service
+    service      = string
+    service_port = number
+
+    # Rules for mutating the request path before it is forwarded to the upstream service
+    rewrite_rules = optional(list(object({
+      match   = string
+      rewrite = string
+    })), [])
+
+    # TLS Config
+    tls_secret_name = optional(string) # The name of the secret containing the cert-manager provided public TLS certificate. Will override any certs generated by this module.
+
+    # Misc
+    extra_annotations = optional(map(string), {}) # Extra annotations that will only apply to this ingress_config
+
+    # CDN Configuration
+    cdn = optional(object({
+      extra_origin_headers = optional(map(string), {}) # Headers sent from the CDN to the origin
+
+      # The default behavior of the CDN before routing requests to this ingress
+      default_cache_behavior = optional(object({
+        caching_enabled      = optional(bool, true)                                                                 # Whether the CDN should cache responses from the origin (overrides all other caching settings)
+        allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]) # What HTTP methods are allowed
+        cached_methods       = optional(list(string), ["GET", "HEAD"])                                              # What HTTP methods will be cached
+        min_ttl              = optional(number, 0)                                                                  # Minimum cache time
+        default_ttl          = optional(number, 86400)                                                              # Default cache time
+        max_ttl              = optional(number, 31536000)                                                           # Maximum cache time
+        cookies_in_cache_key = optional(list(string), ["*"])                                                        # Which cookies will be included in the cache key (Providing "*" means ALL cookies)
+        headers_in_cache_key = optional(list(string), [                                                             # Which headers will be included in the cache key
+          "Authorization",
+          "Origin",
+          "x-http-method-override",
+          "x-http-method",
+          "x-method-override",
+          "x-forwarded-host",
+          "x-host",
+          "x-original-url",
+          "x-rewrite-url",
+          "forwarded"
+        ])
+        query_strings_in_cache_key  = optional(list(string), ["*"])         # Which query strings will be included in the cache key (Providing "*" means ALL query strings)
+        cookies_not_forwarded       = optional(list(string), [])            # Which cookies will NOT be forwarded to the ingress from the CDN
+        headers_not_forwarded       = optional(list(string), [])            # Which headers will NOT be forwarded to the ingress from CDN
+        query_strings_not_forwarded = optional(list(string), [])            # Which query strings will NOT be forwarded to the ingress from the CDN
+        compression_enabled         = optional(bool, true)                  # Whether the CDN performs compression on your assets
+        viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS). One of: allow-all, https-only, redirect-to-https
+      }))
+
+      # Similar to default_cache_behavior but allows you to specific specific rules for certain path patterns
+      # The keys for this map are the path patterns (e.g., "*.jpg")
+      # Path patterns will automatically be prefixed with the path_prefix value, so it can be omitted
+      path_match_behavior = optional(map(object({
+        caching_enabled      = optional(bool, true) # Whether the CDN should cache responses from the origin (overrides all other caching settings)
+        allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"])
+        cached_methods       = optional(list(string), ["GET", "HEAD"])
+        min_ttl              = optional(number, 0)
+        default_ttl          = optional(number, 86400)
+        max_ttl              = optional(number, 31536000)
+        cookies_in_cache_key = optional(list(string), ["*"])
+        headers_in_cache_key = optional(list(string), [
+          "Authorization",
+          "Origin",
+          "x-http-method-override",
+          "x-http-method",
+          "x-method-override",
+          "x-forwarded-host",
+          "x-host",
+          "x-original-url",
+          "x-rewrite-url",
+          "forwarded"
+        ])
+        query_strings_in_cache_key  = optional(list(string), ["*"])
+        cookies_not_forwarded       = optional(list(string), [])
+        headers_not_forwarded       = optional(list(string), [])
+        query_strings_not_forwarded = optional(list(string), [])
+        compression_enabled         = optional(bool, true)
+        viewer_protocol_policy      = optional(string, "redirect-to-https")
+      })), {})
+    }))
+  }))
+```
+
+Default: n/a
+
+### name
+
+Description: The name of the ingresses that will get created
+
+Type: `string`
+
+Default: n/a
+
+### namespace
+
+Description: The namespace the ingress resource should be created
+
+Type: `string`
+
+Default: n/a
+
+### permissions\_policy\_accelerometer
+
+Description: The permissions policy for the accelerometer directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_ambient\_light\_sensor
+
+Description: The permissions policy for the ambient-light-sensor directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_autoplay
+
+Description: The permissions policy for the autoplay directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_battery
+
+Description: The permissions policy for the battery directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_bluetooth
+
+Description: The permissions policy for the bluetooth directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_camera
+
+Description: The permissions policy for the camera directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_display\_capture
+
+Description: The permissions policy for the display-capture directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_document\_domain
+
+Description: The permissions policy for the document-domain directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_enabled
+
+Description: Whether to enable the Permissions-Policy header in HTML responses.
+
+Type: `bool`
+
+Default: `false`
+
+### permissions\_policy\_encrypted\_media
+
+Description: The permissions policy for the encrypted-media directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_execution\_while\_not\_rendered
+
+Description: The permissions policy for the execution-while-not-rendered directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_execution\_while\_out\_of\_viewport
+
+Description: The permissions policy for the execution-while-out-of-viewport directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_fullscreen
+
+Description: The permissions policy for the fullscreen directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_gamepad
+
+Description: The permissions policy for the gamepad directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_geolocation
+
+Description: The permissions policy for the geolocation directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_gyroscope
+
+Description: The permissions policy for the gyroscope directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_hid
+
+Description: The permissions policy for the hid directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_identity\_credentials\_get
+
+Description: The permissions policy for the identity-credentials-get directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_idle\_detection
+
+Description: The permissions policy for the idle-detection directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_local\_fonts
+
+Description: The permissions policy for the local-fonts directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_magnetometer
+
+Description: The permissions policy for the magnetometer directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_microphone
+
+Description: The permissions policy for the microphone directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_midi
+
+Description: The permissions policy for the midi directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_otp\_credentials
+
+Description: The permissions policy for the otp-credentials directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_override
+
+Description: Whether to override the Permissions-Policy header if set from the upstream server
+
+Type: `bool`
+
+Default: `false`
+
+### permissions\_policy\_payment
+
+Description: The permissions policy for the payment directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_picture\_in\_picture
+
+Description: The permissions policy for the picture-in-picture directive
+
+Type: `string`
+
+Default: `"(self)"`
+
+### permissions\_policy\_publickey\_credentials\_create
+
+Description: The permissions policy for the publickey-credentials-create directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_publickey\_credentials\_get
+
+Description: The permissions policy for the publickey-credentials-get directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_screen\_wake\_lock
+
+Description: The permissions policy for the screen-wake-lock directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_serial
+
+Description: The permissions policy for the serial directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_speaker\_selection
+
+Description: The permissions policy for the speaker-selection directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_storage\_access
+
+Description: The permissions policy for the storage-access directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_usb
+
+Description: The permissions policy for the usb directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_web\_share
+
+Description: The permissions policy for the web-share directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_window\_management
+
+Description: The permissions policy for the window-management directive
+
+Type: `string`
+
+Default: `"()"`
+
+### permissions\_policy\_xr\_spatial\_tracking
+
+Description: The permissions policy for the xr-spatial-tracking directive
+
+Type: `string`
+
+Default: `"()"`
+
+### rate\_limiting\_enabled
+
+Description: Whether to enable rate limiting
+
+Type: `bool`
+
+Default: `true`
+
+### redirect\_rules
+
+Description: A list of redirect rules that the ingress will match against before sending requests to the upstreams
+
+Type:
+
+```hcl
+list(object({
+    source    = string                # A regex string for matching the entire request url (^https://domain.com(/.*)?$)
+    target    = string                # The redirect target (can use numbered capture groups from the source - https://domain2.com/$1)
+    permanent = optional(bool, false) # If true will issue a 301 redirect; otherwise, will use 302
+  }))
+```
+
+Default: `[]`
+
+### referrer\_policy
+
+Description: The value for Referrer-Policy header.
+
+Type: `string`
+
+Default: `"no-referrer"`
+
+### x\_content\_type\_options\_enabled
+
+Description: Whether X-Content-Type-Options should be set to nosniff
+
+Type: `bool`
+
+Default: `true`
+
+### x\_frame\_options
+
+Description: The value for the X-Frame-Options header.
+
+Type: `string`
+
+Default: `"SAMEORIGIN"`
+
+### x\_xss\_protection
+
+Description: The value for the X-XSS-Protection header.
+
+Type: `string`
+
+Default: `"1; mode=block"`
+
+## Outputs
+
+The following outputs are exported:
+
+### cdn\_origin\_configs
+
+Description: Configuration to be passed to the kube\_cdn module to configure the CDN
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

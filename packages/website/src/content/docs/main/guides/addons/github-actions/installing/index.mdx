@@ -30,7 +30,7 @@ engine such as Argo Workflows. See our detailed analysis and list of limitations
 To begin using self-hosted runners, you must first install the [Actions Runner Controller (ARC)](https://github.com/actions/actions-runner-controller)
 which is a Kubernetes operator that orchestrates and scales the runners based on Kubernetes custom resources.
 
-We provide a module to deploy this controller: [kube\_gha](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha).
+We provide a module to deploy this controller: [kube\_gha](/docs/main/modules/kube_gha/overview).
 
 Let's deploy it now:
 
@@ -70,7 +70,7 @@ You should now see a new Deployment running in the `gha` namespace called `gha-c
 
 The controller allows you to create various "runners" which are the pods that will actually execute your GHA code.
 
-To create runners, you will use our [kube\_gha\_runners](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners) module.
+To create runners, you will use our [kube\_gha\_runners](/docs/main/modules/kube_gha_runners/overview) module.
 
 Let's deploy one type of runner now:
 
@@ -143,7 +143,7 @@ Let's deploy one type of runner now:
       as an input via `github_token`. Make sure that the token is [encrypted with sops.](/docs/main/guides/iac/deploying-modules#using-secrets)
 
    2. The `runners` input is a key-value map that defines the different runner groups that your workflow jobs can target. The keys
-      are the names of the groups and the values are their configuration. See the [module documentation](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners)
+      are the names of the groups and the values are their configuration. See the [module documentation](/docs/main/modules/kube_gha_runners/overview)
       for information on the various configuration values.
 
       <MarkdownAlert severity="warning">

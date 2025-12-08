@@ -1,0 +1,60 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### ecr\_repositories
+
+Description: A mapping of names to configuration of the repositories to create.
+
+Type:
+
+```hcl
+map(object({
+    is_immutable      = optional(bool, true)  # Whether immutable tags are enabled
+    expire_all_images = optional(bool, false) # Whether all images should be removed after 14 days
+    expiration_rules = optional(list(object({
+      tag_pattern = string
+      days        = number # days since pushed that the image will be removed
+    })), [])
+    additional_push_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have push access to the repository
+    additional_pull_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have pull access to the repository
+  }))
+```
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### aws\_account\_id
+
+Description: n/a
+
+### aws\_region
+
+Description: n/a
+
+### registry
+
+Description: n/a
+
+### repos
+
+Description: n/a
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

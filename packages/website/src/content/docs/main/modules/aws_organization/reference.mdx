@@ -1,0 +1,138 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### accounts
+
+Description: AWS accounts to create in the organization. Keys are arbitrary, but if changed /removed will delete the account.
+
+Type:
+
+```hcl
+map(object({
+    name              = string
+    email             = string
+    close_on_deletion = optional(bool, true)
+    environment       = optional(string)
+
+    // Can be used to override the alternate contact information on a per-account basis
+    alternate_contacts = optional(object({
+      security = optional(object({
+        full_name     = string
+        email_address = string
+        phone_number  = string
+        title         = string
+      }))
+      billing = optional(object({
+        full_name     = string
+        email_address = string
+        phone_number  = string
+        title         = string
+      }))
+      operations = optional(object({
+        full_name     = string
+        email_address = string
+        phone_number  = string
+        title         = string
+      }))
+    }), {})
+  }))
+```
+
+Default: `{}`
+
+### alias
+
+Description: The human-readable string for the AWS account.
+
+Type: `string`
+
+Default: n/a
+
+### alternate\_contacts
+
+Description: The alternate contacts for the AWS organization
+
+Type:
+
+```hcl
+object({
+    security = optional(object({
+      full_name     = string
+      email_address = string
+      phone_number  = string
+      title         = string
+    }))
+    billing = optional(object({
+      full_name     = string
+      email_address = string
+      phone_number  = string
+      title         = string
+    }))
+    operations = optional(object({
+      full_name     = string
+      email_address = string
+      phone_number  = string
+      title         = string
+    }))
+  })
+```
+
+Default: `{}`
+
+### extra\_aws\_service\_access\_principals
+
+Description: Additional service access principals to use in addition to the Panfactum defaults
+
+Type: `list(string)`
+
+Default: `[]`
+
+### primary\_contact
+
+Description: The primary contact for the AWS organization
+
+Type:
+
+```hcl
+object({
+    full_name          = string
+    phone_number       = string
+    address_line_1     = string
+    address_line_2     = optional(string)
+    address_line_3     = optional(string)
+    city               = string
+    company_name       = optional(string)
+    country_code       = string // The ISO-3166 two-letter country code for your organization
+    district_or_county = optional(string)
+    postal_code        = string
+    state_or_region    = optional(string)
+    website_url        = optional(string)
+  })
+```
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### aws\_accounts
+
+Description: The AWS accounts that were provisioned in the organization
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

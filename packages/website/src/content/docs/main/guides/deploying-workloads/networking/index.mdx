@@ -17,8 +17,8 @@ are the standard mechanism for exposing a networked workload backed by one or mo
 The following workload submodules will automatically create Services when `ports` is configured
 for any of their containers:
 
-* [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
-* [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+* [kube\_deployment](/docs/main/modules/kube_deployment/overview)
+* [kube\_stateful\_set](/docs/main/modules/kube_stateful_set/overview)
 
 The behavior of the Services for each of these modules can be configured by setting the following input
 variables:
@@ -27,7 +27,7 @@ variables:
 * `service_type`: The [type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) of the Service
 * `service_ip`: Used to assign a static IP to the service (must be in the cluster's service CIDR block)
 
-Additionally, we provide a submodule, [kube\_service](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_service),
+Additionally, we provide a submodule, [kube\_service](/docs/main/modules/kube_service/overview),
 for creating Services optimized for the Panfactum Stack on an as-needed basis.
 
 ## Inbound Networking
@@ -41,11 +41,11 @@ The central ingress infrastructure is set up in the [bootstrapping guide](/docs/
 but you will still need to set up individual Ingress resources for each service that you want to expose
 to the public internet.
 
-We provide a submodule, [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
+We provide a submodule, [kube\_ingress](/docs/main/modules/kube_ingress/overview),
 that creates an Ingress optimized for the Panfactum Stack. See that module's documentation for more information
 on how to best manage your Ingress resources.
 
-In addition, we provide a submodule [kube\_aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
+In addition, we provide a submodule [kube\_aws\_cdn](/docs/main/modules/kube_aws_cdn/overview),
 that integrates with `kube_ingress` to provision a [CloudFront CDN](https://aws.amazon.com/cloudfront/) in front of your Ingress resources
 for improved performance and security as well as reduced server costs.
 

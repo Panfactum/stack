@@ -686,6 +686,14 @@ resource "kubectl_manifest" "vpa" {
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "controller"
+          maxAllowed = {
+            cpu = "500m"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

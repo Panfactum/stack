@@ -11,7 +11,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 <p class="subtitle">Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.</p>
+using our [aws\_eks](/docs/main/modules/aws_eks/overview) module.</p>
 
 ## A Quick Note
 
@@ -52,7 +52,7 @@ configured to download the image from the public registry *only if it does not a
 in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
 the initial deployment.
 
-We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/main/modules/aws_ecr_pull_through_cache/overview).
 
 However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
 

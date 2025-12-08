@@ -32,7 +32,7 @@ For a full architectural breakdown, see their [excellent documentation.](https:/
 
 ## Deploy Kyverno
 
-We provide a module for deploying Kyverno, [kube\_kyverno](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
+We provide a module for deploying Kyverno, [kube\_kyverno](/docs/main/modules/kube_kyverno/overview).
 
 Let's deploy it now:
 
@@ -73,7 +73,7 @@ Let's deploy it now:
 ## Deploy Panfactum Policies
 
 While `kube_kyverno` installs Kyverno itself, Kyverno does not apply any policy rules by default. To load in the default
-[Kyverno Policies](https://kyverno.io/docs/kyverno-policies/), we provide a module called [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_kyverno).
+[Kyverno Policies](https://kyverno.io/docs/kyverno-policies/), we provide a module called [kube\_policies](/docs/main/modules/kube_kyverno/overview).
 
 Let's deploy the policies now:
 

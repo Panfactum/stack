@@ -1,0 +1,169 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### common\_name
+
+Description: Common name to add to add to the cert
+
+Type: `string`
+
+Default: `null`
+
+### duration
+
+Description: How long the certificate will be valid for.
+
+Type: `string`
+
+Default: `"336h0m0s"`
+
+### extra\_labels
+
+Description: Extra labels to add to the Certificate and Secret resources
+
+Type: `map(string)`
+
+Default: `{}`
+
+### include\_localhost
+
+Description: Whether to include localhost in the SANs
+
+Type: `bool`
+
+Default: `false`
+
+### include\_subdomains
+
+Description: Whether to include subdomains of the services via wildcard
+
+Type: `bool`
+
+Default: `false`
+
+### is\_ca
+
+Description: Whether the certificate is a certificate authority certificate or not.
+
+Type: `bool`
+
+Default: `false`
+
+### issuer\_name
+
+Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
+
+Type: `string`
+
+Default: `null`
+
+### namespace
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+Default: n/a
+
+### private\_key\_algorithm
+
+Description: The algorithm to use for the private key. Must be one of: ECDSA, RSA
+
+Type: `string`
+
+Default: `"ECDSA"`
+
+### private\_key\_encoding
+
+Description: The encoding of the private key. Must by `PKCS1` or `PKCS8`
+
+Type: `string`
+
+Default: `"PKCS1"`
+
+### private\_key\_rotation\_enabled
+
+Description: Whether to enable private key rotation.
+
+Type: `bool`
+
+Default: `true`
+
+### renew\_before
+
+Description: How long prior to the expiration that certificate renewal will be triggered.
+
+Type: `string`
+
+Default: `"168h0m0s"`
+
+### sans\_enabled
+
+Description: Whether to set SANS in the generated certificate
+
+Type: `bool`
+
+Default: `true`
+
+### secret\_name
+
+Description: The name of the secret to save the keypair to
+
+Type: `string`
+
+Default: n/a
+
+### service\_names
+
+Description: The names of the kubernetes service(s) to use for the domain names
+
+Type: `list(string)`
+
+Default: `[]`
+
+### usages
+
+Description: Usages to add to the certificate
+
+Type: `list(string)`
+
+Default: `[]`
+
+### use\_cluster\_issuer
+
+Description: Whether to use a ClusterIssuer. If false, will use an Issuer.
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### certificate\_name
+
+Description: n/a
+
+### secret\_name
+
+Description: n/a
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

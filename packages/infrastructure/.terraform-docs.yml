@@ -1,33 +1,28 @@
 formatter: markdown doc
 sections:
   show:
-    - header
-    - footer
     - inputs
     - modules
     - requirements
     - outputs
-header-from: README.md
-footer-from: FOOTER.md
 settings:
   anchor: false
   html: true
   read-comments: false
+  required: false
+  sensitive: false
 content: |-
   {/* lint disable no-duplicate-headings */}
-  
+
   {/* eslint-disable import/order */}
-  
-  {{ .Header }}
-  
-  {{ .Requirements }}
-  
+
   {{ .Inputs }}
-  
+
   {{ .Outputs }}
-  
-  {{ .Footer }}
-  
+
+  {{ .Requirements }}
+
   {/* eslint-enable import/order */}
-  
+
   {/* lint enable no-duplicate-headings */}
+

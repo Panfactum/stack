@@ -33,7 +33,7 @@ We will demonstrate how to easily accomplish this using the Panfactum CI / CD sy
 ## Build and Push Image from Dockerfile
 
 First, you need to build and push an image based on the Dockerfile in your repository. We provide a submodule that will
-create a WorkflowTemplate that does this for you: [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+create a WorkflowTemplate that does this for you: [wf\_dockerfile\_build](/docs/main/modules/wf_dockerfile_build/overview).
 
 Add this submodule to your CI / CD module that you created in the [Getting Started guide](/docs/main/guides/cicd/getting-started).
 As an example of how this might look:
@@ -63,7 +63,7 @@ Before proceeding, ensure you have used the WorkflowTemplate to successfully cre
 
 <MarkdownAlert severity="info">
   It is possible that you might need to customize the module further if you are using a more complex repository setup
-  like a monorepo. See the [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+  like a monorepo. See the [wf\_dockerfile\_build](/docs/main/modules/wf_dockerfile_build/overview)
   module for additional documentation.
 </MarkdownAlert>
 

@@ -1,7 +1,7 @@
 variable "karpenter_helm_version" {
   description = "The version of the karpenter helm chart to deploy"
   type        = string
-  default     = "1.1.1"
+  default     = "1.8.2"
 }
 
 variable "node_role_arn" {

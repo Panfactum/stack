@@ -19,10 +19,10 @@ variable "pg_custom_image" {
     Custom PostgreSQL container image to use instead of the default CloudNativePG image.
     
     This allows you to use:
-    - Pre-built CNPG images with extensions (e.g., 'ghcr.io/cloudnative-pg/postgis:17')
-    - Custom-built images with your own extensions (e.g., 'myregistry.io/postgres:16.9-custom')
+    - Pre-built CNPG images with extensions (e.g., `ghcr.io/cloudnative-pg/postgis:17`)
+    - Custom-built images with your own extensions (e.g., `myregistry.io/postgres:16.9-custom`)
     
-    When set, this overrides the 'pg_version' variable for image selection.
+    When set, this overrides the `pg_version` variable for image selection.
     The image must be compatible with CloudNativePG requirements.
     
     Note: Custom images bypass the ECR pull through cache. Ensure your cluster
@@ -569,10 +569,10 @@ variable "pg_recovery_target_immediate" {
     and recoveryTarget.targetImmediate=true to stop recovery at the end of the specified backup
     without replaying additional WAL files.
 
-    Format: YYYYMMDDTHHmmss (e.g., '20251015T121455')
+    Format: `YYYYMMDDTHHmmss` (e.g., `20251015T121455`)
 
-    Requires pg_recovery_mode_enabled=true and pg_recovery_directory to be set.
-    This is mutually exclusive with pg_recovery_target_time.
+    Requires `pg_recovery_mode_enabled=true` and `pg_recovery_directory` to be set.
+    This is mutually exclusive with `pg_recovery_target_time`.
   EOT
   type        = string
   default     = null

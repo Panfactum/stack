@@ -1,0 +1,117 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### extra\_env\_secrets
+
+Description: A key-value mapping of extra secret environment variables for the runner pods
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_pod\_annotations
+
+Description: Annotations to add to every runner pod
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_pod\_labels
+
+Description: Labels to add to every runner pod
+
+Type: `map(string)`
+
+Default: `{}`
+
+### gha\_runner\_scale\_set\_helm\_version
+
+Description: The version of the  actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
+
+Type: `string`
+
+Default: `"0.9.3"`
+
+### github\_token
+
+Description: The GitHub token that the runners will use to register with GitHub
+
+Type: `string`
+
+Default: n/a
+
+### node\_image\_cache\_enabled
+
+Description: Whether to cache images locally for better startup performance
+
+Type: `bool`
+
+Default: `true`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### runners
+
+Description: A mapping of runner names to their configuration values
+
+Type:
+
+```hcl
+map(object({
+    github_config_url              = string # The url for the organization or repository that the runners will belong to
+    min_replicas                   = optional(number, 0)
+    max_replicas                   = optional(number, 25)
+    action_runner_image_registry   = optional(string, "ghcr.io")
+    action_runner_image_repository = optional(string, "actions/actions-runner")
+    action_runner_image_tag        = optional(string, "latest")
+    tmp_space_gb                   = optional(number, 1)   # The number of GB of disk space to allocate to the runner
+    memory_mb                      = optional(number, 250) # The number of MB of memory to allocate to the runner
+    cpu_millicores                 = optional(number, 100) # The number of millicores of cpu to allocate to the runner
+    arm_nodes_enabled              = optional(bool, true)  # Whether to allow this runner to run on arm64 nodes
+    spot_nodes_enabled             = optional(bool, true)  # Whether to allow this runner to run on spot nodes
+  }))
+```
+
+Default: n/a
+
+## Outputs
+
+No outputs.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

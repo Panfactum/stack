@@ -7,8 +7,8 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Internal Cluster Networking
 
-<p class="subtitle">Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
-and [kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.</p>
+<p class="subtitle">Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/main/modules/kube_core_dns/overview)
+and [kube\_cilium](/docs/main/modules/kube_cilium/overview) modules.</p>
 
 ## Background
 
@@ -23,7 +23,7 @@ information.
 
 Cilium provides workloads in your clusters with network interfaces that allow them to connect with each other and the wider
 internet. Without this controller, your pods would not be able to communicate. We provide a module
-for deploying Cilium: [kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
+for deploying Cilium: [kube\_cilium](/docs/main/modules/kube_cilium/overview).
 
 Let's deploy it now.
 
@@ -71,7 +71,7 @@ Let's deploy it now.
 
 Kubernetes provides human-readable DNS names for pods and services running inside the cluster (e.g., `my-service.namespace.svc.cluster.local`);
 however, it does not come with its own DNS servers. The standard way to provide this functionality is via CoreDNS.
-We provide a module to deploy CoreDNS called [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
+We provide a module to deploy CoreDNS called [kube\_core\_dns](/docs/main/modules/kube_core_dns/overview).
 
 Let's deploy it now.
 

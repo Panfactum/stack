@@ -143,6 +143,9 @@ resource "helm_release" "redis" {
 
       global = {
         storageClass = "ebs-standard"
+        security = {
+          allowInsecureImages = true
+        }
       }
 
       kubectl = {
@@ -152,6 +155,10 @@ resource "helm_release" "redis" {
         limits = {
           memory = "30Mi"
         }
+      }
+
+      image = {
+        repository = "bitnamilegacy/redis"
       }
 
       auth = {
@@ -280,7 +287,9 @@ resource "helm_release" "redis" {
         downAfterMilliseconds   = 2000
         failoverTimeout         = 1000 * 60 * 3
 
-
+        image = {
+          repository = "bitnamilegacy/redis-sentinel"
+        }
         service = {
           // This will create a "master" service that will always
           // point to the current master so that we can support
@@ -305,6 +314,9 @@ resource "helm_release" "redis" {
       }
 
       kubectl = {
+        image = {
+          repository = "bitnamilegacy/kubectl"
+        }
         requests = {
           memory = "100Mi"
         }
@@ -315,6 +327,9 @@ resource "helm_release" "redis" {
 
       metrics = {
         enabled = var.monitoring_enabled
+        image = {
+          repository = "bitnamilegacy/redis-exporter"
+        }
         resources = {
           requests = {
             memory = "100Mi"
@@ -770,27 +785,28 @@ module "image_cache" {
   images = [
     {
       registry          = "docker.io"
-      repository        = "bitnami/redis"
+      repository        = "bitnamilegacy/redis"
       tag               = "7.4.1-debian-12-r2"
       arm_nodes_enabled = var.arm_nodes_enabled
     },
     {
       registry          = "docker.io"
-      repository        = "bitnami/redis-sentinel"
+      repository        = "bitnamilegacy/redis-sentinel"
       tag               = "7.4.1-debian-12-r2"
       arm_nodes_enabled = var.arm_nodes_enabled
     },
     {
       registry          = "docker.io"
-      repository        = "bitnami/redis-exporter"
+      repository        = "bitnamilegacy/redis-exporter"
       tag               = "1.66.0-debian-12-r2"
       arm_nodes_enabled = var.arm_nodes_enabled
     },
     {
       registry          = "docker.io"
-      repository        = "bitnami/kubectl"
+      repository        = "bitnamilegacy/kubectl"
       tag               = "1.31.2-debian-12-r6"
       arm_nodes_enabled = var.arm_nodes_enabled
     }
   ]
 }
+

@@ -113,7 +113,7 @@ If your first-party IaC is stored in a private git repository, you will need to 
 
 <MarkdownAlert severity="info">
   If you are also deploying IaC using our CI/CD module, ensure you also provide git credentials to the CI/CD system
-  by following [these instructions.](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy#authenticating-with-private-repositories)
+  by following [these instructions.](/docs/main/modules/wf_tf_deploy/overview#authenticating-with-private-repositories)
 </MarkdownAlert>
 
 ### Versioning
@@ -188,7 +188,7 @@ deployed:
 
 ### Using Panfactum Submodules
 
-In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/docs/main/reference/infrastructure-modules/overview)
+In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/docs/main/modules)
 that you many import directly for use in your custom modules.
 
 You can accomplish this via `module` blocks in your infrastructure code ([docs](https://developer.hashicorp.com/terraform/language/modules/sources)).

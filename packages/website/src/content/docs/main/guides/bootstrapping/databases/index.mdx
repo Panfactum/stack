@@ -33,7 +33,7 @@ While there are many ways to deploy PostgreSQL on Kubernetes, we prefer [CloudNa
 which is a best-in-class [Kubernetes Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 for managing the entire lifecycle of the PostgreSQL clusters in production-hardened manner.
 
-We provide a module to deploy the operator: [kube\_cloudnative\_pg](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cloudnative_pg).
+We provide a module to deploy the operator: [kube\_cloudnative\_pg](/docs/main/modules/kube_cloudnative_pg/overview).
 
 Let's deploy it now:
 
@@ -69,7 +69,7 @@ Let's deploy it now:
 
 Note that this will only deploy the CRDs and operator. To deploy actual PostgreSQL clusters, you must
 create [Cluster](https://cloudnative-pg.io/documentation/1.22/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster) resources.
-We provide a module [kube\_pg\_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) that you can use in your
+We provide a module [kube\_pg\_cluster](/docs/main/modules/kube_pg_cluster/overview) that you can use in your
 projects to do this.
 
 ### Test PostgreSQL Cluster
@@ -83,8 +83,8 @@ projects to do this.
 #### Deploy Test Cluster
 
 To demonstrate the capabilities of PostgreSQL running in the Panfactum stack, we have created a demo
-module called [test\_kube\_pg\_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) which is a thin
-wrapper around [kube\_pg\_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+module called [test\_kube\_pg\_cluster](/docs/main/modules/kube_pg_cluster/overview) which is a thin
+wrapper around [kube\_pg\_cluster](/docs/main/modules/kube_pg_cluster/overview).
 
 Let's deploy it now:
 
@@ -225,9 +225,9 @@ However, the Panfactum stack comes with built-in support for many other database
 We believe our stack contains the necessary databases to address the majority of use-cases an
 organization may face:
 
-* **Relational:** PostgreSQL ([kube\_pg\_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster))
-* **Key-value:** Redis ([kube\_redis\_sentinel](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel))
-* **Message Broker:** NATS Jetstream ([kube\_nats](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_nats))
+* **Relational:** PostgreSQL ([kube\_pg\_cluster](/docs/main/modules/kube_pg_cluster/overview))
+* **Key-value:** Redis ([kube\_redis\_sentinel](/docs/main/modules/kube_redis_sentinel/overview))
+* **Message Broker:** NATS Jetstream ([kube\_nats](/docs/main/modules/kube_nats/overview))
 * **Ledger:** Kafka (Coming soon)
 * **Warehouse:** ClickHouse (Coming soon)
 

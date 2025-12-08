@@ -25,7 +25,7 @@ module.exports = {
   },
   ignorePatterns: [
     "*.js", "*.cjs", "*.mjs", "*.md", "*.png", "**/*.mdx/*.ts",
-    "**/*.mdx/*.tsx"
+    "**/*.mdx/*.tsx", "**/reference.mdx"
   ],
   rules: {
     "no-console": "error",

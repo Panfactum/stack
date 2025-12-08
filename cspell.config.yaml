@@ -18,6 +18,9 @@ dictionaries:
   ]
 words:
   [
+    "postgis",
+    "pgvector",
+    "timescaledb",
     "Panfactum",
     "irsa",
     "nodefs",

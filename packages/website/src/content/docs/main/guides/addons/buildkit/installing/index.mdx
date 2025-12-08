@@ -66,7 +66,7 @@ Once you have chosen the cluster you will deploy BuildKit to, you are ready for 
 
 ## Install the Module
 
-We provide a module, [kube\_buildkit](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_buildkit), for
+We provide a module, [kube\_buildkit](/docs/main/modules/kube_buildkit/overview), for
 deploying the BuildKit servers.
 
 Let's deploy it now:
@@ -112,14 +112,14 @@ By default, the builders are sized at 2 vCPU / 8 GB RAM, but you can adjust thes
 We recommend pushing new container images to [AWS Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/) as this
 is the easiest way to consume images from within your Kubernetes clusters.
 
-We provide a module for configuring ECR with your image repositories: [aws\_ecr\_repos](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_repos). [^2]
+We provide a module for configuring ECR with your image repositories: [aws\_ecr\_repos](/docs/main/modules/aws_ecr_repos/overview). [^2]
 
 Note that a *registry* is the domain name (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com`), a *repository* is a specific namespace
 for images in the registry (e.g., `my_image`), and a *tag* is an arbitrary identifier for *single* image in the repository.
 Together these form a unique image identifier (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com/my_image:some_tag`) which conveniently
 also specifies where to push and pull the image from.
 
-[^2]: We also supply [aws\_ecr\_public\_repos](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) for deploying
+[^2]: We also supply [aws\_ecr\_public\_repos](/docs/main/modules/aws_ecr_public_repos/overview) for deploying
     [public repositories](https://docs.aws.amazon.com/AmazonECR/latest/public/public-repositories.html).
 
 Let's set up a test image repository, so we can demonstrate how to build images with BuildKit:

@@ -1,0 +1,57 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### destination\_namespaces
+
+Description: A list of namespaces to sync the Secret to. If not specified, will sync to all namespaces.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### excluded\_namespaces
+
+Description: A list of namespaces that are explicitly excluded from having the Secret copied to.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### secret\_name
+
+Description: The name of the Secret to sync
+
+Type: `string`
+
+Default: n/a
+
+### secret\_namespace
+
+Description: The namespace of the Secret to sync
+
+Type: `any`
+
+Default: n/a
+
+## Outputs
+
+No outputs.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -45,7 +45,7 @@ do this now:
 1. Create a new IaC module for your CI/CD configuration in your infrastructure repository.
 
 2. Add a new Kubernetes namespace using our
-   [kube\_namespace](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_namespace) submodule.
+   [kube\_namespace](/docs/main/modules/kube_namespace/overview) submodule.
 
 3. Follow our [guide for creating a new Event Bus.](/docs/main/guides/addons/event-bus/installing)
 
@@ -73,7 +73,7 @@ do this now:
       [Log trigger](https://argoproj.github.io/argo-events/sensors/triggers/log/) so that you can examine the webhook payload.
 
 4. Create a public Ingress for your webhook using our
-   [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) submodule.
+   [kube\_ingress](/docs/main/modules/kube_ingress/overview) submodule.
 
 5. Deploy your new IaC module to your desired Kubernetes cluster.
 
@@ -106,7 +106,7 @@ We provide [several prebuilt Workflows](http://localhost:3000/docs/main/guides/a
 that you can use for common CI / CD tasks.
 
 Right now, let's set up the IaC deployment workflow,
-[wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy),
+[wf\_tf\_deploy](/docs/main/modules/wf_tf_deploy/overview),
 so that we can automatically deploy your infrastructure changes.
 
 Add an instance of the `wf_tf_deploy` submodule to the CI / CD module you created above and re-apply it:

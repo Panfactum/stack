@@ -1,0 +1,223 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### amd\_builder\_enabled
+
+Description: Whether to build amd64 images.
+
+Type: `bool`
+
+Default: `true`
+
+### args
+
+Description: A mapping of build-time arguments to their respective values
+
+Type: `map(string)`
+
+Default: `{}`
+
+### arm\_builder\_enabled
+
+Description: Whether to build arm64 images.
+
+Type: `bool`
+
+Default: `true`
+
+### build\_context
+
+Description: Relative path from the root of the repository to the build context to submit to BuildKit
+
+Type: `string`
+
+Default: `"."`
+
+### build\_timeout
+
+Description: The number of seconds after which the build will be timed out
+
+Type: `number`
+
+Default: `3600`
+
+### code\_repo
+
+Description: The URL of the git repo containing the Dockerfile to build. Must NOT contain a protocol prefix.
+
+Type: `string`
+
+Default: n/a
+
+### code\_storage\_gb
+
+Description: The size of the volume to mount the code into
+
+Type: `number`
+
+Default: `1`
+
+### cpu\_millicores
+
+Description: The amount of CPU to allocate to pods in the workflow (in millicores)
+
+Type: `number`
+
+Default: `25`
+
+### dockerfile\_path
+
+Description: Relative path from the root of the repository to the Dockerfile / Containerfile to submit to Buildkit
+
+Type: `string`
+
+Default: `"./Dockerfile"`
+
+### extra\_ecr\_repo\_arns\_for\_pull\_access
+
+Description: ARNs of private ECR repositories from which the Dockerfile pulls base images FROM
+
+Type: `list(string)`
+
+Default: `[]`
+
+### git\_password
+
+Description: The password to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
+
+### git\_ref
+
+Description: The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the Workflow
+
+Type: `string`
+
+Default: `"main"`
+
+### git\_username
+
+Description: The username to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
+
+### image\_repo
+
+Description: The name of the AWS ECR repository where generated images will be pushed
+
+Type: `string`
+
+Default: n/a
+
+### image\_tag\_prefix
+
+Description: The prefix to prepend to the image tag
+
+Type: `string`
+
+Default: `""`
+
+### memory\_mb
+
+Description: The amount of memory to allocate to pods in the workflow (in MB)
+
+Type: `number`
+
+Default: `100`
+
+### name
+
+Description: The name of the WorkflowTemplate
+
+Type: `string`
+
+Default: n/a
+
+### namespace
+
+Description: The namespace to deploy the WorkflowTemplate into
+
+Type: `string`
+
+Default: n/a
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### push\_image\_enabled
+
+Description: True iff images should be pushed to ECR in addition to being built
+
+Type: `bool`
+
+Default: `true`
+
+### retry\_max\_attempts
+
+Description: The maximum number of allowable retries
+
+Type: `number`
+
+Default: `2`
+
+### secrets
+
+Description: A mapping of build-time secret ids to their respective values
+
+Type: `map(string)`
+
+Default: `{}`
+
+## Outputs
+
+The following outputs are exported:
+
+### arguments
+
+Description: The arguments to the WorkflowTemplate
+
+### aws\_role\_arn
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### aws\_role\_name
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### entrypoint
+
+Description: The name of the first template in the Workflow
+
+### name
+
+Description: The name of the WorkflowTemplate
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

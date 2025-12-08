@@ -1,0 +1,705 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### active\_deadline\_seconds
+
+Description: Duration in seconds relative to the workflow start time which the workflow is allowed to run before the controller terminates the Workflow
+
+Type: `number`
+
+Default: `86400`
+
+### archive\_logs\_enabled
+
+Description: Whether logs should be archived and made available in the Argo web UI
+
+Type: `bool`
+
+Default: `true`
+
+### arguments
+
+Description: The arguments to set for the Workflow
+
+Type:
+
+```hcl
+object({
+    artifacts  = optional(list(any), [])
+    parameters = optional(list(any), [])
+  })
+```
+
+Default:
+
+```json
+{
+  "artifacts": [],
+  "parameters": []
+}
+```
+
+### arm\_nodes\_enabled
+
+Description: Whether to allow Pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `true`
+
+### burstable\_nodes\_enabled
+
+Description: Whether to allow Pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### cluster\_workflow\_template\_ref
+
+Description: Name is the resource name of the ClusterWorkflowTemplate template (https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/)
+
+Type: `string`
+
+Default: `null`
+
+### common\_env
+
+Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### common\_env\_from\_config\_maps
+
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+
+Type:
+
+```hcl
+map(object({
+    config_map_name = string
+    key             = string
+  }))
+```
+
+Default: `{}`
+
+### common\_env\_from\_secrets
+
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+
+Type:
+
+```hcl
+map(object({
+    secret_name = string
+    key         = string
+  }))
+```
+
+Default: `{}`
+
+### common\_secrets
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### config\_map\_mounts
+
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Workflow
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                     # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false)      # Whether the Pod can launch if this ConfigMap does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the ConfigMap (will mount at `${mount_path}/${sub_path}`)
+  }))
+```
+
+Default: `{}`
+
+### controller\_node\_required
+
+Description: Whether the Pods must be scheduled on a controller node
+
+Type: `bool`
+
+Default: `false`
+
+### default\_container\_image
+
+Description: The default container image to use
+
+Type: `string`
+
+Default: `"docker.io/library/busybox:1.36.1"`
+
+### default\_resources
+
+Description: The default container resources to use
+
+Type:
+
+```hcl
+object({
+    requests = optional(object({
+      memory = optional(string, "100Mi")
+      cpu    = optional(string, "50m")
+    }), { memory = "100Mi", cpu = "50m" })
+    limits = optional(object({
+      memory = optional(string, "100Mi")
+      cpu    = optional(string, null)
+    }), { memory = "100Mi" })
+  })
+```
+
+Default:
+
+```json
+{
+  "limits": {
+    "memory": "100Mi"
+  },
+  "requests": {
+    "cpu": "50m",
+    "memory": "100Mi"
+  }
+}
+```
+
+### delete\_artifacts\_on\_deletion
+
+Description: Change the default behavior to delete artifacts on workflow deletion
+
+Type: `bool`
+
+Default: `false`
+
+### disruptions\_enabled
+
+Description: Whether disruptions should be enabled for Pods in the Workflow
+
+Type: `bool`
+
+Default: `false`
+
+### dns\_policy
+
+Description: The DNS policy for the Pods
+
+Type: `string`
+
+Default: `"ClusterFirst"`
+
+### entrypoint
+
+Description: Name of the template that will be used as the first node in this workflow
+
+Type: `string`
+
+Default: n/a
+
+### extra\_aws\_permissions
+
+Description: Extra JSON-encoded AWS permissions to assign to the Workflow's service account
+
+Type: `string`
+
+Default: `"{}"`
+
+### extra\_labels
+
+Description: Extra labels to assign to all resources in this workflow
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_pod\_annotations
+
+Description: Annotations to add to the Pods in the Workflow
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_pod\_labels
+
+Description: Extra Pod labels to use
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_tolerations
+
+Description: Extra tolerations to add to the Pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### extra\_workflow\_labels
+
+Description: Extra labels to add to the Workflow object
+
+Type: `map(string)`
+
+Default: `{}`
+
+### hooks
+
+Description: Hooks to add to the Workflow
+
+Type: `any`
+
+Default: `{}`
+
+### ip\_allow\_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### labels\_from
+
+Description: Additional values from the spec.workflowMetadata.labelsFrom field. Will be merged with labels\_from\_parameters.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### labels\_from\_parameters
+
+Description: A list of parameter names that will be added as labels when the Workflow is created. The label values will be set as the parameter values.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### linux\_capabilities
+
+Description: Extra linux capabilities to add to containers by default
+
+Type: `list(string)`
+
+Default: `[]`
+
+### mount\_owner
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### name
+
+Description: The name of this Workflow
+
+Type: `string`
+
+Default: n/a
+
+### namespace
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+Default: n/a
+
+### node\_preferences
+
+Description: Node label preferences for the Pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### node\_requirements
+
+Description: Node label requirements for the Pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### on\_exit
+
+Description: A template reference which is invoked at the end of the workflow, irrespective of the success, failure, or error of the primary template.
+
+Type: `string`
+
+Default: `null`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### passthrough\_parameters
+
+Description: Workflow parameters that should automatically passthrough to every template on the workflow
+
+Type:
+
+```hcl
+list(object({
+    default     = optional(string)
+    description = optional(string)
+    enum        = optional(list(string))
+    globalName  = optional(string)
+    name        = string
+    value       = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### pod\_delete\_delay\_seconds
+
+Description: The number of seconds after Workflow completion that Pods will be deleted
+
+Type: `number`
+
+Default: `180`
+
+### pod\_parallelism
+
+Description: Limits the max total parallel pods that can execute at the same time in a workflow
+
+Type: `number`
+
+Default: `null`
+
+### priority
+
+Description: Priority is used if controller is configured to process limited number of workflows in parallel. Workflows with higher priority are processed first.
+
+Type: `number`
+
+Default: `null`
+
+### priority\_class\_name
+
+Description: The default priority class to use for Pods in the Workflow
+
+Type: `string`
+
+Default: `null`
+
+### privileged
+
+Description: Whether the generated containers run with elevated privileges
+
+Type: `bool`
+
+Default: `false`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### read\_only
+
+Description: Whether the generated containers default to read-only root filesystems
+
+Type: `bool`
+
+Default: `true`
+
+### retry\_backoff\_initial\_duration\_seconds
+
+Description: The initial number of seconds to wait before the next retry in an exponential backoff strategy
+
+Type: `number`
+
+Default: `30`
+
+### retry\_backoff\_max\_duration\_seconds
+
+Description: The maximum number of seconds to wait before the next retry in an exponential backoff strategy
+
+Type: `number`
+
+Default: `3600`
+
+### retry\_expression
+
+Description: Expression is a condition expression for when a node will be retried. If it evaluates to false, the node will not be retried and the retry strategy will be ignored.
+
+Type: `string`
+
+Default: `null`
+
+### retry\_max\_attempts
+
+Description: The maximum number of allowable retries
+
+Type: `number`
+
+Default: `5`
+
+### retry\_policy
+
+Description: The policy that determines when the Workflow will be retried
+
+Type: `string`
+
+Default: `"Always"`
+
+### run\_as\_root
+
+Description: Whether to enable running as root in the Pods
+
+Type: `bool`
+
+Default: `false`
+
+### secret\_mounts
+
+Description: A mapping of Secret names to their mount configuration in the containers of the Workflow
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                     # Where in the containers to mount the Secret
+    optional   = optional(bool, false)      # Whether the Pod can launch if this Secret does not exist
+    sub_paths  = optional(list(string), []) # Only mount these keys of the secret (will mount at `${mount_path}/${sub_path}`)
+  }))
+```
+
+Default: `{}`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow Pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
+### suspend
+
+Description: Whether this workflow is suspended
+
+Type: `bool`
+
+Default: `false`
+
+### templates
+
+Description: A list of workflow templates. See https://argo-workflows.readthedocs.io/en/stable/fields/#template.
+
+Type: `any`
+
+Default: n/a
+
+### tmp\_directories
+
+Description: A mapping of temporary directory names (arbitrary) to their configuration
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the host node rather than a PVC
+  }))
+```
+
+Default: `{}`
+
+### uid
+
+Description: The UID to use for the user in the Pods
+
+Type: `number`
+
+Default: `1000`
+
+### volume\_mounts
+
+Description: A mapping of names to configuration for temporary PersistentVolumeClaims used by all Pods in the Workflow
+
+Type:
+
+```hcl
+map(object({
+    storage_class = optional(string, "ebs-standard")
+    access_modes  = optional(list(string), ["ReadWriteOnce"])
+    size_gb       = optional(number, 1) # The size of the volume in GB
+    mount_path    = string              # Where in the containers to mount the volume
+  }))
+```
+
+Default: `{}`
+
+### workflow\_annotations
+
+Description: Annotations to add to the Workflow object
+
+Type: `map(string)`
+
+Default: `{}`
+
+### workflow\_delete\_seconds\_after\_completion
+
+Description: The number of seconds after workflow completion that the Workflow object will be deleted
+
+Type: `number`
+
+Default: `3600`
+
+### workflow\_delete\_seconds\_after\_failure
+
+Description: The number of seconds after workflow failure that the Workflow object will be deleted
+
+Type: `number`
+
+Default: `3600`
+
+### workflow\_delete\_seconds\_after\_success
+
+Description: The number of seconds after workflow success that the Workflow object will be deleted
+
+Type: `number`
+
+Default: `3600`
+
+### workflow\_nodes\_required
+
+Description: Whether the pods must be scheduled on nodes that can only run workflows. This may be useful to prevent disruption of long-running, non-resumable workflows.
+
+Type: `bool`
+
+Default: `false`
+
+### workflow\_parallelism
+
+Description: Number of concurrent instances of this Workflow allowed to be running at any given time
+
+Type: `number`
+
+Default: `1`
+
+## Outputs
+
+The following outputs are exported:
+
+### affinity
+
+Description: The affinity added to each Pod by default
+
+### arguments
+
+Description: The arguments to the workflow
+
+### aws\_role\_arn
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### aws\_role\_name
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### container\_defaults
+
+Description: Default options for every container spec
+
+### container\_security\_context
+
+Description: The security context to be applied to each container in each Pod generated by this Workflow
+
+### env
+
+Description: The environment variables to be added to each container in each Pod generated by this Workflow
+
+### generate\_name
+
+Description: The prefix for generating Workflow names from this spec
+
+### labels
+
+Description: The default labels assigned to all resources in this Workflow
+
+### match\_labels
+
+Description: The labels unique to this deployment that can be used to select the Pods in this Workflow
+
+### name
+
+Description: The non-prefix name of the Workflow spec (should be used for naming derived resources like WorkflowTemplates)
+
+### service\_account\_name
+
+Description: The default service account used for the Pods
+
+### template\_parameters
+
+Description: The default parameters set on each template
+
+### tolerations
+
+Description: Tolerations added to each Pod by default
+
+### volume\_mounts
+
+Description: The volume mounts to be applied to the main container in each Pod generated by this Workflow
+
+### volumes
+
+Description: The volume specification to be applied to all pods generated by this Workflow
+
+### workflow\_spec
+
+Description: The specification for the Workflow
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

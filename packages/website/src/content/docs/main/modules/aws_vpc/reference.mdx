@@ -1,0 +1,125 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### nat\_associations
+
+Description: A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values represent destination subnets that will contain the NAT resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### subnets
+
+Description: Subnet configuration
+
+Type:
+
+```hcl
+map(object({
+    az          = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
+    cidr_block  = string                    # Subnet IP block
+    public      = bool                      # If subnet is routable to and from the public internet
+    extra_tags  = optional(map(string), {}) # Additional tags for the subnet
+    description = optional(string)          # A description of the subnet's purpose
+  }))
+```
+
+Default: `{}`
+
+### vpc\_cidr
+
+Description: The main CIDR range for the VPC.
+
+Type: `string`
+
+Default: `"10.0.0.0/16"`
+
+### vpc\_extra\_tags
+
+Description: Extra tags to add to the VPC resource.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### vpc\_flow\_logs\_enabled
+
+Description: Whether to enable VPC flow logs
+
+Type: `bool`
+
+Default: `false`
+
+### vpc\_flow\_logs\_expire\_after\_days
+
+Description: How many days until VPC flow logs expire.
+
+Type: `number`
+
+Default: `30`
+
+### vpc\_name
+
+Description: The name of the VPC resource.
+
+Type: `string`
+
+Default: n/a
+
+### vpc\_peer\_acceptances
+
+Description: A list of VPC peering requests to accept. All VPC peers will be routable from all subnets.
+
+Type:
+
+```hcl
+map(object({
+    allow_dns                 = bool   # Whether the remote VPC can use the DNS in this VPC.
+    cidr_block                = string # The CIDR block to route to the remote VPC.
+    vpc_peering_connection_id = string # The peering connection ID produced from the VPC peer request.
+  }))
+```
+
+Default: `{}`
+
+## Outputs
+
+The following outputs are exported:
+
+### nat\_ips
+
+Description: n/a
+
+### subnet\_info
+
+Description: Outputs a map of Subnet info.
+
+### test\_config
+
+Description: Configuration for the pf-vpc-network-test command
+
+### vpc\_cidr
+
+Description: n/a
+
+### vpc\_id
+
+Description: n/a
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -72,13 +72,13 @@ deployed in that environment. [^91]
 
 ## Create your VPC
 
-We provide an [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
+We provide an [aws\_vpc](/docs/main/modules/aws_vpc/overview) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
 
 ### Deploy the AWS VPC Module
 
-We will now deploy the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
+We will now deploy the [aws\_vpc](/docs/main/modules/aws_vpc/overview) module via terragrunt:
 
 1. Create a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
@@ -120,7 +120,7 @@ We will now deploy the [aws\_vpc](/docs/main/reference/infrastructure-modules/di
    All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
 
 <MarkdownAlert severity="warning">
-  If you deviate from the default settings for the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module,
+  If you deviate from the default settings for the [aws\_vpc](/docs/main/modules/aws_vpc/overview) module,
   you will need to follow the instructions inside the module documentation for further instructions on how to configure
   AWS networking to support Panfactum infrastructure.
 </MarkdownAlert>

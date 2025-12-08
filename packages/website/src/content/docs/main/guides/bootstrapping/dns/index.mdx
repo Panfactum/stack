@@ -51,7 +51,7 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
 ## Deploy the AWS Registered Domains Module
 
 To use your domain registrations in IaC and to align them with best practices, we will now deploy the
-[aws\_registered\_domains](/docs/main/reference/infrastructure-modules/direct/aws/aws_registered_domains) module. [^1]
+[aws\_registered\_domains](/docs/main/modules/aws_registered_domains/overview) module. [^1]
 
 This module will **not** register / unregister domains, only update the registration settings. In addition,
 it will set up the root [hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) and enable [DNSSEC](https://www.cloudflare.com/dns/dnssec/how-dnssec-works/) to prevent domain hijacking.
@@ -186,7 +186,7 @@ Let's deploy the module now:
     [privacy protection](https://en.wikipedia.org/wiki/Domain_privacy), auto-renewal,
     and [transfer lock](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-lock.html).
     For more information,
-    refer to the [module documentation](/docs/main/reference/infrastructure-modules/direct/aws/aws_registered_domains).
+    refer to the [module documentation](/docs/main/modules/aws_registered_domains/overview).
 
 [^2]: If the zone does not exist, you may skip this step. If you want to *keep* this zone, follow the import instructions above.
 
@@ -248,7 +248,7 @@ subdomain will be managed by its own hosted zone (not the root hosted zone). Thi
   be possible if all records were stored in a single, global hosted zone.
 
 This is accomplished via a concept called [subdomain delegation](/docs/main/concepts/networking/subdomain-delegation). Panfactum's
-[aws\_delegated\_zones](/docs/main/reference/infrastructure-modules/direct/aws/aws_delegated_zones) will provide the relevant setup
+[aws\_delegated\_zones](/docs/main/modules/aws_delegated_zones/overview) will provide the relevant setup
 for this to work.
 
 Let's do this now for **every** environment:
@@ -358,7 +358,7 @@ shows both the return `A` record and the dnssec signature.
 
 ## Deploy Records
 
-If you have static records to deploy, you can use our [aws\_dns\_records](/docs/main/reference/infrastructure-modules/direct/aws/aws_dns_records)
+If you have static records to deploy, you can use our [aws\_dns\_records](/docs/main/modules/aws_dns_records/overview)
 module to deploy them to the appropriate hosted zone.
 
 Specifically, now would be a good time to migrate and/or set up your [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)

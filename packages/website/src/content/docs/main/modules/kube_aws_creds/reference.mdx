@@ -1,0 +1,67 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### credential\_lifetime\_hours
+
+Description: The number of hours that provisioned credentials last before they are rotated.
+
+Type: `number`
+
+Default: `16`
+
+### iam\_policy\_arns
+
+Description: ARNs of IAM policies to attach to the generated user.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### iam\_policy\_json
+
+Description: An IAM policy document in rendered JSON string form.
+
+Type: `string`
+
+Default: `null`
+
+### namespace
+
+Description: The namespace that the Kubernetes Secret containing the user credentials will be provisioned within.
+
+Type: `string`
+
+Default: n/a
+
+## Outputs
+
+The following outputs are exported:
+
+### creds\_secret
+
+Description: The name of the Kubernetes Secret holding credentials for the IAM user
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

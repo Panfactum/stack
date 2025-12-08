@@ -1,0 +1,147 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### code\_storage\_gb
+
+Description: The number of GB to allocate to temporary storage for downloading the code repository
+
+Type: `number`
+
+Default: `1`
+
+### cpu\_millicores
+
+Description: The amount of CPU to allocate to pods in the workflow (in millicores)
+
+Type: `number`
+
+Default: `500`
+
+### git\_password
+
+Description: The git password to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
+
+### git\_ref
+
+Description: The default git ref to use when checking out the repo. Can be overwritten on Workflow creation.
+
+Type: `string`
+
+Default: `"main"`
+
+### git\_username
+
+Description: The git username to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
+
+### memory\_mb
+
+Description: The amount of memory to allocate to pods in the workflow (in MB)
+
+Type: `number`
+
+Default: `2500`
+
+### name
+
+Description: The name of the WorkflowTemplate
+
+Type: `string`
+
+Default: n/a
+
+### namespace
+
+Description: The namespace to deploy the WorkflowTemplate into
+
+Type: `string`
+
+Default: n/a
+
+### repo
+
+Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix.
+
+Type: `string`
+
+Default: n/a
+
+### secrets
+
+Description: A mapping of environment variable names to secret values
+
+Type: `map(string)`
+
+Default: `{}`
+
+### tf\_apply\_dir
+
+Description: The default directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root.
+
+Type: `string`
+
+Default: n/a
+
+### tmp\_storage\_gb
+
+Description: The number of GB to allocate to temporary storage for the IaC deployment
+
+Type: `number`
+
+Default: `3`
+
+## Outputs
+
+The following outputs are exported:
+
+### arguments
+
+Description: The arguments to the WorkflowTemplate
+
+### aws\_role\_arn
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### aws\_role\_name
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### entrypoint
+
+Description: The name of the first template in the Workflow
+
+### name
+
+Description: The name of the WorkflowTemplate
+
+### vault\_role\_name
+
+Description: The name of the Vault role used by the Workflow's Service Account
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -1,0 +1,103 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### admin\_iam\_arns
+
+Description: List of IAM arns for key admins.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### description
+
+Description: The description of the KMS key.
+
+Type: `string`
+
+Default: n/a
+
+### log\_delivery\_enabled
+
+Description: Whether to allow the delivery.logs.amazonaws.com service to use the key
+
+Type: `bool`
+
+Default: `false`
+
+### name
+
+Description: The name of the KMS key.
+
+Type: `string`
+
+Default: n/a
+
+### reader\_iam\_arns
+
+Description: List of IAM arns for users who can use the key for encryption and decryption.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### replication\_enabled
+
+Description: Whether to replicate the key to another region
+
+Type: `bool`
+
+Default: `true`
+
+### restricted\_reader\_iam\_arns
+
+Description: List of IAM arns for users who can only view the key.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### superuser\_iam\_arns
+
+Description: List of IAM arns for key superusers.
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### alias\_arn
+
+Description: n/a
+
+### arn
+
+Description: The ARN of the KMS key
+
+### arn2
+
+Description: The ARN of the backup key
+
+### id
+
+Description: n/a
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

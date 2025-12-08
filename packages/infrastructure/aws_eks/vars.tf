@@ -14,7 +14,7 @@ variable "cluster_description" {
 variable "kube_version" {
   description = "Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied."
   type        = string
-  default     = "1.31"
+  default     = "1.32"
 }
 
 variable "vpc_id" {
@@ -115,7 +115,7 @@ variable "node_ebs_volume_size_gb" {
 variable "node_ami_name" {
   description = "The name of the AMI to use for the controller nodes."
   type        = string
-  default     = "bottlerocket-aws-k8s-1.31-aarch64-v1.41.0-bc3ad241"
+  default     = "bottlerocket-aws-k8s-1.32-aarch64-v1.51.0-47438798"
 }
 
 variable "spot_nodes_enabled" {

@@ -131,7 +131,7 @@ field.
 
 We provide two [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables) for setting the module version:
 
-* `pf_stack_version`: the [Panfactum module](/docs/main/reference/infrastructure-modules/overview) version to use; used
+* `pf_stack_version`: the [Panfactum module](/docs/main/modules) version to use; used
   by `include.panfactum.locals.pf_stack_source`. (See below)
 
 * `version`: the [first-party module](/docs/main/guides/iac/first-party-modules) version to use; used by
@@ -139,7 +139,7 @@ We provide two [terragrunt variables](/docs/main/reference/configuration/terragr
 
 ### Deploying Panfactum Modules
 
-If you are deploying a [Panfactum module](/docs/main/reference/infrastructure-modules/overview), use
+If you are deploying a [Panfactum module](/docs/main/modules), use
 `include.panfactum.locals.pf_stack_source` to dynamically construct the `terraform.source`. This adds version management,
 caching, and other convenience functionality. For example:
 
@@ -319,7 +319,7 @@ Shared inputs to groups of modules can be supplied by setting `extra_inputs` in 
 * `region.yaml`
 * `module.yaml`
 
-For a list of all the common input variables see this [reference list.](/docs/main/reference/infrastructure-modules/overview#common-variables)
+For a list of all the common input variables see this [reference list.](/docs/main/modules#common-variables)
 
 ### Using a Local Copy of Panfactum Modules
 
