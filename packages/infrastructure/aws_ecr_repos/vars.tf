@@ -7,6 +7,7 @@ variable "ecr_repositories" {
       tag_pattern = string
       days        = number # days since pushed that the image will be removed
     })), [])
+    lifecycle_policy_json       = optional(string, null)     # Custom lifecycle policy JSON. When provided, overrides expire_all_images and expiration_rules
     additional_push_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have push access to the repository
     additional_pull_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have pull access to the repository
   }))
