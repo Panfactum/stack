@@ -94,7 +94,7 @@ resource "aws_ecr_repository_policy" "delegated_access" {
 
 resource "aws_ecr_lifecycle_policy" "lifecycle" {
   for_each = var.ecr_repositories
-  policy = jsonencode({
+  policy = each.value.lifecycle_policy_json != null ? each.value.lifecycle_policy_json : jsonencode({
     rules = concat(
       [
         {
