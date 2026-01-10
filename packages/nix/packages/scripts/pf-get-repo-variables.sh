@@ -17,13 +17,21 @@ set -eo pipefail
 
 ROOT="${1:-$(pwd)}"
 ROOT=$(realpath "$ROOT")
-while [[ ! -d "${ROOT}/.git" ]] && [[ ! -f "$ROOT/panfactum.yaml" ]]; do
+while [[ ! -e "${ROOT}/.git" ]] && [[ ! -f "$ROOT/panfactum.yaml" ]]; do
+  if [[ "$ROOT" == "/" ]]; then
+    echo "Error: Could not find .git or panfactum.yaml in any parent directory" >&2
+    exit 1
+  fi
   ROOT=$(dirname "$ROOT")
 done
 
 GIT_ROOT="${1:-$(pwd)}"
 GIT_ROOT=$(realpath "$GIT_ROOT")
-while [[ ! -d "${GIT_ROOT}/.git" ]]; do
+while [[ ! -e "${GIT_ROOT}/.git" ]]; do
+  if [[ "$GIT_ROOT" == "/" ]]; then
+    echo "Error: Could not find .git in any parent directory" >&2
+    exit 1
+  fi
   GIT_ROOT=$(dirname "$GIT_ROOT")
 done
 
