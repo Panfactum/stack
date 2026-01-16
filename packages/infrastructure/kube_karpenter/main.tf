@@ -663,9 +663,7 @@ resource "kubernetes_config_map" "dashboard" {
     name   = "karpenter-dashboard"
     labels = merge(module.util.labels, { "grafana_dashboard" = "1" })
   }
-  data = {
-    "karpenter.json" = file("${path.module}/dashboard.json")
-  }
+  data = { for name in fileset("${path.module}/dashboards", "*.json") : name => file("${path.module}/dashboards/${name}") }
 }
 
 resource "kubectl_manifest" "vpa" {
