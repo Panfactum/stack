@@ -19,26 +19,8 @@ If you'd like to connect to an existing stack, see the [new user guide.](https:/
 
 ## Structure
 
-This repository contains the following components of the panfactum architecture which are all versioned
-together to ensure internal consistency:
-
-- [Panfactum Local Development Environment](packages/nix) - Nix-based development shell and tooling scripts
-
-- [Infrastructure Modules](packages/infrastructure) - OpenTofu/Terraform modules for AWS and Kubernetes infrastructure
-
-- [Documentation Website](packages/website) - The panfactum.com documentation site
-
-- [Reference Architecture](packages/reference) - Example infrastructure configurations and best practices
-
-- [Panfactum CLI](packages/cli) - Command-line interface for infrastructure setup and management
-
-- [Web Scraper](packages/scraper) - Tool for maintaining search indexes and website data
-
-- [Installer](packages/installer) - Installation scripts for the Panfactum Framework
-
-- [Bastion Host](packages/bastion) - Containerized bastion host for secure access
-
-- [Vault](packages/vault) - Custom Vault container with additional plugins
+This repository is a monorepo where all components are versioned together to ensure internal consistency.
+See [packages/TOC.md](packages/TOC.md) for a description of each package.
 
 ## Licensing
 

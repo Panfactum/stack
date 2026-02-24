@@ -26,17 +26,7 @@ All code is written in Typescript and uses `pnpm` as the package manager. We aim
 
 ## Project Structure
 
-- `src/` - Contains the site code
-  - `pages/` - All page routes and related components
-  - `components/` - Reusable UI components
-  - `styles/` - Global CSS styles
-  - `content/` - Markdown files that contain documentation, blog, and other content
-    - `/changlog` - Changelog entries for releases of the Panfactum framework
-    - `/docs` - Versioned documentation for each active release channel of the Panfactum framework
-    - `/maturity` - Non-versioned documentation about our model for assessing the maturity of a company's platform engineering practices
-  - `lib/` - Non-ui utility functions
-  - `state/` - Global state management
-- `public/` - Static assets that are served directly
+See [TOC.md](TOC.md) for a description of this package's contents and [src/TOC.md](src/TOC.md) for the source code layout.
 
 ## Key Dependencies
 
