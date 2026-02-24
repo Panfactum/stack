@@ -68,63 +68,49 @@ export default defineConfig({
 
     })
   },
+  markdown: {
+    remarkPlugins: [remarkGfm, remarkMath],
+    rehypePlugins: [
+      [rehypeMermaid, {
+        // Mermaid renders SVGs at build time in Node.js, so CSS var()
+        // references cannot be used here. Values must be hex literals
+        // that match the Tailwind @theme tokens in global.css.
+        mermaidConfig: {
+          theme: "dark",
+          themeVariables: {
+            darkMode: true,
+            background: "#0c111d",         // gray-dark-mode-950
+            primaryColor: "#1a3b50",       // brand-750
+            primaryTextColor: "#f5f5f6",   // gray-dark-mode-50
+            primaryBorderColor: "#333741", // gray-dark-mode-700
+            secondaryColor: "#1f242f",     // gray-dark-mode-800
+            secondaryTextColor: "#cecfd2", // gray-dark-mode-300
+            lineColor: "#70bfeb",          // brand-300
+            textColor: "#f5f5f6",          // gray-dark-mode-50
+            mainBkg: "#1a3b50",            // brand-750
+            nodeBorder: "#333741",         // gray-dark-mode-700
+            clusterBkg: "#161b26",         // gray-dark-mode-900
+            clusterBorder: "#333741",      // gray-dark-mode-700
+            titleColor: "#f5f5f6",         // gray-dark-mode-50
+            edgeLabelBackground: "#1f242f", // gray-dark-mode-800
+          },
+        },
+      }],
+      rehypeReplaceStrings,
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: "append" }],
+      [
+        rehypeWrap,
+        { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
+      ],
+      rehypeCodeGroup,
+      rehypeKatex,
+    ],
+  },
   integrations: [
     solidJs(),
-    expressiveCode({
-      shiki: {
-        bundledLangs: [
-          'shellsession',
-          'nix',
-          'hcl',
-          'yaml',
-          'dockerfile',
-          'dotenv'
-        ]
-      }
-    }),
-    mdx({
-      syntaxHighlight: false,
-      remarkPlugins: [remarkGfm, remarkMath],
-      rehypePlugins: [
-        [rehypeMermaid, {
-          // Mermaid renders SVGs at build time in Node.js, so CSS var()
-          // references cannot be used here. Values must be hex literals
-          // that match the Tailwind @theme tokens in global.css.
-          mermaidConfig: {
-            theme: "dark",
-            themeVariables: {
-              darkMode: true,
-              background: "#0c111d",         // gray-dark-mode-950
-              primaryColor: "#1a3b50",       // brand-750
-              primaryTextColor: "#f5f5f6",   // gray-dark-mode-50
-              primaryBorderColor: "#333741", // gray-dark-mode-700
-              secondaryColor: "#1f242f",     // gray-dark-mode-800
-              secondaryTextColor: "#cecfd2", // gray-dark-mode-300
-              lineColor: "#70bfeb",          // brand-300
-              textColor: "#f5f5f6",          // gray-dark-mode-50
-              mainBkg: "#1a3b50",            // brand-750
-              nodeBorder: "#333741",         // gray-dark-mode-700
-              clusterBkg: "#161b26",         // gray-dark-mode-900
-              clusterBorder: "#333741",      // gray-dark-mode-700
-              titleColor: "#f5f5f6",         // gray-dark-mode-50
-              edgeLabelBackground: "#1f242f", // gray-dark-mode-800
-            },
-          },
-        }],
-        rehypeReplaceStrings,
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: "append" }],
-        [
-          rehypeWrap,
-          { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
-        ],
-        rehypeCodeGroup,
-        rehypeKatex,
-      ],
-      shikiConfig: {
-        wrap: false,
-      },
-    }),
+    expressiveCode(),
+    mdx(),
     sitemap(),
     criticalCSS({
       dimensions: [

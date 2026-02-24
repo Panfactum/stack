@@ -103,11 +103,9 @@ const renderedSlides = await Promise.all(
 
 <script>
   import Reveal from "reveal.js";
-  import RevealHighlight from "reveal.js/plugin/highlight/highlight";
   import RevealNotes from "reveal.js/plugin/notes/notes";
   import "reveal.js/dist/reveal.css";
   import "@/styles/reveal-panfactum-theme.css";
-  import "reveal.js/plugin/highlight/monokai.css";
 
   // Prevents pushing a duplicate history entry when navigating slides
   // programmatically (from popstate handler or initial hash load).
@@ -185,10 +183,7 @@ const renderedSlides = await Promise.all(
       margin: 0.04,
       minScale: 0.2,
       maxScale: 2.0,
-      plugins: [RevealHighlight, RevealNotes],
-      highlight: {
-        highlightOnLoad: true,
-      },
+      plugins: [RevealNotes],
       keyboard: {
         83: () => {
           // S key opens speaker view

@@ -255,6 +255,36 @@
   white-space: pre;
 }
 
+/*********************************************
+ * EXPRESSIVE CODE INTEGRATION
+ * Syntax highlighting is handled at build time
+ * by astro-expressive-code. These styles ensure
+ * its output renders correctly within slides.
+ *********************************************/
+.reveal .expressive-code {
+  width: 90%;
+  margin: var(--r-block-margin) auto;
+  text-align: left;
+}
+
+.reveal .expressive-code figure.frame {
+  margin: 0;
+}
+
+.reveal .expressive-code .header {
+  display: none;
+}
+
+.reveal .expressive-code pre {
+  width: 100%;
+  margin: 0;
+  box-shadow: none;
+}
+
+.reveal .expressive-code {
+  --ec-codeFontSize: 1.2rem;
+}
+
 .reveal table {
   margin: auto;
   border-collapse: collapse;
