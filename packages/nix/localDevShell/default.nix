@@ -23,7 +23,7 @@
     ####################################
     # Programming Langauges
     ####################################
-    nodejs_22 # nodejs runtime
+    nodejs_25 # nodejs runtime
     nodePackages_latest.pnpm # nodejs package manager
     go # go programming language
     upx # compressing go binaries
