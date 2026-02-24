@@ -5,8 +5,8 @@ public URL. The URL for each file is `https://{var.domain}/path/to/file/in/bucke
 
 Under the hood, this module passes most arguments to either
 
-- `aws_cdn` ([docs](/docs/main/modules/aws_cdn/overview)); or
-- `aws_s3_private_bucket` ([docs](/docs/main/modules/aws_s3_private_bucket/overview))
+* `aws_cdn` ([docs](/docs/main/modules/aws_cdn/overview)); or
+* `aws_s3_private_bucket` ([docs](/docs/main/modules/aws_s3_private_bucket/overview))
 
 so see the documentation for those modules for more information about various input settings.
 
@@ -27,4 +27,3 @@ The `default_file` input allows you to specify the filename that requests will b
 By default, this re-routing occurs for all requests with paths that do not contain a `.`.
 To instead only re-route if the path is to a directory or has a trailing slash (e.g., `/some/page/`),
 set `default_file_strict` to `false`.
-

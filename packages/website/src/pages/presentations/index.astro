@@ -1,0 +1,94 @@
+---
+// Presentation listing page - displays all available presentations
+// in a responsive card grid with title, date, author, and thumbnail
+
+import { getCollection } from "astro:content";
+
+import Layout from "@/components/layouts/primary/Layout.astro";
+
+import { PresentationCard } from "./_components/PresentationCard";
+
+const pageTitle = "Presentations";
+const pageDescription = "Slide decks and talks from the Panfactum team";
+
+// Load all slides and group by presentation
+const allSlides = await getCollection("presentations");
+
+// Group slides by presentation folder (slug)
+const presentationMap = new Map<
+  string,
+  Array<(typeof allSlides)[number]>
+>();
+
+for (const slide of allSlides) {
+  const slug = slide.id.split("/")[0];
+  if (!presentationMap.has(slug)) {
+    presentationMap.set(slug, []);
+  }
+  presentationMap.get(slug)?.push(slide);
+}
+
+// Extract metadata from first slide of each presentation
+interface PresentationMetadata {
+  slug: string;
+  title: string;
+  date: string;
+  author: string;
+  thumbnail?: string;
+}
+
+const presentations: PresentationMetadata[] = Array.from(
+  presentationMap.entries()
+)
+  .map(([slug, slides]) => {
+    // Sort slides to ensure we get the first one
+    const sortedSlides = slides.sort((a, b) => a.id.localeCompare(b.id));
+    const firstSlide = sortedSlides[0];
+
+    return {
+      slug,
+      title: firstSlide?.data.title ?? slug,
+      date: firstSlide?.data.date ?? "Unknown date",
+      author: firstSlide?.data.author ?? "Unknown author",
+      thumbnail: firstSlide?.data.thumbnail,
+    };
+  })
+  .sort((a, b) => {
+    // Sort by date descending (newest first)
+    // Handle various date formats by creating Date objects
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <div class="mx-auto max-w-7xl px-4 pb-16 pt-[calc(var(--header-height)+3rem)]">
+    <h1 class="mb-8 font-machina text-display-lg font-bold text-primary">
+      Presentations
+    </h1>
+
+    {
+      presentations.length === 0 ? (
+        <div class="rounded-lg bg-secondary p-12 text-center">
+          <p class="text-display-sm text-secondary">
+            No presentations available yet. Check back soon!
+          </p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {presentations.map((presentation) => (
+            <PresentationCard
+              title={presentation.title}
+              date={presentation.date}
+              author={presentation.author}
+              slug={presentation.slug}
+              thumbnail={presentation.thumbnail}
+              client:idle
+            />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</Layout>

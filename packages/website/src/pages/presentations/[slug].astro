@@ -1,0 +1,331 @@
+---
+// Presentation viewer page - renders a Reveal.js slide deck
+// from MDX content collection entries sorted by filename
+
+import { getCollection, render } from "astro:content";
+
+import Layout from "@/components/layouts/primary/Layout.astro";
+
+import { PresentationViewer } from "./_components/PresentationViewer";
+
+export async function getStaticPaths() {
+  const allSlides = await getCollection("presentations");
+
+  // Group slides by presentation folder (slug)
+  const presentations = new Map<
+    string,
+    Array<(typeof allSlides)[number]>
+  >();
+
+  for (const slide of allSlides) {
+    const slug = slide.id.split("/")[0];
+    if (!presentations.has(slug)) {
+      presentations.set(slug, []);
+    }
+    presentations.get(slug)?.push(slide);
+  }
+
+  return Array.from(presentations.entries()).map(([slug, slides]) => ({
+    params: { slug },
+    props: {
+      slides: slides.sort((a, b) => a.id.localeCompare(b.id)),
+    },
+  }));
+}
+
+interface Props {
+  slides: Parameters<typeof render>[0][];
+}
+
+const { slides } = Astro.props;
+
+// First slide contains presentation metadata
+const firstSlide = slides[0];
+const title = firstSlide?.data.title ?? "Presentation";
+const description = firstSlide?.data.description ?? "";
+
+// Check if we're in print-pdf mode
+const isPrintPdf = Astro.url.searchParams.has("print-pdf");
+
+// Render all slides to HTML
+const renderedSlides = await Promise.all(
+  slides.map(async (slide) => {
+    const { Content } = await render(slide);
+    return {
+      content: Content,
+      notes: slide.data.notes,
+      slideLayout: slide.data.slideLayout ?? "default",
+      transition: slide.data.transition,
+    };
+  })
+);
+---
+
+<Layout title={`Panfactum: ${title}`} description={description}>
+  <div id="presentation-container" class="relative w-full">
+    {/* eslint-disable better-tailwindcss/no-unregistered-classes -- CSS hooks for fullscreen and Reveal.js styling */}
+    <a
+      href="/presentations"
+      class="back-link mb-4 inline-flex items-center gap-2 text-sm text-secondary transition-colors hover:text-primary"
+    >
+      &larr; Back to all presentations
+    </a>
+    <div class="presentation-frame">
+      <PresentationViewer
+        title={title}
+        isPrintPdf={isPrintPdf}
+        client:load
+      />
+
+      <div class="reveal">
+        <div class="slides">
+          {
+            renderedSlides.map((slide) => (
+              <section
+                data-transition={slide.transition}
+                class={slide.slideLayout === "center" ? "center" : ""}
+              >
+                <slide.content />
+                {slide.notes && (
+                  <aside class="notes">
+                    <p>{slide.notes}</p>
+                  </aside>
+                )}
+              </section>
+            ))
+          }
+        </div>
+      </div>
+    {/* eslint-enable better-tailwindcss/no-unregistered-classes */}
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import Reveal from "reveal.js";
+  import RevealHighlight from "reveal.js/plugin/highlight/highlight";
+  import RevealNotes from "reveal.js/plugin/notes/notes";
+  import "reveal.js/dist/reveal.css";
+  import "@/styles/reveal-panfactum-theme.css";
+  import "reveal.js/plugin/highlight/monokai.css";
+
+  // Prevents pushing a duplicate history entry when navigating slides
+  // programmatically (from popstate handler or initial hash load).
+  let suppressNextPush = false;
+
+  function getRevealDeck(): Reveal | undefined {
+    return (window as unknown as Record<string, unknown>).Reveal as
+      | Reveal
+      | undefined;
+  }
+
+  // Intercept back/forward navigations that target a specific slide.
+  // Registered in the CAPTURE phase so it fires before Astro's
+  // ClientRouter popstate handler (which uses the bubble phase).
+  // When the history entry contains revealSlide data, we navigate
+  // the deck directly and prevent Astro from doing a full page swap.
+  function handleSlidePopstate(event: PopStateEvent) {
+    const state = event.state as Record<string, unknown> | null;
+    if (!state || !("revealSlide" in state)) return;
+
+    const deck = getRevealDeck();
+    if (!deck) return; // Deck not active; let Astro restore the page first
+
+    const slide = state["revealSlide"] as { h: number; v: number };
+    suppressNextPush = true;
+    deck.slide(slide.h, slide.v);
+    event.stopImmediatePropagation();
+  }
+
+  window.addEventListener("popstate", handleSlidePopstate, true);
+
+  // Destroy the active Reveal.js instance and clear the global reference.
+  // Called before Astro's ClientRouter caches the outgoing DOM so that
+  // the cached snapshot contains a clean, unmodified slide structure.
+  function destroyReveal() {
+    const deck = getRevealDeck();
+    if (deck) {
+      try {
+        deck.destroy();
+      } catch {
+        // Ignore errors from destroying a stale instance whose DOM
+        // was already swapped out by the ClientRouter.
+      }
+    }
+    (window as unknown as Record<string, unknown>).Reveal = undefined;
+  }
+
+  // Initialize Reveal.js for the current page.
+  async function initReveal() {
+    const revealEl = document.querySelector(".reveal");
+    if (!revealEl) return;
+
+    // Safety net: destroy any lingering instance that wasn't cleaned
+    // up by the before-swap handler (e.g. on initial page load).
+    destroyReveal();
+
+    // Check if we're in print-pdf mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPrintPdf = urlParams.has("print-pdf");
+
+    // Reveal's built-in hash option is disabled because it calls
+    // history.replaceState(null, …) which overwrites Astro's
+    // ClientRouter history state and breaks browser navigation.
+    // Hash-based slide URLs and history are managed manually below.
+    const deck = new Reveal(revealEl as HTMLElement, {
+      embedded: !isPrintPdf,
+      hash: false,
+      slideNumber: true,
+      controls: true,
+      controlsBackArrows: "visible",
+      progress: true,
+      center: false,
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+      minScale: 0.2,
+      maxScale: 2.0,
+      plugins: [RevealHighlight, RevealNotes],
+      highlight: {
+        highlightOnLoad: true,
+      },
+      keyboard: {
+        83: () => {
+          // S key opens speaker view
+          const notesPlugin = deck.getPlugin("notes");
+          if (notesPlugin && typeof notesPlugin.open === "function") {
+            notesPlugin.open();
+          }
+        },
+      },
+    });
+
+    await deck.initialize();
+
+    // Navigate to the slide indicated by the URL hash (e.g. #/2)
+    const hashMatch = window.location.hash.match(/^#\/(\d+)(?:\/(\d+))?$/);
+    if (hashMatch) {
+      suppressNextPush = true;
+      deck.slide(
+        parseInt(hashMatch[1] ?? "0", 10),
+        parseInt(hashMatch[2] ?? "0", 10),
+      );
+    }
+
+    // Tag the current history entry with the active slide indices
+    // so the popstate handler can restore the correct slide on
+    // back/forward navigation.
+    const indices = deck.getIndices();
+    history.replaceState(
+      { ...history.state, revealSlide: { h: indices.h, v: indices.v } },
+      "",
+      window.location.href,
+    );
+
+    // Push a new history entry on each slide change, preserving
+    // Astro's ClientRouter state alongside the slide coordinates.
+    deck.on("slidechanged", (event: Record<string, unknown>) => {
+      if (suppressNextPush) {
+        suppressNextPush = false;
+        return;
+      }
+      const indexh = event["indexh"] as number;
+      const indexv = event["indexv"] as number;
+      const hash = indexv > 0 ? `#/${indexh}/${indexv}` : `#/${indexh}`;
+      history.pushState(
+        { ...history.state, revealSlide: { h: indexh, v: indexv } },
+        "",
+        hash,
+      );
+    });
+
+    // Make deck globally accessible for the PresentationViewer component
+    (window as unknown as Record<string, unknown>).Reveal = deck;
+  }
+
+  // Destroy before Astro caches the DOM so back/forward restores a
+  // clean slide structure that Reveal can re-initialize from scratch.
+  document.addEventListener("astro:before-swap", destroyReveal);
+  document.addEventListener("astro:page-load", initReveal);
+</script>
+
+<style is:global>
+  /* Embedded mode styles */
+  #presentation-container {
+    min-height: 600px;
+    padding-top: calc(var(--header-height) + 2rem);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 2rem;
+    margin: 0 auto;
+    max-width: 1400px;
+  }
+
+  /* Border around the presentation in embedded mode */
+  #presentation-container .presentation-frame {
+    border: 2px solid var(--color-gray-dark-mode-600);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  /* Fullscreen mode */
+  #presentation-container.fullscreen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    max-width: none;
+    background: #0c111d;
+  }
+
+  /* Remove frame border in fullscreen mode and push content below
+     the fixed control bar so Reveal.js controls aren't clipped */
+  #presentation-container.fullscreen-mode .presentation-frame {
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    padding-top: 60px;
+  }
+
+  /* Hide the back link in fullscreen mode */
+  #presentation-container.fullscreen-mode .back-link {
+    display: none;
+  }
+
+  body.presentation-fullscreen {
+    overflow: hidden;
+  }
+
+  #presentation-container.fullscreen-mode .reveal {
+    height: calc(100vh - 60px) !important;
+  }
+
+  /* Print-pdf mode - fullscreen */
+  body:has(.print-pdf) #presentation-container {
+    margin: 0;
+    max-width: none;
+  }
+
+  /* Ensure reveal container is properly sized.
+     Uses #presentation-container prefix for specificity
+     to override reveal.css's .reveal { height: 100% }. */
+  #presentation-container .reveal {
+    width: 100%;
+    height: 720px;
+  }
+
+  /* Center layout for specific slides */
+  .reveal .slides section.center {
+    text-align: center;
+  }
+
+  /* Hide header in fullscreen mode */
+  body.presentation-fullscreen header {
+    display: none;
+  }
+</style>

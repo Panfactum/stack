@@ -14,14 +14,14 @@ deployed by this module.
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
 
-- `superuser_creds_secret`: Complete access to the database
-- `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
-- `reader_creds_secret`: Read-only access to the database
+* `superuser_creds_secret`: Complete access to the database
+* `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
+* `reader_creds_secret`: Read-only access to the database
 
 Each of the above named Secrets contains the following values:
 
-- `username`: The username to use for authentication
-- `password`: The password to use for authentication
+* `username`: The username to use for authentication
+* `password`: The password to use for authentication
 
 The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
 Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
@@ -31,15 +31,15 @@ to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thu
 credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
 
 <MarkdownAlert severity="warning">
-    The module also supplies `root_name` and `root_password` outputs for the root user of the database.
-    These credentials are **unsafe** to use as they are not automatically rotated.
+  The module also supplies `root_name` and `root_password` outputs for the root user of the database.
+  These credentials are **unsafe** to use as they are not automatically rotated.
 </MarkdownAlert>
 
 ### Connecting
 
 The below example show how to connect to the Redis master
 using dynamically rotated admin credentials by setting various
-environment variables in our [kube_deployment](/docs/main/modules/kube_deployment/overview) module.
+environment variables in our [kube\_deployment](/docs/main/modules/kube_deployment/overview) module.
 
 ```hcl
 module "redis" {
@@ -70,15 +70,15 @@ module "deployment" {
 
 ### Persistence
 
-Redis provides two mechanisms for persistence: 
+Redis provides two mechanisms for persistence:
 [AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/).
 This module uses RDB by default (tuned via `redis_save`).
 
 Using AOF (whether independently or concurrently with RDB) negates the ability to do [partial resynchronizations after restarts
 and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers). Instead, a copy of the database must be transferred from the current master to restarted or new replicas. This greatly increases
-the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence 
-at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not 
-from their local AOF. The only benefit would be if _all_ Redis nodes simultaneously failed with 
+the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence
+at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not
+from their local AOF. The only benefit would be if *all* Redis nodes simultaneously failed with
 a non-graceful shutdown (an incredibly unlikely scenario).
 
 Persistence is always enabled in this module for similar reasons. Without persistence, an entire copy of the database would
@@ -87,14 +87,14 @@ data on disk is far less than the network costs associated with this transfer. M
 never impact performance as writes are completed asynchronously unless configured otherwise.
 
 Once the Redis cluster is running, the PVC autoresizer
-(provided by [kube_pvc_autoresizer](/docs/main/modules/kube_pvc_autoresizer/overview))
+(provided by [kube\_pvc\_autoresizer](/docs/main/modules/kube_pvc_autoresizer/overview))
 will automatically expand the EBS volumes once the free space
 drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling event until a maximum of `persistence_storage_limit_gb`.
 
 <MarkdownAlert severity="warning">
-    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-    ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
+  Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+  ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
 </MarkdownAlert>
 
 ### Disruptions
@@ -118,7 +118,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the
-[kube_disruption_window_controller](/docs/main/modules/kube_disruption_window_controller/overview)
+[kube\_disruption\_window\_controller](/docs/main/modules/kube_disruption_window_controller/overview)
 submodule.
 
 #### Custom PDBs
@@ -170,19 +170,19 @@ pod in this module.
 
 This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
 
-- Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
-- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+* Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+* Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
 
 Note that the above configuration will significantly increase the costs of running the Redis cluster (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
 
 <MarkdownAlert severity="warning">
-    Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
-    disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
-    and limited by the use of PDBs.
+  Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+  disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+  and limited by the use of PDBs.
 
-    An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
-    you should still implement defensive coding practices in your client code to account for potential disruptions.
+  An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+  you should still implement defensive coding practices in your client code to account for potential disruptions.
 </MarkdownAlert>
 
 ### Extra Redis Configuration
@@ -194,4 +194,3 @@ will be of the highest precedence.
 
 For more information about passing flags through the commandline and available options,
 see [this documentation](https://redis.io/docs/latest/operate/oss_and_stack/management/config/).
-

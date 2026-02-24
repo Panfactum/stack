@@ -10,16 +10,16 @@ This module deploys a highly-available [NATS cluster](https://nats.io/) running 
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
 
-- `superuser_creds_secret`: Full access to the [system account](https://docs.nats.io/running-a-nats-service/configuration/sys_accounts) (does not have access to normal data, so should generally be avoided)
-- `admin_creds_secret`: Read and write access to the data streams
-- `reader_creds_secret`: Read-only access to the data streams
+* `superuser_creds_secret`: Full access to the [system account](https://docs.nats.io/running-a-nats-service/configuration/sys_accounts) (does not have access to normal data, so should generally be avoided)
+* `admin_creds_secret`: Read and write access to the data streams
+* `reader_creds_secret`: Read-only access to the data streams
 
 Authenticating with NATS is done via [TLS authentication.](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tls_mutual_auth)
 Each of the above named Secrets contains the following values:
 
-- `ca.crt`: The CA certificate used to verify the server-provided certificate.
-- `tls.crt`: The certificate that the NATS client should provide to the server for authentication.
-- `tls.key`: The TLS key that the NATS client will use for securing communications with the server.
+* `ca.crt`: The CA certificate used to verify the server-provided certificate.
+* `tls.crt`: The certificate that the NATS client should provide to the server for authentication.
+* `tls.key`: The TLS key that the NATS client will use for securing communications with the server.
 
 The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
 Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
@@ -31,13 +31,13 @@ credentials that a pod receives are valid for `vault_credential_lifetime_hours` 
 ### Connecting
 
 <MarkdownAlert severity="warning">
-    Note that you should generally never want to use the superuser role. While this role has access to system events, it does
-    NOT have access to the individual data streams due to a limitation in NATS resource isolation.
+  Note that you should generally never want to use the superuser role. While this role has access to system events, it does
+  NOT have access to the individual data streams due to a limitation in NATS resource isolation.
 </MarkdownAlert>
 
 The below example show how to connect to the NATS cluster
-using dynamically rotated admin credentials by mounting the client certificates 
-in our [kube_deployment](/docs/main/modules/kube_deployment/overview) module.
+using dynamically rotated admin credentials by mounting the client certificates
+in our [kube\_deployment](/docs/main/modules/kube_deployment/overview) module.
 
 ```hcl
 module "nats" {
@@ -96,21 +96,21 @@ before launching (similar to database migrations for other data stores).
 
 That said, there are a few global storage settings to be aware of when first creating the cluster:
 
-- `persistence_initial_storage_gb` (can not be changed after NATS cluster creation)
-- `persistence_storage_limit_gb`
-- `persistence_storage_increase_threshold_percent`
-- `persistence_storage_increase_gb`
-- `persistence_storage_class_name` (can not be changed after NATS cluster creation)
+* `persistence_initial_storage_gb` (can not be changed after NATS cluster creation)
+* `persistence_storage_limit_gb`
+* `persistence_storage_increase_threshold_percent`
+* `persistence_storage_increase_gb`
+* `persistence_storage_class_name` (can not be changed after NATS cluster creation)
 
 Once the NATS cluster is running, the PVC autoresizer
-(provided by [kube_pvc_autoresizer](/docs/main/modules/kube_pvc_autoresizer/overview))
+(provided by [kube\_pvc\_autoresizer](/docs/main/modules/kube_pvc_autoresizer/overview))
 will automatically expand the EBS volumes once the free space
 drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling event until a maximum of `persistence_storage_limit_gb`.
 
 <MarkdownAlert severity="warning">
-    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-    ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
+  Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+  ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
 </MarkdownAlert>
 
 ### Disruptions
@@ -132,7 +132,7 @@ window via `voluntary_disruption_window_seconds`.
 If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
 
 For more information on how this works, see the
-[kube_disruption_window_controller](/docs/main/modules/kube_disruption_window_controller/overview)
+[kube\_disruption\_window\_controller](/docs/main/modules/kube_disruption_window_controller/overview)
 submodule.
 
 #### Custom PDBs
@@ -184,18 +184,17 @@ pod in this module.
 
 This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
 
-- Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
-- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+* Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+* Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
 
 Note that the above configuration will significantly increase the costs of running the NATS cluster (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
 
 <MarkdownAlert severity="warning">
-    Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
-    disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
-    and limited by the use of PDBs.
+  Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+  disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+  and limited by the use of PDBs.
 
-    An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
-    you should still implement defensive coding practices in your client code to account for potential disruptions.
+  An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+  you should still implement defensive coding practices in your client code to account for potential disruptions.
 </MarkdownAlert>
-

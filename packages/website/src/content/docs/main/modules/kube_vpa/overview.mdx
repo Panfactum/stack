@@ -7,7 +7,7 @@ This module provides a deployment of the [vertical-pod-autoscaler](https://githu
 ### Metrics History
 
 Set `history_length_hours` to the number of hours of historical metrics that you want to use for the initial VPA
-recommendations. 
+recommendations.
 
 Metrics are weighted based on an exponential decay algorithm so more recent data will be weighted more heavily
 than older data. Metrics older than `history_length_hours` will no longer impact calculations.
@@ -22,15 +22,15 @@ not set `history_length_hours` to greater than 1 week as this will cause signifi
 The VPA can use Prometheus as the source of its recommendations when setting pod resources.
 To enable this in the Panfactum stack:
 
-- Ensure you have deployed [kube_monitoring](/docs/main/modules/kube_monitoring/overview). 
-Note that `kube_monitoring` **must** have been deployed for at least `history_length_hours` 
-in order for the VPA to work properly.
+* Ensure you have deployed [kube\_monitoring](/docs/main/modules/kube_monitoring/overview).
+  Note that `kube_monitoring` **must** have been deployed for at least `history_length_hours`
+  in order for the VPA to work properly.
 
-- Set `prometheus_enabled` to `true`.
+* Set `prometheus_enabled` to `true`.
 
-- Add the `thanos_query_frontend_url` input from the `kube_monitoring` output.
+* Add the `thanos_query_frontend_url` input from the `kube_monitoring` output.
 
-- Apply the module.
+* Apply the module.
 
-- If you had previously deployed the VPA without Prometheus, delete all `Verticalpodautoscalercheckpoints`:
-`kubectl delete -A verticalpodautoscalercheckpoints.autoscaling.k8s.io --all`.
+* If you had previously deployed the VPA without Prometheus, delete all `Verticalpodautoscalercheckpoints`:
+  `kubectl delete -A verticalpodautoscalercheckpoints.autoscaling.k8s.io --all`.

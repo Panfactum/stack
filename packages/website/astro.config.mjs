@@ -14,6 +14,7 @@ import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
 import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.ts";
+import rehypeMermaid from "./src/lib/plugins/rehypeMermaid.ts";
 import tailwindcss from "@tailwindcss/vite";
 import autoprefixer from 'autoprefixer'
 import postcssImporter from 'postcss-import';
@@ -85,6 +86,31 @@ export default defineConfig({
       syntaxHighlight: false,
       remarkPlugins: [remarkGfm, remarkMath],
       rehypePlugins: [
+        [rehypeMermaid, {
+          // Mermaid renders SVGs at build time in Node.js, so CSS var()
+          // references cannot be used here. Values must be hex literals
+          // that match the Tailwind @theme tokens in global.css.
+          mermaidConfig: {
+            theme: "dark",
+            themeVariables: {
+              darkMode: true,
+              background: "#0c111d",         // gray-dark-mode-950
+              primaryColor: "#1a3b50",       // brand-750
+              primaryTextColor: "#f5f5f6",   // gray-dark-mode-50
+              primaryBorderColor: "#333741", // gray-dark-mode-700
+              secondaryColor: "#1f242f",     // gray-dark-mode-800
+              secondaryTextColor: "#cecfd2", // gray-dark-mode-300
+              lineColor: "#70bfeb",          // brand-300
+              textColor: "#f5f5f6",          // gray-dark-mode-50
+              mainBkg: "#1a3b50",            // brand-750
+              nodeBorder: "#333741",         // gray-dark-mode-700
+              clusterBkg: "#161b26",         // gray-dark-mode-900
+              clusterBorder: "#333741",      // gray-dark-mode-700
+              titleColor: "#f5f5f6",         // gray-dark-mode-50
+              edgeLabelBackground: "#1f242f", // gray-dark-mode-800
+            },
+          },
+        }],
         rehypeReplaceStrings,
         rehypeSlug,
         [rehypeAutolinkHeadings, { behavior: "append" }],
@@ -137,6 +163,13 @@ export default defineConfig({
     svg: true
   },
   vite: {
+    ssr: {
+      // Externalize isomorphic-mermaid and its transitive deps (jsdom, svgdom,
+      // etc.) so Vite delegates them to native Node.js imports. Without this,
+      // Vite's SSR transform hits a CJS/ESM incompatibility in jsdom's dep
+      // chain (html-encoding-sniffer requiring an ESM-only package).
+      external: ["isomorphic-mermaid"],
+    },
     plugins: [visualizer({
       emitFile: true,
       filename: "stats.html"
