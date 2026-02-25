@@ -145,9 +145,6 @@ export default defineConfig({
       Image: false // Image compression is tackled by the image service
     })
   ],
-  experimental: {
-    svg: true
-  },
   vite: {
     ssr: {
       // Externalize isomorphic-mermaid and its transitive deps (jsdom, svgdom,

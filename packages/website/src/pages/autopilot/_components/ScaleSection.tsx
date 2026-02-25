@@ -4,11 +4,11 @@ import { createVisibilityObserver } from "@solid-primitives/intersection-observe
 import { Image } from "@unpic/solid";
 import { clsx } from "clsx";
 import {
-  TbRocket,
-  TbTrendingUp,
-  TbChartLine,
-  TbUsers,
-  TbBuilding,
+  TbOutlineRocket,
+  TbOutlineTrendingUp,
+  TbOutlineChartLine,
+  TbOutlineUsers,
+  TbOutlineBuilding,
 } from "solid-icons/tb";
 import {
   createSignal,
@@ -68,7 +68,7 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
       title: "Bootstrapped",
       subtitle:
         "Get to launch day with real infrastructure—no cloud headaches.",
-      icon: TbRocket,
+      icon: TbOutlineRocket,
       content:
         "When every dollar matters and every hour counts, we give you a fully production-ready platform out-of-the-box—backed by expert help, automated tooling, and zero fluff. Focus on building your product, we'll manage the infrastructure.",
       image: bootstrappedTeamImage.src,
@@ -81,7 +81,7 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
       name: "Seed",
       title: "Seed",
       subtitle: "Move fast, stay lean, and impress your first customers.",
-      icon: TbTrendingUp,
+      icon: TbOutlineTrendingUp,
       content:
         "You need reliability without bloated overhead. We give you managed Kubernetes, autoscaling, cost optimization, and a dedicated engineer so that you can onboard users confidently without worrying about downtime or DevOps hiring.",
       image: seedTeamImage.src,
@@ -94,7 +94,7 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
       name: "Series A",
       title: "Series A",
       subtitle: "Ready for growth, built to scale.",
-      icon: TbChartLine,
+      icon: TbOutlineChartLine,
       content:
         "The flywheel is turning and nothing is more important than maintaining your momentum. We help you shed the limits of your MVP systems without disruption by installing compliance-friendly defaults, multi-env deployments, and proactive monitoring.",
       image: seriesATeamImage.src,
@@ -108,7 +108,7 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
       title: "Series B",
       subtitle:
         "Free your engineers to focus on what makes your product great.",
-      icon: TbUsers,
+      icon: TbOutlineUsers,
       content:
         "You've outgrown homegrown infrastructure. Panfactum takes full ownership of upgrades, environment parity, and incident triage—so your platform team can invest in performance, reliability, and customer-facing improvements.",
       image: seriesBTeamImage.src,
@@ -122,7 +122,7 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
       title: "Series C+",
       subtitle:
         "Enterprise-grade infrastructure. Without the enterprise-grade bloat.",
-      icon: TbBuilding,
+      icon: TbOutlineBuilding,
       content:
         "As your company scales, so does the complexity. We deliver enterprise-grade reliability—global scale, multi-team collaboration, fine-grained cost controls—all while maintaining the same velocity that helped you reach your current success.",
       image: seriesCTeamImage.src,

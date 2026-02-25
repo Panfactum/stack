@@ -2,7 +2,7 @@ import { Dialog } from "@kobalte/core/dialog";
 import { createResizeObserver } from "@solid-primitives/resize-observer";
 import { clsx } from "clsx";
 import { IoChevronForwardOutline } from "solid-icons/io";
-import { TbMenu } from "solid-icons/tb";
+import { TbOutlineMenu } from "solid-icons/tb";
 import {
   type Component,
   createMemo,
@@ -146,7 +146,7 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
               dark:hover:text-white
             `}
           >
-            <TbMenu />
+            <TbOutlineMenu />
             <For each={crumbs()}>
               {(el) => (
                 <>
