@@ -40,7 +40,7 @@ const presentations = defineCollection({
     author: z.string().optional(),
     thumbnail: z.string().optional(),
     notes: z.string().optional(),
-    slideLayout: z.enum(["default", "center", "two-column"]).default("default"),
+    slideLayout: z.enum(["default", "center", "two-column", "author"]).default("default"),
     transition: z.string().optional(),
   }),
 });

@@ -162,6 +162,15 @@
   margin: 0 0 0 1em;
 }
 
+.reveal li + li {
+  margin-top: 0.4em;
+}
+
+.reveal li > ul,
+.reveal li > ol {
+  margin-top: 0.4em;
+}
+
 .reveal ol {
   list-style-type: decimal;
 }
@@ -232,6 +241,7 @@
 
 .reveal code {
   font-family: var(--r-code-font);
+  font-size: 0.85em;
   text-transform: none;
   tab-size: 2;
   color: #ceeaf8;
@@ -444,6 +454,22 @@
   border-radius: 4px;
 }
 
+.reveal .slide-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -10px;
+  padding: 4px 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.reveal .slide-logo img {
+  display: block;
+  height: 24px;
+  width: auto;
+}
+
 /*********************************************
  * PRINT STYLES
  *********************************************/
@@ -453,6 +479,90 @@
   }
 }
 
+
+/*********************************************
+ * TWO-COLUMN LAYOUT
+ *********************************************/
+.reveal .slides section.two-column {
+  text-align: left;
+}
+
+.reveal .slides .columns {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.reveal .slides .column {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.reveal .slides .column svg[id^="mermaid"] {
+  max-width: 100%;
+  max-height: 400px;
+}
+
+/*********************************************
+ * AUTHOR LAYOUT
+ * Name + LinkedIn icon on the left, headshot
+ * floated to the far right.
+ *********************************************/
+.reveal .slides section.author {
+  text-align: left;
+}
+
+.reveal .slides section.author .author-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.reveal .slides section.author .author-header h1 {
+  margin: 0;
+}
+
+.reveal .slides section.author .author-header a {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.reveal .slides section.author .author-body {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+.reveal .slides section.author .author-bio {
+  flex: 1;
+  min-width: 0;
+}
+
+.reveal .slides section.author .author-headshot {
+  flex-shrink: 0;
+  width: 280px;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #333741;
+  background: #1f242f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #85888e;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+}
+
+.reveal .slides section.author .author-headshot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
 
 /*********************************************
  * MERMAID DIAGRAMS

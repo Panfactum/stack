@@ -1,0 +1,23 @@
+---
+slideLayout: "default"
+---
+
+import { PieChartComparison } from "@/pages/presentations/_components/PieChartComparison"
+
+## Where I Spend my Time
+
+<PieChartComparison
+  client:load
+  segments={[
+    { label: "Writing Code", color: "#70bfeb" },
+    { label: "Defining Requirements", color: "#9ad3f1" },
+    { label: "Researching", color: "#3b81b0" },
+    { label: "Reviewing Code", color: "#faaf35" },
+    { label: "DX / Agentic Improvements", color: "#47cd89" },
+    { label: "Testing", color: "#f79009" },
+  ]}
+  pies={[
+    { label: "Traditional Dev", values: [40, 15, 10, 15, 5, 15] },
+    { label: "Agentic Dev", values: [5, 30, 5, 35, 20, 5] },
+  ]}
+/>

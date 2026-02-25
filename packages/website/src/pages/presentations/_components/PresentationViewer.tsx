@@ -12,6 +12,7 @@ import {
 
 interface IPresentationViewerProps {
   title: string;
+  author?: string;
   isPrintPdf: boolean;
 }
 
@@ -194,15 +195,27 @@ export const PresentationViewer: Component<IPresentationViewerProps> = (
             : "relative mb-4 rounded-t-lg",
         )}
       >
-        {/* Title */}
-        <h1
-          class={`
-            text-lg font-semibold text-primary
-            md:text-xl
-          `}
-        >
-          {props.title}
-        </h1>
+        {/* Title and author */}
+        <div class="flex items-baseline gap-3">
+          <h1
+            class={`
+              text-lg font-semibold text-primary
+              md:text-xl
+            `}
+          >
+            {props.title}
+          </h1>
+          <Show when={props.author}>
+            <span
+              class={`
+                text-sm text-secondary italic
+                md:text-base
+              `}
+            >
+              {props.author}
+            </span>
+          </Show>
+        </div>
 
         {/* Controls */}
         <div class="flex items-center gap-2">

@@ -1,29 +1,6 @@
----
-name: create-presentation
-description: Create a new Reveal.js presentation from a topic or outline. USE WHEN the user wants to create, draft, or write a new slideshow presentation.
-argument-hint: <presentation-name> [topic or outline]
----
+# Slide Conventions
 
-# Create Presentation
-
-Create a new Reveal.js slideshow presentation in the Panfactum website's content collection.
-
-## Arguments
-
-- `$0` (required): The presentation slug (kebab-case directory name, e.g. `kubernetes-intro`)
-- Remaining arguments: Topic description or outline for the presentation
-
-## Process
-
-1. **Determine the presentation topic.** If the user provided a topic or outline in the arguments, use that. Otherwise, ask the user what the presentation should cover.
-
-2. **Create the presentation directory** at `packages/website/src/content/presentations/<slug>/`.
-
-3. **Create an `images/` subdirectory** if the presentation will include local images.
-
-4. **Generate the slide MDX files** following the conventions below.
-
-5. **Verify the content** by running `pnpm check` from `packages/website/`.
+Reference document covering presentation structure, frontmatter schema, content features, and design guidelines for Reveal.js presentations.
 
 ## Presentation Structure
 
@@ -48,7 +25,7 @@ Slide files use zero-padded numeric prefixes for ordering:
 
 Files are sorted alphanumerically by `a.id.localeCompare(b.id)`, so the numeric prefix determines slide order.
 
-### Frontmatter Schema
+## Frontmatter Schema
 
 Every MDX file has YAML frontmatter. All fields are optional except where noted:
 
@@ -69,11 +46,11 @@ notes: "Speaker notes go here..."     # Visible in Reveal.js speaker view (S key
 
 **Only the first slide** (alphabetically first file) should contain `title`, `description`, `date`, and `author`. These are extracted as presentation-level metadata.
 
-### Slide Content
+## Slide Content
 
 Slides use standard MDX. The following features are available:
 
-#### Basic Markdown
+### Basic Markdown
 
 ```mdx
 ## Slide Heading
@@ -85,36 +62,36 @@ Body text with **bold**, *italic*, and `inline code`.
   - Nested bullet
 ```
 
-#### Code Blocks
+### Code Blocks
 
 Use fenced code blocks with language identifiers. Syntax highlighting is handled by Reveal.js's highlight plugin.
 
-```mdx
+````mdx
 ## Code Example
 
-​```hcl
+```hcl
 module "eks_cluster" {
   source = "github.com/Panfactum/stack//packages/infrastructure/kube_cluster"
   cluster_name = "production"
 }
-​```
 ```
+````
 
-#### Mermaid Diagrams
+### Mermaid Diagrams
 
 Mermaid code blocks are rendered to inline SVGs at build time (no browser required):
 
-```mdx
+````mdx
 ## Architecture
 
-​```mermaid
+```mermaid
 flowchart TD
     A[Developer] -->|git push| B[CI/CD]
     B -->|deploy| C[Kubernetes]
-​```
 ```
+````
 
-#### Images
+### Images
 
 Import local images and use the `MarkdownImage` component:
 
@@ -129,7 +106,7 @@ import architectureDiagram from './images/architecture.svg'
 
 Store image files in an `images/` subdirectory within the presentation folder.
 
-#### Centered Layout
+### Centered Layout
 
 Use `slideLayout: "center"` for title slides, section dividers, or closing slides:
 
@@ -139,7 +116,7 @@ slideLayout: "center"
 ---
 ```
 
-#### Speaker Notes
+### Speaker Notes
 
 Add speaker notes via the `notes` frontmatter field. Presenters access them by pressing `S`:
 
@@ -149,10 +126,10 @@ notes: "Key talking point: emphasize the cost savings. Mention the 40% reduction
 ---
 ```
 
-## Slide Design Guidelines
+## Design Guidelines
 
 - **Keep slides focused.** One main idea per slide. Avoid walls of text.
-- **Aim for 6-12 slides** for a typical presentation. Adjust based on content depth.
+- **Aim for 6–12 slides** for a typical presentation. Adjust based on content depth.
 - **Use the first slide** as a title slide with `title`, `description`, `date`, and `author`.
 - **Use the last slide** as a closing/thank-you slide with `slideLayout: "center"`.
 - **Use `slideLayout: "center"`** for section dividers and emphasis slides.
@@ -161,7 +138,9 @@ notes: "Key talking point: emphasize the cost savings. Mention the 40% reduction
 - **Add speaker notes** to slides that need additional context or talking points.
 - **Use horizontal rules (`---`)** within a slide for visual separation, not to create new slides (each file is one slide).
 
-## Example: Complete First Slide
+## Examples
+
+### Complete First Slide
 
 ```mdx
 ---
@@ -180,7 +159,7 @@ An integrated framework for building, deploying, and managing software on AWS an
 **The Panfactum Framework**
 ```
 
-## Example: Content Slide with Notes
+### Content Slide with Notes
 
 ```mdx
 ---

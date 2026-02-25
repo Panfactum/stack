@@ -103,6 +103,7 @@
     "astro-seo": "^0.8.4",
     "autoprefixer": "^10.4.21",
     "button": "link:@kobalte/core/button",
+    "chart.js": "^4.5.1",
     "clsx": "1.2.1",
     "dom-parser": "^1.1.5",
     "eslint": "^8.57.1",

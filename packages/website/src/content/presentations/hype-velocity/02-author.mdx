@@ -1,0 +1,31 @@
+---
+slideLayout: "author"
+---
+
+{/* eslint-disable better-tailwindcss/no-unregistered-classes -- Custom Reveal.js author layout classes */}
+
+import { LinkedInLink } from "@/pages/presentations/_components/LinkedInLink"
+import headshot from "./images/headshot.jpg"
+
+<div class="author-body">
+<div class="author-bio">
+
+<div class="author-header">
+
+# Jack Langston
+
+<LinkedInLink client:load url="https://www.linkedin.com/in/jacklangston/" />
+
+</div>
+
+* CEO @ Panfactum
+* Coding daily in Bun (Typescript), Go, Nix, Terraform, and Bash
+* 15 years of professional software engineering
+* Primary focus in Platform Engineering
+* CS Degree in compilers from IU
+
+</div>
+<div class="author-headshot"><img src={headshot.src} alt="Jack Langston" /></div>
+</div>
+
+{/* eslint-enable better-tailwindcss/no-unregistered-classes */}

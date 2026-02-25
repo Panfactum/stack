@@ -7,6 +7,7 @@ import { getCollection, render } from "astro:content";
 import Layout from "@/components/layouts/primary/Layout.astro";
 
 import { PresentationViewer } from "./_components/PresentationViewer";
+import logoWhite from "./_components/images/logo-white.svg";
 
 export async function getStaticPaths() {
   const allSlides = await getCollection("presentations");
@@ -42,6 +43,7 @@ const { slides } = Astro.props;
 // First slide contains presentation metadata
 const firstSlide = slides[0];
 const title = firstSlide?.data.title ?? "Presentation";
+const author = firstSlide?.data.author ?? "";
 const description = firstSlide?.data.description ?? "";
 
 // Check if we're in print-pdf mode
@@ -73,17 +75,21 @@ const renderedSlides = await Promise.all(
     <div class="presentation-frame">
       <PresentationViewer
         title={title}
+        author={author}
         isPrintPdf={isPrintPdf}
         client:load
       />
 
       <div class="reveal">
+        <div class="slide-logo">
+          <img src={logoWhite.src} alt="Panfactum" />
+        </div>
         <div class="slides">
           {
             renderedSlides.map((slide) => (
               <section
                 data-transition={slide.transition}
-                class={slide.slideLayout === "center" ? "center" : ""}
+                class={slide.slideLayout !== "default" ? slide.slideLayout : ""}
               >
                 <slide.content />
                 {slide.notes && (
