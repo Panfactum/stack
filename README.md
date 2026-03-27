@@ -11,6 +11,11 @@
 The Panfactum Framework is an integrated set of OpenTofu (Terraform) modules and local tooling aimed at providing
 the best experience for building, deploying, and managing software on AWS and Kubernetes.
 
+This repository also serves as the canonical reference infrastructure deployment — a fully-worked example of a
+Panfactum framework deployment that defines the live infrastructure used in demos. The `environments/` and
+`infrastructure/` directories at the repo root contain the Terragrunt environments and custom OpenTofu modules
+that power this reference deployment.
+
 ## Installation
 
 If you'd like to add the Panfactum Framework to your organization, see our [deployment guide.](https://panfactum.com/docs/edge/guides/bootstrapping/overview)
@@ -21,6 +26,17 @@ If you'd like to connect to an existing stack, see the [new user guide.](https:/
 
 This repository is a monorepo where all components are versioned together to ensure internal consistency.
 See [packages/TOC.md](packages/TOC.md) for a description of each package.
+
+The reference infrastructure deployment lives at the repo root:
+
+- `environments/` — Terragrunt environment configurations for the reference deployment
+- `infrastructure/` — Custom OpenTofu modules used by the reference deployment
+- `panfactum.yaml` — Panfactum configuration for the reference deployment
+
+## Local Development
+
+The `flake.nix` at the repo root provides a reproducible development shell with all tools needed to work on
+both the framework packages and the reference infrastructure.
 
 ## Licensing
 

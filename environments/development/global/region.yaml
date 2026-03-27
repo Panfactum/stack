@@ -1,0 +1,6 @@
+# Meta
+region: "global" # The region's name
+
+# AWS
+aws_region: "us-east-2" # The AWS region to use for the aws provider
+aws_secondary_region: "us-west-2" # The secondary/backup region to use for the aws_secondary provider

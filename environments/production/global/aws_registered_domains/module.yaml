@@ -1,0 +1,43 @@
+extra_inputs:
+  domain_names:
+    - panfactum.com
+    - getpanfactum.com
+    - trypanfactum.com
+    - panfactum.org
+    - panfactum.io
+  admin_contact:
+    organization_name: Panfactum
+    first_name: Jack
+    last_name: Langston
+    email_address: jack@panfactum.com
+    phone_number: "+1.3173414889"
+    address_line_1: 1141 Tecumseh St
+    address_line_2: ""
+    city: Indianapolis
+    state: IN
+    zip_code: "46201"
+    country_code: US
+  registrant_contact:
+    organization_name: Panfactum
+    first_name: Jack
+    last_name: Langston
+    email_address: jack@panfactum.com
+    phone_number: "+1.3173414889"
+    address_line_1: 1141 Tecumseh St
+    address_line_2: ""
+    city: Indianapolis
+    state: IN
+    zip_code: "46201"
+    country_code: US
+  tech_contact:
+    organization_name: Panfactum
+    first_name: Jack
+    last_name: Langston
+    email_address: jack@panfactum.com
+    phone_number: "+1.3173414889"
+    address_line_1: 1141 Tecumseh St
+    address_line_2: ""
+    city: Indianapolis
+    state: IN
+    zip_code: "46201"
+    country_code: US

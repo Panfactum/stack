@@ -1,0 +1,7 @@
+*
+!known_hosts
+!.gitignore
+!config.yaml
+!config.example.yaml
+!state.lock
+!buildkit.json

@@ -1,0 +1,18 @@
+domains:
+  dev.panfactum.com:
+    zone_id: Z049537117286T4TESS0Y
+    record_manager_role_arn: arn:aws:iam::471112902605:role/route53-record-manager-20250424185745101500000004
+sla_target: 1
+extra_tags: {}
+environment: development
+environment_subdomain: dev
+extra_inputs: {}
+tf_state_account_id: "471112902605"
+tf_state_profile: development-superuser
+tf_state_region: us-east-2
+tf_state_bucket: pf-tf-state-development
+tf_state_lock_table: pf-tf-locks-development
+aws_account_id: "471112902605"
+aws_profile: development-superuser
+aws_secondary_account_id: "471112902605"
+aws_secondary_profile: development-superuser

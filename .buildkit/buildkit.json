@@ -1,0 +1,11 @@
+{
+  "registry": "891377197483.dkr.ecr.us-east-2.amazonaws.com",
+  "cluster": "production-primary",
+  "cache_bucket": "buildkit-cache-da9b534541d8f95f",
+  "cache_bucket_region": "us-east-2",
+  "bastion": "production-primary",
+  "credHelpers": {
+    "891377197483.dkr.ecr.us-east-2.amazonaws.com": "panfactum",
+    "public.ecr.aws": "panfactum"
+  }
+}

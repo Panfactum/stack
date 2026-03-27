@@ -1,0 +1,8 @@
+extra_inputs:
+  self_generated_certs_enabled: false
+  alert_email: it@panfactum.com
+  route53_zones:
+    dev.panfactum.com:
+      zone_id: Z049537117286T4TESS0Y
+      record_manager_role_arn: arn:aws:iam::471112902605:role/route53-record-manager-20250424185745101500000004
+  kube_domain: us-east-2.dev.panfactum.com

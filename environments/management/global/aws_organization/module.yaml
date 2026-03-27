@@ -1,0 +1,10 @@
+extra_inputs:
+  primary_contact:
+    full_name: Jack Langston
+    phone_number: +1 317-341-4889
+    address_line_1: 1141 Tecumseh St.
+    city: Carmel
+    company_name: Panfactum Group, Inc.
+    postal_code: "46201"
+    country_code: US
+    state_or_region: Indiana

@@ -1,0 +1,4 @@
+extra_inputs:
+  domains:
+    panfactum.ai:
+      dnssec_enabled: false

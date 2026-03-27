@@ -5,6 +5,10 @@
 - `infrastructure/` - OpenTofu/Terraform modules for provisioning and managing AWS and Kubernetes infrastructure.
 - `installer/` - Installation scripts for bootstrapping the Panfactum Framework on a new system.
 - `nix/` - Nix-based development shell and tooling packages for reproducible local development environments.
+- `reference-go/` - Reference Go service (demo tracker) demonstrating a containerized Go application deployed via the Panfactum framework.
+- `reference-java/` - Reference Java service (demo task service) demonstrating a containerized Java/Spring application deployed via the Panfactum framework.
+- `reference-python/` - Reference Python service (demo Python service) demonstrating a containerized Python application deployed via the Panfactum framework.
+- `reference-typescript/` - Reference TypeScript service (demo user service) demonstrating a containerized TypeScript application deployed via the Panfactum framework.
 - `scraper/` - TypeScript web scraper that indexes documentation site content into Algolia for search functionality.
 - `vault/` - Custom HashiCorp Vault container image with additional plugins.
 - `website/` - Astro-based documentation website serving panfactum.com, including guides, reference docs, and changelogs.

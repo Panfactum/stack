@@ -1,0 +1,32 @@
+domains:
+  getpanfactum.com:
+    zone_id: Z03246823HHIAC4AIYJGH
+    record_manager_role_arn: arn:aws:iam::891377197483:role/route53-record-manager-20250425205408506600000001
+  panfactum.com:
+    zone_id: Z0093484A5K6EFKTZCHA
+    record_manager_role_arn: arn:aws:iam::891377197483:role/route53-record-manager-20250425205408506600000001
+  panfactum.org:
+    zone_id: Z037155113K6H05RL3UR9
+    record_manager_role_arn: arn:aws:iam::891377197483:role/route53-record-manager-20250425205408506600000001
+  trypanfactum.com:
+    zone_id: Z10413681QCYMX4DRRJ41
+    record_manager_role_arn: arn:aws:iam::891377197483:role/route53-record-manager-20250425205408506600000001
+  panfactum.ai:
+    zone_id: Z0682551242UUKR8WFRFJ
+    record_manager_role_arn: arn:aws:iam::891377197483:role/route53-record-manager-20250423130851566300000004
+  panfactum.io:
+    zone_id: Z0932828144ZBRC78HTUA
+    record_manager_role_arn: arn:aws:iam::891377197483:role/route53-record-manager-20250425205408506600000001
+extra_tags: {}
+environment: production
+extra_inputs: {}
+pf_stack_version: main
+tf_state_account_id: "891377197483"
+tf_state_profile: production-superuser
+tf_state_region: us-east-2
+tf_state_bucket: pf-tf-state-production
+tf_state_lock_table: pf-tf-locks-production
+aws_account_id: "891377197483"
+aws_profile: production-superuser
+aws_secondary_account_id: "891377197483"
+aws_secondary_profile: production-superuser

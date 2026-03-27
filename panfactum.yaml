@@ -1,0 +1,4 @@
+repo_url: git::https://github.com/panfactum/stack.git
+repo_name: stack
+repo_primary_branch: main
+installation_id: 8bfdc6d0-b298-46a0-a13e-e37920ca302d

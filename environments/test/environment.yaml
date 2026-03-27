@@ -1,0 +1,4 @@
+domains:
+  test.panfactum.ai:
+    zone_id: Z04238863P727QI4B8HVS
+    record_manager_role_arn: arn:aws:iam::471112902605:role/route53-record-manager-20250424190040568600000004

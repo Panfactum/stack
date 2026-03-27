@@ -1,0 +1,13 @@
+domains: {}
+sla_target: 1
+extra_tags: {}
+extra_inputs:
+  pull_through_cache_enabled: true
+  vpa_enabled: true
+  panfactum_scheduler_enabled: true
+aws_region: us-east-2
+aws_secondary_region: us-east-1
+kube_api_server: https://20B2D41586000040F2B86C910D52D9A4.gr7.us-east-2.eks.amazonaws.com
+kube_domain: us-east-2.dev.panfactum.com
+kube_config_context: development-us-east-2
+vault_addr: https://vault.us-east-2.dev.panfactum.com

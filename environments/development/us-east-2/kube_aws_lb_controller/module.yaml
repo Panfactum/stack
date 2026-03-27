@@ -1,0 +1,4 @@
+extra_inputs:
+  subnets:
+    - PUBLIC_A
+    - PUBLIC_B

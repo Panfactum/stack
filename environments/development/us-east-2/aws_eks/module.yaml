@@ -1,0 +1,7 @@
+extra_inputs:
+  bootstrap_mode_enabled: false
+  extra_superuser_principal_arns: []
+  cluster_name: development-us-east-2
+  cluster_description: Panfactum cluster in the us-east-2 region of the development environment
+  node_subnets:
+    - PRIVATE_A

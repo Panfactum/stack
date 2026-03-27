@@ -1,0 +1,18 @@
+# Meta
+environment: "management" # Name of the environment
+
+# Panfactum Stack
+pf_stack_version: "main"
+
+# AWS
+aws_account_id: "143003111016" # ID of the aws account to use for the aws provider
+aws_profile: "management-superuser" # Name of the AWS CLI profile to use for the aws provider
+aws_secondary_account_id: "143003111016" #ID of the aws account to use for the aws_secondary provider
+aws_secondary_profile: "management-superuser" # Name of the AWS CLI profile to use for the aws_secondary provider
+
+# State Bucket
+tf_state_account_id: "143003111016" # AWS Account for the S3 bucket holding the state file
+tf_state_region: "us-east-2" # Region for the S3 bucket holding the state file
+tf_state_bucket: "panfactum-tf-state-management" # S3 bucket holding the state file
+tf_state_lock_table: "panfactum-tf-locks-management" # Dynamodb table holding state locks"
+tf_state_profile: "management-superuser" # AWS profile to assume for working with the state files

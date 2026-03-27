@@ -5,9 +5,7 @@
 .env
 .podman
 go
-!packages/reference/.env
-!packages/reference/.direnv
-!packages/reference/.devenv
+!.envrc
 .pnpm/
 .cspell/
 node_modules/
@@ -15,6 +13,9 @@ node_modules/
 *.bkp
 .terragrunt-cache
 .terraform
+.terraformrc
+.terraformrc.dev
+.nats
 
 .DS_Store
 

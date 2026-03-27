@@ -1,0 +1,33 @@
+# Use the JDK image for building the application
+FROM eclipse-temurin:23-jdk-alpine AS build
+WORKDIR /app
+
+# Copy the Maven POM file
+COPY pom.xml .
+
+# Install Maven and download dependencies without building the app
+RUN apk add --no-cache maven
+RUN mvn dependency:go-offline -B
+
+# Copy the source code into the container
+COPY src ./src
+
+# Build the application and skip tests
+RUN mvn clean package -DskipTests
+
+# Check the contents of the target directory to ensure the JAR was created
+RUN ls -l /app/target
+
+# Use the JRE image for the runtime environment
+FROM eclipse-temurin:23-jre-alpine
+
+WORKDIR /app
+
+# Copy the built JAR file from the build stage
+COPY --from=build /app/target/task-service-1.0-SNAPSHOT.jar ./app.jar
+
+# Expose the application port
+EXPOSE 8080
+
+# Run the application
+CMD ["java", "-jar", "app.jar"]

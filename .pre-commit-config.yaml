@@ -50,7 +50,7 @@ repos:
         name: Tofu Format
         entry: tofu fmt -diff -check
         language: system
-        files: ^packages/infrastructure/.*\.tf$
+        files: ^(packages/infrastructure|infrastructure)/.*\.tf$
         pass_filenames: true
         description: "Runs tofu fmt on the infrastructure code"
         fail_fast: false
