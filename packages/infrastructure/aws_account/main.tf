@@ -76,34 +76,71 @@ resource "aws_account_alternate_contact" "billing" {
 
 ###########################################################################
 ## Quota Increases
+## Data sources read the current quota so we skip the increase request
+## when the existing value already meets or exceeds our target.
 ###########################################################################
 
-resource "aws_servicequotas_service_quota" "cf_origin_request_policy" {
+locals {
+  cf_origin_request_policy_desired  = 100
+  cf_response_header_policy_desired = 100
+  cf_cache_policy_desired           = 100
+  ec2_vcpu_quota_desired            = 32
+}
+
+data "aws_servicequotas_service_quota" "cf_origin_request_policy" {
   provider     = aws.global
   quota_code   = "L-C3659C43"
   service_code = "cloudfront"
-  value        = 100
 }
 
-resource "aws_servicequotas_service_quota" "cf_response_header_policy" {
+data "aws_servicequotas_service_quota" "cf_response_header_policy" {
   provider     = aws.global
   quota_code   = "L-CF0D4FC5"
   service_code = "cloudfront"
-  value        = 100
 }
 
-resource "aws_servicequotas_service_quota" "cf_cache_policy" {
+data "aws_servicequotas_service_quota" "cf_cache_policy" {
   provider     = aws.global
   quota_code   = "L-7D134442"
   service_code = "cloudfront"
-  value        = 100
 }
 
-resource "aws_servicequotas_service_quota" "ec2_vcpu_quota" {
+data "aws_servicequotas_service_quota" "ec2_vcpu_quota" {
   provider     = aws.global
   quota_code   = "L-1216C47A"
   service_code = "ec2"
-  value        = 32
+}
+
+resource "aws_servicequotas_service_quota" "cf_origin_request_policy" {
+  count        = data.aws_servicequotas_service_quota.cf_origin_request_policy.value < local.cf_origin_request_policy_desired ? 1 : 0
+  provider     = aws.global
+  quota_code   = "L-C3659C43"
+  service_code = "cloudfront"
+  value        = local.cf_origin_request_policy_desired
+}
+
+resource "aws_servicequotas_service_quota" "cf_response_header_policy" {
+  count        = data.aws_servicequotas_service_quota.cf_response_header_policy.value < local.cf_response_header_policy_desired ? 1 : 0
+  provider     = aws.global
+  quota_code   = "L-CF0D4FC5"
+  service_code = "cloudfront"
+  value        = local.cf_response_header_policy_desired
+}
+
+resource "aws_servicequotas_service_quota" "cf_cache_policy" {
+  count        = data.aws_servicequotas_service_quota.cf_cache_policy.value < local.cf_cache_policy_desired ? 1 : 0
+  provider     = aws.global
+  quota_code   = "L-7D134442"
+  service_code = "cloudfront"
+  value        = local.cf_cache_policy_desired
+}
+
+resource "aws_servicequotas_service_quota" "ec2_vcpu_quota" {
+  count        = data.aws_servicequotas_service_quota.ec2_vcpu_quota.value < local.ec2_vcpu_quota_desired ? 1 : 0
+  provider     = aws.global
+  quota_code   = "L-1216C47A"
+  service_code = "ec2"
+  value        = local.ec2_vcpu_quota_desired
 }
 
 ###########################################################################
