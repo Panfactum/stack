@@ -1,7 +1,7 @@
 variable "vault_secrets_operator_helm_version" {
   description = "The version of the vault-secrets-operator helm chart to deploy"
   type        = string
-  default     = "0.8.1"
+  default     = "1.3.0"
 }
 
 variable "pull_through_cache_enabled" {
