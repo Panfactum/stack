@@ -106,6 +106,8 @@ words:
     "dmarc",
     "authentik",
     "bitnami",
+    "bitnamilegacy",
+    "bitnamicharts",
     "sigv",
     "pgbouncer",
     "pooler",

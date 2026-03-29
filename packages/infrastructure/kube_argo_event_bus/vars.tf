@@ -16,7 +16,7 @@ variable "pull_through_cache_enabled" {
 }
 
 variable "helm_version" {
-  description = "The version of the bitnami/nats helm chart to use"
+  description = "The version of the bitnamilegacy/nats helm chart to use"
   type        = string
   default     = "8.5.1"
 }

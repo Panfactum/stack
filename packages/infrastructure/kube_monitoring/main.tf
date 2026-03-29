@@ -1373,6 +1373,11 @@ resource "helm_release" "thanos" {
   values = [
     yamlencode({
       fullnameOverride = "thanos"
+
+      image = {
+        repository = "bitnamilegacy/thanos"
+      }
+
       query = {
         enabled = true
 

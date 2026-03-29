@@ -10,7 +10,7 @@ variable "namespace" {
 }
 
 variable "helm_version" {
-  description = "The version of the bitnami/redis helm chart to use"
+  description = "The version of the bitnamilegacy/redis helm chart to use"
   type        = string
   default     = "20.5.0"
 }

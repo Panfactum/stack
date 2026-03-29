@@ -207,6 +207,10 @@ resource "helm_release" "nats" {
         max_file_store          = (var.persistence_storage_limit_gb != null ? var.persistence_storage_limit_gb : var.persistence_initial_storage_gb * 10) * 1024 * 1024 * 1024
       })
 
+      image = {
+        repository = "bitnamilegacy/nats"
+      }
+
       # We use our own
       pdb = {
         create = false
