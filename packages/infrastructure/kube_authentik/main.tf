@@ -768,20 +768,3 @@ module "cdn" {
   origin_configs = module.ingress[0].cdn_origin_configs
 }
 
-/***************************************
-* Image Cache
-***************************************/
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [
-    {
-      registry   = "ghcr.io"
-      repository = "goauthentik/server"
-      tag        = var.authentik_helm_version
-    }
-  ]
-}
-

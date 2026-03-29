@@ -173,12 +173,6 @@ variable "creds_syncer_logging_enabled" {
   default     = false
 }
 
-variable "node_image_cached_enabled" {
-  description = "Whether to add the container images to the node image cache for faster startup times"
-  type        = bool
-  default     = true
-}
-
 variable "disabled_commands" {
   description = "Commands that are disabled in Redis. This can be used to provide global protection against unsafe commands."
   type        = list(string)

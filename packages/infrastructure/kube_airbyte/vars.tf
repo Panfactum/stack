@@ -70,12 +70,6 @@ variable "ingress_enabled" {
   default     = true
 }
 
-variable "node_image_cached_enabled" {
-  description = "Whether to enable node image caching"
-  type        = bool
-  default     = true
-}
-
 variable "vpa_enabled" {
   description = "Whether to enable Vertical Pod Autoscaler"
   type        = bool

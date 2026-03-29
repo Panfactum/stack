@@ -211,18 +211,6 @@ resource "kubectl_manifest" "pdb" {
   depends_on        = [helm_release.cnpg]
 }
 
-# This needs to be updated when the helm version is updated
-module "image_cache" {
-  source = "../kube_node_image_cache"
-  images = [
-    {
-      registry   = "ghcr.io"
-      repository = "cloudnative-pg/cloudnative-pg"
-      tag        = "1.24.1"
-    }
-  ]
-}
-
 /***************************************
 * Volume Snapshot Class (for backups)
 ***************************************/

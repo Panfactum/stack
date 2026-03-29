@@ -35,7 +35,6 @@ module "nats" {
   namespace = var.namespace
 
   pull_through_cache_enabled  = var.pull_through_cache_enabled
-  node_image_cached_enabled   = var.node_image_cached_enabled
   monitoring_enabled          = var.monitoring_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   vpa_enabled                 = var.vpa_enabled

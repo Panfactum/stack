@@ -501,21 +501,3 @@ resource "kubernetes_role_binding" "pod_reader" {
   }
 }
 
-/************************************************
-* Caches the pod's images on the node
-************************************************/
-
-module "image_cache" {
-  count  = anytrue([for container in var.containers : (container.image_pin_enabled || container.image_prepull_enabled)]) ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [for config in values({ for container in var.containers : "${container.image_registry}/${container.image_repository}:${container.image_tag}" => {
-    registry          = container.image_registry
-    repository        = container.image_repository
-    tag               = container.image_tag
-    prepull_enabled   = container.image_prepull_enabled
-    pin_enabled       = container.image_pin_enabled
-    arm_nodes_enabled = var.arm_nodes_enabled
-    amd_nodes_enabled = true
-  }... }) : try(config[0], config)]
-}

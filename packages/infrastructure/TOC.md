@@ -84,8 +84,6 @@
 - `kube_nats/` - Deploys NATS message broker into Kubernetes for event streaming and request-response messaging.
 - `kube_nlb_common_resources/` - Provisions shared resources for Network Load Balancers in Kubernetes clusters.
 - `kube_nocodb/` - Deploys NocoDB into Kubernetes as an open-source Airtable alternative for database management.
-- `kube_node_image_cache/` - Caches container images on Kubernetes nodes for faster pod startup times.
-- `kube_node_image_cache_controller/` - Manages and maintains the node image cache across the Kubernetes cluster.
 - `kube_node_settings/` - Configures Kubernetes node settings for kernel parameters, security policies, and runtime options.
 - `kube_open_cost/` - Deploys OpenCost into Kubernetes for cost allocation and monitoring of cloud resources.
 - `kube_opensearch/` - Deploys OpenSearch into Kubernetes for search, analytics, and logging.

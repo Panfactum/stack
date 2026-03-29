@@ -362,12 +362,3 @@ resource "kubectl_manifest" "pdb" {
   server_side_apply = true
   depends_on        = [helm_release.runner]
 }
-
-module "image_cache" {
-  source = "../kube_node_image_cache"
-  images = [for config in values({ for image in local.runner_images : "${image.registry}/${image.repository}:${image.tag}" => {
-    registry   = image.registry
-    repository = image.repository
-    image_tag  = image.tag
-  }... }) : try(config[0], config)]
-}

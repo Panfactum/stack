@@ -774,39 +774,3 @@ module "disruption_window_controller" {
   cron_schedule = var.voluntary_disruption_window_cron_schedule
 }
 
-/***************************************
-* Image Cache
-***************************************/
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [
-    {
-      registry          = "docker.io"
-      repository        = "bitnamilegacy/redis"
-      tag               = "7.4.1-debian-12-r2"
-      arm_nodes_enabled = var.arm_nodes_enabled
-    },
-    {
-      registry          = "docker.io"
-      repository        = "bitnamilegacy/redis-sentinel"
-      tag               = "7.4.1-debian-12-r2"
-      arm_nodes_enabled = var.arm_nodes_enabled
-    },
-    {
-      registry          = "docker.io"
-      repository        = "bitnamilegacy/redis-exporter"
-      tag               = "1.66.0-debian-12-r2"
-      arm_nodes_enabled = var.arm_nodes_enabled
-    },
-    {
-      registry          = "docker.io"
-      repository        = "bitnamilegacy/kubectl"
-      tag               = "1.31.2-debian-12-r6"
-      arm_nodes_enabled = var.arm_nodes_enabled
-    }
-  ]
-}
-

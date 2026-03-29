@@ -27,12 +27,16 @@ export async function updateKubeConfig(inputs: IUpdateKubeConfigInputs) {
         readYAMLFile({
             context,
             filePath: clustersFilePath,
-            validationSchema: CLUSTERS_FILE_SCHEMA
+            validationSchema: CLUSTERS_FILE_SCHEMA,
+            throwOnMissing: false,
+            throwOnEmpty: false,
         }),
         readYAMLFile({
             context,
             filePath: kubeConfigFilePath,
-            validationSchema: KUBE_CONFIG_SCHEMA
+            validationSchema: KUBE_CONFIG_SCHEMA,
+            throwOnMissing: false,
+            throwOnEmpty: false,
         })
     ])
 
@@ -128,7 +132,8 @@ export async function updateKubeConfig(inputs: IUpdateKubeConfigInputs) {
                 clusters: newClusters,
                 users: newUsers,
                 contexts: newContexts
-            }
+            },
+            overwrite: true
         })
     }
 }

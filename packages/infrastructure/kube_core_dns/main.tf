@@ -131,8 +131,6 @@ module "core_dns" {
           "-conf",
           "/etc/coredns/Corefile"
         ]
-        image_prepull_enabled = false // This is deployed before Kyverno is available
-        image_pin_enabled     = false // This is deployed before Kyverno is available
         linux_capabilities    = ["NET_BIND_SERVICE"]
         liveness_probe_port   = "8080"
         liveness_probe_type   = "HTTP"

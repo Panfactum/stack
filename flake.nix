@@ -200,8 +200,8 @@
         formatter = pkgs.nixfmt-rfc-style;
 
         devShell = mkDevShell {
-          withPFCLI = false;
-          activateDefaultShellHook = false;
+          withPFCLI = true;
+          activateDefaultShellHook = true;
           shellHook = localDevShell.shellHook;
           packages = localDevShell.packages;
         };

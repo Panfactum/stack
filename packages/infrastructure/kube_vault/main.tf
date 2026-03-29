@@ -424,20 +424,3 @@ module "cdn" {
   origin_configs = module.ingress[0].cdn_origin_configs
 }
 
-/***************************************
-* Image Cache
-***************************************/
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [
-    {
-      registry   = module.constants.images.vault.registry
-      repository = module.constants.images.vault.repository
-      tag        = module.constants.images.vault.tag
-    }
-  ]
-}
-

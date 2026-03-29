@@ -577,21 +577,3 @@ module "disruption_window_controller" {
 
   cron_schedule = var.voluntary_disruption_window_cron_schedule
 }
-
-/***************************************
-* Image Cache
-***************************************/
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [
-    {
-      registry          = "docker.io"
-      repository        = "bitnami/nats"
-      tag               = "2.10.22-debian-12-r0"
-      arm_nodes_enabled = var.arm_nodes_enabled
-    }
-  ]
-}

@@ -100,7 +100,6 @@ export enum MODULES {
     KUBE_AWS_LB_CONTROLLER = "kube_aws_lb_controller",
     KUBE_EXTERNAL_SNAPSHOTTER = "kube_external_snapshotter",
     KUBE_VELERO = "kube_velero",
-    KUBE_NODE_IMAGE_CACHE_CONTROLLER = "kube_node_image_cache_controller",
     KUBE_PVC_AUTORESIZER = "kube_pvc_autoresizer",
     KUBE_RELOADER = "kube_reloader",
     KUBE_DESCHEDULER = "kube_descheduler",

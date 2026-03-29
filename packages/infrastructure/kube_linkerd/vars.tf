@@ -21,12 +21,6 @@ variable "pull_through_cache_enabled" {
   default     = true
 }
 
-variable "node_image_cache_enabled" {
-  description = "Whether to cache images locally for better startup performance"
-  type        = bool
-  default     = false
-}
-
 variable "log_level" {
   description = "The log level for the Linkerd pods"
   type        = string
@@ -58,12 +52,6 @@ variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
   default     = false
-}
-
-variable "node_image_cached_enabled" {
-  description = "Whether to add the container images to the node image cache for faster startup times"
-  type        = bool
-  default     = true
 }
 
 variable "wait" {

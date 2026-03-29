@@ -5,7 +5,6 @@ import postgresTerragruntHcl from "@/templates/kube_cloudnative_pg_terragrunt.hc
 import kubeDeschedulerTerragruntHcl from "@/templates/kube_descheduler_terragrunt.hcl" with { type: "file" };
 import kubeExternalSnapshotterTerragruntHcl from "@/templates/kube_external_snapshotter_terragrunt.hcl" with { type: "file" };
 import kubeKedaTerragruntHcl from "@/templates/kube_keda_terragrunt.hcl" with { type: "file" };
-import kubeNodeImageCacheControllerTerragruntHcl from "@/templates/kube_node_image_cache_controller_terragrunt.hcl" with { type: "file" };
 import kubePvcAutoresizerTerragruntHcl from "@/templates/kube_pvc_autoresizer_terragrunt.hcl" with { type: "file" };
 import kubeReloaderTerragruntHcl from "@/templates/kube_reloader_terragrunt.hcl" with { type: "file" };
 import kubeVeleroTerragruntHcl from "@/templates/kube_velero_terragrunt.hcl" with { type: "file" };
@@ -181,20 +180,6 @@ export async function setupClusterExtensions(
               module: MODULES.KUBE_RELOADER,
               hclIfMissing: await Bun.file(
                 kubeReloaderTerragruntHcl
-              ).text(),
-            }),
-            await buildDeployModuleTask({
-              taskTitle: "Deploy Node Image Cache Controller",
-              context,
-              env: {
-                ...process.env,
-              },
-              environment,
-              region,
-              skipIfAlreadyApplied: true,
-              module: MODULES.KUBE_NODE_IMAGE_CACHE_CONTROLLER,
-              hclIfMissing: await Bun.file(
-                kubeNodeImageCacheControllerTerragruntHcl
               ).text(),
             }),
             await buildDeployModuleTask({

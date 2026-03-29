@@ -742,40 +742,6 @@ resource "helm_release" "linkerd" {
   ]
 }
 
-/***************************************
-* Image Cache
-***************************************/
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = [
-
-    // This ensures that the proxy image is preloaded onto each node.
-    // This is more for improving node startup time than anything else and saves
-    // around 4-5 seconds off the first container launch
-    {
-      registry    = "cr.l5d.io"
-      repository  = "linkerd/proxy"
-      tag         = local.linkerd_image_tag
-      pin_enabled = false
-    },
-
-    // Allows the operator components to failover faster
-    {
-      registry   = "cr.l5d.io"
-      repository = "linkerd/controller"
-      tag        = local.linkerd_image_tag
-    },
-    {
-      registry   = "cr.l5d.io"
-      repository = "linkerd/policy-controller"
-      tag        = local.linkerd_image_tag
-    }
-  ]
-}
-
 
 /***************************************
 * Linkerd Policies

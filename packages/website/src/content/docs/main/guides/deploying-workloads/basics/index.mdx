@@ -519,23 +519,6 @@ by the controller and provide its name via the `service_account_name` output.
 You can use the output to assign additional permissions to the pods by following our guides
 [here](/docs/main/guides/deploying-workloads/permissions).
 
-### Caching Images on Nodes
-
-By default, a pod's images are pulled just-in-time to the nodes where the pod is assigned. This can result in a significant
-delay to startup time, especially for large images.
-
-We provide a [custom controller](/docs/main/modules/kube_node_image_cache_controller/overview) that will automatically cache images on nodes before the pods are scheduled
-to ensure that they are available as soon as possible. Panfactum workload submodules already have implicit integration with this
-controller, and you can control the image cache settings on a per-container basis through the `containers` input to each workload submodule.
-
-In particular, the container configuration object has two relevant fields:
-
-* `image_prepull_enabed`: Iff true, will schedule a pod to seed the node cache of new nodes immediately upon node creation. (default: `true`)
-* `image_pin_enabled`: Iff true, will pin the image to the node to prevent it from ever being garbage collected. (default: `true`)
-
-If you are not using a Panfactum workload submodule, you can add images directly to the node cache by using the
-[kube\_node\_image\_cache](/docs/main/modules/kube_node_image_cache/overview) submodule.
-
 ## Custom Workload Deployments
 
 All the above information applies specifically to the Panfactum submodules for deploying workloads

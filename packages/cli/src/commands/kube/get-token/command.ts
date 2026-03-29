@@ -65,8 +65,6 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
   })
 
   override async execute(): Promise<number> {
-    const { logger } = this.context
-
     try {
       // Get the EKS token using our utility that combines AWS SDK validation with CLI token generation
       const token = await getEKSToken({
@@ -76,7 +74,8 @@ export default class K8sGetTokenCommand extends PanfactumCommand {
         awsProfile: this.profile
       })
       
-      logger.writeRaw(JSON.stringify(token))
+      // Write directly to stdout since kubectl reads exec plugin credentials from stdout
+      this.context.stdout.write(JSON.stringify(token))
       return 0
     } catch (error) {
       throw new CLIError(`Failed to get EKS token`, error)

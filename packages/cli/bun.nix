@@ -14,9 +14,8 @@ let
   packages = {
     "@aws-crypto/crc32" = {
       out_path = "@aws-crypto/crc32";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/crc32@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/crc32/-/crc32-5.2.0.tgz";
@@ -25,9 +24,8 @@ let
     };
     "@aws-crypto/crc32c" = {
       out_path = "@aws-crypto/crc32c";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/crc32c@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/crc32c/-/crc32c-5.2.0.tgz";
@@ -36,9 +34,8 @@ let
     };
     "@aws-crypto/sha1-browser" = {
       out_path = "@aws-crypto/sha1-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/sha1-browser@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/sha1-browser/-/sha1-browser-5.2.0.tgz";
@@ -47,9 +44,8 @@ let
     };
     "@aws-crypto/sha1-browser/@smithy/util-utf8" = {
       out_path = "@aws-crypto/sha1-browser/node_modules/@smithy/node_modules/util-utf8";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-utf8@2.3.0";
         url = "https://registry.npmjs.org/@smithy/util-utf8/-/util-utf8-2.3.0.tgz";
@@ -58,9 +54,8 @@ let
     };
     "@aws-crypto/sha1-browser/@smithy/util-utf8/@smithy/util-buffer-from" = {
       out_path = "@aws-crypto/sha1-browser/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-buffer-from@2.2.0";
         url = "https://registry.npmjs.org/@smithy/util-buffer-from/-/util-buffer-from-2.2.0.tgz";
@@ -69,9 +64,8 @@ let
     };
     "@aws-crypto/sha1-browser/@smithy/util-utf8/@smithy/util-buffer-from/@smithy/is-array-buffer" = {
       out_path = "@aws-crypto/sha1-browser/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from/node_modules/@smithy/node_modules/is-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/is-array-buffer@2.2.0";
         url = "https://registry.npmjs.org/@smithy/is-array-buffer/-/is-array-buffer-2.2.0.tgz";
@@ -80,9 +74,8 @@ let
     };
     "@aws-crypto/sha256-browser" = {
       out_path = "@aws-crypto/sha256-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/sha256-browser@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/sha256-browser/-/sha256-browser-5.2.0.tgz";
@@ -91,9 +84,8 @@ let
     };
     "@aws-crypto/sha256-browser/@smithy/util-utf8" = {
       out_path = "@aws-crypto/sha256-browser/node_modules/@smithy/node_modules/util-utf8";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-utf8@2.3.0";
         url = "https://registry.npmjs.org/@smithy/util-utf8/-/util-utf8-2.3.0.tgz";
@@ -102,9 +94,8 @@ let
     };
     "@aws-crypto/sha256-browser/@smithy/util-utf8/@smithy/util-buffer-from" = {
       out_path = "@aws-crypto/sha256-browser/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-buffer-from@2.2.0";
         url = "https://registry.npmjs.org/@smithy/util-buffer-from/-/util-buffer-from-2.2.0.tgz";
@@ -113,9 +104,8 @@ let
     };
     "@aws-crypto/sha256-browser/@smithy/util-utf8/@smithy/util-buffer-from/@smithy/is-array-buffer" = {
       out_path = "@aws-crypto/sha256-browser/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from/node_modules/@smithy/node_modules/is-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/is-array-buffer@2.2.0";
         url = "https://registry.npmjs.org/@smithy/is-array-buffer/-/is-array-buffer-2.2.0.tgz";
@@ -124,9 +114,8 @@ let
     };
     "@aws-crypto/sha256-js" = {
       out_path = "@aws-crypto/sha256-js";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/sha256-js@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/sha256-js/-/sha256-js-5.2.0.tgz";
@@ -135,9 +124,8 @@ let
     };
     "@aws-crypto/supports-web-crypto" = {
       out_path = "@aws-crypto/supports-web-crypto";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/supports-web-crypto@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/supports-web-crypto/-/supports-web-crypto-5.2.0.tgz";
@@ -146,9 +134,8 @@ let
     };
     "@aws-crypto/util" = {
       out_path = "@aws-crypto/util";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/util@5.2.0";
         url = "https://registry.npmjs.org/@aws-crypto/util/-/util-5.2.0.tgz";
@@ -157,9 +144,8 @@ let
     };
     "@aws-crypto/util/@smithy/util-utf8" = {
       out_path = "@aws-crypto/util/node_modules/@smithy/node_modules/util-utf8";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-utf8@2.3.0";
         url = "https://registry.npmjs.org/@smithy/util-utf8/-/util-utf8-2.3.0.tgz";
@@ -168,9 +154,8 @@ let
     };
     "@aws-crypto/util/@smithy/util-utf8/@smithy/util-buffer-from" = {
       out_path = "@aws-crypto/util/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-buffer-from@2.2.0";
         url = "https://registry.npmjs.org/@smithy/util-buffer-from/-/util-buffer-from-2.2.0.tgz";
@@ -179,9 +164,8 @@ let
     };
     "@aws-crypto/util/@smithy/util-utf8/@smithy/util-buffer-from/@smithy/is-array-buffer" = {
       out_path = "@aws-crypto/util/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from/node_modules/@smithy/node_modules/is-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/is-array-buffer@2.2.0";
         url = "https://registry.npmjs.org/@smithy/is-array-buffer/-/is-array-buffer-2.2.0.tgz";
@@ -190,9 +174,8 @@ let
     };
     "@aws-sdk/client-account" = {
       out_path = "@aws-sdk/client-account";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-account@3.794.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-account/-/client-account-3.794.0.tgz";
@@ -201,9 +184,8 @@ let
     };
     "@aws-sdk/client-account/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-account/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -212,9 +194,8 @@ let
     };
     "@aws-sdk/client-auto-scaling" = {
       out_path = "@aws-sdk/client-auto-scaling";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-auto-scaling@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-auto-scaling/-/client-auto-scaling-3.825.0.tgz";
@@ -223,9 +204,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.825.0.tgz";
@@ -234,9 +214,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/core/@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/core/node_modules/@aws-sdk/node_modules/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.821.0.tgz";
@@ -245,9 +224,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/core/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -256,9 +234,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
@@ -267,9 +244,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -278,163 +254,161 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.825.0.tgz";
         hash = "sha256-0wajck+mxfURrLIckEWV72qPLqhik3VheaTG46cM5ng=";
       };
     };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-env@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.825.0.tgz";
-        hash = "sha256-pNYrd7VWMEhiJBBqai9I9rQNOi3mRrlOjUmDr19oRtM=";
-      };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-env@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.825.0.tgz";
+          hash = "sha256-pNYrd7VWMEhiJBBqai9I9rQNOi3mRrlOjUmDr19oRtM=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-http@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.825.0.tgz";
-        hash = "sha256-KhuHEVSfh6RVgG9iFHvpiiTNluzRm5zbc1kyG+Os4xU=";
       };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-stream@4.2.2";
-        url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
-        hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
-      };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-http@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.825.0.tgz";
+          hash = "sha256-KhuHEVSfh6RVgG9iFHvpiiTNluzRm5zbc1kyG+Os4xU=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-ini@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.825.0.tgz";
-        hash = "sha256-rEOfIRPnVAOPPDw2tU9J0lw1eq+1e2TFNTBu1gG1S38=";
       };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
-      };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@smithy/util-stream@4.2.2";
+          url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
+          hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-process@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.825.0.tgz";
-        hash = "sha256-JLir9bU//AjFK2AywUC4jGHxRqEL3sd/xqd6u7qyqk4=";
       };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-sso@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.825.0.tgz";
-        hash = "sha256-a6XSQGCoETORg0PSSk49X47gT5RSQNeV71k5PHQFGfc=";
-      };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-ini@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.825.0.tgz";
+          hash = "sha256-rEOfIRPnVAOPPDw2tU9J0lw1eq+1e2TFNTBu1gG1S38=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
-        hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
       };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
-        hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
-      };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
       };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
-        hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
-      };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-process@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.825.0.tgz";
+          hash = "sha256-JLir9bU//AjFK2AywUC4jGHxRqEL3sd/xqd6u7qyqk4=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
       };
-    };
-    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/credential-provider-imds@4.0.6";
-        url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
-        hash = "sha256-c0f3S81YrlQRGh9Kn7wDovB+5z5kcPGXeVNATFPuCb0=";
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-sso@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.825.0.tgz";
+          hash = "sha256-a6XSQGCoETORg0PSSk49X47gT5RSQNeV71k5PHQFGfc=";
+        };
       };
-    };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
+          hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
+        };
+      };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
+          hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
+        };
+      };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
+      };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
+          hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
+        };
+      };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
+      };
+    "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/credential-provider-imds@4.0.6";
+          url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
+          hash = "sha256-c0f3S81YrlQRGh9Kn7wDovB+5z5kcPGXeVNATFPuCb0=";
+        };
+      };
     "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -443,9 +417,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -454,9 +427,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.821.0.tgz";
@@ -465,9 +437,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.821.0.tgz";
@@ -476,9 +447,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.821.0.tgz";
@@ -487,9 +457,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.825.0.tgz";
@@ -498,9 +467,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.821.0.tgz";
@@ -509,9 +477,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -520,9 +487,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.821.0.tgz";
@@ -531,9 +497,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.821.0.tgz";
@@ -542,9 +507,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.825.0.tgz";
@@ -553,9 +517,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.4";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.4.tgz";
@@ -564,9 +527,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/core" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.5.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.5.3.tgz";
@@ -575,9 +537,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/core/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/core/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -586,9 +547,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/fetch-http-handler" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.4";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.4.tgz";
@@ -597,31 +557,29 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/fetch-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-auto-scaling/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-auto-scaling/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.4";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.4.tgz";
@@ -630,9 +588,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/invalid-dependency" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.4";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.4.tgz";
@@ -641,9 +598,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-content-length" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.4.tgz";
@@ -652,9 +608,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.11";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.11.tgz";
@@ -663,9 +618,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -674,9 +628,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.12";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.12.tgz";
@@ -685,9 +638,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -696,9 +648,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.8";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.8.tgz";
@@ -707,9 +658,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/middleware-stack" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.4.tgz";
@@ -718,9 +668,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.3";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.3.tgz";
@@ -729,9 +678,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/node-config-provider/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -740,9 +688,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/node-config-provider/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -751,9 +698,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/node-http-handler" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.6";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz";
@@ -762,9 +708,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/node-http-handler/@smithy/abort-controller" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
@@ -773,31 +718,29 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/node-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-auto-scaling/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-auto-scaling/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-auto-scaling/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.4.3";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.4.3.tgz";
@@ -806,9 +749,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/smithy-client/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/smithy-client/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -817,9 +759,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/types" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -828,9 +769,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/url-parser" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.4.tgz";
@@ -839,9 +779,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/url-parser/@smithy/querystring-parser" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/url-parser/node_modules/@smithy/node_modules/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.4.tgz";
@@ -850,9 +789,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.19.tgz";
@@ -861,9 +799,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-defaults-mode-browser/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -872,9 +809,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.19.tgz";
@@ -883,9 +819,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -894,9 +829,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-defaults-mode-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -905,9 +839,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.6";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.6.tgz";
@@ -916,9 +849,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-middleware" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.4";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.4.tgz";
@@ -927,9 +859,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.5.tgz";
@@ -938,9 +869,8 @@ let
     };
     "@aws-sdk/client-auto-scaling/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-auto-scaling/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -949,9 +879,8 @@ let
     };
     "@aws-sdk/client-dynamodb" = {
       out_path = "@aws-sdk/client-dynamodb";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-dynamodb@3.817.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.817.0.tgz";
@@ -960,9 +889,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.816.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.816.0.tgz";
@@ -971,9 +899,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
@@ -982,9 +909,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -993,9 +919,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.817.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.817.0.tgz";
@@ -1004,9 +929,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.816.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.816.0.tgz";
@@ -1015,9 +939,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.816.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.816.0.tgz";
@@ -1026,108 +949,105 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.817.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.817.0.tgz";
         hash = "sha256-zbhQ4gxgkuJMBj/6s9Z6oI4bfh3AYebvfoNw8/C6jZA=";
       };
     };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.817.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.817.0.tgz";
-        hash = "sha256-NhM8UNR0+U2d9RGZy2bQiJqKdnDlWxuKApYHPAqA6W4=";
-      };
-    };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.817.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.817.0.tgz";
+          hash = "sha256-NhM8UNR0+U2d9RGZy2bQiJqKdnDlWxuKApYHPAqA6W4=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-process@3.816.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.816.0.tgz";
-        hash = "sha256-xnDyK4THbiNhqXt0uRiQcNYKmuIqSEn7kwFTKtWXyBY=";
       };
-    };
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-process@3.816.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.816.0.tgz";
+          hash = "sha256-xnDyK4THbiNhqXt0uRiQcNYKmuIqSEn7kwFTKtWXyBY=";
+        };
+      };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.817.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.817.0.tgz";
         hash = "sha256-Y9QrFo+EyvNqYh7ef2VxE30PHji9vkD+KJ+/3V3Cz4s=";
       };
     };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.817.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.817.0.tgz";
-        hash = "sha256-vWZvOYrziiwsUk/jsqKzfftEo9cIYbKYOatcpQDYAfY=";
-      };
-    };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.817.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.817.0.tgz";
+          hash = "sha256-vWZvOYrziiwsUk/jsqKzfftEo9cIYbKYOatcpQDYAfY=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.817.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.817.0.tgz";
-        hash = "sha256-/bAAILcgiVlVhcSWWBFIaTSswerVS4+xgCT+RcFx9Bg=";
       };
-    };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.817.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.817.0.tgz";
-        hash = "sha256-NhM8UNR0+U2d9RGZy2bQiJqKdnDlWxuKApYHPAqA6W4=";
-      };
-    };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.817.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.817.0.tgz";
+          hash = "sha256-/bAAILcgiVlVhcSWWBFIaTSswerVS4+xgCT+RcFx9Bg=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.817.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.817.0.tgz";
-        hash = "sha256-UTZ6EmFG4eHNBh+p4sdgHlzPwhIz0SPV4PGnN3CAWII=";
       };
-    };
-    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.817.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.817.0.tgz";
-        hash = "sha256-NhM8UNR0+U2d9RGZy2bQiJqKdnDlWxuKApYHPAqA6W4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.817.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.817.0.tgz";
+          hash = "sha256-NhM8UNR0+U2d9RGZy2bQiJqKdnDlWxuKApYHPAqA6W4=";
+        };
       };
-    };
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.817.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.817.0.tgz";
+          hash = "sha256-UTZ6EmFG4eHNBh+p4sdgHlzPwhIz0SPV4PGnN3CAWII=";
+        };
+      };
+    "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.817.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.817.0.tgz";
+          hash = "sha256-NhM8UNR0+U2d9RGZy2bQiJqKdnDlWxuKApYHPAqA6W4=";
+        };
+      };
     "@aws-sdk/client-dynamodb/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.4";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.4.tgz";
@@ -1136,9 +1056,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.804.0.tgz";
@@ -1147,9 +1066,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.804.0.tgz";
@@ -1158,9 +1076,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.804.0.tgz";
@@ -1169,9 +1086,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.816.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.816.0.tgz";
@@ -1180,9 +1096,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.808.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.808.0.tgz";
@@ -1191,9 +1106,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.804.0.tgz";
@@ -1202,9 +1116,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.808.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.808.0.tgz";
@@ -1213,9 +1126,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.804.0.tgz";
@@ -1224,9 +1136,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.816.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.816.0.tgz";
@@ -1235,9 +1146,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.2";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.2.tgz";
@@ -1246,9 +1156,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/core" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.3.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.3.3.tgz";
@@ -1257,9 +1166,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.6";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.6.tgz";
@@ -1268,9 +1176,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.7";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.7.tgz";
@@ -1279,9 +1186,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.3";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.3.tgz";
@@ -1290,9 +1196,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.5";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.5.tgz";
@@ -1301,9 +1206,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.1";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.1.tgz";
@@ -1312,9 +1216,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -1323,9 +1226,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.2.6";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.2.6.tgz";
@@ -1334,9 +1236,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.14";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.14.tgz";
@@ -1345,9 +1246,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.14";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.14.tgz";
@@ -1356,9 +1256,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.4";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.4.tgz";
@@ -1367,9 +1266,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.4";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.4.tgz";
@@ -1378,9 +1276,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.3.tgz";
@@ -1389,9 +1286,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.3";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.3.tgz";
@@ -1400,9 +1296,8 @@ let
     };
     "@aws-sdk/client-dynamodb/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-dynamodb/node_modules/@smithy/node_modules/util-waiter";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-waiter@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.0.3.tgz";
@@ -1411,9 +1306,8 @@ let
     };
     "@aws-sdk/client-ec2" = {
       out_path = "@aws-sdk/client-ec2";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-ec2@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-ec2/-/client-ec2-3.796.0.tgz";
@@ -1422,9 +1316,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.796.0.tgz";
@@ -1433,9 +1326,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
@@ -1444,9 +1336,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -1455,9 +1346,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.796.0.tgz";
@@ -1466,9 +1356,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.796.0.tgz";
@@ -1477,9 +1366,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.796.0.tgz";
@@ -1488,31 +1376,29 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.796.0.tgz";
         hash = "sha256-7KOvTYQS3WCHJJ0hBZ3fVX2EFM/fc9Hdd0NiEt2ZpPk=";
       };
     };
-    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.796.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
-        hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.796.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
+          hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+        };
       };
-    };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-process@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.796.0.tgz";
@@ -1521,75 +1407,73 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.796.0.tgz";
         hash = "sha256-p6XGn3bXKviRgegIxGmXg6ikNVvdvmRCtsavv5VLhfA=";
       };
     };
-    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.796.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.796.0.tgz";
-        hash = "sha256-f0zOz5maAUy72RgxzR6dutVAfYufFCigdFW5wbrwv5Y=";
-      };
-    };
-    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.796.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.796.0.tgz";
+          hash = "sha256-f0zOz5maAUy72RgxzR6dutVAfYufFCigdFW5wbrwv5Y=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.796.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.796.0.tgz";
-        hash = "sha256-rNhEw71OE+zIXqeXvORFeT/G/9mqIuMi/jpd13vyqTY=";
       };
-    };
-    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.796.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
-        hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
-      };
-    };
-    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.796.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.796.0.tgz";
+          hash = "sha256-rNhEw71OE+zIXqeXvORFeT/G/9mqIuMi/jpd13vyqTY=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.796.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.796.0.tgz";
-        hash = "sha256-B7q22q8jt0ZHSO/hvpXrEBrBG+GPm8gnJ/XxVXBCe7k=";
       };
-    };
-    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.796.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
-        hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.796.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
+          hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+        };
       };
-    };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.796.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.796.0.tgz";
+          hash = "sha256-B7q22q8jt0ZHSO/hvpXrEBrBG+GPm8gnJ/XxVXBCe7k=";
+        };
+      };
+    "@aws-sdk/client-ec2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.796.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.796.0.tgz";
+          hash = "sha256-jUrXrsUfOVdiGphFwwqA2O+6gEB7ZXRjwCiesN9kWQY=";
+        };
+      };
     "@aws-sdk/client-ec2/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.796.0.tgz";
@@ -1598,9 +1482,8 @@ let
     };
     "@aws-sdk/client-ec2/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.796.0.tgz";
@@ -1609,9 +1492,8 @@ let
     };
     "@aws-sdk/client-ec2/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -1620,9 +1502,8 @@ let
     };
     "@aws-sdk/client-ec2/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-ec2/node_modules/@smithy/node_modules/util-waiter";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-waiter@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.0.3.tgz";
@@ -1631,9 +1512,8 @@ let
     };
     "@aws-sdk/client-ecr" = {
       out_path = "@aws-sdk/client-ecr";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-ecr@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-ecr/-/client-ecr-3.825.0.tgz";
@@ -1642,9 +1522,8 @@ let
     };
     "@aws-sdk/client-ecr-public" = {
       out_path = "@aws-sdk/client-ecr-public";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-ecr-public@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-ecr-public/-/client-ecr-public-3.825.0.tgz";
@@ -1653,9 +1532,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.825.0.tgz";
@@ -1664,9 +1542,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/core/@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/core/node_modules/@aws-sdk/node_modules/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.821.0.tgz";
@@ -1675,9 +1552,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/core/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -1686,9 +1562,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
@@ -1697,9 +1572,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -1708,9 +1582,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.825.0.tgz";
@@ -1719,9 +1592,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.825.0.tgz";
@@ -1730,130 +1602,126 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.825.0.tgz";
         hash = "sha256-KhuHEVSfh6RVgG9iFHvpiiTNluzRm5zbc1kyG+Os4xU=";
       };
     };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-stream@4.2.2";
-        url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
-        hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        pkg = fetchurl {
+          name = "@smithy/util-stream@4.2.2";
+          url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
+          hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        };
       };
-    };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.825.0.tgz";
         hash = "sha256-rEOfIRPnVAOPPDw2tU9J0lw1eq+1e2TFNTBu1gG1S38=";
       };
     };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
-      };
-    };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-process@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.825.0.tgz";
-        hash = "sha256-JLir9bU//AjFK2AywUC4jGHxRqEL3sd/xqd6u7qyqk4=";
       };
-    };
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-process@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.825.0.tgz";
+          hash = "sha256-JLir9bU//AjFK2AywUC4jGHxRqEL3sd/xqd6u7qyqk4=";
+        };
+      };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.825.0.tgz";
         hash = "sha256-a6XSQGCoETORg0PSSk49X47gT5RSQNeV71k5PHQFGfc=";
       };
     };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
-        hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
-      };
-    };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
+          hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
-        hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
       };
-    };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
-      };
-    };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
+          hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
-        hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
       };
-    };
-    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
       };
-    };
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
+          hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
+        };
+      };
+    "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
+      };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -1862,9 +1730,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -1873,9 +1740,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -1884,9 +1750,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.821.0.tgz";
@@ -1895,9 +1760,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.821.0.tgz";
@@ -1906,9 +1770,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.821.0.tgz";
@@ -1917,9 +1780,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.825.0.tgz";
@@ -1928,9 +1790,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.821.0.tgz";
@@ -1939,9 +1800,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -1950,9 +1810,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.821.0.tgz";
@@ -1961,9 +1820,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.821.0.tgz";
@@ -1972,9 +1830,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.825.0.tgz";
@@ -1983,9 +1840,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.4";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.4.tgz";
@@ -1994,9 +1850,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/core" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.5.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.5.3.tgz";
@@ -2005,9 +1860,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/core/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/core/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -2016,9 +1870,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/fetch-http-handler" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.4";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.4.tgz";
@@ -2027,31 +1880,29 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/fetch-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ecr-public/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-ecr-public/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.4";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.4.tgz";
@@ -2060,9 +1911,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/invalid-dependency" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.4";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.4.tgz";
@@ -2071,9 +1921,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-content-length" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.4.tgz";
@@ -2082,9 +1931,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.11";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.11.tgz";
@@ -2093,9 +1941,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -2104,9 +1951,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.12";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.12.tgz";
@@ -2115,9 +1961,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -2126,9 +1971,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.8";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.8.tgz";
@@ -2137,9 +1981,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/middleware-stack" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.4.tgz";
@@ -2148,9 +1991,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.3";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.3.tgz";
@@ -2159,9 +2001,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/node-config-provider/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -2170,9 +2011,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/node-config-provider/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -2181,9 +2021,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/node-http-handler" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.6";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz";
@@ -2192,9 +2031,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/node-http-handler/@smithy/abort-controller" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
@@ -2203,31 +2041,29 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/node-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ecr-public/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-ecr-public/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-ecr-public/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.4.3";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.4.3.tgz";
@@ -2236,9 +2072,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/smithy-client/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/smithy-client/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -2247,9 +2082,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/types" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -2258,9 +2092,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/url-parser" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.4.tgz";
@@ -2269,9 +2102,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/url-parser/@smithy/querystring-parser" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/url-parser/node_modules/@smithy/node_modules/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.4.tgz";
@@ -2280,9 +2112,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.19.tgz";
@@ -2291,9 +2122,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-defaults-mode-browser/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -2302,9 +2132,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.19.tgz";
@@ -2313,9 +2142,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -2324,9 +2152,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-defaults-mode-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -2335,9 +2162,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.6";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.6.tgz";
@@ -2346,9 +2172,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-middleware" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.4";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.4.tgz";
@@ -2357,9 +2182,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.5.tgz";
@@ -2368,9 +2192,8 @@ let
     };
     "@aws-sdk/client-ecr-public/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-ecr-public/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -2379,9 +2202,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.825.0.tgz";
@@ -2390,9 +2212,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/core/@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/core/node_modules/@aws-sdk/node_modules/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.821.0.tgz";
@@ -2401,9 +2222,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/core/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -2412,9 +2232,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
@@ -2423,9 +2242,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -2434,9 +2252,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.825.0.tgz";
@@ -2445,9 +2262,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.825.0.tgz";
@@ -2456,53 +2272,50 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.825.0.tgz";
         hash = "sha256-KhuHEVSfh6RVgG9iFHvpiiTNluzRm5zbc1kyG+Os4xU=";
       };
     };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-stream@4.2.2";
-        url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
-        hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        pkg = fetchurl {
+          name = "@smithy/util-stream@4.2.2";
+          url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
+          hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        };
       };
-    };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.825.0.tgz";
         hash = "sha256-rEOfIRPnVAOPPDw2tU9J0lw1eq+1e2TFNTBu1gG1S38=";
       };
     };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
       };
-    };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-process@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.825.0.tgz";
@@ -2511,75 +2324,73 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.825.0.tgz";
         hash = "sha256-a6XSQGCoETORg0PSSk49X47gT5RSQNeV71k5PHQFGfc=";
       };
     };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
-        hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
-      };
-    };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
+          hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
-        hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
       };
-    };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
-      };
-    };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
+          hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
-        hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
       };
-    };
-    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
       };
-    };
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
+          hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
+        };
+      };
+    "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
+      };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -2588,9 +2399,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -2599,9 +2409,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -2610,9 +2419,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.821.0.tgz";
@@ -2621,9 +2429,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.821.0.tgz";
@@ -2632,9 +2439,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.821.0.tgz";
@@ -2643,9 +2449,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.825.0.tgz";
@@ -2654,9 +2459,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.821.0.tgz";
@@ -2665,9 +2469,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -2676,9 +2479,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.821.0.tgz";
@@ -2687,9 +2489,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.821.0.tgz";
@@ -2698,9 +2499,8 @@ let
     };
     "@aws-sdk/client-ecr/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.825.0.tgz";
@@ -2709,9 +2509,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.4";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.4.tgz";
@@ -2720,9 +2519,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/core" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.5.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.5.3.tgz";
@@ -2731,9 +2529,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/core/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/core/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -2742,9 +2539,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/fetch-http-handler" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.4";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.4.tgz";
@@ -2753,31 +2549,29 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/fetch-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ecr/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-ecr/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.4";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.4.tgz";
@@ -2786,9 +2580,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/invalid-dependency" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.4";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.4.tgz";
@@ -2797,9 +2590,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-content-length" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.4.tgz";
@@ -2808,9 +2600,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.11";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.11.tgz";
@@ -2819,9 +2610,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -2830,9 +2620,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.12";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.12.tgz";
@@ -2841,9 +2630,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -2852,9 +2640,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.8";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.8.tgz";
@@ -2863,9 +2650,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/middleware-stack" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.4.tgz";
@@ -2874,9 +2660,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.3";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.3.tgz";
@@ -2885,9 +2670,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/node-config-provider/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -2896,9 +2680,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/node-config-provider/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -2907,9 +2690,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/node-http-handler" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.6";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz";
@@ -2918,9 +2700,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/node-http-handler/@smithy/abort-controller" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
@@ -2929,31 +2710,29 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/node-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ecr/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-ecr/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-ecr/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.4.3";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.4.3.tgz";
@@ -2962,9 +2741,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/smithy-client/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/smithy-client/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -2973,9 +2751,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/types" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -2984,9 +2761,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/url-parser" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.4.tgz";
@@ -2995,9 +2771,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/url-parser/@smithy/querystring-parser" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/url-parser/node_modules/@smithy/node_modules/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.4.tgz";
@@ -3006,9 +2781,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.19.tgz";
@@ -3017,9 +2791,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-defaults-mode-browser/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3028,9 +2801,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.19.tgz";
@@ -3039,9 +2811,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -3050,9 +2821,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-defaults-mode-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3061,9 +2831,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.6";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.6.tgz";
@@ -3072,9 +2841,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-middleware" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.4";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.4.tgz";
@@ -3083,9 +2851,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.5.tgz";
@@ -3094,9 +2861,8 @@ let
     };
     "@aws-sdk/client-ecr/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-ecr/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -3105,9 +2871,8 @@ let
     };
     "@aws-sdk/client-eks" = {
       out_path = "@aws-sdk/client-eks";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-eks@3.830.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-eks/-/client-eks-3.830.0.tgz";
@@ -3116,9 +2881,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.826.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.826.0.tgz";
@@ -3127,9 +2891,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/core/@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/core/node_modules/@aws-sdk/node_modules/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.821.0.tgz";
@@ -3138,9 +2901,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/core/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3149,9 +2911,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
@@ -3160,9 +2921,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -3171,9 +2931,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.830.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.830.0.tgz";
@@ -3182,9 +2941,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.826.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.826.0.tgz";
@@ -3193,53 +2951,50 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.826.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.826.0.tgz";
         hash = "sha256-3/LsXbxNQcY3jIV2KAync1Kz0vle9wxhdpuk9+NaS7E=";
       };
     };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-stream@4.2.2";
-        url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
-        hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        pkg = fetchurl {
+          name = "@smithy/util-stream@4.2.2";
+          url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
+          hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        };
       };
-    };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.830.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.830.0.tgz";
         hash = "sha256-sgICigXSsaonzBSqdhghy1Kuss+H4lTE5mCnBnKlNdU=";
       };
     };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
-        hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
+          hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        };
       };
-    };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-process@3.826.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.826.0.tgz";
@@ -3248,75 +3003,73 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.830.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.830.0.tgz";
         hash = "sha256-R0pENcjqEewFRyOqQnHhTOVOAB4Khki282IhJUKH3tA=";
       };
     };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.830.0.tgz";
-        hash = "sha256-lr0oi9psySG9gqJ7X8DZlqRLi3XQTJmEQLZf6sc1Q9o=";
-      };
-    };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.830.0.tgz";
+          hash = "sha256-lr0oi9psySG9gqJ7X8DZlqRLi3XQTJmEQLZf6sc1Q9o=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.830.0.tgz";
-        hash = "sha256-AmeLS9mGMetnHwVRRqe+muW97NROI740bdzcraC/vgE=";
       };
-    };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
-        hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
-      };
-    };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.830.0.tgz";
+          hash = "sha256-AmeLS9mGMetnHwVRRqe+muW97NROI740bdzcraC/vgE=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.830.0.tgz";
-        hash = "sha256-AK+DO//HpALcZraDREFgtv9m7dL/pR6zMbXjU9Wmyk8=";
       };
-    };
-    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
-        hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
+          hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        };
       };
-    };
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.830.0.tgz";
+          hash = "sha256-AK+DO//HpALcZraDREFgtv9m7dL/pR6zMbXjU9Wmyk8=";
+        };
+      };
+    "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
+          hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        };
+      };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -3325,9 +3078,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3336,9 +3088,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -3347,9 +3098,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.821.0.tgz";
@@ -3358,9 +3108,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.821.0.tgz";
@@ -3369,9 +3118,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.821.0.tgz";
@@ -3380,9 +3128,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.828.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.828.0.tgz";
@@ -3391,9 +3138,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.821.0.tgz";
@@ -3402,9 +3148,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -3413,9 +3158,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.828.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.828.0.tgz";
@@ -3424,9 +3168,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.821.0.tgz";
@@ -3435,9 +3178,8 @@ let
     };
     "@aws-sdk/client-eks/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-eks/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.828.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.828.0.tgz";
@@ -3446,9 +3188,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.4";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.4.tgz";
@@ -3457,9 +3198,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/core" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.5.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.5.3.tgz";
@@ -3468,9 +3208,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/core/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/core/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -3479,9 +3218,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/fetch-http-handler" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.4";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.4.tgz";
@@ -3490,31 +3228,29 @@ let
     };
     "@aws-sdk/client-eks/@smithy/fetch-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-eks/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-eks/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.4";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.4.tgz";
@@ -3523,9 +3259,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/invalid-dependency" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.4";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.4.tgz";
@@ -3534,9 +3269,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-content-length" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.4.tgz";
@@ -3545,9 +3279,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.11";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.11.tgz";
@@ -3556,9 +3289,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -3567,9 +3299,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.12";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.12.tgz";
@@ -3578,9 +3309,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -3589,9 +3319,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.8";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.8.tgz";
@@ -3600,9 +3329,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/middleware-stack" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.4.tgz";
@@ -3611,9 +3339,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.3";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.3.tgz";
@@ -3622,9 +3349,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/node-config-provider/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3633,9 +3359,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/node-config-provider/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -3644,9 +3369,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/node-http-handler" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.6";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz";
@@ -3655,9 +3379,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/node-http-handler/@smithy/abort-controller" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
@@ -3666,31 +3389,29 @@ let
     };
     "@aws-sdk/client-eks/@smithy/node-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-eks/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-eks/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-eks/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.4.3";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.4.3.tgz";
@@ -3699,9 +3420,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/smithy-client/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/smithy-client/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -3710,9 +3430,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/types" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -3721,9 +3440,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/url-parser" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.4.tgz";
@@ -3732,9 +3450,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/url-parser/@smithy/querystring-parser" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/url-parser/node_modules/@smithy/node_modules/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.4.tgz";
@@ -3743,9 +3460,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.19.tgz";
@@ -3754,9 +3470,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-defaults-mode-browser/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3765,9 +3480,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.19.tgz";
@@ -3776,9 +3490,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -3787,9 +3500,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-defaults-mode-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3798,9 +3510,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.6";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.6.tgz";
@@ -3809,9 +3520,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-middleware" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.4";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.4.tgz";
@@ -3820,9 +3530,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.5.tgz";
@@ -3831,9 +3540,8 @@ let
     };
     "@aws-sdk/client-eks/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-eks/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -3842,9 +3550,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-elastic-load-balancing-v2@3.830.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-elastic-load-balancing-v2/-/client-elastic-load-balancing-v2-3.830.0.tgz";
@@ -3853,9 +3560,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.826.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.826.0.tgz";
@@ -3864,9 +3570,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/core/@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/core/node_modules/@aws-sdk/node_modules/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.821.0.tgz";
@@ -3875,9 +3580,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/core/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -3886,207 +3590,204 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
         hash = "sha256-IK/LOrW56bqQUdAPX1E8SPUxqr/QlUEyNvcISfexDe0=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.830.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.830.0.tgz";
         hash = "sha256-eRKPHrGIzPnH3yXEFyuV+n7pa3G+baVrSh6geJrN/us=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-env@3.826.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.826.0.tgz";
-        hash = "sha256-UOGoPyGOyUuRKzcY04xMFpKEVW+gSkL1bQZQnjmYRGY=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-env@3.826.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.826.0.tgz";
+          hash = "sha256-UOGoPyGOyUuRKzcY04xMFpKEVW+gSkL1bQZQnjmYRGY=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-http@3.826.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.826.0.tgz";
-        hash = "sha256-3/LsXbxNQcY3jIV2KAync1Kz0vle9wxhdpuk9+NaS7E=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-stream@4.2.2";
-        url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
-        hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-http@3.826.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.826.0.tgz";
+          hash = "sha256-3/LsXbxNQcY3jIV2KAync1Kz0vle9wxhdpuk9+NaS7E=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-ini@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.830.0.tgz";
-        hash = "sha256-sgICigXSsaonzBSqdhghy1Kuss+H4lTE5mCnBnKlNdU=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
-        hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@smithy/util-stream@4.2.2";
+          url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
+          hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-process@3.826.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.826.0.tgz";
-        hash = "sha256-ZwFY6e1aiq5DuYN5v+S9OF9LPNDDXK8WHhOb1p+ZZrM=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-sso@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.830.0.tgz";
-        hash = "sha256-R0pENcjqEewFRyOqQnHhTOVOAB4Khki282IhJUKH3tA=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-ini@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.830.0.tgz";
+          hash = "sha256-sgICigXSsaonzBSqdhghy1Kuss+H4lTE5mCnBnKlNdU=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.830.0.tgz";
-        hash = "sha256-lr0oi9psySG9gqJ7X8DZlqRLi3XQTJmEQLZf6sc1Q9o=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.830.0.tgz";
-        hash = "sha256-AmeLS9mGMetnHwVRRqe+muW97NROI740bdzcraC/vgE=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
+          hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
-        hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.830.0.tgz";
-        hash = "sha256-AK+DO//HpALcZraDREFgtv9m7dL/pR6zMbXjU9Wmyk8=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-process@3.826.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.826.0.tgz";
+          hash = "sha256-ZwFY6e1aiq5DuYN5v+S9OF9LPNDDXK8WHhOb1p+ZZrM=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.830.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
-        hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/credential-provider-imds@4.0.6";
-        url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
-        hash = "sha256-c0f3S81YrlQRGh9Kn7wDovB+5z5kcPGXeVNATFPuCb0=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@smithy/property-provider" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-sso@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.830.0.tgz";
+          hash = "sha256-R0pENcjqEewFRyOqQnHhTOVOAB4Khki282IhJUKH3tA=";
         };
-      pkg = fetchurl {
-        name = "@smithy/property-provider@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
-        hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
       };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/shared-ini-file-loader@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
-        hash = "sha256-RM13rOTSRucQtH7s+laMNnTf0Rb7KqkxhcTvnyGPRWE=";
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.830.0.tgz";
+          hash = "sha256-lr0oi9psySG9gqJ7X8DZlqRLi3XQTJmEQLZf6sc1Q9o=";
+        };
       };
-    };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.830.0.tgz";
+          hash = "sha256-AmeLS9mGMetnHwVRRqe+muW97NROI740bdzcraC/vgE=";
+        };
+      };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
+          hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        };
+      };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.830.0.tgz";
+          hash = "sha256-AK+DO//HpALcZraDREFgtv9m7dL/pR6zMbXjU9Wmyk8=";
+        };
+      };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.830.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.830.0.tgz";
+          hash = "sha256-HD7vi2iLKCSciItvIhpbMpZkC4MO+OGjJUTX8YEngB4=";
+        };
+      };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/credential-provider-imds@4.0.6";
+          url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
+          hash = "sha256-c0f3S81YrlQRGh9Kn7wDovB+5z5kcPGXeVNATFPuCb0=";
+        };
+      };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@smithy/property-provider" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/property-provider@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
+          hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
+        };
+      };
+    "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/shared-ini-file-loader@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
+          hash = "sha256-RM13rOTSRucQtH7s+laMNnTf0Rb7KqkxhcTvnyGPRWE=";
+        };
+      };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.821.0.tgz";
@@ -4095,9 +3796,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.821.0.tgz";
@@ -4106,9 +3806,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.821.0.tgz";
@@ -4117,9 +3816,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.828.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.828.0.tgz";
@@ -4128,9 +3826,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.821.0.tgz";
@@ -4139,9 +3836,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -4150,9 +3846,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.828.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.828.0.tgz";
@@ -4161,9 +3856,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.821.0.tgz";
@@ -4172,9 +3866,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.828.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.828.0.tgz";
@@ -4183,9 +3876,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.4";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.4.tgz";
@@ -4194,9 +3886,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/core" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.5.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.5.3.tgz";
@@ -4205,9 +3896,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/core/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/core/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -4216,42 +3906,40 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/fetch-http-handler" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.4";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.4.tgz";
         hash = "sha256-MJae7yeiTxLbKlH9DVF02EF2Cn0vbGS90KnwprA3w5E=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/fetch-http-handler/@smithy/querystring-builder" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/fetch-http-handler/@smithy/querystring-builder" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/querystring-builder@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
-        hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@smithy/querystring-builder@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
+          hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
-    };
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
+      };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.4";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.4.tgz";
@@ -4260,9 +3948,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/invalid-dependency" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.4";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.4.tgz";
@@ -4271,9 +3958,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-content-length" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.4.tgz";
@@ -4282,53 +3968,50 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.11";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.11.tgz";
         hash = "sha256-AnMVr7T5/4tSAuj/uQ/SFPydG+Y+MIiVj9jumGn8aTM=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/shared-ini-file-loader@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
-        hash = "sha256-RM13rOTSRucQtH7s+laMNnTf0Rb7KqkxhcTvnyGPRWE=";
+        pkg = fetchurl {
+          name = "@smithy/shared-ini-file-loader@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
+          hash = "sha256-RM13rOTSRucQtH7s+laMNnTf0Rb7KqkxhcTvnyGPRWE=";
+        };
       };
-    };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.12";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.12.tgz";
         hash = "sha256-cQ2VBacXvn6UXPIjunOGb/MKslNRAj2pW8pX0brQspQ=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-retry/@smithy/service-error-classification" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-retry/@smithy/service-error-classification" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/service-error-classification@4.0.5";
-        url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
-        hash = "sha256-syRAZUb5yoZGjLzWAWDNA9ryMvhqft3S8/zHC2M+qx8=";
+        pkg = fetchurl {
+          name = "@smithy/service-error-classification@4.0.5";
+          url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
+          hash = "sha256-syRAZUb5yoZGjLzWAWDNA9ryMvhqft3S8/zHC2M+qx8=";
+        };
       };
-    };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.8";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.8.tgz";
@@ -4337,9 +4020,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/middleware-stack" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.4.tgz";
@@ -4348,42 +4030,40 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.3";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.3.tgz";
         hash = "sha256-ldjlrwc00nsBb9VU80CWkEcHZYxKxdqpv3U89DQqL+c=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-config-provider/@smithy/property-provider" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-config-provider/@smithy/property-provider" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/property-provider@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
-        hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-config-provider/@smithy/shared-ini-file-loader" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@smithy/property-provider@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
+          hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
         };
-      pkg = fetchurl {
-        name = "@smithy/shared-ini-file-loader@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
-        hash = "sha256-RM13rOTSRucQtH7s+laMNnTf0Rb7KqkxhcTvnyGPRWE=";
       };
-    };
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-config-provider/@smithy/shared-ini-file-loader" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/shared-ini-file-loader@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
+          hash = "sha256-RM13rOTSRucQtH7s+laMNnTf0Rb7KqkxhcTvnyGPRWE=";
+        };
+      };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-http-handler" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.6";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz";
@@ -4392,42 +4072,40 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-http-handler/@smithy/abort-controller" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
         hash = "sha256-Rs2WwhkfjTCBebh0YpPHmrqi90NL3zsYMEq+apOb19c=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-http-handler/@smithy/querystring-builder" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-http-handler/@smithy/querystring-builder" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/querystring-builder@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
-        hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@smithy/querystring-builder@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
+          hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
       };
-    };
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
+      };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.4.3";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.4.3.tgz";
@@ -4436,9 +4114,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/smithy-client/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/smithy-client/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -4447,9 +4124,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/types" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -4458,9 +4134,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/url-parser" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.4.tgz";
@@ -4469,9 +4144,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/url-parser/@smithy/querystring-parser" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/url-parser/node_modules/@smithy/node_modules/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.4.tgz";
@@ -4480,64 +4154,61 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.19.tgz";
         hash = "sha256-zi5gNgGD8Qt5nHwne1OpkMTJ2uElVYUzpJTTU6Q0TkU=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-browser/@smithy/property-provider" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-browser/@smithy/property-provider" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/property-provider@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
-        hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
+        pkg = fetchurl {
+          name = "@smithy/property-provider@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
+          hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
+        };
       };
-    };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.19.tgz";
         hash = "sha256-L9RagEJyzTL4uQTf0CbQgo+4pZOSJ/gSYd13x6B66y4=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/credential-provider-imds@4.0.6";
-        url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
-        hash = "sha256-c0f3S81YrlQRGh9Kn7wDovB+5z5kcPGXeVNATFPuCb0=";
-      };
-    };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-node/@smithy/property-provider" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@smithy/credential-provider-imds@4.0.6";
+          url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
+          hash = "sha256-c0f3S81YrlQRGh9Kn7wDovB+5z5kcPGXeVNATFPuCb0=";
         };
-      pkg = fetchurl {
-        name = "@smithy/property-provider@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
-        hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
       };
-    };
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-defaults-mode-node/@smithy/property-provider" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/property-provider@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
+          hash = "sha256-gr8GR+on9naiObXPsLiqeS8dvJw7e3cfcNjH8UT1Ffc=";
+        };
+      };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.6";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.6.tgz";
@@ -4546,9 +4217,8 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-middleware" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.4";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.4.tgz";
@@ -4557,31 +4227,29 @@ let
     };
     "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.5.tgz";
         hash = "sha256-QTd+dhjryClwuutorsGjWPVHYyZRGlbGyZVLXiNIqqg=";
       };
     };
-    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-retry/@smithy/service-error-classification" = {
-      out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
+    "@aws-sdk/client-elastic-load-balancing-v2/@smithy/util-retry/@smithy/service-error-classification" =
+      {
+        out_path = "@aws-sdk/client-elastic-load-balancing-v2/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/service-error-classification@4.0.5";
-        url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
-        hash = "sha256-syRAZUb5yoZGjLzWAWDNA9ryMvhqft3S8/zHC2M+qx8=";
+        pkg = fetchurl {
+          name = "@smithy/service-error-classification@4.0.5";
+          url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
+          hash = "sha256-syRAZUb5yoZGjLzWAWDNA9ryMvhqft3S8/zHC2M+qx8=";
+        };
       };
-    };
     "@aws-sdk/client-iam" = {
       out_path = "@aws-sdk/client-iam";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-iam@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-iam/-/client-iam-3.787.0.tgz";
@@ -4590,9 +4258,8 @@ let
     };
     "@aws-sdk/client-iam/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-iam/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -4601,9 +4268,8 @@ let
     };
     "@aws-sdk/client-iam/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-iam/node_modules/@smithy/node_modules/util-waiter";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-waiter@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.0.3.tgz";
@@ -4612,9 +4278,8 @@ let
     };
     "@aws-sdk/client-organizations" = {
       out_path = "@aws-sdk/client-organizations";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-organizations@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-organizations/-/client-organizations-3.787.0.tgz";
@@ -4623,9 +4288,8 @@ let
     };
     "@aws-sdk/client-organizations/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-organizations/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -4634,9 +4298,8 @@ let
     };
     "@aws-sdk/client-route-53" = {
       out_path = "@aws-sdk/client-route-53";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-route-53@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-route-53/-/client-route-53-3.787.0.tgz";
@@ -4645,9 +4308,8 @@ let
     };
     "@aws-sdk/client-route-53-domains" = {
       out_path = "@aws-sdk/client-route-53-domains";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-route-53-domains@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-route-53-domains/-/client-route-53-domains-3.787.0.tgz";
@@ -4656,9 +4318,8 @@ let
     };
     "@aws-sdk/client-route-53-domains/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-route-53-domains/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -4667,9 +4328,8 @@ let
     };
     "@aws-sdk/client-route-53/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-route-53/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -4678,9 +4338,8 @@ let
     };
     "@aws-sdk/client-route-53/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-route-53/node_modules/@smithy/node_modules/util-waiter";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-waiter@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.0.3.tgz";
@@ -4689,9 +4348,8 @@ let
     };
     "@aws-sdk/client-s3" = {
       out_path = "@aws-sdk/client-s3";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-s3@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.787.0.tgz";
@@ -4700,9 +4358,8 @@ let
     };
     "@aws-sdk/client-s3/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-s3/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -4711,9 +4368,8 @@ let
     };
     "@aws-sdk/client-s3/@smithy/util-waiter" = {
       out_path = "@aws-sdk/client-s3/node_modules/@smithy/node_modules/util-waiter";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-waiter@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.0.3.tgz";
@@ -4722,9 +4378,8 @@ let
     };
     "@aws-sdk/client-service-quotas" = {
       out_path = "@aws-sdk/client-service-quotas";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-service-quotas@3.810.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-service-quotas/-/client-service-quotas-3.810.0.tgz";
@@ -4733,9 +4388,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.810.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.810.0.tgz";
@@ -4744,9 +4398,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
@@ -4755,9 +4408,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -4766,152 +4418,150 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.810.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.810.0.tgz";
         hash = "sha256-wHDGcOuGaC3qubMJrNAJaCeSxiQ56FBpIOpPjYHmv6s=";
       };
     };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-env@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.810.0.tgz";
-        hash = "sha256-jrzREmFaVA5sJxW7gR15x0iQkxcBsdYfuuUdwreeqlo=";
-      };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-env@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.810.0.tgz";
+          hash = "sha256-jrzREmFaVA5sJxW7gR15x0iQkxcBsdYfuuUdwreeqlo=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-http@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.810.0.tgz";
-        hash = "sha256-nSx2mBQHJ3DH6S5hcqcNjhBtgCKXsOpafgf/yjgd1+M=";
       };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-ini@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.810.0.tgz";
-        hash = "sha256-szHlPAc7OTkwVjCR3j1hA8eNAJmuNHS8erTzMetzeUk=";
-      };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-http@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.810.0.tgz";
+          hash = "sha256-nSx2mBQHJ3DH6S5hcqcNjhBtgCKXsOpafgf/yjgd1+M=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.810.0.tgz";
-        hash = "sha256-dqOLOltFfjS1MCRK4rNat4aC1UgT4mO0BH5dLtSTPAg=";
       };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-process@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.810.0.tgz";
-        hash = "sha256-UQs30uhwBUWAsI8UWZqOaYc4X3QQFreZwTC66qwoDeY=";
-      };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-ini@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.810.0.tgz";
+          hash = "sha256-szHlPAc7OTkwVjCR3j1hA8eNAJmuNHS8erTzMetzeUk=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-sso@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.810.0.tgz";
-        hash = "sha256-7Z4tNNdzieRND6rESPaXBQAX0QkdwcmTwy9EtHXY4u4=";
       };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.810.0.tgz";
-        hash = "sha256-cxjBDNX5DBybTZDT/BP58jr47Bh6doWuUGByOV/lEFY=";
-      };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.810.0.tgz";
+          hash = "sha256-dqOLOltFfjS1MCRK4rNat4aC1UgT4mO0BH5dLtSTPAg=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.810.0.tgz";
-        hash = "sha256-c/w8L2b3SiwHufZ+dxbyqwXHCa2S3D4Mwv9Dklr0F2M=";
       };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.810.0.tgz";
-        hash = "sha256-dqOLOltFfjS1MCRK4rNat4aC1UgT4mO0BH5dLtSTPAg=";
-      };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-process@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.810.0.tgz";
+          hash = "sha256-UQs30uhwBUWAsI8UWZqOaYc4X3QQFreZwTC66qwoDeY=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.810.0.tgz";
-        hash = "sha256-LX8PHGiA4rKadH8Nz6SK6JNy6kIlJ0QvQiTQnz/PaeI=";
       };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.810.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.810.0.tgz";
-        hash = "sha256-dqOLOltFfjS1MCRK4rNat4aC1UgT4mO0BH5dLtSTPAg=";
-      };
-    };
-    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-sso@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.810.0.tgz";
+          hash = "sha256-7Z4tNNdzieRND6rESPaXBQAX0QkdwcmTwy9EtHXY4u4=";
         };
-      pkg = fetchurl {
-        name = "@smithy/credential-provider-imds@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.4.tgz";
-        hash = "sha256-Jhdn8klqmslPKZzCFV7osR2tYMduQa95qOZBqLWLKzM=";
       };
-    };
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.810.0.tgz";
+          hash = "sha256-cxjBDNX5DBybTZDT/BP58jr47Bh6doWuUGByOV/lEFY=";
+        };
+      };
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.810.0.tgz";
+          hash = "sha256-c/w8L2b3SiwHufZ+dxbyqwXHCa2S3D4Mwv9Dklr0F2M=";
+        };
+      };
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.810.0.tgz";
+          hash = "sha256-dqOLOltFfjS1MCRK4rNat4aC1UgT4mO0BH5dLtSTPAg=";
+        };
+      };
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.810.0.tgz";
+          hash = "sha256-LX8PHGiA4rKadH8Nz6SK6JNy6kIlJ0QvQiTQnz/PaeI=";
+        };
+      };
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.810.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.810.0.tgz";
+          hash = "sha256-dqOLOltFfjS1MCRK4rNat4aC1UgT4mO0BH5dLtSTPAg=";
+        };
+      };
+    "@aws-sdk/client-service-quotas/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@smithy/credential-provider-imds@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.4.tgz";
+          hash = "sha256-Jhdn8klqmslPKZzCFV7osR2tYMduQa95qOZBqLWLKzM=";
+        };
+      };
     "@aws-sdk/client-service-quotas/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.804.0.tgz";
@@ -4920,9 +4570,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.804.0.tgz";
@@ -4931,9 +4580,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.804.0.tgz";
@@ -4942,9 +4590,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.810.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.810.0.tgz";
@@ -4953,9 +4600,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.808.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.808.0.tgz";
@@ -4964,9 +4610,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.804.0.tgz";
@@ -4975,9 +4620,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.808.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.808.0.tgz";
@@ -4986,9 +4630,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.804.0.tgz";
@@ -4997,9 +4640,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.810.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.810.0.tgz";
@@ -5008,9 +4650,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.2";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.2.tgz";
@@ -5019,9 +4660,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/core" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.3.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.3.3.tgz";
@@ -5030,9 +4670,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.6";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.6.tgz";
@@ -5041,9 +4680,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.7";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.7.tgz";
@@ -5052,9 +4690,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.3";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.3.tgz";
@@ -5063,9 +4700,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.5";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.5.tgz";
@@ -5074,9 +4710,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.1";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.1.tgz";
@@ -5085,9 +4720,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -5096,9 +4730,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.2.6";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.2.6.tgz";
@@ -5107,9 +4740,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.14";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.14.tgz";
@@ -5118,31 +4750,29 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.14";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.14.tgz";
         hash = "sha256-vHZQuJedStpyD8VuMTgu6pWQk8bsps05ZIMczgVmXgc=";
       };
     };
-    "@aws-sdk/client-service-quotas/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
-      out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
+    "@aws-sdk/client-service-quotas/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" =
+      {
+        out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/credential-provider-imds@4.0.4";
-        url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.4.tgz";
-        hash = "sha256-Jhdn8klqmslPKZzCFV7osR2tYMduQa95qOZBqLWLKzM=";
+        pkg = fetchurl {
+          name = "@smithy/credential-provider-imds@4.0.4";
+          url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.4.tgz";
+          hash = "sha256-Jhdn8klqmslPKZzCFV7osR2tYMduQa95qOZBqLWLKzM=";
+        };
       };
-    };
     "@aws-sdk/client-service-quotas/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.4";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.4.tgz";
@@ -5151,9 +4781,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.3";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.3.tgz";
@@ -5162,9 +4791,8 @@ let
     };
     "@aws-sdk/client-service-quotas/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-service-quotas/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.3";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.3.tgz";
@@ -5173,9 +4801,8 @@ let
     };
     "@aws-sdk/client-ssm" = {
       out_path = "@aws-sdk/client-ssm";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-ssm@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-ssm/-/client-ssm-3.825.0.tgz";
@@ -5184,9 +4811,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/core" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.825.0.tgz";
@@ -5195,9 +4821,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/core/@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/core/node_modules/@aws-sdk/node_modules/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.821.0.tgz";
@@ -5206,9 +4831,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/core/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -5217,9 +4841,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.2.tgz";
@@ -5228,9 +4851,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -5239,9 +4861,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.825.0.tgz";
@@ -5250,9 +4871,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.825.0.tgz";
@@ -5261,53 +4881,50 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.825.0.tgz";
         hash = "sha256-KhuHEVSfh6RVgG9iFHvpiiTNluzRm5zbc1kyG+Os4xU=";
       };
     };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-http/@smithy/util-stream" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-http/node_modules/@smithy/node_modules/util-stream";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-stream@4.2.2";
-        url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
-        hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        pkg = fetchurl {
+          name = "@smithy/util-stream@4.2.2";
+          url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
+          hash = "sha256-GOgLnY5DQPLc4Pv7d4Qxw1yhaVFqLL72QmllxFoxO78=";
+        };
       };
-    };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.825.0.tgz";
         hash = "sha256-rEOfIRPnVAOPPDw2tU9J0lw1eq+1e2TFNTBu1gG1S38=";
       };
     };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-ini/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-ini/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
       };
-    };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-process" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-process";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-process@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.825.0.tgz";
@@ -5316,75 +4933,73 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.825.0.tgz";
         hash = "sha256-a6XSQGCoETORg0PSSk49X47gT5RSQNeV71k5PHQFGfc=";
       };
     };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/client-sso" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/client-sso";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/client-sso@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
-        hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
-      };
-    };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/client-sso@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.825.0.tgz";
+          hash = "sha256-U55ibtGTvq7VGlT+zcq9rMayVyZb8ePY1F6AMMzpiN8=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/token-providers@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
-        hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
       };
-    };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
-      };
-    };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
-      binaries =
-        {
+        pkg = fetchurl {
+          name = "@aws-sdk/token-providers@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.825.0.tgz";
+          hash = "sha256-oAdN7UL59Bd+6Vo3PTCKjgtn41qnMUPtxwsgeVLSdog=";
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/credential-provider-web-identity@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
-        hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
       };
-    };
-    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-sso/@aws-sdk/token-providers/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-sso/node_modules/@aws-sdk/node_modules/token-providers/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@aws-sdk/nested-clients@3.825.0";
-        url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
-        hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
       };
-    };
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/credential-provider-web-identity@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.825.0.tgz";
+          hash = "sha256-Fx+x4vv15eGblmh+vfGvOr+etYDPfw0d4zlQL1oivB4=";
+        };
+      };
+    "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@aws-sdk/credential-provider-web-identity/@aws-sdk/nested-clients" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@aws-sdk/node_modules/credential-provider-web-identity/node_modules/@aws-sdk/node_modules/nested-clients";
+        binaries = {
+        };
+        pkg = fetchurl {
+          name = "@aws-sdk/nested-clients@3.825.0";
+          url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.825.0.tgz";
+          hash = "sha256-84pV0/jfyVBH7cwR7iykuZdXlD+pGQBl5whAP/nWOF4=";
+        };
+      };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -5393,9 +5008,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -5404,9 +5018,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/credential-provider-node/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/credential-provider-node/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -5415,9 +5028,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.821.0.tgz";
@@ -5426,9 +5038,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.821.0.tgz";
@@ -5437,9 +5048,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.821.0.tgz";
@@ -5448,9 +5058,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.825.0.tgz";
@@ -5459,9 +5068,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.821.0.tgz";
@@ -5470,9 +5078,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/types" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -5481,9 +5088,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.821.0.tgz";
@@ -5492,9 +5098,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.821.0.tgz";
@@ -5503,9 +5108,8 @@ let
     };
     "@aws-sdk/client-ssm/@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@aws-sdk/node_modules/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.825.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.825.0.tgz";
@@ -5514,9 +5118,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/config-resolver" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.4";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.4.tgz";
@@ -5525,9 +5128,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/core" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.5.3";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.5.3.tgz";
@@ -5536,9 +5138,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/core/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/core/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -5547,9 +5148,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/fetch-http-handler" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.4";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.4.tgz";
@@ -5558,31 +5158,29 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/fetch-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ssm/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@smithy/fetch-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/fetch-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-ssm/@smithy/hash-node" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.4";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.4.tgz";
@@ -5591,9 +5189,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/invalid-dependency" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.4";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.4.tgz";
@@ -5602,9 +5199,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-content-length" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.4.tgz";
@@ -5613,9 +5209,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-endpoint" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.11";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.11.tgz";
@@ -5624,9 +5219,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-endpoint/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-endpoint/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -5635,9 +5229,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-retry" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.12";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.12.tgz";
@@ -5646,9 +5239,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -5657,9 +5249,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-serde" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.8";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.8.tgz";
@@ -5668,9 +5259,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/middleware-stack" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.4";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.4.tgz";
@@ -5679,9 +5269,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.3";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.3.tgz";
@@ -5690,9 +5279,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/node-config-provider/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -5701,9 +5289,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/node-config-provider/@smithy/shared-ini-file-loader" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-config-provider/node_modules/@smithy/node_modules/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.4";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.4.tgz";
@@ -5712,9 +5299,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/node-http-handler" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.6";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz";
@@ -5723,9 +5309,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/node-http-handler/@smithy/abort-controller" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
@@ -5734,31 +5319,29 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/node-http-handler/@smithy/querystring-builder" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz";
         hash = "sha256-Mo2XYMapOvWwWMKBZ2MIcA6HeoMeTWlblcBNVEfEm4M=";
       };
     };
-    "@aws-sdk/client-ssm/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" = {
-      out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
+    "@aws-sdk/client-ssm/@smithy/node-http-handler/@smithy/querystring-builder/@smithy/util-uri-escape" =
+      {
+        out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/node-http-handler/node_modules/@smithy/node_modules/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
+        binaries = {
         };
-      pkg = fetchurl {
-        name = "@smithy/util-uri-escape@4.0.0";
-        url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
-        hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        pkg = fetchurl {
+          name = "@smithy/util-uri-escape@4.0.0";
+          url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
+          hash = "sha256-knbkwzgpzvtuNymFHQBWgeDPwK7FzcQOD+yuh774PB4=";
+        };
       };
-    };
     "@aws-sdk/client-ssm/@smithy/smithy-client" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.4.3";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.4.3.tgz";
@@ -5767,9 +5350,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/smithy-client/@smithy/util-stream" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/smithy-client/node_modules/@smithy/node_modules/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.2";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.2.tgz";
@@ -5778,9 +5360,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/types" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -5789,9 +5370,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/url-parser" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.4.tgz";
@@ -5800,9 +5380,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/url-parser/@smithy/querystring-parser" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/url-parser/node_modules/@smithy/node_modules/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.4";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.4.tgz";
@@ -5811,9 +5390,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-defaults-mode-browser" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.19.tgz";
@@ -5822,9 +5400,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-defaults-mode-browser/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-defaults-mode-browser/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -5833,9 +5410,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-defaults-mode-node" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.19";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.19.tgz";
@@ -5844,9 +5420,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-defaults-mode-node/@smithy/credential-provider-imds" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.6";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.6.tgz";
@@ -5855,9 +5430,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-defaults-mode-node/@smithy/property-provider" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-defaults-mode-node/node_modules/@smithy/node_modules/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.4";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.4.tgz";
@@ -5866,9 +5440,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-endpoints" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.6";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.6.tgz";
@@ -5877,9 +5450,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-middleware" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.4";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.4.tgz";
@@ -5888,9 +5460,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-retry" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.5.tgz";
@@ -5899,9 +5470,8 @@ let
     };
     "@aws-sdk/client-ssm/@smithy/util-retry/@smithy/service-error-classification" = {
       out_path = "@aws-sdk/client-ssm/node_modules/@smithy/node_modules/util-retry/node_modules/@smithy/node_modules/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.5";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.5.tgz";
@@ -5910,9 +5480,8 @@ let
     };
     "@aws-sdk/client-sso" = {
       out_path = "@aws-sdk/client-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-sso@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.787.0.tgz";
@@ -5921,9 +5490,8 @@ let
     };
     "@aws-sdk/client-sso/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-sso/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -5932,9 +5500,8 @@ let
     };
     "@aws-sdk/client-sts" = {
       out_path = "@aws-sdk/client-sts";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/client-sts@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/client-sts/-/client-sts-3.787.0.tgz";
@@ -5943,9 +5510,8 @@ let
     };
     "@aws-sdk/client-sts/@smithy/protocol-http" = {
       out_path = "@aws-sdk/client-sts/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -5954,9 +5520,8 @@ let
     };
     "@aws-sdk/core" = {
       out_path = "@aws-sdk/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/core@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/core/-/core-3.775.0.tgz";
@@ -5965,9 +5530,8 @@ let
     };
     "@aws-sdk/core/@smithy/protocol-http" = {
       out_path = "@aws-sdk/core/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -5976,9 +5540,8 @@ let
     };
     "@aws-sdk/core/@smithy/signature-v4" = {
       out_path = "@aws-sdk/core/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.0.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
@@ -5987,9 +5550,8 @@ let
     };
     "@aws-sdk/core/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/core/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -5998,9 +5560,8 @@ let
     };
     "@aws-sdk/credential-provider-env" = {
       out_path = "@aws-sdk/credential-provider-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-env@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.775.0.tgz";
@@ -6009,9 +5570,8 @@ let
     };
     "@aws-sdk/credential-provider-http" = {
       out_path = "@aws-sdk/credential-provider-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-http@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.775.0.tgz";
@@ -6020,9 +5580,8 @@ let
     };
     "@aws-sdk/credential-provider-http/@smithy/protocol-http" = {
       out_path = "@aws-sdk/credential-provider-http/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6031,9 +5590,8 @@ let
     };
     "@aws-sdk/credential-provider-ini" = {
       out_path = "@aws-sdk/credential-provider-ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-ini@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.787.0.tgz";
@@ -6042,9 +5600,8 @@ let
     };
     "@aws-sdk/credential-provider-node" = {
       out_path = "@aws-sdk/credential-provider-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-node@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.787.0.tgz";
@@ -6053,9 +5610,8 @@ let
     };
     "@aws-sdk/credential-provider-process" = {
       out_path = "@aws-sdk/credential-provider-process";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-process@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.775.0.tgz";
@@ -6064,9 +5620,8 @@ let
     };
     "@aws-sdk/credential-provider-sso" = {
       out_path = "@aws-sdk/credential-provider-sso";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-sso@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.787.0.tgz";
@@ -6075,9 +5630,8 @@ let
     };
     "@aws-sdk/credential-provider-web-identity" = {
       out_path = "@aws-sdk/credential-provider-web-identity";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/credential-provider-web-identity@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.787.0.tgz";
@@ -6086,9 +5640,8 @@ let
     };
     "@aws-sdk/endpoint-cache" = {
       out_path = "@aws-sdk/endpoint-cache";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/endpoint-cache@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.804.0.tgz";
@@ -6097,9 +5650,8 @@ let
     };
     "@aws-sdk/middleware-bucket-endpoint" = {
       out_path = "@aws-sdk/middleware-bucket-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-bucket-endpoint@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-bucket-endpoint/-/middleware-bucket-endpoint-3.775.0.tgz";
@@ -6108,9 +5660,8 @@ let
     };
     "@aws-sdk/middleware-bucket-endpoint/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-bucket-endpoint/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6119,9 +5670,8 @@ let
     };
     "@aws-sdk/middleware-endpoint-discovery" = {
       out_path = "@aws-sdk/middleware-endpoint-discovery";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-endpoint-discovery@3.808.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.808.0.tgz";
@@ -6130,9 +5680,8 @@ let
     };
     "@aws-sdk/middleware-endpoint-discovery/@aws-sdk/types" = {
       out_path = "@aws-sdk/middleware-endpoint-discovery/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.804.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.804.0.tgz";
@@ -6141,9 +5690,8 @@ let
     };
     "@aws-sdk/middleware-endpoint-discovery/@smithy/node-config-provider" = {
       out_path = "@aws-sdk/middleware-endpoint-discovery/node_modules/@smithy/node_modules/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.1.1";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.1.1.tgz";
@@ -6152,9 +5700,8 @@ let
     };
     "@aws-sdk/middleware-endpoint-discovery/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-endpoint-discovery/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6163,9 +5710,8 @@ let
     };
     "@aws-sdk/middleware-expect-continue" = {
       out_path = "@aws-sdk/middleware-expect-continue";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-expect-continue@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-expect-continue/-/middleware-expect-continue-3.775.0.tgz";
@@ -6174,9 +5720,8 @@ let
     };
     "@aws-sdk/middleware-expect-continue/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-expect-continue/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6185,9 +5730,8 @@ let
     };
     "@aws-sdk/middleware-flexible-checksums" = {
       out_path = "@aws-sdk/middleware-flexible-checksums";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-flexible-checksums@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-flexible-checksums/-/middleware-flexible-checksums-3.787.0.tgz";
@@ -6196,9 +5740,8 @@ let
     };
     "@aws-sdk/middleware-flexible-checksums/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-flexible-checksums/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6207,9 +5750,8 @@ let
     };
     "@aws-sdk/middleware-host-header" = {
       out_path = "@aws-sdk/middleware-host-header";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-host-header@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.775.0.tgz";
@@ -6218,9 +5760,8 @@ let
     };
     "@aws-sdk/middleware-host-header/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-host-header/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6229,9 +5770,8 @@ let
     };
     "@aws-sdk/middleware-location-constraint" = {
       out_path = "@aws-sdk/middleware-location-constraint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-location-constraint@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-location-constraint/-/middleware-location-constraint-3.775.0.tgz";
@@ -6240,9 +5780,8 @@ let
     };
     "@aws-sdk/middleware-logger" = {
       out_path = "@aws-sdk/middleware-logger";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-logger@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.775.0.tgz";
@@ -6251,9 +5790,8 @@ let
     };
     "@aws-sdk/middleware-recursion-detection" = {
       out_path = "@aws-sdk/middleware-recursion-detection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-recursion-detection@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.775.0.tgz";
@@ -6262,9 +5800,8 @@ let
     };
     "@aws-sdk/middleware-recursion-detection/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-recursion-detection/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6273,9 +5810,8 @@ let
     };
     "@aws-sdk/middleware-sdk-ec2" = {
       out_path = "@aws-sdk/middleware-sdk-ec2";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-sdk-ec2@3.796.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-sdk-ec2/-/middleware-sdk-ec2-3.796.0.tgz";
@@ -6284,9 +5820,8 @@ let
     };
     "@aws-sdk/middleware-sdk-ec2/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6295,9 +5830,8 @@ let
     };
     "@aws-sdk/middleware-sdk-ec2/@smithy/signature-v4" = {
       out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.1.0.tgz";
@@ -6306,9 +5840,8 @@ let
     };
     "@aws-sdk/middleware-sdk-ec2/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/middleware-sdk-ec2/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -6317,9 +5850,8 @@ let
     };
     "@aws-sdk/middleware-sdk-route53" = {
       out_path = "@aws-sdk/middleware-sdk-route53";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-sdk-route53@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-sdk-route53/-/middleware-sdk-route53-3.775.0.tgz";
@@ -6328,9 +5860,8 @@ let
     };
     "@aws-sdk/middleware-sdk-s3" = {
       out_path = "@aws-sdk/middleware-sdk-s3";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-sdk-s3@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-sdk-s3/-/middleware-sdk-s3-3.775.0.tgz";
@@ -6339,9 +5870,8 @@ let
     };
     "@aws-sdk/middleware-sdk-s3/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-sdk-s3/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6350,9 +5880,8 @@ let
     };
     "@aws-sdk/middleware-sdk-s3/@smithy/signature-v4" = {
       out_path = "@aws-sdk/middleware-sdk-s3/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.0.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
@@ -6361,9 +5890,8 @@ let
     };
     "@aws-sdk/middleware-sdk-s3/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/middleware-sdk-s3/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -6372,9 +5900,8 @@ let
     };
     "@aws-sdk/middleware-ssec" = {
       out_path = "@aws-sdk/middleware-ssec";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-ssec@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-ssec/-/middleware-ssec-3.775.0.tgz";
@@ -6383,9 +5910,8 @@ let
     };
     "@aws-sdk/middleware-user-agent" = {
       out_path = "@aws-sdk/middleware-user-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/middleware-user-agent@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.787.0.tgz";
@@ -6394,9 +5920,8 @@ let
     };
     "@aws-sdk/middleware-user-agent/@smithy/protocol-http" = {
       out_path = "@aws-sdk/middleware-user-agent/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6405,9 +5930,8 @@ let
     };
     "@aws-sdk/nested-clients" = {
       out_path = "@aws-sdk/nested-clients";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/nested-clients@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.787.0.tgz";
@@ -6416,9 +5940,8 @@ let
     };
     "@aws-sdk/nested-clients/@smithy/protocol-http" = {
       out_path = "@aws-sdk/nested-clients/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6427,9 +5950,8 @@ let
     };
     "@aws-sdk/region-config-resolver" = {
       out_path = "@aws-sdk/region-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/region-config-resolver@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.775.0.tgz";
@@ -6438,9 +5960,8 @@ let
     };
     "@aws-sdk/signature-v4" = {
       out_path = "@aws-sdk/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/signature-v4@3.374.0";
         url = "https://registry.npmjs.org/@aws-sdk/signature-v4/-/signature-v4-3.374.0.tgz";
@@ -6449,9 +5970,8 @@ let
     };
     "@aws-sdk/signature-v4-multi-region" = {
       out_path = "@aws-sdk/signature-v4-multi-region";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/signature-v4-multi-region@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.775.0.tgz";
@@ -6460,9 +5980,8 @@ let
     };
     "@aws-sdk/signature-v4-multi-region/@smithy/protocol-http" = {
       out_path = "@aws-sdk/signature-v4-multi-region/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -6471,9 +5990,8 @@ let
     };
     "@aws-sdk/signature-v4-multi-region/@smithy/signature-v4" = {
       out_path = "@aws-sdk/signature-v4-multi-region/node_modules/@smithy/node_modules/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@5.0.2";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.0.2.tgz";
@@ -6482,9 +6000,8 @@ let
     };
     "@aws-sdk/signature-v4-multi-region/@smithy/signature-v4/@smithy/util-uri-escape" = {
       out_path = "@aws-sdk/signature-v4-multi-region/node_modules/@smithy/node_modules/signature-v4/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -6493,9 +6010,8 @@ let
     };
     "@aws-sdk/token-providers" = {
       out_path = "@aws-sdk/token-providers";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/token-providers@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.787.0.tgz";
@@ -6504,9 +6020,8 @@ let
     };
     "@aws-sdk/types" = {
       out_path = "@aws-sdk/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.775.0.tgz";
@@ -6515,9 +6030,8 @@ let
     };
     "@aws-sdk/util-arn-parser" = {
       out_path = "@aws-sdk/util-arn-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-arn-parser@3.723.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-arn-parser/-/util-arn-parser-3.723.0.tgz";
@@ -6526,9 +6040,8 @@ let
     };
     "@aws-sdk/util-endpoints" = {
       out_path = "@aws-sdk/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-endpoints@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.787.0.tgz";
@@ -6537,9 +6050,8 @@ let
     };
     "@aws-sdk/util-format-url" = {
       out_path = "@aws-sdk/util-format-url";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-format-url@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-format-url/-/util-format-url-3.775.0.tgz";
@@ -6548,9 +6060,8 @@ let
     };
     "@aws-sdk/util-locate-window" = {
       out_path = "@aws-sdk/util-locate-window";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-locate-window@3.723.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-locate-window/-/util-locate-window-3.723.0.tgz";
@@ -6559,9 +6070,8 @@ let
     };
     "@aws-sdk/util-user-agent-browser" = {
       out_path = "@aws-sdk/util-user-agent-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-browser@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.775.0.tgz";
@@ -6570,9 +6080,8 @@ let
     };
     "@aws-sdk/util-user-agent-node" = {
       out_path = "@aws-sdk/util-user-agent-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-user-agent-node@3.787.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.787.0.tgz";
@@ -6581,9 +6090,8 @@ let
     };
     "@aws-sdk/util-utf8-browser" = {
       out_path = "@aws-sdk/util-utf8-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/util-utf8-browser@3.259.0";
         url = "https://registry.npmjs.org/@aws-sdk/util-utf8-browser/-/util-utf8-browser-3.259.0.tgz";
@@ -6592,9 +6100,8 @@ let
     };
     "@aws-sdk/xml-builder" = {
       out_path = "@aws-sdk/xml-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/xml-builder@3.775.0";
         url = "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.775.0.tgz";
@@ -6603,9 +6110,8 @@ let
     };
     "@babel/code-frame" = {
       out_path = "@babel/code-frame";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@babel/code-frame@7.26.2";
         url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.26.2.tgz";
@@ -6614,9 +6120,8 @@ let
     };
     "@babel/helper-validator-identifier" = {
       out_path = "@babel/helper-validator-identifier";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@babel/helper-validator-identifier@7.25.9";
         url = "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.25.9.tgz";
@@ -6625,9 +6130,8 @@ let
     };
     "@emnapi/core" = {
       out_path = "@emnapi/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@emnapi/core@1.4.0";
         url = "https://registry.npmjs.org/@emnapi/core/-/core-1.4.0.tgz";
@@ -6636,9 +6140,8 @@ let
     };
     "@emnapi/runtime" = {
       out_path = "@emnapi/runtime";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@emnapi/runtime@1.4.0";
         url = "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.4.0.tgz";
@@ -6647,9 +6150,8 @@ let
     };
     "@emnapi/wasi-threads" = {
       out_path = "@emnapi/wasi-threads";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@emnapi/wasi-threads@1.0.1";
         url = "https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.0.1.tgz";
@@ -6658,9 +6160,8 @@ let
     };
     "@eslint-community/eslint-utils" = {
       out_path = "@eslint-community/eslint-utils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint-community/eslint-utils@4.5.1";
         url = "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.5.1.tgz";
@@ -6669,9 +6170,8 @@ let
     };
     "@eslint-community/eslint-utils/eslint-visitor-keys" = {
       out_path = "@eslint-community/eslint-utils/node_modules/eslint-visitor-keys";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-visitor-keys@3.4.3";
         url = "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz";
@@ -6680,9 +6180,8 @@ let
     };
     "@eslint-community/regexpp" = {
       out_path = "@eslint-community/regexpp";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint-community/regexpp@4.12.1";
         url = "https://registry.npmjs.org/@eslint-community/regexpp/-/regexpp-4.12.1.tgz";
@@ -6691,9 +6190,8 @@ let
     };
     "@eslint/compat" = {
       out_path = "@eslint/compat";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/compat@1.2.8";
         url = "https://registry.npmjs.org/@eslint/compat/-/compat-1.2.8.tgz";
@@ -6702,9 +6200,8 @@ let
     };
     "@eslint/config-array" = {
       out_path = "@eslint/config-array";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/config-array@0.20.0";
         url = "https://registry.npmjs.org/@eslint/config-array/-/config-array-0.20.0.tgz";
@@ -6713,9 +6210,8 @@ let
     };
     "@eslint/config-helpers" = {
       out_path = "@eslint/config-helpers";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/config-helpers@0.2.1";
         url = "https://registry.npmjs.org/@eslint/config-helpers/-/config-helpers-0.2.1.tgz";
@@ -6724,9 +6220,8 @@ let
     };
     "@eslint/core" = {
       out_path = "@eslint/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/core@0.12.0";
         url = "https://registry.npmjs.org/@eslint/core/-/core-0.12.0.tgz";
@@ -6735,9 +6230,8 @@ let
     };
     "@eslint/eslintrc" = {
       out_path = "@eslint/eslintrc";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/eslintrc@3.3.1";
         url = "https://registry.npmjs.org/@eslint/eslintrc/-/eslintrc-3.3.1.tgz";
@@ -6746,9 +6240,8 @@ let
     };
     "@eslint/js" = {
       out_path = "@eslint/js";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/js@9.24.0";
         url = "https://registry.npmjs.org/@eslint/js/-/js-9.24.0.tgz";
@@ -6757,9 +6250,8 @@ let
     };
     "@eslint/object-schema" = {
       out_path = "@eslint/object-schema";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/object-schema@2.1.6";
         url = "https://registry.npmjs.org/@eslint/object-schema/-/object-schema-2.1.6.tgz";
@@ -6768,9 +6260,8 @@ let
     };
     "@eslint/plugin-kit" = {
       out_path = "@eslint/plugin-kit";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/plugin-kit@0.2.8";
         url = "https://registry.npmjs.org/@eslint/plugin-kit/-/plugin-kit-0.2.8.tgz";
@@ -6779,9 +6270,8 @@ let
     };
     "@eslint/plugin-kit/@eslint/core" = {
       out_path = "@eslint/plugin-kit/node_modules/@eslint/node_modules/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@eslint/core@0.13.0";
         url = "https://registry.npmjs.org/@eslint/core/-/core-0.13.0.tgz";
@@ -6790,9 +6280,8 @@ let
     };
     "@goauthentik/api" = {
       out_path = "@goauthentik/api";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@goauthentik/api@2025.4.0-1746018955";
         url = "https://registry.npmjs.org/@goauthentik/api/-/api-2025.4.0-1746018955.tgz";
@@ -6801,9 +6290,8 @@ let
     };
     "@humanfs/core" = {
       out_path = "@humanfs/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@humanfs/core@0.19.1";
         url = "https://registry.npmjs.org/@humanfs/core/-/core-0.19.1.tgz";
@@ -6812,9 +6300,8 @@ let
     };
     "@humanfs/node" = {
       out_path = "@humanfs/node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@humanfs/node@0.16.6";
         url = "https://registry.npmjs.org/@humanfs/node/-/node-0.16.6.tgz";
@@ -6823,9 +6310,8 @@ let
     };
     "@humanfs/node/@humanwhocodes/retry" = {
       out_path = "@humanfs/node/node_modules/@humanwhocodes/node_modules/retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@humanwhocodes/retry@0.3.1";
         url = "https://registry.npmjs.org/@humanwhocodes/retry/-/retry-0.3.1.tgz";
@@ -6834,9 +6320,8 @@ let
     };
     "@humanwhocodes/module-importer" = {
       out_path = "@humanwhocodes/module-importer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@humanwhocodes/module-importer@1.0.1";
         url = "https://registry.npmjs.org/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz";
@@ -6845,9 +6330,8 @@ let
     };
     "@humanwhocodes/retry" = {
       out_path = "@humanwhocodes/retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@humanwhocodes/retry@0.4.2";
         url = "https://registry.npmjs.org/@humanwhocodes/retry/-/retry-0.4.2.tgz";
@@ -6856,9 +6340,8 @@ let
     };
     "@inquirer/checkbox" = {
       out_path = "@inquirer/checkbox";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/checkbox@4.1.5";
         url = "https://registry.npmjs.org/@inquirer/checkbox/-/checkbox-4.1.5.tgz";
@@ -6867,9 +6350,8 @@ let
     };
     "@inquirer/checkbox/ansi-escapes" = {
       out_path = "@inquirer/checkbox/node_modules/ansi-escapes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-escapes@4.3.2";
         url = "https://registry.npmjs.org/ansi-escapes/-/ansi-escapes-4.3.2.tgz";
@@ -6878,9 +6360,8 @@ let
     };
     "@inquirer/checkbox/ansi-escapes/type-fest" = {
       out_path = "@inquirer/checkbox/node_modules/ansi-escapes/node_modules/type-fest";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "type-fest@0.21.3";
         url = "https://registry.npmjs.org/type-fest/-/type-fest-0.21.3.tgz";
@@ -6889,9 +6370,8 @@ let
     };
     "@inquirer/confirm" = {
       out_path = "@inquirer/confirm";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/confirm@5.1.9";
         url = "https://registry.npmjs.org/@inquirer/confirm/-/confirm-5.1.9.tgz";
@@ -6900,9 +6380,8 @@ let
     };
     "@inquirer/core" = {
       out_path = "@inquirer/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/core@10.1.10";
         url = "https://registry.npmjs.org/@inquirer/core/-/core-10.1.10.tgz";
@@ -6911,9 +6390,8 @@ let
     };
     "@inquirer/core/ansi-escapes" = {
       out_path = "@inquirer/core/node_modules/ansi-escapes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-escapes@4.3.2";
         url = "https://registry.npmjs.org/ansi-escapes/-/ansi-escapes-4.3.2.tgz";
@@ -6922,9 +6400,8 @@ let
     };
     "@inquirer/core/ansi-escapes/type-fest" = {
       out_path = "@inquirer/core/node_modules/ansi-escapes/node_modules/type-fest";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "type-fest@0.21.3";
         url = "https://registry.npmjs.org/type-fest/-/type-fest-0.21.3.tgz";
@@ -6933,9 +6410,8 @@ let
     };
     "@inquirer/core/wrap-ansi" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "wrap-ansi@6.2.0";
         url = "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-6.2.0.tgz";
@@ -6944,9 +6420,8 @@ let
     };
     "@inquirer/core/wrap-ansi/ansi-styles" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/ansi-styles";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-styles@4.3.0";
         url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz";
@@ -6955,9 +6430,8 @@ let
     };
     "@inquirer/core/wrap-ansi/string-width" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/string-width";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "string-width@4.2.3";
         url = "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz";
@@ -6966,9 +6440,8 @@ let
     };
     "@inquirer/core/wrap-ansi/string-width/emoji-regex" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/string-width/node_modules/emoji-regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "emoji-regex@8.0.0";
         url = "https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz";
@@ -6977,9 +6450,8 @@ let
     };
     "@inquirer/core/wrap-ansi/string-width/is-fullwidth-code-point" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/string-width/node_modules/is-fullwidth-code-point";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-fullwidth-code-point@3.0.0";
         url = "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz";
@@ -6988,9 +6460,8 @@ let
     };
     "@inquirer/core/wrap-ansi/strip-ansi" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/strip-ansi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "strip-ansi@6.0.1";
         url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz";
@@ -6999,9 +6470,8 @@ let
     };
     "@inquirer/core/wrap-ansi/strip-ansi/ansi-regex" = {
       out_path = "@inquirer/core/node_modules/wrap-ansi/node_modules/strip-ansi/node_modules/ansi-regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-regex@5.0.1";
         url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz";
@@ -7010,9 +6480,8 @@ let
     };
     "@inquirer/editor" = {
       out_path = "@inquirer/editor";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/editor@4.2.10";
         url = "https://registry.npmjs.org/@inquirer/editor/-/editor-4.2.10.tgz";
@@ -7021,9 +6490,8 @@ let
     };
     "@inquirer/expand" = {
       out_path = "@inquirer/expand";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/expand@4.0.12";
         url = "https://registry.npmjs.org/@inquirer/expand/-/expand-4.0.12.tgz";
@@ -7032,9 +6500,8 @@ let
     };
     "@inquirer/figures" = {
       out_path = "@inquirer/figures";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/figures@1.0.11";
         url = "https://registry.npmjs.org/@inquirer/figures/-/figures-1.0.11.tgz";
@@ -7043,9 +6510,8 @@ let
     };
     "@inquirer/input" = {
       out_path = "@inquirer/input";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/input@4.1.9";
         url = "https://registry.npmjs.org/@inquirer/input/-/input-4.1.9.tgz";
@@ -7054,9 +6520,8 @@ let
     };
     "@inquirer/number" = {
       out_path = "@inquirer/number";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/number@3.0.12";
         url = "https://registry.npmjs.org/@inquirer/number/-/number-3.0.12.tgz";
@@ -7065,9 +6530,8 @@ let
     };
     "@inquirer/password" = {
       out_path = "@inquirer/password";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/password@4.0.12";
         url = "https://registry.npmjs.org/@inquirer/password/-/password-4.0.12.tgz";
@@ -7076,9 +6540,8 @@ let
     };
     "@inquirer/password/ansi-escapes" = {
       out_path = "@inquirer/password/node_modules/ansi-escapes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-escapes@4.3.2";
         url = "https://registry.npmjs.org/ansi-escapes/-/ansi-escapes-4.3.2.tgz";
@@ -7087,9 +6550,8 @@ let
     };
     "@inquirer/password/ansi-escapes/type-fest" = {
       out_path = "@inquirer/password/node_modules/ansi-escapes/node_modules/type-fest";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "type-fest@0.21.3";
         url = "https://registry.npmjs.org/type-fest/-/type-fest-0.21.3.tgz";
@@ -7098,9 +6560,8 @@ let
     };
     "@inquirer/prompts" = {
       out_path = "@inquirer/prompts";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/prompts@7.4.1";
         url = "https://registry.npmjs.org/@inquirer/prompts/-/prompts-7.4.1.tgz";
@@ -7109,9 +6570,8 @@ let
     };
     "@inquirer/rawlist" = {
       out_path = "@inquirer/rawlist";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/rawlist@4.0.12";
         url = "https://registry.npmjs.org/@inquirer/rawlist/-/rawlist-4.0.12.tgz";
@@ -7120,9 +6580,8 @@ let
     };
     "@inquirer/search" = {
       out_path = "@inquirer/search";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/search@3.0.12";
         url = "https://registry.npmjs.org/@inquirer/search/-/search-3.0.12.tgz";
@@ -7131,9 +6590,8 @@ let
     };
     "@inquirer/select" = {
       out_path = "@inquirer/select";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/select@4.1.1";
         url = "https://registry.npmjs.org/@inquirer/select/-/select-4.1.1.tgz";
@@ -7142,9 +6600,8 @@ let
     };
     "@inquirer/select/ansi-escapes" = {
       out_path = "@inquirer/select/node_modules/ansi-escapes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-escapes@4.3.2";
         url = "https://registry.npmjs.org/ansi-escapes/-/ansi-escapes-4.3.2.tgz";
@@ -7153,9 +6610,8 @@ let
     };
     "@inquirer/select/ansi-escapes/type-fest" = {
       out_path = "@inquirer/select/node_modules/ansi-escapes/node_modules/type-fest";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "type-fest@0.21.3";
         url = "https://registry.npmjs.org/type-fest/-/type-fest-0.21.3.tgz";
@@ -7164,9 +6620,8 @@ let
     };
     "@inquirer/type" = {
       out_path = "@inquirer/type";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@inquirer/type@3.0.6";
         url = "https://registry.npmjs.org/@inquirer/type/-/type-3.0.6.tgz";
@@ -7175,9 +6630,8 @@ let
     };
     "@isaacs/fs-minipass" = {
       out_path = "@isaacs/fs-minipass";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@isaacs/fs-minipass@4.0.1";
         url = "https://registry.npmjs.org/@isaacs/fs-minipass/-/fs-minipass-4.0.1.tgz";
@@ -7186,9 +6640,8 @@ let
     };
     "@isaacs/fs-minipass/minipass" = {
       out_path = "@isaacs/fs-minipass/node_modules/minipass";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minipass@7.1.2";
         url = "https://registry.npmjs.org/minipass/-/minipass-7.1.2.tgz";
@@ -7197,9 +6650,8 @@ let
     };
     "@jsep-plugin/assignment" = {
       out_path = "@jsep-plugin/assignment";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@jsep-plugin/assignment@1.3.0";
         url = "https://registry.npmjs.org/@jsep-plugin/assignment/-/assignment-1.3.0.tgz";
@@ -7208,9 +6660,8 @@ let
     };
     "@jsep-plugin/regex" = {
       out_path = "@jsep-plugin/regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@jsep-plugin/regex@1.0.4";
         url = "https://registry.npmjs.org/@jsep-plugin/regex/-/regex-1.0.4.tgz";
@@ -7219,9 +6670,8 @@ let
     };
     "@kubernetes/client-node" = {
       out_path = "@kubernetes/client-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@kubernetes/client-node@1.1.2";
         url = "https://registry.npmjs.org/@kubernetes/client-node/-/client-node-1.1.2.tgz";
@@ -7230,9 +6680,8 @@ let
     };
     "@napi-rs/wasm-runtime" = {
       out_path = "@napi-rs/wasm-runtime";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@napi-rs/wasm-runtime@0.2.8";
         url = "https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.8.tgz";
@@ -7241,9 +6690,8 @@ let
     };
     "@nodelib/fs.scandir" = {
       out_path = "@nodelib/fs.scandir";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@nodelib/fs.scandir@2.1.5";
         url = "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz";
@@ -7252,9 +6700,8 @@ let
     };
     "@nodelib/fs.stat" = {
       out_path = "@nodelib/fs.stat";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@nodelib/fs.stat@2.0.5";
         url = "https://registry.npmjs.org/@nodelib/fs.stat/-/fs.stat-2.0.5.tgz";
@@ -7263,9 +6710,8 @@ let
     };
     "@nodelib/fs.walk" = {
       out_path = "@nodelib/fs.walk";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@nodelib/fs.walk@1.2.8";
         url = "https://registry.npmjs.org/@nodelib/fs.walk/-/fs.walk-1.2.8.tgz";
@@ -7274,9 +6720,8 @@ let
     };
     "@nolyfill/is-core-module" = {
       out_path = "@nolyfill/is-core-module";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@nolyfill/is-core-module@1.0.39";
         url = "https://registry.npmjs.org/@nolyfill/is-core-module/-/is-core-module-1.0.39.tgz";
@@ -7285,9 +6730,8 @@ let
     };
     "@pkgr/core" = {
       out_path = "@pkgr/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@pkgr/core@0.2.1";
         url = "https://registry.npmjs.org/@pkgr/core/-/core-0.2.1.tgz";
@@ -7296,9 +6740,8 @@ let
     };
     "@rtsao/scc" = {
       out_path = "@rtsao/scc";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@rtsao/scc@1.1.0";
         url = "https://registry.npmjs.org/@rtsao/scc/-/scc-1.1.0.tgz";
@@ -7307,9 +6750,8 @@ let
     };
     "@smithy/abort-controller" = {
       out_path = "@smithy/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.2";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.2.tgz";
@@ -7318,9 +6760,8 @@ let
     };
     "@smithy/chunked-blob-reader" = {
       out_path = "@smithy/chunked-blob-reader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/chunked-blob-reader@5.0.0";
         url = "https://registry.npmjs.org/@smithy/chunked-blob-reader/-/chunked-blob-reader-5.0.0.tgz";
@@ -7329,9 +6770,8 @@ let
     };
     "@smithy/chunked-blob-reader-native" = {
       out_path = "@smithy/chunked-blob-reader-native";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/chunked-blob-reader-native@4.0.0";
         url = "https://registry.npmjs.org/@smithy/chunked-blob-reader-native/-/chunked-blob-reader-native-4.0.0.tgz";
@@ -7340,9 +6780,8 @@ let
     };
     "@smithy/config-resolver" = {
       out_path = "@smithy/config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/config-resolver@4.1.0";
         url = "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.1.0.tgz";
@@ -7351,9 +6790,8 @@ let
     };
     "@smithy/core" = {
       out_path = "@smithy/core";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/core@3.2.0";
         url = "https://registry.npmjs.org/@smithy/core/-/core-3.2.0.tgz";
@@ -7362,9 +6800,8 @@ let
     };
     "@smithy/core/@smithy/protocol-http" = {
       out_path = "@smithy/core/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -7373,9 +6810,8 @@ let
     };
     "@smithy/credential-provider-imds" = {
       out_path = "@smithy/credential-provider-imds";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/credential-provider-imds@4.0.2";
         url = "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.0.2.tgz";
@@ -7384,9 +6820,8 @@ let
     };
     "@smithy/eventstream-codec" = {
       out_path = "@smithy/eventstream-codec";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/eventstream-codec@1.1.0";
         url = "https://registry.npmjs.org/@smithy/eventstream-codec/-/eventstream-codec-1.1.0.tgz";
@@ -7395,9 +6830,8 @@ let
     };
     "@smithy/eventstream-codec/@aws-crypto/crc32" = {
       out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/crc32@3.0.0";
         url = "https://registry.npmjs.org/@aws-crypto/crc32/-/crc32-3.0.0.tgz";
@@ -7406,9 +6840,8 @@ let
     };
     "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-crypto/util" = {
       out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-crypto/node_modules/util";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-crypto/util@3.0.0";
         url = "https://registry.npmjs.org/@aws-crypto/util/-/util-3.0.0.tgz";
@@ -7417,9 +6850,8 @@ let
     };
     "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-sdk/types" = {
       out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-sdk/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@aws-sdk/types@3.821.0";
         url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.821.0.tgz";
@@ -7428,9 +6860,8 @@ let
     };
     "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-sdk/types/@smithy/types" = {
       out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-sdk/node_modules/types/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -7439,9 +6870,8 @@ let
     };
     "@smithy/eventstream-codec/@aws-crypto/crc32/@aws-sdk/types/tslib" = {
       out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/@aws-sdk/node_modules/types/node_modules/tslib";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tslib@2.8.1";
         url = "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz";
@@ -7450,9 +6880,8 @@ let
     };
     "@smithy/eventstream-codec/@aws-crypto/crc32/tslib" = {
       out_path = "@smithy/eventstream-codec/node_modules/@aws-crypto/node_modules/crc32/node_modules/tslib";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tslib@1.14.1";
         url = "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz";
@@ -7461,9 +6890,8 @@ let
     };
     "@smithy/eventstream-codec/@smithy/types" = {
       out_path = "@smithy/eventstream-codec/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@1.2.0";
         url = "https://registry.npmjs.org/@smithy/types/-/types-1.2.0.tgz";
@@ -7472,9 +6900,8 @@ let
     };
     "@smithy/eventstream-codec/@smithy/util-hex-encoding" = {
       out_path = "@smithy/eventstream-codec/node_modules/@smithy/node_modules/util-hex-encoding";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-hex-encoding@1.1.0";
         url = "https://registry.npmjs.org/@smithy/util-hex-encoding/-/util-hex-encoding-1.1.0.tgz";
@@ -7483,9 +6910,8 @@ let
     };
     "@smithy/eventstream-serde-browser" = {
       out_path = "@smithy/eventstream-serde-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/eventstream-serde-browser@4.0.2";
         url = "https://registry.npmjs.org/@smithy/eventstream-serde-browser/-/eventstream-serde-browser-4.0.2.tgz";
@@ -7494,9 +6920,8 @@ let
     };
     "@smithy/eventstream-serde-config-resolver" = {
       out_path = "@smithy/eventstream-serde-config-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/eventstream-serde-config-resolver@4.1.0";
         url = "https://registry.npmjs.org/@smithy/eventstream-serde-config-resolver/-/eventstream-serde-config-resolver-4.1.0.tgz";
@@ -7505,9 +6930,8 @@ let
     };
     "@smithy/eventstream-serde-node" = {
       out_path = "@smithy/eventstream-serde-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/eventstream-serde-node@4.0.2";
         url = "https://registry.npmjs.org/@smithy/eventstream-serde-node/-/eventstream-serde-node-4.0.2.tgz";
@@ -7516,9 +6940,8 @@ let
     };
     "@smithy/eventstream-serde-universal" = {
       out_path = "@smithy/eventstream-serde-universal";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/eventstream-serde-universal@4.0.2";
         url = "https://registry.npmjs.org/@smithy/eventstream-serde-universal/-/eventstream-serde-universal-4.0.2.tgz";
@@ -7527,9 +6950,8 @@ let
     };
     "@smithy/eventstream-serde-universal/@smithy/eventstream-codec" = {
       out_path = "@smithy/eventstream-serde-universal/node_modules/@smithy/node_modules/eventstream-codec";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/eventstream-codec@4.0.2";
         url = "https://registry.npmjs.org/@smithy/eventstream-codec/-/eventstream-codec-4.0.2.tgz";
@@ -7538,9 +6960,8 @@ let
     };
     "@smithy/fetch-http-handler" = {
       out_path = "@smithy/fetch-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/fetch-http-handler@5.0.2";
         url = "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.0.2.tgz";
@@ -7549,9 +6970,8 @@ let
     };
     "@smithy/fetch-http-handler/@smithy/protocol-http" = {
       out_path = "@smithy/fetch-http-handler/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -7560,9 +6980,8 @@ let
     };
     "@smithy/hash-blob-browser" = {
       out_path = "@smithy/hash-blob-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-blob-browser@4.0.2";
         url = "https://registry.npmjs.org/@smithy/hash-blob-browser/-/hash-blob-browser-4.0.2.tgz";
@@ -7571,9 +6990,8 @@ let
     };
     "@smithy/hash-node" = {
       out_path = "@smithy/hash-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-node@4.0.2";
         url = "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.0.2.tgz";
@@ -7582,9 +7000,8 @@ let
     };
     "@smithy/hash-stream-node" = {
       out_path = "@smithy/hash-stream-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/hash-stream-node@4.0.2";
         url = "https://registry.npmjs.org/@smithy/hash-stream-node/-/hash-stream-node-4.0.2.tgz";
@@ -7593,9 +7010,8 @@ let
     };
     "@smithy/invalid-dependency" = {
       out_path = "@smithy/invalid-dependency";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/invalid-dependency@4.0.2";
         url = "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.0.2.tgz";
@@ -7604,9 +7020,8 @@ let
     };
     "@smithy/is-array-buffer" = {
       out_path = "@smithy/is-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/is-array-buffer@4.0.0";
         url = "https://registry.npmjs.org/@smithy/is-array-buffer/-/is-array-buffer-4.0.0.tgz";
@@ -7615,9 +7030,8 @@ let
     };
     "@smithy/md5-js" = {
       out_path = "@smithy/md5-js";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/md5-js@4.0.2";
         url = "https://registry.npmjs.org/@smithy/md5-js/-/md5-js-4.0.2.tgz";
@@ -7626,9 +7040,8 @@ let
     };
     "@smithy/middleware-content-length" = {
       out_path = "@smithy/middleware-content-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-content-length@4.0.2";
         url = "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.0.2.tgz";
@@ -7637,9 +7050,8 @@ let
     };
     "@smithy/middleware-content-length/@smithy/protocol-http" = {
       out_path = "@smithy/middleware-content-length/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -7648,9 +7060,8 @@ let
     };
     "@smithy/middleware-endpoint" = {
       out_path = "@smithy/middleware-endpoint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-endpoint@4.1.0";
         url = "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.1.0.tgz";
@@ -7659,9 +7070,8 @@ let
     };
     "@smithy/middleware-retry" = {
       out_path = "@smithy/middleware-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-retry@4.1.0";
         url = "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.1.0.tgz";
@@ -7670,9 +7080,8 @@ let
     };
     "@smithy/middleware-retry/@smithy/protocol-http" = {
       out_path = "@smithy/middleware-retry/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -7681,9 +7090,8 @@ let
     };
     "@smithy/middleware-serde" = {
       out_path = "@smithy/middleware-serde";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-serde@4.0.3";
         url = "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.0.3.tgz";
@@ -7692,9 +7100,8 @@ let
     };
     "@smithy/middleware-stack" = {
       out_path = "@smithy/middleware-stack";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/middleware-stack@4.0.2";
         url = "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.0.2.tgz";
@@ -7703,9 +7110,8 @@ let
     };
     "@smithy/node-config-provider" = {
       out_path = "@smithy/node-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-config-provider@4.0.2";
         url = "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.0.2.tgz";
@@ -7714,9 +7120,8 @@ let
     };
     "@smithy/node-http-handler" = {
       out_path = "@smithy/node-http-handler";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/node-http-handler@4.0.4";
         url = "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.0.4.tgz";
@@ -7725,9 +7130,8 @@ let
     };
     "@smithy/node-http-handler/@smithy/protocol-http" = {
       out_path = "@smithy/node-http-handler/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -7736,9 +7140,8 @@ let
     };
     "@smithy/property-provider" = {
       out_path = "@smithy/property-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/property-provider@4.0.2";
         url = "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.0.2.tgz";
@@ -7747,9 +7150,8 @@ let
     };
     "@smithy/protocol-http" = {
       out_path = "@smithy/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.2";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.2.tgz";
@@ -7758,9 +7160,8 @@ let
     };
     "@smithy/protocol-http/@smithy/types" = {
       out_path = "@smithy/protocol-http/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -7769,9 +7170,8 @@ let
     };
     "@smithy/querystring-builder" = {
       out_path = "@smithy/querystring-builder";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-builder@4.0.2";
         url = "https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.0.2.tgz";
@@ -7780,9 +7180,8 @@ let
     };
     "@smithy/querystring-builder/@smithy/util-uri-escape" = {
       out_path = "@smithy/querystring-builder/node_modules/@smithy/node_modules/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-4.0.0.tgz";
@@ -7791,9 +7190,8 @@ let
     };
     "@smithy/querystring-parser" = {
       out_path = "@smithy/querystring-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/querystring-parser@4.0.2";
         url = "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.0.2.tgz";
@@ -7802,9 +7200,8 @@ let
     };
     "@smithy/service-error-classification" = {
       out_path = "@smithy/service-error-classification";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/service-error-classification@4.0.2";
         url = "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.0.2.tgz";
@@ -7813,9 +7210,8 @@ let
     };
     "@smithy/shared-ini-file-loader" = {
       out_path = "@smithy/shared-ini-file-loader";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/shared-ini-file-loader@4.0.2";
         url = "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.0.2.tgz";
@@ -7824,9 +7220,8 @@ let
     };
     "@smithy/signature-v4" = {
       out_path = "@smithy/signature-v4";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/signature-v4@1.1.0";
         url = "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-1.1.0.tgz";
@@ -7835,9 +7230,8 @@ let
     };
     "@smithy/signature-v4/@smithy/is-array-buffer" = {
       out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/is-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/is-array-buffer@1.1.0";
         url = "https://registry.npmjs.org/@smithy/is-array-buffer/-/is-array-buffer-1.1.0.tgz";
@@ -7846,9 +7240,8 @@ let
     };
     "@smithy/signature-v4/@smithy/types" = {
       out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@1.2.0";
         url = "https://registry.npmjs.org/@smithy/types/-/types-1.2.0.tgz";
@@ -7857,9 +7250,8 @@ let
     };
     "@smithy/signature-v4/@smithy/util-hex-encoding" = {
       out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-hex-encoding";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-hex-encoding@1.1.0";
         url = "https://registry.npmjs.org/@smithy/util-hex-encoding/-/util-hex-encoding-1.1.0.tgz";
@@ -7868,9 +7260,8 @@ let
     };
     "@smithy/signature-v4/@smithy/util-middleware" = {
       out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@1.1.0";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-1.1.0.tgz";
@@ -7879,9 +7270,8 @@ let
     };
     "@smithy/signature-v4/@smithy/util-utf8" = {
       out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-utf8";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-utf8@1.1.0";
         url = "https://registry.npmjs.org/@smithy/util-utf8/-/util-utf8-1.1.0.tgz";
@@ -7890,9 +7280,8 @@ let
     };
     "@smithy/signature-v4/@smithy/util-utf8/@smithy/util-buffer-from" = {
       out_path = "@smithy/signature-v4/node_modules/@smithy/node_modules/util-utf8/node_modules/@smithy/node_modules/util-buffer-from";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-buffer-from@1.1.0";
         url = "https://registry.npmjs.org/@smithy/util-buffer-from/-/util-buffer-from-1.1.0.tgz";
@@ -7901,9 +7290,8 @@ let
     };
     "@smithy/smithy-client" = {
       out_path = "@smithy/smithy-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/smithy-client@4.2.0";
         url = "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.2.0.tgz";
@@ -7912,9 +7300,8 @@ let
     };
     "@smithy/smithy-client/@smithy/protocol-http" = {
       out_path = "@smithy/smithy-client/node_modules/@smithy/node_modules/protocol-http";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/protocol-http@5.1.0";
         url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.1.0.tgz";
@@ -7923,9 +7310,8 @@ let
     };
     "@smithy/types" = {
       out_path = "@smithy/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.2.0";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.2.0.tgz";
@@ -7934,9 +7320,8 @@ let
     };
     "@smithy/url-parser" = {
       out_path = "@smithy/url-parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/url-parser@4.0.2";
         url = "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.0.2.tgz";
@@ -7945,9 +7330,8 @@ let
     };
     "@smithy/util-base64" = {
       out_path = "@smithy/util-base64";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-base64@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-base64/-/util-base64-4.0.0.tgz";
@@ -7956,9 +7340,8 @@ let
     };
     "@smithy/util-body-length-browser" = {
       out_path = "@smithy/util-body-length-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-body-length-browser@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-body-length-browser/-/util-body-length-browser-4.0.0.tgz";
@@ -7967,9 +7350,8 @@ let
     };
     "@smithy/util-body-length-node" = {
       out_path = "@smithy/util-body-length-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-body-length-node@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-body-length-node/-/util-body-length-node-4.0.0.tgz";
@@ -7978,9 +7360,8 @@ let
     };
     "@smithy/util-buffer-from" = {
       out_path = "@smithy/util-buffer-from";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-buffer-from@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-buffer-from/-/util-buffer-from-4.0.0.tgz";
@@ -7989,9 +7370,8 @@ let
     };
     "@smithy/util-config-provider" = {
       out_path = "@smithy/util-config-provider";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-config-provider@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-config-provider/-/util-config-provider-4.0.0.tgz";
@@ -8000,9 +7380,8 @@ let
     };
     "@smithy/util-defaults-mode-browser" = {
       out_path = "@smithy/util-defaults-mode-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-browser@4.0.8";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.0.8.tgz";
@@ -8011,9 +7390,8 @@ let
     };
     "@smithy/util-defaults-mode-node" = {
       out_path = "@smithy/util-defaults-mode-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-defaults-mode-node@4.0.8";
         url = "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.0.8.tgz";
@@ -8022,9 +7400,8 @@ let
     };
     "@smithy/util-endpoints" = {
       out_path = "@smithy/util-endpoints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-endpoints@3.0.2";
         url = "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.0.2.tgz";
@@ -8033,9 +7410,8 @@ let
     };
     "@smithy/util-hex-encoding" = {
       out_path = "@smithy/util-hex-encoding";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-hex-encoding@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-hex-encoding/-/util-hex-encoding-4.0.0.tgz";
@@ -8044,9 +7420,8 @@ let
     };
     "@smithy/util-middleware" = {
       out_path = "@smithy/util-middleware";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-middleware@4.0.2";
         url = "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.0.2.tgz";
@@ -8055,9 +7430,8 @@ let
     };
     "@smithy/util-retry" = {
       out_path = "@smithy/util-retry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-retry@4.0.2";
         url = "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.0.2.tgz";
@@ -8066,9 +7440,8 @@ let
     };
     "@smithy/util-stream" = {
       out_path = "@smithy/util-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-stream@4.2.0";
         url = "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.2.0.tgz";
@@ -8077,9 +7450,8 @@ let
     };
     "@smithy/util-uri-escape" = {
       out_path = "@smithy/util-uri-escape";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-uri-escape@1.1.0";
         url = "https://registry.npmjs.org/@smithy/util-uri-escape/-/util-uri-escape-1.1.0.tgz";
@@ -8088,9 +7460,8 @@ let
     };
     "@smithy/util-utf8" = {
       out_path = "@smithy/util-utf8";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-utf8@4.0.0";
         url = "https://registry.npmjs.org/@smithy/util-utf8/-/util-utf8-4.0.0.tgz";
@@ -8099,9 +7470,8 @@ let
     };
     "@smithy/util-waiter" = {
       out_path = "@smithy/util-waiter";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/util-waiter@4.0.5";
         url = "https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.0.5.tgz";
@@ -8110,9 +7480,8 @@ let
     };
     "@smithy/util-waiter/@smithy/abort-controller" = {
       out_path = "@smithy/util-waiter/node_modules/@smithy/node_modules/abort-controller";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/abort-controller@4.0.4";
         url = "https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.0.4.tgz";
@@ -8121,9 +7490,8 @@ let
     };
     "@smithy/util-waiter/@smithy/types" = {
       out_path = "@smithy/util-waiter/node_modules/@smithy/node_modules/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@smithy/types@4.3.1";
         url = "https://registry.npmjs.org/@smithy/types/-/types-4.3.1.tgz";
@@ -8132,9 +7500,8 @@ let
     };
     "@tybys/wasm-util" = {
       out_path = "@tybys/wasm-util";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@tybys/wasm-util@0.9.0";
         url = "https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.9.0.tgz";
@@ -8143,9 +7510,8 @@ let
     };
     "@types/bun" = {
       out_path = "@types/bun";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/bun@1.2.8";
         url = "https://registry.npmjs.org/@types/bun/-/bun-1.2.8.tgz";
@@ -8154,9 +7520,8 @@ let
     };
     "@types/estree" = {
       out_path = "@types/estree";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/estree@1.0.7";
         url = "https://registry.npmjs.org/@types/estree/-/estree-1.0.7.tgz";
@@ -8165,9 +7530,8 @@ let
     };
     "@types/ini" = {
       out_path = "@types/ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/ini@4.1.1";
         url = "https://registry.npmjs.org/@types/ini/-/ini-4.1.1.tgz";
@@ -8176,9 +7540,8 @@ let
     };
     "@types/js-yaml" = {
       out_path = "@types/js-yaml";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/js-yaml@4.0.9";
         url = "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-4.0.9.tgz";
@@ -8187,9 +7550,8 @@ let
     };
     "@types/json-schema" = {
       out_path = "@types/json-schema";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/json-schema@7.0.15";
         url = "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.15.tgz";
@@ -8198,9 +7560,8 @@ let
     };
     "@types/json5" = {
       out_path = "@types/json5";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/json5@0.0.29";
         url = "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz";
@@ -8209,9 +7570,8 @@ let
     };
     "@types/node" = {
       out_path = "@types/node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/node@22.14.0";
         url = "https://registry.npmjs.org/@types/node/-/node-22.14.0.tgz";
@@ -8220,9 +7580,8 @@ let
     };
     "@types/node-fetch" = {
       out_path = "@types/node-fetch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/node-fetch@2.6.12";
         url = "https://registry.npmjs.org/@types/node-fetch/-/node-fetch-2.6.12.tgz";
@@ -8231,9 +7590,8 @@ let
     };
     "@types/normalize-package-data" = {
       out_path = "@types/normalize-package-data";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/normalize-package-data@2.4.4";
         url = "https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.4.tgz";
@@ -8242,9 +7600,8 @@ let
     };
     "@types/stream-buffers" = {
       out_path = "@types/stream-buffers";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/stream-buffers@3.0.7";
         url = "https://registry.npmjs.org/@types/stream-buffers/-/stream-buffers-3.0.7.tgz";
@@ -8253,9 +7610,8 @@ let
     };
     "@types/tar" = {
       out_path = "@types/tar";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/tar@6.1.13";
         url = "https://registry.npmjs.org/@types/tar/-/tar-6.1.13.tgz";
@@ -8264,9 +7620,8 @@ let
     };
     "@types/uuid" = {
       out_path = "@types/uuid";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/uuid@9.0.8";
         url = "https://registry.npmjs.org/@types/uuid/-/uuid-9.0.8.tgz";
@@ -8275,9 +7630,8 @@ let
     };
     "@types/ws" = {
       out_path = "@types/ws";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@types/ws@8.18.1";
         url = "https://registry.npmjs.org/@types/ws/-/ws-8.18.1.tgz";
@@ -8286,9 +7640,8 @@ let
     };
     "@typescript-eslint/eslint-plugin" = {
       out_path = "@typescript-eslint/eslint-plugin";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/eslint-plugin@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/eslint-plugin/-/eslint-plugin-8.29.0.tgz";
@@ -8297,9 +7650,8 @@ let
     };
     "@typescript-eslint/parser" = {
       out_path = "@typescript-eslint/parser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/parser@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-8.29.0.tgz";
@@ -8308,9 +7660,8 @@ let
     };
     "@typescript-eslint/scope-manager" = {
       out_path = "@typescript-eslint/scope-manager";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/scope-manager@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/scope-manager/-/scope-manager-8.29.0.tgz";
@@ -8319,9 +7670,8 @@ let
     };
     "@typescript-eslint/type-utils" = {
       out_path = "@typescript-eslint/type-utils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/type-utils@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/type-utils/-/type-utils-8.29.0.tgz";
@@ -8330,9 +7680,8 @@ let
     };
     "@typescript-eslint/types" = {
       out_path = "@typescript-eslint/types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/types@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/types/-/types-8.29.0.tgz";
@@ -8341,9 +7690,8 @@ let
     };
     "@typescript-eslint/typescript-estree" = {
       out_path = "@typescript-eslint/typescript-estree";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/typescript-estree@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.29.0.tgz";
@@ -8352,9 +7700,8 @@ let
     };
     "@typescript-eslint/typescript-estree/minimatch" = {
       out_path = "@typescript-eslint/typescript-estree/node_modules/minimatch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minimatch@9.0.5";
         url = "https://registry.npmjs.org/minimatch/-/minimatch-9.0.5.tgz";
@@ -8363,9 +7710,8 @@ let
     };
     "@typescript-eslint/typescript-estree/minimatch/brace-expansion" = {
       out_path = "@typescript-eslint/typescript-estree/node_modules/minimatch/node_modules/brace-expansion";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "brace-expansion@2.0.1";
         url = "https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.0.1.tgz";
@@ -8385,9 +7731,8 @@ let
     };
     "@typescript-eslint/utils" = {
       out_path = "@typescript-eslint/utils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/utils@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.29.0.tgz";
@@ -8396,9 +7741,8 @@ let
     };
     "@typescript-eslint/visitor-keys" = {
       out_path = "@typescript-eslint/visitor-keys";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@typescript-eslint/visitor-keys@8.29.0";
         url = "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-8.29.0.tgz";
@@ -8407,9 +7751,8 @@ let
     };
     "@unrs/resolver-binding-darwin-arm64" = {
       out_path = "@unrs/resolver-binding-darwin-arm64";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-darwin-arm64@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-darwin-arm64/-/resolver-binding-darwin-arm64-1.4.1.tgz";
@@ -8418,9 +7761,8 @@ let
     };
     "@unrs/resolver-binding-darwin-x64" = {
       out_path = "@unrs/resolver-binding-darwin-x64";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-darwin-x64@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-darwin-x64/-/resolver-binding-darwin-x64-1.4.1.tgz";
@@ -8429,9 +7771,8 @@ let
     };
     "@unrs/resolver-binding-freebsd-x64" = {
       out_path = "@unrs/resolver-binding-freebsd-x64";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-freebsd-x64@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-freebsd-x64/-/resolver-binding-freebsd-x64-1.4.1.tgz";
@@ -8440,9 +7781,8 @@ let
     };
     "@unrs/resolver-binding-linux-arm-gnueabihf" = {
       out_path = "@unrs/resolver-binding-linux-arm-gnueabihf";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-arm-gnueabihf@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm-gnueabihf/-/resolver-binding-linux-arm-gnueabihf-1.4.1.tgz";
@@ -8451,9 +7791,8 @@ let
     };
     "@unrs/resolver-binding-linux-arm-musleabihf" = {
       out_path = "@unrs/resolver-binding-linux-arm-musleabihf";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-arm-musleabihf@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm-musleabihf/-/resolver-binding-linux-arm-musleabihf-1.4.1.tgz";
@@ -8462,9 +7801,8 @@ let
     };
     "@unrs/resolver-binding-linux-arm64-gnu" = {
       out_path = "@unrs/resolver-binding-linux-arm64-gnu";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-arm64-gnu@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm64-gnu/-/resolver-binding-linux-arm64-gnu-1.4.1.tgz";
@@ -8473,9 +7811,8 @@ let
     };
     "@unrs/resolver-binding-linux-arm64-musl" = {
       out_path = "@unrs/resolver-binding-linux-arm64-musl";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-arm64-musl@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm64-musl/-/resolver-binding-linux-arm64-musl-1.4.1.tgz";
@@ -8484,9 +7821,8 @@ let
     };
     "@unrs/resolver-binding-linux-ppc64-gnu" = {
       out_path = "@unrs/resolver-binding-linux-ppc64-gnu";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-ppc64-gnu@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-ppc64-gnu/-/resolver-binding-linux-ppc64-gnu-1.4.1.tgz";
@@ -8495,9 +7831,8 @@ let
     };
     "@unrs/resolver-binding-linux-s390x-gnu" = {
       out_path = "@unrs/resolver-binding-linux-s390x-gnu";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-s390x-gnu@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-s390x-gnu/-/resolver-binding-linux-s390x-gnu-1.4.1.tgz";
@@ -8506,9 +7841,8 @@ let
     };
     "@unrs/resolver-binding-linux-x64-gnu" = {
       out_path = "@unrs/resolver-binding-linux-x64-gnu";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-x64-gnu@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-x64-gnu/-/resolver-binding-linux-x64-gnu-1.4.1.tgz";
@@ -8517,9 +7851,8 @@ let
     };
     "@unrs/resolver-binding-linux-x64-musl" = {
       out_path = "@unrs/resolver-binding-linux-x64-musl";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-linux-x64-musl@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-linux-x64-musl/-/resolver-binding-linux-x64-musl-1.4.1.tgz";
@@ -8528,9 +7861,8 @@ let
     };
     "@unrs/resolver-binding-wasm32-wasi" = {
       out_path = "@unrs/resolver-binding-wasm32-wasi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-wasm32-wasi@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-wasm32-wasi/-/resolver-binding-wasm32-wasi-1.4.1.tgz";
@@ -8539,9 +7871,8 @@ let
     };
     "@unrs/resolver-binding-win32-arm64-msvc" = {
       out_path = "@unrs/resolver-binding-win32-arm64-msvc";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-win32-arm64-msvc@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-win32-arm64-msvc/-/resolver-binding-win32-arm64-msvc-1.4.1.tgz";
@@ -8550,9 +7881,8 @@ let
     };
     "@unrs/resolver-binding-win32-ia32-msvc" = {
       out_path = "@unrs/resolver-binding-win32-ia32-msvc";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-win32-ia32-msvc@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-win32-ia32-msvc/-/resolver-binding-win32-ia32-msvc-1.4.1.tgz";
@@ -8561,9 +7891,8 @@ let
     };
     "@unrs/resolver-binding-win32-x64-msvc" = {
       out_path = "@unrs/resolver-binding-win32-x64-msvc";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "@unrs/resolver-binding-win32-x64-msvc@1.4.1";
         url = "https://registry.npmjs.org/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.4.1.tgz";
@@ -8583,9 +7912,8 @@ let
     };
     "acorn-jsx" = {
       out_path = "acorn-jsx";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "acorn-jsx@5.3.2";
         url = "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz";
@@ -8594,9 +7922,8 @@ let
     };
     "agent-base" = {
       out_path = "agent-base";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "agent-base@7.1.3";
         url = "https://registry.npmjs.org/agent-base/-/agent-base-7.1.3.tgz";
@@ -8605,9 +7932,8 @@ let
     };
     "ajv" = {
       out_path = "ajv";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ajv@6.12.6";
         url = "https://registry.npmjs.org/ajv/-/ajv-6.12.6.tgz";
@@ -8616,9 +7942,8 @@ let
     };
     "ansi-escapes" = {
       out_path = "ansi-escapes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-escapes@7.0.0";
         url = "https://registry.npmjs.org/ansi-escapes/-/ansi-escapes-7.0.0.tgz";
@@ -8627,9 +7952,8 @@ let
     };
     "ansi-regex" = {
       out_path = "ansi-regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-regex@6.1.0";
         url = "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.1.0.tgz";
@@ -8638,9 +7962,8 @@ let
     };
     "ansi-styles" = {
       out_path = "ansi-styles";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-styles@6.2.1";
         url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-6.2.1.tgz";
@@ -8649,9 +7972,8 @@ let
     };
     "argparse" = {
       out_path = "argparse";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "argparse@2.0.1";
         url = "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz";
@@ -8660,9 +7982,8 @@ let
     };
     "array-buffer-byte-length" = {
       out_path = "array-buffer-byte-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "array-buffer-byte-length@1.0.2";
         url = "https://registry.npmjs.org/array-buffer-byte-length/-/array-buffer-byte-length-1.0.2.tgz";
@@ -8671,9 +7992,8 @@ let
     };
     "array-includes" = {
       out_path = "array-includes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "array-includes@3.1.8";
         url = "https://registry.npmjs.org/array-includes/-/array-includes-3.1.8.tgz";
@@ -8682,9 +8002,8 @@ let
     };
     "array.prototype.findlastindex" = {
       out_path = "array.prototype.findlastindex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "array.prototype.findlastindex@1.2.6";
         url = "https://registry.npmjs.org/array.prototype.findlastindex/-/array.prototype.findlastindex-1.2.6.tgz";
@@ -8693,9 +8012,8 @@ let
     };
     "array.prototype.flat" = {
       out_path = "array.prototype.flat";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "array.prototype.flat@1.3.3";
         url = "https://registry.npmjs.org/array.prototype.flat/-/array.prototype.flat-1.3.3.tgz";
@@ -8704,9 +8022,8 @@ let
     };
     "array.prototype.flatmap" = {
       out_path = "array.prototype.flatmap";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "array.prototype.flatmap@1.3.3";
         url = "https://registry.npmjs.org/array.prototype.flatmap/-/array.prototype.flatmap-1.3.3.tgz";
@@ -8715,9 +8032,8 @@ let
     };
     "arraybuffer.prototype.slice" = {
       out_path = "arraybuffer.prototype.slice";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "arraybuffer.prototype.slice@1.0.4";
         url = "https://registry.npmjs.org/arraybuffer.prototype.slice/-/arraybuffer.prototype.slice-1.0.4.tgz";
@@ -8726,9 +8042,8 @@ let
     };
     "async-function" = {
       out_path = "async-function";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "async-function@1.0.0";
         url = "https://registry.npmjs.org/async-function/-/async-function-1.0.0.tgz";
@@ -8737,9 +8052,8 @@ let
     };
     "asynckit" = {
       out_path = "asynckit";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "asynckit@0.4.0";
         url = "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz";
@@ -8748,9 +8062,8 @@ let
     };
     "available-typed-arrays" = {
       out_path = "available-typed-arrays";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "available-typed-arrays@1.0.7";
         url = "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.7.tgz";
@@ -8759,9 +8072,8 @@ let
     };
     "axios" = {
       out_path = "axios";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "axios@1.9.0";
         url = "https://registry.npmjs.org/axios/-/axios-1.9.0.tgz";
@@ -8770,9 +8082,8 @@ let
     };
     "balanced-match" = {
       out_path = "balanced-match";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "balanced-match@1.0.2";
         url = "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz";
@@ -8781,9 +8092,8 @@ let
     };
     "bowser" = {
       out_path = "bowser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "bowser@2.11.0";
         url = "https://registry.npmjs.org/bowser/-/bowser-2.11.0.tgz";
@@ -8792,9 +8102,8 @@ let
     };
     "brace-expansion" = {
       out_path = "brace-expansion";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "brace-expansion@1.1.11";
         url = "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.11.tgz";
@@ -8803,9 +8112,8 @@ let
     };
     "braces" = {
       out_path = "braces";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "braces@3.0.3";
         url = "https://registry.npmjs.org/braces/-/braces-3.0.3.tgz";
@@ -8825,9 +8133,8 @@ let
     };
     "builtin-modules" = {
       out_path = "builtin-modules";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "builtin-modules@3.3.0";
         url = "https://registry.npmjs.org/builtin-modules/-/builtin-modules-3.3.0.tgz";
@@ -8836,9 +8143,8 @@ let
     };
     "bun-types" = {
       out_path = "bun-types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "bun-types@1.2.7";
         url = "https://registry.npmjs.org/bun-types/-/bun-types-1.2.7.tgz";
@@ -8847,9 +8153,8 @@ let
     };
     "bundle-name" = {
       out_path = "bundle-name";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "bundle-name@4.1.0";
         url = "https://registry.npmjs.org/bundle-name/-/bundle-name-4.1.0.tgz";
@@ -8858,9 +8163,8 @@ let
     };
     "bytes" = {
       out_path = "bytes";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "bytes@3.1.2";
         url = "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz";
@@ -8869,9 +8173,8 @@ let
     };
     "call-bind" = {
       out_path = "call-bind";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "call-bind@1.0.8";
         url = "https://registry.npmjs.org/call-bind/-/call-bind-1.0.8.tgz";
@@ -8880,9 +8183,8 @@ let
     };
     "call-bind-apply-helpers" = {
       out_path = "call-bind-apply-helpers";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "call-bind-apply-helpers@1.0.2";
         url = "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz";
@@ -8891,9 +8193,8 @@ let
     };
     "call-bound" = {
       out_path = "call-bound";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "call-bound@1.0.4";
         url = "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz";
@@ -8902,9 +8203,8 @@ let
     };
     "callsites" = {
       out_path = "callsites";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "callsites@3.1.0";
         url = "https://registry.npmjs.org/callsites/-/callsites-3.1.0.tgz";
@@ -8913,9 +8213,8 @@ let
     };
     "caniuse-lite" = {
       out_path = "caniuse-lite";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "caniuse-lite@1.0.30001712";
         url = "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001712.tgz";
@@ -8924,9 +8223,8 @@ let
     };
     "chalk" = {
       out_path = "chalk";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "chalk@4.1.2";
         url = "https://registry.npmjs.org/chalk/-/chalk-4.1.2.tgz";
@@ -8935,9 +8233,8 @@ let
     };
     "chalk/ansi-styles" = {
       out_path = "chalk/node_modules/ansi-styles";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ansi-styles@4.3.0";
         url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz";
@@ -8946,9 +8243,8 @@ let
     };
     "chardet" = {
       out_path = "chardet";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "chardet@0.7.0";
         url = "https://registry.npmjs.org/chardet/-/chardet-0.7.0.tgz";
@@ -8957,9 +8253,8 @@ let
     };
     "chownr" = {
       out_path = "chownr";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "chownr@3.0.0";
         url = "https://registry.npmjs.org/chownr/-/chownr-3.0.0.tgz";
@@ -8968,9 +8263,8 @@ let
     };
     "ci-info" = {
       out_path = "ci-info";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ci-info@4.2.0";
         url = "https://registry.npmjs.org/ci-info/-/ci-info-4.2.0.tgz";
@@ -8979,9 +8273,8 @@ let
     };
     "clean-regexp" = {
       out_path = "clean-regexp";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "clean-regexp@1.0.0";
         url = "https://registry.npmjs.org/clean-regexp/-/clean-regexp-1.0.0.tgz";
@@ -8990,9 +8283,8 @@ let
     };
     "clean-regexp/escape-string-regexp" = {
       out_path = "clean-regexp/node_modules/escape-string-regexp";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "escape-string-regexp@1.0.5";
         url = "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz";
@@ -9001,9 +8293,8 @@ let
     };
     "cli-cursor" = {
       out_path = "cli-cursor";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "cli-cursor@5.0.0";
         url = "https://registry.npmjs.org/cli-cursor/-/cli-cursor-5.0.0.tgz";
@@ -9012,9 +8303,8 @@ let
     };
     "cli-truncate" = {
       out_path = "cli-truncate";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "cli-truncate@4.0.0";
         url = "https://registry.npmjs.org/cli-truncate/-/cli-truncate-4.0.0.tgz";
@@ -9023,9 +8313,8 @@ let
     };
     "cli-width" = {
       out_path = "cli-width";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "cli-width@4.1.0";
         url = "https://registry.npmjs.org/cli-width/-/cli-width-4.1.0.tgz";
@@ -9034,9 +8323,8 @@ let
     };
     "clipanion" = {
       out_path = "clipanion";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "clipanion@4.0.0-rc.4";
         url = "https://registry.npmjs.org/clipanion/-/clipanion-4.0.0-rc.4.tgz";
@@ -9045,9 +8333,8 @@ let
     };
     "color-convert" = {
       out_path = "color-convert";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "color-convert@2.0.1";
         url = "https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz";
@@ -9056,9 +8343,8 @@ let
     };
     "color-name" = {
       out_path = "color-name";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "color-name@1.1.4";
         url = "https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz";
@@ -9067,9 +8353,8 @@ let
     };
     "colorette" = {
       out_path = "colorette";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "colorette@2.0.20";
         url = "https://registry.npmjs.org/colorette/-/colorette-2.0.20.tgz";
@@ -9078,9 +8363,8 @@ let
     };
     "combined-stream" = {
       out_path = "combined-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "combined-stream@1.0.8";
         url = "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz";
@@ -9089,9 +8373,8 @@ let
     };
     "concat-map" = {
       out_path = "concat-map";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "concat-map@0.0.1";
         url = "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz";
@@ -9100,9 +8383,8 @@ let
     };
     "core-js-compat" = {
       out_path = "core-js-compat";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "core-js-compat@3.41.0";
         url = "https://registry.npmjs.org/core-js-compat/-/core-js-compat-3.41.0.tgz";
@@ -9111,9 +8393,8 @@ let
     };
     "cross-spawn" = {
       out_path = "cross-spawn";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "cross-spawn@7.0.6";
         url = "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz";
@@ -9122,9 +8403,8 @@ let
     };
     "daemon" = {
       out_path = "daemon";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "daemon@1.1.0";
         url = "https://registry.npmjs.org/daemon/-/daemon-1.1.0.tgz";
@@ -9133,9 +8413,8 @@ let
     };
     "data-view-buffer" = {
       out_path = "data-view-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "data-view-buffer@1.0.2";
         url = "https://registry.npmjs.org/data-view-buffer/-/data-view-buffer-1.0.2.tgz";
@@ -9144,9 +8423,8 @@ let
     };
     "data-view-byte-length" = {
       out_path = "data-view-byte-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "data-view-byte-length@1.0.2";
         url = "https://registry.npmjs.org/data-view-byte-length/-/data-view-byte-length-1.0.2.tgz";
@@ -9155,9 +8433,8 @@ let
     };
     "data-view-byte-offset" = {
       out_path = "data-view-byte-offset";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "data-view-byte-offset@1.0.1";
         url = "https://registry.npmjs.org/data-view-byte-offset/-/data-view-byte-offset-1.0.1.tgz";
@@ -9166,9 +8443,8 @@ let
     };
     "debug" = {
       out_path = "debug";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "debug@4.4.0";
         url = "https://registry.npmjs.org/debug/-/debug-4.4.0.tgz";
@@ -9177,9 +8453,8 @@ let
     };
     "deep-is" = {
       out_path = "deep-is";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "deep-is@0.1.4";
         url = "https://registry.npmjs.org/deep-is/-/deep-is-0.1.4.tgz";
@@ -9188,9 +8463,8 @@ let
     };
     "default-browser" = {
       out_path = "default-browser";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "default-browser@5.2.1";
         url = "https://registry.npmjs.org/default-browser/-/default-browser-5.2.1.tgz";
@@ -9199,9 +8473,8 @@ let
     };
     "default-browser-id" = {
       out_path = "default-browser-id";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "default-browser-id@5.0.0";
         url = "https://registry.npmjs.org/default-browser-id/-/default-browser-id-5.0.0.tgz";
@@ -9210,9 +8483,8 @@ let
     };
     "define-data-property" = {
       out_path = "define-data-property";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "define-data-property@1.1.4";
         url = "https://registry.npmjs.org/define-data-property/-/define-data-property-1.1.4.tgz";
@@ -9221,9 +8493,8 @@ let
     };
     "define-lazy-prop" = {
       out_path = "define-lazy-prop";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "define-lazy-prop@3.0.0";
         url = "https://registry.npmjs.org/define-lazy-prop/-/define-lazy-prop-3.0.0.tgz";
@@ -9232,9 +8503,8 @@ let
     };
     "define-properties" = {
       out_path = "define-properties";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "define-properties@1.2.1";
         url = "https://registry.npmjs.org/define-properties/-/define-properties-1.2.1.tgz";
@@ -9243,9 +8513,8 @@ let
     };
     "delayed-stream" = {
       out_path = "delayed-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "delayed-stream@1.0.0";
         url = "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz";
@@ -9254,9 +8523,8 @@ let
     };
     "doctrine" = {
       out_path = "doctrine";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "doctrine@2.1.0";
         url = "https://registry.npmjs.org/doctrine/-/doctrine-2.1.0.tgz";
@@ -9265,9 +8533,8 @@ let
     };
     "dunder-proto" = {
       out_path = "dunder-proto";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "dunder-proto@1.0.1";
         url = "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz";
@@ -9276,9 +8543,8 @@ let
     };
     "electron-to-chromium" = {
       out_path = "electron-to-chromium";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "electron-to-chromium@1.5.132";
         url = "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.132.tgz";
@@ -9287,9 +8553,8 @@ let
     };
     "emoji-regex" = {
       out_path = "emoji-regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "emoji-regex@10.4.0";
         url = "https://registry.npmjs.org/emoji-regex/-/emoji-regex-10.4.0.tgz";
@@ -9298,9 +8563,8 @@ let
     };
     "environment" = {
       out_path = "environment";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "environment@1.1.0";
         url = "https://registry.npmjs.org/environment/-/environment-1.1.0.tgz";
@@ -9309,9 +8573,8 @@ let
     };
     "es-abstract" = {
       out_path = "es-abstract";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-abstract@1.23.9";
         url = "https://registry.npmjs.org/es-abstract/-/es-abstract-1.23.9.tgz";
@@ -9320,9 +8583,8 @@ let
     };
     "es-define-property" = {
       out_path = "es-define-property";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-define-property@1.0.1";
         url = "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz";
@@ -9331,9 +8593,8 @@ let
     };
     "es-errors" = {
       out_path = "es-errors";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-errors@1.3.0";
         url = "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz";
@@ -9342,9 +8603,8 @@ let
     };
     "es-object-atoms" = {
       out_path = "es-object-atoms";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-object-atoms@1.1.1";
         url = "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.1.tgz";
@@ -9353,9 +8613,8 @@ let
     };
     "es-set-tostringtag" = {
       out_path = "es-set-tostringtag";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-set-tostringtag@2.1.0";
         url = "https://registry.npmjs.org/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz";
@@ -9364,9 +8623,8 @@ let
     };
     "es-shim-unscopables" = {
       out_path = "es-shim-unscopables";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-shim-unscopables@1.1.0";
         url = "https://registry.npmjs.org/es-shim-unscopables/-/es-shim-unscopables-1.1.0.tgz";
@@ -9375,9 +8633,8 @@ let
     };
     "es-to-primitive" = {
       out_path = "es-to-primitive";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "es-to-primitive@1.3.0";
         url = "https://registry.npmjs.org/es-to-primitive/-/es-to-primitive-1.3.0.tgz";
@@ -9386,9 +8643,8 @@ let
     };
     "escalade" = {
       out_path = "escalade";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "escalade@3.2.0";
         url = "https://registry.npmjs.org/escalade/-/escalade-3.2.0.tgz";
@@ -9397,9 +8653,8 @@ let
     };
     "escape-string-regexp" = {
       out_path = "escape-string-regexp";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "escape-string-regexp@4.0.0";
         url = "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz";
@@ -9430,9 +8685,8 @@ let
     };
     "eslint-import-resolver-node" = {
       out_path = "eslint-import-resolver-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-import-resolver-node@0.3.9";
         url = "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.9.tgz";
@@ -9441,9 +8695,8 @@ let
     };
     "eslint-import-resolver-node/debug" = {
       out_path = "eslint-import-resolver-node/node_modules/debug";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "debug@3.2.7";
         url = "https://registry.npmjs.org/debug/-/debug-3.2.7.tgz";
@@ -9452,9 +8705,8 @@ let
     };
     "eslint-import-resolver-typescript" = {
       out_path = "eslint-import-resolver-typescript";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-import-resolver-typescript@3.10.0";
         url = "https://registry.npmjs.org/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.10.0.tgz";
@@ -9463,9 +8715,8 @@ let
     };
     "eslint-module-utils" = {
       out_path = "eslint-module-utils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-module-utils@2.12.0";
         url = "https://registry.npmjs.org/eslint-module-utils/-/eslint-module-utils-2.12.0.tgz";
@@ -9474,9 +8725,8 @@ let
     };
     "eslint-module-utils/debug" = {
       out_path = "eslint-module-utils/node_modules/debug";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "debug@3.2.7";
         url = "https://registry.npmjs.org/debug/-/debug-3.2.7.tgz";
@@ -9485,9 +8735,8 @@ let
     };
     "eslint-plugin-import" = {
       out_path = "eslint-plugin-import";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-plugin-import@2.31.0";
         url = "https://registry.npmjs.org/eslint-plugin-import/-/eslint-plugin-import-2.31.0.tgz";
@@ -9496,9 +8745,8 @@ let
     };
     "eslint-plugin-import/debug" = {
       out_path = "eslint-plugin-import/node_modules/debug";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "debug@3.2.7";
         url = "https://registry.npmjs.org/debug/-/debug-3.2.7.tgz";
@@ -9507,9 +8755,8 @@ let
     };
     "eslint-plugin-prettier" = {
       out_path = "eslint-plugin-prettier";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-plugin-prettier@5.2.6";
         url = "https://registry.npmjs.org/eslint-plugin-prettier/-/eslint-plugin-prettier-5.2.6.tgz";
@@ -9518,9 +8765,8 @@ let
     };
     "eslint-plugin-promise" = {
       out_path = "eslint-plugin-promise";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-plugin-promise@7.2.1";
         url = "https://registry.npmjs.org/eslint-plugin-promise/-/eslint-plugin-promise-7.2.1.tgz";
@@ -9529,9 +8775,8 @@ let
     };
     "eslint-plugin-sonarjs" = {
       out_path = "eslint-plugin-sonarjs";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-plugin-sonarjs@3.0.2";
         url = "https://registry.npmjs.org/eslint-plugin-sonarjs/-/eslint-plugin-sonarjs-3.0.2.tgz";
@@ -9540,9 +8785,8 @@ let
     };
     "eslint-plugin-sonarjs/minimatch" = {
       out_path = "eslint-plugin-sonarjs/node_modules/minimatch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minimatch@9.0.5";
         url = "https://registry.npmjs.org/minimatch/-/minimatch-9.0.5.tgz";
@@ -9551,9 +8795,8 @@ let
     };
     "eslint-plugin-sonarjs/minimatch/brace-expansion" = {
       out_path = "eslint-plugin-sonarjs/node_modules/minimatch/node_modules/brace-expansion";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "brace-expansion@2.0.1";
         url = "https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.0.1.tgz";
@@ -9573,9 +8816,8 @@ let
     };
     "eslint-plugin-unicorn" = {
       out_path = "eslint-plugin-unicorn";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-plugin-unicorn@57.0.0";
         url = "https://registry.npmjs.org/eslint-plugin-unicorn/-/eslint-plugin-unicorn-57.0.0.tgz";
@@ -9584,9 +8826,8 @@ let
     };
     "eslint-plugin-unicorn/globals" = {
       out_path = "eslint-plugin-unicorn/node_modules/globals";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "globals@15.15.0";
         url = "https://registry.npmjs.org/globals/-/globals-15.15.0.tgz";
@@ -9606,9 +8847,8 @@ let
     };
     "eslint-plugin-unused-imports" = {
       out_path = "eslint-plugin-unused-imports";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-plugin-unused-imports@4.1.4";
         url = "https://registry.npmjs.org/eslint-plugin-unused-imports/-/eslint-plugin-unused-imports-4.1.4.tgz";
@@ -9617,9 +8857,8 @@ let
     };
     "eslint-scope" = {
       out_path = "eslint-scope";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-scope@8.3.0";
         url = "https://registry.npmjs.org/eslint-scope/-/eslint-scope-8.3.0.tgz";
@@ -9628,9 +8867,8 @@ let
     };
     "eslint-visitor-keys" = {
       out_path = "eslint-visitor-keys";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eslint-visitor-keys@4.2.0";
         url = "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-4.2.0.tgz";
@@ -9639,9 +8877,8 @@ let
     };
     "espree" = {
       out_path = "espree";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "espree@10.3.0";
         url = "https://registry.npmjs.org/espree/-/espree-10.3.0.tgz";
@@ -9650,9 +8887,8 @@ let
     };
     "esquery" = {
       out_path = "esquery";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "esquery@1.6.0";
         url = "https://registry.npmjs.org/esquery/-/esquery-1.6.0.tgz";
@@ -9661,9 +8897,8 @@ let
     };
     "esrecurse" = {
       out_path = "esrecurse";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "esrecurse@4.3.0";
         url = "https://registry.npmjs.org/esrecurse/-/esrecurse-4.3.0.tgz";
@@ -9672,9 +8907,8 @@ let
     };
     "estraverse" = {
       out_path = "estraverse";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "estraverse@5.3.0";
         url = "https://registry.npmjs.org/estraverse/-/estraverse-5.3.0.tgz";
@@ -9683,9 +8917,8 @@ let
     };
     "esutils" = {
       out_path = "esutils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "esutils@2.0.3";
         url = "https://registry.npmjs.org/esutils/-/esutils-2.0.3.tgz";
@@ -9694,9 +8927,8 @@ let
     };
     "eventemitter3" = {
       out_path = "eventemitter3";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "eventemitter3@5.0.1";
         url = "https://registry.npmjs.org/eventemitter3/-/eventemitter3-5.0.1.tgz";
@@ -9705,9 +8937,8 @@ let
     };
     "external-editor" = {
       out_path = "external-editor";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "external-editor@3.1.0";
         url = "https://registry.npmjs.org/external-editor/-/external-editor-3.1.0.tgz";
@@ -9716,9 +8947,8 @@ let
     };
     "external-editor/tmp" = {
       out_path = "external-editor/node_modules/tmp";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tmp@0.0.33";
         url = "https://registry.npmjs.org/tmp/-/tmp-0.0.33.tgz";
@@ -9727,9 +8957,8 @@ let
     };
     "fast-deep-equal" = {
       out_path = "fast-deep-equal";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fast-deep-equal@3.1.3";
         url = "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz";
@@ -9738,9 +8967,8 @@ let
     };
     "fast-diff" = {
       out_path = "fast-diff";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fast-diff@1.3.0";
         url = "https://registry.npmjs.org/fast-diff/-/fast-diff-1.3.0.tgz";
@@ -9749,9 +8977,8 @@ let
     };
     "fast-glob" = {
       out_path = "fast-glob";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fast-glob@3.3.3";
         url = "https://registry.npmjs.org/fast-glob/-/fast-glob-3.3.3.tgz";
@@ -9760,9 +8987,8 @@ let
     };
     "fast-glob/glob-parent" = {
       out_path = "fast-glob/node_modules/glob-parent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "glob-parent@5.1.2";
         url = "https://registry.npmjs.org/glob-parent/-/glob-parent-5.1.2.tgz";
@@ -9771,9 +8997,8 @@ let
     };
     "fast-json-stable-stringify" = {
       out_path = "fast-json-stable-stringify";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fast-json-stable-stringify@2.1.0";
         url = "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz";
@@ -9782,9 +9007,8 @@ let
     };
     "fast-levenshtein" = {
       out_path = "fast-levenshtein";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fast-levenshtein@2.0.6";
         url = "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz";
@@ -9804,9 +9028,8 @@ let
     };
     "fastq" = {
       out_path = "fastq";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fastq@1.19.1";
         url = "https://registry.npmjs.org/fastq/-/fastq-1.19.1.tgz";
@@ -9815,9 +9038,8 @@ let
     };
     "fdir" = {
       out_path = "fdir";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fdir@6.4.3";
         url = "https://registry.npmjs.org/fdir/-/fdir-6.4.3.tgz";
@@ -9826,9 +9048,8 @@ let
     };
     "file-entry-cache" = {
       out_path = "file-entry-cache";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "file-entry-cache@8.0.0";
         url = "https://registry.npmjs.org/file-entry-cache/-/file-entry-cache-8.0.0.tgz";
@@ -9837,9 +9058,8 @@ let
     };
     "fill-range" = {
       out_path = "fill-range";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "fill-range@7.1.1";
         url = "https://registry.npmjs.org/fill-range/-/fill-range-7.1.1.tgz";
@@ -9848,9 +9068,8 @@ let
     };
     "find-up" = {
       out_path = "find-up";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "find-up@5.0.0";
         url = "https://registry.npmjs.org/find-up/-/find-up-5.0.0.tgz";
@@ -9859,9 +9078,8 @@ let
     };
     "find-up-simple" = {
       out_path = "find-up-simple";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "find-up-simple@1.0.1";
         url = "https://registry.npmjs.org/find-up-simple/-/find-up-simple-1.0.1.tgz";
@@ -9870,9 +9088,8 @@ let
     };
     "flat-cache" = {
       out_path = "flat-cache";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "flat-cache@4.0.1";
         url = "https://registry.npmjs.org/flat-cache/-/flat-cache-4.0.1.tgz";
@@ -9881,9 +9098,8 @@ let
     };
     "flatted" = {
       out_path = "flatted";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "flatted@3.3.3";
         url = "https://registry.npmjs.org/flatted/-/flatted-3.3.3.tgz";
@@ -9892,9 +9108,8 @@ let
     };
     "follow-redirects" = {
       out_path = "follow-redirects";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "follow-redirects@1.15.9";
         url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz";
@@ -9903,9 +9118,8 @@ let
     };
     "for-each" = {
       out_path = "for-each";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "for-each@0.3.5";
         url = "https://registry.npmjs.org/for-each/-/for-each-0.3.5.tgz";
@@ -9914,9 +9128,8 @@ let
     };
     "form-data" = {
       out_path = "form-data";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "form-data@4.0.2";
         url = "https://registry.npmjs.org/form-data/-/form-data-4.0.2.tgz";
@@ -9925,9 +9138,8 @@ let
     };
     "function-bind" = {
       out_path = "function-bind";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "function-bind@1.1.2";
         url = "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz";
@@ -9936,9 +9148,8 @@ let
     };
     "function.prototype.name" = {
       out_path = "function.prototype.name";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "function.prototype.name@1.1.8";
         url = "https://registry.npmjs.org/function.prototype.name/-/function.prototype.name-1.1.8.tgz";
@@ -9947,9 +9158,8 @@ let
     };
     "functional-red-black-tree" = {
       out_path = "functional-red-black-tree";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "functional-red-black-tree@1.0.1";
         url = "https://registry.npmjs.org/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz";
@@ -9958,9 +9168,8 @@ let
     };
     "functions-have-names" = {
       out_path = "functions-have-names";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "functions-have-names@1.2.3";
         url = "https://registry.npmjs.org/functions-have-names/-/functions-have-names-1.2.3.tgz";
@@ -9969,9 +9178,8 @@ let
     };
     "get-east-asian-width" = {
       out_path = "get-east-asian-width";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "get-east-asian-width@1.3.0";
         url = "https://registry.npmjs.org/get-east-asian-width/-/get-east-asian-width-1.3.0.tgz";
@@ -9980,9 +9188,8 @@ let
     };
     "get-intrinsic" = {
       out_path = "get-intrinsic";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "get-intrinsic@1.3.0";
         url = "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz";
@@ -9991,9 +9198,8 @@ let
     };
     "get-proto" = {
       out_path = "get-proto";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "get-proto@1.0.1";
         url = "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz";
@@ -10002,9 +9208,8 @@ let
     };
     "get-symbol-description" = {
       out_path = "get-symbol-description";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "get-symbol-description@1.1.0";
         url = "https://registry.npmjs.org/get-symbol-description/-/get-symbol-description-1.1.0.tgz";
@@ -10013,9 +9218,8 @@ let
     };
     "get-tsconfig" = {
       out_path = "get-tsconfig";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "get-tsconfig@4.10.0";
         url = "https://registry.npmjs.org/get-tsconfig/-/get-tsconfig-4.10.0.tgz";
@@ -10024,9 +9228,8 @@ let
     };
     "glob-parent" = {
       out_path = "glob-parent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "glob-parent@6.0.2";
         url = "https://registry.npmjs.org/glob-parent/-/glob-parent-6.0.2.tgz";
@@ -10035,9 +9238,8 @@ let
     };
     "globals" = {
       out_path = "globals";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "globals@14.0.0";
         url = "https://registry.npmjs.org/globals/-/globals-14.0.0.tgz";
@@ -10046,9 +9248,8 @@ let
     };
     "globalthis" = {
       out_path = "globalthis";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "globalthis@1.0.4";
         url = "https://registry.npmjs.org/globalthis/-/globalthis-1.0.4.tgz";
@@ -10057,9 +9258,8 @@ let
     };
     "gopd" = {
       out_path = "gopd";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "gopd@1.2.0";
         url = "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz";
@@ -10068,9 +9268,8 @@ let
     };
     "graphemer" = {
       out_path = "graphemer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "graphemer@1.4.0";
         url = "https://registry.npmjs.org/graphemer/-/graphemer-1.4.0.tgz";
@@ -10079,9 +9278,8 @@ let
     };
     "has-bigints" = {
       out_path = "has-bigints";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "has-bigints@1.1.0";
         url = "https://registry.npmjs.org/has-bigints/-/has-bigints-1.1.0.tgz";
@@ -10090,9 +9288,8 @@ let
     };
     "has-flag" = {
       out_path = "has-flag";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "has-flag@4.0.0";
         url = "https://registry.npmjs.org/has-flag/-/has-flag-4.0.0.tgz";
@@ -10101,9 +9298,8 @@ let
     };
     "has-property-descriptors" = {
       out_path = "has-property-descriptors";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "has-property-descriptors@1.0.2";
         url = "https://registry.npmjs.org/has-property-descriptors/-/has-property-descriptors-1.0.2.tgz";
@@ -10112,9 +9308,8 @@ let
     };
     "has-proto" = {
       out_path = "has-proto";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "has-proto@1.2.0";
         url = "https://registry.npmjs.org/has-proto/-/has-proto-1.2.0.tgz";
@@ -10123,9 +9318,8 @@ let
     };
     "has-symbols" = {
       out_path = "has-symbols";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "has-symbols@1.1.0";
         url = "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz";
@@ -10134,9 +9328,8 @@ let
     };
     "has-tostringtag" = {
       out_path = "has-tostringtag";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "has-tostringtag@1.0.2";
         url = "https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz";
@@ -10145,9 +9338,8 @@ let
     };
     "hasown" = {
       out_path = "hasown";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "hasown@2.0.2";
         url = "https://registry.npmjs.org/hasown/-/hasown-2.0.2.tgz";
@@ -10156,9 +9348,8 @@ let
     };
     "hosted-git-info" = {
       out_path = "hosted-git-info";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "hosted-git-info@7.0.2";
         url = "https://registry.npmjs.org/hosted-git-info/-/hosted-git-info-7.0.2.tgz";
@@ -10167,9 +9358,8 @@ let
     };
     "hpagent" = {
       out_path = "hpagent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "hpagent@1.2.0";
         url = "https://registry.npmjs.org/hpagent/-/hpagent-1.2.0.tgz";
@@ -10178,9 +9368,8 @@ let
     };
     "iconv-lite" = {
       out_path = "iconv-lite";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "iconv-lite@0.4.24";
         url = "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz";
@@ -10189,9 +9378,8 @@ let
     };
     "ignore" = {
       out_path = "ignore";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ignore@5.3.2";
         url = "https://registry.npmjs.org/ignore/-/ignore-5.3.2.tgz";
@@ -10200,9 +9388,8 @@ let
     };
     "import-fresh" = {
       out_path = "import-fresh";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "import-fresh@3.3.1";
         url = "https://registry.npmjs.org/import-fresh/-/import-fresh-3.3.1.tgz";
@@ -10211,9 +9398,8 @@ let
     };
     "imurmurhash" = {
       out_path = "imurmurhash";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "imurmurhash@0.1.4";
         url = "https://registry.npmjs.org/imurmurhash/-/imurmurhash-0.1.4.tgz";
@@ -10222,9 +9408,8 @@ let
     };
     "indent-string" = {
       out_path = "indent-string";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "indent-string@5.0.0";
         url = "https://registry.npmjs.org/indent-string/-/indent-string-5.0.0.tgz";
@@ -10233,9 +9418,8 @@ let
     };
     "index-to-position" = {
       out_path = "index-to-position";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "index-to-position@1.0.0";
         url = "https://registry.npmjs.org/index-to-position/-/index-to-position-1.0.0.tgz";
@@ -10244,9 +9428,8 @@ let
     };
     "ini" = {
       out_path = "ini";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ini@5.0.0";
         url = "https://registry.npmjs.org/ini/-/ini-5.0.0.tgz";
@@ -10255,9 +9438,8 @@ let
     };
     "init" = {
       out_path = "init";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "init@0.1.2";
         url = "https://registry.npmjs.org/init/-/init-0.1.2.tgz";
@@ -10266,9 +9448,8 @@ let
     };
     "internal-slot" = {
       out_path = "internal-slot";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "internal-slot@1.1.0";
         url = "https://registry.npmjs.org/internal-slot/-/internal-slot-1.1.0.tgz";
@@ -10277,9 +9458,8 @@ let
     };
     "ip-address" = {
       out_path = "ip-address";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ip-address@9.0.5";
         url = "https://registry.npmjs.org/ip-address/-/ip-address-9.0.5.tgz";
@@ -10288,9 +9468,8 @@ let
     };
     "is-array-buffer" = {
       out_path = "is-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-array-buffer@3.0.5";
         url = "https://registry.npmjs.org/is-array-buffer/-/is-array-buffer-3.0.5.tgz";
@@ -10299,9 +9478,8 @@ let
     };
     "is-async-function" = {
       out_path = "is-async-function";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-async-function@2.1.1";
         url = "https://registry.npmjs.org/is-async-function/-/is-async-function-2.1.1.tgz";
@@ -10310,9 +9488,8 @@ let
     };
     "is-bigint" = {
       out_path = "is-bigint";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-bigint@1.1.0";
         url = "https://registry.npmjs.org/is-bigint/-/is-bigint-1.1.0.tgz";
@@ -10321,9 +9498,8 @@ let
     };
     "is-boolean-object" = {
       out_path = "is-boolean-object";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-boolean-object@1.2.2";
         url = "https://registry.npmjs.org/is-boolean-object/-/is-boolean-object-1.2.2.tgz";
@@ -10332,9 +9508,8 @@ let
     };
     "is-builtin-module" = {
       out_path = "is-builtin-module";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-builtin-module@4.0.0";
         url = "https://registry.npmjs.org/is-builtin-module/-/is-builtin-module-4.0.0.tgz";
@@ -10343,9 +9518,8 @@ let
     };
     "is-builtin-module/builtin-modules" = {
       out_path = "is-builtin-module/node_modules/builtin-modules";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "builtin-modules@4.0.0";
         url = "https://registry.npmjs.org/builtin-modules/-/builtin-modules-4.0.0.tgz";
@@ -10354,9 +9528,8 @@ let
     };
     "is-bun-module" = {
       out_path = "is-bun-module";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-bun-module@2.0.0";
         url = "https://registry.npmjs.org/is-bun-module/-/is-bun-module-2.0.0.tgz";
@@ -10376,9 +9549,8 @@ let
     };
     "is-callable" = {
       out_path = "is-callable";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-callable@1.2.7";
         url = "https://registry.npmjs.org/is-callable/-/is-callable-1.2.7.tgz";
@@ -10387,9 +9559,8 @@ let
     };
     "is-core-module" = {
       out_path = "is-core-module";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-core-module@2.16.1";
         url = "https://registry.npmjs.org/is-core-module/-/is-core-module-2.16.1.tgz";
@@ -10398,9 +9569,8 @@ let
     };
     "is-data-view" = {
       out_path = "is-data-view";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-data-view@1.0.2";
         url = "https://registry.npmjs.org/is-data-view/-/is-data-view-1.0.2.tgz";
@@ -10409,9 +9579,8 @@ let
     };
     "is-date-object" = {
       out_path = "is-date-object";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-date-object@1.1.0";
         url = "https://registry.npmjs.org/is-date-object/-/is-date-object-1.1.0.tgz";
@@ -10431,9 +9600,8 @@ let
     };
     "is-extglob" = {
       out_path = "is-extglob";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-extglob@2.1.1";
         url = "https://registry.npmjs.org/is-extglob/-/is-extglob-2.1.1.tgz";
@@ -10442,9 +9610,8 @@ let
     };
     "is-finalizationregistry" = {
       out_path = "is-finalizationregistry";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-finalizationregistry@1.1.1";
         url = "https://registry.npmjs.org/is-finalizationregistry/-/is-finalizationregistry-1.1.1.tgz";
@@ -10453,9 +9620,8 @@ let
     };
     "is-fullwidth-code-point" = {
       out_path = "is-fullwidth-code-point";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-fullwidth-code-point@4.0.0";
         url = "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-4.0.0.tgz";
@@ -10464,9 +9630,8 @@ let
     };
     "is-generator-function" = {
       out_path = "is-generator-function";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-generator-function@1.1.0";
         url = "https://registry.npmjs.org/is-generator-function/-/is-generator-function-1.1.0.tgz";
@@ -10475,9 +9640,8 @@ let
     };
     "is-glob" = {
       out_path = "is-glob";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-glob@4.0.3";
         url = "https://registry.npmjs.org/is-glob/-/is-glob-4.0.3.tgz";
@@ -10497,9 +9661,8 @@ let
     };
     "is-map" = {
       out_path = "is-map";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-map@2.0.3";
         url = "https://registry.npmjs.org/is-map/-/is-map-2.0.3.tgz";
@@ -10508,9 +9671,8 @@ let
     };
     "is-number" = {
       out_path = "is-number";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-number@7.0.0";
         url = "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz";
@@ -10519,9 +9681,8 @@ let
     };
     "is-number-object" = {
       out_path = "is-number-object";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-number-object@1.1.1";
         url = "https://registry.npmjs.org/is-number-object/-/is-number-object-1.1.1.tgz";
@@ -10530,9 +9691,8 @@ let
     };
     "is-regex" = {
       out_path = "is-regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-regex@1.2.1";
         url = "https://registry.npmjs.org/is-regex/-/is-regex-1.2.1.tgz";
@@ -10541,9 +9701,8 @@ let
     };
     "is-set" = {
       out_path = "is-set";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-set@2.0.3";
         url = "https://registry.npmjs.org/is-set/-/is-set-2.0.3.tgz";
@@ -10552,9 +9711,8 @@ let
     };
     "is-shared-array-buffer" = {
       out_path = "is-shared-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-shared-array-buffer@1.0.4";
         url = "https://registry.npmjs.org/is-shared-array-buffer/-/is-shared-array-buffer-1.0.4.tgz";
@@ -10563,9 +9721,8 @@ let
     };
     "is-string" = {
       out_path = "is-string";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-string@1.1.1";
         url = "https://registry.npmjs.org/is-string/-/is-string-1.1.1.tgz";
@@ -10574,9 +9731,8 @@ let
     };
     "is-symbol" = {
       out_path = "is-symbol";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-symbol@1.1.1";
         url = "https://registry.npmjs.org/is-symbol/-/is-symbol-1.1.1.tgz";
@@ -10585,9 +9741,8 @@ let
     };
     "is-typed-array" = {
       out_path = "is-typed-array";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-typed-array@1.1.15";
         url = "https://registry.npmjs.org/is-typed-array/-/is-typed-array-1.1.15.tgz";
@@ -10596,9 +9751,8 @@ let
     };
     "is-weakmap" = {
       out_path = "is-weakmap";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-weakmap@2.0.2";
         url = "https://registry.npmjs.org/is-weakmap/-/is-weakmap-2.0.2.tgz";
@@ -10607,9 +9761,8 @@ let
     };
     "is-weakref" = {
       out_path = "is-weakref";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-weakref@1.1.1";
         url = "https://registry.npmjs.org/is-weakref/-/is-weakref-1.1.1.tgz";
@@ -10618,9 +9771,8 @@ let
     };
     "is-weakset" = {
       out_path = "is-weakset";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-weakset@2.0.4";
         url = "https://registry.npmjs.org/is-weakset/-/is-weakset-2.0.4.tgz";
@@ -10629,9 +9781,8 @@ let
     };
     "is-wsl" = {
       out_path = "is-wsl";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-wsl@3.1.0";
         url = "https://registry.npmjs.org/is-wsl/-/is-wsl-3.1.0.tgz";
@@ -10640,9 +9791,8 @@ let
     };
     "isarray" = {
       out_path = "isarray";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "isarray@2.0.5";
         url = "https://registry.npmjs.org/isarray/-/isarray-2.0.5.tgz";
@@ -10651,9 +9801,8 @@ let
     };
     "isexe" = {
       out_path = "isexe";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "isexe@2.0.0";
         url = "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz";
@@ -10662,9 +9811,8 @@ let
     };
     "isomorphic-ws" = {
       out_path = "isomorphic-ws";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "isomorphic-ws@5.0.0";
         url = "https://registry.npmjs.org/isomorphic-ws/-/isomorphic-ws-5.0.0.tgz";
@@ -10673,9 +9821,8 @@ let
     };
     "jose" = {
       out_path = "jose";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "jose@6.0.10";
         url = "https://registry.npmjs.org/jose/-/jose-6.0.10.tgz";
@@ -10684,9 +9831,8 @@ let
     };
     "js-tokens" = {
       out_path = "js-tokens";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "js-tokens@4.0.0";
         url = "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz";
@@ -10706,9 +9852,8 @@ let
     };
     "jsbn" = {
       out_path = "jsbn";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "jsbn@1.1.0";
         url = "https://registry.npmjs.org/jsbn/-/jsbn-1.1.0.tgz";
@@ -10717,9 +9862,8 @@ let
     };
     "jsep" = {
       out_path = "jsep";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "jsep@1.4.0";
         url = "https://registry.npmjs.org/jsep/-/jsep-1.4.0.tgz";
@@ -10739,9 +9883,8 @@ let
     };
     "json-buffer" = {
       out_path = "json-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "json-buffer@3.0.1";
         url = "https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.1.tgz";
@@ -10750,9 +9893,8 @@ let
     };
     "json-schema-traverse" = {
       out_path = "json-schema-traverse";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "json-schema-traverse@0.4.1";
         url = "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz";
@@ -10761,9 +9903,8 @@ let
     };
     "json-stable-stringify-without-jsonify" = {
       out_path = "json-stable-stringify-without-jsonify";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "json-stable-stringify-without-jsonify@1.0.1";
         url = "https://registry.npmjs.org/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz";
@@ -10795,9 +9936,8 @@ let
     };
     "jsx-ast-utils" = {
       out_path = "jsx-ast-utils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "jsx-ast-utils@3.3.5";
         url = "https://registry.npmjs.org/jsx-ast-utils/-/jsx-ast-utils-3.3.5.tgz";
@@ -10806,9 +9946,8 @@ let
     };
     "keyv" = {
       out_path = "keyv";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "keyv@4.5.4";
         url = "https://registry.npmjs.org/keyv/-/keyv-4.5.4.tgz";
@@ -10817,9 +9956,8 @@ let
     };
     "levn" = {
       out_path = "levn";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "levn@0.4.1";
         url = "https://registry.npmjs.org/levn/-/levn-0.4.1.tgz";
@@ -10828,9 +9966,8 @@ let
     };
     "listr2" = {
       out_path = "listr2";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "listr2@8.3.2";
         url = "https://registry.npmjs.org/listr2/-/listr2-8.3.2.tgz";
@@ -10839,9 +9976,8 @@ let
     };
     "locate-path" = {
       out_path = "locate-path";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "locate-path@6.0.0";
         url = "https://registry.npmjs.org/locate-path/-/locate-path-6.0.0.tgz";
@@ -10850,9 +9986,8 @@ let
     };
     "lodash.merge" = {
       out_path = "lodash.merge";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "lodash.merge@4.6.2";
         url = "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz";
@@ -10861,9 +9996,8 @@ let
     };
     "log-update" = {
       out_path = "log-update";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "log-update@6.1.0";
         url = "https://registry.npmjs.org/log-update/-/log-update-6.1.0.tgz";
@@ -10872,9 +10006,8 @@ let
     };
     "log-update/slice-ansi" = {
       out_path = "log-update/node_modules/slice-ansi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "slice-ansi@7.1.0";
         url = "https://registry.npmjs.org/slice-ansi/-/slice-ansi-7.1.0.tgz";
@@ -10883,9 +10016,8 @@ let
     };
     "log-update/slice-ansi/is-fullwidth-code-point" = {
       out_path = "log-update/node_modules/slice-ansi/node_modules/is-fullwidth-code-point";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "is-fullwidth-code-point@5.0.0";
         url = "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-5.0.0.tgz";
@@ -10894,9 +10026,8 @@ let
     };
     "lru-cache" = {
       out_path = "lru-cache";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "lru-cache@10.4.3";
         url = "https://registry.npmjs.org/lru-cache/-/lru-cache-10.4.3.tgz";
@@ -10905,9 +10036,8 @@ let
     };
     "math-intrinsics" = {
       out_path = "math-intrinsics";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "math-intrinsics@1.1.0";
         url = "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz";
@@ -10916,9 +10046,8 @@ let
     };
     "merge2" = {
       out_path = "merge2";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "merge2@1.4.1";
         url = "https://registry.npmjs.org/merge2/-/merge2-1.4.1.tgz";
@@ -10927,9 +10056,8 @@ let
     };
     "micromatch" = {
       out_path = "micromatch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "micromatch@4.0.8";
         url = "https://registry.npmjs.org/micromatch/-/micromatch-4.0.8.tgz";
@@ -10938,9 +10066,8 @@ let
     };
     "micromatch/picomatch" = {
       out_path = "micromatch/node_modules/picomatch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "picomatch@2.3.1";
         url = "https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz";
@@ -10949,9 +10076,8 @@ let
     };
     "mime-db" = {
       out_path = "mime-db";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "mime-db@1.52.0";
         url = "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz";
@@ -10960,9 +10086,8 @@ let
     };
     "mime-types" = {
       out_path = "mime-types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "mime-types@2.1.35";
         url = "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz";
@@ -10971,9 +10096,8 @@ let
     };
     "mimic-function" = {
       out_path = "mimic-function";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "mimic-function@5.0.1";
         url = "https://registry.npmjs.org/mimic-function/-/mimic-function-5.0.1.tgz";
@@ -10982,9 +10106,8 @@ let
     };
     "min-indent" = {
       out_path = "min-indent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "min-indent@1.0.1";
         url = "https://registry.npmjs.org/min-indent/-/min-indent-1.0.1.tgz";
@@ -10993,9 +10116,8 @@ let
     };
     "minimatch" = {
       out_path = "minimatch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minimatch@3.1.2";
         url = "https://registry.npmjs.org/minimatch/-/minimatch-3.1.2.tgz";
@@ -11004,9 +10126,8 @@ let
     };
     "minimist" = {
       out_path = "minimist";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minimist@1.2.8";
         url = "https://registry.npmjs.org/minimist/-/minimist-1.2.8.tgz";
@@ -11015,9 +10136,8 @@ let
     };
     "minipass" = {
       out_path = "minipass";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minipass@4.2.8";
         url = "https://registry.npmjs.org/minipass/-/minipass-4.2.8.tgz";
@@ -11026,9 +10146,8 @@ let
     };
     "minizlib" = {
       out_path = "minizlib";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minizlib@3.0.2";
         url = "https://registry.npmjs.org/minizlib/-/minizlib-3.0.2.tgz";
@@ -11037,9 +10156,8 @@ let
     };
     "minizlib/minipass" = {
       out_path = "minizlib/node_modules/minipass";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minipass@7.1.2";
         url = "https://registry.npmjs.org/minipass/-/minipass-7.1.2.tgz";
@@ -11059,9 +10177,8 @@ let
     };
     "mnemonist" = {
       out_path = "mnemonist";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "mnemonist@0.38.3";
         url = "https://registry.npmjs.org/mnemonist/-/mnemonist-0.38.3.tgz";
@@ -11070,9 +10187,8 @@ let
     };
     "ms" = {
       out_path = "ms";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ms@2.1.3";
         url = "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz";
@@ -11081,9 +10197,8 @@ let
     };
     "mute-stream" = {
       out_path = "mute-stream";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "mute-stream@2.0.0";
         url = "https://registry.npmjs.org/mute-stream/-/mute-stream-2.0.0.tgz";
@@ -11092,9 +10207,8 @@ let
     };
     "natural-compare" = {
       out_path = "natural-compare";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "natural-compare@1.4.0";
         url = "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz";
@@ -11103,9 +10217,8 @@ let
     };
     "node-fetch" = {
       out_path = "node-fetch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "node-fetch@2.7.0";
         url = "https://registry.npmjs.org/node-fetch/-/node-fetch-2.7.0.tgz";
@@ -11114,9 +10227,8 @@ let
     };
     "node-releases" = {
       out_path = "node-releases";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "node-releases@2.0.19";
         url = "https://registry.npmjs.org/node-releases/-/node-releases-2.0.19.tgz";
@@ -11125,9 +10237,8 @@ let
     };
     "normalize-package-data" = {
       out_path = "normalize-package-data";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "normalize-package-data@6.0.2";
         url = "https://registry.npmjs.org/normalize-package-data/-/normalize-package-data-6.0.2.tgz";
@@ -11147,9 +10258,8 @@ let
     };
     "oauth4webapi" = {
       out_path = "oauth4webapi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "oauth4webapi@3.5.0";
         url = "https://registry.npmjs.org/oauth4webapi/-/oauth4webapi-3.5.0.tgz";
@@ -11158,9 +10268,8 @@ let
     };
     "object-inspect" = {
       out_path = "object-inspect";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "object-inspect@1.13.4";
         url = "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz";
@@ -11169,9 +10278,8 @@ let
     };
     "object-keys" = {
       out_path = "object-keys";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "object-keys@1.1.1";
         url = "https://registry.npmjs.org/object-keys/-/object-keys-1.1.1.tgz";
@@ -11180,9 +10288,8 @@ let
     };
     "object.assign" = {
       out_path = "object.assign";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "object.assign@4.1.7";
         url = "https://registry.npmjs.org/object.assign/-/object.assign-4.1.7.tgz";
@@ -11191,9 +10298,8 @@ let
     };
     "object.fromentries" = {
       out_path = "object.fromentries";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "object.fromentries@2.0.8";
         url = "https://registry.npmjs.org/object.fromentries/-/object.fromentries-2.0.8.tgz";
@@ -11202,9 +10308,8 @@ let
     };
     "object.groupby" = {
       out_path = "object.groupby";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "object.groupby@1.0.3";
         url = "https://registry.npmjs.org/object.groupby/-/object.groupby-1.0.3.tgz";
@@ -11213,9 +10318,8 @@ let
     };
     "object.values" = {
       out_path = "object.values";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "object.values@1.2.1";
         url = "https://registry.npmjs.org/object.values/-/object.values-1.2.1.tgz";
@@ -11224,9 +10328,8 @@ let
     };
     "obliterator" = {
       out_path = "obliterator";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "obliterator@1.6.1";
         url = "https://registry.npmjs.org/obliterator/-/obliterator-1.6.1.tgz";
@@ -11235,9 +10338,8 @@ let
     };
     "onetime" = {
       out_path = "onetime";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "onetime@7.0.0";
         url = "https://registry.npmjs.org/onetime/-/onetime-7.0.0.tgz";
@@ -11246,9 +10348,8 @@ let
     };
     "open" = {
       out_path = "open";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "open@10.1.2";
         url = "https://registry.npmjs.org/open/-/open-10.1.2.tgz";
@@ -11257,9 +10358,8 @@ let
     };
     "openid-client" = {
       out_path = "openid-client";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "openid-client@6.4.2";
         url = "https://registry.npmjs.org/openid-client/-/openid-client-6.4.2.tgz";
@@ -11268,9 +10368,8 @@ let
     };
     "optionator" = {
       out_path = "optionator";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "optionator@0.9.4";
         url = "https://registry.npmjs.org/optionator/-/optionator-0.9.4.tgz";
@@ -11279,9 +10378,8 @@ let
     };
     "os-tmpdir" = {
       out_path = "os-tmpdir";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "os-tmpdir@1.0.2";
         url = "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.2.tgz";
@@ -11290,9 +10388,8 @@ let
     };
     "own-keys" = {
       out_path = "own-keys";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "own-keys@1.0.1";
         url = "https://registry.npmjs.org/own-keys/-/own-keys-1.0.1.tgz";
@@ -11301,9 +10398,8 @@ let
     };
     "p-limit" = {
       out_path = "p-limit";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "p-limit@3.1.0";
         url = "https://registry.npmjs.org/p-limit/-/p-limit-3.1.0.tgz";
@@ -11312,9 +10408,8 @@ let
     };
     "p-locate" = {
       out_path = "p-locate";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "p-locate@5.0.0";
         url = "https://registry.npmjs.org/p-locate/-/p-locate-5.0.0.tgz";
@@ -11323,9 +10418,8 @@ let
     };
     "parent-module" = {
       out_path = "parent-module";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "parent-module@1.0.1";
         url = "https://registry.npmjs.org/parent-module/-/parent-module-1.0.1.tgz";
@@ -11334,9 +10428,8 @@ let
     };
     "parse-json" = {
       out_path = "parse-json";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "parse-json@8.2.0";
         url = "https://registry.npmjs.org/parse-json/-/parse-json-8.2.0.tgz";
@@ -11345,9 +10438,8 @@ let
     };
     "path-exists" = {
       out_path = "path-exists";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "path-exists@4.0.0";
         url = "https://registry.npmjs.org/path-exists/-/path-exists-4.0.0.tgz";
@@ -11356,9 +10448,8 @@ let
     };
     "path-key" = {
       out_path = "path-key";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "path-key@3.1.1";
         url = "https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz";
@@ -11367,9 +10458,8 @@ let
     };
     "path-parse" = {
       out_path = "path-parse";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "path-parse@1.0.7";
         url = "https://registry.npmjs.org/path-parse/-/path-parse-1.0.7.tgz";
@@ -11378,9 +10468,8 @@ let
     };
     "picocolors" = {
       out_path = "picocolors";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "picocolors@1.1.1";
         url = "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz";
@@ -11389,9 +10478,8 @@ let
     };
     "picomatch" = {
       out_path = "picomatch";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "picomatch@4.0.2";
         url = "https://registry.npmjs.org/picomatch/-/picomatch-4.0.2.tgz";
@@ -11400,9 +10488,8 @@ let
     };
     "pluralize" = {
       out_path = "pluralize";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "pluralize@8.0.0";
         url = "https://registry.npmjs.org/pluralize/-/pluralize-8.0.0.tgz";
@@ -11411,9 +10498,8 @@ let
     };
     "possible-typed-array-names" = {
       out_path = "possible-typed-array-names";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "possible-typed-array-names@1.1.0";
         url = "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz";
@@ -11422,9 +10508,8 @@ let
     };
     "posthog-node" = {
       out_path = "posthog-node";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "posthog-node@4.17.1";
         url = "https://registry.npmjs.org/posthog-node/-/posthog-node-4.17.1.tgz";
@@ -11433,9 +10518,8 @@ let
     };
     "prelude-ls" = {
       out_path = "prelude-ls";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "prelude-ls@1.2.1";
         url = "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz";
@@ -11455,9 +10539,8 @@ let
     };
     "prettier-linter-helpers" = {
       out_path = "prettier-linter-helpers";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "prettier-linter-helpers@1.0.0";
         url = "https://registry.npmjs.org/prettier-linter-helpers/-/prettier-linter-helpers-1.0.0.tgz";
@@ -11466,9 +10549,8 @@ let
     };
     "proxy-from-env" = {
       out_path = "proxy-from-env";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "proxy-from-env@1.1.0";
         url = "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz";
@@ -11477,9 +10559,8 @@ let
     };
     "punycode" = {
       out_path = "punycode";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "punycode@2.3.1";
         url = "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz";
@@ -11488,9 +10569,8 @@ let
     };
     "queue-microtask" = {
       out_path = "queue-microtask";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "queue-microtask@1.2.3";
         url = "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz";
@@ -11499,9 +10579,8 @@ let
     };
     "read-package-up" = {
       out_path = "read-package-up";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "read-package-up@11.0.0";
         url = "https://registry.npmjs.org/read-package-up/-/read-package-up-11.0.0.tgz";
@@ -11510,9 +10589,8 @@ let
     };
     "read-pkg" = {
       out_path = "read-pkg";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "read-pkg@9.0.1";
         url = "https://registry.npmjs.org/read-pkg/-/read-pkg-9.0.1.tgz";
@@ -11521,9 +10599,8 @@ let
     };
     "refa" = {
       out_path = "refa";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "refa@0.12.1";
         url = "https://registry.npmjs.org/refa/-/refa-0.12.1.tgz";
@@ -11532,9 +10609,8 @@ let
     };
     "reflect.getprototypeof" = {
       out_path = "reflect.getprototypeof";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "reflect.getprototypeof@1.0.10";
         url = "https://registry.npmjs.org/reflect.getprototypeof/-/reflect.getprototypeof-1.0.10.tgz";
@@ -11543,9 +10619,8 @@ let
     };
     "regexp-ast-analysis" = {
       out_path = "regexp-ast-analysis";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "regexp-ast-analysis@0.7.1";
         url = "https://registry.npmjs.org/regexp-ast-analysis/-/regexp-ast-analysis-0.7.1.tgz";
@@ -11565,9 +10640,8 @@ let
     };
     "regexp.prototype.flags" = {
       out_path = "regexp.prototype.flags";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "regexp.prototype.flags@1.5.4";
         url = "https://registry.npmjs.org/regexp.prototype.flags/-/regexp.prototype.flags-1.5.4.tgz";
@@ -11609,9 +10683,8 @@ let
     };
     "resolve-from" = {
       out_path = "resolve-from";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "resolve-from@4.0.0";
         url = "https://registry.npmjs.org/resolve-from/-/resolve-from-4.0.0.tgz";
@@ -11620,9 +10693,8 @@ let
     };
     "resolve-pkg-maps" = {
       out_path = "resolve-pkg-maps";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "resolve-pkg-maps@1.0.0";
         url = "https://registry.npmjs.org/resolve-pkg-maps/-/resolve-pkg-maps-1.0.0.tgz";
@@ -11631,9 +10703,8 @@ let
     };
     "restore-cursor" = {
       out_path = "restore-cursor";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "restore-cursor@5.1.0";
         url = "https://registry.npmjs.org/restore-cursor/-/restore-cursor-5.1.0.tgz";
@@ -11642,9 +10713,8 @@ let
     };
     "reusify" = {
       out_path = "reusify";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "reusify@1.1.0";
         url = "https://registry.npmjs.org/reusify/-/reusify-1.1.0.tgz";
@@ -11653,9 +10723,8 @@ let
     };
     "rfc4648" = {
       out_path = "rfc4648";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "rfc4648@1.5.4";
         url = "https://registry.npmjs.org/rfc4648/-/rfc4648-1.5.4.tgz";
@@ -11664,9 +10733,8 @@ let
     };
     "rfdc" = {
       out_path = "rfdc";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "rfdc@1.4.1";
         url = "https://registry.npmjs.org/rfdc/-/rfdc-1.4.1.tgz";
@@ -11675,9 +10743,8 @@ let
     };
     "run-applescript" = {
       out_path = "run-applescript";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "run-applescript@7.0.0";
         url = "https://registry.npmjs.org/run-applescript/-/run-applescript-7.0.0.tgz";
@@ -11686,9 +10753,8 @@ let
     };
     "run-parallel" = {
       out_path = "run-parallel";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "run-parallel@1.2.0";
         url = "https://registry.npmjs.org/run-parallel/-/run-parallel-1.2.0.tgz";
@@ -11697,9 +10763,8 @@ let
     };
     "safe-array-concat" = {
       out_path = "safe-array-concat";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "safe-array-concat@1.1.3";
         url = "https://registry.npmjs.org/safe-array-concat/-/safe-array-concat-1.1.3.tgz";
@@ -11708,9 +10773,8 @@ let
     };
     "safe-push-apply" = {
       out_path = "safe-push-apply";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "safe-push-apply@1.0.0";
         url = "https://registry.npmjs.org/safe-push-apply/-/safe-push-apply-1.0.0.tgz";
@@ -11719,9 +10783,8 @@ let
     };
     "safe-regex-test" = {
       out_path = "safe-regex-test";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "safe-regex-test@1.1.0";
         url = "https://registry.npmjs.org/safe-regex-test/-/safe-regex-test-1.1.0.tgz";
@@ -11730,9 +10793,8 @@ let
     };
     "safer-buffer" = {
       out_path = "safer-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "safer-buffer@2.1.2";
         url = "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz";
@@ -11741,9 +10803,8 @@ let
     };
     "scslre" = {
       out_path = "scslre";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "scslre@0.3.0";
         url = "https://registry.npmjs.org/scslre/-/scslre-0.3.0.tgz";
@@ -11763,9 +10824,8 @@ let
     };
     "set-function-length" = {
       out_path = "set-function-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "set-function-length@1.2.2";
         url = "https://registry.npmjs.org/set-function-length/-/set-function-length-1.2.2.tgz";
@@ -11774,9 +10834,8 @@ let
     };
     "set-function-name" = {
       out_path = "set-function-name";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "set-function-name@2.0.2";
         url = "https://registry.npmjs.org/set-function-name/-/set-function-name-2.0.2.tgz";
@@ -11785,9 +10844,8 @@ let
     };
     "set-proto" = {
       out_path = "set-proto";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "set-proto@1.0.0";
         url = "https://registry.npmjs.org/set-proto/-/set-proto-1.0.0.tgz";
@@ -11796,9 +10854,8 @@ let
     };
     "shebang-command" = {
       out_path = "shebang-command";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "shebang-command@2.0.0";
         url = "https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz";
@@ -11807,9 +10864,8 @@ let
     };
     "shebang-regex" = {
       out_path = "shebang-regex";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "shebang-regex@3.0.0";
         url = "https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz";
@@ -11818,9 +10874,8 @@ let
     };
     "side-channel" = {
       out_path = "side-channel";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "side-channel@1.1.0";
         url = "https://registry.npmjs.org/side-channel/-/side-channel-1.1.0.tgz";
@@ -11829,9 +10884,8 @@ let
     };
     "side-channel-list" = {
       out_path = "side-channel-list";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "side-channel-list@1.0.0";
         url = "https://registry.npmjs.org/side-channel-list/-/side-channel-list-1.0.0.tgz";
@@ -11840,9 +10894,8 @@ let
     };
     "side-channel-map" = {
       out_path = "side-channel-map";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "side-channel-map@1.0.1";
         url = "https://registry.npmjs.org/side-channel-map/-/side-channel-map-1.0.1.tgz";
@@ -11851,9 +10904,8 @@ let
     };
     "side-channel-weakmap" = {
       out_path = "side-channel-weakmap";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "side-channel-weakmap@1.0.2";
         url = "https://registry.npmjs.org/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz";
@@ -11862,9 +10914,8 @@ let
     };
     "signal-exit" = {
       out_path = "signal-exit";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "signal-exit@4.1.0";
         url = "https://registry.npmjs.org/signal-exit/-/signal-exit-4.1.0.tgz";
@@ -11873,9 +10924,8 @@ let
     };
     "slice-ansi" = {
       out_path = "slice-ansi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "slice-ansi@5.0.0";
         url = "https://registry.npmjs.org/slice-ansi/-/slice-ansi-5.0.0.tgz";
@@ -11884,9 +10934,8 @@ let
     };
     "smart-buffer" = {
       out_path = "smart-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "smart-buffer@4.2.0";
         url = "https://registry.npmjs.org/smart-buffer/-/smart-buffer-4.2.0.tgz";
@@ -11895,9 +10944,8 @@ let
     };
     "socks" = {
       out_path = "socks";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "socks@2.8.4";
         url = "https://registry.npmjs.org/socks/-/socks-2.8.4.tgz";
@@ -11906,9 +10954,8 @@ let
     };
     "socks-proxy-agent" = {
       out_path = "socks-proxy-agent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "socks-proxy-agent@8.0.5";
         url = "https://registry.npmjs.org/socks-proxy-agent/-/socks-proxy-agent-8.0.5.tgz";
@@ -11917,9 +10964,8 @@ let
     };
     "spdx-correct" = {
       out_path = "spdx-correct";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "spdx-correct@3.2.0";
         url = "https://registry.npmjs.org/spdx-correct/-/spdx-correct-3.2.0.tgz";
@@ -11928,9 +10974,8 @@ let
     };
     "spdx-exceptions" = {
       out_path = "spdx-exceptions";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "spdx-exceptions@2.5.0";
         url = "https://registry.npmjs.org/spdx-exceptions/-/spdx-exceptions-2.5.0.tgz";
@@ -11939,9 +10984,8 @@ let
     };
     "spdx-expression-parse" = {
       out_path = "spdx-expression-parse";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "spdx-expression-parse@3.0.1";
         url = "https://registry.npmjs.org/spdx-expression-parse/-/spdx-expression-parse-3.0.1.tgz";
@@ -11950,9 +10994,8 @@ let
     };
     "spdx-license-ids" = {
       out_path = "spdx-license-ids";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "spdx-license-ids@3.0.21";
         url = "https://registry.npmjs.org/spdx-license-ids/-/spdx-license-ids-3.0.21.tgz";
@@ -11961,9 +11004,8 @@ let
     };
     "sprintf-js" = {
       out_path = "sprintf-js";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "sprintf-js@1.1.3";
         url = "https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.1.3.tgz";
@@ -11972,9 +11014,8 @@ let
     };
     "stable-hash" = {
       out_path = "stable-hash";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "stable-hash@0.0.5";
         url = "https://registry.npmjs.org/stable-hash/-/stable-hash-0.0.5.tgz";
@@ -11983,9 +11024,8 @@ let
     };
     "stream-buffers" = {
       out_path = "stream-buffers";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "stream-buffers@3.0.3";
         url = "https://registry.npmjs.org/stream-buffers/-/stream-buffers-3.0.3.tgz";
@@ -11994,9 +11034,8 @@ let
     };
     "string-width" = {
       out_path = "string-width";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "string-width@7.2.0";
         url = "https://registry.npmjs.org/string-width/-/string-width-7.2.0.tgz";
@@ -12005,9 +11044,8 @@ let
     };
     "string.prototype.trim" = {
       out_path = "string.prototype.trim";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "string.prototype.trim@1.2.10";
         url = "https://registry.npmjs.org/string.prototype.trim/-/string.prototype.trim-1.2.10.tgz";
@@ -12016,9 +11054,8 @@ let
     };
     "string.prototype.trimend" = {
       out_path = "string.prototype.trimend";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "string.prototype.trimend@1.0.9";
         url = "https://registry.npmjs.org/string.prototype.trimend/-/string.prototype.trimend-1.0.9.tgz";
@@ -12027,9 +11064,8 @@ let
     };
     "string.prototype.trimstart" = {
       out_path = "string.prototype.trimstart";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "string.prototype.trimstart@1.0.8";
         url = "https://registry.npmjs.org/string.prototype.trimstart/-/string.prototype.trimstart-1.0.8.tgz";
@@ -12038,9 +11074,8 @@ let
     };
     "strip-ansi" = {
       out_path = "strip-ansi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "strip-ansi@7.1.0";
         url = "https://registry.npmjs.org/strip-ansi/-/strip-ansi-7.1.0.tgz";
@@ -12049,9 +11084,8 @@ let
     };
     "strip-bom" = {
       out_path = "strip-bom";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "strip-bom@3.0.0";
         url = "https://registry.npmjs.org/strip-bom/-/strip-bom-3.0.0.tgz";
@@ -12060,9 +11094,8 @@ let
     };
     "strip-indent" = {
       out_path = "strip-indent";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "strip-indent@4.0.0";
         url = "https://registry.npmjs.org/strip-indent/-/strip-indent-4.0.0.tgz";
@@ -12071,9 +11104,8 @@ let
     };
     "strip-json-comments" = {
       out_path = "strip-json-comments";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "strip-json-comments@3.1.1";
         url = "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz";
@@ -12082,9 +11114,8 @@ let
     };
     "strnum" = {
       out_path = "strnum";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "strnum@1.1.2";
         url = "https://registry.npmjs.org/strnum/-/strnum-1.1.2.tgz";
@@ -12093,9 +11124,8 @@ let
     };
     "supports-color" = {
       out_path = "supports-color";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "supports-color@7.2.0";
         url = "https://registry.npmjs.org/supports-color/-/supports-color-7.2.0.tgz";
@@ -12104,9 +11134,8 @@ let
     };
     "supports-hyperlinks" = {
       out_path = "supports-hyperlinks";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "supports-hyperlinks@3.2.0";
         url = "https://registry.npmjs.org/supports-hyperlinks/-/supports-hyperlinks-3.2.0.tgz";
@@ -12115,9 +11144,8 @@ let
     };
     "supports-preserve-symlinks-flag" = {
       out_path = "supports-preserve-symlinks-flag";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "supports-preserve-symlinks-flag@1.0.0";
         url = "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz";
@@ -12126,9 +11154,8 @@ let
     };
     "synckit" = {
       out_path = "synckit";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "synckit@0.11.2";
         url = "https://registry.npmjs.org/synckit/-/synckit-0.11.2.tgz";
@@ -12137,9 +11164,8 @@ let
     };
     "tar" = {
       out_path = "tar";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tar@7.4.3";
         url = "https://registry.npmjs.org/tar/-/tar-7.4.3.tgz";
@@ -12148,9 +11174,8 @@ let
     };
     "tar/minipass" = {
       out_path = "tar/node_modules/minipass";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "minipass@7.1.2";
         url = "https://registry.npmjs.org/minipass/-/minipass-7.1.2.tgz";
@@ -12159,9 +11184,8 @@ let
     };
     "terminal-columns" = {
       out_path = "terminal-columns";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "terminal-columns@2.0.0";
         url = "https://registry.npmjs.org/terminal-columns/-/terminal-columns-2.0.0.tgz";
@@ -12170,9 +11194,8 @@ let
     };
     "terminal-link" = {
       out_path = "terminal-link";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "terminal-link@4.0.0";
         url = "https://registry.npmjs.org/terminal-link/-/terminal-link-4.0.0.tgz";
@@ -12181,9 +11204,8 @@ let
     };
     "tinyglobby" = {
       out_path = "tinyglobby";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tinyglobby@0.2.12";
         url = "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.12.tgz";
@@ -12192,9 +11214,8 @@ let
     };
     "tmp" = {
       out_path = "tmp";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tmp@0.2.3";
         url = "https://registry.npmjs.org/tmp/-/tmp-0.2.3.tgz";
@@ -12203,9 +11224,8 @@ let
     };
     "tmp-promise" = {
       out_path = "tmp-promise";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tmp-promise@3.0.3";
         url = "https://registry.npmjs.org/tmp-promise/-/tmp-promise-3.0.3.tgz";
@@ -12214,9 +11234,8 @@ let
     };
     "to-regex-range" = {
       out_path = "to-regex-range";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "to-regex-range@5.0.1";
         url = "https://registry.npmjs.org/to-regex-range/-/to-regex-range-5.0.1.tgz";
@@ -12225,9 +11244,8 @@ let
     };
     "tr46" = {
       out_path = "tr46";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tr46@0.0.3";
         url = "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz";
@@ -12236,9 +11254,8 @@ let
     };
     "ts-api-utils" = {
       out_path = "ts-api-utils";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ts-api-utils@2.1.0";
         url = "https://registry.npmjs.org/ts-api-utils/-/ts-api-utils-2.1.0.tgz";
@@ -12247,9 +11264,8 @@ let
     };
     "tsconfig-paths" = {
       out_path = "tsconfig-paths";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tsconfig-paths@3.15.0";
         url = "https://registry.npmjs.org/tsconfig-paths/-/tsconfig-paths-3.15.0.tgz";
@@ -12258,9 +11274,8 @@ let
     };
     "tslib" = {
       out_path = "tslib";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "tslib@2.8.1";
         url = "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz";
@@ -12269,9 +11284,8 @@ let
     };
     "typanion" = {
       out_path = "typanion";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "typanion@3.14.0";
         url = "https://registry.npmjs.org/typanion/-/typanion-3.14.0.tgz";
@@ -12280,9 +11294,8 @@ let
     };
     "type-check" = {
       out_path = "type-check";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "type-check@0.4.0";
         url = "https://registry.npmjs.org/type-check/-/type-check-0.4.0.tgz";
@@ -12291,9 +11304,8 @@ let
     };
     "type-fest" = {
       out_path = "type-fest";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "type-fest@4.39.1";
         url = "https://registry.npmjs.org/type-fest/-/type-fest-4.39.1.tgz";
@@ -12302,9 +11314,8 @@ let
     };
     "typed-array-buffer" = {
       out_path = "typed-array-buffer";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "typed-array-buffer@1.0.3";
         url = "https://registry.npmjs.org/typed-array-buffer/-/typed-array-buffer-1.0.3.tgz";
@@ -12313,9 +11324,8 @@ let
     };
     "typed-array-byte-length" = {
       out_path = "typed-array-byte-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "typed-array-byte-length@1.0.3";
         url = "https://registry.npmjs.org/typed-array-byte-length/-/typed-array-byte-length-1.0.3.tgz";
@@ -12324,9 +11334,8 @@ let
     };
     "typed-array-byte-offset" = {
       out_path = "typed-array-byte-offset";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "typed-array-byte-offset@1.0.4";
         url = "https://registry.npmjs.org/typed-array-byte-offset/-/typed-array-byte-offset-1.0.4.tgz";
@@ -12335,9 +11344,8 @@ let
     };
     "typed-array-length" = {
       out_path = "typed-array-length";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "typed-array-length@1.0.7";
         url = "https://registry.npmjs.org/typed-array-length/-/typed-array-length-1.0.7.tgz";
@@ -12358,9 +11366,8 @@ let
     };
     "unbox-primitive" = {
       out_path = "unbox-primitive";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "unbox-primitive@1.1.0";
         url = "https://registry.npmjs.org/unbox-primitive/-/unbox-primitive-1.1.0.tgz";
@@ -12369,9 +11376,8 @@ let
     };
     "undici-types" = {
       out_path = "undici-types";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "undici-types@6.21.0";
         url = "https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz";
@@ -12380,9 +11386,8 @@ let
     };
     "unicorn-magic" = {
       out_path = "unicorn-magic";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "unicorn-magic@0.1.0";
         url = "https://registry.npmjs.org/unicorn-magic/-/unicorn-magic-0.1.0.tgz";
@@ -12391,9 +11396,8 @@ let
     };
     "unrs-resolver" = {
       out_path = "unrs-resolver";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "unrs-resolver@1.4.1";
         url = "https://registry.npmjs.org/unrs-resolver/-/unrs-resolver-1.4.1.tgz";
@@ -12413,9 +11417,8 @@ let
     };
     "uri-js" = {
       out_path = "uri-js";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "uri-js@4.4.1";
         url = "https://registry.npmjs.org/uri-js/-/uri-js-4.4.1.tgz";
@@ -12435,9 +11438,8 @@ let
     };
     "validate-npm-package-license" = {
       out_path = "validate-npm-package-license";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "validate-npm-package-license@3.0.4";
         url = "https://registry.npmjs.org/validate-npm-package-license/-/validate-npm-package-license-3.0.4.tgz";
@@ -12446,9 +11448,8 @@ let
     };
     "webidl-conversions" = {
       out_path = "webidl-conversions";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "webidl-conversions@3.0.1";
         url = "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-3.0.1.tgz";
@@ -12457,9 +11458,8 @@ let
     };
     "whatwg-url" = {
       out_path = "whatwg-url";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "whatwg-url@5.0.0";
         url = "https://registry.npmjs.org/whatwg-url/-/whatwg-url-5.0.0.tgz";
@@ -12479,9 +11479,8 @@ let
     };
     "which-boxed-primitive" = {
       out_path = "which-boxed-primitive";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "which-boxed-primitive@1.1.1";
         url = "https://registry.npmjs.org/which-boxed-primitive/-/which-boxed-primitive-1.1.1.tgz";
@@ -12490,9 +11489,8 @@ let
     };
     "which-builtin-type" = {
       out_path = "which-builtin-type";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "which-builtin-type@1.2.1";
         url = "https://registry.npmjs.org/which-builtin-type/-/which-builtin-type-1.2.1.tgz";
@@ -12501,9 +11499,8 @@ let
     };
     "which-collection" = {
       out_path = "which-collection";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "which-collection@1.0.2";
         url = "https://registry.npmjs.org/which-collection/-/which-collection-1.0.2.tgz";
@@ -12512,9 +11509,8 @@ let
     };
     "which-typed-array" = {
       out_path = "which-typed-array";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "which-typed-array@1.1.19";
         url = "https://registry.npmjs.org/which-typed-array/-/which-typed-array-1.1.19.tgz";
@@ -12523,9 +11519,8 @@ let
     };
     "word-wrap" = {
       out_path = "word-wrap";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "word-wrap@1.2.5";
         url = "https://registry.npmjs.org/word-wrap/-/word-wrap-1.2.5.tgz";
@@ -12534,9 +11529,8 @@ let
     };
     "wrap-ansi" = {
       out_path = "wrap-ansi";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "wrap-ansi@9.0.0";
         url = "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-9.0.0.tgz";
@@ -12545,9 +11539,8 @@ let
     };
     "ws" = {
       out_path = "ws";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "ws@8.18.1";
         url = "https://registry.npmjs.org/ws/-/ws-8.18.1.tgz";
@@ -12556,9 +11549,8 @@ let
     };
     "yallist" = {
       out_path = "yallist";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "yallist@5.0.0";
         url = "https://registry.npmjs.org/yallist/-/yallist-5.0.0.tgz";
@@ -12578,9 +11570,8 @@ let
     };
     "yocto-queue" = {
       out_path = "yocto-queue";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "yocto-queue@0.1.0";
         url = "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz";
@@ -12589,9 +11580,8 @@ let
     };
     "yoctocolors-cjs" = {
       out_path = "yoctocolors-cjs";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "yoctocolors-cjs@2.1.2";
         url = "https://registry.npmjs.org/yoctocolors-cjs/-/yoctocolors-cjs-2.1.2.tgz";
@@ -12600,9 +11590,8 @@ let
     };
     "zod" = {
       out_path = "zod";
-      binaries =
-        {
-        };
+      binaries = {
+      };
       pkg = fetchurl {
         name = "zod@3.24.2";
         url = "https://registry.npmjs.org/zod/-/zod-3.24.2.tgz";

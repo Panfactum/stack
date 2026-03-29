@@ -356,16 +356,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_node_image_cache",
-      "type": "submodule",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_node_image_cache_controller",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_open_cost",
       "type": "direct",
       "group": "kubernetes"

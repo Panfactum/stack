@@ -637,17 +637,6 @@ resource "kubectl_manifest" "pdb_server" {
   depends_on        = [helm_release.argo]
 }
 
-module "image_cache" {
-  source = "../kube_node_image_cache"
-  images = [
-    {
-      registry   = "quay.io"
-      repository = "argoproj/argoexec"
-      tag        = "v3.5.11"
-    }
-  ]
-}
-
 /***************************************
 * Argo Events
 ***************************************/

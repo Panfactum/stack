@@ -92,8 +92,6 @@ variable "containers" {
     image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
-    image_prepull_enabled   = optional(bool, true)             # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
-    image_pin_enabled       = optional(bool, false)            # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     command                 = list(string)                     # The command to be run as the root process inside the container
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
@@ -253,12 +251,6 @@ variable "host_network" {
   description = "Whether the generated pods are allowed to use the host network"
   type        = bool
   default     = false
-}
-
-variable "node_image_cached_enabled" {
-  description = "Whether to add the container images to the node image cache for faster startup times"
-  type        = bool
-  default     = true
 }
 
 variable "cilium_required" {

@@ -88,7 +88,7 @@ export async function updateModuleStatus(input: IUpdateModuleStatusInput): Promi
     }
 
     const filePath = join(moduleDirectory, MODULE_STATUS_FILE)
-    const existingStatus = await readYAMLFile({ context, filePath, validationSchema: MODULE_STATUS_FILE_SCHEMA })
+    const existingStatus = await readYAMLFile({ context, filePath, validationSchema: MODULE_STATUS_FILE_SCHEMA, throwOnMissing: false, throwOnEmpty: false })
 
     if (existingStatus) {
         const newStatus = existingStatus;

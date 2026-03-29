@@ -16,13 +16,6 @@ variable "pull_through_cache_enabled" {
   default     = true
 }
 
-
-variable "node_image_cache_enabled" {
-  description = "Whether to to cache images locally for better startup performance"
-  type        = bool
-  default     = true
-}
-
 variable "log_level" {
   description = "The log level for the operator pods"
   type        = string

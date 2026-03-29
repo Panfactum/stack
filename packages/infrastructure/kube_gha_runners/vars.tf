@@ -56,9 +56,3 @@ variable "extra_pod_labels" {
   type        = map(string)
   default     = {}
 }
-
-variable "node_image_cache_enabled" {
-  description = "Whether to cache images locally for better startup performance"
-  type        = bool
-  default     = true
-}

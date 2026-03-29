@@ -129,8 +129,6 @@ list(object({
     image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
-    image_pin_enabled       = optional(bool, true)             # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
-    image_prepull_enabled   = optional(bool, true)             # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
     command                 = list(string)                     # The command to be run as the root process inside the container
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
@@ -282,14 +280,6 @@ Description: The namespace the Job should be deployed to
 Type: `string`
 
 Default: n/a
-
-### node\_image\_cached\_enabled
-
-Description: Whether to add the container images to the node image cache for faster startup times
-
-Type: `bool`
-
-Default: `true`
 
 ### node\_preferences
 

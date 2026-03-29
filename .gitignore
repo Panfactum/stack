@@ -1,5 +1,3 @@
-.devenv.flake.nix
-.devenv/
 .direnv/
 .idea
 .env
@@ -9,22 +7,17 @@ go
 .pnpm/
 .cspell/
 node_modules/
-
 *.bkp
 .terragrunt-cache
 .terraform
 .terraformrc
 .terraformrc.dev
 .nats
-
 .DS_Store
-
 # https://docs.cursor.com/context/codebase-indexing#working-with-large-monorepos
 .cursorignore
-
 .tmp-panfactum-install-config.json
 **/.claude/settings.local.json
 tmp
 .claude/tasks
-
-**/.serena/cache
+*.user.yaml

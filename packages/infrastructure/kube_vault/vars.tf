@@ -104,12 +104,6 @@ variable "cors_extra_allowed_origins" {
   default     = []
 }
 
-variable "node_image_cached_enabled" {
-  description = "Whether to add the container images to the node image cache for faster startup times"
-  type        = bool
-  default     = true
-}
-
 variable "log_level" {
   description = "The log level for Vault pods. Must be one of: trace, debug, info, warn, error."
   type        = string

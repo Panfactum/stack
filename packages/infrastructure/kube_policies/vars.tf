@@ -34,12 +34,6 @@ variable "panfactum_scheduler_enabled" {
   default     = false
 }
 
-variable "panfactum_node_image_cache_enabled" {
-  description = "Whether support for the node-local image cache should be enabled"
-  type        = bool
-  default     = true
-}
-
 variable "environment_variable_injection_enabled" {
   description = "Whether a standard set of environment variables should be injected into each container"
   type        = bool

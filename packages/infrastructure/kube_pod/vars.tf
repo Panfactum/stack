@@ -23,8 +23,6 @@ variable "containers" {
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
     command                 = list(string)                     # The command to be run as the root process inside the container
-    image_prepull_enabled   = optional(bool, false)            # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
-    image_pin_enabled       = optional(bool, false)            # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
     privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode

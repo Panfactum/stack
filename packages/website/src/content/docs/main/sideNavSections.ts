@@ -1060,22 +1060,6 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
         ],
       },
       {
-        text: "Node Image Cache",
-        path: "/kube_node_image_cache",
-        sub: [
-          { text: "Overview", path: "/overview" },
-          { text: "Reference", path: "/reference" },
-        ],
-      },
-      {
-        text: "Node Image Cache Controller",
-        path: "/kube_node_image_cache_controller",
-        sub: [
-          { text: "Overview", path: "/overview" },
-          { text: "Reference", path: "/reference" },
-        ],
-      },
-      {
         text: "Node Settings",
         path: "/kube_node_settings",
         sub: [

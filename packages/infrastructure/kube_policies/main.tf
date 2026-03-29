@@ -70,7 +70,6 @@ resource "kubectl_manifest" "panfactum_policies" {
       rules = [for rule in concat(
         local.rule_cilium_test,
         local.rule_disable_linkerd,
-        local.rule_node_image_cache,
         local.rule_use_pull_through_image_cache,
         local.rule_use_panfactum_scheduler,
         local.rule_add_default_tolerations,

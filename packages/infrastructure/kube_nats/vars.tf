@@ -85,12 +85,6 @@ variable "vault_credential_lifetime_hours" {
   }
 }
 
-variable "node_image_cached_enabled" {
-  description = "Whether to add the container images to the node image cache for faster startup times"
-  type        = bool
-  default     = true
-}
-
 variable "persistence_initial_storage_gb" {
   description = "How many GB to initially allocate for persistent storage (will grow automatically as needed). Can only be set on cluster creation."
   type        = number
