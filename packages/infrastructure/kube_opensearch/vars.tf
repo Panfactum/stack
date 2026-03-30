@@ -1,7 +1,7 @@
 variable "opensearch_version" {
   description = "The version of OpenSearch to deploy. Note that we only test this module with the default version."
   type        = string
-  default     = "3.0.0"
+  default     = "3.2.0"
 }
 
 variable "pull_through_cache_enabled" {

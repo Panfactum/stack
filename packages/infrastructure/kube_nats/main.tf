@@ -113,6 +113,12 @@ resource "helm_release" "nats" {
 
       fullnameOverride = random_id.id.hex
 
+      global = {
+        security = {
+          allowInsecureImages = true
+        }
+      }
+
       podAnnotations = {
         "config.linkerd.io/opaque-ports" = "4222,6222"
         "linkerd.io/inject"              = "disabled"

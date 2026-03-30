@@ -366,7 +366,7 @@ data "aws_ami" "fck_nat" {
   # a service disruption
   filter {
     name   = "creation-date"
-    values = ["2024-01-25*"]
+    values = ["2026-01-26*"]
   }
 
   owners      = ["568608671756"]

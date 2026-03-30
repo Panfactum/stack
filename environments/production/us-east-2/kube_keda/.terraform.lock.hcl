@@ -38,6 +38,7 @@ provider "registry.opentofu.org/hashicorp/aws" {
     "zh:e0c0b8166abc935e30aaf834091424b710d1ce7b18d2da2e4619ee70f065904e",
     "zh:eaf138b103328edf5317e64af3013e25ba337d20fa1854c2a4199fcb2a13cbf0",
   ]
+  constraints = "5.94.1"
 }
 
 provider "registry.opentofu.org/hashicorp/helm" {
