@@ -22,7 +22,7 @@ module "website" {
   }
   bucket_name = "pf-website-astro"
   description = "Hosts the new Astro Panfactum website"
-  domains     = ["docs.panfactum.com"]
+  domains     = [var.website_domain]
 }
 
 module "installer" {
