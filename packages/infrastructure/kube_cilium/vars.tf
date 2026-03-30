@@ -1,7 +1,7 @@
 variable "cilium_helm_version" {
   description = "The version of the cilium helm chart to deploy"
   type        = string
-  default     = "1.16.3"
+  default     = "1.17.14"
 }
 
 variable "log_level" {

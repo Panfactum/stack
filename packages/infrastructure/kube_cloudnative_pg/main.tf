@@ -20,7 +20,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.1.3"
+      version = "2.1.6"
     }
     pf = {
       source  = "panfactum/pf"
@@ -210,6 +210,7 @@ resource "kubectl_manifest" "pdb" {
   server_side_apply = true
   depends_on        = [helm_release.cnpg]
 }
+
 
 /***************************************
 * Volume Snapshot Class (for backups)

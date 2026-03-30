@@ -1,13 +1,13 @@
 variable "velero_helm_version" {
   description = "The version of the velero helm chart"
   type        = string
-  default     = "8.1.0"
+  default     = "9.1.3"
 }
 
 variable "aws_plugin_version" {
   description = "The image version of the velero/velero-plugin-for-aws image"
   type        = string
-  default     = "v1.11.0"
+  default     = "v1.12.0"
 }
 
 variable "aws_iam_ip_allow_list" {

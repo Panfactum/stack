@@ -1,7 +1,7 @@
 variable "open_cost_helm_version" {
   description = "The image version of the stakater/reloader helm chart"
   type        = string
-  default     = "1.38.1"
+  default     = "2.5.12"
 }
 
 variable "pull_through_cache_enabled" {

@@ -12,7 +12,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.1.3"
+      version = "2.1.6"
     }
     random = {
       source  = "hashicorp/random"
@@ -36,10 +36,14 @@ locals {
   default_evictor_config = {
     name = "DefaultEvictor"
     args = {
-      evictSystemCriticalPods = true
-      evictFailedBarePods     = true
-      evictLocalStoragePods   = true
-      nodeFit                 = false
+      podProtections = {
+        defaultDisabled = [
+          "PodsWithLocalStorage",
+          "SystemCriticalPods",
+          "FailedBarePods",
+        ]
+      }
+      nodeFit = false
       labelSelector = {
         matchExpressions = [
           { key = "panfactum.com/descheduler-enabled", operator = "NotIn", values = ["0", "false"] }
@@ -51,10 +55,14 @@ locals {
   default_evictor_config_with_fit = {
     name = "DefaultEvictor"
     args = {
-      evictSystemCriticalPods = true
-      evictFailedBarePods     = true
-      evictLocalStoragePods   = true
-      nodeFit                 = true
+      podProtections = {
+        defaultDisabled = [
+          "PodsWithLocalStorage",
+          "SystemCriticalPods",
+          "FailedBarePods",
+        ]
+      }
+      nodeFit = true
       labelSelector = {
         matchExpressions = [
           { key = "panfactum.com/descheduler-enabled", operator = "NotIn", values = ["0", "false"] }

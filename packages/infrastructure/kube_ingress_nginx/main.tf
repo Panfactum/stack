@@ -16,7 +16,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.1.3"
+      version = "2.1.6"
     }
     pf = {
       source  = "panfactum/pf"
@@ -197,6 +197,11 @@ resource "helm_release" "nginx_ingress" {
 
         // See https://kubernetes.github.io/ingress-nginx/deploy/hardening-guide/
         config = {
+
+          // Required for configuration-snippet annotations used by kube_ingress module.
+          // Chart 4.12.x changed the default from "Critical" to "High", which silently
+          // rejects snippet annotations.
+          annotations-risk-level = "Critical"
 
           // Sets up tracing (TODO)
           // enable-opentracing = "true"

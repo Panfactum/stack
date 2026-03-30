@@ -1,25 +1,25 @@
 variable "kube_prometheus_stack_version" {
   description = "The version of the kube-prometheus-stack to deploy"
   type        = string
-  default     = "58.5.3"
+  default     = "82.10.5"
 }
 
 variable "thanos_chart_version" {
   description = "The version of the bitnamilegacy/thanos helm chart to deploy"
   type        = string
-  default     = "15.4.7"
+  default     = "17.4.0"
 }
 
 variable "loki_chart_version" {
   description = "The version of the grafana/loki helm chart to deploy"
   type        = string
-  default     = "6.6.2"
+  default     = "6.40.0"
 }
 
 variable "thanos_image_version" {
   description = "The version of thanos images to use"
   type        = string
-  default     = "v0.35.0"
+  default     = "v0.41.0"
 }
 
 variable "aws_iam_ip_allow_list" {

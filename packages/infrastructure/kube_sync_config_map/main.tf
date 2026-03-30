@@ -6,7 +6,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.1.3"
+      version = "2.1.6"
     }
     pf = {
       source  = "panfactum/pf"

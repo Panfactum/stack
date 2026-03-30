@@ -1,7 +1,7 @@
 variable "metrics_server_helm_version" {
   description = "The version of the metrics-server helm chart to deploy"
   type        = string
-  default     = "3.12.2"
+  default     = "3.13.0"
 }
 
 variable "vpa_enabled" {
