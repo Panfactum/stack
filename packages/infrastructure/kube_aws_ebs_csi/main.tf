@@ -136,8 +136,6 @@ resource "helm_release" "ebs_csi_driver" {
   values = [
     yamlencode({
 
-      labels = module.util_controller.labels
-
       controller = {
 
         replicaCount              = var.sla_target == 3 ? 2 : 1
@@ -147,7 +145,7 @@ resource "helm_release" "ebs_csi_driver" {
         serviceAccount = {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
-          autoMountServiceAccountToken = true
+          automountServiceAccountToken = true
         }
         podLabels = merge(
           {
@@ -199,7 +197,7 @@ resource "helm_release" "ebs_csi_driver" {
         serviceAccount = {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
-          autoMountServiceAccountToken = true
+          automountServiceAccountToken = true
         }
         updateStrategy = {
           type = "RollingUpdate"

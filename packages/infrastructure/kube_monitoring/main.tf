@@ -504,7 +504,6 @@ resource "helm_release" "prometheus_stack" {
     yamlencode({
       fullnameOverride                   = "monitoring"
       cleanPrometheusOperatorObjectNames = true
-      labels                             = module.util_prometheus.labels
       commonLabels = {
         customizationHash = md5(join("", [
           for filename in sort(fileset(path.module, "prometheus_customize/*")) : filesha256(filename)
@@ -534,7 +533,6 @@ resource "helm_release" "prometheus_stack" {
         enabled          = true
         fullnameOverride = "prometheus-operator"
         labels           = module.util_operator.labels
-        podLabels        = module.util_operator.labels
         strategy = {
           type          = "Recreate"
           rollingUpdate = null
@@ -884,6 +882,7 @@ resource "helm_release" "prometheus_stack" {
           replicas                  = 2
           tolerations               = module.util_prometheus.tolerations
           affinity                  = module.util_prometheus.affinity
+          podAntiAffinity           = "" // Disable chart's built-in anti-affinity; we provide our own via affinity
           topologySpreadConstraints = module.util_prometheus.topology_spread_constraints
           priorityClassName         = module.constants.cluster_important_priority_class_name
           resources = {
@@ -1011,6 +1010,7 @@ resource "helm_release" "prometheus_stack" {
           replicas                  = 2
           resources                 = local.default_resources
           affinity                  = module.util_alertmanager.affinity
+          podAntiAffinity           = "" // Disable chart's built-in anti-affinity; we provide our own via affinity
           tolerations               = module.util_alertmanager.tolerations
           topologySpreadConstraints = module.util_alertmanager.topology_spread_constraints
           priorityClassName         = module.constants.cluster_important_priority_class_name
@@ -1024,7 +1024,6 @@ resource "helm_release" "prometheus_stack" {
         enabled                  = true
         defaultDashboardsEnabled = false // We load custom ones
         extraLabels              = module.util_grafana.labels
-        podLabels                = module.util_grafana.labels
         annotations = {
           "reloader.stakater.com/auto" = "true"
         }
@@ -1404,6 +1403,9 @@ resource "helm_release" "thanos" {
         schedulerName             = local.scheduler
         resources                 = local.default_resources
 
+        pdb = {
+          create = false // We create our own PDBs
+        }
         networkPolicy = {
           enabled = false
         }
@@ -1463,6 +1465,9 @@ resource "helm_release" "thanos" {
         schedulerName             = local.scheduler
         resources                 = local.default_resources
 
+        pdb = {
+          create = false // We create our own PDBs
+        }
         networkPolicy = {
           enabled = false
         }
@@ -1490,11 +1495,15 @@ resource "helm_release" "thanos" {
         schedulerName = local.scheduler
         resources     = local.default_resources
 
+        pdb = {
+          create = false // We create our own PDBs
+        }
         networkPolicy = {
           enabled = false
         }
       }
       compactor = {
+
         enabled = true
 
         logLevel               = var.thanos_log_level
@@ -1547,6 +1556,9 @@ resource "helm_release" "thanos" {
           }
         }
 
+        pdb = {
+          create = false // We create our own PDBs
+        }
         networkPolicy = {
           enabled = false
         }
@@ -1612,6 +1624,9 @@ resource "helm_release" "thanos" {
         schedulerName             = local.scheduler
         resources                 = local.default_resources
 
+        pdb = {
+          create = false // We create our own PDBs
+        }
         networkPolicy = {
           enabled = false
         }
@@ -1640,6 +1655,9 @@ resource "helm_release" "thanos" {
           enabled      = true
           storageClass = var.thanos_ruler_storage_class_name
           size         = "2Gi"
+        }
+        pdb = {
+          create = false // We create our own PDBs
         }
         networkPolicy = {
           enabled = false

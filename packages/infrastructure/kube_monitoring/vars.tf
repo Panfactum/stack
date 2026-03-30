@@ -7,7 +7,7 @@ variable "kube_prometheus_stack_version" {
 variable "thanos_chart_version" {
   description = "The version of the bitnamilegacy/thanos helm chart to deploy"
   type        = string
-  default     = "17.4.0"
+  default     = "17.3.1"
 }
 
 variable "loki_chart_version" {

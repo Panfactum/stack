@@ -116,6 +116,13 @@ data "aws_iam_policy_document" "ip_blocks" {
       values   = local.ip_allow_list_with_defaults
       variable = "aws:SourceIp"
     }
+
+    // Do not block requests made by AWS services on behalf of the role
+    condition {
+      test     = "BoolIfExists"
+      values   = ["false"]
+      variable = "aws:ViaAWSService"
+    }
   }
 
   statement {
@@ -181,6 +188,13 @@ data "aws_iam_policy_document" "ip_blocks" {
       test     = "NotIpAddress"
       values   = local.ip_allow_list_with_defaults
       variable = "aws:VpcSourceIp"
+    }
+
+    // Do not block requests made by AWS services on behalf of the role
+    condition {
+      test     = "BoolIfExists"
+      values   = ["false"]
+      variable = "aws:ViaAWSService"
     }
   }
 }

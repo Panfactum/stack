@@ -291,6 +291,7 @@ resource "helm_release" "linkerd_cni" {
       commonLabels      = module.util_cni.labels
       logLevel          = var.log_level
       priorityClassName = "system-node-critical"
+      iptablesMode      = "legacy" // Bottlerocket does not ship iptables-nft; the new default "nft" causes exit status 127
 
       resources = {
         memory = {
@@ -304,6 +305,8 @@ resource "helm_release" "linkerd_cni" {
       tolerations = module.util_cni.tolerations
     })
   ]
+
+  depends_on = [kubectl_manifest.vpa_cni]
 }
 
 resource "kubernetes_cluster_role" "linkerd_cni_node_patcher" {
@@ -624,8 +627,9 @@ resource "helm_release" "linkerd" {
 
 
       proxyInit = {
-        logFormat = "json"
-        logLevel  = var.log_level
+        logFormat    = "json"
+        logLevel     = var.log_level
+        iptablesMode = "legacy" // Bottlerocket does not ship iptables-nft; the new default "nft" causes exit status 127
 
         // Be default, the init container
         // has way too many resources and ends up
@@ -986,10 +990,18 @@ resource "kubectl_manifest" "vpa_cni" {
     }
     spec = {
       resourcePolicy = {
-        containerPolicies = [{
-          containerName = "remove-taint"
-          mode          = "Off"
-        }]
+        containerPolicies = [
+          {
+            containerName = "remove-taint"
+            mode          = "Off"
+          },
+          {
+            containerName = "install-cni"
+            minAllowed = {
+              memory = "15Mi"
+            }
+          }
+        ]
       }
       updatePolicy = {
         updateMode = "Auto"
@@ -1007,7 +1019,6 @@ resource "kubectl_manifest" "vpa_cni" {
   })
   force_conflicts   = true
   server_side_apply = true
-  depends_on        = [helm_release.linkerd_cni]
 }
 
 resource "kubectl_manifest" "pdb_cni" {

@@ -1,7 +1,7 @@
 variable "linkerd_helm_version" {
   description = "The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)"
   type        = string
-  default     = "2024.11.8"
+  default     = "2025.10.7"
 }
 
 variable "vault_ca_crt" {

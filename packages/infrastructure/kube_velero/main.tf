@@ -218,6 +218,11 @@ resource "helm_release" "velero" {
 
       cleanUpCRDs = true
       upgradeCRDs = true
+      kubectl = {
+        image = {
+          repository = "docker.io/bitnamilegacy/kubectl"
+        }
+      }
 
 
       serviceAccount = {
