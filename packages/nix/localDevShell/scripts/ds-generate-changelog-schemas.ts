@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// Generates JSON Schema files for log.yaml and metadata.yaml from the current codebase.
+// Generates the JSON Schema file for changelog log.yaml from the current codebase.
 
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "fs";
 import { join, resolve } from "path";
@@ -20,10 +20,6 @@ const METADATA_YAML_PATH = join(INFRASTRUCTURE_DIR, "metadata.yaml");
 const LOG_SCHEMA_OUTPUT_PATH = join(
   REPO_ROOT,
   "packages/website/src/content/changelog/log.schema.json"
-);
-const METADATA_SCHEMA_OUTPUT_PATH = join(
-  INFRASTRUCTURE_DIR,
-  "metadata.schema.json"
 );
 
 // ---------------------------------------------------------------------------
@@ -443,65 +439,6 @@ function buildLogSchema(
   };
 }
 
-function buildMetadataSchema(): object {
-  return {
-    $schema: "http://json-schema.org/draft-07/schema#",
-    type: "object",
-    additionalProperties: false,
-    properties: {
-      renamed_modules: {
-        type: "array",
-        description:
-          "Tracks modules that have been renamed. Used by the website to generate redirects and by tooling to assist with upgrades.",
-        items: {
-          type: "object",
-          required: ["old_name", "new_name"],
-          additionalProperties: false,
-          properties: {
-            old_name: {
-              type: "string",
-              description:
-                "The previous module name (directory name under packages/infrastructure/).",
-            },
-            new_name: {
-              type: "string",
-              description:
-                "The current module name (directory name under packages/infrastructure/).",
-            },
-            motivation: {
-              type: "string",
-              description:
-                "Inline markdown describing why the module was renamed.",
-            },
-          },
-        },
-      },
-      removed_modules: {
-        type: "array",
-        description:
-          "Tracks modules that have been removed entirely. Used by the website and tooling to inform users during upgrades.",
-        items: {
-          type: "object",
-          required: ["name"],
-          additionalProperties: false,
-          properties: {
-            name: {
-              type: "string",
-              description:
-                "The name of the removed module (former directory name under packages/infrastructure/).",
-            },
-            motivation: {
-              type: "string",
-              description:
-                "Inline markdown describing why the module was removed.",
-            },
-          },
-        },
-      },
-    },
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -529,9 +466,6 @@ function main(): void {
     CONFIGURATION_ENUM
   );
 
-  console.log("Building metadata schema...");
-  const metadataSchema = buildMetadataSchema();
-
   console.log(
     `Writing log schema to ${LOG_SCHEMA_OUTPUT_PATH}...`
   );
@@ -540,15 +474,7 @@ function main(): void {
     JSON.stringify(logSchema, null, 2) + "\n"
   );
 
-  console.log(
-    `Writing metadata schema to ${METADATA_SCHEMA_OUTPUT_PATH}...`
-  );
-  writeFileSync(
-    METADATA_SCHEMA_OUTPUT_PATH,
-    JSON.stringify(metadataSchema, null, 2) + "\n"
-  );
-
-  console.log("Done. Both schema files generated successfully.");
+  console.log("Done. Schema file generated successfully.");
 }
 
 main();
