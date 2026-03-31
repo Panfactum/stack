@@ -34,6 +34,8 @@ const SidebarSection: Component<SidebarSectionProps> = (props) => {
           expandable={false}
           href={sectionPath()}
           isChild={props.isChild}
+          onUpgradePath={props.onUpgradePath}
+          skip={props.skip}
         />
       }
     >

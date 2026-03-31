@@ -1,23 +1,38 @@
 ---
-import mdxRenderer from "@astrojs/mdx/server.js";
-import solidRenderer from "@astrojs/solid-js/server.js";
-import { experimental_AstroContainer } from 'astro/container';
+// Handles changelog list pages, release detail pages, upgrade instruction pages, and stable channel pages.
+// Route types: list (/edge/0), detail (edge.25-04-03), upgrade (edge.25-04-03/upgrade), stable-channel (stable.25-04/summary).
+
 import { getCollection, render } from 'astro:content';
+import { marked } from 'marked';
 
 import Layout from '@/components/layouts/docs/Layout.astro';
 import { DOCS_VERSIONS } from '@/lib/constants';
 
-import { ChangelogAccordion } from './_components/ChangelogAccordion';
-import type { ChangelogEntry } from './_components/ChangelogAccordion';
+import { ChangelogDetail } from './_components/ChangelogDetail';
+import type { RenderedChangeItem } from './_components/ChangelogDetail';
+import { ChangelogList } from './_components/ChangelogList';
+import type { ChangelogListEntry } from './_components/ChangelogList';
+import { ChannelTabBar } from './_components/ChannelTabBar';
+import { contentIdToUrlParam, docsSlugToChangelogSlug, getDirKey, getStableChannelFromId } from './_components/changelogUtils';
 import { getNameFromId } from './_components/getNameFromId';
 
 export const ENTRIES_PER_PAGE = 10;
 
 type ChangesCollection = Awaited<ReturnType<typeof getCollection<"changes">>>;
+type ChangesEntry = ChangesCollection[number];
+type UpgradeInstructionsEntry = Awaited<ReturnType<typeof getCollection<"upgradeInstructions">>>[number];
+
 export interface ChangelogPage {
     pageNumber: number;
     totalPages: number;
     entries: ChangesCollection;
+}
+
+type ChannelTab = "summary" | "upgrade" | "releases";
+
+interface ChannelContent {
+  summary?: UpgradeInstructionsEntry;
+  upgrade?: UpgradeInstructionsEntry;
 }
 
 /**********************************************
@@ -26,24 +41,17 @@ export interface ChangelogPage {
 
 /**
  * Groups changelog entries into pages with a configurable number of entries per page
- * 
- * @param entries - Array of changelog entries to paginate
- * @returns Array of pages, each containing up to ENTRIES_PER_PAGE entries
  */
 export function paginateChangelog(entries: ChangesCollection): ChangelogPage[] {
-
-    // Sort entries by date from filename (newest first)
     const sortedEntries = [...entries].sort((a, b) => {
         return b.id.localeCompare(a.id);
     });
 
-    // Group entries into pages based on ENTRIES_PER_PAGE
     const pages: ChangelogPage[] = [];
 
     for (let i = 0; i < sortedEntries.length; i += ENTRIES_PER_PAGE) {
         const pageEntries: ChangesCollection = [];
-        
-        // Add entries up to the configured amount or until we run out
+
         for (let j = 0; j < ENTRIES_PER_PAGE && i + j < sortedEntries.length; j++) {
             pageEntries.push(sortedEntries[i + j]);
         }
@@ -56,110 +64,376 @@ export function paginateChangelog(entries: ChangesCollection): ChangelogPage[] {
     }
 
     return pages;
-} 
+}
 
 export async function getStaticPaths() {
-
   const allChanges = await getCollection('changes');
+  const allUpgradeInstructions = await getCollection('upgradeInstructions');
+
+  const upgradeInstructionsByDir = new Map<string, UpgradeInstructionsEntry>(
+    allUpgradeInstructions.map((entry) => {
+      return [getDirKey(entry.id), entry];
+    })
+  );
+
+  // Build channel-level content map from MDX files matching stable/XX-YY/summary or stable/XX-YY/upgrade
+  const channelContentBySlug = new Map<string, ChannelContent>();
+  for (const entry of allUpgradeInstructions) {
+    const summaryMatch = entry.id.match(/^stable\/(\d{2}-\d{2})\/summary$/);
+    if (summaryMatch) {
+      const slug = `stable.${summaryMatch[1]}`;
+      const existing = channelContentBySlug.get(slug) ?? {};
+      existing.summary = entry;
+      channelContentBySlug.set(slug, existing);
+      continue;
+    }
+    const upgradeMatch = entry.id.match(/^stable\/(\d{2}-\d{2})\/upgrade$/);
+    if (upgradeMatch) {
+      const slug = `stable.${upgradeMatch[1]}`;
+      const existing = channelContentBySlug.get(slug) ?? {};
+      existing.upgrade = entry;
+      channelContentBySlug.set(slug, existing);
+    }
+  }
 
   // Edge Releases - List
-
   const allEdgeEntries = allChanges.filter(entry => entry.id.startsWith('edge'));
-  
-  const edgeListPages =  paginateChangelog(allEdgeEntries).map((page) => ({
+
+  const edgeListPages = paginateChangelog(allEdgeEntries).map((page) => ({
     params: { page: `edge/${page.pageNumber.toString()}` },
-    props: { page }
+    props: { type: 'list' as const, page }
   }));
 
-
-  // Stable Releases - Lists - Get all stable entries and group them by version
+  // Stable Releases - grouped by channel version
   const stableEntries = allChanges.filter(entry => entry.id.startsWith('stable'));
   const stableGroups = stableEntries.reduce((groups, entry) => {
-    const version = entry.id.slice(6, 11);
-    if (!groups[version]) {
-      groups[version] = [];
+    const channel = getStableChannelFromId(entry.id);
+    if (!groups[channel]) {
+      groups[channel] = [];
     }
-    groups[version].push(entry);
+    groups[channel].push(entry);
     return groups;
   }, {} as Record<string, ChangesCollection>);
 
-  const stablePages = Object.entries(stableGroups).map(([version, entries]) => {
-    return paginateChangelog(entries).map((page) => ({
-      params: { page: `stable-${version}/${page.pageNumber.toString()}` },
-      props: { page }
+  // Compute the latest release ID per stable channel
+  const latestReleaseByChannel = new Map<string, string>();
+  for (const [channel, entries] of Object.entries(stableGroups)) {
+    const sorted = [...entries].sort((a, b) => b.id.localeCompare(a.id));
+    const latest = sorted[0];
+    if (latest) {
+      latestReleaseByChannel.set(channel, contentIdToUrlParam(latest.id));
+    }
+  }
+
+  // Stable channel pages: summary, upgrade, and paginated release list tabs
+  const stableChannelPages = Object.entries(stableGroups).flatMap(([channel, entries]) => {
+    const channelContent = channelContentBySlug.get(channel);
+    const channelLabel = DOCS_VERSIONS.find((v) => docsSlugToChangelogSlug(v.slug) === channel)?.label ?? channel;
+    const latestReleaseId = latestReleaseByChannel.get(channel);
+
+    const summaryRoute = {
+      params: { page: `${channel}/summary` },
+      props: {
+        type: 'stable-channel' as const,
+        initialTab: 'summary' as ChannelTab,
+        channelSlug: channel,
+        channelLabel,
+        channelSummaryEntry: channelContent?.summary,
+        channelUpgradeEntry: channelContent?.upgrade,
+        latestReleaseId,
+        page: paginateChangelog(entries)[0],
+      }
+    };
+
+    const upgradeRoute = channelContent?.upgrade ? [{
+      params: { page: `${channel}/upgrade` },
+      props: {
+        type: 'stable-channel' as const,
+        initialTab: 'upgrade' as ChannelTab,
+        channelSlug: channel,
+        channelLabel,
+        channelSummaryEntry: channelContent?.summary,
+        channelUpgradeEntry: channelContent?.upgrade,
+        latestReleaseId,
+        page: paginateChangelog(entries)[0],
+      }
+    }] : [];
+
+    const releaseListRoutes = paginateChangelog(entries).map((page) => ({
+      params: { page: `${channel}/${page.pageNumber.toString()}` },
+      props: {
+        type: 'stable-channel' as const,
+        initialTab: 'releases' as ChannelTab,
+        channelSlug: channel,
+        channelLabel,
+        channelSummaryEntry: channelContent?.summary,
+        channelUpgradeEntry: channelContent?.upgrade,
+        latestReleaseId,
+        page,
+      }
     }));
-  }).flat(1)
 
-  // Unreleased - Individual
+    return [summaryRoute, ...upgradeRoute, ...releaseListRoutes];
+  });
+
+  // Unreleased — rendered as a detail page
   const unreleasedEntries = allChanges.filter(entry => entry.id.startsWith('main'));
-  const unreleasedPages = unreleasedEntries.map((page) => ({
-    params: { page: `${page.id}/0` },
-    props: { page }
+  const unreleasedPages = unreleasedEntries.map((entry) => ({
+    params: { page: 'main/0' },
+    props: { type: 'detail' as const, entry, upgradeEntry: upgradeInstructionsByDir.get(getDirKey(entry.id)) }
   }));
 
-  // All pages
-  const individualPages = allChanges.map((page) => ({
-    params: { page: page.id },
-    props: { page }
+  // Build a map from each entry ID to its next (newer) release in the same channel
+  const channelEntries = new Map<string, ChangesCollection>();
+  for (const entry of allChanges) {
+    const channel = entry.id.split('/')[0] ?? '';
+    const existing = channelEntries.get(channel) ?? [];
+    existing.push(entry);
+    channelEntries.set(channel, existing);
+  }
+  const nextReleaseById = new Map<string, string>();
+  const previousReleaseById = new Map<string, string>();
+  for (const entries of channelEntries.values()) {
+    const sorted = [...entries].sort((a, b) => a.id.localeCompare(b.id));
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const current = sorted[i];
+      const next = sorted[i + 1];
+      if (current && next) {
+        nextReleaseById.set(current.id, contentIdToUrlParam(next.id));
+        previousReleaseById.set(next.id, contentIdToUrlParam(current.id));
+      }
+    }
+  }
+
+  // Detail pages — one per changelog entry, with optional upgrade instructions
+  const detailPages = allChanges.map((entry) => ({
+    params: { page: contentIdToUrlParam(entry.id) },
+    props: {
+      type: 'detail' as const,
+      entry,
+      upgradeEntry: upgradeInstructionsByDir.get(getDirKey(entry.id)),
+      nextReleaseId: nextReleaseById.get(entry.id),
+      previousReleaseId: previousReleaseById.get(entry.id),
+    }
   }));
 
-  return [...edgeListPages, ...stablePages, ...unreleasedPages, ...individualPages];
+  // Upgrade pages — same detail page rendered with the upgrade tab active
+  const upgradePages = allChanges
+    .filter(entry => entry.data.upgrade_instructions !== undefined)
+    .map((entry) => {
+      const urlParam = contentIdToUrlParam(entry.id);
+      return {
+        params: { page: `${urlParam}/upgrade` },
+        props: {
+          type: 'detail' as const,
+          entry,
+          upgradeEntry: upgradeInstructionsByDir.get(getDirKey(entry.id)),
+          initialTab: 'upgrade' as const,
+          nextReleaseId: nextReleaseById.get(entry.id),
+          previousReleaseId: previousReleaseById.get(entry.id),
+        }
+      };
+    });
+
+  return [...edgeListPages, ...stableChannelPages, ...unreleasedPages, ...detailPages, ...upgradePages];
 }
 
 /**********************************************
- * Individual page rendering
- * 
- * This is a bit complicated because we need to support two different page types:
- * 
- * 1. A list of entries (/changelog/<release_channel>/<page_number>: /changelog/edge/0)
- * 2. A single entry (/changelog/<release_tag>: /changelog/edge.25-05-22)
- * 
- * This is needed for linkability of the changelog entries since the list of entries is paginated
- * and thus the content changes. We want the ability to link to a specific entry without having
- * to know the page number.
- * 
- * We can detect which type of page we are rendering by checking if the page has an "entries" property.
- * Depending on the type of page, basically everything about how we render the page is different.
+ * Page rendering
  **********************************************/
-const { page } = Astro.props;
+type StableChannelProps = {
+  type: 'stable-channel';
+  initialTab: ChannelTab;
+  channelSlug: string;
+  channelLabel: string;
+  channelSummaryEntry?: UpgradeInstructionsEntry;
+  channelUpgradeEntry?: UpgradeInstructionsEntry;
+  latestReleaseId?: string;
+  page?: ChangelogPage;
+};
 
-const sections = DOCS_VERSIONS.map((version) => ({  
-        text: version.label,
-        path: `/${version.slug}/0`
-      }))
+const props = Astro.props as
+  | { type: 'list'; page: ChangelogPage }
+  | { type: 'detail'; entry: ChangesEntry; upgradeEntry: UpgradeInstructionsEntry | undefined; initialTab?: 'upgrade'; nextReleaseId?: string; previousReleaseId?: string }
+  | StableChannelProps;
 
-let renderedEntries: ChangelogEntry[] = [];
-let title;
-let label;
+// Build sidebar sections with nested sub-items for each channel
+const sidebarChanges = await getCollection('changes');
+const sidebarUpgradeInstructions = await getCollection('upgradeInstructions');
+
+const sections = DOCS_VERSIONS.map((version) => {
+  const changelogSlug = docsSlugToChangelogSlug(version.slug);
+
+  // Upcoming — simple leaf link
+  if (version.slug === 'main') {
+    return {
+      text: version.label,
+      path: `/${changelogSlug}/0`
+    };
+  }
+
+  // Edge — show last 20 releases as sub-items
+  if (version.slug === 'edge') {
+    const edgeEntries = sidebarChanges
+      .filter(e => e.id.startsWith('edge'))
+      .sort((a, b) => b.id.localeCompare(a.id))
+      .slice(0, 20);
+
+    return {
+      text: version.label,
+      path: `/${changelogSlug}`,
+      sub: [
+        { text: "Release List", path: "/0" },
+        ...edgeEntries.map(entry => {
+          const urlParam = contentIdToUrlParam(entry.id);
+          const onUpgradePath = entry.data.upgrade_instructions !== undefined || entry.data.branch !== undefined;
+          return {
+            text: urlParam,
+            path: `/${urlParam}`.slice(`/${changelogSlug}`.length),
+            ...(onUpgradePath ? { onUpgradePath: true } : {}),
+            ...(entry.data.skip ? { skip: true } : {}),
+          };
+        })
+      ]
+    };
+  }
+
+  // Stable — show summary, upgrade instructions (if available), and releases
+  if (version.slug.startsWith('stable')) {
+    const channelKey = changelogSlug.replace('stable.', '');
+    const hasUpgrade = sidebarUpgradeInstructions.some(
+      e => e.id === `stable/${channelKey}/upgrade`
+    );
+
+    const sub: Array<{text: string; path: string}> = [
+      { text: "Summary", path: "/summary" },
+    ];
+    if (hasUpgrade) {
+      sub.push({ text: "Upgrade Instructions", path: "/upgrade" });
+    }
+    sub.push({ text: "Releases", path: "/0" });
+
+    return {
+      text: version.label,
+      path: `/${changelogSlug}`,
+      sub
+    };
+  }
+
+  // Fallback
+  return {
+    text: version.label,
+    path: `/${changelogSlug}/0`
+  };
+});
+
+let listEntries: ChangelogListEntry[] = [];
+let title = "";
 let versionFromPath = "";
-let Content;
-if("entries" in page) {
+let listPage: ChangelogPage | undefined;
+let UpgradeContent: ((_props: Record<string, unknown>) => unknown) | undefined;
+let detailEntry: ChangesEntry | undefined;
+let detailChanges: RenderedChangeItem[] = [];
+let detailName = "";
+let detailListUrl = "";
+let detailUrl = "";
+let upgradeUrl = "";
+
+// Stable channel rendering state (capitalized so Astro treats them as components in templates)
+let ChannelSummaryContent: ((_props: Record<string, unknown>) => unknown) | undefined;
+let ChannelUpgradeContent: ((_props: Record<string, unknown>) => unknown) | undefined;
+let channelListEntries: ChangelogListEntry[] = [];
+let channelListPage: ChangelogPage | undefined;
+let channelVersionFromPath = "";
+
+if (props.type === 'list') {
+  listPage = props.page;
   const pagePath = Astro.params.page;
   const pathComponents = pagePath.split('/');
-  versionFromPath = pathComponents[0];
-  label = DOCS_VERSIONS.find((version) => version.slug === versionFromPath)?.label ?? "";
-  title = `${label} Changelog Entries - Page ${page.pageNumber}`
+  versionFromPath = pathComponents[0] ?? '';
+  const label = DOCS_VERSIONS.find((version) => docsSlugToChangelogSlug(version.slug) === versionFromPath)?.label ?? "";
+  title = `${label} Changelog Entries - Page ${props.page.pageNumber}`;
 
-  //const renderers = await loadRenderers([solid.getContainerRenderer(), mdx.getContainerRenderer()]);
-  const container = await experimental_AstroContainer.create();
-  container.addServerRenderer({renderer: solidRenderer, name: "astrojs/solid-js"});
-  container.addServerRenderer({renderer: mdxRenderer, name: "astrojs/mdx"});
+  listEntries = props.page.entries.map((entry) => ({
+    id: contentIdToUrlParam(entry.id),
+    summary: entry.data.summary,
+    skip: entry.data.skip ?? false,
+    highlights: entry.data.highlights?.map((h) => marked.parseInline(h) as string),
+    changes: entry.data.changes?.map((c) => ({
+      type: c.type,
+      summary: c.summary,
+    })),
+    branch: entry.data.branch,
+    branched_from: entry.data.branched_from,
+    upgrade_instructions: entry.data.upgrade_instructions,
+  }));
+} else if (props.type === 'detail') {
+  detailEntry = props.entry;
+  const urlParam = contentIdToUrlParam(props.entry.id);
+  detailName = getNameFromId(urlParam);
+  detailUrl = `/docs/changelog/${urlParam}`;
+  upgradeUrl = `/docs/changelog/${urlParam}/upgrade`;
 
-  renderedEntries = await Promise.all(
-    page.entries.map(async (entry) => {
-      const { Content } = await render(entry);
-      return {
-        id: entry.id,
-        content: await container.renderToString(Content),
-        summary: entry.data.summary,
-        skip: entry.data.skip
-      };
-    })
-  );
-} else {
-  title = `Changelog - ${getNameFromId(page.id)}`
-  Content = (await render(page)).Content;
+  title = props.initialTab === 'upgrade'
+    ? `Upgrade Instructions - ${detailName}`
+    : `Changelog - ${detailName}`;
+
+  // Determine list URL from the entry's channel (upcoming releases have no list)
+  const rawChannel = props.entry.id.split('/')[0] ?? '';
+  if (rawChannel !== 'main') {
+    const listSlug = rawChannel === 'stable'
+      ? getStableChannelFromId(props.entry.id)
+      : rawChannel;
+    detailListUrl = `/docs/changelog/${listSlug}/0`;
+  }
+
+  // Render inline markdown in change descriptions
+  detailChanges = (props.entry.data.changes ?? []).map((change) => ({
+    type: change.type,
+    descriptionHtml: marked.parseInline(change.summary) as string,
+    descriptionDetailHtml: change.description ? marked.parse(change.description) as string : undefined,
+    actionItemsHtml: change.action_items?.map(item => marked.parse(item) as string),
+    references: change.references,
+    impacts: change.impacts,
+  }));
+
+  // Render upgrade instructions MDX if available
+  if (props.upgradeEntry) {
+    UpgradeContent = (await render(props.upgradeEntry)).Content as ((_props: Record<string, unknown>) => unknown) | undefined;
+  }
+} else if (props.type === 'stable-channel') {
+  title = props.channelLabel;
+  channelVersionFromPath = props.channelSlug;
+
+  // Render channel summary MDX if available
+  if (props.channelSummaryEntry) {
+    ChannelSummaryContent = (await render(props.channelSummaryEntry)).Content as ((_props: Record<string, unknown>) => unknown) | undefined;
+  }
+
+  // Render channel upgrade MDX if available
+  if (props.channelUpgradeEntry) {
+    ChannelUpgradeContent = (await render(props.channelUpgradeEntry)).Content as ((_props: Record<string, unknown>) => unknown) | undefined;
+  }
+
+  // Prepare release list entries for the releases tab
+  channelListPage = props.page;
+  if (channelListPage) {
+    channelListEntries = channelListPage.entries.map((entry) => ({
+      id: contentIdToUrlParam(entry.id),
+      summary: entry.data.summary,
+      skip: entry.data.skip ?? false,
+      highlights: entry.data.highlights?.map((h) => marked.parseInline(h) as string),
+      changes: entry.data.changes?.map((c) => ({
+        type: c.type,
+        summary: c.summary,
+      })),
+      branch: entry.data.branch,
+      branched_from: entry.data.branched_from,
+      upgrade_instructions: entry.data.upgrade_instructions,
+    }));
+  }
 }
+
 ---
 
 <Layout
@@ -173,46 +447,201 @@ if("entries" in page) {
     }
   ]}
 >
-{"entries" in page ? (
-<h1>{label} Release List</h1>
-<ChangelogAccordion client:load entries={renderedEntries} />
+  {props.type === 'list' && listPage && (
+    <>
+      <div class="mb-6 flex flex-col gap-4">
+        <div class="flex items-center justify-between gap-4">
+          <h1 class="!mb-0">{DOCS_VERSIONS.find((v) => docsSlugToChangelogSlug(v.slug) === versionFromPath)?.label ?? ""} Release List</h1>
+          <a
+            href={`/docs/changelog/${versionFromPath}.json`}
+            title="View as JSON"
+            class="flex items-center justify-center rounded-md border border-primary bg-tertiary px-2 py-1 text-secondary !no-underline hover:bg-secondary hover:text-primary"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4a2 2 0 0 0-2 2v3a2 3 0 0 1-2 3 2 3 0 0 1 2 3v3a2 2 0 0 0 2 2M17 4a2 2 0 0 1 2 2v3a2 3 0 0 0 2 3 2 3 0 0 0-2 3v3a2 2 0 0 1-2 2"/></svg>
+          </a>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border-2 border-success-100/50 bg-gray-dark-mode-900 px-4 py-2.5 text-sm">
+          <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-success-800"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
+          </span>
+          <span>Releases marked with this icon are on the <b>upgrade path</b> and include upgrade instructions you should follow.</span>
+        </div>
+      </div>
+      <ChangelogList client:load entries={listEntries} />
 
-<div class="my-8 flex items-center justify-between">
-  <div class="flex w-40 justify-start">
-    {page.pageNumber > 0 ? (
-      <a href={`/changelog/${versionFromPath}/${page.pageNumber - 1}`} class={`
-        rounded px-4 py-2 text-nowrap no-underline transition-colors
-      `}>← Previous</a>
-    ) : <div></div>}
-  </div>
-  
-  <div class="flex justify-center space-x-2">
-    {Array.from({ length: page.totalPages }).map((_, i) => (
-      <a 
-        href={`/changelog/${versionFromPath}/${i}`} 
-        class={`
-          flex size-8 items-center justify-center rounded
-          ${i === page.pageNumber ? `text-white` : ''}
-          no-underline transition-colors
-        `}
-      >
-        {i + 1}
-      </a>
-    ))}
-  </div>
-  
-  <div class="flex w-24 justify-end">
-    {page.pageNumber < page.totalPages - 1 ? (
-      <a href={`/changelog/${versionFromPath}/${page.pageNumber + 1}`} class={`
-        rounded px-4 py-2 text-nowrap no-underline transition-colors
-      `}>Next →</a>
-    ) : <div></div>}
-  </div>
-</div>
-) : (
-  <>
-  <h1>{title}</h1>
-  {Content && <Content />}
-  </>
-)}
+      {listPage.totalPages > 1 && (
+        <div class="my-8 flex items-center justify-center gap-2">
+          {listPage.pageNumber > 0 && (
+            <a
+              href={`/docs/changelog/${versionFromPath}/${listPage.pageNumber - 1}`}
+              class="flex items-center justify-center rounded-lg border border-primary bg-secondary px-4 py-2 text-sm !no-underline transition-colors hover:bg-tertiary"
+            >&larr; Previous</a>
+          )}
+
+          {Array.from({ length: listPage.totalPages }).map((_, i) => {
+            const isActive = i === listPage?.pageNumber;
+            return (
+              <a
+                href={`/docs/changelog/${versionFromPath}/${i}`}
+                class={`flex size-9 items-center justify-center rounded-lg border text-sm !no-underline transition-colors ${isActive ? 'border-brand-500 bg-brand-750 font-semibold text-white' : 'border-primary bg-secondary hover:bg-tertiary'}`}
+              >
+                {i + 1}
+              </a>
+            );
+          })}
+
+          {listPage.pageNumber < listPage.totalPages - 1 && (
+            <a
+              href={`/docs/changelog/${versionFromPath}/${listPage.pageNumber + 1}`}
+              class="flex items-center justify-center rounded-lg border border-primary bg-secondary px-4 py-2 text-sm !no-underline transition-colors hover:bg-tertiary"
+            >Next &rarr;</a>
+          )}
+        </div>
+      )}
+    </>
+  )}
+
+  {props.type === 'detail' && detailEntry && (
+    <ChangelogDetail
+      client:load
+      id={contentIdToUrlParam(detailEntry.id)}
+      name={detailName}
+      summary={detailEntry.data.summary}
+      skip={detailEntry.data.skip ?? false}
+      changes={detailChanges}
+      hasUpgradeInstructions={detailEntry.data.upgrade_instructions !== undefined}
+      initialTab={props.initialTab}
+      detailUrl={detailUrl}
+      upgradeUrl={upgradeUrl}
+      listUrl={detailListUrl || undefined}
+      branch={detailEntry.data.branch}
+      branched_from={detailEntry.data.branched_from}
+      nextReleaseId={props.nextReleaseId}
+      previousReleaseId={props.previousReleaseId}
+    >
+      {UpgradeContent && (
+        <div class="[&>*:not(h1,h2,h3,h4,h5,h6)]:!mt-0 [&>*]:!mb-4 [&>:is(h1,h2,h3,h4,h5,h6):first-child]:!mt-0">
+          <UpgradeContent />
+        </div>
+      )}
+    </ChangelogDetail>
+  )}
+
+  {props.type === 'stable-channel' && (
+    <>
+      {/* Page header with latest release pill */}
+      <div class="mb-6 flex flex-col gap-4">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-4">
+            <h1 class="!mb-0">{props.channelLabel}</h1>
+            {props.latestReleaseId && (
+              <a
+                href={`/docs/changelog/${props.latestReleaseId}`}
+                class="rounded-lg bg-brand-200 px-3 py-1.5 text-sm font-semibold !text-black !no-underline hover:bg-brand-300"
+              >
+                Latest: {props.latestReleaseId}
+              </a>
+            )}
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              href={`/docs/changelog/${props.channelSlug}.json`}
+              title="View as JSON"
+              class="flex items-center justify-center rounded-md border border-primary bg-tertiary px-2 py-1 text-secondary !no-underline hover:bg-secondary hover:text-primary"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4a2 2 0 0 0-2 2v3a2 3 0 0 1-2 3 2 3 0 0 1 2 3v3a2 2 0 0 0 2 2M17 4a2 2 0 0 1 2 2v3a2 3 0 0 0 2 3 2 3 0 0 0-2 3v3a2 2 0 0 1-2 2"/></svg>
+            </a>
+            <a
+              href={`/docs/changelog/${props.channelSlug}/llm.txt`}
+              title="View as LLM text"
+              class="flex items-center justify-center rounded-md border border-primary bg-tertiary px-2 py-1 text-secondary !no-underline hover:bg-secondary hover:text-primary"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/><path d="M5 8h14a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><path d="M9 12v.01"/><path d="M15 12v.01"/><path d="M6 16l2 3"/><path d="M18 16l-2 3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <ChannelTabBar
+        client:load
+        initialTab={props.initialTab}
+        summaryUrl={`/docs/changelog/${props.channelSlug}/summary`}
+        upgradeUrl={`/docs/changelog/${props.channelSlug}/upgrade`}
+        releasesUrl={`/docs/changelog/${props.channelSlug}/0`}
+        hasUpgradeInstructions={ChannelUpgradeContent !== undefined}
+      />
+
+      {/* Summary tab */}
+      <div data-tab="summary" class={props.initialTab !== 'summary' ? 'hidden' : ''}>
+        <div class="pt-6">
+          {ChannelSummaryContent ? (
+            <div class="[&>*:not(h1,h2,h3,h4,h5,h6)]:!mt-0 [&>*]:!mb-4 [&>:is(h1,h2,h3,h4,h5,h6):first-child]:!mt-0">
+              <ChannelSummaryContent />
+            </div>
+          ) : (
+            <p class="text-secondary italic">No summary available for this channel.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Upgrade Instructions tab */}
+      <div data-tab="upgrade" class={props.initialTab !== 'upgrade' ? 'hidden' : ''}>
+        <div class="pt-6">
+          {ChannelUpgradeContent ? (
+            <div class="[&>*:not(h1,h2,h3,h4,h5,h6)]:!mt-0 [&>*]:!mb-4 [&>:is(h1,h2,h3,h4,h5,h6):first-child]:!mt-0">
+              <ChannelUpgradeContent />
+            </div>
+          ) : (
+            <p class="text-secondary italic">No upgrade instructions available for this channel.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Release List tab */}
+      <div data-tab="releases" class={props.initialTab !== 'releases' ? 'hidden' : ''}>
+        <div class="pt-6">
+          {/* Upgrade path legend */}
+          <div class="mb-6 flex items-center gap-3 rounded-xl border-2 border-success-100/50 bg-gray-dark-mode-900 px-4 py-2.5 text-sm">
+            <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stroke-success-800"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
+            </span>
+            <span>Releases marked with this icon are on the <b>upgrade path</b> and include upgrade instructions you should follow.</span>
+          </div>
+
+          <ChangelogList client:load entries={channelListEntries} />
+
+          {channelListPage && channelListPage.totalPages > 1 && (
+            <div class="my-8 flex items-center justify-center gap-2">
+              {channelListPage.pageNumber > 0 && (
+                <a
+                  href={`/docs/changelog/${channelVersionFromPath}/${channelListPage.pageNumber - 1}`}
+                  class="flex items-center justify-center rounded-lg border border-primary bg-secondary px-4 py-2 text-sm !no-underline transition-colors hover:bg-tertiary"
+                >&larr; Previous</a>
+              )}
+
+              {Array.from({ length: channelListPage.totalPages }).map((_, i) => {
+                const isActive = i === channelListPage?.pageNumber;
+                return (
+                  <a
+                    href={`/docs/changelog/${channelVersionFromPath}/${i}`}
+                    class={`flex size-9 items-center justify-center rounded-lg border text-sm !no-underline transition-colors ${isActive ? 'border-brand-500 bg-brand-750 font-semibold text-white' : 'border-primary bg-secondary hover:bg-tertiary'}`}
+                  >
+                    {i + 1}
+                  </a>
+                );
+              })}
+
+              {channelListPage.pageNumber < channelListPage.totalPages - 1 && (
+                <a
+                  href={`/docs/changelog/${channelVersionFromPath}/${channelListPage.pageNumber + 1}`}
+                  class="flex items-center justify-center rounded-lg border border-primary bg-secondary px-4 py-2 text-sm !no-underline transition-colors hover:bg-tertiary"
+                >Next &rarr;</a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )}
 </Layout>

@@ -42,7 +42,7 @@ const Tooltip: ParentComponent<TooltipProps> = (props) => {
       <KobalteTooltip.Portal>
         <KobalteTooltip.Content
           class={`
-            z-[200] max-w-[80vw] border-2 border-offWhite bg-gray-dark-mode-900
+            z-[200] max-w-[80vw] border border-offWhite bg-gray-dark-mode-900
             p-4 text-gray-dark-mode-50
           `}
           onPointerDownOutside={() => {

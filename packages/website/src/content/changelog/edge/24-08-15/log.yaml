@@ -1,0 +1,68 @@
+# Changelog entry for edge release 24-08-15.
+# Migrated from edge.24-08-15.mdx.
+summary: "Improves PostgreSQL failover speed with enhanced shutdown logic, adds workflow composition capabilities with template references, and fixes repository working directory issues in CI/CD workflows."
+highlights:
+  - "`pg_shutdown_timeout` renamed to `pg_smart_shutdown_timeout` in [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
+  - "New shutdown/failover logic reduces PostgreSQL downtime from 60-120s to <5s"
+  - "Adds `templateRef` support to [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec) for Workflow composition"
+changes:
+  - type: breaking_change
+    summary: >-
+      `pg_shutdown_timeout` has been renamed to `pg_smart_shutdown_timeout` in
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). Additionally,
+      the shutdown and failover logic has been overhauled to reduce failover downtime from 60-120 seconds to under 5 seconds.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: Shutdown timeout renamed; failover downtime reduced to under 5s
+  - type: addition
+    summary: >-
+      Adds passthrough parameters to
+      [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+    impacts:
+      - type: iac-module
+        component: wf_spec
+        summary: Passthrough parameters added
+  - type: addition
+    summary: >-
+      Makes `tf_apply_dir` a Workflow parameter in
+      [`wf_tf_deploy`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+      so that only a single instance of this module is needed per cluster.
+    impacts:
+      - type: iac-module
+        component: wf_tf_deploy
+        summary: tf_apply_dir exposed as a Workflow parameter
+  - type: addition
+    summary: >-
+      Adds the ability to use `templateRef` to
+      [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
+      in [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+    impacts:
+      - type: iac-module
+        component: wf_spec
+        summary: templateRef support added for Workflow composition
+  - type: fix
+    summary: >-
+      Fixed the working directory in
+      [`wf_tf_deploy`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+      and [`wf_dockerfile_build`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+      to be inside the cloned repository.
+    impacts:
+      - type: iac-module
+        component: wf_tf_deploy
+        summary: Working directory fixed to cloned repository
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: Working directory fixed to cloned repository
+  - type: fix
+    summary: >-
+      Addressed OOM errors when using resource templates with
+      [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+    references:
+      - type: issue-report
+        summary: "OOM errors with wf_spec resource templates"
+        link: https://github.com/Panfactum/stack/issues/111
+    impacts:
+      - type: iac-module
+        component: wf_spec
+        summary: OOM errors with resource templates resolved

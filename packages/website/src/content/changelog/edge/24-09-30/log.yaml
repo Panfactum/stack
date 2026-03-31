@@ -1,0 +1,42 @@
+# Changelog entry for edge release 24-09-30.
+# Migrated from edge.24-09-30.mdx.
+summary: "Adds self-hosted GitHub Action runners addon and EKS cluster suspend/resume commands, while fixing voluntary disruption window namespace limitations."
+highlights:
+  - "New [GitHub Action runners addon](/docs/edge/guides/addons/github-actions/installing) for self-hosted CI"
+  - "New `pf-eks-suspend` and `pf-eks-resume` commands for cluster lifecycle management"
+  - "Fixed disruption windows to work in all namespaces (previously only worked in `argo`)"
+changes:
+  - type: addition
+    summary: >-
+      Adds a [new addon for self-hosted GitHub Action runners.](/docs/edge/guides/addons/github-actions/installing)
+    impacts:
+      - type: iac-module
+        component: kube_gha
+        summary: New module for self-hosted GitHub Action runner infrastructure
+      - type: iac-module
+        component: kube_gha_runners
+        summary: New module for configuring GitHub Action runner workloads
+  - type: addition
+    summary: >-
+      Adds the `pf-eks-suspend` and `pf-eks-resume` commands to
+      [suspend and resume the EKS cluster](/docs/main/guides/bootstrapping/suspend-kubernetes-cluster).
+    impacts:
+      - type: cli
+        component: kube cluster-suspend
+        summary: New command to suspend an EKS cluster
+      - type: cli
+        component: kube cluster-resume
+        summary: New command to resume a suspended EKS cluster
+  - type: fix
+    summary: >-
+      Fixes an issue where voluntary disruption windows created by
+      [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+      would only work for the `argo` namespace. They will now work in all namespaces.
+    references:
+      - type: issue-report
+        summary: "Disruption windows only working in argo namespace"
+        link: https://github.com/Panfactum/stack/issues/137
+    impacts:
+      - type: iac-module
+        component: kube_disruption_window_controller
+        summary: Fixed disruption windows to apply across all namespaces

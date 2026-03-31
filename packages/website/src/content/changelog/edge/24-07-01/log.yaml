@@ -1,0 +1,133 @@
+# Changelog entry for edge release 24-07-01.
+# Migrated from edge.24-07-01.mdx.
+summary: "Graduates BuildKit to beta status, updates ECR repository configuration for better customization, adds Argo Events components, introduces several helpful CLI tools, and improves ARM support across core components."
+highlights:
+  - "[`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) graduates to Beta status"
+  - "ECR repository input format changed to support per-repository configuration"
+  - "New [`kube_argo_sensor`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor) and [`kube_argo_event_source`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) submodules (Alpha)"
+  - "All core cluster components now support both amd64 and arm64 nodes"
+changes:
+  - type: breaking_change
+    summary: >-
+      The input format to [`aws_ecr_repos`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) has been
+      reformatted to support better per-repository configuration. Terragrunt inputs will need to be updated (no resource replacement required).
+    impacts:
+      - type: iac-module
+        component: aws_ecr_repos
+        summary: Input format changed for per-repository config
+  - type: breaking_change
+    summary: >-
+      EC2 instances in EKS node groups, NAT hosts in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc),
+      KMS replica keys in [`aws_kms_encrypt_key`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key),
+      and pods in [`kube_bastion`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) will no longer be
+      tagged with the Panfactum version and commit hash to avoid unnecessary disruptions.
+    impacts:
+      - type: iac-module
+        component: aws_vpc
+        summary: NAT hosts no longer tagged with version/commit hash
+      - type: iac-module
+        component: aws_kms_encrypt_key
+        summary: Replica keys no longer tagged with version/commit hash
+      - type: iac-module
+        component: kube_bastion
+        summary: Pods no longer tagged with version/commit hash
+  - type: addition
+    summary: >-
+      [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) has graduated to Beta
+      status and is ready for general consumption. Installation and usage instructions are
+      [here](/docs/edge/guides/addons/buildkit/installing).
+    impacts:
+      - type: iac-module
+        component: kube_buildkit
+        summary: Graduated to Beta status
+  - type: addition
+    summary: >-
+      [`aws_ecr_repos`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now supports custom image
+      expiration rules and both pull and push permissions.
+    impacts:
+      - type: iac-module
+        component: aws_ecr_repos
+        summary: New custom expiration rules and permission options
+  - type: addition
+    summary: >-
+      [`aws_ecr_public_repos`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) added to support
+      creating public ECR repositories.
+    impacts:
+      - type: iac-module
+        component: aws_ecr_public_repos
+        summary: New module for public ECR repositories
+  - type: addition
+    summary: >-
+      Adds ARM support in [`kube_bastion`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) and
+      `kube_pvc_autoresizer`. All core cluster components can now run on both amd64 and arm64 nodes.
+    impacts:
+      - type: iac-module
+        component: kube_bastion
+        summary: Added arm64 node support
+      - type: iac-module
+        component: kube_pvc_autoresizer
+        summary: Added arm64 node support
+  - type: addition
+    summary: >-
+      `pf-providers-enable` now ensures `.terraform.lock.hcl` files have all common platform checksums.
+  - type: addition
+    summary: >-
+      Adds `pf-get-terragrunt-variables` to derive Terragrunt variables for a given directory.
+  - type: addition
+    summary: >-
+      Adds `pf-tf-delete-locks` for bulk-releasing Tofu state locks.
+    impacts:
+      - type: cli
+        component: "iac delete-locks"
+        summary: New command for bulk-releasing Tofu state locks
+  - type: addition
+    summary: >-
+      Adds `pf-sops-set-profile` to update all sops-encrypted files in a directory to use the indicated AWS profile for KMS operations.
+    impacts:
+      - type: cli
+        component: "wf sops-set-profile"
+        summary: New command to update sops AWS profile for KMS
+  - type: addition
+    summary: >-
+      (Alpha) Adds [`kube_argo_sensor`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+      and [`kube_argo_event_source`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+      submodules for deploying core Argo Events components.
+    impacts:
+      - type: iac-module
+        component: kube_argo_sensor
+        summary: New Alpha submodule for Argo Events sensors
+      - type: iac-module
+        component: kube_argo_event_source
+        summary: New Alpha submodule for Argo Events sources
+  - type: addition
+    summary: >-
+      (Alpha) Adds the [`kube_workflow_spec`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workflow_spec)
+      submodule to help define production-ready Argo Workflows.
+    impacts:
+      - type: iac-module
+        component: wf_spec
+        summary: New Alpha submodule for Argo Workflow definitions
+  - type: fix
+    summary: >-
+      [`kube_aws_ebs_csi`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) adjusted to ensure
+      PVCs are detached from nodes during node shutdown, preventing delays when moving PVCs between nodes.
+    references:
+      - type: issue-report
+        summary: "PVC not detached during node shutdown causing delays"
+        link: https://github.com/Panfactum/stack/issues/50
+    impacts:
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: Fix for PVC detachment during node shutdown
+  - type: fix
+    summary: >-
+      [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) no longer accidentally
+      includes the Vault provider.
+    references:
+      - type: issue-report
+        summary: "kube_core_dns accidentally includes Vault provider"
+        link: https://github.com/Panfactum/stack/issues/61
+    impacts:
+      - type: iac-module
+        component: kube_core_dns
+        summary: Removed accidental Vault provider inclusion

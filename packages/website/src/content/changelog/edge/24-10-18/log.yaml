@@ -1,0 +1,89 @@
+# Changelog entry for edge release 24-10-18.
+# Migrated from edge.24-10-18.mdx.
+summary: "Replaces devenv with plain nix flakes for significantly improved performance, upgrades Cilium and AWS EBS CSI drivers, adds CDN support for core components, and fixes various resource utilization and git-related issues."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "devenv replaced with plain nix flakes — macOS initial install now ~5 minutes (down from 45+)"
+  - "`pf-get-version-hash` renamed to `pf-get-commit-hash` with updated argument format"
+  - "`pgadmin4` removed from devShell — choose your own database client"
+  - "Cilium upgraded to v1.16.3 — 75MB per-node memory reduction"
+changes:
+  - type: breaking_change
+    summary: >-
+      [devenv](https://devenv.sh/) has been removed in favor of plain [nix flakes](https://nixos.wiki/wiki/Flakes).
+      The `flake.nix` syntax has changed and `devenv.nix` files can be removed. See upgrade instructions for migration steps.
+    impacts:
+      - type: configuration
+        component: flake.nix
+        summary: Syntax changed due to devenv removal; devenv.nix files can be deleted
+  - type: breaking_change
+    summary: >-
+      `pf-get-version-hash` has been renamed to `pf-get-commit-hash` and now takes named rather than positional arguments.
+    impacts:
+      - type: devshell
+        component: pf-get-commit-hash
+        summary: Renamed from pf-get-version-hash with named arguments
+  - type: breaking_change
+    summary: >-
+      Removes `pgadmin4` from the devShell as it significantly increased build times.
+  - type: improvement
+    summary: >-
+      Upgrades [`kube_cilium`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3,
+      reducing per-node memory usage by 75MB and reducing bootstrapping errors.
+    impacts:
+      - type: iac-module
+        component: kube_cilium
+        summary: Upgraded to v1.16.3 with 75MB per-node memory reduction
+  - type: improvement
+    summary: >-
+      Upgrades [`kube_aws_ebs_csi`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36
+      for improved node shutdown performance.
+    impacts:
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: Upgraded to v1.36 for improved node shutdown performance
+  - type: improvement
+    summary: >-
+      Updates [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+      to support 10 concurrent image builds per module rather than just one.
+    impacts:
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: Now supports 10 concurrent image builds per module
+  - type: addition
+    summary: >-
+      Adds `cdn_mode_enabled` to
+      [`kube_vault`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) and
+      [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik).
+    impacts:
+      - type: iac-module
+        component: kube_vault
+        summary: Added cdn_mode_enabled input variable
+      - type: iac-module
+        component: kube_authentik
+        summary: Added cdn_mode_enabled input variable
+  - type: addition
+    summary: >-
+      Adds `image_tag_prefix` to
+      [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+    impacts:
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: Added image_tag_prefix input variable
+  - type: fix
+    summary: >-
+      Fixed scheduling constraint bugs that resulted in less-than-optimal resource utilization, especially in tiny clusters.
+    references:
+      - type: issue-report
+        summary: "Scheduling constraint bugs causing poor resource utilization"
+        link: https://github.com/Panfactum/stack/issues/167
+  - type: fix
+    summary: >-
+      Fixed an issue where `pf_stack_version` could not be a commit hash.
+  - type: fix
+    summary: >-
+      Fixed an issue where `pf-wf-git-checkout` would fail when given a branch name as a git ref.
+    impacts:
+      - type: devshell
+        component: pf-wf-git-checkout
+        summary: Fixed failure when using branch names as git refs

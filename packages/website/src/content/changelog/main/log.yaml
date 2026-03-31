@@ -1,0 +1,259 @@
+# Unreleased changes for the next edge release.
+# Add new changes here as they are developed.
+summary: "Introduces dedicated DNS zones for cluster management, consolidates certificate modules, adds KEDA for autoscaling, launches the new Panfactum CLI tool, and restructures several AWS modules for better configuration management."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "New `pf` CLI tool — run `pf devshell sync` then `terragrunt run-all apply` to initialize"
+  - "`kube_cert_manager` and `kube_cert_issuers` consolidated into new `kube_certificates` module — state migration required"
+  - "KEDA added to base cluster — install via [`kube_keda`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda)"
+  - "Kubernetes default version updated to 1.31"
+  - "`burstable_nodes_enabled` now defaults to `true` for all modules"
+changes:
+  - type: breaking_change
+    summary: >-
+      Every cluster now requires a dedicated DNS zone for hosting control-plane utilities. `kube_domain` is a
+      new required configuration value in `region.yaml` for every region housing a Kubernetes cluster. It must
+      be a subdomain of a domain available to the environment.
+    action_items:
+      - "Add a `kube_domain` field to `region.yaml` for every region that contains a Kubernetes cluster. The value must be a subdomain of a domain already available in the environment (e.g., `kube.example.com` if `example.com` is managed)."
+      - "Deploy the corresponding DNS zone via `aws_dns_zones` before applying cluster modules."
+    impacts:
+      - type: configuration
+        component: region.yaml
+        summary: New required kube_domain field for cluster DNS zones
+  - type: breaking_change
+    summary: >-
+      We now create the Authentik email template in `kube_authentik`. The organization name is now a required input.
+      Use the new `organization_name` output from `kube_authentik` as an input to `authentik_core_resources`.
+    action_items:
+      - "Add the `organization_name` variable to your `kube_authentik` module configuration."
+      - "Wire the `organization_name` output from `kube_authentik` into the `authentik_core_resources` module as an input via a `dependency` block."
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Organization name now required input; produces email template
+      - type: iac-module
+        component: authentik_core_resources
+        summary: Must now consume organization_name output from kube_authentik
+  - type: breaking_change
+    summary: >-
+      `kube_cert_manager` and `kube_cert_issuers` have been consolidated into a single `kube_certificates` module
+      to address various race conditions on cluster installation. See upgrade instructions for the state migration
+      steps.
+    action_items:
+      - "Create a new `kube_certificates` module deployment."
+      - "Migrate the Terraform state from both `kube_cert_manager` and `kube_cert_issuers` into the new module."
+      - "Remove the old module directories after confirming the migration succeeds."
+      - "Follow the detailed state migration steps in the upgrade instructions."
+    impacts:
+      - type: iac-module
+        component: kube_cert_manager
+        summary: Deprecated and consolidated into kube_certificates
+      - type: iac-module
+        component: kube_cert_issuers
+        summary: Deprecated and consolidated into kube_certificates
+      - type: iac-module
+        component: kube_certificates
+        summary: New module replacing kube_cert_manager and kube_cert_issuers
+  - type: breaking_change
+    summary: >-
+      KEDA is now included in the base Panfactum cluster and modules assume it is installed.
+      See the installation instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
+    action_items:
+      - "Deploy the `kube_keda` module in every cluster following the [installation guide](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda). This must be done before applying other modules that now depend on KEDA being present."
+    impacts:
+      - type: iac-module
+        component: kube_keda
+        summary: Now required as part of base cluster installation
+  - type: breaking_change
+    summary: >-
+      `burstable_nodes_enabled` now defaults to `true` for all modules. This fixes the broken default introduced
+      in `edge.25-03-26`.
+    description: >-
+      If you explicitly set `burstable_nodes_enabled = false` in any module, no action is needed. Otherwise,
+      review your workloads to confirm they are compatible with burstable (T-family) instances, which are now
+      used by default.
+  - type: breaking_change
+    summary: >-
+      Contact information variables on
+      [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) and
+      [`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains)
+      have been consolidated to single objects for each contact.
+    action_items:
+      - "Replace the individual contact field variables (e.g., `contact_first_name`, `contact_last_name`, etc.) with the new consolidated contact objects in your `aws_account` and `aws_registered_domains` module configurations."
+      - "Refer to the updated module reference docs for the exact object structure."
+    impacts:
+      - type: iac-module
+        component: aws_account
+        summary: Contact variables consolidated into single objects per contact
+      - type: iac-module
+        component: aws_registered_domains
+        summary: Contact variables consolidated into single objects per contact
+  - type: breaking_change
+    summary: >-
+      Inputs to [`aws_dns_zones`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) have been
+      consolidated to a single `domains` object for better per-domain granular configuration.
+    action_items:
+      - "Migrate your `aws_dns_zones` inputs from separate domain list variables to the new `domains` object. Each key in the object is a domain name, and the value contains per-domain configuration."
+      - "See the [module reference](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) for the new input schema."
+    impacts:
+      - type: iac-module
+        component: aws_dns_zones
+        summary: Inputs consolidated into single domains object
+  - type: breaking_change
+    summary: >-
+      The backup vault name in
+      [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources)
+      now has a unique suffix. **Manually delete the existing `terraform-<env_name>` backup vault before applying
+      the updated module.**
+    action_items:
+      - "In the AWS console (or via CLI), manually delete the existing AWS Backup vault named `terraform-<env_name>` in each environment."
+      - "Re-apply the `tf_bootstrap_resources` module, which will create the replacement vault with the new uniquely-suffixed name."
+    impacts:
+      - type: iac-module
+        component: tf_bootstrap_resources
+        summary: Backup vault name now includes unique suffix; manual deletion required
+  - type: breaking_change
+    summary: >-
+      This release adds the new `pf` CLI tool. After completing all other migration steps, run `pf devshell sync`
+      and then `terragrunt apply` on all modules.
+    action_items:
+      - "Run `pf devshell sync` to initialize the new CLI tool's local configuration."
+      - "Run `terragrunt run-all apply` across all modules to propagate the changes introduced by the sync."
+    impacts:
+      - type: cli
+        component: devshell sync
+        summary: New command to sync devshell configuration
+      - type: devshell
+        component: pf
+        summary: New CLI tool added to the devshell
+  - type: breaking_change
+    summary: >-
+      The default Kubernetes version has been updated to 1.31 from 1.30.
+    action_items:
+      - "Review the [Kubernetes 1.31 changelog](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.31.md) for any deprecated APIs or behavior changes that affect your workloads."
+      - "If you pin `kube_version` explicitly, update it to `1.31`. Otherwise, re-apply `aws_eks` to trigger the upgrade."
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Default Kubernetes version updated to 1.31
+  - type: addition
+    summary: >-
+      Adds the [`kube_job`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_job) submodule
+      for running one-off Jobs as part of module deployment processes (e.g., database migrations).
+    description: >-
+      No action required. The `kube_job` submodule is available for use in your custom modules when you need to
+      run one-off tasks during deployments.
+    impacts:
+      - type: iac-module
+        component: kube_job
+        summary: New submodule for running one-off Kubernetes Jobs
+  - type: addition
+    summary: >-
+      Adds [KEDA](https://keda.sh/) to the base cluster installation via the
+      [`kube_keda`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda) module.
+    action_items:
+      - "Deploy the `kube_keda` module as part of your cluster bootstrap process. See the related breaking change entry for installation order details."
+    impacts:
+      - type: iac-module
+        component: kube_keda
+        summary: New module for deploying KEDA autoscaler
+  - type: addition
+    summary: >-
+      Adds `sub_paths` to `config_map_mounts` and `secret_mounts` inputs in all applicable Panfactum submodules
+      for more granular control over mounted files.
+    description: >-
+      No action required. If you need to mount individual files from a ConfigMap or Secret rather than the entire
+      volume, you can now specify `sub_paths` in the mount configuration.
+  - type: addition
+    summary: >-
+      Adds `backup:TagResource` to
+      [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources)
+      to address [AWS Notification](https://github.com/Panfactum/stack/issues/291).
+    action_items:
+      - "Re-apply `tf_bootstrap_resources` to receive the updated IAM policy."
+    impacts:
+      - type: iac-module
+        component: tf_bootstrap_resources
+        summary: Added backup:TagResource permission to IAM policy
+  - type: fix
+    summary: >-
+      Fixed Kubernetes RBAC issues: addressed problems with EKS access entries preventing proper permission grants
+      and updated RBAC policies to incorporate new CRDs added since the last stable release.
+    action_items:
+      - "Re-apply `aws_eks` to receive the corrected access entry permissions and updated RBAC policies."
+    references:
+      - type: issue-report
+        summary: "EKS access entries preventing proper RBAC permission grants"
+        link: https://github.com/Panfactum/stack/issues/311
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Fixed access entry permissions and updated RBAC for new CRDs
+  - type: fix
+    summary: >-
+      Fixed issue where AWS SSO sessions would not automatically sync across profiles, resulting in unnecessary
+      SSO login prompts. Now only one SSO login is required for all AWS profiles.
+    action_items:
+      - "Run `pf devshell sync` to regenerate your AWS config files with the corrected SSO session handling."
+    references:
+      - type: issue-report
+        summary: "AWS SSO sessions not syncing across profiles"
+        link: https://github.com/Panfactum/stack/issues/221
+  - type: fix
+    summary: >-
+      Fixes the default value for `min_node_cpu` of
+      [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools).
+    action_items:
+      - "Re-apply `kube_karpenter_node_pools` to pick up the corrected default."
+      - "If you previously set `min_node_cpu` explicitly to work around this issue, you can remove the override."
+    impacts:
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: Fixed incorrect default value for min_node_cpu
+  - type: fix
+    summary: >-
+      Addressed an issue that slowed down node bootstrapping due to self-imposed rate-limits on image pulling.
+    description: >-
+      No action required. Nodes will bootstrap faster automatically after upgrading.
+  - type: fix
+    summary: >-
+      Fixes private repo authentication in
+      [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+    action_items:
+      - "Re-apply any modules that use `wf_dockerfile_build` with private repositories to receive the fix."
+    impacts:
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: Fixed private repository authentication
+  - type: fix
+    summary: >-
+      Adds missing `lifetime_evictions_enabled` input to
+      [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+    description: >-
+      No action required. If you need to control lifetime evictions for StatefulSets, you can now set the
+      `lifetime_evictions_enabled` input on `kube_stateful_set`.
+    impacts:
+      - type: iac-module
+        component: kube_stateful_set
+        summary: Added missing lifetime_evictions_enabled input
+  - type: fix
+    summary: >-
+      Adds additional AAAA record for IPv6 support for
+      [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn).
+    action_items:
+      - "Re-apply any modules that use `aws_cdn` to create the AAAA record."
+    impacts:
+      - type: iac-module
+        component: aws_cdn
+        summary: Added AAAA record for IPv6 support
+  - type: fix
+    summary: >-
+      Addresses invalid policy document format for the DNSSEC KMS keys in
+      [`aws_dnssec`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_dnssec).
+    action_items:
+      - "Re-apply any modules that use `aws_dnssec` to receive the corrected KMS key policy."
+    impacts:
+      - type: iac-module
+        component: aws_dnssec
+        summary: Fixed invalid DNSSEC KMS key policy document format

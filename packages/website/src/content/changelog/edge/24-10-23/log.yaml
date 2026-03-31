@@ -1,0 +1,59 @@
+# Changelog entry for edge release 24-10-23.
+# Migrated from edge.24-10-23.mdx.
+summary: "Updates minimum Nix version requirement, dramatically improves module download efficiency, adds S3 public website hosting capabilities, enhances CloudFront CDN functionality, and fixes ECR Helm chart authentication."
+highlights:
+  - "Minimum Nix version bumped to >= 2.23 — a check is now enforced in `.envrc`"
+  - "Panfactum modules now downloaded as gzipped tarballs — 90%+ bandwidth reduction, dramatically faster init"
+  - "New [`aws_s3_public_website`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module for serving files from S3 via CloudFront"
+changes:
+  - type: breaking_change
+    summary: >-
+      The required Nix version has been updated to `>= 2.23` (up from `>= 2.18`). A check in the `.envrc` loading
+      script now enforces this. If you installed Nix with the Determinate Systems installer, see
+      [these upgrade docs](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#upgrading-nix).
+  - type: improvement
+    summary: >-
+      Panfactum modules are now downloaded as gzipped tarballs from an HTTPS server rather than requiring a full git
+      clone. This dramatically improves module initialization speed and reduces network bandwidth by over 90%.
+  - type: addition
+    summary: >-
+      Added a new module,
+      [`aws_s3_public_website`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website),
+      to enable serving files directly from an S3 bucket via CloudFront.
+    impacts:
+      - type: iac-module
+        component: aws_s3_public_website
+        summary: New module for serving S3 files via CloudFront
+  - type: addition
+    summary: >-
+      [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) can now handle CORS headers on
+      behalf of origin servers and now uses 10x more efficient
+      [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)
+      for request/response mutations.
+    impacts:
+      - type: iac-module
+        component: aws_cdn
+        summary: Added CORS handling and switched to CloudFront functions
+  - type: fix
+    summary: >-
+      Deploying modules that use Helm charts hosted in ECR (e.g.,
+      [`kube_karpenter`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)) will now use
+      the appropriate credentials.
+    references:
+      - type: issue-report
+        summary: "pf-get-repo-variables returns wrong directory in .terragrunt-cache"
+        link: https://github.com/Panfactum/stack/issues/119
+      - type: issue-report
+        summary: "ECR token caching and public registry handling issues"
+        link: https://github.com/Panfactum/stack/issues/70
+    impacts:
+      - type: iac-module
+        component: kube_karpenter
+        summary: Fixed ECR Helm chart authentication credentials
+  - type: fix
+    summary: >-
+      Upgraded Argo Workflows to fix issues related to workflow timeouts being ignored.
+    impacts:
+      - type: iac-module
+        component: kube_argo
+        summary: Upgraded to fix ignored workflow timeout issues

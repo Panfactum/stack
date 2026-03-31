@@ -1,0 +1,30 @@
+# Changelog entry for edge release 25-01-09.
+# Migrated from edge.25-01-09.mdx.
+summary: "Adds cluster-wide environment variable injection capability, pins Bottlerocket OS AMIs to prevent node crashes from unexpected AWS updates, and fixes EKS module conditions for low SLA targets."
+highlights:
+  - "New `common_env` and `common_secrets` inputs in `kube_policies` for cluster-wide environment variable injection"
+  - "Bottlerocket OS AMIs now pinned to prevent unexpected node crashes from AWS AMI updates"
+changes:
+  - type: addition
+    summary: >-
+      [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) now has
+      `common_env` and `common_secrets` inputs that inject environment variables into all containers in the cluster.
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: New common_env and common_secrets inputs for cluster-wide env var injection
+  - type: fix
+    summary: >-
+      Pins Bottlerocket OS AMIs to pre-tested versions as AWS occasionally publishes breaking AMI changes that
+      can crash nodes in the cluster.
+  - type: fix
+    summary: >-
+      Fixes the pre- and post-condition check for the `aws_eks` module when `sla_target` is set to 1.
+    references:
+      - type: issue-report
+        summary: "aws_eks condition check fails when sla_target is 1"
+        link: https://github.com/Panfactum/stack/issues/229
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Fix pre/post-condition check when sla_target is set to 1

@@ -1,0 +1,95 @@
+# Changelog entry for edge release 24-06-06.
+# Migrated from edge.24-06-06.mdx.
+summary: "Introduces workload utility submodule for standardized pod specs, disables VPC flow logs by default, improves environment setup with scaffolding script, and fixes several environment and resource-related issues."
+highlights:
+  - "New [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility) submodule for production-hardened Pod specs"
+  - "VPC flow logs now disabled by default in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc)"
+  - "New `pf-env-scaffold` script for environment bootstrapping setup"
+changes:
+  - type: breaking_change
+    summary: >-
+      The reloader deployment must be deleted before the next apply of
+      [`kube_reloader`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reloader). No inputs have changed.
+    impacts:
+      - type: iac-module
+        component: kube_reloader
+        summary: Requires redeployment before next apply
+  - type: breaking_change
+    summary: >-
+      The alpha module `kube_labels` has been removed in favor of the labels provided by
+      [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility).
+    impacts:
+      - type: iac-module
+        component: kube_workload_utility
+        summary: Replaces removed kube_labels module
+  - type: breaking_change
+    summary: >-
+      VPC flow logs in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) are now disabled by default
+      as they can be fairly expensive. They can be re-enabled by setting `vpc_flow_logs_enabled` to `true`.
+    impacts:
+      - type: iac-module
+        component: aws_vpc
+        summary: VPC flow logs now disabled by default
+  - type: addition
+    summary: >-
+      Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
+      [bootstrapping guide](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code).
+  - type: addition
+    summary: >-
+      Added [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility)
+      to make it easier to create uniform, production-hardened Pod specs that take advantage of all Panfactum stack capabilities.
+    impacts:
+      - type: iac-module
+        component: kube_workload_utility
+        summary: New submodule for production-hardened Pod specs
+  - type: addition
+    summary: >-
+      Added [`kube_constants`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) that export
+      static configuration values useful when creating resources on Panfactum clusters.
+    impacts:
+      - type: iac-module
+        component: kube_constants
+        summary: New submodule exporting static cluster config values
+  - type: addition
+    summary: >-
+      [`kube_cert_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) will now
+      automatically delete Certificate secrets if the Certificate is deleted.
+    impacts:
+      - type: iac-module
+        component: kube_cert_manager
+        summary: Auto-deletes Certificate secrets on Certificate removal
+  - type: addition
+    summary: >-
+      [`aws_ses_domain`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain) now takes an optional
+      `smtp_allowed_cidrs` input that restricts what IPs can use the generated SMTP credentials.
+    impacts:
+      - type: iac-module
+        component: aws_ses_domain
+        summary: New smtp_allowed_cidrs input for IP restrictions
+  - type: addition
+    summary: >-
+      Terragrunt will now automatically retry on some errors up to three times before exiting with failure.
+  - type: fix
+    summary: >-
+      `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
+      instead of full devenv re-evaluations.
+    references:
+      - type: issue-report
+        summary: ".env files not loaded into shell environment"
+        link: https://github.com/Panfactum/stack/issues/52
+    impacts:
+      - type: configuration
+        component: ".env"
+        summary: Proper loading and fast reload on changes
+  - type: fix
+    summary: >-
+      Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when
+      bootstrapping before VPA takes effect.
+  - type: fix
+    summary: >-
+      [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) now respects the
+      `log_level` input.
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Now respects the log_level input

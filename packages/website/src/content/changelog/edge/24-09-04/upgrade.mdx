@@ -1,0 +1,78 @@
+{/* Upgrade instructions for edge release 24-09-04. */}
+{/* Covers the extensive variable renames across workload submodules. */}
+
+## Variable Renames in Workload Submodules
+
+The following variable renames have been applied across
+[`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment),
+[`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set),
+[`kube_cron_job`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job),
+[`kube_pod`](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod),
+[`wf_spec`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec),
+and [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
+
+| Old Name | New Name |
+|----------|----------|
+| `ready_check_*` | `readiness_probe_*` |
+| `liveness_check_*` | `liveness_probe_*` |
+| `image` / `image_version` | `image_registry` / `image_repository` / `image_tag` |
+| `secrets` | `common_secrets` |
+| `pod_annotations` | `extra_pod_annotations` |
+| `readonly` | `read_only` |
+| `read_only_root_fs` | `read_only` |
+| `instance_type_anti_affinity_required` | `instance_type_spread_required` |
+| `topology_spread_enabled` | `az_spread_preferred` |
+| `topology_spread_required` | `az_spread_required` |
+| `zone_anti_affinity_required` | `az_anti_affinity_required` |
+
+In [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
+[`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel):
+
+| Old Name | New Name |
+|----------|----------|
+| `spot_instances_enabled` | `spot_nodes_enabled` |
+| `arm_instances_enabled` | `arm_nodes_enabled` |
+| `burstable_instances_enabled` | `burstable_nodes_enabled` |
+
+In [`kube_constants`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants):
+
+| Old Name | New Name |
+|----------|----------|
+| `panfactum_image` | `panfactum_image_repository` |
+| `panfactum_image_version` | `panfactum_image_tag` |
+
+## Removed Inputs
+
+The following inputs have been removed from workload submodules as they are no longer recommended:
+
+- `prefer_spot_nodes_enabled`
+- `prefer_burstable_nodes_enabled`
+- `prefer_arm_nodes_enabled`
+- `az_anti_affinity_preferred` (use `az_spread_preferred` instead)
+
+## `enhanced_ha_enabled` Removed from Submodules
+
+The `enhanced_ha_enabled` input has been replaced with more granular tuning knobs in the following submodules:
+`kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault_proxy`, `kube_argo_event_bus`, and `kube_argo_event_source`.
+
+## Controller Node Taints
+
+Nodes managed by EKS Node Groups are now tainted with `controller=true:NoSchedule`. Most workload submodules
+have a new `controller_nodes_enabled` input to allow your workloads to tolerate this taint if desired.
+
+## Default Flag Changes
+
+The following flags are now enabled by default in workload submodules:
+- `spot_nodes_enabled`
+- `arm_nodes_enabled`
+- `vpa_enabled`
+- `panfactum_scheduler_enabled`
+- `pull_through_cache_enabled`
+
+Additionally in `kube_deployment`: `az_spread_preferred` is now enabled by default.
+In `kube_stateful_set`: `az_spread_required` and `instance_type_spread_required` are now enabled by default.
+
+## Remove BuildKit StatefulSets
+
+Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace
+must be removed if [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed.

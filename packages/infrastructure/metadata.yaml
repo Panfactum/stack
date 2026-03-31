@@ -1,0 +1,22 @@
+# Tracks renamed and removed infrastructure modules.
+# Used by the website for redirects and by tooling for upgrade assistance.
+renamed_modules:
+  - old_name: kube_priority_classes
+    new_name: kube_policies
+    motivation: Consolidated priority class management into the broader `kube_policies` module.
+
+removed_modules:
+  - name: kube_fledged
+    motivation: Replaced by Kyverno-based node image caching (`kube_node_image_cache`), which was itself later removed.
+  - name: kube_reflector
+    motivation: Split into `kube_sync_config_map` and `kube_sync_secret` for more granular Kyverno-based resource syncing.
+  - name: kube_rbac
+    motivation: Replaced by EKS access entries managed directly in `aws_eks`.
+  - name: kube_secrets_csi
+    motivation: Replaced by Vault Secrets Operator for a more reliable secrets injection approach.
+  - name: kube_trust_manager
+    motivation: Functionality covered by other certificate and config syncing modules.
+  - name: kube_node_image_cache
+    motivation: Node image caching approach was removed in favor of default image pull optimizations.
+  - name: kube_node_image_cache_controller
+    motivation: Node image caching approach was removed in favor of default image pull optimizations.

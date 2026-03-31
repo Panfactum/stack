@@ -1,0 +1,49 @@
+# Changelog entry for edge release 24-06-08.
+# Migrated from edge.24-06-08.mdx.
+summary: "Deprecates kube_trust_manager in favor of kube_reflector, adds domain contact type configuration, simplifies EKS reset process with new command, and fixes VPC and CoreDNS-related issues."
+highlights:
+  - "[`kube_trust_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) deprecated in favor of [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector)"
+  - "New `pf-eks-reset` command consolidates manual cluster reset steps"
+changes:
+  - type: breaking_change
+    summary: >-
+      [`kube_trust_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) has been deprecated
+      as its functionality was redundant with [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector).
+      To remove it: apply this release, remove dependency blocks in terragrunt.hcl files, run `terragrunt destroy` on the module,
+      and delete the `bundles` CRD.
+  - type: addition
+    summary: >-
+      [`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) can now set the
+      contact type for each contact.
+    impacts:
+      - type: iac-module
+        component: aws_registered_domains
+        summary: New contact type configuration per contact
+  - type: addition
+    summary: >-
+      Users can now reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`)
+      in the [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+    impacts:
+      - type: iac-module
+        component: aws_vpc
+        summary: Supports short availability zone references
+  - type: addition
+    summary: >-
+      The manual steps needed to reset new EKS clusters during the bootstrapping guide have been consolidated
+      into a single new command, `pf-eks-reset`.
+  - type: fix
+    summary: >-
+      Addressed issue in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) that caused a temporary,
+      harmless error to crash the `terragrunt apply` on initial bootstrapping.
+    impacts:
+      - type: iac-module
+        component: aws_vpc
+        summary: Fix for apply crash during initial bootstrapping
+  - type: fix
+    summary: >-
+      Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
+      [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) module.
+    impacts:
+      - type: iac-module
+        component: kube_core_dns
+        summary: Fix for NetworkPolicy blocking Cilium tests

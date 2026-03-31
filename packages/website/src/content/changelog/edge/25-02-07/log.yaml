@@ -1,0 +1,68 @@
+# Changelog entry for edge release 25-02-07.
+# Migrated from edge.25-02-07.mdx.
+summary: "Contains a VPA CRD bug that affects upgrades - skip this release. Improves VPA pod eviction policies, adds PostgreSQL CPU update thresholds to prevent autoscaling thrash, and fixes several deployment issues."
+skip: true
+highlights:
+  - "Skip this release — VPA CRD bug makes upgrading to the next release difficult without manual intervention"
+changes:
+  - type: improvement
+    summary: >-
+      Enables the Access Token auth method for the Argo Workflows server to allow direct API access programmatically.
+    impacts:
+      - type: iac-module
+        component: kube_argo
+        summary: Enables Access Token auth method for direct API access
+  - type: improvement
+    summary: >-
+      The vertical pod autoscaler will now only evict pods when resources need to scale up, not down. This reduces
+      unnecessary resource thrash and improves cluster stability.
+    impacts:
+      - type: iac-module
+        component: kube_vpa
+        summary: Only evicts pods on scale-up, no longer on scale-down
+  - type: addition
+    summary: >-
+      Adds ability to pass extra service annotations through the
+      [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+    impacts:
+      - type: iac-module
+        component: kube_deployment
+        summary: New support for extra service annotations
+  - type: fix
+    summary: >-
+      Added `pg_minimum_cpu_update_millicores` input to
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      to reduce autoscaling thrash caused by frequent small VPA CPU recommendation updates.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: New pg_minimum_cpu_update_millicores input to reduce CPU autoscaling thrash
+  - type: fix
+    summary: >-
+      Applied fix for
+      [argo-events write hole issue](https://github.com/argoproj/argo-events/pull/3449) in
+      [`kube_argo`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo).
+    impacts:
+      - type: iac-module
+        component: kube_argo
+        summary: Fix for argo-events write hole issue
+  - type: fix
+    summary: >-
+      Fixes bug that prevented
+      [`kube_cert_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)
+      from being deployed when `self_generated_certs_enabled` was set to `true`.
+    references:
+      - type: issue-report
+        summary: "kube_cert_manager deployment fails with self_generated_certs_enabled"
+        link: https://github.com/Panfactum/stack/issues/208
+    impacts:
+      - type: iac-module
+        component: kube_cert_manager
+        summary: Fix deployment failure when self_generated_certs_enabled is true
+  - type: fix
+    summary: >-
+      Fixes `aws_eks` subnet validation check that prevented module deployment in some valid scenarios.
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Fix subnet validation check blocking valid deployments

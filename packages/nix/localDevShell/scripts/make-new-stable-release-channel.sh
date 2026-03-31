@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Script is used to cut a new version of the docs
+# Script is used to cut a new stable release channel of the docs and changelog.
 
 DOCS_DIR="$REPO_ROOT/packages/website/src/content/docs"
 CHANGELOG_DIR="$REPO_ROOT/packages/website/src/content/changelog"
@@ -68,22 +68,15 @@ jq --arg slug "$RELEASE_SLUG" \
   '.versions[$slug] = {"ref": $ref, "placeholder": $placeholder, "label": $label, "slug": $slug}' \
   "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
-# Create a new changelog file for the stable release channel
-cat >"$CHANGELOG_DIR/$RELEASE_SLUG.mdx" <<EOF
----
-summary: Initial release of the $CHANNEL_LABEL release channel.
----
+# Derive the stable directory name (strip "stable." prefix)
+STABLE_DIR_NAME="${STABLE_VERSION_TAG#stable.}"
+STABLE_ENTRY_DIR="$CHANGELOG_DIR/stable/$STABLE_DIR_NAME"
 
-import ChangelogEntry from "./ChangelogEntry.astro"
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
-
-<ChangelogEntry>
-  <Fragment slot="alerts">
-    <MarkdownAlert severity="info">
-      This release was forked from the $($LATEST_EDGE_TAG) edge release.
-    </MarkdownAlert>
-  </Fragment>
-</ChangelogEntry>
+# Create the new stable entry directory with an initial log.yaml
+mkdir -p "$STABLE_ENTRY_DIR"
+cat >"$STABLE_ENTRY_DIR/log.yaml" <<EOF
+summary: "Initial release of the $CHANNEL_LABEL release channel, forked from $LATEST_EDGE_TAG."
+changes: []
 EOF
 
 # Commit the docs changes

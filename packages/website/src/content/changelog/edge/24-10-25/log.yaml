@@ -1,0 +1,6 @@
+# Changelog entry for edge release 24-10-25.
+# Migrated from edge.24-10-25.mdx.
+summary: "Release contains a critical bug that can cause a complete cluster crash due to issues with the Kyverno policy engine. Skip this release and use edge.24-11-13 instead."
+skip: true
+highlights:
+  - "Skip this release — critical Kyverno bug can cause complete cluster crash. Use `edge.24-11-13` instead."

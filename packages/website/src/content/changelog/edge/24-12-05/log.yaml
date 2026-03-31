@@ -1,0 +1,113 @@
+# Changelog entry for edge release 24-12-05.
+# Migrated from edge.24-12-05.mdx.
+summary: "Major Linkerd upgrade that improves security and startup times, replaces NATS backend for Argo EventBus, and adds support for NATS Jetstream message broker along with numerous improvements to node image caching and AWS EKS features."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "Major Linkerd upgrade — removes privileged `proxy-init` container, reduces pod startup by 5-20s"
+  - "NATS backend for `kube_argo_event_bus` replaced with [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) — EventBus deletion required"
+  - "`kube_fledged` and `kube_reflector` removed (deprecated in `edge.24-11-13`)"
+  - "Must update modules in specific order — see upgrade instructions"
+changes:
+  - type: breaking_change
+    summary: >-
+      Major Linkerd upgrade that removes the privileged `proxy-init` initContainer. Reduces pod startup times by
+      5-20 seconds and improves security. **Modules must be updated in a specific order** — see upgrade instructions.
+    impacts:
+      - type: iac-module
+        component: kube_linkerd
+        summary: Removes privileged proxy-init container and speeds up pod startup
+  - type: breaking_change
+    summary: >-
+      The NATS backend for
+      [`kube_argo_event_bus`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+      has been replaced with [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats).
+      Existing `EventBus` resources must be manually deleted before applying. **Deleting EventBus causes loss of
+      unprocessed events.**
+    impacts:
+      - type: iac-module
+        component: kube_argo_event_bus
+        summary: NATS backend replaced; existing EventBus resources must be deleted
+      - type: iac-module
+        component: kube_nats
+        summary: New module now provides NATS backend for EventBus
+  - type: breaking_change
+    summary: >-
+      `kube_fledged` and `kube_reflector` modules have been removed (deprecated in `edge.24-11-13`).
+  - type: breaking_change
+    summary: >-
+      The `images` input of
+      [`kube_node_image_cache`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache)
+      now takes a list of image configuration objects instead of image strings. `node_image_cached_enabled` has been
+      removed from submodules — configure image caching per-container instead.
+  - type: addition
+    summary: >-
+      Added support for the [NATS Jetstream message broker](https://docs.nats.io/nats-concepts/jetstream) via
+      [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats). Also adds the `nats`
+      CLI to the devShell and NATS support in `pf-db-tunnel`.
+    impacts:
+      - type: iac-module
+        component: kube_nats
+        summary: New module for deploying NATS Jetstream message broker
+      - type: devshell
+        component: nats
+        summary: NATS CLI added to the development shell
+      - type: devshell
+        component: pf-db-tunnel
+        summary: Added NATS connection support
+  - type: addition
+    summary: >-
+      The [`kube_node_image_cache_controller`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller)
+      now pulls cached images in parallel as soon as a node launches (previously serial, causing significant delays).
+  - type: addition
+    summary: >-
+      Images provided to Panfactum submodules are now cached by default.
+  - type: addition
+    summary: >-
+      Additional annotations and labels can now be added to controllers created via `kube_deployment`,
+      `kube_stateful_set`, `kube_daemon_set`, and `kube_cron_job`.
+    impacts:
+      - type: iac-module
+        component: kube_deployment
+        summary: Supports additional annotations and labels on controllers
+      - type: iac-module
+        component: kube_stateful_set
+        summary: Supports additional annotations and labels on controllers
+      - type: iac-module
+        component: kube_daemon_set
+        summary: Supports additional annotations and labels on controllers
+      - type: iac-module
+        component: kube_cron_job
+        summary: Supports additional annotations and labels on controllers
+  - type: improvement
+    summary: >-
+      [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has EKS access entries and
+      ARC Zonal Shift enabled. Also now launches with `arm64` nodes when `bootstrap_mode_enabled` is `true`.
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Enables EKS access entries, ARC Zonal Shift, and arm64 bootstrap nodes
+  - type: fix
+    summary: >-
+      Resolved slow Vault startup times for Vault databases larger than 100MB.
+    impacts:
+      - type: iac-module
+        component: kube_vault
+        summary: Fixes slow startup for databases larger than 100MB
+  - type: fix
+    summary: >-
+      BuildKit cache PVCs are now excluded from Velero backups.
+    impacts:
+      - type: iac-module
+        component: kube_buildkit
+        summary: Cache PVCs now excluded from Velero backups
+  - type: fix
+    summary: >-
+      Addressed issue where resetting one's own password via Authentik caused an unauthorized error.
+    references:
+      - type: issue-report
+        summary: "Authentik password reset returns unauthorized error"
+        link: https://github.com/Panfactum/stack/issues/177
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Fixes unauthorized error when resetting own password

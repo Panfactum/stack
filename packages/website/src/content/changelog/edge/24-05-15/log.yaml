@@ -1,0 +1,40 @@
+# Changelog entry for edge release 24-05-15.
+# Migrated from edge.24-05-15.mdx.
+summary: "Updates Vault domain configuration, adds the Reflector module for cross-namespace synchronization, and fixes PostgreSQL graceful shutdown issues."
+highlights:
+  - "[`kube_vault`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now takes `vault_domain` as an input instead of `environment_domains`"
+  - "New [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for cross-namespace ConfigMap/Secret synchronization"
+  - "Fixed graceful shutdown for PostgreSQL clusters on spot instances"
+changes:
+  - type: breaking_change
+    summary: >-
+      [`kube_vault`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now takes `vault_domain`
+      as an input instead of `environment_domains`. This change was made as having multiple domains for Vault
+      is incompatible with using Vault as an intermediary IdP.
+    impacts:
+      - type: iac-module
+        component: kube_vault
+        summary: "Replaced environment_domains input with vault_domain"
+  - type: addition
+    summary: >-
+      New [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for deploying
+      the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
+      namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
+      the module as a part of the foundational Stack.
+  - type: addition
+    summary: >-
+      `pg_shutdown_timeout` variable added to [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      to control how long the postgres instances will wait for active connections to close before shutting down.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: "New pg_shutdown_timeout variable added"
+  - type: fix
+    summary: >-
+      Fixed an issue where simultaneous, graceful shutdown of all postgres nodes in a
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      would cause unnecessary downtime when the primary was running on a spot instance.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: "Fixed graceful shutdown causing unnecessary downtime on spot instances"

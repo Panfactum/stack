@@ -1,0 +1,18 @@
+{/* Upgrade instructions for edge release 24-12-19. */}
+{/* Covers the SLA Target Levels introduction and enhanced_ha_enabled removal. */}
+
+## Migrate from `enhanced_ha_enabled` to `sla_target`
+
+This release introduces the concept of [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels).
+
+The `enhanced_ha_enabled` input has been removed from all modules. The previous behavior when
+`enhanced_ha_enabled` was `true` (the default) is now equivalent to `sla_target = 3` (the new default).
+
+To set the SLA target, use the new `sla_target` [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#metadata)
+at the environment, region, or module scope.
+
+## Update Provider Versions
+
+This release upgrades the following Terraform provider versions — update these in first-party IaC:
+
+- `pf`: 0.0.5 → 0.0.7

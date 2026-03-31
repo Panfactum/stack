@@ -1,0 +1,55 @@
+# Changelog entry for edge release 24-05-30.
+# Migrated from edge.24-05-30.mdx.
+summary: "Reduces default Vault storage size, adds Loki logging backend, introduces PVC Autoresizer for automatic EBS volume expansion, and fixes Karpenter scheduling issues."
+highlights:
+  - "Default `vault_storage_size_gb` changed from `20` to `2` — manual update required if you used the old default"
+  - "New [`kube_logging`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_logging) module with Loki backend (Alpha)"
+  - "New [`kube_pvc_autoresizer`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer) for automatic EBS volume expansion"
+changes:
+  - type: breaking_change
+    summary: >-
+      The default for `vault_storage_size_gb` in [`kube_vault`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+      has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
+      you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
+    impacts:
+      - type: iac-module
+        component: kube_vault
+        summary: "Default vault_storage_size_gb changed from 20 to 2"
+  - type: addition
+    summary: >-
+      (Alpha) Added the [Loki](https://grafana.com/docs/loki/latest/)
+      logging backend via [`kube_logging`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_logging)
+      and the [Alloy](https://grafana.com/docs/alloy/latest/) log collector via [`kube_alloy`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_alloy).
+    impacts:
+      - type: iac-module
+        component: kube_logging
+        summary: "New module providing Loki logging backend"
+      - type: iac-module
+        component: kube_alloy
+        summary: "New module providing Alloy log collector"
+  - type: addition
+    summary: >-
+      The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
+      [`kube_pvc_autoresizer`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer) module in order
+      to automatically expand EBS volumes as they fill up. A guide for deploying it is available
+      [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
+    impacts:
+      - type: iac-module
+        component: kube_pvc_autoresizer
+        summary: "New module for automatic EBS volume expansion"
+  - type: addition
+    summary: >-
+      Added validation for phone number format in
+      [`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains).
+    impacts:
+      - type: iac-module
+        component: aws_registered_domains
+        summary: "Added phone number format validation"
+  - type: fix
+    summary: >-
+      Resolved issue where scheduling constraints could not be resolved for components deployed before Karpenter
+      ([#41](https://github.com/Panfactum/stack/issues/41)).
+    references:
+      - type: issue-report
+        summary: "Scheduling constraints unresolvable for pre-Karpenter components"
+        link: https://github.com/Panfactum/stack/issues/41

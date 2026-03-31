@@ -1,0 +1,105 @@
+{/* Upgrade instructions for the next unreleased edge release. */}
+{/* Covers kube_certificates consolidation, backup vault rename, and pf CLI introduction. */}
+
+## Install KEDA
+
+We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed.
+See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
+
+## Migrate `kube_cert_manager` and `kube_cert_issuers` to `kube_certificates`
+
+`kube_cert_manager` and `kube_cert_issuers` have been consolidated into a single `kube_certificates` module.
+
+1. Create a `kube_certificates` directory as a sibling to the `kube_cert_manager` and `kube_cert_issuers` directories.
+
+2. Create a `terragrunt.hcl` file in the `kube_certificates` directory with the following contents:
+
+   ```hcl
+   include "panfactum" {
+     path   = find_in_parent_folders("panfactum.hcl")
+     expose = true
+   }
+
+   terraform {
+     source = include.panfactum.locals.pf_stack_source
+   }
+
+   dependency "vault_core" {
+     config_path  = "../vault_core_resources"
+     skip_outputs = true
+   }
+
+   inputs = {
+     alert_email = "..." # Copy from kube_cert_issuers
+   }
+   ```
+
+3. From the **region** directory, run the following:
+
+   ```bash
+   (cd kube_cert_issuers; terragrunt state pull > state.json);
+   (cd kube_cert_manager; terragrunt state pull > state.json);
+   jq -s '
+     .[0] as $f1
+     | .[1] as $f2
+     | $f1
+       | .outputs = ($f1.outputs + $f2.outputs)
+       | .resources = ($f1.resources + $f2.resources)
+   ' kube_cert_issuers/state.json kube_cert_manager/state.json > kube_certificates/state.json;
+   jq 'del(
+     .resources[]
+     | select(
+       .type == "pf_kube_labels"
+       and (has("module") | not)
+     )
+   )' kube_certificates/state.json > tmp && mv tmp kube_certificates/state.json;
+   rm kube_cert_issuers/state.json;
+   rm kube_cert_manager/state.json;
+   ```
+
+4. Update the version of the Panfactum framework you are using.
+
+5. Navigate to the `kube_certificates` directory.
+
+   1. Run `terragrunt init`.
+   2. Run `terragrunt state push state.json && rm state.json`.
+   3. Run `terragrunt apply` and review the changes. There should be only a few resources that will be replaced.
+
+6. Remove the `kube_cert_issuers` and `kube_cert_manager` directories.
+
+7. Replace any references to `kube_cert_issuers` and `kube_cert_manager` with `kube_certificates` in your code.
+
+## Rename Dedicated Cluster DNS Zone
+
+Every cluster now has a dedicated DNS zone for hosting control-plane utilities. `kube_domain` is now a required
+configuration value and should be set in the `region.yaml` for every region that houses a Kubernetes cluster.
+The value must be a subdomain of a domain available to the environment.
+
+## Configure Authentik Organization Name
+
+We now create the Authentik email template in `kube_authentik`. The organization name is now a required input.
+Use the new `organization_name` output from the `kube_authentik` module as an input to the `authentik_core_resources` module.
+
+## Rename Backup Vault in `tf_bootstrap_resources`
+
+The backup vault name in [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources)
+now has a unique suffix to prevent conflicts. **Before applying the updated module, manually delete the existing
+backup vault** named `terraform-<env_name>`. Delete all recovery points first, then the vault.
+
+## Initialize the `pf` CLI
+
+This release adds the new `pf` CLI tool. To begin using it:
+
+1. Complete all migration steps for the breaking changes above.
+2. Run `pf devshell sync`. Ensure this completes successfully before proceeding.
+3. Run `terragrunt apply` on **all** modules (or `terragrunt run-all apply`).
+
+## Consolidate Contact Information Variables
+
+The contact information variables on
+[`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) and
+[`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) have been
+consolidated to single objects for each contact.
+
+The inputs to [`aws_dns_zones`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) have been
+consolidated to a single `domains` object for better per-domain configuration.

@@ -1,0 +1,33 @@
+# Changelog entry for edge release 24-12-11.
+# Migrated from edge.24-12-11.mdx.
+summary: "Upgrades numerous core components including Kubernetes 1.30, Authentik 2024.6, Karpenter 1.1, and PostgreSQL 16.6, adds node EBS volume size configuration, and improves cluster recovery after disruptions."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "Kubernetes upgraded to 1.30, Authentik to 2024.6.4, Karpenter to 1.1, PostgreSQL to 16.6"
+  - "All Terraform provider versions upgraded — first-party IaC modules must update their provider versions"
+  - "New `node_ebs_volume_size_gb` input for `aws_eks` and `kube_karpenter_node_pools`"
+changes:
+  - type: breaking_change
+    summary: >-
+      All terraform provider versions in Panfactum modules have been upgraded. Any first-party IaC modules that
+      utilize Panfactum submodules will need their provider versions upgraded as well.
+  - type: breaking_change
+    summary: >-
+      Major component upgrades: Kubernetes 1.29→1.30, Authentik 2024.4.2→2024.6.4, Argo Workflows 3.5→3.6,
+      Karpenter 1.0→1.1, Redis 7.2→7.4, Velero 1.13→1.15, VPA 1.1→1.2, PostgreSQL 16.4→16.6.
+      Review each component's release notes before upgrading.
+  - type: addition
+    summary: >-
+      [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) and
+      [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+      can now configure each node's root volume size via `node_ebs_volume_size_gb`.
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Adds configurable node root EBS volume size
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: Adds configurable node root EBS volume size
+  - type: fix
+    summary: >-
+      Addresses issue where non-HA clusters could not recover when many nodes are disrupted at once.

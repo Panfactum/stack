@@ -1,0 +1,101 @@
+# Changelog entry for edge release 24-10-15.
+# Migrated from edge.24-10-15.mdx.
+summary: "Introduces the Panfactum provider to greatly simplify module development, upgrades to OpenTofu v1.8, adds CDN capabilities with CloudFront integration, and significantly improves DNS and ingress routing configuration."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "New [Panfactum provider](https://registry.terraform.io/providers/Panfactum/pf/latest) eliminates boilerplate in first-party modules"
+  - "OpenTofu upgraded to v1.8 — variables now supported in module `source` fields"
+  - "New [`kube_aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) and [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) modules for CloudFront CDN"
+  - "[`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) `domains` moved to top-level and `rewrite_rules` replaced with `redirect_rules`"
+changes:
+  - type: breaking_change
+    summary: >-
+      This release integrates the new Panfactum provider and upgrades OpenTofu to v1.8. The templating system and
+      `pf-update-iac` have been removed. Terragrunt no longer passes `pf_stack_version`, `pf_stack_commit`,
+      `environment`, `region`, `pf_root_module`, and `is_local` as module inputs. See upgrade instructions for details.
+  - type: breaking_change
+    summary: >-
+      [`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows
+      `rewrite_rules` on `ingress_configs`. The new top-level `redirect_rules` variable has enhanced capabilities
+      including full URL pattern matching and permanent vs temporary redirects.
+    impacts:
+      - type: iac-module
+        component: kube_ingress
+        summary: Replaced rewrite_rules with top-level redirect_rules variable
+  - type: breaking_change
+    summary: >-
+      [`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) `domains` is
+      now a top-level variable rather than being specified on individual `ingress_configs`.
+    impacts:
+      - type: iac-module
+        component: kube_ingress
+        summary: Moved domains from ingress_configs to top-level variable
+  - type: addition
+    summary: >-
+      New module [`kube_aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) for
+      setting up a CloudFront distribution in front of Ingress resources. [`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) updated to support CDN settings.
+    impacts:
+      - type: iac-module
+        component: kube_aws_cdn
+        summary: New module for CloudFront CDN in front of Ingress resources
+      - type: iac-module
+        component: kube_ingress
+        summary: Updated to support CDN configuration settings
+  - type: addition
+    summary: >-
+      New module [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) for non-Kubernetes CDN use cases.
+    impacts:
+      - type: iac-module
+        component: aws_cdn
+        summary: New module for non-Kubernetes CloudFront CDN use cases
+  - type: addition
+    summary: >-
+      New module [`aws_dns_zones`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) for creating
+      Route53 zones that have a non-AWS registrar.
+    impacts:
+      - type: iac-module
+        component: aws_dns_zones
+        summary: New module for Route53 zones with non-AWS registrars
+  - type: addition
+    summary: >-
+      Adds Cloudflare support in
+      [`kube_external_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) and
+      `kube_cert_issuers`.
+    impacts:
+      - type: iac-module
+        component: kube_external_dns
+        summary: Added Cloudflare DNS provider support
+      - type: iac-module
+        component: kube_cert_issuers
+        summary: Added Cloudflare DNS challenge support
+  - type: improvement
+    summary: >-
+      `tls_1_2_enabled` now defaults to `true` in
+      [`kube_ingress_nginx`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) to support
+      CDNs like CloudFront that do not yet support TLSv1.3.
+    impacts:
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: Default tls_1_2_enabled changed to true for CDN compatibility
+  - type: fix
+    summary: >-
+      The internal logic of
+      [`aws_dns_records`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) has been updated so
+      that each record is managed independently, fixing an issue where adding or removing records caused all records
+      to be recreated.
+    impacts:
+      - type: iac-module
+        component: aws_dns_records
+        summary: Records now managed independently to prevent unnecessary recreation
+  - type: fix
+    summary: >-
+      `pf-wf-git-checkout` no longer automatically appends `.git` to repo URLs, which is incompatible with some
+      git hosting providers (e.g., Azure DevOps).
+    references:
+      - type: issue-report
+        summary: "pf-wf-git-checkout appends .git to repo URLs"
+        link: https://github.com/Panfactum/stack/issues/160
+    impacts:
+      - type: devshell
+        component: pf-wf-git-checkout
+        summary: Stopped auto-appending .git to repo URLs

@@ -1,0 +1,86 @@
+# Changelog entry for edge release 24-06-13.
+# Migrated from edge.24-06-13.mdx.
+summary: "Adds PgBouncer configuration options, introduces cost-saving opportunities with enhanced_ha_enabled flag, adds OpenCost for Kubernetes cost analysis, and fixes various issues with VPC, Authentik, and pod scheduling."
+highlights:
+  - "New `enhanced_ha_enabled` input to core modules — disable for ~$50/month savings with minor availability tradeoff"
+  - "New [`kube_open_cost`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_open_cost) module for Kubernetes cost analysis"
+  - "Many new PgBouncer configuration inputs in [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
+changes:
+  - type: addition
+    summary: >-
+      Updates [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) with many new
+      variables for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: New PgBouncer configuration variables
+  - type: addition
+    summary: >-
+      Adds support for `path_prefix` to
+      [`kube_vault_proxy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy).
+    impacts:
+      - type: iac-module
+        component: kube_vault_proxy
+        summary: New path_prefix input support
+  - type: addition
+    summary: >-
+      Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
+      allow for approximately $50/month in cost savings in exchange for reducing availability from 99.995% to 99.9%.
+      This is useful for less critical clusters (e.g., `development`).
+  - type: addition
+    summary: >-
+      Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
+      to the [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) module.
+    impacts:
+      - type: iac-module
+        component: aws_account
+        summary: New Spot Data Feed integration
+  - type: addition
+    summary: >-
+      Adds the [`kube_open_cost`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_open_cost) module
+      for calculating the cost of workloads running on Kubernetes.
+    impacts:
+      - type: iac-module
+        component: kube_open_cost
+        summary: New module for Kubernetes cost analysis
+  - type: fix
+    summary: >-
+      Addressed issue in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) where NAT nodes
+      wouldn't restart if NAT setup failed with an exit code other than `1`.
+    impacts:
+      - type: iac-module
+        component: aws_vpc
+        summary: Fix for NAT node restart on non-1 exit codes
+  - type: fix
+    summary: >-
+      Increased the memory floor of the Authentik server in
+      [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) to avoid OOM issues.
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Increased memory floor to prevent OOM errors
+  - type: fix
+    summary: >-
+      Correctly applies pod labels in
+      [`kube_aws_lb_controller`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+    impacts:
+      - type: iac-module
+        component: kube_aws_lb_controller
+        summary: Fix for incorrect pod label application
+  - type: fix
+    summary: >-
+      Removes node preferences defaults from
+      [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility)
+      that were preventing efficient node deprovisioning.
+    impacts:
+      - type: iac-module
+        component: kube_workload_utility
+        summary: Remove defaults blocking node deprovisioning
+  - type: fix
+    summary: >-
+      Fixes incorrect SCIM property mapping in
+      [`authentik_aws_sso`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
+    impacts:
+      - type: iac-module
+        component: authentik_aws_sso
+        summary: Fix for incorrect SCIM property mapping

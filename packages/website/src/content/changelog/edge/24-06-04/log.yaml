@@ -1,0 +1,65 @@
+# Changelog entry for edge release 24-06-04.
+# Migrated from edge.24-06-04.mdx.
+summary: "Upgrades to devenv 1.0, improves Redis sentinel configuration, significantly speeds up devenv rebuilds on macOS, and fixes several issues with Karpenter autoscaling and ExternalDNS."
+highlights:
+  - "Upgraded to devenv 1.0 — `.env` values can no longer be referenced directly inside `.nix` files"
+  - "macOS devenv rebuilds now 10-15x faster (from 10+ minutes down to ~45 seconds)"
+  - "Fixed Karpenter autoscaling issue when `extra_tags` was provided"
+changes:
+  - type: breaking_change
+    summary: >-
+      Upgraded to devenv 1.0. As a part of this upgrade, `.env` file values can no longer be referenced directly
+      inside `.nix` files.
+  - type: addition
+    summary: >-
+      Updated [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) to automatically
+      limit client buffer size to prevent OOM issues when processing very bursty traffic.
+    impacts:
+      - type: iac-module
+        component: kube_redis_sentinel
+        summary: "Auto-limit client buffer size to prevent OOM issues"
+  - type: addition
+    summary: >-
+      Added `pf-update` command that runs all the repository scaffolding commands at once.
+  - type: fix
+    summary: >-
+      Addressed an issue that caused updates to the local devenv to take at least 10 minutes to rebuild on macOS.
+      Rebuilds should now be 10-15x faster, but will still take about 45 seconds at minimum.
+  - type: fix
+    summary: >-
+      Added missing defaults for `PF_ENVIRONMENTS_DIR` and `PF_IAC_DIR`.
+  - type: fix
+    summary: >-
+      Resolves an issue where devenv warnings could not be resolved during the initial bootstrapping guide.
+  - type: fix
+    summary: >-
+      Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced
+      with `.` for both keys and values for both Kubernetes labels and AWS tags.
+  - type: fix
+    summary: >-
+      Fixed core components that were using all Kubernetes labels for `labelSelector` matching rules, which
+      prevented Karpenter from autoscaling when `extra_tags` was provided. This previously manifested as
+      `spec.requirements: Too many: #: must have at most 30 items`.
+    references:
+      - type: issue-report
+        summary: "Karpenter autoscaling broken when extra_tags provided"
+        link: https://github.com/Panfactum/stack/issues/42
+      - type: issue-report
+        summary: "Too many label selectors preventing Karpenter scaling"
+        link: https://github.com/Panfactum/stack/issues/46
+  - type: fix
+    summary: >-
+      Added extra constraints to [`kube_external_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
+      to prevent it from querying zones it isn't managing.
+    impacts:
+      - type: iac-module
+        component: kube_external_dns
+        summary: "Added constraints to prevent querying unmanaged zones"
+  - type: fix
+    summary: >-
+      Prevented [`kube_external_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) from
+      excluding parent domains of included domains.
+    impacts:
+      - type: iac-module
+        component: kube_external_dns
+        summary: "Fixed exclusion of parent domains of included domains"

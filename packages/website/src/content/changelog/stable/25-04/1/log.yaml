@@ -1,0 +1,15 @@
+# Changelog entry for stable release 25-04.1.
+# Migrated from stable.25-04.1.mdx.
+summary: "Fixes the default value for min_node_cpu of kube_karpenter_node_pools to prevent errors."
+highlights:
+  - "Fixed `min_node_cpu` default in `kube_karpenter_node_pools` to prevent deployment errors"
+changes:
+  - type: fix
+    summary: >-
+      Fixes the default value for `min_node_cpu` of
+      [`kube_karpenter_node_pools`](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+      so that an error no longer occurs.
+    impacts:
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: Fixed incorrect default value for min_node_cpu

@@ -24,6 +24,13 @@ case "$FILE_PATH" in
     { shellcheck "$FILE_PATH" >"$TMPDIR/shellcheck" 2>&1 || echo "shellcheck" >>"$TMPDIR/failed"; } &
   fi
   ;;
+*.yaml)
+  if [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/ ]]; then
+    { ds-validate-changelog "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+  elif [[ "$REL_PATH" == "packages/infrastructure/metadata.yaml" ]]; then
+    { ds-validate-iac-metadata "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+  fi
+  ;;
 esac
 
 wait
@@ -41,6 +48,10 @@ while read -r tool; do
     ;;
   shellcheck)
     ERRORS+="$(cat "$TMPDIR/shellcheck")"$'\n'
+    ;;
+  changelog-validate)
+    ERRORS+="changelog-validate: validation errors found in $FILE_PATH"$'\n'
+    ERRORS+="$(cat "$TMPDIR/changelog-validate")"$'\n'
     ;;
   esac
 done <"$TMPDIR/failed"

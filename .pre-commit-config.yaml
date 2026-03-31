@@ -91,6 +91,24 @@ repos:
         description: "Runs linting for the CLI code"
         fail_fast: true
 
+      - id: validate-changelog-schema
+        name: Validate Changelog Schema
+        entry: ds-validate-changelog
+        language: system
+        files: ^packages/website/src/content/changelog/.*/log\.yaml$
+        pass_filenames: true
+        description: "Validates changelog log.yaml files against the JSON schema"
+        fail_fast: true
+
+      - id: validate-metadata-schema
+        name: Validate Metadata Schema
+        entry: ds-validate-iac-metadata
+        language: system
+        files: ^packages/infrastructure/metadata\.yaml$
+        pass_filenames: true
+        description: "Validates metadata.yaml against the JSON schema"
+        fail_fast: true
+
       - id: generate-tf-reference
         name: Generate Terraform Reference
         entry: precommit-generate-tf-reference

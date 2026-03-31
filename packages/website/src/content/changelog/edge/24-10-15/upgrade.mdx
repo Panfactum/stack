@@ -1,0 +1,65 @@
+{/* Upgrade instructions for edge release 24-10-15. */}
+{/* Covers the Panfactum provider integration and module simplification changes. */}
+
+## Panfactum Provider Integration
+
+This release integrates the new [Panfactum provider](https://registry.terraform.io/providers/Panfactum/pf/latest)
+and removes the need to pass many different variables through the module tree.
+
+Additionally, [OpenTofu has been upgraded to v1.8](https://opentofu.org/blog/opentofu-1-8-0/) which now supports
+variables in module `source` fields. Two new inputs are now passed to every module by default: `pf_module_source`
+and `pf_module_ref`.
+
+**Before:**
+```hcl
+module "namespace" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+
+  namespace = "example"
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+```
+
+**After:**
+```hcl
+module "namespace" {
+  source = "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
+
+  namespace = "example"
+}
+```
+
+### Removed Module Inputs
+
+Terragrunt no longer passes the following inputs to modules by default (they are now accessed via the Panfactum provider):
+
+- `pf_stack_version`
+- `pf_stack_commit`
+- `environment`
+- `region`
+- `pf_root_module`
+- `is_local`
+
+### Removed Tooling
+
+The templating system and `pf-update-iac` have been removed as they are no longer necessary.
+
+For more information, see the [updated first-party IaC development documentation.](/docs/edge/guides/iac/first-party-modules#writing-modules)
+
+## `kube_ingress` Changes
+
+[`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) has two breaking changes:
+
+1. `rewrite_rules` on `ingress_configs` has been replaced with a top-level `redirect_rules` variable that supports
+   pattern matching against the full URL and specifies permanent vs temporary redirects.
+
+2. `domains` can no longer be specified on individual `ingress_configs`. It is now a top-level variable.

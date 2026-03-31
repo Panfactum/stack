@@ -1,0 +1,26 @@
+{/* Upgrade instructions for edge release 24-08-12. */}
+{/* Covers the panfactum.yaml repository variables migration. */}
+
+## Migrate Repository Variables to `panfactum.yaml`
+
+[Repository variables](/docs/edge/reference/configuration/repo-variables) must now be defined in a `panfactum.yaml`
+file at the root of your repository instead of in your `devenv.nix`.
+
+Variable names are no longer prefixed with `PF_` and are now lowercase.
+
+**Example migration:**
+
+Before (in `devenv.nix`):
+```nix
+env.PF_REPO_NAME = "my-repo";
+env.PF_REPO_URL = "https://github.com/my-org/my-repo";
+```
+
+After (in `panfactum.yaml` at repo root):
+```yaml
+repo_name: my-repo
+repo_url: https://github.com/my-org/my-repo
+```
+
+This change makes it easier to reference these values outside of local development contexts such as CI pipelines
+where `devenv.nix` isn't loaded.

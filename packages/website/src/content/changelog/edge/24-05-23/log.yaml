@@ -1,0 +1,31 @@
+# Changelog entry for edge release 24-05-23.
+# Migrated from edge.24-05-23.mdx.
+summary: "Adds the Reflector module for cross-namespace synchronization, introduces PostgreSQL shutdown timeout configuration, and fixes graceful shutdown issues in PostgreSQL clusters."
+highlights:
+  - "New [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for cross-namespace ConfigMap/Secret synchronization"
+  - "New `pg_shutdown_timeout` input for [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
+  - "Fixed graceful shutdown for PostgreSQL clusters on spot instances"
+changes:
+  - type: addition
+    summary: >-
+      New [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for deploying
+      the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
+      namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
+      the module as a part of the foundational Stack.
+  - type: addition
+    summary: >-
+      `pg_shutdown_timeout` variable added to [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      to control how long the postgres instances will wait for active connections to close before shutting down.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: "New pg_shutdown_timeout variable added"
+  - type: fix
+    summary: >-
+      Fixed an issue where simultaneous, graceful shutdown of all postgres nodes in a
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      would cause unnecessary downtime when the primary was running on a spot instance.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: "Fixed graceful shutdown causing unnecessary downtime on spot instances"

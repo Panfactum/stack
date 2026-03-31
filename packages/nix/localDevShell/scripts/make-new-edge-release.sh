@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Script is used to cut a new version of the docs
+# Script is used to cut a new edge release of the docs and changelog.
 WEBSITE_DIR="$REPO_ROOT/packages/website"
 DOCS_DIR="$WEBSITE_DIR/src/content/docs"
 CHANGELOG_DIR="$WEBSITE_DIR/src/content/changelog"
@@ -31,38 +31,27 @@ find "$DOCS_DIR/edge" -type f -exec sed -i -E "s|([\"'(])/docs/main|\1/docs/edge
 # Search and replace __PANFACTUM_VERSION_MAIN__ with __PANFACTUM_VERSION_EDGE__ in all files
 find "$DOCS_DIR/edge" -type f -exec sed -i -E "s|__PANFACTUM_VERSION_MAIN__|__PANFACTUM_VERSION_EDGE__|g" {} \;
 
-# Get the new version tag
+# Get the new version tag and derive the edge directory name (strip "edge." prefix)
 VERSION_TAG="edge.$(date +'%y-%m-%d')"
+EDGE_DATE="${VERSION_TAG#edge.}"
+EDGE_ENTRY_DIR="$CHANGELOG_DIR/edge/$EDGE_DATE"
 
 # Update the version tag in constants
 jq --arg tag "$VERSION_TAG" '.versions.edge.ref = "\($tag)"' "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
-# Copy the unreleased changelog to the new version if it exists
-if [ -f "$CHANGELOG_DIR/unreleased.mdx" ]; then
-  cp "$CHANGELOG_DIR/unreleased.mdx" "$CHANGELOG_DIR/$VERSION_TAG.mdx"
+# Create the new edge entry directory and copy main/log.yaml into it
+mkdir -p "$EDGE_ENTRY_DIR"
+cp "$CHANGELOG_DIR/main/log.yaml" "$EDGE_ENTRY_DIR/log.yaml"
+
+# If main/upgrade.mdx exists, move it to the new edge entry directory
+if [ -f "$CHANGELOG_DIR/main/upgrade.mdx" ]; then
+  mv "$CHANGELOG_DIR/main/upgrade.mdx" "$EDGE_ENTRY_DIR/upgrade.mdx"
 fi
 
-# Create a new template unreleased.mdx file
-cat >"$CHANGELOG_DIR/unreleased.mdx" <<'EOF'
----
-summary: 
----
-
-import ChangelogEntry from "./ChangelogEntry.astro"
-
-<ChangelogEntry>
-  <Fragment slot="breaking-changes">
-  </Fragment>
-
-  <Fragment slot="changes">
-  </Fragment>
-
-  <Fragment slot="additions">
-  </Fragment>
-
-  <Fragment slot="fixes">
-  </Fragment>
-</ChangelogEntry>
+# Reset main/log.yaml to a clean template for the next release cycle
+cat >"$CHANGELOG_DIR/main/log.yaml" <<'EOF'
+summary: ""
+changes: []
 EOF
 
 # Commit the changes and create the tag

@@ -1,0 +1,65 @@
+# Changelog entry for edge release 24-10-21.
+# Migrated from edge.24-10-21.mdx.
+summary: "Improves Karpenter node size management with instance type anti-affinity and maximum size limits, fixes EBS volume mount performance, and addresses issues with Cilium memory limits and Ingress NGINX on large CPU nodes."
+highlights:
+  - "`instance_type_spread_required` renamed to `instance_type_anti_affinity_required` in all submodules"
+  - "New `max_node_memory_mb` and `max_node_cpu` limits in `kube_karpenter_node_pools` (defaults: 64GB/32 CPUs)"
+  - "Fixed slow EBS PV mount times — fix applies to new PVs only"
+changes:
+  - type: breaking_change
+    summary: >-
+      In all Panfactum submodules, `instance_type_spread_required` has been renamed to
+      `instance_type_anti_affinity_required` as TopologySpreadConstraints were replaced with AntiAffinity rules
+      to work around [a Karpenter issue](https://github.com/kubernetes-sigs/karpenter/issues/1762).
+  - type: breaking_change
+    summary: >-
+      Two new variables for
+      [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools),
+      `max_node_memory_mb` and `max_node_cpu`, limit the maximum size of provisionable nodes. Default limits are 64GB
+      of memory and 32 CPUs. Adjust these inputs if you require larger nodes.
+    impacts:
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: Added max_node_memory_mb and max_node_cpu limits (64GB/32 CPUs default)
+  - type: fix
+    summary: >-
+      Prevents Karpenter from scheduling on bare metal instances, which have caused observed issues.
+    impacts:
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: Bare metal instances excluded from provisioning
+  - type: fix
+    summary: >-
+      Removes memory limits on the Cilium node agent in
+      [`kube_cilium`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) as they could cause
+      Cilium to fail on larger node sizes where memory requirements scale proportionally.
+    references:
+      - type: issue-report
+        summary: "Cilium memory limits cause failures on larger nodes"
+        link: https://github.com/Panfactum/stack/issues/227
+    impacts:
+      - type: iac-module
+        component: kube_cilium
+        summary: Removed memory limits on node agent to prevent failures on large nodes
+  - type: fix
+    summary: >-
+      Upgrades
+      [`kube_ingress_nginx`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_nginx_ingress) so
+      it can run on nodes with a large number of CPU cores.
+    references:
+      - type: issue-report
+        summary: "Ingress NGINX fails on high-CPU-count nodes"
+        link: https://github.com/Panfactum/stack/issues/227
+    impacts:
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: Fixed compatibility with high-CPU-count nodes
+  - type: fix
+    summary: >-
+      EBS-backed PVs with many large files now mount nearly instantly by adding the recommended remediation for
+      a Bottlerocket OS issue. Note: this fix only applies to new PVs. For existing PVs, manually add
+      `context="system_u:object_r:local_t:s0"` to the PV's `spec.mountOptions`.
+    impacts:
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: Fixed slow mount times for PVs with many large files

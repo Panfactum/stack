@@ -1,4 +1,4 @@
-import { NODE_ENV, ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME } from "astro:env/client"
+import { ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME } from "astro:env/client"
 
 import { CONSTANTS } from "./versions";
 
@@ -19,7 +19,6 @@ export interface VersionOption {
 
 export const DOCS_VERSIONS: VersionOption[] = Object.entries(CONSTANTS.versions)
   .map(([_, { label, slug }]) => ({ label, slug }))
-  .filter((opt) => NODE_ENV === "development" || opt.slug !== "main")
 
 export function algoliaEnv() {
   return {

@@ -1,0 +1,86 @@
+# Changelog entry for edge release 24-12-19.
+# Migrated from edge.24-12-19.mdx.
+summary: "Introduces SLA Target Levels for cost-to-availability tradeoffs, adds advanced path rewriting capabilities for ingress and CDN modules, improves support for private ECR repositories, and fixes several Redis and environment variable issues."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "New `sla_target` Terragrunt variable replaces `enhanced_ha_enabled` — controls cost-to-availability tradeoff"
+  - "Provider version updated: `pf` 0.0.5→0.0.7"
+  - "New arbitrary path rewriting support in `kube_ingress`, `kube_aws_cdn`, `aws_cdn`, and `aws_s3_public_website`"
+  - "`wf_dockerfile_build` now supports private ECR base images"
+changes:
+  - type: breaking_change
+    summary: >-
+      Introduces [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels). The
+      `enhanced_ha_enabled` input has been removed from all modules. The previous default behavior
+      (`enhanced_ha_enabled = true`) is equivalent to `sla_target = 3` (the new default).
+  - type: breaking_change
+    summary: >-
+      `pf` provider version upgraded from 0.0.5 to 0.0.7. Update this in first-party IaC.
+  - type: addition
+    summary: >-
+      Adds support for arbitrary path rewriting in
+      [`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
+      [`kube_aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
+      [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn), and
+      [`aws_s3_public_website`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website).
+    impacts:
+      - type: iac-module
+        component: kube_ingress
+        summary: Adds support for arbitrary path rewriting rules
+      - type: iac-module
+        component: kube_aws_cdn
+        summary: Adds support for arbitrary path rewriting rules
+      - type: iac-module
+        component: aws_cdn
+        summary: Adds support for arbitrary path rewriting rules
+      - type: iac-module
+        component: aws_s3_public_website
+        summary: Adds support for arbitrary path rewriting rules
+  - type: addition
+    summary: >-
+      [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+      now supports sourcing base images from private ECR repositories.
+    impacts:
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: Supports sourcing base images from private ECR repositories
+  - type: addition
+    summary: >-
+      Adds `not_found_path` to
+      [`aws_s3_public_website`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website)
+      for specifying the asset to load when no object exists at the requested path.
+    impacts:
+      - type: iac-module
+        component: aws_s3_public_website
+        summary: Adds not_found_path input for custom 404 asset handling
+  - type: addition
+    summary: >-
+      Adds `custom_error_responses` to
+      [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn)
+      to overwrite error responses from the upstream origin.
+    impacts:
+      - type: iac-module
+        component: aws_cdn
+        summary: Adds custom_error_responses to override upstream error responses
+  - type: fix
+    summary: >-
+      Addressed conflicting PDB issue with
+      [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+      that prevented vertical autoscaling from working.
+    impacts:
+      - type: iac-module
+        component: kube_redis_sentinel
+        summary: Fixes conflicting PDB that prevented vertical autoscaling
+  - type: fix
+    summary: >-
+      Standard Panfactum environment variables for Kubernetes workloads are now injected before user-defined
+      environment variables to make them available for use in dependent variables, and will no longer override
+      user-defined variables.
+  - type: fix
+    summary: >-
+      Fixed CRD auto-upgrade and incorrect AWS permissions in
+      [`kube_aws_lb_controller`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+    impacts:
+      - type: iac-module
+        component: kube_aws_lb_controller
+        summary: Fixes CRD auto-upgrade and incorrect AWS permissions

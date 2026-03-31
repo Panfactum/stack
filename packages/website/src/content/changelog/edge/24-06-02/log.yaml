@@ -1,0 +1,92 @@
+# Changelog entry for edge release 24-06-02.
+# Migrated from edge.24-06-02.mdx.
+summary: "Replaces EKS CoreDNS with a custom module, adds monitoring stack with Prometheus and Grafana, introduces Argo Workflow engine, and makes significant improvements to cluster resource utilization and stability."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "EKS CoreDNS addon replaced by [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) — manual migration required"
+  - "New monitoring stack with Prometheus, Thanos, and Grafana via [`kube_monitoring`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring) (Alpha)"
+  - "New Argo Workflow engine via [`kube_argo`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) (Alpha)"
+  - "New [`kube_vault_proxy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy) to add SSO to web assets without integrated SSO"
+  - "`pgbouncer_read_only_enabled` now defaults to `false` — breaking change for read-only pooler users"
+changes:
+  - type: breaking_change
+    summary: >-
+      The EKS CoreDNS addon has been removed and replaced with the
+      [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+      module in order to provide better guarantees about DNS behavior. See upgrade instructions for migration steps.
+    impacts:
+      - type: iac-module
+        component: kube_core_dns
+        summary: "New module replacing EKS CoreDNS addon"
+  - type: breaking_change
+    summary: >-
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has two
+      new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`),
+      which enable the `r` and `rw` poolers, respectively. This is a breaking change as `pgbouncer_read_only_enabled`
+      now defaults to `false`.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: "New pgbouncer_read_only_enabled and pgbouncer_read_write_enabled flags"
+  - type: breaking_change
+    summary: >-
+      Label selectors in [`kube_pod`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod) have been
+      stabilized but require a one-time manual deletion of already-deployed Deployments (e.g., `bastion/bastion`)
+      before re-applying.
+    impacts:
+      - type: iac-module
+        component: kube_pod
+        summary: "Stabilized label selectors requiring one-time Deployment deletion"
+  - type: addition
+    summary: >-
+      (Alpha) Added a monitoring stack [`kube_monitoring`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring)
+      which includes HA Prometheus, Prometheus Operator, Thanos metrics storage on S3, Node Exporter,
+      kube-state-metrics, Alertmanager, and Grafana with 20+ custom dashboards.
+    impacts:
+      - type: iac-module
+        component: kube_monitoring
+        summary: "New module with Prometheus, Thanos, and Grafana monitoring stack"
+  - type: addition
+    summary: >-
+      (Alpha) Added the Argo Workflow engine to the stack via the
+      [`kube_argo`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) module.
+    impacts:
+      - type: iac-module
+        component: kube_argo
+        summary: "New module providing Argo Workflow engine"
+  - type: addition
+    summary: >-
+      New module [`kube_vault_proxy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy)
+      that can be used to add SSO to web assets that do not have integrated SSO.
+    impacts:
+      - type: iac-module
+        component: kube_vault_proxy
+        summary: "New module for adding SSO to web assets"
+  - type: addition
+    summary: >-
+      [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) has a
+      new flag, `lfu_cache_enabled`, to configure automatic LFU-based eviction under memory pressure.
+    impacts:
+      - type: iac-module
+        component: kube_redis_sentinel
+        summary: "New lfu_cache_enabled flag for LFU-based eviction"
+  - type: improvement
+    summary: >-
+      Added the standard Restricted Reader role to Vault instances and updated
+      [`vault_auth_oidc`](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to take
+      `restricted_reader_groups`.
+    impacts:
+      - type: iac-module
+        component: vault_auth_oidc
+        summary: "New restricted_reader_groups input added"
+  - type: improvement
+    summary: >-
+      Reduced controller node costs by ~40% by recommending `controller_node_count = 1` and
+      `controller_node_instance_types = ["t3a.medium"]` after bootstrapping.
+  - type: improvement
+    summary: >-
+      Added scheduling constraints to prevent critical workloads from scheduling all pods on the same instance type.
+  - type: fix
+    summary: >-
+      PVCs for postgres instances were inadvertently created with duplicated entries for accessModes.
+      This has been fixed (existing PVCs are unaffected as they are immutable).

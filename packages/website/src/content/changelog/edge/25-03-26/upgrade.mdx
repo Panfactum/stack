@@ -1,0 +1,27 @@
+{/* Upgrade instructions for edge release 25-03-26. */}
+{/* Covers the burstable/spot separation and PostgreSQL backup directory changes. */}
+
+## Update `burstable_nodes_enabled` Usage
+
+Across all Panfactum modules, `burstable_nodes_enabled` no longer automatically adds a spot instance toleration.
+If you want [spot instances](https://aws.amazon.com/ec2/spot/), you must now explicitly set `spot_nodes_enabled = true`
+as well.
+
+Review any modules where you previously set `burstable_nodes_enabled = true` and add `spot_nodes_enabled = true`
+if spot instances are also desired.
+
+## Set `pg_backup_directory` to Preserve Backup History
+
+The backup directory for
+[`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) is now explicitly
+specified by `pg_backup_directory` instead of being randomly generated.
+
+**This release will automatically restart your backup history unless you explicitly set `pg_backup_directory`
+to the `recovery_directory` output value from the previous release.**
+
+To preserve your existing backup history:
+1. Retrieve the current `recovery_directory` output from your `kube_pg_cluster` deployment.
+2. Set `pg_backup_directory` to that value in your Terragrunt inputs before applying this release.
+3. Ensure backups are working correctly after upgrading.
+
+Note: The `recovery_directory` output has been renamed to `backup_directory`.

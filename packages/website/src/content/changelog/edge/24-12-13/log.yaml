@@ -1,0 +1,71 @@
+# Changelog entry for edge release 24-12-13.
+# Migrated from edge.24-12-13.mdx.
+summary: "Replaces kube_rbac with EKS access entries, consolidates priority classes into kube_policies, upgrades Authentik to 2024.8.2, and fixes Argo Workflows permissions and NATS connection issues."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "`kube_rbac` deprecated — destroy it after upgrading `aws_eks` which now uses EKS access entries"
+  - "`kube_priority_classes` consolidated into `kube_policies` — destroy it before upgrading `kube_policies`"
+  - "Provider versions updated: `pf` 0.0.4→0.0.5, `authentik` 2024.6.1→2024.8.4"
+  - "`eks_cluster_name` removed from most submodules — now resolved dynamically"
+changes:
+  - type: breaking_change
+    summary: >-
+      The `kube_rbac` module has been deprecated and replaced by EKS access entries in
+      [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks). Destroy any deployments of
+      `kube_rbac` after upgrading `aws_eks`. See upgrade instructions.
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Now manages RBAC via EKS access entries instead of kube_rbac
+  - type: breaking_change
+    summary: >-
+      The `kube_priority_classes` module has been consolidated into
+      [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies). Destroy it
+      immediately before upgrading `kube_policies`.
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: Now includes priority classes previously in kube_priority_classes
+  - type: breaking_change
+    summary: >-
+      `eks_cluster_name` is no longer an input to most submodules as it is now dynamically resolved.
+  - type: breaking_change
+    summary: >-
+      Terraform provider versions upgraded: `pf` 0.0.4→0.0.5, `authentik` 2024.6.1→2024.8.4. Update these in
+      first-party IaC.
+  - type: improvement
+    summary: >-
+      Upgrades Authentik in
+      [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+      to 2024.8.2.
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Authentik upgraded to version 2024.8.2
+  - type: fix
+    summary: >-
+      Adds correct permissions to allow users to retry specific Workflow nodes in Argo Workflows.
+    impacts:
+      - type: iac-module
+        component: kube_argo
+        summary: Fixes permissions for retrying specific Workflow nodes
+  - type: fix
+    summary: >-
+      Adds automatic NATS connection retries to Argo Events components.
+    references:
+      - type: issue-report
+        summary: "NATS connection failures in Argo Events"
+        link: https://github.com/Panfactum/stack/issues/309
+    impacts:
+      - type: iac-module
+        component: kube_argo_event_bus
+        summary: Adds automatic NATS connection retries
+  - type: fix
+    summary: >-
+      Addresses issue in
+      [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+      where the `git_ref` could not be a branch name.
+    impacts:
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: Fixes git_ref to accept branch names

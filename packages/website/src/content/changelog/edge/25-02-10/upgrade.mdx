@@ -1,0 +1,10 @@
+{/* Upgrade instructions for edge release 25-02-10. */}
+{/* Covers the kube_vpa upgrade ordering requirement. */}
+
+## Apply `kube_vpa` First
+
+This update requires that you apply
+[`kube_vpa`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) before any other module.
+
+If you run into any issues, set `vpa_enabled` to `false` before applying the module, then re-enable it once
+the module is successfully deployed.

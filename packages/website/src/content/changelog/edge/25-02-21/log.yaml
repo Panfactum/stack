@@ -1,0 +1,49 @@
+# Changelog entry for edge release 25-02-21.
+# Migrated from edge.25-02-21.mdx.
+summary: "Adds private git repository support for first-party modules, enables cluster-wide pod labels and annotations, improves DaemonSet update performance, and fixes CI/CD pipeline and region configuration issues."
+highlights:
+  - "First-party IaC modules now support private git repositories via `GIT_USERNAME`/`GIT_PASSWORD` env vars"
+  - "New `common_pod_labels` and `common_pod_annotations` inputs in `kube_policies` for cluster-wide pod metadata"
+  - "DaemonSet updates now take constant time (previously scaled with node count, causing timeouts)"
+changes:
+  - type: addition
+    summary: >-
+      Adds support for using a private git repository for first-party IaC modules by providing `GIT_USERNAME`
+      and `GIT_PASSWORD` environment variables. See the
+      [updated documentation.](/docs/main/guides/iac/first-party-modules#using-a-private-git-repository)
+  - type: addition
+    summary: >-
+      [`kube_policies`](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies) now takes
+      `common_pod_labels` and `common_pod_annotations` inputs to apply a standard set of labels and/or
+      annotations to all pods in the cluster.
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: New common_pod_labels and common_pod_annotations inputs for cluster-wide pod metadata
+  - type: fix
+    summary: >-
+      Addressed issue where the `.kube/.gitignore` file was not being created.
+    references:
+      - type: issue-report
+        summary: ".kube/.gitignore file not created"
+        link: https://github.com/Panfactum/stack/issues/244
+  - type: fix
+    summary: >-
+      DaemonSets in the cluster will now update in constant time. Previously update time scaled with node count,
+      leading to timeouts.
+    impacts:
+      - type: iac-module
+        component: kube_daemon_set
+        summary: Updates now complete in constant time regardless of node count
+  - type: fix
+    summary: >-
+      Resolves a bug that caused
+      [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) workflows to fail.
+    impacts:
+      - type: iac-module
+        component: wf_tf_deploy
+        summary: Fix bug causing workflow execution failures
+  - type: fix
+    summary: >-
+      Resolves a bug that caused module deployment to fail if Kubernetes settings were not configured for the region
+      even if Kubernetes was not used.

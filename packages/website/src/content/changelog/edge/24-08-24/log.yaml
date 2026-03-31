@@ -1,0 +1,30 @@
+# Changelog entry for edge release 24-08-24.
+# Migrated from edge.24-08-24.mdx.
+summary: "Improves Authentik stability by preventing deployment failures during initial creation and eliminating downtime during database failovers."
+highlights:
+  - "Fixed [`authentik_core_resources`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources) first-create deployment failure"
+  - "Authentik no longer experiences downtime during database failover events"
+changes:
+  - type: fix
+    summary: >-
+      [`authentik_core_resources`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources)
+      will no longer fail to apply and end up in an invalid state when first created.
+    references:
+      - type: issue-report
+        summary: "authentik_core_resources fails on first creation"
+        link: https://github.com/Panfactum/stack/issues/67
+    impacts:
+      - type: iac-module
+        component: authentik_core_resources
+        summary: Fixed first-create deployment failure and invalid state
+  - type: fix
+    summary: >-
+      Authentik should no longer experience any downtime during database failover events.
+    references:
+      - type: issue-report
+        summary: "Authentik downtime during database failover"
+        link: https://github.com/Panfactum/stack/issues/75
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Eliminated downtime during database failover events

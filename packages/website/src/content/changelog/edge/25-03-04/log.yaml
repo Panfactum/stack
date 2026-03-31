@@ -1,0 +1,17 @@
+# Changelog entry for edge release 25-03-04.
+# Migrated from edge.25-03-04.mdx.
+summary: "Prevents unnecessary MongoDB provider generation and fixes certificate issuers to properly use Cloudflare zones when creating TLS certificates."
+highlights:
+  - "Fixed `kube_cert_issuer` to correctly use `cloudflare_zones` input when generating certificates"
+changes:
+  - type: fix
+    summary: >-
+      The MongoDB provider is no longer generated when not utilized.
+  - type: fix
+    summary: >-
+      [`kube_cert_issuers`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers) now
+      correctly uses the `cloudflare_zones` input when generating TLS certificates.
+    impacts:
+      - type: iac-module
+        component: kube_cert_issuers
+        summary: Now correctly uses cloudflare_zones input for TLS certificates

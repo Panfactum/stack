@@ -1,0 +1,491 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "Brief one-line summary of the release, displayed in the accordion list view."
+    },
+    "skip": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, marks this release as one users should skip (e.g., a broken release). Displayed with a visual indicator in the changelog list."
+    },
+    "branch": {
+      "type": "string",
+      "description": "The git branch associated with this release (e.g., a stable release branch name)."
+    },
+    "upgrade_instructions": {
+      "type": "string",
+      "pattern": "^.+\\.mdx$",
+      "description": "Relative path to an MDX file containing detailed upgrade/migration instructions. Omit entirely if the release has no upgrade steps. This content gets its own dedicated page accessible via an \"Upgrade Instructions\" button on the entry."
+    },
+    "highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of important things to call out from this release. Displayed on the paginated changelog list page as the visible summary for each entry. Each item is inline markdown."
+    },
+    "changes": {
+      "type": "array",
+      "description": "Flat list of all changes in this release, each tagged with a type. Rendered only on the dedicated page for each release, not on the paginated list page.",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "summary"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "breaking_change",
+              "fix",
+              "improvement",
+              "addition",
+              "deprecation"
+            ],
+            "description": "The category of change."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Inline markdown describing the change. For breaking changes, should explain what changed and why, but detailed migration steps belong in upgrade_instructions."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional long-form markdown focused on recommendations the user should follow to adapt to this change. Use for actionable guidance such as configuration updates, code adjustments, or workflow changes the user should make in response. Supports full markdown syntax including headings, lists, code blocks, and links."
+          },
+          "action_items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of discrete action items the user should complete in response to this change. Each string supports full markdown syntax."
+          },
+          "references": {
+            "type": "array",
+            "description": "List of references that either explain what motivated this change (e.g., the commit, PR, or issue that prompted it) or help users respond to it (e.g., documentation on affected APIs, migration guides, or relevant configuration options).",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "summary",
+                "link"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "issue-report",
+                    "external-docs",
+                    "internal-docs"
+                  ],
+                  "description": "The kind of reference. 'commit' is a link to a specific git commit or pull request in a source repository. 'issue-report' is a link to a bug report, feature request, or discussion thread. 'external-docs' is a link to third-party documentation (e.g., Kubernetes, Terraform, Helm docs). 'internal-docs' is a link to a page on panfactum.com."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "Brief description of the reference."
+                },
+                "link": {
+                  "type": "string",
+                  "description": "URL or path to the referenced resource."
+                }
+              }
+            }
+          },
+          "impacts": {
+            "type": "array",
+            "description": "List of components affected by this change.",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "component"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "iac-module",
+                    "cli",
+                    "devshell",
+                    "configuration"
+                  ],
+                  "description": "The kind of component affected by this change."
+                },
+                "component": {
+                  "type": "string",
+                  "description": "Identifies the specific component affected. Valid values depend on type (see conditional schemas below)."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "Brief inline markdown summarizing how this component is affected by the change."
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "iac-module"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "component": {
+                        "enum": [
+                          "authentik_aws_sso",
+                          "authentik_core_resources",
+                          "authentik_github_sso",
+                          "authentik_mongodb_atlas_sso",
+                          "authentik_vault_sso",
+                          "authentik_zoho_sso",
+                          "aws_account",
+                          "aws_account_permission_binding",
+                          "aws_cdn",
+                          "aws_cloudwatch_log_group",
+                          "aws_core_permissions",
+                          "aws_delegated_zones",
+                          "aws_dns_iam_role",
+                          "aws_dns_links",
+                          "aws_dns_records",
+                          "aws_dns_zones",
+                          "aws_dnssec",
+                          "aws_ecr_public_repos",
+                          "aws_ecr_pull_through_cache",
+                          "aws_ecr_pull_through_cache_addresses",
+                          "aws_ecr_repos",
+                          "aws_eks",
+                          "aws_iam_identity_center_permissions",
+                          "aws_kms_encrypt_key",
+                          "aws_organization",
+                          "aws_registered_domains",
+                          "aws_s3_private_bucket",
+                          "aws_s3_public_website",
+                          "aws_ses_domain",
+                          "aws_vpc",
+                          "kube_airbyte",
+                          "kube_alloy",
+                          "kube_argo",
+                          "kube_argo_event_bus",
+                          "kube_argo_event_source",
+                          "kube_argo_sensor",
+                          "kube_authentik",
+                          "kube_aws_cdn",
+                          "kube_aws_creds",
+                          "kube_aws_ebs_csi",
+                          "kube_aws_lb_controller",
+                          "kube_bastion",
+                          "kube_buildkit",
+                          "kube_cert_issuers",
+                          "kube_cert_manager",
+                          "kube_certificates",
+                          "kube_cilium",
+                          "kube_cloudnative_pg",
+                          "kube_constants",
+                          "kube_core_dns",
+                          "kube_cron_job",
+                          "kube_daemon_set",
+                          "kube_deployment",
+                          "kube_descheduler",
+                          "kube_disruption_window_controller",
+                          "kube_external_dns",
+                          "kube_external_snapshotter",
+                          "kube_fledged",
+                          "kube_gha",
+                          "kube_gha_runners",
+                          "kube_grist",
+                          "kube_ingress",
+                          "kube_ingress_nginx",
+                          "kube_internal_cert",
+                          "kube_job",
+                          "kube_karpenter",
+                          "kube_karpenter_node_pools",
+                          "kube_keda",
+                          "kube_kyverno",
+                          "kube_linkerd",
+                          "kube_logging",
+                          "kube_metrics_server",
+                          "kube_monitoring",
+                          "kube_namespace",
+                          "kube_nats",
+                          "kube_nlb_common_resources",
+                          "kube_nocodb",
+                          "kube_node_image_cache",
+                          "kube_node_image_cache_controller",
+                          "kube_node_settings",
+                          "kube_open_cost",
+                          "kube_opensearch",
+                          "kube_pg_cluster",
+                          "kube_pod",
+                          "kube_policies",
+                          "kube_priority_classes",
+                          "kube_pvc_annotator",
+                          "kube_pvc_autoresizer",
+                          "kube_rbac",
+                          "kube_redis_sentinel",
+                          "kube_reflector",
+                          "kube_reloader",
+                          "kube_sa_auth_aws",
+                          "kube_sa_auth_vault",
+                          "kube_sa_auth_workflow",
+                          "kube_scheduler",
+                          "kube_secrets_csi",
+                          "kube_service",
+                          "kube_stateful_set",
+                          "kube_sync_config_map",
+                          "kube_sync_secret",
+                          "kube_trust_manager",
+                          "kube_vault",
+                          "kube_vault_proxy",
+                          "kube_velero",
+                          "kube_vpa",
+                          "kube_workload_utility",
+                          "mongodb_atlas_identity_provider",
+                          "test_kube_pg_cluster",
+                          "tf_bootstrap_resources",
+                          "vault_auth_oidc",
+                          "vault_core_resources",
+                          "wf_dockerfile_build",
+                          "wf_spec",
+                          "wf_tf_deploy"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "cli"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "component": {
+                        "enum": [
+                          "aws ecr wait-on-image",
+                          "aws profile list",
+                          "aws vpc-network-test",
+                          "buildkit build",
+                          "buildkit clear-cache",
+                          "buildkit get-address",
+                          "buildkit record-build",
+                          "buildkit scale up",
+                          "buildkit suspend",
+                          "buildkit tunnel",
+                          "cluster add",
+                          "cluster enable",
+                          "config get",
+                          "db get-creds",
+                          "db tunnel",
+                          "devshell sync",
+                          "docker credential-helper",
+                          "domain add",
+                          "domain remove",
+                          "env add",
+                          "env remove",
+                          "iac delete-locks",
+                          "iac update-module-status",
+                          "k8s velero snapshot-gc",
+                          "kube cluster-resume",
+                          "kube cluster-suspend",
+                          "kube disable-disruptions",
+                          "kube enable-disruptions",
+                          "kube get-token",
+                          "kube profile-for-context",
+                          "sso add",
+                          "tunnel",
+                          "util get-commit-hash",
+                          "util get-module-hash",
+                          "vault get-token",
+                          "welcome",
+                          "wf git-checkout",
+                          "wf sops-set-profile"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "devshell"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "component": {
+                        "enum": [
+                          "argo",
+                          "autossh",
+                          "aws",
+                          "aws-nuke",
+                          "bash",
+                          "bc",
+                          "build-panfactum-image",
+                          "buildctl",
+                          "cilium",
+                          "cmctl",
+                          "croc",
+                          "curl",
+                          "dig",
+                          "docker-credential-panfactum",
+                          "enter-shell-local",
+                          "envsubst",
+                          "fzf",
+                          "generate-all-tf-reference",
+                          "generate-tf-reference",
+                          "getopt",
+                          "git",
+                          "git-lfs",
+                          "gzip",
+                          "hcl2json",
+                          "helm",
+                          "jq",
+                          "k9s",
+                          "kube-capacity",
+                          "kubectl",
+                          "kubectl-cnpg",
+                          "kubectl-evict-pod",
+                          "kubectx",
+                          "kustomize",
+                          "kyverno",
+                          "less",
+                          "linkerd",
+                          "lint",
+                          "lint-spellcheck",
+                          "lint-website",
+                          "lsof",
+                          "make-new-edge-release",
+                          "make-new-stable-release-channel",
+                          "manifest-tool",
+                          "micro",
+                          "mktemp",
+                          "mtr",
+                          "nats",
+                          "nats-top",
+                          "nsc",
+                          "opensearch-cli",
+                          "parallel",
+                          "pf",
+                          "pf-buildkit-build",
+                          "pf-buildkit-clear-cache",
+                          "pf-buildkit-get-address",
+                          "pf-buildkit-record-build",
+                          "pf-buildkit-scale-down",
+                          "pf-buildkit-scale-up",
+                          "pf-buildkit-tunnel",
+                          "pf-buildkit-validate",
+                          "pf-db-tunnel",
+                          "pf-eks-resume",
+                          "pf-eks-suspend",
+                          "pf-get-aws-profile-for-kube-context",
+                          "pf-get-commit-hash",
+                          "pf-get-db-creds",
+                          "pf-get-kube-token",
+                          "pf-get-local-module-hash",
+                          "pf-get-open-port",
+                          "pf-get-repo-variables",
+                          "pf-get-vault-token",
+                          "pf-sops-set-profile",
+                          "pf-tf-delete-locks",
+                          "pf-tf-init",
+                          "pf-tunnel",
+                          "pf-velero-snapshot-gc",
+                          "pf-voluntary-disruptions-disable",
+                          "pf-voluntary-disruptions-enable",
+                          "pf-vpc-network-test",
+                          "pf-wf-git-checkout",
+                          "precommit-generate-tf-reference",
+                          "precommit-lint-cli",
+                          "precommit-lint-website",
+                          "precommit-terraform-docs",
+                          "precommit-terraform-fmt",
+                          "precommit-terragrunt-fmt",
+                          "precommit-typecheck-cli",
+                          "precommit-typecheck-website",
+                          "psql",
+                          "redis-cli",
+                          "rg",
+                          "rsync",
+                          "session-manager-plugin",
+                          "skopeo",
+                          "sops",
+                          "ssh",
+                          "step",
+                          "stern",
+                          "terraform-ls",
+                          "terragrunt",
+                          "tofu",
+                          "unzip",
+                          "vault",
+                          "velero",
+                          "wait-on-image",
+                          "whois",
+                          "yq",
+                          "zx"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "configuration"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "component": {
+                        "enum": [
+                          ".env",
+                          ".nats",
+                          ".terraformrc",
+                          ".terraformrc.dev",
+                          "clusters.yaml",
+                          "environment.secrets.yaml",
+                          "environment.user.yaml",
+                          "environment.yaml",
+                          "flake.nix",
+                          "global.secrets.yaml",
+                          "global.user.yaml",
+                          "global.yaml",
+                          "module.secrets.yaml",
+                          "module.user.yaml",
+                          "module.yaml",
+                          "panfactum.user.yaml",
+                          "panfactum.yaml",
+                          "region.secrets.yaml",
+                          "region.user.yaml",
+                          "region.yaml"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -24,4 +24,6 @@ export interface DocsSubsectionMetadata {
   text: string;
   path: string;
   sub?: DocsSubsectionMetadata[];
+  onUpgradePath?: boolean;
+  skip?: boolean;
 }

@@ -1,6 +1,6 @@
 import { Collapsible } from "@kobalte/core/collapsible";
 import { clsx } from "clsx";
-import { FiChevronDown } from "solid-icons/fi";
+import { FiArrowUpCircle, FiChevronDown, FiXCircle } from "solid-icons/fi";
 import { Show, type Component } from "solid-js";
 
 import SavedLink from "@/components/util/SavedLink.tsx";
@@ -14,6 +14,8 @@ interface SidebarMenuButtonProps {
   IconComponent?: Component;
   isChild?: boolean;
   saveUserLocation?: boolean; // Iff ture, the href will be replaced with the user's last visited page that is "inside" the href (e.g., '/docs' -> '/docs/a/b/c`)
+  onUpgradePath?: boolean;
+  skip?: boolean;
 }
 
 const SidebarMenuButton: Component<SidebarMenuButtonProps> = (props) => {
@@ -73,6 +75,16 @@ const SidebarMenuButton: Component<SidebarMenuButtonProps> = (props) => {
                 <span class="w-full overflow-hidden text-nowrap text-ellipsis">
                   {props.text}
                 </span>
+                <Show when={props.skip}>
+                  <span class="shrink-0 text-error-400">
+                    <FiXCircle size={14} />
+                  </span>
+                </Show>
+                <Show when={!props.skip && props.onUpgradePath}>
+                  <span class="shrink-0 text-success-400">
+                    <FiArrowUpCircle size={14} />
+                  </span>
+                </Show>
               </div>
             </button>
           </SavedLink>

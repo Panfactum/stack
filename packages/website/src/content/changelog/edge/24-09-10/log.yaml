@@ -1,0 +1,69 @@
+# Changelog entry for edge release 24-09-10.
+# Migrated from edge.24-09-10.mdx.
+summary: "Updates Karpenter CRD specification requiring manual intervention during upgrade, restructures ports configuration in workload modules, adds Kubernetes Service submodule, and fixes PostgreSQL credential access issues."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "Karpenter CRD update requires manual state manipulation — see upgrade instructions"
+  - "`ports` input moved to container-level in [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)"
+  - "New [`kube_service`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service) submodule for optimized Kubernetes Services"
+changes:
+  - type: breaking_change
+    summary: >-
+      Karpenter has updated its CRD specification which requires manual intervention during upgrade.
+      See upgrade instructions for the required state manipulation commands.
+    impacts:
+      - type: iac-module
+        component: kube_karpenter
+        summary: CRD specification updated; requires manual state manipulation
+  - type: breaking_change
+    summary: >-
+      The `ports` input on [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+      and [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been
+      moved to a container-level field rather than a top-level field to better align with the Kubernetes API.
+    impacts:
+      - type: iac-module
+        component: kube_deployment
+        summary: Ports input moved from top-level to container-level
+      - type: iac-module
+        component: kube_stateful_set
+        summary: Ports input moved from top-level to container-level
+  - type: addition
+    summary: >-
+      Adds a new submodule,
+      [`kube_service`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for defining
+      Kubernetes Services optimized for the Panfactum Stack. Also integrated into `kube_deployment` and `kube_stateful_set`
+      for automatic Service creation.
+    impacts:
+      - type: iac-module
+        component: kube_service
+        summary: New submodule for Panfactum-optimized Kubernetes Services
+      - type: iac-module
+        component: kube_deployment
+        summary: Integrated automatic Service creation via kube_service
+      - type: iac-module
+        component: kube_stateful_set
+        summary: Integrated automatic Service creation via kube_service
+  - type: addition
+    summary: >-
+      Adds `extra_storage_classes` input to the
+      [`kube_aws_ebs_csi`](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module.
+    impacts:
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: Added extra_storage_classes input for custom storage classes
+  - type: fix
+    summary: >-
+      Addressed issue in [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
+    references:
+      - type: issue-report
+        summary: "Vault-created non-superuser credentials lack non-public schema access"
+        link: https://github.com/Panfactum/stack/issues/128
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: Fixed Vault-created credentials lacking non-public schema access
+  - type: fix
+    summary: >-
+      Addressed issue where Terragrunt configuration caused version pinning for `goauthentik/authentik` and `alekc/kubectl`
+      providers to be removed during `terragrunt init -upgrade`.

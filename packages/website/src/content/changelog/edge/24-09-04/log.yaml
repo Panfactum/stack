@@ -1,0 +1,102 @@
+# Changelog entry for edge release 24-09-04.
+# Migrated from edge.24-09-04.mdx.
+summary: "Standardizes naming conventions across modules, enables core Panfactum features by default, improves node scheduling with controller taints, and fixes EBS volume detachment issues to prevent pod rescheduling delays."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "Extensive variable renames in workload submodules — `ready_check_*` → `readiness_probe_*`, `image`/`image_version` split, and more"
+  - "Core features (`spot_nodes_enabled`, `arm_nodes_enabled`, `vpa_enabled`, `panfactum_scheduler_enabled`) now enabled by default"
+  - "EKS Node Group nodes now tainted with `controller=true:NoSchedule` — add `controller_nodes_enabled` where needed"
+  - "Remove BuildKit StatefulSets before applying this release"
+changes:
+  - type: breaking_change
+    summary: >-
+      Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace
+      must be removed if [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed.
+    impacts:
+      - type: iac-module
+        component: kube_buildkit
+        summary: StatefulSets must be removed before applying this release
+  - type: breaking_change
+    summary: >-
+      Extensive variable renames across workload submodules including `kube_deployment`, `kube_stateful_set`,
+      `kube_cron_job`, `kube_pod`, `wf_spec`, and `kube_workload_utility`. See upgrade instructions for the full list.
+    impacts:
+      - type: iac-module
+        component: kube_deployment
+        summary: Multiple input variables renamed
+      - type: iac-module
+        component: kube_stateful_set
+        summary: Multiple input variables renamed
+      - type: iac-module
+        component: kube_cron_job
+        summary: Multiple input variables renamed
+      - type: iac-module
+        component: kube_pod
+        summary: Multiple input variables renamed
+      - type: iac-module
+        component: wf_spec
+        summary: Multiple input variables renamed
+      - type: iac-module
+        component: kube_workload_utility
+        summary: Multiple input variables renamed
+  - type: breaking_change
+    summary: >-
+      The `enhanced_ha_enabled` input has been replaced with more granular tuning knobs in all submodules including
+      `kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault_proxy`, `kube_argo_event_bus`, and `kube_argo_event_source`.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: Replaced enhanced_ha_enabled with granular HA controls
+      - type: iac-module
+        component: kube_redis_sentinel
+        summary: Replaced enhanced_ha_enabled with granular HA controls
+      - type: iac-module
+        component: kube_vault_proxy
+        summary: Replaced enhanced_ha_enabled with granular HA controls
+      - type: iac-module
+        component: kube_argo_event_bus
+        summary: Replaced enhanced_ha_enabled with granular HA controls
+      - type: iac-module
+        component: kube_argo_event_source
+        summary: Replaced enhanced_ha_enabled with granular HA controls
+  - type: breaking_change
+    summary: >-
+      Nodes managed by EKS Node Groups are now tainted with `controller=true:NoSchedule`. Most workload submodules
+      have a new `controller_nodes_enabled` input to allow tolerating this taint if desired.
+  - type: breaking_change
+    summary: >-
+      Several flags are now enabled by default in workload submodules: `spot_nodes_enabled`, `arm_nodes_enabled`,
+      `vpa_enabled`, `panfactum_scheduler_enabled`, and `pull_through_cache_enabled`.
+  - type: addition
+    summary: >-
+      Adds built-in default [downward-api](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/)
+      integrations in all workload submodules.
+  - type: addition
+    summary: >-
+      All mounted ConfigMaps and Secrets in workload submodules are now mounted as executable to make it easier
+      to mount scripts.
+  - type: fix
+    summary: >-
+      Updates Karpenter and EBS CSI Controller to prevent remaining edge cases where nodes were terminated
+      prior to EBS volumes being detached, which caused six-minute delays for rescheduling stateful pods.
+    impacts:
+      - type: iac-module
+        component: kube_karpenter
+        summary: Updated to prevent premature node termination before EBS detach
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: Updated to prevent premature node termination before EBS detach
+  - type: fix
+    summary: >-
+      Removes the `RemoveDuplicates` strategy in
+      [`kube_descheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
+      to allow scheduling multiple pods of the same controller on the same node when `host_anti_affinity_required`
+      is set to `false`.
+    references:
+      - type: issue-report
+        summary: "RemoveDuplicates strategy prevents flexible pod scheduling"
+        link: https://github.com/Panfactum/stack/issues/123
+    impacts:
+      - type: iac-module
+        component: kube_descheduler
+        summary: Removed RemoveDuplicates strategy for flexible pod scheduling

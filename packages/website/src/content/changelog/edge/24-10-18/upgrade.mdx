@@ -1,0 +1,58 @@
+{/* Upgrade instructions for edge release 24-10-18. */}
+{/* Covers the devenv to plain nix flakes migration. */}
+
+## Migrate from devenv to Plain Nix Flakes
+
+[devenv](https://devenv.sh/) has been removed from the Panfactum Stack in favor of plain
+[nix flakes](https://nixos.wiki/wiki/Flakes). This brings significantly improved performance on macOS (initial
+installation ~5 minutes, down from 45+) and opens the shell instantly after initial setup.
+
+### Update `flake.nix`
+
+**Before:**
+```nix
+{
+    inputs = {
+        pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+        panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
+    };
+
+    outputs = { self, panfactum, pkgs, ... } @ inputs: {
+        devShells = panfactum.lib.mkDevShells {
+            inherit pkgs;
+            modules = [ (import ./devenv.nix )];
+        };
+    };
+}
+```
+
+**After:**
+```nix
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
+  };
+
+  outputs = { panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
+      {
+        devShell = panfactum.lib.${system}.mkDevShell { };
+      }
+    );
+}
+```
+
+### Remove devenv Files
+
+1. Remove your `devenv.nix` file.
+2. Remove the `.devenv` directory.
+
+For alternatives to devenv functionality using the new devShell paradigm, see
+[our documentation.](/docs/main/guides/development-shell/customizing)
+
+### Renamed Command
+
+`pf-get-version-hash` has been renamed to `pf-get-commit-hash`. It now takes named rather than positional arguments.
+Update any scripts or CI configurations that use this command.

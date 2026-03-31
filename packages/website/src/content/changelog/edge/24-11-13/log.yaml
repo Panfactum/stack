@@ -1,0 +1,114 @@
+# Changelog entry for edge release 24-11-13.
+# Migrated from edge.24-11-13.mdx.
+summary: "Introduces Kyverno policy engine as a core component, replaces Fledged and Reflector with Kyverno-based alternatives, improves PostgreSQL autoscaling capabilities, and enhances pod scheduling with automatic ARM64 and spot instance tolerations."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "Kyverno policy engine added as a core Panfactum component — **must install before other modules work**"
+  - "`kube_fledged` and `kube_reflector` deprecated — must remove before upgrading to next version"
+  - "`pg_memory_mb` and `pg_cpu_millicores` replaced with min/max VPA inputs in `kube_pg_cluster`"
+  - "All pods now automatically tolerate arm64 and spot node taints cluster-wide"
+changes:
+  - type: breaking_change
+    summary: >-
+      The [Kyverno](https://kyverno.io/docs/introduction/) policy engine has been added as a core part of the
+      Panfactum Stack. **You must install Kyverno** by following the
+      [new bootstrapping guide section.](/docs/edge/guides/bootstrapping/policy-controller)
+      Many modules now depend on Kyverno and will not function without it.
+    impacts:
+      - type: iac-module
+        component: kube_kyverno
+        summary: New core module that must be installed before other modules
+  - type: breaking_change
+    summary: >-
+      `kube_fledged` has been replaced by a new node-local image caching mechanism built on top of Kyverno.
+      `kube_fledged` must be removed before upgrading to the next version. Use
+      [`kube_node_image_cache`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache)
+      as the replacement.
+    impacts:
+      - type: iac-module
+        component: kube_kyverno
+        summary: Now provides node-local image caching replacing kube_fledged
+  - type: breaking_change
+    summary: >-
+      `kube_reflector` has been replaced with Kyverno-based syncing. Must be removed before the next version.
+      Use [`kube_sync_config_map`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map)
+      and [`kube_sync_secret`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret) instead.
+    impacts:
+      - type: iac-module
+        component: kube_sync_config_map
+        summary: New Kyverno-based replacement for kube_reflector ConfigMap syncing
+      - type: iac-module
+        component: kube_sync_secret
+        summary: New Kyverno-based replacement for kube_reflector Secret syncing
+      - type: iac-module
+        component: kube_kyverno
+        summary: Now handles resource syncing replacing kube_reflector
+  - type: breaking_change
+    summary: >-
+      Vertical pod autoscaling now works for PostgreSQL clusters in
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+      `pg_memory_mb` and `pg_cpu_millicores` have been removed and replaced with min/max VPA configuration inputs.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: Replaced pg_memory_mb and pg_cpu_millicores with VPA min/max inputs
+  - type: breaking_change
+    summary: >-
+      All pods in Panfactum clusters now automatically tolerate `arm64` and `spot` node taints. To disable for a
+      specific pod, add `panfactum.com/arm64-enabled = "false"` or `panfactum.com/spot-enabled = "false"` labels.
+    impacts:
+      - type: iac-module
+        component: kube_kyverno
+        summary: Adds cluster-wide arm64 and spot toleration policies
+  - type: addition
+    summary: >-
+      Adds a new submodule,
+      [`kube_daemon_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set), for creating
+      Kubernetes DaemonSets.
+    impacts:
+      - type: iac-module
+        component: kube_daemon_set
+        summary: New submodule for creating Kubernetes DaemonSets
+  - type: improvement
+    summary: >-
+      Upgraded the CNPG operator to 1.24, adding additional stability improvements during failover events.
+      The old `kube_pg_cluster` submodule is no longer compatible — use the new version.
+    impacts:
+      - type: iac-module
+        component: kube_cloudnative_pg
+        summary: Upgraded CNPG operator to 1.24 with failover stability fixes
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: Updated for compatibility with CNPG operator 1.24
+  - type: improvement
+    summary: >-
+      Upgraded the default PostgreSQL version to 16.4.
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: Default PostgreSQL version upgraded to 16.4
+  - type: fix
+    summary: >-
+      Added Kyverno rule that forces Linkerd sidecars to terminate prior to `terminationGracePeriodSeconds`.
+    references:
+      - type: issue-report
+        summary: "Linkerd sidecar not terminating before grace period"
+        link: https://github.com/Panfactum/stack/issues/164
+      - type: issue-report
+        summary: "Pod termination blocked by Linkerd sidecar"
+        link: https://github.com/Panfactum/stack/issues/148
+    impacts:
+      - type: iac-module
+        component: kube_kyverno
+        summary: Added policy for Linkerd sidecar termination ordering
+      - type: iac-module
+        component: kube_linkerd
+        summary: Sidecars now terminate before terminationGracePeriodSeconds
+  - type: fix
+    summary: >-
+      Adjusted Cilium deployment to address edge cases where Cilium would not successfully launch new nodes
+      after a complete zonal or cluster outage.
+    impacts:
+      - type: iac-module
+        component: kube_cilium
+        summary: Fixed node launch failures after zonal or cluster outages

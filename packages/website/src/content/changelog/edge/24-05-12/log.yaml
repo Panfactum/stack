@@ -1,0 +1,9 @@
+# Changelog entry for edge release 24-05-12.
+# Migrated from edge.24-05-12.mdx.
+summary: "The initial edge release of the Panfactum stack."
+highlights:
+  - "The initial edge release of the Panfactum stack!"
+changes:
+  - type: addition
+    summary: >-
+      The initial edge release of the Panfactum stack!

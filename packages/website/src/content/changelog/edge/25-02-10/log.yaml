@@ -1,0 +1,56 @@
+# Changelog entry for edge release 25-02-10.
+# Migrated from edge.25-02-10.mdx.
+summary: "Adds wait options to speed up deployments, fixes VPA CRD management issues, ensures bastion high availability with two replicas, and resolves policy deployment conflicts during bootstrapping."
+upgrade_instructions: upgrade.mdx
+highlights:
+  - "Apply `kube_vpa` before any other module — required ordering for this release"
+  - "New `wait` input on Kubernetes modules — set to `false` to skip readiness checks for faster deploys"
+  - "`kube_bastion` now always uses two replicas for immediate tunnel reconnection"
+changes:
+  - type: breaking_change
+    summary: >-
+      This update requires that you apply
+      [`kube_vpa`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) before any other module.
+      See upgrade instructions.
+    impacts:
+      - type: iac-module
+        component: kube_vpa
+        summary: Must be applied before all other modules in this release
+  - type: addition
+    summary: >-
+      Most Kubernetes modules now have a `wait` input that can be set to `false` to skip waiting for resources
+      to reach a ready state. This significantly improves deployment speed but disables automatic rollback.
+  - type: fix
+    summary: >-
+      [`kube_bastion`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) now always uses
+      two replicas to ensure tunnels can immediately reconnect if one bastion gets restarted.
+    references:
+      - type: issue-report
+        summary: "kube_bastion needs two replicas for tunnel reconnection"
+        link: https://github.com/Panfactum/stack/issues/216
+    impacts:
+      - type: iac-module
+        component: kube_bastion
+        summary: Now uses two replicas for immediate tunnel reconnection
+  - type: fix
+    summary: >-
+      VPA CRDs included in
+      [`kube_vpa`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) were not appropriately
+      updated in the previous release due to a Helm CRD management bug. This release resolves the issue.
+    impacts:
+      - type: iac-module
+        component: kube_vpa
+        summary: Fix VPA CRDs not being updated due to Helm CRD management bug
+  - type: fix
+    summary: >-
+      Fixes an issue that prevented
+      [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) from being
+      deployed during bootstrapping due to a non-existent `node-image-cache` namespace.
+    references:
+      - type: issue-report
+        summary: "kube_policies deployment fails due to missing namespace"
+        link: https://github.com/Panfactum/stack/issues/207
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: Fix deployment failure during bootstrapping from missing namespace

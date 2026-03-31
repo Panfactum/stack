@@ -1,0 +1,45 @@
+{/* Upgrade instructions for edge release 24-09-12. */}
+{/* Covers the Secrets CSI removal, credential output renames, and pf-providers-enable rename. */}
+
+## Remove `kube_secrets_csi`
+
+[`kube_secrets_csi`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) has been deprecated
+and should be removed from your clusters. It was primarily used for managing dynamically generated Vault secrets such as
+database credentials. We have switched to a new paradigm using the
+[Vault Secrets Operator](https://github.com/hashicorp/vault-secrets-operator).
+
+To remove it:
+1. Apply this release.
+2. Remove any dependency blocks to `kube_secrets_csi` in your `terragrunt.hcl` files.
+3. Run `terragrunt destroy` on the `kube_secrets_csi` module.
+
+This saves approximately 150MB of memory per node and improves security by removing pods that needed elevated
+host-level permissions.
+
+## Rename Credential Outputs
+
+[`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
+[`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) output renames:
+
+| Old Name | New Name |
+|----------|----------|
+| `superuser_username` | `root_username` |
+| `superuser_password` | `root_password` |
+
+## Rename `pf-providers-enable` to `pf-tf-init`
+
+`pf-providers-enable` has been renamed to `pf-tf-init`. It now has expanded functionality:
+- Influences every module in the directory tree where it is run (not just CWD).
+- Runs `init -upgrade` on every module to update provider versions and download submodules.
+- Significantly improved runtime speed.
+
+Update the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) steps to use `pf-tf-init` when
+upgrading the Panfactum version in an environment.
+
+## Remove Manual Provider Configuration
+
+You no longer need to manually enable providers via the `providers` array in each `module.yaml`. Terragrunt now
+automatically detects which providers to include at runtime.
+
+The `providers` input no longer has any functionality and the `providers` array can be removed from all `module.yaml`
+files. If this leaves a `module.yaml` empty, the entire file can be deleted.
