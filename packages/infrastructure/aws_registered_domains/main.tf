@@ -4,12 +4,12 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "5.80.0"
+      version               = "6.38.0"
       configuration_aliases = [aws.global]
     }
     time = {
       source  = "hashicorp/time"
-      version = "0.10.0"
+      version = "0.13.1"
     }
     pf = {
       source  = "panfactum/pf"

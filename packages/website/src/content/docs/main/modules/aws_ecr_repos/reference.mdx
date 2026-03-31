@@ -20,6 +20,7 @@ map(object({
       tag_pattern = string
       days        = number # days since pushed that the image will be removed
     })), [])
+    lifecycle_policy_json       = optional(string, null)     # Custom lifecycle policy JSON. When provided, overrides expire_all_images and expiration_rules
     additional_push_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have push access to the repository
     additional_pull_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have pull access to the repository
   }))
@@ -51,7 +52,7 @@ Description: n/a
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.38.0/docs) (6.38.0)
 
 - [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 

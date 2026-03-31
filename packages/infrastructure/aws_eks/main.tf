@@ -4,12 +4,12 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "5.80.0"
+      version               = "6.38.0"
       configuration_aliases = [aws.secondary]
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.6"
+      version = "4.2.1"
     }
     pf = {
       source  = "panfactum/pf"
@@ -456,20 +456,20 @@ resource "aws_launch_template" "controller" {
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
-      delete_on_termination = "true"
+      delete_on_termination = true
       volume_size           = 25
       volume_type           = "gp3"
-      encrypted             = "true"
+      encrypted             = true
     }
   }
 
   block_device_mappings {
     device_name = "/dev/xvdb"
     ebs {
-      delete_on_termination = "true"
+      delete_on_termination = true
       volume_size           = var.node_ebs_volume_size_gb
       volume_type           = "gp3"
-      encrypted             = "true"
+      encrypted             = true
     }
   }
 

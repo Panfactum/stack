@@ -6,7 +6,7 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.34.0"
+      version = "2.35.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -14,7 +14,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "0.10.0"
+      version = "0.13.1"
     }
     pf = {
       source  = "panfactum/pf"

@@ -2,23 +2,23 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.34.0"
+      version = "2.35.0"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.6"
+      version = "4.2.1"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "5.80.0"
+      version = "6.38.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.3"
+      version = "3.8.1"
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "4.5.0"
+      version = "4.8.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
