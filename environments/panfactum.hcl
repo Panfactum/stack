@@ -464,7 +464,7 @@ remote_state {
 ### Terragrunt Configuration
 ################################################################
 
-terraform_version_constraint = "~> 1.8"
+terraform_version_constraint = "~> 1.9"
 terraform_binary             = "tofu"
 
 retryable_errors = local.is_ci ? [".*"] : [
