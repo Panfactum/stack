@@ -61,7 +61,7 @@ variable "panfactum_scheduler_enabled" {
 variable "buildkit_image_version" {
   description = "The version of BuildKit to use"
   type        = string
-  default     = "v0.18.1-rootless"
+  default     = "v0.28.1-rootless"
 }
 
 variable "vpa_enabled" {
