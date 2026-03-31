@@ -14,7 +14,7 @@ BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
 #############################################
 ## General Metadata
 #############################################
-export CI="false"
+unset CI
 export PF_DEVSHELL=1
 
 #############################################
