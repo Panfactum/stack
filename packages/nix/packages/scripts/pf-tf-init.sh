@@ -17,18 +17,19 @@ usage() {
 # and (b) upgrade their provider versions
 ####################################################################
 
-terragrunt run-all \
-  init -upgrade \
-  --terragrunt-ignore-external-dependencies
+terragrunt init --all \
+  -upgrade \
+  --queue-exclude-external
 
 ####################################################################
 # Step 2: Update the platform locks to include all platforms
 ####################################################################
 
-terragrunt run-all \
+terragrunt run --all \
+  --queue-exclude-external \
+  -- \
   providers lock \
   -platform=linux_amd64 \
   -platform=linux_arm64 \
   -platform=darwin_amd64 \
-  -platform=darwin_arm64 \
-  --terragrunt-ignore-external-dependencies
+  -platform=darwin_arm64

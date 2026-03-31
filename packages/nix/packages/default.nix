@@ -7,7 +7,6 @@
   redisPkgs,
   postgresPkgs,
   vaultPkgs,
-  linkerdPkgs,
   kyvernoPkgs,
   natsPkgs,
   opensearchPkgs,
@@ -23,9 +22,9 @@ let
     export GIT_LFS_SKIP_SMUDGE=1
     for arg in "$@"
     do
-        if [[ "$arg" == "run-all" ]]; then
-            export TERRAGRUNT_PROVIDER_CACHE=1
-            export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
+        if [[ "$arg" == "--all" ]]; then
+            export TG_PROVIDER_CACHE=1
+            export TG_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
         fi
     done
 
@@ -66,7 +65,7 @@ with pkgs;
   kubeUtilsPkgs.kubernetes-helm # for working with Helm charts
   kubeUtilsPkgs.kube-capacity # for visualizing resource utilization in the cluster
   kubeUtilsPkgs.kubectl-evict-pod # for initiating pod evictions
-  linkerdPkgs.linkerd_edge # utility for working with the service mesh
+  (pkgs.callPackage ./linkerd-edge.nix { }) # utility for working with the service mesh
   cilium # for managing the cilium CNI
   kubeUtilsPkgs.argo # utility for working with argo workflows
   kubeUtilsPkgs.cmctl # for working with cert-manager

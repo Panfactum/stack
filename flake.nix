@@ -4,15 +4,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/ac055f38c798b0d87695240c7b761b82fc7e5bc2";
     flake-utils.url = "github:numtide/flake-utils";
-    kubeUtilsPkgsSrc.url = "github:NixOS/nixpkgs/0cb2fd7c59fed0cd82ef858cbcbdb552b9a33465";
-    awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/f27ec3a00d953eaf96c5ecdcd64bc30c44a20315";
+    kubeUtilsPkgsSrc.url = "github:NixOS/nixpkgs/c58ada2eda15d0576e9a2ad74bd8f2318509a40f";
+    awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/75690239f08f885ca9b0267580101f60d10fbe62";
     tfUtilsPkgsSrc.url = "github:NixOS/nixpkgs/3385ca0cd7e14c1a1eb80401fe011705ff012323";
     buildkitPkgsSrc.url = "github:NixOS/nixpkgs/b40629efe5d6ec48dd1efba650c797ddbd39ace0";
     redisPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     postgresPkgsSrc.url = "github:NixOS/nixpkgs/16e046229f3b4f53257973a5532bcbb72457d2f2";
     vaultPkgsSrc.url = "github:NixOS/nixpkgs/325eb628b89b9a8183256f62d017bfb499b19bd9";
-    linkerdPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
-    kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
+    kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/0aeb7297ae709defc8cce9078e00b96b45d72efa";
     natsPkgsSrc.url = "github:NixOS/nixpkgs/34a626458d686f1b58139620a8b2793e9e123bba";
     opensearchPkgsSrc.url = "github:NixOS/nixpkgs/67d2b8200c828903b36a6dd0fb952fe424aa0606";
     bunPkgsSrc.url = "github:NixOS/nixpkgs/573c650e8a14b2faa0041645ab18aed7e60f0c9a";
@@ -36,7 +35,6 @@
       redisPkgsSrc,
       postgresPkgsSrc,
       vaultPkgsSrc,
-      linkerdPkgsSrc,
       kyvernoPkgsSrc,
       opensearchPkgsSrc,
       natsPkgsSrc,
@@ -94,12 +92,6 @@
             allowUnfree = true;
           };
         };
-        linkerdPkgs = import linkerdPkgsSrc {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        };
         kyvernoPkgs = import kyvernoPkgsSrc {
           inherit system;
           config = {
@@ -137,7 +129,6 @@
               redisPkgs
               postgresPkgs
               vaultPkgs
-              linkerdPkgs
               kyvernoPkgs
               natsPkgs
               opensearchPkgs

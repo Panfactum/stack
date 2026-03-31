@@ -48,8 +48,8 @@ pf wf sops-set-profile --directory . --profile ci
 #####################################################
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 cd "$TF_APPLY_DIR"
-terragrunt run-all apply \
-  --terragrunt-ignore-external-dependencies \
+terragrunt apply --all \
+  --queue-exclude-external \
   --terragrunt-download-dir /tmp/.terragrunt \
   --terragrunt-non-interactive \
   --terragrunt-fetch-dependency-output-from-state \

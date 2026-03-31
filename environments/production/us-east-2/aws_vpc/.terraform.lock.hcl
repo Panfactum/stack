@@ -53,6 +53,9 @@ provider "registry.opentofu.org/hashicorp/random" {
   constraints = "3.8.1"
   hashes = [
     "h1:EHn3jsqOKhWjbg0X+psk0Ww96yz3N7ASqEKKuFvDFwo=",
+    "h1:LsYuJLZcYl1RiH7Hd3w90Ra5+k5cNqfdRUQXItkTI8Y=",
+    "h1:nz02g0rqNAJ+KO1Lq5Krfp3qJCuhA4bJuV8jtUw99ss=",
+    "h1:tZP70yQDl6mKnTsDtx6tS6GReVb1lgb7WnlIIneXsHY=",
     "zh:25c458c7c676f15705e872202dad7dcd0982e4a48e7ea1800afa5fc64e77f4c8",
     "zh:2edeaf6f1b20435b2f81855ad98a2e70956d473be9e52a5fdf57ccd0098ba476",
     "zh:44becb9d5f75d55e36dfed0c5beabaf4c92e0a2bc61a3814d698271c646d48e7",

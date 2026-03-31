@@ -1,5 +1,5 @@
 // This file provides utilities for initializing and applying all Terragrunt modules
-// It combines terragrunt run-all init and apply operations in sequence
+// It combines terragrunt init --all and apply --all operations in sequence
 
 import { terragruntApplyAll } from "./terragruntApplyAll";
 import { terragruntInitAll } from "./terragruntInitAll";
@@ -24,8 +24,8 @@ interface ITerragruntInitAndApplyAllInput {
  * @remarks
  * This convenience function combines the initialization and deployment
  * steps for all modules in a region. It's equivalent to running:
- * 1. `terragrunt run-all init -upgrade`
- * 2. `terragrunt run-all apply -auto-approve`
+ * 1. `terragrunt init --all -upgrade`
+ * 2. `terragrunt apply --all -auto-approve`
  * 
  * The function ensures modules are properly initialized before deployment,
  * preventing common errors related to missing providers or backends.

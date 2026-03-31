@@ -11,7 +11,7 @@ In particular, generated Workflows will perform the following actions:
 * Automatically configure authentication for the following providers: AWS, Kubernetes, Vault
 * Update SOPS-encrypted files to use the CI's AWS profile
 * Configure the [Terragrunt provider cache](https://terragrunt.gruntwork.io/docs/features/provider-cache/).
-* Run `terragrunt run-all apply` on the directory indicated by `tf_apply_dir`.
+* Run `terragrunt apply --all` on the directory indicated by `tf_apply_dir`.
 * Automatically retry several times in the case of transient failures and/or rate limits.
 * Unlock the state backend in case of a runtime failure.
 
@@ -20,7 +20,7 @@ In particular, generated Workflows will perform the following actions:
 | Parameter      | Default            | Order | Description                                                                                                               |
 | -------------- | ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------- |
 | `git_ref`      | `var.git_ref`      | 0     | The [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking out the `var.repo`. |
-| `tf_apply_dir` | `var.tf_apply_dir` | 1     | A relative path from the root of the `var.repo` in which `terragrunt run-all apply` will be run.                          |
+| `tf_apply_dir` | `var.tf_apply_dir` | 1     | A relative path from the root of the `var.repo` in which `terragrunt apply --all` will be run.                          |
 
 ## Usage
 
@@ -46,7 +46,7 @@ module "tf_deploy" {
 The critical configuration values are:
 
 * `repo`: The repository containing your configuration-as-code (i.e., `terragrunt.hcl` files)
-* `tf_apply_dir`: A relative path from the root of the repo in which `terragrunt run-all apply` will be run. The generated
+* `tf_apply_dir`: A relative path from the root of the repo in which `terragrunt apply --all` will be run. The generated
   Workflow will apply all modules in this subdirectory. Can and should be overwritten when creating individual Workflows.
 * `git_ref`: The default [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking
   out the `repo`. Can and should be overwritten when creating individual Workflows.

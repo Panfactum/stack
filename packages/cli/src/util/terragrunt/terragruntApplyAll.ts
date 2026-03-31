@@ -22,10 +22,10 @@ interface ITerragruntApplyAllInput {
 }
 
 /**
- * Applies all Terragrunt modules within a region using run-all command
- * 
+ * Applies all Terragrunt modules within a region using --all flag
+ *
  * @remarks
- * This function executes `terragrunt run-all apply` to deploy all modules
+ * This function executes `terragrunt apply --all` to deploy all modules
  * in a specific region. It's designed for bulk operations where multiple
  * modules need to be deployed or updated together.
  * 
@@ -77,8 +77,8 @@ export async function terragruntApplyAll(input: ITerragruntApplyAllInput): Promi
   await execute({
     command: [
       "terragrunt",
-      "run-all",
       "apply",
+      "--all",
       "-auto-approve",
       "--terragrunt-non-interactive",
     ],

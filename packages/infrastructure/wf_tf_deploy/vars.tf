@@ -22,7 +22,7 @@ variable "repo" {
 }
 
 variable "tf_apply_dir" {
-  description = "The default directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root."
+  description = "The default directory where 'terragrunt apply --all' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root."
   type        = string
   validation {
     condition     = !startswith(var.tf_apply_dir, "/") && !startswith(var.tf_apply_dir, ".")

@@ -5,7 +5,10 @@ provider "registry.opentofu.org/alekc/kubectl" {
   version     = "2.1.6"
   constraints = "2.1.6"
   hashes = [
+    "h1:5ExY2bTYxSzu6Dty9xjLE9rHW6Evt+lhqNQYVoanokA=",
     "h1:DBigTuT3jCtrEWfsSL6sM75GCF7qNu8HzJU1j+T1dro=",
+    "h1:ZvaSs+5x8+yA/ZxwGo/BTBqPqUEeB8Kn0aZOlOw2X5c=",
+    "h1:w1cut54Qvv/uHNkxSMe8VlOBf927vm7vZ+NrTssMg1Y=",
     "zh:21260fa4777df8da6ffafaf8fd42d778de3edbf67a4bd86f71f7297fbf22c050",
     "zh:2fa26b05104d126ccaf2fb817b81d04bb768c66f162f4693e2c701bf84901cd8",
     "zh:31af2454eb1ca6c0685a8c400fca23923a703aef23bed27eaeeb4828b8f8f120",
@@ -47,7 +50,10 @@ provider "registry.opentofu.org/hashicorp/helm" {
   version     = "3.1.1"
   constraints = "3.1.1"
   hashes = [
+    "h1:0EBPFRAzAnwXiyr7LVBoCtSwaoMDHEe4dbQvS4rNFuk=",
     "h1:8SOQHxpTUK0rYBsCoxqrvDRc75KZl9hBt1m7QLrs+QM=",
+    "h1:I0TSwVK/TX2Ib2sVKa6d4P0YVl3lnmAqgAHuJBaKpqw=",
+    "h1:brfn5YltnzexsfqpWKw+5gS9U/m77e0An3hZQamlEZk=",
     "zh:09b38905e234c2e0b185332819614224660050b7e4b25e9e858b593ab01adafe",
     "zh:09fed1b19b8bcded169fb76304e06c5b1216d5ceba92948c23384f34ddbf1fac",
     "zh:2e0af220f3fe79048d82f6de91752ba9929c215819d3de4f82ccb473bcd9e5df",
@@ -86,6 +92,9 @@ provider "registry.opentofu.org/hashicorp/random" {
   constraints = "3.8.1"
   hashes = [
     "h1:EHn3jsqOKhWjbg0X+psk0Ww96yz3N7ASqEKKuFvDFwo=",
+    "h1:LsYuJLZcYl1RiH7Hd3w90Ra5+k5cNqfdRUQXItkTI8Y=",
+    "h1:nz02g0rqNAJ+KO1Lq5Krfp3qJCuhA4bJuV8jtUw99ss=",
+    "h1:tZP70yQDl6mKnTsDtx6tS6GReVb1lgb7WnlIIneXsHY=",
     "zh:25c458c7c676f15705e872202dad7dcd0982e4a48e7ea1800afa5fc64e77f4c8",
     "zh:2edeaf6f1b20435b2f81855ad98a2e70956d473be9e52a5fdf57ccd0098ba476",
     "zh:44becb9d5f75d55e36dfed0c5beabaf4c92e0a2bc61a3814d698271c646d48e7",
@@ -102,7 +111,10 @@ provider "registry.opentofu.org/hashicorp/time" {
   version     = "0.13.1"
   constraints = "0.13.1"
   hashes = [
+    "h1:3X1jTAlLJV6G9AylC+BgX7WrKFcZYHqA+Z4JwB+v7as=",
+    "h1:3gEXjZJTiotJAofPFswhJYnlSM8+O4OFxC8L6DrVmdY=",
     "h1:ueilLAoXlZPufdJYuPFeqznwP39ZwLsRcQtqow+NUiI=",
+    "h1:wuRUDd/TqWU++kXU+jf8v0xVhAF+KqcSD/sjY/Y+1Yw=",
     "zh:10f32af8b544a039f19abd546e345d056a55cb7bdd69d5bbd7322cbc86883848",
     "zh:35dd5beb34a9f73de8d0fed332814c69acae69397c9c065ce63ccd8315442bef",
     "zh:56545d1dd5f2e7262e0c0c124264974229ec9cc234d0d7a0e36e14b869590f4a",

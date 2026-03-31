@@ -132,7 +132,7 @@ module "tf_deploy_workflow" {
     },
     {
       name        = "tf_apply_dir"
-      description = "Which directory to run 'terragrunt run-all apply' in inside the ${var.repo} repository"
+      description = "Which directory to run 'terragrunt apply --all' in inside the ${var.repo} repository"
       default     = var.tf_apply_dir
     }
   ]

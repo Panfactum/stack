@@ -16,7 +16,7 @@ output "oidc_discovery_url" {
 
 output "oidc_redirect_uris" {
   description = "The redirect URIs to use for the auth/oidc auth method in Vault"
-  value       = local.redirect_uris
+  value       = [for uri in local.redirect_uris : uri.url]
 }
 
 output "oidc_issuer" {

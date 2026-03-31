@@ -2,7 +2,7 @@ terraform {
   required_providers {
     authentik = {
       source  = "goauthentik/authentik"
-      version = "2024.8.4"
+      version = "2024.10.2"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -30,9 +30,18 @@ terraform {
 
 locals {
   redirect_uris = [
-    "https://${var.vault_domain}/ui/vault/auth/oidc/oidc/callback",
-    "https://${var.vault_domain}/oidc/callback",
-    "http://localhost:8250/oidc/callback"
+    {
+      matching_mode = "strict"
+      url           = "https://${var.vault_domain}/ui/vault/auth/oidc/oidc/callback"
+    },
+    {
+      matching_mode = "strict"
+      url           = "https://${var.vault_domain}/oidc/callback"
+    },
+    {
+      matching_mode = "strict"
+      url           = "http://localhost:8250/oidc/callback"
+    }
   ]
 }
 
@@ -104,6 +113,10 @@ data "authentik_flow" "default-authorization-flow" {
   slug = "default-provider-authorization-implicit-consent"
 }
 
+data "authentik_flow" "default-invalidation-flow" {
+  slug = "default-provider-invalidation-flow"
+}
+
 data "authentik_property_mapping_provider_scope" "profile" {
   managed = "goauthentik.io/providers/oauth2/scope-profile"
 }
@@ -118,11 +131,12 @@ data "authentik_property_mapping_provider_scope" "openid" {
 
 
 resource "authentik_provider_oauth2" "vault" {
-  name               = var.vault_name
-  authorization_flow = data.authentik_flow.default-authorization-flow.id
-  client_id          = random_id.client_id.hex
-  signing_key        = authentik_certificate_key_pair.signing.id
-  redirect_uris      = local.redirect_uris
+  name                  = var.vault_name
+  authorization_flow    = data.authentik_flow.default-authorization-flow.id
+  invalidation_flow     = data.authentik_flow.default-invalidation-flow.id
+  client_id             = random_id.client_id.hex
+  signing_key           = authentik_certificate_key_pair.signing.id
+  allowed_redirect_uris = local.redirect_uris
   property_mappings = sort([
     data.authentik_property_mapping_provider_scope.profile.id,
     data.authentik_property_mapping_provider_scope.email.id,

@@ -21,3 +21,4 @@ node_modules/
 tmp
 .claude/tasks
 *.user.yaml
+result

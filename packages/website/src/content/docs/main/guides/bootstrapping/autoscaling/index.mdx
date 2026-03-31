@@ -202,7 +202,7 @@ Let's deploy it now:
    This will turn on the VPA for all modules in this cluster in the next apply.
 
 6. Navigate up to the directory containing all your modules (i.e., the region directory). Run
-   `terragrunt run-all apply` to re-apply all the modules in the region at once. Note that this might cause your Vault proxy
+   `terragrunt apply --all` to re-apply all the modules in the region at once. Note that this might cause your Vault proxy
    to disconnect as pods are restarted and thus result in an incomplete apply. Simply reconnect the proxy and try the command again.
 
 7. After all these modules are updated, you should now see many VPA resources in k9s (`:vpa`). After a minute or two, they
