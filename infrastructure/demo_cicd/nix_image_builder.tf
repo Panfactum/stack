@@ -288,7 +288,7 @@ module "nix_image_builder_workflow" {
         containers = [
           {
             name  = "init-store"
-            image = "${module.pull_through.docker_hub_registry}/nixos/nix"
+            image = "${module.pull_through.docker_hub_registry}/nixos/nix:2.34.4"
             command = [
               "/scripts/init-store.sh"
             ]
@@ -311,7 +311,7 @@ module "nix_image_builder_workflow" {
           },
           {
             name  = "main"
-            image = "${module.pull_through.docker_hub_registry}/nixos/nix"
+            image = "${module.pull_through.docker_hub_registry}/nixos/nix:2.34.4"
             command = [
               "/scripts/build-and-push.sh"
             ]

@@ -4,4 +4,4 @@ set -eo pipefail
 
 nix-env -iA nixpkgs.rsync
 
-rsync -a --ignore-existing /nix/ /nix2/
+rsync -a --update /nix/ /nix2/
