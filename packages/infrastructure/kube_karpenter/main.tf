@@ -179,10 +179,10 @@ data "aws_iam_policy_document" "karpenter" {
       "ec2:CreateFleet"
     ]
     resources = [
-      "arn:aws:ec2:${data.aws_region.main.name}::image/*",
-      "arn:aws:ec2:${data.aws_region.main.name}::snapshot/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:security-group/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:subnet/*"
+      "arn:aws:ec2:${data.aws_region.main.region}::image/*",
+      "arn:aws:ec2:${data.aws_region.main.region}::snapshot/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:security-group/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:subnet/*"
     ]
   }
   statement {
@@ -193,7 +193,7 @@ data "aws_iam_policy_document" "karpenter" {
       "ec2:CreateFleet"
     ]
     resources = [
-      "arn:aws:ec2:${data.aws_region.main.name}:*:launch-template/*"
+      "arn:aws:ec2:${data.aws_region.main.region}:*:launch-template/*"
     ]
     condition {
       test     = "StringEquals"
@@ -217,12 +217,12 @@ data "aws_iam_policy_document" "karpenter" {
       "ec2:CreateLaunchTemplate"
     ]
     resources = [
-      "arn:aws:ec2:${data.aws_region.main.name}:*:fleet/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:instance/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:volume/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:network-interface/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:launch-template/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:spot-instances-request/*"
+      "arn:aws:ec2:${data.aws_region.main.region}:*:fleet/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:instance/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:volume/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:network-interface/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:launch-template/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:spot-instances-request/*"
     ]
     condition {
       test     = "StringEquals"
@@ -249,12 +249,12 @@ data "aws_iam_policy_document" "karpenter" {
       "ec2:CreateTags"
     ]
     resources = [
-      "arn:aws:ec2:${data.aws_region.main.name}:*:fleet/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:instance/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:volume/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:network-interface/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:launch-template/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:spot-instances-request/*"
+      "arn:aws:ec2:${data.aws_region.main.region}:*:fleet/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:instance/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:volume/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:network-interface/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:launch-template/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:spot-instances-request/*"
     ]
 
     condition {
@@ -290,8 +290,8 @@ data "aws_iam_policy_document" "karpenter" {
       "ec2:CreateTags"
     ]
     resources = [
-      "arn:aws:ec2:${data.aws_region.main.name}:*:instance/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:spot-instances-request/*"
+      "arn:aws:ec2:${data.aws_region.main.region}:*:instance/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:spot-instances-request/*"
     ]
     condition {
       test     = "StringEquals"
@@ -327,8 +327,8 @@ data "aws_iam_policy_document" "karpenter" {
       "ec2:DeleteLaunchTemplate"
     ]
     resources = [
-      "arn:aws:ec2:${data.aws_region.main.name}:*:instance/*",
-      "arn:aws:ec2:${data.aws_region.main.name}:*:launch-template/*"
+      "arn:aws:ec2:${data.aws_region.main.region}:*:instance/*",
+      "arn:aws:ec2:${data.aws_region.main.region}:*:launch-template/*"
     ]
     condition {
       test     = "StringEquals"
@@ -359,7 +359,7 @@ data "aws_iam_policy_document" "karpenter" {
     resources = ["*"]
     condition {
       test     = "StringEquals"
-      values   = [data.aws_region.main.name]
+      values   = [data.aws_region.main.region]
       variable = "aws:RequestedRegion"
     }
   }
@@ -368,7 +368,7 @@ data "aws_iam_policy_document" "karpenter" {
     sid       = "AllowSSMReadActions"
     effect    = "Allow"
     actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:${data.aws_region.main.name}::parameter/aws/service/*"]
+    resources = ["arn:aws:ssm:${data.aws_region.main.region}::parameter/aws/service/*"]
   }
 
   statement {
@@ -427,7 +427,7 @@ data "aws_iam_policy_document" "karpenter" {
     }
     condition {
       test     = "StringEquals"
-      values   = [data.aws_region.main.name]
+      values   = [data.aws_region.main.region]
       variable = "aws:RequestTag/topology.kubernetes.io/region"
     }
   }
@@ -451,7 +451,7 @@ data "aws_iam_policy_document" "karpenter" {
     }
     condition {
       test     = "StringEquals"
-      values   = [data.aws_region.main.name]
+      values   = [data.aws_region.main.region]
       variable = "aws:RequestTag/topology.kubernetes.io/region"
     }
     condition {
@@ -461,7 +461,7 @@ data "aws_iam_policy_document" "karpenter" {
     }
     condition {
       test     = "StringEquals"
-      values   = [data.aws_region.main.name]
+      values   = [data.aws_region.main.region]
       variable = "aws:ResourceTag/topology.kubernetes.io/region"
     }
     condition {
@@ -492,7 +492,7 @@ data "aws_iam_policy_document" "karpenter" {
     }
     condition {
       test     = "StringEquals"
-      values   = [data.aws_region.main.name]
+      values   = [data.aws_region.main.region]
       variable = "aws:ResourceTag/topology.kubernetes.io/region"
     }
     condition {
@@ -518,7 +518,7 @@ data "aws_iam_policy_document" "karpenter" {
     actions = [
       "eks:DescribeCluster",
     ]
-    resources = ["arn:aws:eks:${data.aws_region.main.name}:${data.aws_caller_identity.main.account_id}:cluster/${local.cluster_name}"]
+    resources = ["arn:aws:eks:${data.aws_region.main.region}:${data.aws_caller_identity.main.account_id}:cluster/${local.cluster_name}"]
   }
 }
 

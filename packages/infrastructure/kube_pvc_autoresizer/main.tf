@@ -128,7 +128,7 @@ resource "helm_release" "pvc_autoresizer" {
     })
   ]
 
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize/kustomize.sh"
     args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }

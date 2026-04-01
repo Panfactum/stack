@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "image_builder" {
       "ecr:UploadLayerPart"
     ]
     resources = [
-      "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/${var.image_repo}"
+      "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/${var.image_repo}"
     ]
   }
   dynamic "statement" {
@@ -162,13 +162,13 @@ module "image_builder_workflow" {
     GIT_USERNAME           = var.git_username
     CODE_REPO              = var.code_repo
     IMAGE_REPO             = var.image_repo
-    IMAGE_REGISTRY         = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com"
-    IMAGE_REGION           = data.aws_region.current.name
+    IMAGE_REGISTRY         = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.region}.amazonaws.com"
+    IMAGE_REGION           = data.aws_region.current.region
     PUSH_IMAGE             = tostring(var.push_image_enabled)
     BUILD_CONTEXT          = var.build_context
     DOCKERFILE_PATH        = var.dockerfile_path
     BUILDKIT_BUCKET_NAME   = data.kubernetes_config_map.buildkit_bucket.data.bucket
-    BUILDKIT_BUCKET_REGION = data.aws_region.current.name
+    BUILDKIT_BUCKET_REGION = data.aws_region.current.region
     SECRET_ARGS            = join(" ", [for id, val in var.secrets : "--secret id=${id},env=${id}"])
     BUILD_ARGS             = join(" ", [for arg, val in var.args : "--opt build-arg:${arg}=${val}"])
     IMAGE_TAG_PREFIX       = var.image_tag_prefix

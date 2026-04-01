@@ -247,10 +247,10 @@ locals {
     // Remote state bucket config
     "node.attr.remote_store.repository.s3.type"            = "s3"
     "node.attr.remote_store.repository.s3.settings.bucket" = module.s3_bucket.bucket_name
-    "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.name
+    "node.attr.remote_store.repository.s3.settings.region" = data.aws_region.region.region
     //"s3.client.default.identity_token_file"                = "/usr/share/opensearch/config/aws-web-identity-token-file" // This MUST be set for IRSA to be enabled
-    "s3.client.default.region"   = data.aws_region.region.name
-    "s3.client.default.endpoint" = "s3.${data.aws_region.region.name}.amazonaws.com"
+    "s3.client.default.region"   = data.aws_region.region.region
+    "s3.client.default.endpoint" = "s3.${data.aws_region.region.region}.amazonaws.com"
 
     // Segment Replication
     // See https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/segment-replication/index/

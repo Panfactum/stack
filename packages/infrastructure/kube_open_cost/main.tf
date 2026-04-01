@@ -363,7 +363,7 @@ resource "kubernetes_cluster_role_binding" "network_cost" {
 # We consider s3 IPs to be "in-zone" b/c we use the
 # s3 endpoint
 data "aws_ip_ranges" "s3" {
-  regions  = [data.aws_region.current.name]
+  regions  = [data.aws_region.current.region]
   services = ["s3"]
 }
 

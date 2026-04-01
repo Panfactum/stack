@@ -34,7 +34,7 @@ locals {
       dns01 = {
         route53 = {
           hostedZoneID = config.zone_id
-          region       = data.aws_region.main.name
+          region       = data.aws_region.main.region
           role         = config.record_manager_role_arn
         }
       }

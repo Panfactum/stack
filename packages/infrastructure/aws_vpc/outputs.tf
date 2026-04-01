@@ -6,7 +6,7 @@ output "subnet_info" {
 output "test_config" {
   description = "Configuration for the pf-vpc-network-test command"
   value = {
-    region = data.aws_region.region.name,
+    region = data.aws_region.region.region,
     subnets = [for name, config in local.private_subnets : {
       subnet = name,
       asg    = aws_autoscaling_group.test[name].name

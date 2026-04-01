@@ -203,7 +203,7 @@ module "nocodb" {
     NC_ADMIN_EMAIL             = var.superuser_email
     NC_JWT_EXPIRES_IN          = "${var.auth_expires_hours}h"
     NC_S3_BUCKET_NAME          = module.s3_bucket.bucket_name
-    NC_S3_REGION               = data.aws_region.current.name
+    NC_S3_REGION               = data.aws_region.current.region
     NC_ATTACHMENT_FIELD_SIZE   = tostring(var.attachment_max_size_mb * 1024 * 1024)
     NC_MAX_ATTACHMENTS_ALLOWED = tostring(var.attachment_max_allowed)
     NC_SECURE_ATTACHMENTS      = tostring(var.secure_attachments_enabled)

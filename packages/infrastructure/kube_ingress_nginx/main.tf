@@ -397,7 +397,7 @@ resource "helm_release" "nginx_ingress" {
 
   // The helm chart doesn't allow enabling plugins for some reason
   // so we manually inject the "plugins" field into the configmap
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
 

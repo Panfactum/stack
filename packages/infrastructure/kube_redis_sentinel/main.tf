@@ -351,7 +351,7 @@ resource "helm_release" "redis" {
   ]
 
   # Required due to this issue: https://github.com/bitnami/charts/issues/27479
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize/kustomize.sh"
     args = [
       "${random_id.id.hex}-node",

@@ -36,7 +36,7 @@ data "pf_aws_tags" "tags" {
 
 data "pf_aws_tags" "secondary_tags" {
   module          = "aws_kms_encrypt_key"
-  region_override = data.aws_region.secondary.name
+  region_override = data.aws_region.secondary.region
 }
 
 ###########################################################################

@@ -545,7 +545,7 @@ resource "aws_cloudfront_distribution" "cdn" {
         for_each = var.origin_shield_enabled ? ["enabled"] : []
         content {
           enabled              = true
-          origin_shield_region = local.origin_shield_region_mappings[data.aws_region.region.name]
+          origin_shield_region = local.origin_shield_region_mappings[data.aws_region.region.region]
         }
       }
     }

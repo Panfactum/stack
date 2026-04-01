@@ -299,7 +299,7 @@ resource "helm_release" "ebs_csi_driver" {
   // to allow time for all other pods on the node to terminate as the
   // ebs pod has to be the last one to terminate in order to detach the ebs volumes
   // (2) We need to remove the default podAntiAffinity rules from the deployment
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
 

@@ -969,8 +969,8 @@ resource "helm_release" "prometheus_stack" {
                 type = "s3"
                 config = {
                   bucket       = module.metrics_bucket.bucket_name
-                  region       = data.aws_region.current.name
-                  endpoint     = "s3.${data.aws_region.current.name}.amazonaws.com"
+                  region       = data.aws_region.current.region
+                  endpoint     = "s3.${data.aws_region.current.region}.amazonaws.com"
                   aws_sdk_auth = true
                 }
               }
@@ -1226,7 +1226,7 @@ resource "helm_release" "prometheus_stack" {
     })
   ]
 
-  postrender {
+  postrender = {
     binary_path = "${path.module}/prometheus_kustomize/kustomize.sh"
   }
 
@@ -1674,8 +1674,8 @@ resource "helm_release" "thanos" {
           type = "s3"
           config = {
             bucket       = module.metrics_bucket.bucket_name
-            region       = data.aws_region.current.name
-            endpoint     = "s3.${data.aws_region.current.name}.amazonaws.com"
+            region       = data.aws_region.current.region
+            endpoint     = "s3.${data.aws_region.current.region}.amazonaws.com"
             aws_sdk_auth = true
           }
         }

@@ -3,7 +3,7 @@
 #################################################################
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host           = "${kube_api_server}"
     config_context = "${kube_config_context}"
   }

@@ -11,7 +11,7 @@ output "smtp_user" {
 
 output "smtp_host" {
   description = "The SMTP server for sending email"
-  value       = "email-smtp.${data.aws_region.current.name}.amazonaws.com"
+  value       = "email-smtp.${data.aws_region.current.region}.amazonaws.com"
 }
 
 output "domain" {

@@ -10,5 +10,5 @@ output "spot_data_feed_bucket_arn" {
 
 output "spot_data_feed_bucket_region" {
   description = "The region of the bucket for the spot data feed"
-  value       = data.aws_region.current.name
+  value       = data.aws_region.current.region
 }

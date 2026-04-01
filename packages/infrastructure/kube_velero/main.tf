@@ -271,13 +271,13 @@ resource "helm_release" "velero" {
           bucket     = module.backup_bucket.bucket_name
           default    = true
           config = {
-            region = data.aws_region.current.name
+            region = data.aws_region.current.region
           }
         }]
         volumeSnapshotLocation = [{
           provider = "velero.io/aws"
           config = {
-            region = data.aws_region.current.name
+            region = data.aws_region.current.region
           }
         }]
         defaultBackupStorageLocation   = "s3"

@@ -201,7 +201,7 @@ resource "aws_internet_gateway" "main" {
 
 resource "aws_vpc_endpoint" "s3" {
   vpc_id          = aws_vpc.main.id
-  service_name    = "com.amazonaws.${data.aws_region.region.name}.s3"
+  service_name    = "com.amazonaws.${data.aws_region.region.region}.s3"
   route_table_ids = [for table in aws_route_table.tables : table.id]
   tags            = merge(data.pf_aws_tags.tags.tags, { Name = "S3-endpoint-${aws_vpc.main.id}}" })
 }
@@ -212,7 +212,7 @@ resource "aws_vpc_endpoint" "s3" {
 
 locals {
   subnets_resolved_config = { for k, v in local.subnets : k => merge(v, {
-    availability_zone = lower(length(v.az) == 1 ? "${data.aws_region.region.name}${v.az}" : v.az) ## Allows the user to input either 'a' or 'us-east-2a'
+    availability_zone = lower(length(v.az) == 1 ? "${data.aws_region.region.region}${v.az}" : v.az) ## Allows the user to input either 'a' or 'us-east-2a'
     type              = v.public ? "public" : contains(keys(local.nat_associations), k) ? "private" : "isolated"
   }) }
 }
@@ -668,7 +668,7 @@ data "aws_iam_policy_document" "log_delivery" {
     }
     condition {
       test     = "ArnLike"
-      values   = ["arn:aws:logs:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:*"]
+      values   = ["arn:aws:logs:${data.aws_region.region.region}:${data.aws_caller_identity.current.account_id}:*"]
       variable = "aws:SourceArn"
     }
   }
@@ -692,7 +692,7 @@ data "aws_iam_policy_document" "log_delivery" {
     }
     condition {
       test     = "ArnLike"
-      values   = ["arn:aws:logs:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:*"]
+      values   = ["arn:aws:logs:${data.aws_region.region.region}:${data.aws_caller_identity.current.account_id}:*"]
       variable = "aws:SourceArn"
     }
   }

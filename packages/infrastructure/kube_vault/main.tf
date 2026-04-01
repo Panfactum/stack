@@ -254,7 +254,7 @@ resource "helm_release" "vault" {
         priorityClassName         = module.constants.cluster_important_priority_class_name # Vault can go down temporarily without disrupting the cluster
 
         extraEnvironmentVars = {
-          AWS_REGION   = data.aws_region.region.name
+          AWS_REGION   = data.aws_region.region.region
           AWS_ROLE_ARN = module.aws_permissions.role_arn
 
           // We noticed very slow startup times once the Vault db exceeds 100Mb.
@@ -273,7 +273,7 @@ resource "helm_release" "vault" {
             enabled   = true
             setNodeId = true
             config = templatefile("./ha.hcl", {
-              aws_region   = data.aws_region.region.name
+              aws_region   = data.aws_region.region.region
               kms_key_id   = module.unseal_key.id
               aws_role_arn = module.aws_permissions.role_arn
             })

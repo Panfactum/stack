@@ -20,7 +20,7 @@ output "cluster_ca_data" {
 
 output "cluster_region" {
   description = "The AWS region to which the EKS cluster is deployed"
-  value       = data.aws_region.region.name
+  value       = data.aws_region.region.region
 }
 
 output "node_instance_profile" {

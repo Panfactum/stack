@@ -384,7 +384,7 @@ resource "helm_release" "cilium" {
         ]
         extraEnv = [
           { name : "AWS_ROLE_ARN", value = module.aws_permissions.role_arn },
-          { name : "AWS_REGION", value = data.aws_region.region.name }
+          { name : "AWS_REGION", value = data.aws_region.region.region }
         ]
 
         prometheus = {

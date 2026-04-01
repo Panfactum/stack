@@ -265,7 +265,7 @@ resource "helm_release" "loki" {
         }
         storage = {
           type   = "s3"
-          region = data.aws_region.current.name
+          region = data.aws_region.current.region
           bucketNames = {
             chunks = module.logs_bucket.bucket_name
             ruler  = module.loki_ruler_bucket.bucket_name
@@ -281,8 +281,8 @@ resource "helm_release" "loki" {
               s3 = {
                 bucketnames      = module.logs_bucket.bucket_name
                 insecure         = false
-                region           = data.aws_region.current.name
-                s3               = "s3://${data.aws_region.current.name}"
+                region           = data.aws_region.current.region
+                s3               = "s3://${data.aws_region.current.region}"
                 s3forcepathstyle = false
               }
             }
@@ -489,8 +489,8 @@ resource "helm_release" "loki" {
               s3 = {
                 bucketnames      = module.loki_ruler_bucket.bucket_name
                 insecure         = false
-                region           = data.aws_region.current.name
-                s3               = "s3://${data.aws_region.current.name}"
+                region           = data.aws_region.current.region
+                s3               = "s3://${data.aws_region.current.region}"
                 s3forcepathstyle = false
               }
             }
@@ -533,7 +533,7 @@ resource "helm_release" "loki" {
               }
             }
             aws = {
-              s3 = "s3://${data.aws_region.current.name}/${module.logs_bucket.bucket_name}"
+              s3 = "s3://${data.aws_region.current.region}/${module.logs_bucket.bucket_name}"
               http_config = {
                 # timeout = "5s"
                 idle_conn_timeout       = "30s"

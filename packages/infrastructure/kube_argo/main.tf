@@ -236,7 +236,7 @@ resource "kubernetes_config_map" "artifacts" {
       s3 = {
         endpoint = "s3.amazonaws.com"
         bucket   = module.artifact_bucket.bucket_name
-        region   = data.aws_region.current.name
+        region   = data.aws_region.current.region
       }
     })
   }
@@ -351,7 +351,7 @@ resource "helm_release" "argo" {
         s3 = {
           endpoint = "s3.amazonaws.com"
           bucket   = module.artifact_bucket.bucket_name
-          region   = data.aws_region.current.name
+          region   = data.aws_region.current.region
         }
       }
 
@@ -730,7 +730,7 @@ resource "helm_release" "argo_events" {
     })
   ]
 
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize_events/kustomize.sh"
   }
 }

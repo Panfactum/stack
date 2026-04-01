@@ -507,7 +507,7 @@ resource "helm_release" "alb_controller" {
       configureDefaultAffinity = false
 
       clusterName                = data.pf_metadata.metadata.kube_cluster_name
-      region                     = data.aws_region.main.name
+      region                     = data.aws_region.main.region
       vpcId                      = var.vpc_id
       enableBackendSecurityGroup = true
       backendSecurityGroup       = aws_security_group.backend.id

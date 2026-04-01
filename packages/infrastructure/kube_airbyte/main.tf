@@ -669,7 +669,7 @@ resource "helm_release" "airbyte" {
             workloadOutput = module.airbyte_bucket.bucket_name
           }
           s3 = {
-            region             = data.aws_region.current.name
+            region             = data.aws_region.current.region
             authenticationType = "instanceProfile"
           }
         }

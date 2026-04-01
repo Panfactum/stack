@@ -669,7 +669,7 @@ resource "helm_release" "linkerd" {
   // ones without the proxy which generates prometheus errors
   // (2) There is no way to set pod labels for each individual controller
   // (3) There is no way to customize affinities
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize/kustomize.sh"
     args = [
       yamlencode({
@@ -965,7 +965,7 @@ resource "helm_release" "viz" {
 
 
   # Needed b/c tolerations are not set appropriately on the metrics-api
-  postrender {
+  postrender = {
     binary_path = "${path.module}/kustomize_viz/kustomize.sh"
   }
 

@@ -317,8 +317,8 @@ module "grist" {
 
       // Docs storage
       GRIST_DOCS_MINIO_BUCKET        = module.s3_bucket.bucket_name
-      GRIST_DOCS_MINIO_BUCKET_REGION = data.aws_region.current.name
-      GRIST_DOCS_MINIO_ENDPOINT      = "s3.${data.aws_region.current.name}.amazonaws.com"
+      GRIST_DOCS_MINIO_BUCKET_REGION = data.aws_region.current.region
+      GRIST_DOCS_MINIO_ENDPOINT      = "s3.${data.aws_region.current.region}.amazonaws.com"
 
       // OIDC Settigns
       GRIST_OIDC_IDP_CLIENT_ID                 = vault_identity_oidc_client.oidc.client_id

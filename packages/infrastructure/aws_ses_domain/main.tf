@@ -84,7 +84,7 @@ resource "aws_route53_record" "example_ses_domain_mail_from_mx" {
   name    = aws_ses_domain_mail_from.example.mail_from_domain
   type    = "MX"
   ttl     = "600"
-  records = ["10 feedback-smtp.${data.aws_region.current.name}.amazonses.com"]
+  records = ["10 feedback-smtp.${data.aws_region.current.region}.amazonses.com"]
 }
 
 resource "aws_route53_record" "example_ses_domain_mail_from_txt" {

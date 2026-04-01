@@ -5,7 +5,7 @@ output "bucket_name" {
 
 output "bucket_region" {
   description = "The region of the S3 bucket"
-  value       = data.aws_region.current.name
+  value       = data.aws_region.current.region
 }
 
 output "bucket_arn" {
