@@ -167,7 +167,7 @@
             contents = with pkgs.dockerTools; [
               (pkgs.buildEnv {
                 name = "image-root";
-                paths = panfactumPackages;
+                paths = panfactumPackages true;
                 pathsToLink = [ "/bin" ];
               })
               usrBinEnv
