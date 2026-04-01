@@ -140,6 +140,7 @@ variable "containers" {
     run_as_root             = optional(bool, false)            # Whether to run the container as root
     uid                     = optional(number, 1000)           # user to use when running the container if not root
     linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    seccomp_profile_type    = optional(string, null)           # Seccomp profile type (e.g., RuntimeDefault, Unconfined). If null, no explicit profile is set.
     read_only               = optional(bool, true)             # Whether to use a readonly file system
     env                     = optional(map(string), {})        # Environment variables specific to the container
     liveness_probe_command  = optional(list(string), null)     # Will run the specified command as the liveness probe if type is exec

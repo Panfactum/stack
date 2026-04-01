@@ -254,6 +254,9 @@ locals {
         add  = container.linux_capabilities
         drop = container.privileged ? [] : ["ALL"]
       }
+      seccompProfile = container.seccomp_profile_type != null ? {
+        type = container.seccomp_profile_type
+      } : null
     }
   }
 

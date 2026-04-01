@@ -179,6 +179,7 @@ module "buildkit" {
         "SETUID",
         "SETGID"
       ]
+      seccomp_profile_type   = "Unconfined"
       liveness_probe_type    = "exec"
       liveness_probe_command = ["buildctl", "debug", "workers"]
       minimum_cpu            = var.cpu_millicores
