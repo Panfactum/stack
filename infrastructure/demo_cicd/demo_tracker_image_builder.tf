@@ -9,6 +9,7 @@ module "demo_tracker_service_builder" {
   dockerfile_path = "./packages/reference-go/Containerfile"
   build_context   = "./packages/reference-go"
   image_repo      = "demo-tracker-service"
+  memory_mb       = 150
 
   args = {}
 }

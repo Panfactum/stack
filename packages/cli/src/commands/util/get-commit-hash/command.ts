@@ -43,6 +43,7 @@ import { getCommitHash } from '@/util/git/getCommitHash';
  */
 export class GetCommitHashCommand extends PanfactumCommand {
   static override paths = [['util', 'get-commit-hash']];
+  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Resolve git references to commit SHAs',
