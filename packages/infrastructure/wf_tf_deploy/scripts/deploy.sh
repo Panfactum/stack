@@ -41,7 +41,7 @@ export VAULT_TOKEN
 #####################################################
 # Step 5: Update sops-encrypted files so the runner can decrypt them
 #####################################################
-pf wf sops-set-profile --directory . --profile ci
+pf wf sops-set-profile . ci
 
 #####################################################
 # Step 6: Use terragrunt to deploy the IaC

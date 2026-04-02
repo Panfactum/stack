@@ -236,6 +236,7 @@ try {
   } else {
     globalThis.console.error(error);
   }
+  process.exitCode = 1;
 } finally {
   await cleanup();
 }
