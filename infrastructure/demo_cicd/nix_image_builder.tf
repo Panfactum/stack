@@ -162,7 +162,7 @@ module "nix_image_builder_workflow" {
   name                               = local.nix_image_builder_name
   namespace                          = local.namespace
   burstable_nodes_enabled            = true
-  active_deadline_seconds            = 60 * 60
+  active_deadline_seconds            = 60 * 120
   retry_backoff_max_duration_seconds = 60 * 5
   retry_max_attempts                 = 3
 
