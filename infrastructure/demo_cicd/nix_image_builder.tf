@@ -138,6 +138,7 @@ resource "kubernetes_config_map" "nix_image_builder_scripts" {
   }
   data = {
     "build-and-push.sh" = file("${path.module}/nix_image_builder/build-and-push.sh")
+    "check-image.sh"    = file("${path.module}/nix_image_builder/check-image.sh")
     "init-store.sh"     = file("${path.module}/nix_image_builder/init-store.sh")
     "merge-and-copy.sh" = file("${path.module}/nix_image_builder/merge-and-copy.sh")
   }
@@ -197,8 +198,14 @@ module "nix_image_builder_workflow" {
       dag = {
         tasks = [
           {
+            name     = "check-image"
+            template = "check-image"
+          },
+          {
             name     = "build-and-push"
             template = "build-and-push"
+            depends  = "check-image"
+            when     = "{{tasks.check-image.outputs.parameters.needs-build-amd64}} == true"
             arguments = {
               parameters = [{
                 name  = "arch"
@@ -209,6 +216,8 @@ module "nix_image_builder_workflow" {
           {
             name     = "build-and-push-arm"
             template = "build-and-push"
+            depends  = "check-image"
+            when     = "{{tasks.check-image.outputs.parameters.needs-build-arm64}} == true"
             arguments = {
               parameters = [{
                 name  = "arch"
@@ -219,18 +228,67 @@ module "nix_image_builder_workflow" {
           {
             name     = "merge-and-copy"
             template = "merge-and-copy"
+            depends  = "(build-and-push.Succeeded || build-and-push.Skipped) && (build-and-push-arm.Succeeded || build-and-push-arm.Skipped)"
+            when     = "{{tasks.check-image.outputs.parameters.needs-merge}} == true"
             arguments = {
               parameters = [{
                 name  = "commit-sha"
-                value = "{{tasks.build-and-push.outputs.parameters.commit-sha}}"
+                value = "{{tasks.check-image.outputs.parameters.commit-sha}}"
               }]
             }
-            dependencies = [
-              "build-and-push",
-              "build-and-push-arm"
-            ]
           }
         ]
+      }
+    },
+    {
+      name = "check-image"
+      outputs = {
+        parameters = [
+          {
+            name = "needs-build-amd64"
+            valueFrom = {
+              path = "/tmp/needs-build-amd64"
+            }
+          },
+          {
+            name = "needs-build-arm64"
+            valueFrom = {
+              path = "/tmp/needs-build-arm64"
+            }
+          },
+          {
+            name = "needs-merge"
+            valueFrom = {
+              path = "/tmp/needs-merge"
+            }
+          },
+          {
+            name = "commit-sha"
+            valueFrom = {
+              path = "/tmp/commit-sha"
+            }
+          }
+        ]
+      }
+      container = {
+        name  = "check-image"
+        image = local.ci_image
+        command = [
+          "/scripts/check-image.sh"
+        ]
+        env = module.nix_image_builder_workflow.env
+        volumeMounts = concat(
+          module.nix_image_builder_workflow.volume_mounts
+        )
+        resources = {
+          requests = {
+            memory = "256Mi"
+            cpu    = "100m"
+          }
+          limits = {
+            memory = "256Mi"
+          }
+        }
       }
     },
     {
