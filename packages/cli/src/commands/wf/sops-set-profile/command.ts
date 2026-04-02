@@ -6,6 +6,7 @@ import { Command, Option } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
+import { fileContains } from '@/util/fs/fileContains';
 import { readYAMLFile } from '@/util/yaml/readYAMLFile';
 import { writeYAMLFile } from '@/util/yaml/writeYAMLFile';
 
@@ -131,6 +132,20 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
      */
     const updateSopsFile = async (filePath: string): Promise<IUpdateResult> => {
       try {
+        // Quick check: skip files that don't contain SOPS metadata
+        // This avoids expensive YAML parsing for non-SOPS files
+        const hasSopsKey = await fileContains({
+          filePath,
+          regex: /^sops:$/
+        });
+        if (!hasSopsKey) {
+          return {
+            filePath,
+            status: 'skipped',
+            reason: 'Not a SOPS-encrypted file (no sops section)'
+          };
+        }
+
         const sopsFileSchema = z.object({
           sops: z.object({
             kms: z.array(z.record(z.string())).optional()
@@ -145,15 +160,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
           throwOnEmpty: false
         });
 
-        if (!data) {
-          return {
-            filePath,
-            status: 'skipped',
-            reason: 'File is empty or not a valid YAML file'
-          };
-        }
-        
-        if (!data.sops?.kms) {
+        if (!data?.sops?.kms) {
           return {
             filePath,
             status: 'skipped',
