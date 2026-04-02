@@ -330,11 +330,11 @@ module "nix_image_builder_workflow" {
             )
             resources = {
               requests = {
-                memory = "2Gi"
+                memory = "8Gi"
                 cpu    = "1000m"
               }
               limits = {
-                memory = "2Gi"
+                memory = "8Gi"
               }
             }
             dependencies = ["init-store"]
