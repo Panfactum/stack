@@ -65,6 +65,7 @@ import { execute } from '@/util/subprocess/execute.ts'
  * @see {@link execute} - For git command execution
  */
 export class WorkflowGitCheckoutCommand extends PanfactumCommand {
+  static override requiresDevshell = false;
   static override paths = [['wf', 'git-checkout']]
 
   static override usage = Command.Usage({

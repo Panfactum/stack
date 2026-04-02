@@ -2,13 +2,13 @@
 
 set -eo pipefail
 
-# Step 1: Get the commit hash
-GIT_COMMIT_HASH=$(pf-get-commit-hash --repo "https://$GIT_REPO" --ref "$GIT_REF" --no-verify)
-
-# Step 2: Checkout the code
+# Step 1: Checkout the code
 cd /code || exit
-pf-wf-git-checkout --repo "$GIT_REPO" --checkout "$GIT_COMMIT_HASH"
+pf-wf-git-checkout --repo "$GIT_REPO" --checkout "$GIT_REF"
 cd repo || exit
+
+# Step 2: Get the commit hash from the checked-out repo
+GIT_COMMIT_HASH=$(git rev-parse HEAD)
 
 # Step 3: Upload to S3
 INSTALLER_PATH="packages/installer/install.sh"

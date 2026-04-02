@@ -2,7 +2,7 @@
 // It recursively discovers and kills a process and all its child processes
 
 import { CLISubprocessError } from "@/util/error/error";
-import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumBaseContext } from "@/util/context/context";
 
 /**
  * Input parameters for killProcessTree function
@@ -13,7 +13,7 @@ export interface IKillProcessTreeInput {
   /** Signal to send (SIGTERM or SIGKILL) */
   signal?: 'SIGTERM' | 'SIGKILL';
   /** Panfactum context for logging */
-  context: PanfactumContext;
+  context: PanfactumBaseContext;
   /** Timeout before force killing (milliseconds) - not used in this implementation but kept for API compatibility */
   timeout?: number;
 }
@@ -91,7 +91,7 @@ export async function killProcessTree(input: IKillProcessTreeInput): Promise<voi
  * @param pid - Root process ID
  * @param context - Panfactum context for logging
  */
-async function killWindowsProcessTree(pid: number, context: PanfactumContext): Promise<void> {
+async function killWindowsProcessTree(pid: number, context: PanfactumBaseContext): Promise<void> {
   try {
     const proc = Bun.spawn(['taskkill', '/pid', pid.toString(), '/T', '/F'], {
       stdout: 'pipe',
@@ -134,7 +134,7 @@ async function killWindowsProcessTree(pid: number, context: PanfactumContext): P
  * @param context - Panfactum context for logging
  * @returns Set of all PIDs in the process tree
  */
-async function buildUnixProcessTree(rootPid: number, context: PanfactumContext): Promise<Set<number>> {
+async function buildUnixProcessTree(rootPid: number, context: PanfactumBaseContext): Promise<Set<number>> {
   const allPids = new Set<number>();
   const pidsToProcess = [rootPid];
   const criticalPids = [0, 1, 2]; // PID 0 (kernel), PID 1 (init), PID 2 (kernel threads)
@@ -177,7 +177,7 @@ async function buildUnixProcessTree(rootPid: number, context: PanfactumContext):
  * @param context - Panfactum context for logging
  * @returns Array of child PIDs
  */
-async function getUnixChildPids(pid: number, context: PanfactumContext): Promise<number[]> {
+async function getUnixChildPids(pid: number, context: PanfactumBaseContext): Promise<number[]> {
   const platform = process.platform;
   let command: string[];
   
@@ -236,7 +236,7 @@ async function getUnixChildPids(pid: number, context: PanfactumContext): Promise
  * @param signal - Signal to send
  * @param context - Panfactum context for logging
  */
-async function killUnixProcesses(pids: Set<number>, signal: string, context: PanfactumContext): Promise<void> {
+async function killUnixProcesses(pids: Set<number>, signal: string, context: PanfactumBaseContext): Promise<void> {
   // Convert signal name to number
   const signalNum = signal === 'SIGKILL' ? '9' : '15';
   

@@ -38,6 +38,18 @@ import type { PanfactumContext } from "@/util/context/context";
 export abstract class PanfactumCommand extends Command<PanfactumContext> {
 
     /**
+     * Whether this command requires the devshell configuration to be loaded
+     *
+     * @remarks
+     * Commands that run outside a git repository (e.g., workflow commands in
+     * CI/CD containers) should set this to false to skip devshell config
+     * initialization, which depends on `git rev-parse --show-toplevel`.
+     *
+     * @defaultValue true
+     */
+    static requiresDevshell = true;
+
+    /**
      * Debug mode flag that enables verbose logging
      * 
      * @remarks

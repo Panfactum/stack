@@ -2,7 +2,7 @@
 // It encapsulates process tracking, killing, and cleanup functionality
 
 import { killProcessTree } from "@/util/subprocess/killProcessTree";
-import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumBaseContext } from "@/util/context/context";
 
 /**
  * Represents a background process being tracked by the CLI
@@ -38,7 +38,7 @@ interface IKillBackgroundProcessInput {
  * - Cleanup of process trees
  * - Bulk operations on all tracked processes
  * 
- * The manager is designed to be attached to the PanfactumContext for easy access
+ * The manager is designed to be attached to the PanfactumBaseContext for easy access
  * throughout the CLI lifecycle.
  * 
  * @example
@@ -70,7 +70,7 @@ export class BackgroundProcessManager {
    * 
    * @param context - Panfactum context for logging and configuration
    */
-  constructor(private readonly context: PanfactumContext) {}
+  constructor(private readonly context: PanfactumBaseContext) {}
 
   /**
    * Adds a background process to the tracking list

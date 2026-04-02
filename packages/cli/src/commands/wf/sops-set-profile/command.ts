@@ -74,6 +74,7 @@ interface IUpdateResult {
  * @see {@link writeYAMLFile} - For preserving YAML structure
  */
 export class SopsSetProfileCommand extends PanfactumCommand {
+  static override requiresDevshell = false;
   static override paths = [['wf', 'sops-set-profile']];
 
   static override usage = Command.Usage({

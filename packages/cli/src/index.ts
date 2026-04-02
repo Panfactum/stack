@@ -61,12 +61,12 @@ import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
-import { createPanfactumContext, type PanfactumContext } from "./util/context/context.ts";
+import { createPanfactumContext, createPanfactumLightContext, type PanfactumContext, type PanfactumBaseContext } from "./util/context/context.ts";
 import { phClient } from "./util/posthog/tracking.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
 // Create a CLI instance
-const cli = new Cli<PanfactumContext | BaseContext>({
+const cli = new Cli<PanfactumContext | PanfactumBaseContext | BaseContext>({
   binaryName: "pf",
   binaryLabel: "Panfactum CLI"
 });
@@ -125,10 +125,10 @@ let cleanupStarted = false;
 
 /**
  * Global reference to the Panfactum context for cleanup
- * 
+ *
  * @internal
  */
-let panfactumContextInstance: PanfactumContext | null = null;
+let panfactumContextInstance: PanfactumBaseContext | null = null;
 
 /**
  * Performs cleanup operations before CLI termination
@@ -195,30 +195,38 @@ process.on('exit', () => {
  */
 try {
   const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
-  const panfactumContext = await createPanfactumContext(
-    Cli.defaultContext,
-    {
-      debugEnabled: proc.debugEnabled ?? false,
-      cwd: process.env["CWD"] || process.cwd()
-    }
-  )
+  const contextOpts = {
+    debugEnabled: proc.debugEnabled ?? false,
+    cwd: process.env["CWD"] || process.cwd()
+  };
+
+  // Check the static requiresDevshell flag on the command's class
+  const needsDevshell = (proc.constructor as { requiresDevshell?: boolean }).requiresDevshell !== false;
+
+  // Create a lightweight context for commands that don't need devshell config
+  // (e.g., workflow commands that run before a git repo exists)
+  const panfactumContext = needsDevshell
+    ? await createPanfactumContext(Cli.defaultContext, contextOpts)
+    : createPanfactumLightContext(Cli.defaultContext, contextOpts);
 
   // Store context for cleanup
   panfactumContextInstance = panfactumContext;
 
-  const { devshellConfig } = panfactumContext
-  if (devshellConfig.user_id) {
-    phClient.captureImmediate({
-      event: 'cli-start',
-      distinctId: devshellConfig.user_id,
-      // todo: pass in sub command level command arguments
-      properties: {
-        path: proc.path.join(" "),
-        help: proc.help,
-        debugEnabled: proc.debugEnabled,
-        cwd: proc.cwd,
-      }
-    })
+  if (needsDevshell) {
+    const { devshellConfig } = panfactumContext as PanfactumContext;
+    if (devshellConfig.user_id) {
+      phClient.captureImmediate({
+        event: 'cli-start',
+        distinctId: devshellConfig.user_id,
+        // todo: pass in sub command level command arguments
+        properties: {
+          path: proc.path.join(" "),
+          help: proc.help,
+          debugEnabled: proc.debugEnabled,
+          cwd: proc.cwd,
+        }
+      })
+    }
   }
 
   await cli.runExit(proc, panfactumContext);
