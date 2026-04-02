@@ -1,5 +1,4 @@
 Port 2222
-Protocol 2
 
 # Logging
 PrintLastLog no

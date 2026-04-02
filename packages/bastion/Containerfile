@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:bookworm AS production
+FROM docker.io/library/debian:trixie AS production
 
 LABEL org.opencontainers.image.source=https://github.com/panfactum/stack
 LABEL org.opencontainers.image.description="Bastion host for the Panfactum stack"
