@@ -1225,3 +1225,54 @@ changes:
       - type: iac-module
         component: kube_velero
         summary: Now deployed before the descheduler during pf cluster install
+  - type: fix
+    summary: >-
+      Fixes `pf env install` where the AWS account alias was incorrectly set to the account ID
+      instead of the user-provided account name. The `alias` input update was reading from
+      `ctx.accountId` instead of `ctx.accountName`, causing the alias prompt result to be discarded.
+    references:
+      - type: internal-commit
+        summary: "fix(env): use accountName instead of accountId for alias input update"
+        link: 79b510609863bade8668dad6357fda3280eab11d
+  - type: fix
+    summary: >-
+      Fixes `pf env install` where the "Set AWS account alias" task ran unconditionally even when the
+      account name was already known, and would be skipped when it was actually needed. The task's
+      `enabled` condition was inverted — it now correctly prompts for the alias only when `accountName`
+      has not yet been set.
+    references:
+      - type: internal-commit
+        summary: "fix(env): correct enabled condition and expand error output for bootstrapEnvironment"
+        link: 322d777893c39e78d00eb8b40e3b872a50e21d7b
+  - type: improvement
+    summary: >-
+      `pf env install` now shows full error details when a task fails. Previously Listr would collapse
+      error output, hiding the underlying cause. Setting `collapseErrors: false` ensures the complete
+      error message is visible without needing to inspect logs separately.
+    references:
+      - type: internal-commit
+        summary: "fix(env): correct enabled condition and expand error output for bootstrapEnvironment"
+        link: 322d777893c39e78d00eb8b40e3b872a50e21d7b
+  - type: fix
+    summary: >-
+      Fixes `pf env install` where AWS static credentials were not correctly written to the AWS
+      credentials and config files. The `addAWSProfileFromStaticCreds` utility now properly updates
+      an existing profile entry when re-running the installer, preventing stale or missing credentials
+      from causing downstream authentication failures.
+    references:
+      - type: internal-commit
+        summary: "fix: aws static creds update cli fx"
+        link: c70f947891cc2dc96c6f8c330b8c70fb985f0c7c
+  - type: fix
+    summary: >-
+      Fixes `pf domain add` where the domain registration request was silently skipped and never
+      submitted to AWS. The "Submitting registration request to AWS" task had `skip: true` set,
+      causing the wizard to complete without actually registering the domain.
+    references:
+      - type: internal-commit
+        summary: "fix: remove skip:true from domain registration submission task"
+        link: 9d9d9b14061f6be41d14551a7d3278d45bd52f17
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Domain registration request is now actually submitted to AWS

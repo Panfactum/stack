@@ -37,6 +37,8 @@ bun ./scripts/show-diff.ts [<hash>]
 
 If the output says "No user-facing changed files detected", report that no user-facing changes were found and stop — do not create an empty entry.
 
+When a commit hash is provided, the output begins with the full commit message under a `=== Commit Message ===` header. Use this message to inform entry summaries and as the `summary` for any `internal-commit` reference.
+
 Understanding the actual changes (not just which files changed) is critical for writing accurate summaries and choosing the correct change type. Skim all diffs before proceeding.
 
 ### 2. Gather Context

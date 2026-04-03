@@ -101,6 +101,13 @@ function main(): void {
   const sorted = files.sort();
 
   if (hash) {
+    const commitMessage = runGit(
+      `git log -1 --no-show-signature --format=%B ${hash}`
+    ).trim();
+    if (commitMessage.length > 0) {
+      console.log(`=== Commit Message ===\n${commitMessage}\n`);
+    }
+
     const diff = diffForCommit(hash, sorted);
     if (diff.length === 0) {
       console.log("(no diff)");

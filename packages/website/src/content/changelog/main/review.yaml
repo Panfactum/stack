@@ -20,6 +20,8 @@ todo:
   - "Entry 'Fixes pf env install AWSServiceRoleForEC2Spot import' (commit 7b1f505992598d12b16864c9ec33865c97232d9b): 'env install' is not in the CLI component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
   - "Commit 7e27f7e2e6ff2583f013b59ff4f8e23cac9dfb10 (setupCertIssuers route53_zones): This commit hardcodes a specific development zone (development.panfactum.com with Zone ID Z00914472Z7HO5DHUBPV1 and a specific IAM role ARN) in the route53_zones update instead of reading from context. This appears to be a debugging artifact. Verify whether these hardcoded values were removed before shipping, or if this path was fully superseded by setupCertificates.ts in cluster/add/. No new changelog entry was added as the cert issuers automation is already covered by the existing improvement entry referencing commit 2ca29499f6d742ee64fe75d3671674e441291bb1."
   - "Entry 'pf cluster install Linkerd check streaming output' (commit 989fcf567fb8e3868435b678dd76609ee40b4fff): no CLI impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'Fixes pf env install account alias bug' (commit 79b510609863bade8668dad6357fda3280eab11d): 'env install' is not in the CLI component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
+  - "Entry 'Fixes pf env install AWS static credentials' (commit c70f947891cc2dc96c6f8c330b8c70fb985f0c7c): show-diff returned no diff output for this commit; entry was inferred from the commit message 'fix: aws static creds update cli fx' and the changed files (env/install/command.ts and addAWSProfileFromStaticCreds.ts). Verify the exact fix and update the summary if it does not match what was actually changed."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -91,3 +93,12 @@ validated:
   - ea523aa3624fc11ba54833ea2a392d150c3a4046
   - 989fcf567fb8e3868435b678dd76609ee40b4fff
   - 5440599fd7a771ef230de32ee6557731d7a14338
+  - 60202cee433ce0e0f3c1b3fc3c22d86223db3d4d
+  - a61aef28fe0cd0200d81d0015b8f1240f8e952dd
+  - affcdcd2f6570b0bc4d57b966ca5ecd7ebfc407f
+  - 6d685b787ecb57ff77edb0172169f11f3bdf5398
+  - 79b510609863bade8668dad6357fda3280eab11d
+  - 322d777893c39e78d00eb8b40e3b872a50e21d7b
+  - db27f252de288aaa275a70a9d9e02553b8d097eb
+  - c70f947891cc2dc96c6f8c330b8c70fb985f0c7c
+  - 9d9d9b14061f6be41d14551a7d3278d45bd52f17
