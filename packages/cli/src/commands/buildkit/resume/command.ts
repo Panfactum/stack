@@ -47,6 +47,7 @@ const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive inte
  * @see {@link BuildkitScaleDownCommand} - For suspending BuildKit
  */
 export default class BuildkitScaleUpCommand extends PanfactumCommand {
+  static override requiresDevshell = false;
   static override paths = [['buildkit', 'scale', 'up']]
 
   static override usage = PanfactumCommand.Usage({
