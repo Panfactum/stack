@@ -222,6 +222,13 @@ changes:
       [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
     action_items:
       - "Re-apply any modules that use `wf_dockerfile_build` with private repositories to receive the fix."
+    references:
+      - type: internal-commit
+        summary: "fix: wf_dockerfile_build private repo auth"
+        link: 36018714e101bc216537a8eb6dfc1854c60cfe01
+      - type: internal-commit
+        summary: "fix: wf_dockerfile_build private repo auth (correct variable names)"
+        link: 8fe2e40a5f3174679470209208133a32698a2f66
     impacts:
       - type: iac-module
         component: wf_dockerfile_build
@@ -453,3 +460,347 @@ changes:
       - type: internal-commit
         summary: "refactor: rename install-cluster to cluster install"
         link: 8c03b01043302de2bced3649ebf6e7cc112be3b1
+  - type: addition
+    summary: >-
+      Adds the `pf config get` CLI command, which reads and merges Panfactum configuration
+      from all applicable `global.yaml`, `environment.yaml`, `region.yaml`, and `module.yaml`
+      files for the current directory and outputs the resolved configuration as JSON.
+    description: >-
+      This command is useful for debugging configuration issues: it shows exactly which
+      settings are active by merging all configuration sources in precedence order.
+      It also exposes derived values such as `environment_domain` and `kube_domain` that
+      are computed from the raw config fields.
+    references:
+      - type: internal-commit
+        summary: "chore: cli refactor"
+        link: 6a380d2664c6020bf7fe5e60d7df289fb1b3486a
+    impacts:
+      - type: cli
+        component: config get
+        summary: New command to retrieve and display the merged Panfactum configuration for a directory
+  - type: addition
+    summary: >-
+      Adds the `pf aws vpc-network-test` CLI command, which verifies network connectivity for
+      each subnet in a deployed `aws_vpc` module by spinning up a temporary test instance via
+      AWS Systems Manager and confirming that egress traffic is correctly routed through the NAT gateway.
+    description: >-
+      Previously this functionality existed only as an internal helper script. It is now exposed as
+      a first-class `pf` CLI command, making it easier for operators to validate VPC network
+      configuration after deploying or modifying an `aws_vpc` module.
+    references:
+      - type: internal-commit
+        summary: "feat: cli refactor"
+        link: 31fd6940342ea29532080d6ff2a3a835bbb55995
+    impacts:
+      - type: cli
+        component: aws vpc-network-test
+        summary: New command to test VPC egress network connectivity after deploying aws_vpc
+  - type: improvement
+    summary: >-
+      The `pf` CLI now uses a structured `Logger` class and a `PanfactumCommand` base class,
+      producing consistently formatted output and improved error messages that include subprocess
+      logs and validation details when a command fails.
+    description: >-
+      These are internal architectural improvements. Users benefit from clearer error output
+      when CLI commands encounter subprocess failures or configuration validation errors —
+      the log now includes the failed command, working directory, and full subprocess output.
+    references:
+      - type: internal-commit
+        summary: "feat: cli refactor"
+        link: 31fd6940342ea29532080d6ff2a3a835bbb55995
+  - type: fix
+    summary: >-
+      Fixes the `setSLA` step in `pf cluster install` where a missing return statement caused the
+      selected SLA target to be silently discarded, resulting in the cluster install proceeding
+      without the user-configured SLA value.
+    references:
+      - type: internal-commit
+        summary: "fix: setSLA"
+        link: 5bf5678581290b8c1b786f8756db00b664c62c7f
+  - type: improvement
+    summary: >-
+      `pf cluster install` now automates Vault deployment and initialization. After the CSI
+      drivers step, the installer deploys `kube_vault`, waits for all Vault pods to become
+      ready, initializes Vault, unseals it, and then deploys `vault_core_resources`. Recovery
+      keys and the root token are encrypted and saved to `kube_vault/secrets.yaml`.
+    description: >-
+      Previously, Vault setup required manual steps after running `pf cluster install`. These
+      steps are now fully automated: the installer deploys the `kube_vault` module, polls until
+      all pods are running, runs `vault operator init` to obtain recovery keys and the root token,
+      unseals Vault with the recovery keys, and then deploys `vault_core_resources` (using a
+      `kubectl port-forward` to Vault during the Terraform apply). Recovery keys and the root
+      token are encrypted via SOPS and written to `kube_vault/secrets.yaml`. Users should
+      move these credentials to a secure location after the install completes — they should not
+      remain accessible to all superusers in a shared secrets store.
+    references:
+      - type: internal-commit
+        summary: "chore: vault updates"
+        link: 6519c292ef148081c10a2aa089a295d63827af27
+    impacts:
+      - type: iac-module
+        component: kube_vault
+        summary: Now deployed and initialized automatically by pf cluster install
+      - type: iac-module
+        component: vault_core_resources
+        summary: Now deployed automatically by pf cluster install after Vault initialization
+  - type: fix
+    summary: >-
+      Fixes a duplicate step ID in `pf cluster install` where the Base EKS Cluster step
+      incorrectly shared the `csiDrivers` checkpoint ID with the CSI Drivers step. The EKS
+      step is now tracked under the `setupEKS` ID. Users with an existing checkpoint that
+      marked `csiDrivers` as the EKS step will see the EKS step re-run once.
+    references:
+      - type: internal-commit
+        summary: "chore: vault updates"
+        link: 6519c292ef148081c10a2aa089a295d63827af27
+  - type: improvement
+    summary: >-
+      `pf cluster install` now dynamically selects an available port for the Vault kubectl
+      port-forward proxy instead of hardcoding port 8200, preventing installation failures
+      when port 8200 is already in use on the local machine.
+    description: >-
+      Previously, the Vault proxy used during `vault_core_resources` deployment always bound
+      to port 8200. If another process was using that port, the install step would fail. The
+      proxy now scans ports starting at 8200 and picks the first available one, making the
+      install process more resilient in shared or busy development environments.
+    references:
+      - type: internal-commit
+        summary: "chore: vault core resources"
+        link: 403036045129cbd3a0fe203d9c0d8d4a6d8abdc5
+  - type: improvement
+    summary: >-
+      `pf cluster install` now tracks the cert manager deployment (`certManagerDeployment`)
+      as its own resumable checkpoint and deploys `kube_cert_manager` via a Vault proxy
+      connection, consistent with how other modules are deployed during cluster installation.
+    description: >-
+      The cert management install step has been refactored to use the same `deployModule`
+      abstraction as other steps (e.g., Vault). This means the cert manager deployment
+      now has its own fine-grained checkpoint so that if the step fails partway through,
+      subsequent runs will skip directly to the cert manager step rather than restarting
+      the full cert management phase from scratch.
+    references:
+      - type: internal-commit
+        summary: "chore: cert management"
+        link: ad33083d8f32e1a143531a845d845b5543dcc5a1
+  - type: improvement
+    summary: >-
+      `pf cluster install` now automates certificate issuer deployment as a resumable step. The
+      installer prompts for an alert email, configures the `kube_cert_issuers` module with the
+      correct Route 53 zone data, deploys it via Vault proxy, and then re-applies `kube_cert_manager`
+      with `self_generated_certs_enabled = false` to issue the first real certificate — all with
+      fine-grained checkpointing so each sub-step can be resumed independently.
+    references:
+      - type: internal-commit
+        summary: "cert issuers"
+        link: 2ca29499f6d742ee64fe75d3671674e441291bb1
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` cert management step using the wrong module path (`kube_vault`
+      instead of `kube_cert_manager`) when looking up the `terragrunt.hcl` file to deploy.
+    references:
+      - type: internal-commit
+        summary: "cert issuers"
+        link: 2ca29499f6d742ee64fe75d3671674e441291bb1
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` vault core resources step using the wrong module path (`kube_vault`
+      instead of `vault_core_resources`) when initializing the module deployment.
+    references:
+      - type: internal-commit
+        summary: "cert issuers"
+        link: 2ca29499f6d742ee64fe75d3671674e441291bb1
+  - type: improvement
+    summary: >-
+      `pf cluster install` now automates Linkerd deployment as a resumable step. After the certificate
+      issuer step, the installer deploys `kube_linkerd` via a Vault proxy connection and then runs
+      `linkerd check --cni-namespace=linkerd` to verify the control plane is healthy — each sub-step
+      tracked with fine-grained checkpointing so the install can resume from where it left off.
+    description: >-
+      Previously, Linkerd had to be deployed manually after `pf cluster install` completed. This step
+      integrates Linkerd installation into the automated cluster install workflow, consistent with how
+      other modules such as Vault, cert manager, and cert issuers are handled. The control plane health
+      check runs after deployment to catch issues early before subsequent steps proceed.
+    references:
+      - type: internal-commit
+        summary: "linkerd"
+        link: b04b36dad98ca97a3d416543ff95e42811665c13
+    impacts:
+      - type: iac-module
+        component: kube_linkerd
+        summary: Now deployed and verified automatically by pf cluster install
+  - type: improvement
+    summary: >-
+      `pf cluster install` now automates autoscaling deployment as a resumable step. After the Linkerd
+      step, the installer deploys the metrics server, vertical pod autoscaler (VPA), Karpenter, node
+      pools, the bin-packing scheduler, and KEDA — each sub-step individually tracked so interrupted
+      installs can resume from where they left off rather than restarting the entire autoscaling phase.
+    description: >-
+      Previously, the autoscaling phase of cluster installation (metrics server, VPA, Karpenter, node
+      pools, scheduler, KEDA) had to be run manually or would restart from scratch on failure. The
+      installer now tracks each sub-step with fine-grained checkpoints (metricsServerDeployment,
+      vpaDeployment, allResourcesUpdatedForVPA, karpenterDeployment, nodePoolsDeployment, adjustNodePools,
+      schedulerDeployment, kedaDeployment) and skips steps that already completed. This makes the
+      autoscaling phase consistent with the vault, cert manager, cert issuers, and Linkerd phases.
+    references:
+      - type: internal-commit
+        summary: "autoscaling"
+        link: 76adbbf33773a0e28308e5bda34960e567ea8a3b
+    impacts:
+      - type: iac-module
+        component: kube_metrics_server
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_vpa
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_karpenter
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_scheduler
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_keda
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+  - type: improvement
+    summary: >-
+      `pf cluster install` now fully automates inbound networking deployment as a series of fine-grained
+      resumable sub-steps: ExternalDNS, AWS Load Balancer Controller, ingress TLS secret generation,
+      Nginx ingress, Vault ingress (with DNS propagation check), Vault address update, Bastion deployment,
+      and Bastion connectivity configuration — each individually checkpointed so interrupted installs
+      resume from where they left off.
+    description: >-
+      Previously, the inbound networking phase of cluster installation used a hardcoded `kubectl
+      port-forward` to reach Vault, which was fragile and not integrated with the checkpointing system.
+      The step is now fully implemented using the shared `deployModule` abstraction and `startVaultProxy`
+      utility, consistent with how Vault, cert manager, cert issuers, Linkerd, and autoscaling steps are
+      handled. Each sub-step (deployExternalDns, deployAwsLbController, generateIngressSecret,
+      deployNginxIngress, deployVaultIngress, updateVaultAddress, deployBastion,
+      configureBastionConnectivity) is tracked independently.
+    references:
+      - type: internal-commit
+        summary: "instantiate inbound networking"
+        link: 6bc9823b0a576fb0d56a63478ae39872682cf9fc
+      - type: internal-commit
+        summary: "chore: final updates"
+        link: 91fb52517c3c24210dee2bd96ee8e89d28293f01
+    impacts:
+      - type: iac-module
+        component: kube_external_dns
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_aws_lb_controller
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_bastion
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+  - type: improvement
+    summary: >-
+      `pf cluster install` now automates maintenance controllers deployment as a resumable step. After the
+      inbound networking step, the installer deploys Reloader, Node Image Cache Controller, PVC Autoresizer,
+      Descheduler, External Snapshotter, and Velero — each sub-step individually checkpointed so interrupted
+      installs can resume without restarting the entire maintenance controllers phase.
+    description: >-
+      Previously, the maintenance controllers phase of cluster installation had to be completed manually
+      or from scratch on retry. The installer now tracks each sub-step with fine-grained checkpoints
+      (deployReloader, deployNodeImageCaches, deployPvcAutoresizer, deployDescheduler,
+      deployExternalSnapshotter, deployVelero) and skips steps that already completed, consistent with
+      how Vault, cert manager, cert issuers, Linkerd, autoscaling, and inbound networking phases are handled.
+    references:
+      - type: internal-commit
+        summary: "chore: final updates"
+        link: 91fb52517c3c24210dee2bd96ee8e89d28293f01
+    impacts:
+      - type: iac-module
+        component: kube_reloader
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_node_image_cache_controller
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_pvc_autoresizer
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_descheduler
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_external_snapshotter
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+      - type: iac-module
+        component: kube_velero
+        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+  - type: improvement
+    summary: >-
+      `pf cluster install` now automates Cloud Native PostgreSQL deployment as the final resumable step,
+      completing the full end-to-end cluster installation workflow. A success message with next steps
+      is displayed once all phases have been completed.
+    references:
+      - type: internal-commit
+        summary: "chore: final updates"
+        link: 91fb52517c3c24210dee2bd96ee8e89d28293f01
+    impacts:
+      - type: iac-module
+        component: kube_cloudnative_pg
+        summary: Now deployed automatically by pf cluster install as the final resumable step
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` inbound networking step where the DH parameter for TLS was generated
+      using the slow default `openssl dhparam 4096` command. The command now passes `-dsaparam` to use
+      DSA-style parameter generation, which is significantly faster.
+    description: >-
+      The previous command could take many minutes to generate DH parameters. With the `-dsaparam` flag,
+      generation completes in seconds. The generated parameters are also now stored directly in SOPS rather
+      than with an incorrect YAML escaping format that could cause parsing issues.
+    references:
+      - type: internal-commit
+        summary: "fix: CLI updates (#339)"
+        link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
+  - type: improvement
+    summary: >-
+      `pf cluster install` now validates that a VPC name does not already exist in AWS before accepting
+      it during the VPC setup step, preventing duplicate VPC creation. The default VPC name and description
+      now include the region for better disambiguation across environments.
+    references:
+      - type: internal-commit
+        summary: "fix: CLI updates (#339)"
+        link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
+  - type: improvement
+    summary: >-
+      `pf cluster install` now auto-formats EKS cluster name input to lowercase with hyphens,
+      transforming typed input in real-time so users can enter a free-form name without worrying about
+      invalid characters. The formatted name is saved to config after confirmation.
+    references:
+      - type: internal-commit
+        summary: "fix: CLI updates (#339)"
+        link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` and other CLI commands that call `terragrunt output` to verify
+      AWS session validity before executing, automatically prompting re-authentication if the
+      session has expired rather than failing with a cryptic error.
+    description: >-
+      Previously, if an AWS SSO session had expired during a long-running install, the `terragrunt output`
+      call would fail with an unhelpful error message. The CLI now calls `aws sts get-caller-identity`
+      before executing and, if the session is invalid, logs a message and prompts for re-login.
+    references:
+      - type: internal-commit
+        summary: "fix: CLI updates (#339)"
+        link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
+  - type: fix
+    summary: >-
+      Fixes a compilation error in `pf devshell sync` caused by references to non-existent internal
+      utilities (`safeFileExists` and `createNullWriter`) in the kubeconfig and SSH config builders.
+      The command now compiles and runs correctly.
+    references:
+      - type: internal-commit
+        summary: "fix: comment some things for compilation"
+        link: 738389f5a03f39078b5cfcce211254397cd83465
+    impacts:
+      - type: cli
+        component: devshell sync
+        summary: Fixed compilation error that prevented the command from running

@@ -1,7 +1,14 @@
 todo:
+  - "Entry 'Fixes compilation error in pf devshell sync' (commit 738389f5a03f39078b5cfcce211254397cd83465): the fix also changes behavior — safeFileExists and createNullWriter were commented out, so known_hosts/connection_info and cluster_info files are no longer deleted before rebuilding. Verify whether this behavioral regression is intentional or should be restored with correct utility imports."
   - "Entry 'Adds a new install.sh bootstrapper script': no impacts added because packages/installer/install.sh does not map to any existing schema impact type (iac-module, cli, devshell, configuration). Consider adding a new impact type (e.g., 'installer') or confirm no impacts are needed."
   - "Entry 'install.sh bootstrapper' updated for commit e7ade5824f74f7dc6a778514a23c7da891c3a4fb: the Nix installer was pinned to v0.38.1 and the --determinate=false flag was removed. Verify the pinned version is intentional and that the flag removal does not affect installation behavior on target platforms."
   - "Entry 'pf install-cluster renamed to pf cluster install' (commit 8c03b01043302de2bced3649ebf6e7cc112be3b1): the CLI component 'cluster install' is not in the schema's allowed values for the cli impact type. No impacts block was added. Consider adding 'cluster install' to the schema's cli component enum, or confirm the correct component name."
+  - "Entry 'Fixes the setSLA step in pf cluster install' (commit 5bf5678581290b8c1b786f8756db00b664c62c7f): no impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'pf cluster install dynamic Vault proxy port' (commit 403036045129cbd3a0fe203d9c0d8d4a6d8abdc5): no impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entries for commit 2ca29499f6d742ee64fe75d3671674e441291bb1 (cert issuers, cert management path fix, vault core resources path fix): no impacts block added to any of the three entries because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add impacts to all three entries."
+  - "Entry 'pf cluster install Linkerd automation' (commit b04b36dad98ca97a3d416543ff95e42811665c13): no CLI impact added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'pf cluster install inbound networking automation' (commit 6bc9823b0a576fb0d56a63478ae39872682cf9fc): no CLI impact added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'pf cluster install CloudNativePG automation' (commit 91fb52517c3c24210dee2bd96ee8e89d28293f01): component 'kube_cloudnative_pg' is not in the iac-module schema enum. Verify whether this module exists in the codebase under packages/infrastructure/kube_cloudnative_pg/ and if so, add it to the schema."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -38,3 +45,20 @@ validated:
   - 3eed67c578f7f442649b36c3586bffe5c0adbe37
   - 733c3c8cf4b9c33e17adc99f6527108c58713144
   - 8c03b01043302de2bced3649ebf6e7cc112be3b1
+  - 6a380d2664c6020bf7fe5e60d7df289fb1b3486a
+  - 31fd6940342ea29532080d6ff2a3a835bbb55995
+  - 5bf5678581290b8c1b786f8756db00b664c62c7f
+  - 0042bc58f5507940ef5ba62cfeb54e528dfaa013
+  - 36018714e101bc216537a8eb6dfc1854c60cfe01
+  - 8fe2e40a5f3174679470209208133a32698a2f66
+  - 6519c292ef148081c10a2aa089a295d63827af27
+  - 403036045129cbd3a0fe203d9c0d8d4a6d8abdc5
+  - ad33083d8f32e1a143531a845d845b5543dcc5a1
+  - 2ca29499f6d742ee64fe75d3671674e441291bb1
+  - b04b36dad98ca97a3d416543ff95e42811665c13
+  - 76adbbf33773a0e28308e5bda34960e567ea8a3b
+  - 6bc9823b0a576fb0d56a63478ae39872682cf9fc
+  - 91fb52517c3c24210dee2bd96ee8e89d28293f01
+  - 5364649a857b1228fd1631533976c8288b71f058
+  - d966e41f762d8e82e3b088a66bddd8cabb29ff93
+  - 738389f5a03f39078b5cfcce211254397cd83465

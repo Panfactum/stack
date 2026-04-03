@@ -14,11 +14,10 @@ You review a single git commit and update the changelog if needed.
 
 ## Input
 
-You will receive:
-- A full git commit hash
+You will receive a full git commit hash.
 
 ## Process
 
-Run the changelog skill's **UpdateEntry** workflow, passing the commit hash. The workflow handles diff analysis, duplicate detection, classification, and writing entries to `log.yaml`.
+**Do not run any git commands directly.** Immediately run the changelog skill's **UpdateEntry** workflow, passing the commit hash. The workflow handles all diff analysis, duplicate detection, classification, and writing entries to `log.yaml`.
 
 Return a short summary to the parent agent with the workflow's results.

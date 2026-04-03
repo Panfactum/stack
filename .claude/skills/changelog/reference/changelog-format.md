@@ -6,14 +6,16 @@ The changelog uses two files per release directory:
 - **`log.yaml`** — User-facing changelog data (summary, highlights, changes). Validated by `log.schema.json`.
 - **`review.yaml`** — AI review metadata (todo items, validated commit hashes). Validated by `review.schema.json`. Stripped before release.
 
-## Schema Locations
+## Schemas
 
-```
-packages/website/src/content/changelog/log.schema.json
-packages/website/src/content/changelog/review.schema.json
-```
+The schemas below define the valid values for change types, impact types, reference types, and component names. Component names are dynamically generated from the codebase, so the schema is the only reliable source.
 
-Read the log schema to get the current valid values for change types, impact types, reference types, and component names. Component names are dynamically generated from the codebase, so the schema is the only reliable source.
+<log-schema>
+@packages/website/src/content/changelog/log.schema.json
+</log-schema>
+<review-schema>
+@packages/website/src/content/changelog/review.schema.json
+</review-schema>
 
 ## File Locations
 
