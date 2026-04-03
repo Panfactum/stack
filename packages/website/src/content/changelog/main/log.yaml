@@ -1126,3 +1126,102 @@ changes:
       - type: iac-module
         component: aws_account
         summary: Now provisions CloudFront service quota increases for origin request, response header, and cache policies
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` inbound networking and Linkerd steps where Vault secrets were read
+      from the wrong module directory. Both steps were looking for `secrets.yaml` inside their own
+      module directory (`kube_ingress_nginx` and `kube_linkerd` respectively) instead of the correct
+      `kube_vault` directory, causing the install to fail when resuming those steps.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): cluster install fixes and improvements"
+        link: 5de4d4dd0d508552d06d46cf763af56302d80721
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` Vault pod readiness check to scope the `kubectl get pods` query to
+      the `vault` namespace instead of all namespaces. The retry limit has also been increased from
+      20 to 60 attempts to allow more time for Vault pods to become ready.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): cluster install fixes and improvements"
+        link: 5de4d4dd0d508552d06d46cf763af56302d80721
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` EKS setup step where the `kube_api_server` configuration value was
+      saved as an empty string. The step now reads the actual cluster URL from `aws_eks` module output
+      and writes it correctly to `region.yaml`.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): cluster install fixes and improvements"
+        link: 5de4d4dd0d508552d06d46cf763af56302d80721
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` cluster reset step where EC2 instance termination would silently
+      skip terminating instances. The step was splitting instance IDs only on newlines rather than
+      on all whitespace, and checking the length of the wrong variable, so instances were not passed
+      correctly to the AWS CLI terminate command.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): cluster install fixes and improvements"
+        link: 5de4d4dd0d508552d06d46cf763af56302d80721
+  - type: improvement
+    summary: >-
+      `pf cluster install` now kills all background processes (such as the Vault proxy) when any
+      install step throws an error. Previously, a step failure could leave orphaned background
+      processes running in the terminal session.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): cluster install fixes and improvements"
+        link: 5de4d4dd0d508552d06d46cf763af56302d80721
+  - type: improvement
+    summary: >-
+      `pf cluster install` now streams real-time rolling output during the Linkerd control plane
+      check step. The terminal displays a scrolling window of the last 5 output lines from
+      `linkerd check` as it runs, rather than showing nothing until the check completes.
+    description: >-
+      Previously, subprocess output was only surfaced to the Listr task renderer once after the
+      subprocess finished. This made long-running checks like `linkerd check` appear to stall with
+      no feedback. The `execute` utility now updates the task output on each line received, and the
+      Linkerd check step uses `rendererOptions.outputBar: 5` so users can see live progress.
+    references:
+      - type: internal-commit
+        summary: "fix(cluster install): stream linkerd check output line by line"
+        link: 989fcf567fb8e3868435b678dd76609ee40b4fff
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` inbound networking step where the Vault domain was read from the wrong
+      YAML key. The step was looking for `vault_addr` at the top level of the module YAML but the value
+      is stored under `extra_inputs.vault_domain`, causing the DNS propagation check and subsequent steps
+      to use an undefined value.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): inbound networking and support services fixes"
+        link: 5440599fd7a771ef230de32ee6557731d7a14338
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` by removing hardcoded values from the `kube_aws_lb_controller` and
+      `kube_ingress_nginx` Terragrunt templates. The load balancer controller template previously
+      hardcoded `subnets = ["PUBLIC_A", "PUBLIC_B"]`, and the Nginx ingress template hardcoded
+      `ingress_domains` and `sla_level`, both of which would cause failures when applied against a
+      real cluster. These values are now either omitted or set programmatically during installation.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): inbound networking and support services fixes"
+        link: 5440599fd7a771ef230de32ee6557731d7a14338
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` support services step where `kube_external_snapshotter` and
+      `kube_velero` were deployed after the descheduler rather than before it. The two modules are
+      now deployed together as a concurrent sub-group earlier in the sequence, matching the intended
+      dependency ordering for maintenance controllers.
+    references:
+      - type: internal-commit
+        summary: "fix(cli): inbound networking and support services fixes"
+        link: 5440599fd7a771ef230de32ee6557731d7a14338
+    impacts:
+      - type: iac-module
+        component: kube_external_snapshotter
+        summary: Now deployed before the descheduler during pf cluster install
+      - type: iac-module
+        component: kube_velero
+        summary: Now deployed before the descheduler during pf cluster install

@@ -14,6 +14,8 @@ hooks:
       hooks:
         - type: command
           command: "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-git-show.sh"
+        - type: command
+          command: "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-npx.sh"
 ---
 
 You review a single git commit and update the changelog if needed.

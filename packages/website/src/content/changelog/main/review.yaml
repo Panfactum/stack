@@ -18,6 +18,8 @@ todo:
   - "Entry 'New pf env install command' (commit 265d0a3fa27c15364fd814fd44d66aac4396bb88): 'env install' is not in the cli component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
   - "Entry 'tf_bootstrap_resources secondary region removal' (commit 265d0a3fa27c15364fd814fd44d66aac4396bb88): classified as breaking_change because it removes the aws.secondary provider alias. Verify whether any existing users have this secondary provider configured and whether there are migration docs needed."
   - "Entry 'Fixes pf env install AWSServiceRoleForEC2Spot import' (commit 7b1f505992598d12b16864c9ec33865c97232d9b): 'env install' is not in the CLI component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
+  - "Commit 7e27f7e2e6ff2583f013b59ff4f8e23cac9dfb10 (setupCertIssuers route53_zones): This commit hardcodes a specific development zone (development.panfactum.com with Zone ID Z00914472Z7HO5DHUBPV1 and a specific IAM role ARN) in the route53_zones update instead of reading from context. This appears to be a debugging artifact. Verify whether these hardcoded values were removed before shipping, or if this path was fully superseded by setupCertificates.ts in cluster/add/. No new changelog entry was added as the cert issuers automation is already covered by the existing improvement entry referencing commit 2ca29499f6d742ee64fe75d3671674e441291bb1."
+  - "Entry 'pf cluster install Linkerd check streaming output' (commit 989fcf567fb8e3868435b678dd76609ee40b4fff): no CLI impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -83,3 +85,9 @@ validated:
   - 7b1f505992598d12b16864c9ec33865c97232d9b
   - 5a39ffe25bc2abac97a76b802195f4935acd1126
   - 925223d78f004555375cecdad50f86676b51596e
+  - 5de4d4dd0d508552d06d46cf763af56302d80721
+  - b9257537a66620e8a531a64fc5f136739e3230d6
+  - 7e27f7e2e6ff2583f013b59ff4f8e23cac9dfb10
+  - ea523aa3624fc11ba54833ea2a392d150c3a4046
+  - 989fcf567fb8e3868435b678dd76609ee40b4fff
+  - 5440599fd7a771ef230de32ee6557731d7a14338
