@@ -49,16 +49,10 @@ Read the output to understand what entries are already in `main/log.yaml`.
 
 ### 3. Read the Actual Diffs
 
-**If a commit hash was provided**, read the diff for that commit:
+Run the show-diff script from the skill directory. **If a commit hash was provided**, pass it as an argument to scope to that single commit; otherwise, omit it to diff the full branch against `main`:
 
 ```bash
-git show <hash> --format=""
-```
-
-**Otherwise**, for each changed file (or group of related files), read the diff relative to `main`:
-
-```bash
-bun ./scripts/show-diff.ts <file> [file...]
+bun ./scripts/show-diff.ts [<hash>]
 ```
 
 Understanding the actual changes (not just which files changed) is critical for writing accurate summaries and choosing the correct change type. Skim all diffs before proceeding.

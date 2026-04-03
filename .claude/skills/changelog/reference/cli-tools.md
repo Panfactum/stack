@@ -65,21 +65,21 @@ If no changes are detected, prints a message and exits with code `0`.
 
 ## show-diff.ts
 
-Shows the combined diff (committed, staged, and unstaged) for one or more files relative to `main`. Used by the UpdateEntry workflow to read the actual changes and write accurate summaries.
+Shows the combined diff for changed files relative to `main`, filtered to user-facing paths via `.changelog-include` glob patterns. Used by the UpdateEntry workflow to read the actual changes and write accurate summaries.
 
 **Usage:**
 
 ```bash
-bun ./scripts/show-diff.ts <file> [file...]
+bun ./scripts/show-diff.ts [commit-hash]
 ```
 
 **Arguments:**
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `file` | Yes | One or more file paths to show diffs for. |
+| `commit-hash` | No | A specific git commit hash. When provided, shows the diff for that single commit. When omitted, shows committed, staged, and unstaged diffs relative to `main`. |
 
-**Output:** Per-file sections with labeled diff hunks (committed, staged, unstaged). Only non-empty diff sources are shown. Example:
+**Output:** When no commit hash is provided, per-file sections with labeled diff hunks (committed, staged, unstaged). Only non-empty diff sources are shown. When a commit hash is provided, the unified diff for that commit. Non-user-facing files are filtered out with a count. Example (no hash):
 
 ```
 === packages/infrastructure/aws_eks/main.tf ===
@@ -91,7 +91,11 @@ diff --git a/packages/infrastructure/aws_eks/main.tf b/packages/infrastructure/a
 --- unstaged ---
 diff --git a/packages/nix/packages/default.nix b/packages/nix/packages/default.nix
 ...
+
+(2 non-user-facing files filtered out)
 ```
+
+If no user-facing changes are detected, prints a message and exits with code `0`.
 
 ## list-commits-since-release.ts
 
