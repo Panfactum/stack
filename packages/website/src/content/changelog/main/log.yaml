@@ -275,3 +275,143 @@ changes:
       - type: internal-docs
         summary: "Versioning and releases documentation"
         link: /docs/main/guides/versioning/releases
+  - type: addition
+    summary: >-
+      Adds a new `install.sh` bootstrapper script under `packages/installer` that automates the full initial setup
+      of a Panfactum infrastructure repository: platform and prerequisite checks, Nix and direnv installation,
+      `flake.nix` and `panfactum.yaml` generation, DevShell build, and `direnv allow` — all in a single command.
+    description: >-
+      New users can run this installer script to go from zero to a fully operational Panfactum DevShell in one step.
+      The script validates prerequisites (Git >= 2.40, Nix >= 2.23, direnv >= 2.32), installs missing dependencies
+      where possible, creates `flake.nix` and `panfactum.yaml` with interactive prompts, builds the Panfactum DevShell
+      via `pf-update`, and activates direnv. The script is idempotent — re-running it safely skips steps that are
+      already complete. Repository URLs are validated to require HTTPS format, and SSH remote URLs are automatically
+      converted to HTTPS.
+    references:
+      - type: internal-commit
+        summary: "chore: creates initial panfactum installer"
+        link: 74bc98bf931abfee89143015332bd3261cefcb59
+      - type: internal-commit
+        summary: "feat(installer): complete end-to-end install flow with flake.nix, pf-update, and direnv allow"
+        link: e7ade5824f74f7dc6a778514a23c7da891c3a4fb
+  - type: improvement
+    summary: >-
+      The `enter-shell-local` devshell script now respects the `PF_SKIP_CHECK_REPO_SETUP=1` environment variable,
+      allowing users to bypass the `pf-check-repo-setup` validation step when entering a local devshell.
+    description: >-
+      Setting `PF_SKIP_CHECK_REPO_SETUP=1` before entering the devshell skips the repository setup check, which is
+      useful during initial bootstrapping (e.g., when using the new installer script) before a fully configured
+      repository is in place.
+    references:
+      - type: internal-commit
+        summary: "chore: creates initial panfactum installer"
+        link: 74bc98bf931abfee89143015332bd3261cefcb59
+    impacts:
+      - type: devshell
+        component: enter-shell-local
+        summary: Supports PF_SKIP_CHECK_REPO_SETUP=1 to bypass repo setup validation on shell entry
+  - type: fix
+    summary: >-
+      Fixes user input prompts in `install.sh` when the script is run via a pipe (e.g., `curl … | sh`).
+      The installer now reads input directly from `/dev/tty` so interactive prompts work correctly
+      regardless of how stdin is connected. Prompts are also highlighted in yellow for better visibility.
+    description: >-
+      Previously, the `create_panfactum_yaml` prompts for repository URL, repository name, and primary
+      branch would hang or fail silently when stdin was not attached to a terminal (e.g., when the
+      installer was invoked via `curl … | sh`). The fix redirects each `read` call to use `/dev/tty`
+      directly (`read -r … </dev/tty`), which reliably captures keyboard input regardless of how the
+      script's stdin stream is connected. User-facing prompts are now rendered in yellow for improved
+      readability.
+    references:
+      - type: internal-commit
+        summary: "fix: installer user input via pipe"
+        link: dd6a76203cec41092a81ea963b513732159f5a70
+      - type: internal-commit
+        summary: "fix: installer user input via pipe - take 2"
+        link: ab63aee9dfda4b84b936583c229ff68d3d14a204
+  - type: fix
+    summary: >-
+      Corrects the environment variable name used to skip repository setup validation in `enter-shell-local`
+      from `PF_SKIP_REPO_CHECK` to `PF_SKIP_CHECK_REPO_SETUP`. Users who set `PF_SKIP_REPO_CHECK=1` must
+      update to `PF_SKIP_CHECK_REPO_SETUP=1`.
+    action_items:
+      - "If you previously set `PF_SKIP_REPO_CHECK=1` to skip the repo setup check, update your environment to use `PF_SKIP_CHECK_REPO_SETUP=1` instead."
+    references:
+      - type: internal-commit
+        summary: "fix: PF_SKIP_CHECK_REPO_SETUP"
+        link: a9b39c8b808f69cf147c83342fecf49404bad8f3
+    impacts:
+      - type: devshell
+        component: enter-shell-local
+        summary: Renamed PF_SKIP_REPO_CHECK to PF_SKIP_CHECK_REPO_SETUP
+  - type: fix
+    summary: >-
+      Fixes version detection in `install.sh` for Git and Nix. Git version parsing now uses field position
+      (`$3`) instead of last field (`$NF`) to handle platforms where `git --version` appends extra output.
+      Nix version checks now suppress stderr to prevent warning noise from interfering with version comparisons.
+    references:
+      - type: internal-commit
+        summary: "fix: installer git checks and ignore nix warnings"
+        link: 9aa5de525f498086e3f0a9f95f24cf292de8056e
+  - type: fix
+    summary: >-
+      Fixes `install.sh` so that `nix` is available immediately after installation without requiring
+      a shell restart. The installer now sources the Nix daemon profile script in-process after installing Nix.
+    references:
+      - type: internal-commit
+        summary: "fix: source nix in installer"
+        link: 0b66035e3ed76459ad2e1faa5150a52e509d467d
+  - type: fix
+    summary: >-
+      Fixes `install.sh` to use `nix profile install nixpkgs#direnv` instead of the deprecated
+      `nix-env -iA nixpkgs.direnv` command, which is incompatible with the flake-enabled Nix installed
+      by the Determinate Systems installer. Also updates the direnv hook error message to link to the
+      official direnv hook documentation instead of generating a shell-specific command.
+    references:
+      - type: internal-commit
+        summary: "fix: repo url input for installer"
+        link: 6ff1dbd263c3082b52743eba81be1edd9b42aed7
+      - type: external-docs
+        summary: "direnv hook installation documentation"
+        link: https://direnv.net/docs/hook.html
+  - type: fix
+    summary: >-
+      Fixes `install.sh` so that the repository name default prompt is correctly derived from the
+      entered repository URL. Previously, the wrong variable (`$default_repo_url`) was used, causing
+      the default name to always be empty.
+    references:
+      - type: internal-commit
+        summary: "fix: default repo name for installer"
+        link: 7be27a540ce6a3c7ca1fd52f65d4962ade472045
+  - type: fix
+    summary: >-
+      Fixes a logic bug in `install.sh` where the direnv hook condition used the wrong boolean
+      operator. The condition now correctly uses `&&` so the hook is only appended when the shell
+      config path is identified AND the config file exists, preventing attempts to write to a
+      non-existent path.
+    references:
+      - type: internal-commit
+        summary: "fix: direnv installer"
+        link: fd8126dddc92d163f8080babaf07558568606fee
+      - type: internal-commit
+        summary: "fix: direnv hook check"
+        link: 7b1091c71ab8443e201aa32e95bd7a609ad29e43
+  - type: improvement
+    summary: >-
+      Improves UX in `install.sh` during direnv installation and DevShell build. Direnv installation
+      now shows colored success and error output with captured logs on failure. The `pf-update` build
+      step now prints a "Still building..." progress indicator every 10 seconds so users know the
+      process has not stalled.
+    references:
+      - type: internal-commit
+        summary: "fix: direnv installer"
+        link: fd8126dddc92d163f8080babaf07558568606fee
+  - type: fix
+    summary: >-
+      Fixes `install.sh` to automatically detect the user's shell (bash or zsh), append the direnv
+      hook to the appropriate shell config file (`~/.bashrc` or `~/.zshrc`) if it is missing, and
+      exit with instructions to restart the shell before continuing.
+    references:
+      - type: internal-commit
+        summary: "fix: auto-append direnv hook to shell config in install.sh"
+        link: eb60e19e23fe6b4013d109d35121ac875c472618

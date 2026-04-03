@@ -1,4 +1,8 @@
+todo:
+  - "Entry 'Adds a new install.sh bootstrapper script': no impacts added because packages/installer/install.sh does not map to any existing schema impact type (iac-module, cli, devshell, configuration). Consider adding a new impact type (e.g., 'installer') or confirm no impacts are needed."
+  - "Entry 'install.sh bootstrapper' updated for commit e7ade5824f74f7dc6a778514a23c7da891c3a4fb: the Nix installer was pinned to v0.38.1 and the --determinate=false flag was removed. Verify the pinned version is intentional and that the flag removal does not affect installation behavior on target platforms."
 validated:
+  - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
   - 7d7349f621f9b979a1bc660b409d96eef5c0ce3c
   - 37474bbaf31f7eaa2ffec23ebe33af564d3bd0ff
@@ -13,3 +17,19 @@ validated:
   - a7b3ebbbc3f9e4dda5ace70fada70c560e93e892
   - a3ca110ca5adf6dd76e6ba10ab549486659ee314
   - 28e2b1078f70fbfbc19ac1b97b8617798b436f59
+  - 70491731293c2383488a1ca9bd68f93f6bcc8c27
+  - 5404bde31454c20084ec5e78901f2c0132371e2b
+  - 6c925aefbdc111980b73dd766fc516800ba5f274
+  - 09bdf9841b6f58d66cb3768cc81a331eb6ce8631
+  - 27c0d4149e0d14d7f643b90194a5deee30b25e3e
+  - 74bc98bf931abfee89143015332bd3261cefcb59
+  - a9b39c8b808f69cf147c83342fecf49404bad8f3
+  - e7ade5824f74f7dc6a778514a23c7da891c3a4fb
+  - dd6a76203cec41092a81ea963b513732159f5a70
+  - ab63aee9dfda4b84b936583c229ff68d3d14a204
+  - 0b66035e3ed76459ad2e1faa5150a52e509d467d
+  - 6ff1dbd263c3082b52743eba81be1edd9b42aed7
+  - 7be27a540ce6a3c7ca1fd52f65d4962ade472045
+  - fd8126dddc92d163f8080babaf07558568606fee
+  - eb60e19e23fe6b4013d109d35121ac875c472618
+  - 7b1091c71ab8443e201aa32e95bd7a609ad29e43

@@ -28,11 +28,14 @@ let
         fi
     done
 
-    if [[ "$CI" == "true" || "$CI" == "1" ]]; then
+    if [[ "$CI" == "true" || "$CI" == "1" ]] && [[ -n "$GIT_PASSWORD" ]]; then
         {
           stdbuf -oL ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@" 2> >(stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g" >&2)
         } | stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g"
         exit ''${PIPESTATUS[0]}
+    elif [[ "$CI" == "true" || "$CI" == "1" ]]; then
+        ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@"
+        exit "$?"
     else
         ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@"
         exit "$?"
