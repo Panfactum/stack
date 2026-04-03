@@ -27,7 +27,17 @@ Before proceeding, verify:
 
 These workflow steps MUST be followed exactly as written. Do NOT prompt the user for input at any step.
 
-### 1. Gather Context
+### 1. Analyze Git Changes
+
+Run the changed-files script from the skill directory. **If a commit hash was provided**, pass it as an argument to scope to that single commit; otherwise, omit it to diff the full branch against `main`:
+
+```bash
+bun ./scripts/list-changed-files.ts [<hash>]
+```
+
+If no changed files are found, report that no git changes were found and stop — do not create an empty entry.
+
+### 2. Gather Context
 
 Run both of the following commands from the skill directory (`.claude/skills/changelog/`):
 
@@ -36,22 +46,6 @@ bun ./scripts/list-changes.ts
 ```
 
 Read the output to understand what entries are already in `main/log.yaml`.
-
-### 2. Analyze Git Changes
-
-**If a commit hash was provided**, list the files changed in that specific commit:
-
-```bash
-git diff-tree --no-commit-id --name-only -r <hash>
-```
-
-**Otherwise**, run the changed-files script from the skill directory to diff the full branch against `main`:
-
-```bash
-bun ./scripts/list-changed-files.ts
-```
-
-If no changed files are found, report that no git changes were found and stop — do not create an empty entry.
 
 ### 3. Read the Actual Diffs
 

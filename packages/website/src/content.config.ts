@@ -34,7 +34,7 @@ const changes = defineCollection({
       description: z.string().optional(),
       action_items: z.array(z.string()).optional(),
       references: z.array(z.object({
-        type: z.enum(["commit", "issue-report", "external-docs", "internal-docs"]),
+        type: z.enum(["internal-commit", "external-commit", "commit", "issue-report", "external-docs", "internal-docs"]),
         summary: z.string(),
         link: z.string(),
       })).optional(),

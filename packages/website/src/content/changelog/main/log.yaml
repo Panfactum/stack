@@ -257,3 +257,21 @@ changes:
       - type: iac-module
         component: aws_dnssec
         summary: Fixed invalid DNSSEC KMS key policy document format
+  - type: improvement
+    summary: >-
+      Stable releases are now open to all users. The stable release format has been updated to
+      `stable.<YY-MM>.<patch>` (e.g., `stable.25-04.0`), the support window is six months from initial release,
+      and new stable channels will align with Kubernetes releases (~three per year).
+    description: >-
+      Previously, stable releases were only available to stack subscribers. Stable releases are now publicly available
+      to all users of the Panfactum framework. The release naming convention has also changed: stable releases
+      now use the format `stable.<YY-MM>.<patch>` instead of the previous `<YY-MM>.<patch>`. The support window
+      has been updated to six months from the initial release date (previously twelve months). New stable release
+      channels will be created roughly three times per year, aligned with new Kubernetes releases.
+    references:
+      - type: internal-commit
+        summary: "Open stable releases to all users and update release format, cadence, and support policy"
+        link: 70491731293c2383488a1ca9bd68f93f6bcc8c27
+      - type: internal-docs
+        summary: "Versioning and releases documentation"
+        link: /docs/main/guides/versioning/releases

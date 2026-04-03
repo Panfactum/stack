@@ -21,7 +21,17 @@ You will receive:
 
 ## Process
 
-### 1. Read the Commit Diff
+### 1. Check for User-Facing Files
+
+Run the list-changed-files script from the skill directory (`.claude/skills/changelog/`):
+
+```bash
+bun ./scripts/list-changed-files.ts <hash>
+```
+
+If the output says "No user-facing changed files detected", report "internal" and return immediately — no further analysis needed.
+
+Otherwise, read the full diff:
 
 ```bash
 git show <hash> --format=""

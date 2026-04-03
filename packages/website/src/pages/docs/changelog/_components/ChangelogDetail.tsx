@@ -45,6 +45,8 @@ type ChangeType =
 type ImpactType = "iac-module" | "cli" | "devshell" | "configuration";
 
 type ReferenceType =
+  | "internal-commit"
+  | "external-commit"
   | "commit"
   | "issue-report"
   | "external-docs"
@@ -143,6 +145,14 @@ interface ReferenceTypeConfig {
 }
 
 const REFERENCE_TYPE_CONFIG: Record<ReferenceType, ReferenceTypeConfig> = {
+  "internal-commit": {
+    label: "Commit",
+    icon: () => <FiGitCommit size={14} />,
+  },
+  "external-commit": {
+    label: "Commit",
+    icon: () => <FiGitCommit size={14} />,
+  },
   commit: {
     label: "Commit",
     icon: () => <FiGitCommit size={14} />,
