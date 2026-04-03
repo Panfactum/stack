@@ -415,3 +415,41 @@ changes:
       - type: internal-commit
         summary: "fix: auto-append direnv hook to shell config in install.sh"
         link: eb60e19e23fe6b4013d109d35121ac875c472618
+  - type: fix
+    summary: >-
+      Fixes shell config file detection in `install.sh` for direnv hook installation. The installer
+      now detects which shell config file (`~/.zshrc` or `~/.bashrc`) exists on disk rather than
+      inspecting `$ZSH_VERSION`/`$BASH_VERSION` shell variables, which could fail when the script
+      is run from a shell other than the user's primary one. Zsh is preferred when both config files
+      are present. Also tightens the hook-append guard to skip the write when no config file was
+      found, preventing attempts to append to an unresolved path.
+    references:
+      - type: internal-commit
+        summary: "fix: direnv hook installer"
+        link: 486c6c56ce10edc26253d6a52f789859230978ab
+  - type: improvement
+    summary: >-
+      The `pf cluster install` command now supports fine-grained step resumability, configuration
+      caching, and improved error handling. Interrupted installs can resume from the last completed
+      sub-step rather than restarting the entire phase, and user-provided inputs (VPC name, cluster
+      name, domains, etc.) are persisted to the config file so they are not re-prompted on retry.
+    description: >-
+      Previously, if `pf cluster install` failed partway through a phase (e.g., autoscaling), the
+      entire phase would restart from scratch on the next run. The command now tracks each sub-step
+      individually (e.g., metrics server setup, VPA setup, Karpenter setup) and skips steps that
+      already completed. Errors are also written to a debug file for easier troubleshooting. This
+      makes the cluster installation process significantly more resilient to transient failures.
+    references:
+      - type: internal-commit
+        summary: "CLI improvements (#330)"
+        link: 733c3c8cf4b9c33e17adc99f6527108c58713144
+  - type: breaking_change
+    summary: >-
+      The `pf install-cluster` CLI command has been renamed to `pf cluster install`. Any scripts
+      or documentation referencing the old command must be updated.
+    action_items:
+      - "Replace all invocations of `pf install-cluster` with `pf cluster install` in your scripts, CI pipelines, and runbooks."
+    references:
+      - type: internal-commit
+        summary: "refactor: rename install-cluster to cluster install"
+        link: 8c03b01043302de2bced3649ebf6e7cc112be3b1

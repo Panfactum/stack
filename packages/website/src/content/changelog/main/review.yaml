@@ -1,6 +1,7 @@
 todo:
   - "Entry 'Adds a new install.sh bootstrapper script': no impacts added because packages/installer/install.sh does not map to any existing schema impact type (iac-module, cli, devshell, configuration). Consider adding a new impact type (e.g., 'installer') or confirm no impacts are needed."
   - "Entry 'install.sh bootstrapper' updated for commit e7ade5824f74f7dc6a778514a23c7da891c3a4fb: the Nix installer was pinned to v0.38.1 and the --determinate=false flag was removed. Verify the pinned version is intentional and that the flag removal does not affect installation behavior on target platforms."
+  - "Entry 'pf install-cluster renamed to pf cluster install' (commit 8c03b01043302de2bced3649ebf6e7cc112be3b1): the CLI component 'cluster install' is not in the schema's allowed values for the cli impact type. No impacts block was added. Consider adding 'cluster install' to the schema's cli component enum, or confirm the correct component name."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -33,3 +34,7 @@ validated:
   - fd8126dddc92d163f8080babaf07558568606fee
   - eb60e19e23fe6b4013d109d35121ac875c472618
   - 7b1091c71ab8443e201aa32e95bd7a609ad29e43
+  - 486c6c56ce10edc26253d6a52f789859230978ab
+  - 3eed67c578f7f442649b36c3586bffe5c0adbe37
+  - 733c3c8cf4b9c33e17adc99f6527108c58713144
+  - 8c03b01043302de2bced3649ebf6e7cc112be3b1

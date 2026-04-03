@@ -1,13 +1,17 @@
 #!/usr/bin/env bun
 // Lists commit hashes since the last edge release that are not in the validated list in review.yaml.
+// Automatically filters out commits that only touch non-user-facing files (per .changelog-include).
 
 import { execSync } from "child_process";
 import { readFileSync, existsSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import { parse } from "yaml";
 
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+
 const REVIEW_YAML_PATH = resolve(
-  import.meta.dir,
+  scriptDir,
   "../../../../packages/website/src/content/changelog/main/review.yaml"
 );
 
@@ -43,6 +47,23 @@ function loadValidated(): Set<string> {
   return new Set();
 }
 
+function loadIncludePatterns(): Bun.Glob[] {
+  const includeFile = resolve(scriptDir, "..", ".changelog-include");
+  const content = readFileSync(includeFile, "utf8");
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"))
+    .map((pattern) => new Bun.Glob(pattern));
+}
+
+function hasUserFacingFiles(hash: string, patterns: Bun.Glob[]): boolean {
+  const filesRaw = run(`git diff-tree --no-commit-id --name-only -r ${hash}`);
+  if (filesRaw.length === 0) return false;
+  const files = filesRaw.split("\n").filter((f) => f.length > 0);
+  return files.some((file) => patterns.some((glob) => glob.match(file)));
+}
+
 function main(): void {
   const tagsRaw = run("git tag --sort=-v:refname");
   if (tagsRaw.length === 0) {
@@ -66,8 +87,11 @@ function main(): void {
 
   const allHashes = logRaw.split("\n").filter((l) => l.length > 0);
   const validated = loadValidated();
+  const patterns = loadIncludePatterns();
 
-  const unvalidated = allHashes.filter((hash) => !validated.has(hash));
+  const unvalidated = allHashes.filter(
+    (hash) => !validated.has(hash) && hasUserFacingFiles(hash, patterns)
+  );
 
   // Reverse to chronological order (earliest first)
   unvalidated.reverse();

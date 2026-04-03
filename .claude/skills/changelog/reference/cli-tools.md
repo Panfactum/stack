@@ -128,7 +128,7 @@ If no edge release tags exist or no commits are found since the last tag, prints
 
 ## list-unvalidated-commits.ts
 
-Lists commit hashes since the last edge release that have not yet been reviewed by the ValidateChangelog workflow. Reads the `validated` array from `main/review.yaml` and filters it against all non-merge commits since the last `edge.*` tag.
+Lists commit hashes since the last edge release that have not yet been reviewed by the ValidateChangelog workflow. Reads the `validated` array from `main/review.yaml` and filters it against all non-merge commits since the last `edge.*` tag. Commits that only touch non-user-facing files (per `.changelog-include` glob patterns) are automatically excluded.
 
 **Usage:**
 
