@@ -1276,3 +1276,19 @@ changes:
       - type: cli
         component: domain add
         summary: Domain registration request is now actually submitted to AWS
+  - type: fix
+    summary: >-
+      Fixes the `zones` output of [`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains)
+      to expose the correct structure (`zone_id` per domain), enabling `pf domain add` to
+      successfully read zone metadata after deploying the module and complete domain registration.
+    references:
+      - type: internal-commit
+        summary: "fix: aws_registered_domains output"
+        link: 4c7728c99d5ec35bbf3a663ac9681b43d5666cc1
+    impacts:
+      - type: iac-module
+        component: aws_registered_domains
+        summary: zones output now exposes zone_id per domain
+      - type: cli
+        component: domain add
+        summary: Can now correctly read zone metadata after aws_registered_domains deployment
