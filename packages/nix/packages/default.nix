@@ -105,6 +105,7 @@ with pkgs;
   entr # Re-running scripts when files change
   bc # bash calculator
   jq # json
+  jaq # json/yaml processor (supports --from yaml)
   yq # yaml
   fzf # fuzzy selector
   getopt # for parsing command-line arguments

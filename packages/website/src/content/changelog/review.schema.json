@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "todo": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of questions, concerns, or uncertainties flagged during AI-assisted changelog authoring that require human review. Each item describes a specific issue with enough context to act on it."
+    },
+    "validated": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{40}$"
+      },
+      "description": "List of full git commit hashes that have been reviewed by the ValidateChangelog workflow. Used to track which commits have already been checked for changelog coverage so they are not re-analyzed on subsequent runs."
+    }
+  }
+}

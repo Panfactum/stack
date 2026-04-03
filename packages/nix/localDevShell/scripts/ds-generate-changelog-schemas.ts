@@ -335,13 +335,14 @@ function buildLogSchema(
                   type: {
                     type: "string",
                     enum: [
-                      "commit",
+                      "internal-commit",
+                      "external-commit",
                       "issue-report",
                       "external-docs",
                       "internal-docs",
                     ],
                     description:
-                      "The kind of reference. 'commit' is a link to a specific git commit or pull request in a source repository. 'issue-report' is a link to a bug report, feature request, or discussion thread. 'external-docs' is a link to third-party documentation (e.g., Kubernetes, Terraform, Helm docs). 'internal-docs' is a link to a page on panfactum.com.",
+                      "The kind of reference. 'internal-commit' is a commit in the Panfactum stack repository — link must be the full 40-character commit SHA. 'external-commit' is a link to a commit or pull request in an external repository. 'issue-report' is a link to a bug report, feature request, or discussion thread. 'external-docs' is a link to third-party documentation (e.g., Kubernetes, Terraform, Helm docs). 'internal-docs' is a link to a page on panfactum.com.",
                   },
                   summary: {
                     type: "string",
@@ -350,9 +351,25 @@ function buildLogSchema(
                   link: {
                     type: "string",
                     description:
-                      "URL or path to the referenced resource.",
+                      "URL or path to the referenced resource. For internal-commit references, this must be the full 40-character commit SHA.",
                   },
                 },
+                allOf: [
+                  {
+                    if: {
+                      properties: {
+                        type: { const: "internal-commit" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        link: {
+                          pattern: "^[0-9a-f]{40}$",
+                        },
+                      },
+                    },
+                  },
+                ],
               },
             },
             impacts: {
@@ -466,9 +483,7 @@ function main(): void {
     CONFIGURATION_ENUM
   );
 
-  console.log(
-    `Writing log schema to ${LOG_SCHEMA_OUTPUT_PATH}...`
-  );
+  console.log(`Writing log schema to ${LOG_SCHEMA_OUTPUT_PATH}...`);
   writeFileSync(
     LOG_SCHEMA_OUTPUT_PATH,
     JSON.stringify(logSchema, null, 2) + "\n"

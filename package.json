@@ -8,5 +8,7 @@
   "devDependencies": {
     "check-dependency-version-consistency": "4.1.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "yaml": "^2.7.1"
+  }
 }

@@ -25,8 +25,10 @@ case "$FILE_PATH" in
   fi
   ;;
 *.yaml)
-  if [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/ ]]; then
+  if [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/.*log\.yaml$ ]]; then
     { ds-validate-changelog "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+  elif [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/.*review\.yaml$ ]]; then
+    { ds-validate-changelog-review "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   elif [[ "$REL_PATH" == "packages/infrastructure/metadata.yaml" ]]; then
     { ds-validate-iac-metadata "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   fi

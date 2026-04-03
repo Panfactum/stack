@@ -100,6 +100,15 @@ repos:
         description: "Validates changelog log.yaml files against the JSON schema"
         fail_fast: true
 
+      - id: validate-changelog-review-schema
+        name: Validate Changelog Review Schema
+        entry: ds-validate-changelog-review
+        language: system
+        files: ^packages/website/src/content/changelog/.*/review\.yaml$
+        pass_filenames: true
+        description: "Validates changelog review.yaml files against the JSON schema"
+        fail_fast: true
+
       - id: validate-metadata-schema
         name: Validate Metadata Schema
         entry: ds-validate-iac-metadata
