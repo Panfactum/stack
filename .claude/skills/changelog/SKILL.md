@@ -2,6 +2,7 @@
 name: changelog
 description: Manage changelog entries — add, edit, validate, or summarize changes in main/log.yaml. USE WHEN the user wants to manage changelog entries, add release notes, or validate changelog data.
 argument-hint: "[action] [description]"
+model: sonnet
 ---
 
 # Changelog
