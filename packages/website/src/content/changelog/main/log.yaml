@@ -250,6 +250,10 @@ changes:
       [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn).
     action_items:
       - "Re-apply any modules that use `aws_cdn` to create the AAAA record."
+    references:
+      - type: internal-commit
+        summary: "Adds additional AAAA record for IPv6 support for aws_cdn"
+        link: 5a39ffe25bc2abac97a76b802195f4935acd1126
     impacts:
       - type: iac-module
         component: aws_cdn
@@ -804,3 +808,321 @@ changes:
       - type: cli
         component: devshell sync
         summary: Fixed compilation error that prevented the command from running
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` VPC setup step where the AWS CLI could hang waiting for user
+      input from a pager when listing VPCs. The `--no-cli-pager` flag is now passed to the
+      `aws ec2 describe-vpcs` call, ensuring the command always returns output non-interactively.
+    references:
+      - type: internal-commit
+        summary: "chore: add additional debug logs"
+        link: 9b8ead4095a2fb15c4adc4f55fd21ba2e8de8d9d
+  - type: addition
+    summary: >-
+      Adds the [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      submodule for deploying a secured, multi-node OpenSearch cluster on Kubernetes with automated S3 backups,
+      mTLS via internal certificates, and Vault-managed credentials.
+    description: >-
+      The `kube_opensearch` module provisions a production-grade OpenSearch cluster with mutual TLS authentication
+      using Panfactum's internal certificate infrastructure, role-based access control (superuser, admin, reader),
+      automated S3 snapshot backups, and Vault dynamic credentials. It is designed for use as a submodule within
+      custom infrastructure modules that need full-text search or log analytics capabilities.
+    references:
+      - type: internal-commit
+        summary: "feat: alpha opensearch module"
+        link: dafb4d5782ba675eb6a0c4eff407ea59ab6f815e
+    impacts:
+      - type: iac-module
+        component: kube_opensearch
+        summary: New submodule for deploying a secured OpenSearch cluster
+  - type: breaking_change
+    summary: >-
+      `pull_through_cache_enabled` now defaults to `true` for [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats),
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster),
+      and [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
+      These modules will now pull images through the ECR pull-through cache by default.
+    description: >-
+      If your environment does not have an ECR pull-through cache configured, image pulls for these modules will
+      fail. Either configure ECR pull-through caching via `aws_ecr_pull_through_cache` or explicitly set
+      `pull_through_cache_enabled = false` in each affected module.
+    action_items:
+      - "If ECR pull-through caching is not configured in your environment, set `pull_through_cache_enabled = false` on `kube_nats`, `kube_pg_cluster`, and `kube_redis_sentinel` modules."
+      - "Alternatively, deploy the `aws_ecr_pull_through_cache` module to enable pull-through caching before re-applying these modules."
+    references:
+      - type: internal-commit
+        summary: "feat: alpha opensearch module"
+        link: dafb4d5782ba675eb6a0c4eff407ea59ab6f815e
+    impacts:
+      - type: iac-module
+        component: kube_nats
+        summary: pull_through_cache_enabled now defaults to true
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: pull_through_cache_enabled now defaults to true
+      - type: iac-module
+        component: kube_redis_sentinel
+        summary: pull_through_cache_enabled now defaults to true
+  - type: addition
+    summary: >-
+      Adds the `opensearch-cli` tool to the Panfactum DevShell for interacting with OpenSearch clusters
+      from the command line.
+    references:
+      - type: internal-commit
+        summary: "feat: alpha opensearch module"
+        link: dafb4d5782ba675eb6a0c4eff407ea59ab6f815e
+    impacts:
+      - type: devshell
+        component: opensearch-cli
+        summary: New tool for interacting with OpenSearch clusters
+  - type: breaking_change
+    summary: >-
+      The `update_type` variable has been removed from
+      [`kube_cron_job`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job).
+      Any module configuration that explicitly sets this variable must remove it to avoid a Terraform error.
+    action_items:
+      - "Remove any `update_type` input from your `kube_cron_job` module configurations."
+    references:
+      - type: internal-commit
+        summary: "feat: alpha opensearch module"
+        link: dafb4d5782ba675eb6a0c4eff407ea59ab6f815e
+    impacts:
+      - type: iac-module
+        component: kube_cron_job
+        summary: Removed update_type variable
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` VPC setup step where the checkpoint was tracked under the wrong step ID
+      (`kyvernoIaCSetup` instead of `setupVPCIaC`), causing resumed installs to incorrectly re-run the
+      VPC deployment even when it had already completed.
+    references:
+      - type: internal-commit
+        summary: "fix: cli updates"
+        link: 8d47487d857f75f57f6b1265beb51266e41c56f8
+  - type: fix
+    summary: >-
+      Fixes `pf aws vpc-network-test` so that progress message spinners are correctly closed when
+      the underlying AWS operations (instance ID lookup, SSM command dispatch, SSM output retrieval)
+      throw an error, preventing orphaned spinner output in the terminal on failure.
+    references:
+      - type: internal-commit
+        summary: "fix: cli updates"
+        link: 8d47487d857f75f57f6b1265beb51266e41c56f8
+    impacts:
+      - type: cli
+        component: aws vpc-network-test
+        summary: Progress spinners now close correctly on error
+  - type: fix
+    summary: >-
+      Increases the SSM command status polling retry limit from 20 to 60 in `pf aws vpc-network-test`,
+      reducing spurious timeout failures when SSM commands take longer to complete on newly provisioned instances.
+    references:
+      - type: internal-commit
+        summary: "fix: cli updates"
+        link: 8d47487d857f75f57f6b1265beb51266e41c56f8
+    impacts:
+      - type: cli
+        component: aws vpc-network-test
+        summary: SSM command polling retries increased from 20 to 60
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` vault secrets step where writing encrypted SOPS files would fail
+      if the target directory did not yet exist. The CLI now auto-creates the full directory path
+      before writing, preventing installation failures when directories have not been created ahead of time.
+    references:
+      - type: internal-commit
+        summary: "fix: cli updates"
+        link: 8d47487d857f75f57f6b1265beb51266e41c56f8
+  - type: fix
+    summary: >-
+      Fixes a hang in CLI subprocess execution where stdout/stderr line-callback promises were not
+      awaited and stdout/stderr streams were consumed sequentially instead of in parallel.
+      Commands that produced large amounts of output or used line callbacks could stall or produce
+      incomplete output. Subprocess calls now read stdout, stderr, and the merged stream concurrently.
+    references:
+      - type: internal-commit
+        summary: "fix: cli updates"
+        link: 8d47487d857f75f57f6b1265beb51266e41c56f8
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` so that the SLA target prompt is only shown once per installation
+      session. The confirmed SLA target is now persisted via the checkpointer, so resuming an
+      interrupted install skips the prompt and uses the previously selected value.
+    references:
+      - type: internal-commit
+        summary: "fix: only ask for cla confirmation once"
+        link: eb2069598796850a9a9eb985614e69c6124d5525
+  - type: addition
+    summary: >-
+      Adds the new `aws_organization` IaC module for creating and managing an AWS Organization,
+      member accounts, and contact information from Terraform. The module provisions the organization
+      structure, enables required AWS service access principals, and sets primary and alternate contacts
+      on all member accounts.
+    description: >-
+      The `aws_organization` module lets Panfactum manage your entire AWS Organization as infrastructure
+      as code. It creates and manages AWS accounts within the organization, configures IAM Organizations
+      features (root credentials management, root sessions), and sets per-account contact information.
+      This is a prerequisite for the automated `pf env install` workflow which provisions new AWS
+      accounts automatically using the organization.
+    references:
+      - type: internal-commit
+        summary: "feat: opensearch alpha state"
+        link: 265d0a3fa27c15364fd814fd44d66aac4396bb88
+    impacts:
+      - type: iac-module
+        component: aws_organization
+        summary: New module for managing AWS Organization structure and member accounts
+  - type: addition
+    summary: >-
+      Adds the `pf env install` CLI command, which provides a guided wizard for installing a new
+      Panfactum environment. The wizard handles AWS Organization setup, account provisioning, IAM
+      Identity Center configuration, and foundational IaC bootstrapping in a single interactive flow.
+    description: >-
+      `pf env install` walks users through the complete environment setup process — detecting whether
+      an AWS Organization exists, provisioning a new AWS account via the organization, bootstrapping
+      the Terraform state bucket and lock table, and optionally connecting the environment to AWS SSO.
+      This significantly reduces the manual steps required to add a new environment to a Panfactum
+      managed AWS estate.
+    references:
+      - type: internal-commit
+        summary: "feat: opensearch alpha state"
+        link: 265d0a3fa27c15364fd814fd44d66aac4396bb88
+  - type: breaking_change
+    summary: >-
+      The `aws.secondary` provider alias and cross-region DynamoDB replica have been removed from
+      [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources).
+      Any module configuration that includes a secondary AWS provider alias must remove it to avoid
+      a Terraform error on next apply.
+    action_items:
+      - "Remove the `aws.secondary` provider alias from your `tf_bootstrap_resources` Terragrunt configuration if present."
+      - "Re-apply `tf_bootstrap_resources` to remove the cross-region DynamoDB replica from your state lock table."
+    references:
+      - type: internal-commit
+        summary: "feat: opensearch alpha state"
+        link: 265d0a3fa27c15364fd814fd44d66aac4396bb88
+    impacts:
+      - type: iac-module
+        component: tf_bootstrap_resources
+        summary: Secondary region provider alias and DynamoDB replica removed
+  - type: improvement
+    summary: >-
+      The [`kube_logging`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_logging)
+      module has been updated to Loki chart version 6.29.0 (from 6.6.2). The default log level has been
+      changed from `warn` to `info` and several query, caching, and compaction settings have been tuned
+      for improved performance and throughput.
+    references:
+      - type: internal-commit
+        summary: "feat: opensearch alpha state"
+        link: 265d0a3fa27c15364fd814fd44d66aac4396bb88
+    impacts:
+      - type: iac-module
+        component: kube_logging
+        summary: Loki chart updated to 6.29.0; default log level changed to info; query parallelism and caching tuned
+  - type: improvement
+    summary: >-
+      The [`kube_node_settings`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_settings)
+      module now sets `max-locked-memory` to unlimited in the node OCI defaults, which is required for
+      OpenSearch and other memory-intensive workloads that use `mlock` to prevent swapping.
+    references:
+      - type: internal-commit
+        summary: "feat: opensearch alpha state"
+        link: 265d0a3fa27c15364fd814fd44d66aac4396bb88
+    impacts:
+      - type: iac-module
+        component: kube_node_settings
+        summary: max-locked-memory OCI resource limit set to unlimited
+  - type: improvement
+    summary: >-
+      The [`kube_alloy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_alloy)
+      Alloy log pipeline now drops the `filename`, `job`, and `pod` labels from log streams before
+      forwarding to Loki, reducing label cardinality and lowering storage costs.
+    references:
+      - type: internal-commit
+        summary: "feat: opensearch alpha state"
+        link: 265d0a3fa27c15364fd814fd44d66aac4396bb88
+    impacts:
+      - type: iac-module
+        component: kube_alloy
+        summary: High-cardinality labels (filename, job, pod) dropped from log streams
+  - type: fix
+    summary: >-
+      Fixes S3 snapshot connectivity in [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      by explicitly setting `s3.client.default.endpoint` to the regional AWS S3 endpoint. Without this setting,
+      the S3 repository plugin may fail to authenticate via IRSA or connect to the correct regional bucket.
+    references:
+      - type: internal-commit
+        summary: "fix: set s3.client.default.endpoint for kube_opensearch S3 repository plugin"
+        link: 997834fa45e43fdb304c4597dd15824660695c97
+    impacts:
+      - type: iac-module
+        component: kube_opensearch
+        summary: S3 client default endpoint now explicitly set to the regional AWS S3 endpoint
+  - type: improvement
+    summary: >-
+      The `pf devshell sync` command's internal sync logic has been refactored into reusable Listr task
+      builders for Kubernetes cluster credentials, SSH bastion connection info, and AWS Identity Center
+      profiles. The command now also syncs AWS Identity Center configuration as part of the standard
+      sync flow.
+    description: >-
+      The sync logic was previously implemented as ad-hoc functions in the devshell update command. It is
+      now structured as composable task builders (`buildSyncKubeClustersTask`, `buildSyncSSHTask`,
+      `buildSyncAWSIdentityCenterTask`) that are shared across `pf devshell sync`, `pf env install`,
+      and future CLI commands. This improves reliability and enables progress visibility via Listr's
+      task renderer.
+    references:
+      - type: internal-commit
+        summary: "refactor devshell update to use task builders and add AWS Identity Center sync"
+        link: 7b1f505992598d12b16864c9ec33865c97232d9b
+    impacts:
+      - type: cli
+        component: devshell sync
+        summary: Internal sync logic refactored into reusable task builders; AWS Identity Center sync added
+  - type: addition
+    summary: >-
+      Adds the new `pf domain add` CLI command, which provides a guided wizard for adding a domain
+      to a Panfactum environment.
+    references:
+      - type: internal-commit
+        summary: "refactor devshell update to use task builders and add AWS Identity Center sync"
+        link: 7b1f505992598d12b16864c9ec33865c97232d9b
+    impacts:
+      - type: cli
+        component: domain add
+        summary: New guided wizard for adding a domain to an environment
+  - type: improvement
+    summary: >-
+      `pf config get` now returns three additional derived fields: `environment_dir` (the environment
+      directory name), `region_dir` (the region directory name), and `module_dir` (the module directory
+      name). These directory names may differ from the logical environment, region, and module names
+      used in configuration.
+    references:
+      - type: internal-commit
+        summary: "refactor devshell update to use task builders and add AWS Identity Center sync"
+        link: 7b1f505992598d12b16864c9ec33865c97232d9b
+    impacts:
+      - type: cli
+        component: config get
+        summary: Now returns environment_dir, region_dir, and module_dir derived fields
+  - type: fix
+    summary: >-
+      Fixes `pf env install` to conditionally skip importing the `AWSServiceRoleForEC2Spot` IAM
+      service-linked role when it does not already exist in the account. Previously the import step
+      would always attempt the import, causing failures on accounts where spot instances had never
+      been used and the role had not yet been created by AWS.
+    references:
+      - type: internal-commit
+        summary: "refactor devshell update to use task builders and add AWS Identity Center sync"
+        link: 7b1f505992598d12b16864c9ec33865c97232d9b
+  - type: improvement
+    summary: >-
+      [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) now automatically
+      requests CloudFront service quota increases for origin request policies, response header policies,
+      and cache policies (all raised to 100). This prevents quota exhaustion errors when managing many
+      CloudFront distributions.
+    references:
+      - type: internal-commit
+        summary: "refactor devshell update to use task builders and add AWS Identity Center sync"
+        link: 7b1f505992598d12b16864c9ec33865c97232d9b
+    impacts:
+      - type: iac-module
+        component: aws_account
+        summary: Now provisions CloudFront service quota increases for origin request, response header, and cache policies

@@ -25,7 +25,7 @@ Before proceeding, verify:
 
 ## Workflow Steps
 
-These workflow steps MUST be followed exactly as written. Do NOT prompt the user for input at any step.
+These workflow steps MUST be followed exactly as written. Do NOT prompt the user for input at any step. Do NOT run git commands directly — all diff and file information comes from the provided scripts.
 
 ### 1. Read the Diffs
 
@@ -63,7 +63,7 @@ For each changed file path, apply the heuristics below to produce suggested `imp
 
 Files that do not match any pattern should be noted but do not automatically produce a component suggestion.
 
-After mapping, cross-reference the suggested component names against the valid enums in `packages/website/src/content/changelog/log.schema.json`. If a suggested component name is not present in the schema for its impact type, include it anyway and add a `todo` item to `packages/website/src/content/changelog/main/review.yaml` noting it is unverified.
+After mapping, cross-reference the suggested component names against the valid enums in the log schema (auto-loaded via the changelog-format reference doc). If a suggested component name is not present in the schema for its impact type, include it anyway and add a `todo` item to `packages/website/src/content/changelog/main/review.yaml` noting it is unverified.
 
 ### 4. Determine Entries
 

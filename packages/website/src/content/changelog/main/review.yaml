@@ -9,6 +9,15 @@ todo:
   - "Entry 'pf cluster install Linkerd automation' (commit b04b36dad98ca97a3d416543ff95e42811665c13): no CLI impact added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'pf cluster install inbound networking automation' (commit 6bc9823b0a576fb0d56a63478ae39872682cf9fc): no CLI impact added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'pf cluster install CloudNativePG automation' (commit 91fb52517c3c24210dee2bd96ee8e89d28293f01): component 'kube_cloudnative_pg' is not in the iac-module schema enum. Verify whether this module exists in the codebase under packages/infrastructure/kube_cloudnative_pg/ and if so, add it to the schema."
+  - "Entry 'Fixes pf cluster install VPC setup step hanging due to AWS CLI pager' (commit 9b8ead4095a2fb15c4adc4f55fd21ba2e8de8d9d): no impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'pull_through_cache_enabled defaults to true' (commit dafb4d5782ba675eb6a0c4eff407ea59ab6f815e): classified as breaking_change because it changes default behavior for kube_nats, kube_pg_cluster, kube_redis_sentinel. Verify whether kube_stateful_set also changed pull_through_cache_enabled in this or a nearby commit."
+  - "Entry 'Removed update_type from kube_cron_job' (commit dafb4d5782ba675eb6a0c4eff407ea59ab6f815e): update_type was likely vestigial (CronJobs do not support update strategies). If no users set this variable explicitly, this may be safe to classify as a fix/improvement rather than breaking_change."
+  - Commit 8d47487d857f75f57f6b1265beb51266e41c56f8 changes context.ts to hardcode logLevel 'debug' with a TODO comment. This likely changes the verbosity of all CLI commands. Verify whether this is intentional for the release or a temporary debugging aid that should be reverted before shipping.
+  - "Entry 'Fixes pf cluster install SLA target re-prompt' (commit eb2069598796850a9a9eb985614e69c6124d5525): no CLI impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'New aws_organization module' (commit 265d0a3fa27c15364fd814fd44d66aac4396bb88): component 'aws_organization' is not in the iac-module schema enum. Verify the module exists at packages/infrastructure/aws_organization/ and add it to the schema's iac-module enum."
+  - "Entry 'New pf env install command' (commit 265d0a3fa27c15364fd814fd44d66aac4396bb88): 'env install' is not in the cli component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
+  - "Entry 'tf_bootstrap_resources secondary region removal' (commit 265d0a3fa27c15364fd814fd44d66aac4396bb88): classified as breaking_change because it removes the aws.secondary provider alias. Verify whether any existing users have this secondary provider configured and whether there are migration docs needed."
+  - "Entry 'Fixes pf env install AWSServiceRoleForEC2Spot import' (commit 7b1f505992598d12b16864c9ec33865c97232d9b): 'env install' is not in the CLI component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -62,3 +71,15 @@ validated:
   - 5364649a857b1228fd1631533976c8288b71f058
   - d966e41f762d8e82e3b088a66bddd8cabb29ff93
   - 738389f5a03f39078b5cfcce211254397cd83465
+  - e29c77add9f73fd0cda47818c26deb596e1729e1
+  - 9b8ead4095a2fb15c4adc4f55fd21ba2e8de8d9d
+  - dafb4d5782ba675eb6a0c4eff407ea59ab6f815e
+  - 8d47487d857f75f57f6b1265beb51266e41c56f8
+  - eb2069598796850a9a9eb985614e69c6124d5525
+  - 265d0a3fa27c15364fd814fd44d66aac4396bb88
+  - 2deb1c22c32c2c95cfef161eeda879b956ba781c
+  - 997834fa45e43fdb304c4597dd15824660695c97
+  - 63903c0600e2994946e6d9a3a18a9adfde9726cd
+  - 7b1f505992598d12b16864c9ec33865c97232d9b
+  - 5a39ffe25bc2abac97a76b802195f4935acd1126
+  - 925223d78f004555375cecdad50f86676b51596e
