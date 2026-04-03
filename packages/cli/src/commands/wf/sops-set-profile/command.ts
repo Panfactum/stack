@@ -149,7 +149,7 @@ This can be used in CI pipelines to simplify access to encrypted files that woul
         const sopsFileSchema = z.object({
           sops: z.object({
             kms: z.array(z.record(z.string())).optional()
-          }).optional()
+          }).passthrough().optional()
         }).passthrough(); // Allow other fields in the YAML
 
         const data = await readYAMLFile({

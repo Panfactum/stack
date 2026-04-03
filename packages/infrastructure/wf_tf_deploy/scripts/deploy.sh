@@ -50,9 +50,9 @@ mkdir -p "$TF_PLUGIN_CACHE_DIR"
 cd "$TF_APPLY_DIR"
 terragrunt apply --all \
   --queue-exclude-external \
-  --terragrunt-download-dir /tmp/.terragrunt \
-  --terragrunt-non-interactive \
-  --terragrunt-fetch-dependency-output-from-state \
-  --terragrunt-provider-cache \
-  --terragrunt-provider-cache-dir "$TF_PLUGIN_CACHE_DIR" \
-  --terragrunt-parallelism 5
+  --download-dir /tmp/.terragrunt \
+  --non-interactive \
+  --dependency-fetch-output-from-state \
+  --provider-cache \
+  --provider-cache-dir "$TF_PLUGIN_CACHE_DIR" \
+  --parallelism 5
