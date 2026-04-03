@@ -22,6 +22,14 @@ todo:
   - "Entry 'pf cluster install Linkerd check streaming output' (commit 989fcf567fb8e3868435b678dd76609ee40b4fff): no CLI impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'Fixes pf env install account alias bug' (commit 79b510609863bade8668dad6357fda3280eab11d): 'env install' is not in the CLI component schema enum. No impacts block was added. Consider adding 'env install' to the schema's cli component enum."
   - "Entry 'Fixes pf env install AWS static credentials' (commit c70f947891cc2dc96c6f8c330b8c70fb985f0c7c): show-diff returned no diff output for this commit; entry was inferred from the commit message 'fix: aws static creds update cli fx' and the changed files (env/install/command.ts and addAWSProfileFromStaticCreds.ts). Verify the exact fix and update the summary if it does not match what was actually changed."
+  - "Entry 'Fixes pf cluster install kubectl --context flag' (commit 3637fac4ac001ddacf2bd48cc9897ae5543cd173): show-diff returned no diff content despite user-facing files being detected. Entry was written from commit message 'fix: pass kube context to kubectl commands' alone. Verify which specific kubectl commands were missing --context and update the summary if needed. No impacts block added because 'cluster install' is not a valid CLI component in the schema."
+  - "Entry 'Fixes kube_cert_issuers subdomain cert issuance' (commit 8aa22456510df9d9cc7a85730a810079e75ed424): show-diff returned '(no diff)' despite detecting user-facing files. Entry was written from commit message 'fix: provider cert-issuers the ability to create certs for subdomains of the cluster domain' alone. Verify the exact module(s) affected (kube_cert_issuers vs. kube_certificates) and update the summary and impacts accordingly. The HTML entity &lt; in the summary should be replaced with < if the YAML field supports it."
+  - "Entry 'pf cluster install streams run-all apply output' (commit 96f0de01ef79e15ffb70c5473e0c45070190e1eb): no impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'Fixes panfactum.hcl for new pf CLI' (commit 778dac2c2e3e7cbb9141666e0eac0afefedabea1): show-diff returned '(no diff)' because panfactum.hcl is at the repo root and not covered by .changelog-include patterns. Entry was written from the commit message 'fix: panfactum.hcl for new cli' alone. Verify the exact changes made (e.g., which flags or commands were updated) and update the summary accordingly. Also confirm whether this is a distinct fix from the existing 'Fixes panfactum.hcl --terragrunt-global-cache flag' entry (commit c71b2b32a1f58286448afdf1419443e0f7c5f9f9) or if the two should be merged."
+  - "Commit 46db2eeca78b0208f1a24daf93ac7b0f8edb99f4 (refactor: remove old devshell scripts): show-diff detected user-facing files in packages/nix/ matching .changelog-include patterns but git show returned no diff content. This is the same '(no diff)' anomaly seen in other commits. The commit removes old devshell scripts superseded by the new pf CLI — no changelog entry was added because (1) the refactor: prefix signals no user-facing behavior change and (2) the pf CLI migration is already documented in an existing breaking_change entry. Verify which specific scripts were removed and confirm they are fully superseded."
+  - "Entry 'Fixes install.sh to use pf commands' (commit 485bb8f898b65caacfb8d9180dec0a111f95c88c): show-diff returned '(no diff)' despite detecting user-facing files in packages/installer/. Entry was written from the commit message 'fix: update stage 1 installer to use pf commands' alone. Verify which specific commands were replaced (e.g., pf-update → pf devshell sync, or similar) and update the summary accordingly. Also confirm whether this entry overlaps with the existing install.sh additions or other installer fixes."
+  - "Entry 'Fixes SLA value formatting in pf cluster install setSLA step' (commit d8976a0552a5a9f6e4d81b58269c96b219dcb392): show-diff returned '(no diff)' — changed files are not covered by .changelog-include patterns. Entry was written from the commit message 'fix: set sla formatting for cluster install' alone. Verify the exact formatting issue (e.g., wrong enum value, wrong case, serialization format) and update the summary accordingly. Also confirm whether this is distinct from the existing setSLA missing-return-statement entry (commit 5bf5678581290b8c1b786f8756db00b664c62c7f) or if the two should be merged."
+  - "Entry 'Fixes step nesting in pf cluster install' (commit 7c80f0a2d2fe0346cb7a1943baa97984d09ba851): show-diff returned '(no diff)' — changed files are not covered by .changelog-include patterns. Entry was written from the commit message 'fix: cluster install step nesting' alone. Verify the exact nesting issue (e.g., Listr task hierarchy, step dependency ordering, or checkpoint group structure) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -103,3 +111,40 @@ validated:
   - c70f947891cc2dc96c6f8c330b8c70fb985f0c7c
   - 9d9d9b14061f6be41d14551a7d3278d45bd52f17
   - 4c7728c99d5ec35bbf3a663ac9681b43d5666cc1
+  - b8ffeccb6b2800e15a9a6cef98ac833509a44743
+  - 3637fac4ac001ddacf2bd48cc9897ae5543cd173
+  - c71b2b32a1f58286448afdf1419443e0f7c5f9f9
+  - 1d3457d6c9386ef1686026d65d2d2af9804cd1e8
+  - e9758e019f4d49cfb141b1aabe12706dc526ae5b
+  - 3d527a618df7182ce3f125b4c5cd7b86cd664fab
+  - 8aa22456510df9d9cc7a85730a810079e75ed424
+  - 098ce1c7243358611c2b42758848ddc3010e92c7
+  - b1d46a347783c83d92f62b5c077bd4e834713b78
+  - f7b8efb6673a9b38af2d991672bf8f34eb89bcd9
+  - 06cd8ab868f8b85ba81a543d903a29d9c1a5c943
+  - 96f0de01ef79e15ffb70c5473e0c45070190e1eb
+  - 4d97e6bc2796c175ee37239c7da3bb297bd5e734
+  - 54ff18e918918cd927c0cd414997eaaa516fac0e
+  - 0dbcbbc77c0a4d82e623e7241967852b0788ad93
+  - d6516cc99dfbdccaa89571f5a042a801261ede13
+  - 6f44a35ec09f64f4388aa6b9eb327649b44801a4
+  - a255f1d49094007a35ce4bda8b898cc6be963fab
+  - 46db2eeca78b0208f1a24daf93ac7b0f8edb99f4
+  - 778dac2c2e3e7cbb9141666e0eac0afefedabea1
+  - 9da785c5af9a6d5066c02b6811ff61032bb2cc8d
+  - 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+  - e0bedc9006e289a7756917a08a9c34d0400ecae3
+  - 144af8bf96042551ec5d41a8a9820ee1544e9c45
+  - 3747d0982bbff1e6ac4d2684a417dbd9c1f16d1e
+  - a30d2e64da1de9fb4d96ffa9cf8d9fc4acd6d06a
+  - 485bb8f898b65caacfb8d9180dec0a111f95c88c
+  - 21d70937a4329fabf4872039ce14b63bb039dc91
+  - 1c7d2dd454ef5fa216abe3fabb12aa1bcdf76bfb
+  - d52b6c96383aa2c4020020c9beadc1a198dc32c6
+  - 6f47d8e6ee2cd4f2d409ccaf189293f919cdb027
+  - d8976a0552a5a9f6e4d81b58269c96b219dcb392
+  - 567780ce6b257b77b20a87a5de382070ae72e819
+  - c801c731f0dfca88f765c7f54eaeb7e59d37f419
+  - 0a0e3ca4e78569312fc7bb4763c120a92674bb5d
+  - 703803d96f3d115ec80a3cb4337aebeab2e75537
+  - 7c80f0a2d2fe0346cb7a1943baa97984d09ba851

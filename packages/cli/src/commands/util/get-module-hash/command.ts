@@ -54,6 +54,7 @@ import { getModuleHash } from '@/util/terragrunt/getModuleHash';
  */
 export class GetModuleHashCommand extends PanfactumCommand {
   static override paths = [['util', 'get-module-hash']];
+  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Generate SHA1 hash of Terraform module contents',

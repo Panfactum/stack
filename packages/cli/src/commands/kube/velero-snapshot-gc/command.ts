@@ -41,6 +41,7 @@ interface IVolumeSnapshot {
  */
 export class K8sVeleroSnapshotGcCommand extends PanfactumCommand {
   static override paths = [['k8s', 'velero', 'snapshot-gc']];
+  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Remove orphaned VolumeSnapshots and VolumeSnapshotContents',

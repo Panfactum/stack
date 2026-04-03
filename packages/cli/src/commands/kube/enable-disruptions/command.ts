@@ -41,6 +41,7 @@ import { execute } from '@/util/subprocess/execute';
  */
 export class K8sDisruptionsEnableCommand extends PanfactumCommand {
   static override paths = [['kube', 'enable-disruptions']];
+  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Enable voluntary disruptions for maintenance windows',

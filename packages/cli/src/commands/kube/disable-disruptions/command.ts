@@ -81,6 +81,7 @@ const timestampSchema = z.string()
  */
 export class K8sDisruptionsDisableCommand extends PanfactumCommand {
   static override paths = [['kube', 'disable-disruptions']];
+  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Disable voluntary disruptions for expired maintenance windows',

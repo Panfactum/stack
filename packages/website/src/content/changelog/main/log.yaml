@@ -1292,3 +1292,315 @@ changes:
       - type: cli
         component: domain add
         summary: Can now correctly read zone metadata after aws_registered_domains deployment
+  - type: fix
+    summary: >-
+      Fixes `pf cluster install` kubectl commands that were missing the `--context` flag, causing
+      them to operate against the wrong cluster when multiple Kubernetes contexts are present in the
+      kubeconfig. The kube context is now explicitly passed to all kubectl invocations during cluster
+      installation.
+    references:
+      - type: internal-commit
+        summary: "fix: pass kube context to kubectl commands"
+        link: 3637fac4ac001ddacf2bd48cc9897ae5543cd173
+  - type: fix
+    summary: >-
+      Fixes `panfactum.hcl` so that `pf config get` is no longer invoked with the
+      `--terragrunt-global-cache` flag. The global cache caused Terragrunt to reuse the first
+      result of `pf config get` for all subsequent modules in the same `run-all` session,
+      returning stale or incorrect per-module configuration.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer bugfixes"
+        link: c71b2b32a1f58286448afdf1419443e0f7c5f9f9
+  - type: fix
+    summary: >-
+      Fixes error cause chaining in `CLIError` so that when a nested error is wrapped, the
+      original root cause is correctly propagated. Previously the wrapped error itself was used
+      as the cause even when it already had a deeper cause, making multi-level error chains
+      appear truncated in debug output.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer bugfixes"
+        link: c71b2b32a1f58286448afdf1419443e0f7c5f9f9
+  - type: fix
+    summary: >-
+      Fixes `kube_cert_issuers` (now `kube_certificates`) to allow certificate issuance for
+      subdomains of the cluster domain. Previously the cert issuer was not configured to issue
+      certificates covering subdomains of the dedicated cluster DNS zone, preventing internal
+      services from obtaining valid TLS certificates for `*.<cluster-domain>` hostnames.
+    references:
+      - type: internal-commit
+        summary: "fix: provider cert-issuers the ability to create certs for subdomains of the cluster domain"
+        link: 8aa22456510df9d9cc7a85730a810079e75ed424
+    impacts:
+      - type: iac-module
+        component: kube_cert_issuers
+        summary: Now issues certificates for subdomains of the cluster domain
+      - type: iac-module
+        component: kube_certificates
+        summary: Now issues certificates for subdomains of the cluster domain
+  - type: improvement
+    summary: >-
+      `pf cluster install` now streams real-time output from `terragrunt run-all apply` during the
+      autoscaling setup step. Each log line is displayed as it is produced rather than waiting for
+      the command to complete.
+    description: >-
+      Previously, `terragruntApplyAll` forwarded subprocess output directly to the Listr task renderer
+      via a `task` parameter coupled into the `execute` utility. This coupling is now replaced with an
+      `onLogLine` callback pattern so callers control how log lines are surfaced. The autoscaling step
+      uses this callback to display rolling output, giving users visibility into the apply progress
+      without having to wait for the full command to finish.
+    references:
+      - type: internal-commit
+        summary: "feat: log lines out of run-all apply"
+        link: 96f0de01ef79e15ffb70c5473e0c45070190e1eb
+  - type: fix
+    summary: >-
+      Fixes `panfactum.hcl` to work correctly with the new `pf` CLI. The Terragrunt root
+      configuration has been updated so that it invokes `pf` CLI commands with the flags and
+      arguments expected by the new CLI interface.
+    references:
+      - type: internal-commit
+        summary: "fix: panfactum.hcl for new cli"
+        link: 778dac2c2e3e7cbb9141666e0eac0afefedabea1
+  - type: fix
+    summary: >-
+      Fixes `pf env add` where AWS contact information was not correctly written to the
+      `aws_organization` module during initial organization setup. The deploy task was using
+      the wrong input key (`account_access_configuration` instead of `primary_contact`) and
+      field names that did not match the module's variable schema.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer fixes"
+        link: 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+    impacts:
+      - type: cli
+        component: env add
+        summary: Fixed contact information not being saved to aws_organization during first-environment setup
+  - type: fix
+    summary: >-
+      Fixes `pf env add` where optional contact information prompts (Organization Name and
+      Street Address 2) incorrectly required non-empty input, preventing users from skipping
+      them. The prompts now correctly accept empty values for optional fields.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer fixes"
+        link: 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+    impacts:
+      - type: cli
+        component: env add
+        summary: Optional contact info prompts now accept empty input as intended
+  - type: fix
+    summary: >-
+      Fixes `pf env add` where the IAM Identity Center update step ran unconditionally whenever
+      a management environment existed, even if the IAM Identity Center Permissions module had
+      not been deployed yet. The step now checks for the presence of the actual module directory
+      before attempting to update IAM Identity Center configuration.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer fixes"
+        link: 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+    impacts:
+      - type: cli
+        component: env add
+        summary: IAM Identity Center update step now skipped when the permissions module is not deployed
+  - type: fix
+    summary: >-
+      Fixes `pf devshell sync` where standard HCL files were not overwritten when they already
+      existed, and where the `.envrc` update subtask was silently dropped due to a syntax error.
+      Both issues prevented devshell configuration from being updated on re-runs of the sync command.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer fixes"
+        link: 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+    impacts:
+      - type: cli
+        component: devshell sync
+        summary: HCL files now overwritten on sync; .envrc update task now correctly registered and executed
+  - type: fix
+    summary: >-
+      Fixes `panfactum.hcl` so that the Authentik provider block does not fail when
+      `authentik_url` is not defined in the region or environment vars. The value is now
+      read using `lookup()` with a sentinel fallback, which prevents Terragrunt from erroring
+      in environments where Authentik is not installed.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer fixes"
+        link: 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+  - type: fix
+    summary: >-
+      Fixes a race condition in `aws_organization` where IAM Organizations features could be
+      enabled before the organization itself was fully created. The `aws_iam_organizations_features`
+      resource now explicitly depends on `aws_organizations_organization`.
+    references:
+      - type: internal-commit
+        summary: "fix: misc cli installer fixes"
+        link: 7be6e52c65c27ddf9af94a0367a56b5d37b93035
+    impacts:
+      - type: iac-module
+        component: aws_organization
+        summary: Fixed race condition between organization creation and feature enablement
+  - type: improvement
+    summary: >-
+      `pf env add` contact information prompts now pre-fill with existing AWS account data, reducing
+      manual entry when adding additional environments. The new account email prompt auto-suggests a
+      plus-suffixed address based on the management account email (e.g., `you+myenv@yourdomain.com`).
+    references:
+      - type: internal-commit
+        summary: "fix: env add: misc cli improvements"
+        link: e0bedc9006e289a7756917a08a9c34d0400ecae3
+    impacts:
+      - type: cli
+        component: env add
+        summary: Contact info prompts pre-filled from existing AWS account; email default auto-suggested
+  - type: improvement
+    summary: >-
+      `pf env add` account alias prompt now displays a contextual explainer clarifying that the
+      AWS account name must be globally unique across all AWS organizations, not just unique within
+      the user's own organization.
+    references:
+      - type: internal-commit
+        summary: "fix: env add: misc cli improvements"
+        link: e0bedc9006e289a7756917a08a9c34d0400ecae3
+    impacts:
+      - type: cli
+        component: env add
+        summary: Account alias prompt now includes explainer about global uniqueness requirement
+  - type: improvement
+    summary: >-
+      `pf env add` management environment bootstrap now deploys and configures the `aws_organization`
+      module directly during the bootstrap phase, ensuring the organization is correctly set up when
+      installing the management environment.
+    references:
+      - type: internal-commit
+        summary: "fix: env add: misc cli improvements"
+        link: e0bedc9006e289a7756917a08a9c34d0400ecae3
+    impacts:
+      - type: cli
+        component: env add
+        summary: Management environment bootstrap now deploys aws_organization module
+  - type: improvement
+    summary: >-
+      `pf env add` now displays a finish message upon successful completion, giving users
+      clear confirmation that the environment setup process has finished.
+    references:
+      - type: internal-commit
+        summary: "feat: adds finish message to 'pf env add'"
+        link: 3747d0982bbff1e6ac4d2684a417dbd9c1f16d1e
+    impacts:
+      - type: cli
+        component: env add
+        summary: Displays a completion message when environment setup finishes successfully
+  - type: fix
+    summary: >-
+      Fixes `install.sh` to use `pf` CLI commands during the stage 1 installation process.
+      The installer script has been updated to invoke the new `pf` CLI instead of legacy
+      devshell script equivalents, ensuring the bootstrapper stays consistent with the
+      current CLI interface.
+    references:
+      - type: internal-commit
+        summary: "fix: update stage 1 installer to use pf commands"
+        link: 485bb8f898b65caacfb8d9180dec0a111f95c88c
+  - type: improvement
+    summary: >-
+      `pf env add` now provides clearer step-by-step instructions when setting up a new AWS account.
+      The flow now includes a direct link to the AWS sign-up page, interactive confirmation prompts for
+      each step (account creation, IAM user creation, and credential retrieval), and dedicated guidance
+      for creating an IAM user with `AdministratorAccess` and generating access keys.
+    references:
+      - type: internal-commit
+        summary: "fix: better install instructions + missing region"
+        link: 21d70937a4329fabf4872039ce14b63bb039dc91
+      - type: external-docs
+        summary: "AWS IAM access keys documentation"
+        link: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+    impacts:
+      - type: cli
+        component: env add
+        summary: Improved step-by-step AWS account and IAM user setup instructions with direct sign-up links
+  - type: fix
+    summary: >-
+      Fixes `pf env add` where `OrganizationsClient` and `STSClient` were instantiated without an
+      explicit `region`, causing failures in environments where the AWS SDK default region is not
+      `us-east-1`. Both clients now explicitly use `us-east-1`, which is required for the AWS
+      Organizations and STS global endpoints.
+    references:
+      - type: internal-commit
+        summary: "fix: better install instructions + missing region"
+        link: 21d70937a4329fabf4872039ce14b63bb039dc91
+    impacts:
+      - type: cli
+        component: env add
+        summary: OrganizationsClient and STSClient now explicitly set region to us-east-1
+  - type: fix
+    summary: >-
+      Fixes `install.sh` so that the `check_git_repo` validation runs before Nix installation
+      instead of after. Previously, if the installer exited after installing Nix but before completing,
+      users re-running the script would see a misleading error that Nix was not installed. Moving
+      the check earlier ensures the error is surfaced at the right stage.
+    references:
+      - type: internal-commit
+        summary: "fix: better install instructions + missing region"
+        link: 21d70937a4329fabf4872039ce14b63bb039dc91
+  - type: fix
+    summary: >-
+      Fixes a loop bug in `pf env add` where the `AdministratorAccess` credential validation
+      step could not re-prompt for new credentials after failing the policy check. Previously,
+      if the provided IAM user lacked `AdministratorAccess`, the retry prompt would loop without
+      allowing the user to enter different credentials. The fix restructures the validation into
+      nested loops that properly support both retrying with the same credentials and entering new
+      ones. Also adds root-user detection so credentials belonging to the AWS root account are
+      rejected with a clear error message.
+    references:
+      - type: internal-commit
+        summary: "fix: AdministratorAccess credential validation loop"
+        link: 1c7d2dd454ef5fa216abe3fabb12aa1bcdf76bfb
+    impacts:
+      - type: cli
+        component: env add
+        summary: Fixed infinite loop in AdministratorAccess policy validation; root account credentials are now rejected with a clear error
+  - type: fix
+    summary: >-
+      Fixes `pf domain add` to correctly skip environment subzone setup when no eligible environments
+      exist. A missing `return` statement caused execution to fall through to subzone configuration
+      logic even when there were no candidate environments, potentially producing incorrect DNS
+      delegations.
+    references:
+      - type: internal-commit
+        summary: "fix: properly skip subzone setup if applicable"
+        link: 6f47d8e6ee2cd4f2d409ccaf189293f919cdb027
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Subzone setup now correctly exits early when no eligible environments are present
+  - type: fix
+    summary: >-
+      Fixes SLA value formatting in the `pf cluster install` `setSLA` step so that the selected
+      SLA target is written in the correct format when persisted to the cluster configuration.
+    references:
+      - type: internal-commit
+        summary: "fix: set sla formatting for cluster install"
+        link: d8976a0552a5a9f6e4d81b58269c96b219dcb392
+  - type: fix
+    summary: >-
+      Fixes `pf env add` to correctly import an existing AWS organization instead of attempting
+      to create a new one when an organization already exists. Previously the command would fail
+      when run against an AWS account that already had an organization, preventing management
+      environment setup from completing.
+    references:
+      - type: internal-commit
+        summary: "fix: import existing org in env add command"
+        link: 0a0e3ca4e78569312fc7bb4763c120a92674bb5d
+    impacts:
+      - type: cli
+        component: env add
+        summary: Fixed failure when running env add against an account that already has an AWS organization
+  - type: fix
+    summary: >-
+      Fixes step nesting in `pf cluster install` so that install steps are correctly structured
+      in the installation workflow. Incorrectly nested steps could cause steps to run out of order
+      or be skipped during cluster installation.
+    references:
+      - type: internal-commit
+        summary: "fix: cluster install step nesting"
+        link: 7c80f0a2d2fe0346cb7a1943baa97984d09ba851

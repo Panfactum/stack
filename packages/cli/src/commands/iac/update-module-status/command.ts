@@ -57,6 +57,7 @@ import { updateModuleStatus } from "@/util/terragrunt/updateModuleStatus";
  */
 export class UpdateModuleStatusCommand extends PanfactumCommand {
   static override paths = [["iac", "update-module-status"]];
+  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: "Updates the local status file for a particular IaC module",
