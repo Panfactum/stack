@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse hook: block direct `git show` and `git diff` commands.
 # Diffs should come from changelog scripts (show-diff.ts), not raw git commands.
+export NO_RTK=1
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')

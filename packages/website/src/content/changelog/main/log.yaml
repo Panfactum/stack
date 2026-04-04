@@ -1604,3 +1604,33 @@ changes:
       - type: internal-commit
         summary: "fix: cluster install step nesting"
         link: 7c80f0a2d2fe0346cb7a1943baa97984d09ba851
+  - type: fix
+    summary: >-
+      Fixes image pull failures in [`vault_core_resources`](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources)
+      by upgrading the vault-secrets-operator chart to 1.3.0.
+    description: >-
+      The `gcr.io/kubebuilder/kube-rbac-proxy:v0.15.0` image bundled with vault-secrets-operator chart 0.8.1
+      was removed from GCR. Chart 0.9.0 and later switched to `quay.io/brancz/kube-rbac-proxy:v0.18.1`,
+      resolving the pull failure without requiring manual image overrides.
+    references:
+      - type: internal-commit
+        summary: "fix(deps): bump vault-secrets-operator chart to 1.3.0"
+        link: 051d0b1213f4b8db3d2bf3e36b30a8e9c88f28ee
+    impacts:
+      - type: iac-module
+        component: vault_core_resources
+        summary: vault-secrets-operator Helm chart bumped to 1.3.0 to fix gcr.io image pull failure
+  - type: fix
+    summary: >-
+      Fixes [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) to skip
+      service quota increase requests when the current quota value already meets or exceeds the target.
+      Previously, AWS would reject such requests with an error, causing `apply` to fail on accounts that
+      had quotas raised out-of-band or by a prior apply.
+    references:
+      - type: internal-commit
+        summary: "fix(aws_account): skip quota increases already at target value"
+        link: 838357f4a1cca6a118c1f67b71f7920e54170c79
+    impacts:
+      - type: iac-module
+        component: aws_account
+        summary: Quota increase resources are now gated on a count check so requests are only submitted when the current value is below the target

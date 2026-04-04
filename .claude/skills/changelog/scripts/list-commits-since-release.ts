@@ -8,6 +8,7 @@ function run(cmd: string): string {
     return execSync(cmd, {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
+      env: { ...process.env, NO_RTK: "1" },
     }).trim();
   } catch {
     return "";

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse hook: block direct edits to generated files and point to their sources.
+export NO_RTK=1
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')

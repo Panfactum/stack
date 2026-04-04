@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse hook: block npx/node commands and instruct to use bun instead.
+export NO_RTK=1
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')

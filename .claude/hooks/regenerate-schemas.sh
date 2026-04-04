@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # PostToolUse hook: regenerate changelog JSON schemas when metadata.yaml is edited.
+export NO_RTK=1
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')

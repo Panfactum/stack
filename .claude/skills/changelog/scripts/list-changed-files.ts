@@ -16,6 +16,7 @@ function runGit(command: string): string[] {
     const output = execSync(command, {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
+      env: { ...process.env, NO_RTK: "1" },
     });
     return output
       .split("\n")
