@@ -1,4 +1,5 @@
 todo:
+  - "Entry 'pf sso add now deploys Authentik at sso.<domain>' (commit 07d42f09a43b367e79433147d0e9c46a083e95b9): classified as improvement. Verify whether existing users who already ran pf sso add with the old authentik.<domain> subdomain need to take action (e.g., update global.yaml, re-apply kube_authentik with the new domain, or reconfigure DNS). If action is required, upgrade the entry to breaking_change and add action_items."
   - "Entries for commit 3e06e130f943907d5409980df2333fbdc813a5bf (.envrc nix check refactor and install.sh build time estimate): no impacts blocks added because packages/cli/src/files/direnv/envrc does not map to any schema impact type (iac-module, cli, devshell, configuration) and packages/installer/install.sh also has no matching impact type. Verify whether a new impact type or a configuration/.envrc component should be added to capture these changes."
   - "Entry 'Fixes compilation error in pf devshell sync' (commit 738389f5a03f39078b5cfcce211254397cd83465): the fix also changes behavior — safeFileExists and createNullWriter were commented out, so known_hosts/connection_info and cluster_info files are no longer deleted before rebuilding. Verify whether this behavioral regression is intentional or should be restored with correct utility imports."
   - "Entry 'Adds a new install.sh bootstrapper script': no impacts added because packages/installer/install.sh does not map to any existing schema impact type (iac-module, cli, devshell, configuration). Consider adding a new impact type (e.g., 'installer') or confirm no impacts are needed."
@@ -34,10 +35,20 @@ todo:
   - "Entry 'Fixes step nesting in pf cluster install' (commit 7c80f0a2d2fe0346cb7a1943baa97984d09ba851): show-diff returned '(no diff)' — changed files are not covered by .changelog-include patterns. Entry was written from the commit message 'fix: cluster install step nesting' alone. Verify the exact nesting issue (e.g., Listr task hierarchy, step dependency ordering, or checkpoint group structure) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'Fixes pf cluster install EKS setup initial superuser permissions' (commit d127b6f43fc5e715bed6b714ae08e112cbf4a1ca): show-diff returned '(no diff)' — the changed file packages/cli/src/commands/cluster/install/setupEKS.ts is not covered by .changelog-include patterns. Entry was written from the commit message 'fix: initial cluster permissions' alone. Verify the exact fix (e.g., extra_superuser_principal_arns not set, wrong ARN source, or condition bug) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema."
   - "Entry 'Fixes color rendering bug in applyColors (dedent order)' (commit b695023a1701ff34709eeee49c64d2c9aaf79050): changed file is packages/cli/src/context/logger.ts, a shared utility class not tied to a specific CLI command path. No impacts block was added. Consider whether a generic 'cli' impact should be added or if a Logger/utility impact type is appropriate."
+  - "Entry 'Default answer values in pf CLI prompts displayed in italic gray' (commit c30b909eac165687992550d41c9987cbdfc95207): changed file is packages/cli/src/util/context/logger.ts, a shared utility with no specific CLI command path. No impacts block was added for this fix. If a generic CLI logger/utility impact type is desired, add it. Same pattern as the applyColors fix (b695023a)."
+  - "Entry 'Fixes primary region identification in CLI' (commit 56d4c8c464f92fb4aa821bcedc0cb20e6568453e): the changed file packages/cli/src/util/config/getRegions.ts is a shared utility and does not map to any specific cli component in the schema. No impacts block was added. Consider whether a generic cli impact or a new utility component category is appropriate."
   - "Entry 'Fixes kube_vault Helm release race condition' (commit ccecb3270b0384feeaeaf62cf47124942071b121): the internal-commit reference summary reuses the git commit message 'fix:cli: initial domain register poll title', which describes the CLI fix in the same commit rather than the kube_vault change. If someone adds a more descriptive commit-level description later, update the reference summary for the kube_vault entry."
   - "Entry 'Panfactum terragrunt hooks add .pf.yaml status file' (commit a316a5dc7cc6eb0a4acc93f1a333d8e40a50036a): changed files are packages/cli/src/files/terragrunt/panfactum.hcl and packages/cli/src/util/devshell/constants.ts. Neither maps cleanly to a schema impact type — panfactum.hcl is a CLI-bundled file (not an iac-module, cli command, devshell tool, or configuration enum entry), and .pf.yaml is a generated file not in the configuration component enum. No impacts block was added. Consider adding a 'configuration' component entry for '.pf.yaml' or a generic CLI/configuration impact."
   - "Entry 'Fixes panfactum.hcl pf-get-vault-token silencing' (commit 1ac42430c0dd1fc59d2f3b0aab851416fbe099dc): changed file is packages/cli/src/files/terragrunt/panfactum.hcl which is a CLI-bundled config file and does not map cleanly to any schema impact type. No impacts block was added. Consider whether a 'configuration' component for 'panfactum.hcl' should be added to the schema."
+  - "Entry 'Adds TypeScript CLI implementations of legacy bash devshell scripts' (commit dcfa7211e0afa76c8656bb706b61cac0a5dea76f): the commit message says no breaking changes, but old pf-* scripts are simplified to pass-throughs calling the new pf CLI. Verify that all legacy scripts (pf-buildkit-*, pf-voluntary-disruptions-*, etc.) still exist as functional wrappers in the DevShell and haven't been removed entirely. If any were deleted without a wrapper, add a breaking_change entry."
+  - "Entry 'Adds TypeScript CLI implementations of legacy bash devshell scripts' (commit dcfa7211e0afa76c8656bb706b61cac0a5dea76f): wf_dockerfile_build/scripts/scale-buildkit.sh now calls '/bin/pf buildkit resume' (with the /bin/ prefix still present — line 34610 in diff). Verify this is correct and not a bug where '/bin/' was accidentally left in the new command."
+  - "Entry 'kube_opensearch S3 static credentials' (commit 55a2cd5eea66664a7994f5841abda062d982fe1e): the module switches from IRSA to static creds using kube_aws_creds. Verify whether users who already deployed kube_opensearch with IRSA need to take action (e.g., remove old IRSA service account annotations or re-apply the module) and add action_items if so."
+  - "Entry 'kube_opensearch dashboard opt-in' (commit 55a2cd5eea66664a7994f5841abda062d982fe1e): the previous improvement entry implied dashboards were always included, but they are now opt-in (dashboard_enabled defaults to false). Verify whether early adopters of kube_opensearch who expected dashboards need a breaking_change entry or action items."
+  - "Entry 'Fixes cluster-deployed detection in the CLI' (commit b4439e1bf5c8e329a58c8889fa8c29c58f4f25e7): the changed file packages/cli/src/util/config/getRegions.ts is a shared utility and does not map to any specific cli component in the schema. No impacts block was added. Consider whether a generic cli impact or a new utility component category is appropriate."
 validated:
+  - 0c1e3abe3ebb11f8985a37394060017c83e812ad
+  - 55a2cd5eea66664a7994f5841abda062d982fe1e
+  - f66cfb1a19fb8e5898b85a7c1a0993b265c3b2e4
   - 829ad02cd9296a82c8918338fdefbdafd5ca2fae
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -244,3 +255,68 @@ validated:
   - 1ac42430c0dd1fc59d2f3b0aab851416fbe099dc
   - cf2ef5abf90ba6c01e78276cdae63fd22bd54288
   - 27cdbcf16525e9989430f33ef211b5a3f9e17560
+  - 0e5d41b543b20f222ae7afa692e48d283216be37
+  - 1a8e4add783f1ba32bc55664b3ec154a22a51e7a
+  - c365437e5673edcb6c052cf78e94003c90a90407
+  - 4f3e553b1425807c7dd84a7bc65d6b5e2c8d1e94
+  - c7178d3ab8a857594c8c79bce7a4411176ca2244
+  - acd5bfc8864fd1277504137996a536b8c72494eb
+  - 5cd779112382e803f6b4e20ce35f7f76788ebff0
+  - 3903a9470f20e0be50e630af78cb0235304ff0ae
+  - 97cc08f087b13cfd822827ae645929ccc7fab738
+  - 33160da3a8492a06323de484697f4e50a31210c6
+  - c9bac8f242beff2b5d28239a364665d4a43a2773
+  - 1c45d231c3b1f8b8d1ddac4fba751a0490dcffe9
+  - 56d4c8c464f92fb4aa821bcedc0cb20e6568453e
+  - edf631ddf4a14bff92aaea31b2a6ca08a55a7833
+  - 389632ed207eb8bbb26e48dac85f4661b7e119c8
+  - 9ed18f9a5179142c216fcbd74c06e4f8f08b83e3
+  - da7bc835ecf06681defe6a6cf0c2170c335264bc
+  - a2141bfbfaebae9280252968bc89b084f40f5b3c
+  - e5edff11ae9c8e7251764f58b1e4357ba8ee3dc6
+  - 1dc45f74fb324cf0a8cd35be642b2ef3f1a244b5
+  - 4825a917123a4894df14c2fb41548c9d9227a79c
+  - b4439e1bf5c8e329a58c8889fa8c29c58f4f25e7
+  - d4da65931ff9bd8e12707f179430d5d107c31215
+  - d09ed80f4a3c9b5d7ba8a9fc46912f00f0bf8f39
+  - c30b909eac165687992550d41c9987cbdfc95207
+  - d34274c7b1d70d75c666734a4ca6cfb5cb9e7f0e
+  - 5e4d6524bb7f8d283e86f3775fdd4067f0b1d7ac
+  - 07d42f09a43b367e79433147d0e9c46a083e95b9
+  - cefc9900cb364e5056c1e5c73a4624e30d17f3bf
+  - da2c2c0b6d592fb74487da17f8f9df5db839e1a2
+  - 9349ff71dee07eaf056b1d15111e8676838e89e7
+  - 6f6211d9d7a9774022c215afe4d5092e69a7f65f
+  - d044ca03b10987eb7c93d42fc77f561641201a85
+  - 67143b00110420fe0253a47e18988b072350f8a0
+  - 654a4ad80408b2347cdd87aed1623d28bb5c3725
+  - 34ee420cad0fd8bc0c5fd72674bf734b02771ca7
+  - ce9783a125f31347aa835d2885816d0abae57807
+  - f9903b9bdafe6dd44f8aeea43a75ca9b0a0a1419
+  - 1aed9737fed298a33b7dbfae6cb4370a8f2b472d
+  - 5d6c7ee80a7966988687ca691f5080b28599c772
+  - d7e596c735284934c4000156cdce6ede26dedf5f
+  - 6891e91db0113765e6f226c83242a6f3686804d3
+  - 919e46249012e6623547cdbbb7da12b014314c8d
+  - a297a0b2a33cbcc654262ac225c54e05072c4a30
+  - 554a661855c58ab9fb51d6eb45966356a27af182
+  - f0e4193c37b4950ef5e83e72303663033e3c80e9
+  - 6001eed85f76a8aaf53597846df50d66992e53d7
+  - 33d887c36fae56bc624511e72a8ac7f939db47f3
+  - 96d9e523239dab49f7929fd089c0d32fb3bcd472
+  - dcfa7211e0afa76c8656bb706b61cac0a5dea76f
+  - 6ccb3aa4275e1b5b4daf0709ada98fdbf4db4e72
+  - b2f07bf1763f7bd96a25707c11a2be7532caeaf6
+  - b7b790dd661af18039021d3352666f3ba3fc41c9
+  - dd36035b968faeb3c4f64406aea69e47353f968a
+  - 2702b0c70a3f8aed03ea6606ba291b6e2b380885
+  - 30f40bd6c4414685d5923bfe6b0029557acab1d3
+  - 14cb9e692705dfa5b13f113d9699abb6df58b97c
+  - aaa63ac02ce6adee3e990bc8c45c49a1ca2089c0
+  - 5809f908864efcc93847361fabefc7abfa764d61
+  - b1168e61fb424a8e66a542c5c232721195300cfc
+  - e714cfc07835ddfaa414efb73cab508ad22b490f
+  - 292b996bfdc0aef6c102493da0dbe4221548d0e3
+  - 7f88565f64a1736adba9158b187b14646d952398
+  - eced1ab337f51c01a7a045c34a372cf1aae95321
+  - a56e4de8b04358461ee6413679c236b9669193b2

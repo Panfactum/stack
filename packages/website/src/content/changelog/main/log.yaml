@@ -1785,12 +1785,16 @@ changes:
       variable has been removed from `kube_policies`. Any Terragrunt configuration setting these variables must remove
       them to avoid errors on next apply."
   - type: "fix"
-    summary: "Image pulls for `kube_nats` and `kube_monitoring` are restored after Bitnami deprecated their public
-      `docker.io/bitnami/*` catalog on August 28, 2025. All"
+    summary: >-
+      Image pulls for `kube_nats`, `kube_monitoring`, `kube_redis_sentinel`, and `kube_linkerd` are
+      restored after Bitnami deprecated `docker.io/bitnami/*`.
     references:
       - type: "internal-commit"
         summary: "fix(infrastructure): migrate bitnami images to bitnamilegacy registry"
         link: "f3f6bd1ecffd9012a0af3fc0b6d58671a1314cd4"
+      - type: "internal-commit"
+        summary: "chore: upgrade kubernetes to 1.32 and moves module directory"
+        link: "e714cfc07835ddfaa414efb73cab508ad22b490f"
       - type: "external-docs"
         summary: "Bitnami deprecated their public docker.io/bitnami/* catalog — bitnamilegacy fallback info"
         link: "https://github.com/bitnami/bitnami-docker-archive"
@@ -1801,9 +1805,16 @@ changes:
       - type: "iac-module"
         component: "kube_monitoring"
         summary: "Helm image override updated to use bitnamilegacy/thanos"
-    description: "Image pulls for `kube_nats` and `kube_monitoring` are restored after Bitnami deprecated their public
-      `docker.io/bitnami/*` catalog on August 28, 2025. All affected image references have been migrated to the
-      `docker.io/bitnamilegacy/*` read-only fallback registry."
+      - type: "iac-module"
+        component: "kube_redis_sentinel"
+        summary: "Helm image override updated to use bitnamilegacy/redis"
+      - type: "iac-module"
+        component: "kube_linkerd"
+        summary: "kubectl sidecar image updated to use bitnamilegacy/kubectl"
+    description: >-
+      Image pulls for `kube_nats`, `kube_monitoring`, `kube_redis_sentinel`, and `kube_linkerd` are restored after
+      Bitnami deprecated their public `docker.io/bitnami/*` catalog on August 28, 2025. All affected image references
+      have been migrated to the `docker.io/bitnamilegacy/*` read-only fallback registry.
   - type: "improvement"
     summary: "The default Kubernetes version has been updated to 1.33 from 1.32. Bottlerocket AMI, all addon Helm chart
       versions, and the"
@@ -3114,26 +3125,28 @@ changes:
   - type: "improvement"
     summary: >-
       [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
-      adds OpenSearch Dashboards with ingress and new `log_level`, `slow_request_log_thresholds`, and
-      `extra_cluster_settings` inputs.
+      adds opt-in OpenSearch Dashboards with ingress, new `dashboard_enabled`/`dashboard_domain` inputs,
+      and `log_level`, `slow_request_log_thresholds`, and `extra_cluster_settings` inputs.
     references:
       - type: "internal-commit"
-        summary: "fix: kube_certificates migration guide"
-        link: "8dddf6bf63532b62b4cf55e7b598421a645b1643"
+        summary: "feat: adds opensearch dashboards, remote storage, and v3"
+        link: "55a2cd5eea66664a7994f5841abda062d982fe1e"
     impacts:
       - type: "iac-module"
         component: "kube_opensearch"
         summary: >-
-          Added OpenSearch Dashboards Helm deployment with ingress; new log_level,
-          slow_request_log_thresholds, and extra_cluster_settings inputs
+          Added opt-in OpenSearch Dashboards Helm deployment with ingress via dashboard_enabled and
+          dashboard_domain inputs; new log_level, slow_request_log_thresholds, and extra_cluster_settings inputs
     description: >-
-      `kube_opensearch` now deploys OpenSearch Dashboards alongside the OpenSearch cluster using the
-      upstream Helm chart, with a `kube_ingress` resource for external access. The module also adds three
-      new optional inputs: `log_level` (default `WARN`) controls cluster log verbosity;
-      `slow_request_log_thresholds` configures per-level slow-search log thresholds; and
-      `extra_cluster_settings` allows arbitrary `opensearch.yml` settings to be injected or overridden
-      without forking the module. These additions make it easier to operate and observe OpenSearch in
-      production.
+      `kube_opensearch` now supports deploying OpenSearch Dashboards alongside the OpenSearch cluster
+      using the upstream Helm chart. Dashboards are **opt-in** via the new `dashboard_enabled` input
+      (default `false`); when enabled, `dashboard_domain` must also be set to configure the ingress
+      hostname. The deployment includes a VPA, PDB, and basic-auth access using auto-generated
+      superuser credentials exposed via the new `dashboard_superuser_username` and
+      `dashboard_superuser_password` outputs. The module also adds three new optional inputs:
+      `log_level` (default `WARN`) controls cluster log verbosity; `slow_request_log_thresholds`
+      configures per-level slow-search log thresholds; and `extra_cluster_settings` allows arbitrary
+      `opensearch.yml` settings to be injected or overridden without forking the module.
   - type: "fix"
     summary: >-
       Fixes [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
@@ -3141,9 +3154,9 @@ changes:
       previously disabled.
     references:
       - type: "internal-commit"
-        summary: "fix: kube_certificates migration guide"
-        link: "8dddf6bf63532b62b4cf55e7b598421a645b1643"
-      - type: "external-commit"
+        summary: "feat: adds opensearch dashboards, remote storage, and v3"
+        link: "55a2cd5eea66664a7994f5841abda062d982fe1e"
+      - type: "issue-report"
         summary: "OpenSearch issue #15902 (segment replication remote store)"
         link: "https://github.com/opensearch-project/OpenSearch/issues/15902"
     impacts:
@@ -3437,9 +3450,7 @@ changes:
       `region.secrets.yaml` as `authentik_token`, where it is subsequently read through the
       standard `getPanfactumConfig()` merge. Vault tokens are no longer threaded manually
       through module deployments in the SSO workflow, since `panfactum.hcl` picks them up
-      automatically from region config. The "Setup Vault SSO" step now also clears `vault_token`
-      from `region.secrets.yaml` upon completion, since static Vault credentials are no longer
-      needed after Vault OIDC is configured.
+      automatically from region config.
   - type: "fix"
     summary: >-
       Fixes `panfactum.hcl` so that the Authentik provider token falls back to the
@@ -3469,6 +3480,1498 @@ changes:
     description: >-
       The checkbox prompt that asks which environments to security-harden during federated auth
       setup has been relabeled from "Select your production environment(s)" to "Select the
-      environment(s) you want to security harden:" with an added explainer: "All other
-      environments will grant users full access. This can be changed later." This makes the
+      environment(s) you want to security harden:" with an explainer: "Users will have full
+      access to all non-selected environments. This can be changed later." This makes the
       intent and consequence of the selection clearer for first-time users.
+  - type: "fix"
+    summary: >-
+      Fixes inverted skip conditions in `pf sso add` federated auth steps for SCIM
+      configuration and user sync.
+    references:
+      - type: "internal-commit"
+        summary: "fix: skip logic and input schema"
+        link: "1a8e4add783f1ba32bc55664b3ec154a22a51e7a"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "SCIM config and user sync steps now correctly skip when their completion conditions are already met"
+    description: >-
+      Two `skip` callbacks in the `setupFederatedAuth` task list had their boolean conditions
+      inverted. The "Get SCIM User Configuration" step was returning `!token || !url` (skip when
+      either is missing) instead of `!!token && !!url` (skip when both are present). The "Sync
+      Users and Groups" step was returning `!userSyncComplete` (skip when not complete) instead of
+      `!!userSyncComplete` (skip when complete). Both bugs caused the steps to skip when they
+      should run and run when they should skip, making `pf sso add` re-prompt for SCIM credentials
+      and re-run the user sync on every invocation even after successful completion.
+  - type: "fix"
+    summary: >-
+      Fixes `pf sso add` Vault SSO step reading OIDC outputs from the wrong
+      module with an incorrect schema.
+    references:
+      - type: "internal-commit"
+        summary: "fix: skip logic and input schema"
+        link: "1a8e4add783f1ba32bc55664b3ec154a22a51e7a"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Vault SSO OIDC output parsing now reads from the correct module with the correct schema"
+    description: >-
+      The "Get Vault OIDC configuration" task in `setupVaultSSO` was calling `terragruntOutput`
+      against `MODULES.VAULT_AUTH_OIDC` — the module being deployed — instead of the correct
+      source module `MODULES.AUTHENTIK_VAULT_SSO + "_" + kubeConfigContext`. Additionally, the
+      Zod validation schema expected flat string values (e.g., `client_id: z.string()`) when
+      `terragruntOutput` returns wrapped objects (e.g., `client_id: z.object({ value: z.string() })`).
+      Both bugs caused the Vault SSO setup step to fail with a validation error during `pf sso add`,
+      preventing Vault OIDC from being configured automatically.
+  - type: "fix"
+    summary: >-
+      Fixes `pf sso add` Authentik setup step sending the wrong email address as the Authentik
+      root user email (`akadmin_email`).
+    references:
+      - type: "internal-commit"
+        summary: "fix: various SSO fixes"
+        link: "f66cfb1a19fb8e5898b85a7c1a0993b265c3b2e4"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Authentik root user email now correctly populated from the root email prompt rather than the admin user email"
+    description: >-
+      The `akadmin_email` input update in the `kube_authentik` deployment step was referencing
+      `ctx.authentikAdminEmail` (the user's personal Authentik admin email) instead of
+      `ctx.authentikRootEmail` (the initial Authentik root/bootstrap user email). This caused
+      the wrong email address to be written into `kube_authentik` for the root user, which would
+      result in the Authentik root account being tied to the wrong email during SSO setup.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` Vault SSO step now automatically runs AWS Identity Center sync after Vault
+      SSO is fully configured.
+    references:
+      - type: "internal-commit"
+        summary: "fix: various SSO fixes"
+        link: "f66cfb1a19fb8e5898b85a7c1a0993b265c3b2e4"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Vault SSO setup now ends with an automatic AWS Identity Center sync step"
+    description: >-
+      The "Setup Vault SSO" workflow in `pf sso add` previously left the AWS Identity Center
+      out of sync after Vault SSO was configured. A `buildSyncAWSIdentityCenterTask` step has
+      been appended to the Vault SSO task list so that AWS profile config is updated
+      automatically at the end of Vault SSO setup. The step also removes a spurious
+      `upsertConfigValues` call that was clearing `vault_addr` from region config mid-flow.
+  - type: "improvement"
+    summary: >-
+      `buildSyncAWSIdentityCenterTask` now accepts an optional `startURL` parameter to
+      pre-populate the SSO session start URL without prompting.
+    references:
+      - type: "internal-commit"
+        summary: "fix: various SSO fixes"
+        link: "f66cfb1a19fb8e5898b85a7c1a0993b265c3b2e4"
+    description: >-
+      The internal `buildSyncAWSIdentityCenterTask` utility now accepts an optional `startURL`
+      argument. When provided, it is used directly as the `sso_start_url` in the AWS config
+      `sso-session sso` block instead of prompting the user for the SSO start URL interactively.
+      This allows callers like `pf sso add` to supply a known start URL from earlier wizard steps
+      without requiring an additional user prompt.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` now automatically revokes the Vault root token and removes it from
+      `region.secrets.yaml` after Vault SSO setup completes.
+    references:
+      - type: "internal-commit"
+        summary: "feat: better resumability & revoke vault root token"
+        link: "4f3e553b1425807c7dd84a7bc65d6b5e2c8d1e94"
+      - type: "internal-commit"
+        summary: "chore: disable vault credential removal task"
+        link: "c365437e5673edcb6c052cf78e94003c90a90407"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Vault root token is now automatically revoked and removed from region.secrets.yaml after Vault SSO setup"
+    description: >-
+      Previously, the "Removing static Vault credentials" step in `setupVaultSSO` was disabled
+      with a TODO comment, requiring users to manually delete `vault_token` from
+      `region.secrets.yaml` after completing Vault SSO setup. The step is now fully implemented:
+      when `vault_token` is present in the Panfactum config, `pf sso add` executes
+      `kubectl exec vault-0 -n vault -- vault token revoke <token>` to revoke the root token,
+      then removes the `vault_token` field from `region.secrets.yaml` via `sopsUpsert`. Static
+      root credentials are automatically cleaned up once Vault OIDC authentication is in place.
+  - type: "fix"
+    summary: >-
+      Fixes [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      S3 connectivity by switching from IRSA to static AWS credentials to work around an upstream
+      OpenSearch limitation.
+    references:
+      - type: "internal-commit"
+        summary: "feat: adds opensearch dashboards, remote storage, and v3"
+        link: "55a2cd5eea66664a7994f5841abda062d982fe1e"
+      - type: "issue-report"
+        summary: "OpenSearch issue #16523 (IRSA web identity token not usable with S3 plugin)"
+        link: "https://github.com/opensearch-project/OpenSearch/issues/16523"
+    impacts:
+      - type: "iac-module"
+        component: "kube_opensearch"
+        summary: "S3 repository plugin now authenticates with static IAM credentials via kube_aws_creds instead of IRSA"
+    description: >-
+      The OpenSearch S3 repository plugin cannot use the web identity token file required by IRSA
+      (see opensearch-project/OpenSearch#16523). As a workaround, the module now uses the
+      `kube_aws_creds` submodule to provision short-lived static IAM access keys (rotated every
+      14 days) and injects them as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` environment
+      variables via the OpenSearch keystore at startup. The previous `module.irsa` resource has
+      been replaced with `module.aws_creds`.
+  - type: "improvement"
+    summary: >-
+      [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      now sizes the JVM heap dynamically to 50% of the container memory request instead of a
+      hardcoded 512 MB.
+    references:
+      - type: "internal-commit"
+        summary: "feat: adds opensearch dashboards, remote storage, and v3"
+        link: "55a2cd5eea66664a7994f5841abda062d982fe1e"
+    impacts:
+      - type: "iac-module"
+        component: "kube_opensearch"
+        summary: "JVM heap size is now calculated as 50% of CONTAINER_MEMORY_REQUEST at pod startup"
+    description: >-
+      Previously the OpenSearch JVM heap was hardcoded to `-Xmx512M -Xms512M`, which could cause
+      out-of-memory errors or waste resources when the VPA adjusted the pod's memory request.
+      The entrypoint script now reads the `CONTAINER_MEMORY_REQUEST` environment variable (injected
+      by `kube_policies`) and sets the heap to half the request in megabytes, keeping JVM memory
+      proportional to the pod allocation.
+  - type: "improvement"
+    summary: >-
+      [`kube_policies`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_policies)
+      now automatically injects a `NODE_OPTIONS` environment variable into every container, setting
+      `--max-old-space-size` to the container's memory request.
+    references:
+      - type: "internal-commit"
+        summary: "feat: adds opensearch dashboards, remote storage, and v3"
+        link: "55a2cd5eea66664a7994f5841abda062d982fe1e"
+    impacts:
+      - type: "iac-module"
+        component: "kube_policies"
+        summary: "NODE_OPTIONS --max-old-space-size is now injected into all containers and init-containers proportional to memory request"
+    description: >-
+      Node.js processes default to a fixed V8 heap limit (typically 512 MB regardless of available
+      memory) which can cause unexpected OOM crashes. `kube_policies` now injects
+      `NODE_OPTIONS=--max-old-space-size=<MB>` into every container and init-container, setting
+      the V8 heap to match the container's memory request. This is applied via a
+      `patchStrategicMerge` so that VPA mutations (which happen after the initial Kyverno webhook)
+      are handled correctly without double-applying or overriding an explicitly set value.
+  - type: "fix"
+    summary: >-
+      Fixes `pf cluster add` Vault unseal step to validate `vault status` JSON output with
+      a Zod schema before reading `sealed`.
+    references:
+      - type: "internal-commit"
+        summary: "lint: added schema validation on vault status"
+        link: "0c1e3abe3ebb11f8985a37394060017c83e812ad"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Vault unseal skip-check now uses parseJson with a Zod schema instead of bare JSON.parse"
+    description: >-
+      Previously, the `skip` callback for the Vault unseal step called `JSON.parse()` directly
+      on the output of `vault status -format=json` and read `.sealed` without validation.
+      If the command produced unexpected output (e.g., an error message or a differently-shaped
+      JSON object), the property access would silently yield `undefined` and the step would
+      skip unsealing incorrectly. The fix introduces a `parseJson` utility that combines
+      `JSON.parse` with a Zod `z.object({ sealed: z.boolean() })` schema, ensuring that
+      any malformed output throws a clear validation error instead of silently producing
+      wrong behavior.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` federated auth EKS update step now writes a checkpoint so re-runs skip
+      completed work.
+    references:
+      - type: "internal-commit"
+        summary: "feat: better resumability & revoke vault root token"
+        link: "4f3e553b1425807c7dd84a7bc65d6b5e2c8d1e94"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "The 'Updating EKS to use AWS SSO' sub-step now writes a federatedAuthEnabled checkpoint and is skipped on re-run"
+    description: >-
+      The "Setup AWS Federated SSO" step in `pf sso add` previously had no checkpoint for the
+      final "Updating EKS to use AWS SSO" task, meaning the command would re-apply that task on
+      every re-run even if it had already completed. This commit adds a `skip` callback that
+      reads `federatedAuthEnabled` from the `aws_eks` module's `.pf.yaml` file. After the EKS
+      update task succeeds, a new task writes `federatedAuthEnabled: true` to `.pf.yaml`,
+      ensuring the step is cleanly skipped on subsequent invocations.
+  - type: fix
+    summary: >-
+      Fixes `NODE_OPTIONS` environment variable not being injected into init containers by
+      `kube_policies`.
+    references:
+      - type: internal-commit
+        summary: fix init container policies
+        link: c7178d3ab8a857594c8c79bce7a4411176ca2244
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: >-
+          The `add-environment-variables-init-containers` Kyverno rule was iterating over
+          `spec.containers` instead of `spec.initContainers` when injecting `NODE_OPTIONS`,
+          so init containers never received the correct heap-size environment variable.
+  - type: improvement
+    summary: "`pf cluster add` no longer deploys ECR pull-through cache; setup moved to `pf cluster enable`."
+    description: >-
+      Previously, `pf cluster add` bundled the `aws_ecr_pull_through_cache` deployment and
+      DockerHub/GitHub credential collection into the initial VPC setup step. This required users
+      to have those credentials ready at bootstrap time. ECR pull-through cache is now an optional
+      post-install feature accessible via `pf cluster enable`, reducing the required inputs and
+      complexity of the initial cluster bootstrapping flow. The `pull_through_cache_enabled`
+      config value is now explicitly set to `false` during VPC setup to prevent image pull
+      failures until the feature is intentionally enabled.
+    references:
+      - type: internal-commit
+        summary: removed ecr setup as part of vpc setup
+        link: acd5bfc8864fd1277504137996a536b8c72494eb
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: ECR pull-through cache setup removed from VPC step; no longer deployed during initial cluster bootstrap
+      - type: cli
+        component: cluster enable
+        summary: New command scaffolded for opt-in ECR pull-through cache setup (not yet implemented)
+  - type: improvement
+    summary: "`pf cluster add` now checks the EC2 vCPU quota and warns if it is below 16."
+    description: >-
+      Previously, `pf cluster add` would proceed with cluster installation regardless of whether the
+      AWS account had sufficient EC2 vCPU quota, which could result in cryptic failures mid-install.
+      The installer now queries the AWS Service Quotas API for the running on-demand standard instance
+      quota (L-1216C47A) and emits a clear warning (including the current quota value) if the value
+      is below 16. If the environment was created with `pf env add`, the quota increase has already
+      been requested automatically — users simply need to wait for the request to be approved before
+      re-running the installer.
+    references:
+      - type: internal-commit
+        summary: vCPU check (#363)
+        link: 5cd779112382e803f6b4e20ce35f7f76788ebff0
+      - type: internal-commit
+        summary: refactor use factory function for ServiceQuotasClient instantiation
+        link: 1dc45f74fb324cf0a8cd35be642b2ef3f1a244b5
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: Now validates EC2 vCPU quota is at least 16 before starting cluster installation
+  - type: fix
+    summary: >-
+      Fixes a namespace apply-order race condition in
+      [`kube_certificates`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_certificates)
+      where resources used `var.namespace` instead of `local.namespace`.
+    references:
+      - type: internal-commit
+        summary: "fix: namespace not existing race condition (#362)"
+        link: 3903a9470f20e0be50e630af78cb0235304ff0ae
+    impacts:
+      - type: iac-module
+        component: kube_certificates
+        summary: >-
+          All Kubernetes resources now reference local.namespace instead of var.namespace; the
+          now-unused namespace and service_account input variables have been removed
+    description: >-
+      Multiple resources in `kube_certificates` (including `kubernetes_secret`, `kubernetes_service_account`,
+      `kubernetes_role`, `kubernetes_role_binding`, `kubernetes_config_map`, and `kubectl_manifest`) were
+      referencing `var.namespace` directly. Because Terraform evaluates variable references without creating
+      an implicit dependency on the resource that creates the namespace, these resources could be scheduled
+      before the namespace existed, causing intermittent apply failures. Switching to `local.namespace`
+      creates the correct implicit dependency chain. The now-unused `namespace` and `service_account`
+      input variables (which both defaulted to `"cert-manager"`) have been removed from the module interface.
+  - type: fix
+    summary: >-
+      Fixes `pf sso add` Vault SSO step passing the wrong `vault_name` to `authentik_vault_sso`; now
+      correctly prefixes with `vault-`.
+    references:
+      - type: internal-commit
+        summary: "added skip and vault name"
+        link: 97cc08f087b13cfd822827ae645929ccc7fab738
+    impacts:
+      - type: cli
+        component: sso add
+        summary: "vault_name input for authentik_vault_sso is now vault-<kube_config_context> instead of bare kube_config_context"
+      - type: iac-module
+        component: authentik_vault_sso
+        summary: "vault_name is now prefixed with vault- to match the expected Authentik application name"
+    description: >-
+      The `setupVaultSSO` task previously passed `kube_config_context` directly as the
+      `vault_name` input to `authentik_vault_sso`. The module expects a name prefixed with
+      `vault-` (e.g., `vault-production-us-east-1`) to match the Authentik application name
+      that the module creates. Without the prefix, the Authentik application name would not
+      align with the Vault OIDC configuration, causing auth failures. The input is now set
+      to `vault-${regionConfig.kube_config_context}`.
+  - type: fix
+    summary: >-
+      Fixes `pf sso add` Vault token revocation to use `VAULT_TOKEN` env var
+      and `-self` flag instead of a positional argument.
+    references:
+      - type: internal-commit
+        summary: "fix: vault token revocation"
+        link: 33160da3a8492a06323de484697f4e50a31210c6
+    impacts:
+      - type: cli
+        component: sso add
+        summary: "Vault root token is now revoked correctly via VAULT_TOKEN env var and -self flag"
+    description: >-
+      The "Removing static Vault credentials" step in `setupVaultSSO` was passing the token
+      as a positional argument (`vault token revoke <token>`). The Vault CLI's `token revoke
+      -self` subcommand revokes the token currently set in `VAULT_TOKEN`, which is the correct
+      self-revocation approach. The fix sets `VAULT_TOKEN=<token>` as an env var in the
+      `kubectl exec` command and uses `-self` instead of the positional argument, ensuring
+      the root token is properly invalidated after Vault SSO setup completes.
+  - type: improvement
+    summary: >-
+      `pf sso add` "Deploy Authentik AWS SSO" step is now resumable via a `.pf.yaml`
+      `first_applied` checkpoint.
+    references:
+      - type: internal-commit
+        summary: "added skip and vault name"
+        link: 97cc08f087b13cfd822827ae645929ccc7fab738
+    impacts:
+      - type: cli
+        component: sso add
+        summary: "Deploy Authentik AWS SSO sub-step now reads first_applied from .pf.yaml and skips if already deployed"
+    description: >-
+      Previously the "Deploy Authentik AWS SSO" task in the federated auth flow had no skip
+      condition, so re-running `pf sso add` after a partial failure would unconditionally
+      re-apply the module. The task is now wrapped with a `skip` callback that reads
+      `first_applied` from the `authentik_aws_sso` module's `.pf.yaml` file and skips the
+      deployment if it was already completed. After a successful deployment, a follow-up task
+      writes `first_applied: true` to `.pf.yaml` to mark the step complete.
+  - type: "fix"
+    summary: >-
+      Fixes `pf sso add` "Setup AWS Federated SSO" skip check reading `federated_auth_enabled`
+      instead of the correct `federatedAuthEnabled` field from `aws_eks/.pf.yaml`.
+    references:
+      - type: "internal-commit"
+        summary: "fix: skip logic for federated auth"
+        link: "c9bac8f242beff2b5d28239a364665d4a43a2773"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Skip check for AWS federated SSO now reads federatedAuthEnabled (camelCase) instead of federated_auth_enabled"
+    description: >-
+      The skip callback for the "Setup AWS Federated SSO" task was reading
+      `federated_auth_enabled` (snake_case) from the `aws_eks` module's `.pf.yaml` file.
+      The checkpoint is written as `federatedAuthEnabled` (camelCase), so the skip check
+      never matched and the federated auth step would re-run on every invocation of
+      `pf sso add` even after it had already completed successfully. The field name in
+      the skip callback has been corrected to `federatedAuthEnabled`.
+  - type: "fix"
+    summary: >-
+      Fixes `pf sso add` Vault token revocation where `VAULT_TOKEN` was not evaluated by
+      the shell inside `kubectl exec`.
+    references:
+      - type: "internal-commit"
+        summary: "providing token to destroy and using -self"
+        link: "1c45d231c3b1f8b8d1ddac4fba751a0490dcffe9"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Vault token revocation now correctly passes VAULT_TOKEN via sh -c instead of as a bare kubectl exec argument"
+    description: >-
+      The "Removing static Vault credentials" task in `setupVaultSSO` called `kubectl exec`
+      with `VAULT_TOKEN=${vaultToken}` as a standalone argument before `vault token revoke
+      -self`. Because `kubectl exec` passes arguments directly to the container process
+      without invoking a shell, the environment variable assignment was never evaluated and
+      Vault received no token, causing revocation to fail silently or use wrong credentials.
+      The fix wraps the command in `sh -c "VAULT_TOKEN=... vault token revoke -self"` so
+      the shell properly expands the variable before invoking vault.
+  - type: "fix"
+    summary: >-
+      Fixes primary region identification in the CLI to exclude the `global` region from
+      being marked as primary.
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli: primary region identification algo"
+        link: "56d4c8c464f92fb4aa821bcedc0cb20e6568453e"
+      - type: "internal-commit"
+        summary: "fix: attempt 2 at fix primary region"
+        link: "edf631ddf4a14bff92aaea31b2a6ca08a55a7833"
+    description: >-
+      The `getRegions` utility in the CLI identified the primary region by comparing
+      `tf_state_region` from the Panfactum config against the `aws_region` value in each
+      region directory. However, this logic incorrectly allowed the `global` pseudo-region to
+      be flagged as primary when its `aws_region` value happened to match `tf_state_region`.
+      An initial fix added a `region !== GLOBAL_REGION` exclusion, but `region` could be
+      `undefined` when no `region` key is present in `region.yaml`, causing the comparison to
+      incorrectly allow the region through. A second fix resolves this by extracting the
+      resolved `name` value (`region ?? basename(regionPath)`) and using it in the exclusion
+      check instead. CLI commands that rely on primary region detection (such as `pf cluster add`
+      and `pf env add`) will now behave correctly in environments that include a `global` region
+      directory whose `region.yaml` does not explicitly set the `region` key.
+  - type: "fix"
+    summary: >-
+      Fixes `pf env add` state bucket generation failing on new AWS accounts where S3 is not yet
+      active.
+    description: >-
+      On freshly created AWS accounts, the S3 service may not be immediately active, causing the
+      `HeadBucketCommand` call during state bucket name generation to fail with a "not signed up"
+      error. This fix introduces a dedicated "Activate S3 service" step that runs before bucket name
+      generation: it attempts to create and delete a dummy bucket, retrying with exponential backoff
+      up to 30 times until S3 becomes available. The bucket name generation step itself also gained
+      a small retry loop (up to 3 attempts) around the `HeadBucketCommand` call to handle transient
+      connectivity issues that are common immediately after account creation.
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli: check if s3 service is active before generating state bucket name"
+        link: "389632ed207eb8bbb26e48dac85f4661b7e119c8"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "Now activates and validates S3 service before attempting state bucket name generation"
+  - type: "fix"
+    summary: "Fixes `pf sso add` Authentik setup to show the password reset link inline when the browser prompt appears."
+    references:
+      - type: "internal-commit"
+        summary: "added authentik recovery link to output"
+        link: "a2141bfbfaebae9280252968bc89b084f40f5b3c"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Password reset link is now shown inline in the browser-open prompt"
+    description: >-
+      Previously, the Authentik password reset link was only accessible by opening the
+      browser automatically. If the user declined the browser prompt or it failed to open,
+      there was no visible copy of the link to use manually. The link is now embedded
+      directly in the explainer text of the confirmation prompt so users can copy and
+      paste it regardless of whether the browser opens successfully.
+  - type: "fix"
+    summary: >-
+      Fixes `pf devshell sync` generating the `.aws` directory gitignore at the wrong path
+      (`.aws/.aws` instead of `.aws/.gitignore`).
+    references:
+      - type: "internal-commit"
+        summary: "fix: .aws gitignore generation"
+        link: "e5edff11ae9c8e7251764f58b1e4357ba8ee3dc6"
+    impacts:
+      - type: "cli"
+        component: "devshell sync"
+        summary: "The .aws directory .gitignore file is now written to the correct path"
+    description: >-
+      The `syncStandardFiles` task in `pf devshell sync` was calling `upsertGitIgnore`
+      with a path of `join(aws_dir, ".aws")` instead of `join(aws_dir, ".gitignore")`.
+      This caused the gitignore file for the `.aws` directory to be written to a file
+      literally named `.aws` inside the `.aws` directory, rather than to the expected
+      `.gitignore` file. AWS credentials and config files in the `.aws` directory were
+      therefore not protected by the intended gitignore rules.
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` failing to authenticate with the AWS Service Quotas API
+      when using file-based credentials.
+    description: >-
+      The AWS SDK JS v3 has a known bug (https://github.com/aws/aws-sdk-js-v3/issues/6872) where
+      passing a `profile` option to certain SDK clients does not correctly resolve credentials from
+      the credentials file. `pf cluster add` was directly instantiating `ServiceQuotasClient` with
+      a `profile` option, which triggered this bug and caused quota checks to fail with credential
+      errors in environments that rely on file-based AWS credentials. The fix introduces a
+      `getServiceQuotasClient` factory function (consistent with other AWS client factories in the
+      CLI) that explicitly resolves credentials from the credentials file before constructing the
+      client, bypassing the SDK bug.
+    references:
+      - type: internal-commit
+        summary: refactor use factory function for ServiceQuotasClient instantiation
+        link: 1dc45f74fb324cf0a8cd35be642b2ef3f1a244b5
+      - type: issue-report
+        summary: "AWS SDK JS v3: profile option does not resolve credentials from file"
+        link: https://github.com/aws/aws-sdk-js-v3/issues/6872
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: EC2 vCPU quota check now correctly authenticates using file-based AWS credentials
+  - type: improvement
+    summary: >-
+      `pf cluster add` now interactively prompts for environment and region,
+      removing the need to run from the correct directory.
+    description: >-
+      Previously, `pf cluster add` read configuration from the current working directory,
+      requiring users to manually `cd` into the correct region folder before running the command.
+      The command now presents interactive prompts to select the target environment (excluding
+      management) and region (excluding global and regions that already have a cluster deployed),
+      then derives all paths from the selection. This removes a common source of user error
+      and makes the cluster installation workflow location-independent.
+    references:
+      - type: internal-commit
+        summary: refactor add environment and region selection to cluster add command
+        link: 4825a917123a4894df14c2fb41548c9d9227a79c
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: Now prompts for environment and region at startup; no longer requires running from the region directory
+  - type: fix
+    summary: >-
+      Fixes cluster-deployed detection in the CLI to check actual module deployment status
+      rather than config file values.
+    references:
+      - type: internal-commit
+        summary: using kubeApiServer to mark clusterDeployed
+        link: b4439e1bf5c8e329a58c8889fa8c29c58f4f25e7
+      - type: internal-commit
+        summary: "refactor: improve cluster deployment detection to use actual deployment status"
+        link: d34274c7b1d70d75c666734a4ca6cfb5cb9e7f0e
+    description: >-
+      The `getRegions` utility previously read `kube_domain` and then `kube_api_server` from each
+      region's `region.yaml` to decide whether a Kubernetes cluster had been deployed
+      (`clusterDeployed`). Both of those values can be set before a cluster is actually running,
+      making the check unreliable. The detection now uses `getModuleStatus` to inspect the live
+      `.pf.yaml` deploy status of `kube_reloader` — a module that is only in a `success` state
+      after the full cluster stack has been applied. Commands that rely on `clusterDeployed`
+      (such as `pf cluster add`, which skips regions that already have a cluster) now correctly
+      reflect the true deployment state of each region.
+  - type: improvement
+    summary: >-
+      `pf env add` now provides IAM user creation instructions when importing an existing AWS
+      organization.
+    references:
+      - type: internal-commit
+        summary: "feat: provide instructions for creating a user if importing existing AWS org"
+        link: d4da65931ff9bd8e12707f179430d5d107c31215
+    impacts:
+      - type: cli
+        component: env add
+        summary: >-
+          Displays IAM user creation instructions and prompts for management account login
+          when Panfactum is configured to manage an existing AWS organization
+    description: >-
+      Previously, when a user ran `pf env add` against an existing AWS organization and opted
+      for Panfactum to manage it, the command called `getRootAccountAdminAccess` directly without
+      guiding the user through the required IAM user setup steps. The flow now first confirms that
+      the user has logged into the management account, then walks through creating a dedicated
+      `management-superuser` IAM user with `AdministratorAccess`, creating access key credentials,
+      and entering those credentials — exactly the same guided flow used for brand-new accounts.
+      The AWS console URLs for user creation and access key creation are automatically opened in
+      the browser via the new `failsafeOpen` utility, which silently ignores failures if the browser
+      cannot be launched.
+  - type: "improvement"
+    summary: >-
+      `pf env add` now displays optional billing console setup instructions after the AWS
+      Organization management environment is bootstrapped.
+    references:
+      - type: "internal-commit"
+        summary: "feat: adds instructions for enabling billing when organization setup is complete"
+        link: "d09ed80f4a3c9b5d7ba8a9fc46912f00f0bf8f39"
+      - type: "external-docs"
+        summary: "AWS IAM User Guide — Grant access to the billing console"
+        link: "https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-account-iam.html"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "Post-org-bootstrap success message now includes optional billing visibility setup instructions"
+    description: >-
+      After successfully bootstrapping the management environment, `pf env add` previously only
+      mentioned that existing AWS accounts could be invited into the organization. The message now
+      also surfaces the optional "Grant access to the billing console" step from the AWS IAM User
+      Guide, directing users to complete those manual steps if they want IAM users to have
+      visibility into billing information. Both the billing setup and the account invitation steps
+      are now explicitly labeled as optional, and the wording clarifies that neither is required
+      to proceed with adding a new standard environment.
+  - type: "fix"
+    summary: >-
+      Default answer values in `pf` CLI prompts are now displayed in italic gray, making them
+      visually distinct from active input.
+    references:
+      - type: "internal-commit"
+        summary: "fix: default answer styles and adds 'pf env add' default env name"
+        link: "c30b909eac165687992550d41c9987cbdfc95207"
+    description: >-
+      The Inquirer theme used by the `pf` CLI logger was missing a `defaultAnswer` style
+      function. As a result, default values shown in prompts (e.g., for `input` and `password`
+      prompt types) were rendered without distinct styling, making them hard to distinguish from
+      placeholder text. The theme now applies `pc.italic(pc.gray(...))` to default answer text,
+      giving it a muted italic appearance that is consistent with standard CLI UX conventions.
+  - type: improvement
+    summary: >-
+      `pf cluster add` and `pf sso add` now only show fully deployed environments and
+      regions in their selection prompts.
+    references:
+      - type: internal-commit
+        summary: "refactor: improve cluster deployment detection to use actual deployment status"
+        link: d34274c7b1d70d75c666734a4ca6cfb5cb9e7f0e
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: Environment and region selection now filters to deployed environments only
+      - type: cli
+        component: sso add
+        summary: Environment and region selection now filters to deployed environments only
+    description: >-
+      Previously, `pf cluster add` and `pf sso add` would display all environments (including
+      undeployed ones) in their selection prompts, labeling undeployed options with a
+      "(not deployed)" suffix. This was confusing and could lead to errors if a user selected
+      an environment that had not yet been bootstrapped. The prompts now pre-filter the lists
+      to only include fully deployed environments, eliminating the need for the warning label
+      and making the UX cleaner and safer.
+  - type: "improvement"
+    summary: >-
+      `pf env add` environment name prompt now suggests a smart default based on existing
+      environments ("production" or "development" if absent).
+    references:
+      - type: "internal-commit"
+        summary: "fix: default answer styles and adds 'pf env add' default env name"
+        link: "c30b909eac165687992550d41c9987cbdfc95207"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "Environment name prompt now pre-fills with a contextual default based on existing environments"
+    description: >-
+      The environment name input in `pf env add` now supplies a `default` value to guide
+      users. The default is chosen in priority order: (1) the name of a partially-deployed
+      environment if one already exists (allowing a resume), (2) `"production"` if no
+      environment with "prod" in its name is present, (3) `"development"` if no "dev"
+      environment exists, or (4) no default otherwise. This reduces friction for first-time
+      users and makes it easier to resume interrupted setups.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` now deploys Authentik at `sso.<domain>` instead of `authentik.<domain>`,
+      standardizing the SSO subdomain across all environments.
+    references:
+      - type: "internal-commit"
+        summary: "refactor: standardize SSO subdomain configuration and update domain references"
+        link: "07d42f09a43b367e79433147d0e9c46a083e95b9"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Authentik is now deployed at `sso.<domain>` instead of `authentik.<domain>`"
+    description: >-
+      The Authentik subdomain used during `pf sso add` has been standardized from
+      `authentik.<domain>` to `sso.<domain>`. A shared `SSO_SUBDOMAIN` constant now governs
+      all domain construction within the SSO setup workflow, eliminating the inconsistency
+      between the module `domain` input, the API base path, the `authentik_url` written to
+      `global.yaml`, and the user-facing prompts. The domain selector prompt also now shows
+      the full `sso.<domain>` format so users see exactly which URL will be provisioned.
+  - type: "improvement"
+    summary: >-
+      `pf cluster add` now configures the bastion domain dynamically as `bastion.<kube_domain>`
+      instead of leaving `bastion_domains` empty.
+    references:
+      - type: "internal-commit"
+        summary: "feat: configure bastion domain dynamically from kube_domain"
+        link: "cefc9900cb364e5056c1e5c73a4624e30d17f3bf"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Bastion domain is now automatically set to `bastion.<kube_domain>` during cluster setup"
+      - type: "iac-module"
+        component: "kube_bastion"
+        summary: "Receives `bastion_domains` input populated from the cluster's `kube_domain` config value"
+    description: >-
+      Previously, the `kube_bastion` Terragrunt template generated by `pf cluster add` hardcoded
+      `bastion_domains = []`, leaving the bastion with no configured domain. The installer now reads
+      `kube_domain` from the Panfactum config and passes `bastion.<kube_domain>` as the
+      `bastion_domains` input when deploying the bastion module. This mirrors the pattern established
+      for the SSO subdomain and removes a manual configuration step that previously had to be completed
+      after cluster bootstrap.
+  - type: "fix"
+    summary: >-
+      Fixes `pf-db-tunnel` by removing an obsolete `pf-check-ssh` call that was no longer
+      needed as an SSH pre-check step.
+    references:
+      - type: "internal-commit"
+        summary: "fix: remove obsolete pf-check-ssh call from pf-db-tunnel"
+        link: "da2c2c0b6d592fb74487da17f8f9df5db839e1a2"
+    impacts:
+      - type: "devshell"
+        component: "pf-db-tunnel"
+        summary: "Removed obsolete pf-check-ssh pre-flight call from tunnel script"
+  - type: "fix"
+    summary: >-
+      Fixes `pf-tunnel` by removing an obsolete `pf-check-ssh` source call that was no longer
+      needed as an SSH pre-check step.
+    references:
+      - type: "internal-commit"
+        summary: "fix: remove obsolete pf-check-ssh source from pf-tunnel"
+        link: "9349ff71dee07eaf056b1d15111e8676838e89e7"
+    impacts:
+      - type: "devshell"
+        component: "pf-tunnel"
+        summary: "Removed obsolete pf-check-ssh pre-flight source call from tunnel script"
+  - type: "fix"
+    summary: >-
+      Fixes `pf-tunnel` script failures caused by missing SSH configuration variable definitions
+      (`CONNECTION_INFO_FILE`, `CONFIG_FILE`, `KNOWN_HOSTS_FILE`).
+    references:
+      - type: "internal-commit"
+        summary: "fix: define missing SSH configuration variables in pf-tunnel"
+        link: "6f6211d9d7a9774022c215afe4d5092e69a7f65f"
+    impacts:
+      - type: "devshell"
+        component: "pf-tunnel"
+        summary: "Defines missing SSH config path variables that caused runtime failures"
+  - type: "improvement"
+    summary: >-
+      [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      now correctly applies `minimum_memory_mb` per node; default increased from 25 MB to 1000 MB.
+    references:
+      - type: "internal-commit"
+        summary: "feat: improve OpenSearch memory configuration"
+        link: "d044ca03b10987eb7c93d42fc77f561641201a85"
+    impacts:
+      - type: "iac-module"
+        component: "kube_opensearch"
+        summary: >-
+          minimum_memory_mb is now applied to the container spec; default increased from 25 MB to
+          1000 MB and validation minimum updated to match
+    description: >-
+      Previously, the `minimum_memory_mb` input variable for `kube_opensearch` was declared
+      but its value was never passed to the underlying `kube_stateful_set` container spec —
+      the container's `minimum_memory` was hardcoded to `1000` regardless of the variable's
+      value. This commit wires `var.minimum_memory_mb` into the container configuration so the
+      variable actually controls the memory floor. The default and validation minimum are also
+      updated from 25 MB to 1000 MB to reflect OpenSearch's real memory requirements. The
+      variable description has been corrected to reference OpenSearch nodes instead of Redis.
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` passing the logical region name instead of
+      `aws_region` to AWS API calls.
+    references:
+      - type: internal-commit
+        summary: "fix: standardize AWS region parameter handling and improve SSO flexibility"
+        link: 67143b00110420fe0253a47e18988b072350f8a0
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: >-
+          VPC name lookup, EKS addon management, and EC2 instance termination
+          now use aws_region from config instead of the logical region name
+    description: >-
+      Several AWS CLI and SDK calls within `pf cluster add` were receiving
+      the Panfactum logical `region` value (a directory slug that may differ
+      from the AWS region code) instead of the actual `aws_region` value read
+      from the Panfactum config. Affected calls included the `aws ec2
+      describe-vpcs` VPC name uniqueness check, `aws eks list-addons` and
+      `aws eks delete-addon` calls during cluster reset, and `aws ec2
+      describe-instances` / `aws ec2 terminate-instances` calls that clean up
+      old nodes. All of these now use the `aws_region` config value, fixing
+      failures in setups where the directory name does not match the AWS
+      region code. Cluster installation also now validates that `aws_region`
+      is present in the region config before proceeding.
+  - type: improvement
+    summary: >-
+      `pf cluster add` now automatically sets up Vault Federated SSO during
+      the cluster extensions step if Authentik is already deployed.
+    references:
+      - type: internal-commit
+        summary: "fix: standardize AWS region parameter handling and improve SSO flexibility"
+        link: 67143b00110420fe0253a47e18988b072350f8a0
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: >-
+          New "Setup Vault Federated SSO" task added to the cluster extensions
+          step; automatically skipped if Authentik is not deployed anywhere
+      - type: iac-module
+        component: authentik_vault_sso
+        summary: Now deployed automatically by pf cluster add when Authentik is present
+      - type: iac-module
+        component: vault_auth_oidc
+        summary: Now deployed automatically by pf cluster add when Authentik is present
+    description: >-
+      After the cluster extensions phase completes, `pf cluster add` now
+      attempts to configure Vault Federated SSO by searching all environments
+      for a deployed `kube_authentik` module. If one is found, the installer
+      automatically deploys `authentik_vault_sso` and `vault_auth_oidc` and
+      revokes the static Vault root token. If no Authentik deployment is
+      found the step is silently skipped. This means users who run
+      `pf cluster add` after `pf sso add` no longer need a separate step to
+      wire Vault into their identity provider.
+  - type: addition
+    summary: >-
+      Adds the `pf cluster enable` command for enabling optional cluster
+      features such as ECR pull-through cache.
+    description: >-
+      `pf cluster enable` provides a guided wizard for activating opt-in
+      cluster features. The first supported feature is `ecr-pull-through-cache`,
+      which prompts for Docker Hub and GitHub credentials, stores them
+      encrypted via SOPS, deploys the `aws_ecr_pull_through_cache` IaC module,
+      and re-deploys `kube_policies` with pull-through cache enabled. More
+      features will be added over time using the same extensible pattern.
+    references:
+      - type: internal-commit
+        summary: "feat: implement cluster enable command with ECR pull-through cache support"
+        link: 654a4ad80408b2347cdd87aed1623d28bb5c3725
+    impacts:
+      - type: cli
+        component: cluster enable
+        summary: New command enabling optional cluster features via a guided wizard
+      - type: iac-module
+        component: aws_ecr_pull_through_cache
+        summary: Deployed automatically when enabling the ecr-pull-through-cache feature
+      - type: iac-module
+        component: kube_policies
+        summary: Re-deployed with pull_through_cache_enabled set to true after ECR setup
+  - type: addition
+    summary: >-
+      All `pf` CLI commands now accept a `--cwd` flag to override the working
+      directory used for repository root detection.
+    description: >-
+      Previously the CLI always resolved the repository root from `process.cwd()`,
+      which required the terminal to be inside the repository when invoking
+      any `pf` command. The new `--cwd` flag (also readable from the `CWD`
+      environment variable) lets callers specify an explicit working directory,
+      enabling automation scripts, editor integrations, and CI pipelines to
+      invoke `pf` commands from outside the repo tree.
+    references:
+      - type: internal-commit
+        summary: "feat: implement cluster enable command with ECR pull-through cache support"
+        link: 654a4ad80408b2347cdd87aed1623d28bb5c3725
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: Now respects --cwd for repository root resolution
+      - type: cli
+        component: cluster enable
+        summary: Now respects --cwd for repository root resolution
+      - type: cli
+        component: config get
+        summary: Now respects --cwd for repository root resolution
+  - type: fix
+    summary: >-
+      Fixes `setupVaultSSO` reading config from `process.cwd()` instead of
+      the correct region path.
+    references:
+      - type: internal-commit
+        summary: "fix: standardize AWS region parameter handling and improve SSO flexibility"
+        link: 67143b00110420fe0253a47e18988b072350f8a0
+    impacts:
+      - type: cli
+        component: sso add
+        summary: Vault SSO setup now reads region config from the selected region path
+      - type: cli
+        component: cluster add
+        summary: Vault SSO setup invoked during cluster extensions uses the correct region path
+    description: >-
+      The `setupVaultSSO` utility previously called `getPanfactumConfig` with
+      `process.cwd()` as the directory, which resolved configuration relative
+      to wherever the CLI process was launched rather than the selected
+      cluster region. The function now accepts an explicit `regionPath`
+      parameter. Both `pf sso add` and the new Vault SSO step in
+      `pf cluster add` pass the correct region path, ensuring config values
+      such as `aws_profile`, `environment`, `region`, `kube_config_context`,
+      and `vault_token` are always read from the intended region directory.
+  - type: "improvement"
+    summary: >-
+      `pf cluster add` EKS deployment step now shows a 15-minute ETA warning in the task title
+      during the apply phase.
+    references:
+      - type: "internal-commit"
+        summary: "added eks time warning message"
+        link: "5e4d6524bb7f8d283e86f3775fdd4067f0b1d7ac"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "EKS deploy step now displays a time estimate warning in the task title during planning"
+    description: >-
+      The `buildDeployModuleTask` utility now accepts an optional `etaWarningMessage` parameter.
+      When provided, the warning is appended to the "Applying - Planning changes" task title so
+      users see a time estimate while waiting for the EKS module to deploy. The EKS setup step
+      passes `'This may take up to 15 minutes.'`, improving UX for a step that can be
+      unexpectedly slow.
+  - type: "improvement"
+    summary: "`pf cluster enable` ECR setup now runs `terragrunt run-all apply` after enabling pull-through cache."
+    references:
+      - type: "internal-commit"
+        summary: "added apply all after ecr pull through cache enable"
+        link: "34ee420cad0fd8bc0c5fd72674bf734b02771ca7"
+    impacts:
+      - type: "cli"
+        component: "cluster enable"
+        summary: "ECR setup now runs a full region-wide apply after enabling pull-through cache"
+    description: >-
+      Previously the ECR enable step only re-deployed `kube_policies` after setting
+      `pull_through_cache_enabled: true` in the region config. This was insufficient because many
+      other modules reference that flag. The step now runs `terragrunt run-all apply` across the
+      entire region directory, ensuring every module that depends on pull-through cache settings
+      is updated in a single operation.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` now automatically opens the browser to the Authentik token settings page
+      after creating the API token.
+    references:
+      - type: "internal-commit"
+        summary: "feat: add automatic browser opening to Authentik token page"
+        link: "ce9783a125f31347aa835d2885816d0abae57807"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Browser is now automatically opened to the Authentik token settings page during API token setup"
+    description: >-
+      Previously, the `pf sso add` Authentik setup step instructed users to manually navigate to
+      the Authentik user token settings page (`/if/user/#/settings;{"page":"page-tokens"}`) to
+      copy the newly created API token. The browser is now opened automatically to that URL
+      immediately after the token is created, reducing the steps required and making the token
+      retrieval flow consistent with the earlier password-reset browser-open step.
+  - type: "improvement"
+    summary: "`pf sso add` Authentik root email defaults to `authentik-root@sso.<domain>`; admin email must not be the AWS root email."
+    references:
+      - type: "internal-commit"
+        summary: "feat: improve Authentik setup with default root email and better instructions"
+        link: "f9903b9bdafe6dd44f8aeea43a75ca9b0a0a1419"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Root email prompt pre-filled with authentik-root@sso.<domain>; admin email explainer improved"
+    description: >-
+      Previously, the Authentik root user email prompt had no default value, requiring users to
+      type a full email address. The prompt now pre-populates with
+      `authentik-root@sso.<domain>` (using the selected SSO subdomain) so users can press Enter
+      to accept a sensible default. The admin user email explainer has also been updated to
+      clarify that the email must be unique and must not be the AWS root account email address,
+      preventing a common setup error where users accidentally reuse the account root email.
+  - type: fix
+    summary: "Fixes `pf cluster add` EKS setup where the default cluster name was not pre-formatted, allowing invalid characters."
+    references:
+      - type: internal-commit
+        summary: "fix: improve cluster name handling in EKS setup"
+        link: "1aed9737fed298a33b7dbfae6cb4370a8f2b472d"
+    impacts:
+      - type: cli
+        component: "cluster add"
+        summary: "EKS setup default cluster name is now pre-formatted to lowercase with hyphens"
+    description: >-
+      The EKS cluster name prompt already applied `clusterNameFormatter` as a real-time
+      transformer while the user typed, but the `default` value passed to the prompt
+      was the raw `${environment}-${region}` string. If a user accepted the default
+      without modification, the formatter was not applied to the default, so the saved
+      cluster name could contain uppercase letters or underscores that violate EKS naming
+      constraints. The default is now passed through `clusterNameFormatter` before being
+      shown, ensuring the pre-filled value is always a valid, formatted cluster name.
+  - type: "addition"
+    summary: >-
+      The `pf` CLI now collects anonymous usage telemetry via PostHog when `user_id` is set in `panfactum.user.yaml`.
+    references:
+      - type: "internal-commit"
+        summary: "feat: add anonymous usage tracing"
+        link: "5d6c7ee80a7966988687ca691f5080b28599c772"
+    impacts:
+      - type: "cli"
+        component: "welcome"
+        summary: "Now generates a UUID user_id on first run and stores it in panfactum.user.yaml; fires a PostHog installation event"
+    description: >-
+      The `pf` CLI now fires a `cli-start` telemetry event to PostHog on each invocation when a
+      `user_id` is present in the Panfactum repo variables. The `user_id` is a UUID generated by
+      `pf welcome` on first DevShell setup and stored in the new `panfactum.user.yaml` user-specific
+      config file. All telemetry is anonymous and tied only to the generated `user_id`; no personally
+      identifiable information is collected.
+  - type: "addition"
+    summary: >-
+      Introduces `panfactum.user.yaml` as a per-user config file that overrides `panfactum.yaml` and is gitignored by default.
+    references:
+      - type: "internal-commit"
+        summary: "feat: add anonymous usage tracing"
+        link: "5d6c7ee80a7966988687ca691f5080b28599c772"
+    impacts:
+      - type: "configuration"
+        component: "panfactum.user.yaml"
+        summary: "New optional per-user config file; values merged on top of panfactum.yaml and gitignored automatically"
+      - type: "cli"
+        component: "devshell sync"
+        summary: "*.user.yaml files are now added to the root and environments gitignore entries"
+    description: >-
+      `panfactum.user.yaml` is a new optional configuration file placed alongside `panfactum.yaml`
+      in the repository root. Its values are merged on top of `panfactum.yaml` at read time, allowing
+      individual contributors to maintain user-specific settings (such as `user_id` for telemetry) without
+      committing them to the shared repository. The file is automatically gitignored by `pf devshell sync`
+      via new `*.user.yaml` entries added to both the root and environments directory gitignore patterns.
+  - type: "fix"
+    summary: >-
+      Fixes `pf` CLI usage telemetry to fire after command parsing so that command path and flags are captured.
+    references:
+      - type: "internal-commit"
+        summary: "fix: move usage tracking from context to command execution"
+        link: "d7e596c735284934c4000156cdce6ede26dedf5f"
+    description: >-
+      The `cli-start` PostHog event was previously fired inside `createPanfactumContext`, before the
+      command had been fully processed. At that point `proc.path`, `proc.help`, and other command-level
+      properties were not yet available, so the event carried no useful context. The tracking call has
+      been moved to the main entry point after `cli.process()` completes, and the event now records the
+      command path, help flag, debug flag, and working directory alongside the `user_id`.
+  - type: "fix"
+    summary: >-
+      Fixes [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      dashboard superuser password to exclude special characters, preventing authentication failures.
+    references:
+      - type: "internal-commit"
+        summary: "fix: restrict opensearch dashboard password to alphanumeric characters only"
+        link: "919e46249012e6623547cdbbb7da12b014314c8d"
+    impacts:
+      - type: "iac-module"
+        component: "kube_opensearch"
+        summary: "Dashboard superuser password is now restricted to alphanumeric characters (special = false)"
+  - type: "improvement"
+    summary: >-
+      Panfactum documentation URLs simplified — `/docs/main/` prefix removed, internal links now use `/main/` directly.
+    references:
+      - type: "internal-commit"
+        summary: "feat: make docs the top-level entity for the website"
+        link: "f0e4193c37b4950ef5e83e72303663033e3c80e9"
+    description: >-
+      All internal cross-links in module documentation (README and FOOTER files) have been updated
+      to remove the `/docs` prefix. Links previously formatted as `/docs/main/guides/...` or
+      `/docs/main/reference/...` now use `/main/guides/...` and `/main/reference/...` respectively.
+      This reflects a website URL restructuring that makes documentation the top-level entity,
+      resulting in cleaner, shorter URLs across the Panfactum documentation site.
+  - type: "improvement"
+    summary: >-
+      `make-new-edge-release` and `make-new-stable-release-channel` updated to use the structured changelog system.
+    references:
+      - type: "internal-commit"
+        summary: "feat: make docs the top-level entity for the website"
+        link: "f0e4193c37b4950ef5e83e72303663033e3c80e9"
+    impacts:
+      - type: "devshell"
+        component: "make-new-edge-release"
+        summary: >-
+          Now copies the unreleased changelog log.yaml to a versioned file on release and
+          resets a fresh unreleased.mdx template instead of updating a single changelog MDX file
+      - type: "devshell"
+        component: "make-new-stable-release-channel"
+        summary: >-
+          Now writes the new stable release changelog to the CHANGELOG_DIR path instead
+          of the legacy docs/changelog path
+    description: >-
+      The edge release script (`make-new-edge-release`) previously updated a single
+      `changelog/edge.mdx` file with a sed replacement. It now copies the current
+      `changelog/unreleased.mdx` to a versioned file (e.g., `edge.26-04-04.mdx`) and
+      resets `unreleased.mdx` to a blank template. The stable release script
+      (`make-new-stable-release-channel`) now resolves the changelog output path from
+      the new `CHANGELOG_DIR` variable rather than the legacy `docs/changelog/` location.
+  - type: improvement
+    summary: >-
+      The default `minimum_memory_mb` in [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      has been increased from 1000MB to 4000MB to match realistic production sizing requirements.
+    references:
+      - type: internal-commit
+        summary: "bring back website in code"
+        link: 6001eed85f76a8aaf53597846df50d66992e53d7
+    impacts:
+      - type: iac-module
+        component: kube_opensearch
+        summary: Default minimum memory per OpenSearch node increased from 1000MB to 4000MB
+    description: >-
+      The previous default of 1000MB was too low for real-world OpenSearch deployments and could
+      result in out-of-memory conditions or poor performance. The new default of 4000MB better reflects
+      the minimum viable memory required for stable OpenSearch operation. If you previously relied on the
+      1000MB default and need to maintain that value, set `minimum_memory_mb = 1000` explicitly in your
+      module inputs.
+  - type: fix
+    summary: >-
+      Fixes [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      security update job not respecting the `vpa_enabled` input variable.
+    references:
+      - type: internal-commit
+        summary: "bring back website in code"
+        link: 6001eed85f76a8aaf53597846df50d66992e53d7
+    impacts:
+      - type: iac-module
+        component: kube_opensearch
+        summary: Security update job now correctly inherits the vpa_enabled setting from the parent module
+  - type: fix
+    summary: >-
+      Fixes a bug in [`kube_policies`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_policies)
+      where `reader` and `restricted_reader` roles were accidentally granted full write access.
+    references:
+      - type: internal-commit
+        summary: "feat: upgrades kubernetes to 1.31"
+        link: 33d887c36fae56bc624511e72a8ac7f939db47f3
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: >-
+          read_verbs corrected from all verbs (including create/delete/patch/update) to get/list/watch only
+    description: >-
+      The `read_verbs` local variable in `kube_policies/rbac.tf` was accidentally set to the same
+      value as `all_verbs`, giving the `reader` and `restricted_reader` ClusterRoles full write
+      access to non-secret resources. This fix corrects `read_verbs` to `["get", "list", "watch"]`
+      so that read-only roles can no longer create, delete, patch, or update cluster resources.
+      Re-apply `kube_policies` to receive the corrected RBAC permissions.
+    action_items:
+      - "Re-apply `kube_policies` to receive the corrected read-only RBAC permissions."
+  - type: addition
+    summary: >-
+      Adds TypeScript CLI implementations of legacy bash devshell scripts as `pf` subcommands,
+      improving error handling and type safety.
+    references:
+      - type: internal-commit
+        summary: "refactor: migrate bash scripts to TypeScript CLI commands"
+        link: dcfa7211e0afa76c8656bb706b61cac0a5dea76f
+    impacts:
+      - type: cli
+        component: buildkit build
+        summary: New CLI command replacing pf-buildkit-build devshell script
+      - type: cli
+        component: buildkit clear-cache
+        summary: New CLI command replacing pf-buildkit-clear-cache devshell script
+      - type: cli
+        component: buildkit get-address
+        summary: New CLI command replacing pf-buildkit-get-address devshell script
+      - type: cli
+        component: buildkit record-build
+        summary: New CLI command replacing pf-buildkit-record-build devshell script
+      - type: cli
+        component: buildkit suspend
+        summary: New CLI command replacing pf-buildkit-scale-down devshell script
+      - type: cli
+        component: buildkit tunnel
+        summary: New CLI command replacing pf-buildkit-tunnel devshell script
+      - type: cli
+        component: db get-creds
+        summary: New CLI command replacing pf-get-db-creds devshell script
+      - type: cli
+        component: db tunnel
+        summary: New CLI command replacing pf-db-tunnel devshell script
+      - type: cli
+        component: docker credential-helper
+        summary: New CLI command replacing docker-credential-panfactum devshell script
+      - type: cli
+        component: kube disable-disruptions
+        summary: New CLI command replacing pf-voluntary-disruptions-disable devshell script
+      - type: cli
+        component: kube enable-disruptions
+        summary: New CLI command replacing pf-voluntary-disruptions-enable devshell script
+      - type: cli
+        component: kube cluster-resume
+        summary: New CLI command replacing pf-eks-resume devshell script
+      - type: cli
+        component: kube cluster-suspend
+        summary: New CLI command replacing pf-eks-suspend devshell script
+      - type: cli
+        component: kube get-token
+        summary: New CLI command replacing pf-get-kube-token devshell script
+      - type: cli
+        component: kube profile-for-context
+        summary: New CLI command replacing pf-get-aws-profile-for-kube-context devshell script
+      - type: cli
+        component: k8s velero snapshot-gc
+        summary: New CLI command replacing pf-velero-snapshot-gc devshell script
+      - type: cli
+        component: tunnel
+        summary: New CLI command replacing pf-tunnel devshell script
+      - type: cli
+        component: util get-commit-hash
+        summary: New CLI command replacing pf-get-commit-hash devshell script
+      - type: cli
+        component: util get-module-hash
+        summary: New CLI command replacing pf-get-local-module-hash devshell script
+      - type: cli
+        component: vault get-token
+        summary: New CLI command replacing pf-get-vault-token devshell script
+      - type: cli
+        component: wf git-checkout
+        summary: New CLI command replacing pf-wf-git-checkout devshell script
+      - type: cli
+        component: wf sops-set-profile
+        summary: New CLI command replacing pf-sops-set-profile devshell script
+      - type: cli
+        component: aws ecr wait-on-image
+        summary: New CLI command for polling ECR until a specific image tag becomes available
+      - type: cli
+        component: iac delete-locks
+        summary: New CLI command replacing pf-tf-delete-locks devshell script
+    description: >-
+      A large set of legacy bash devshell scripts have been rewritten as TypeScript `pf`
+      subcommands. This improves maintainability, error handling, and type safety across all
+      operations. The old bash scripts remain available in the DevShell as pass-through wrappers
+      for backward compatibility, but the canonical interface going forward is the `pf` CLI.
+      Infrastructure modules and workflow scripts have been updated internally to call the new
+      commands. No user-visible behavior changes are expected.
+  - type: improvement
+    summary: >-
+      [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_buildkit),
+      [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
+      [`kube_velero`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_velero),
+      [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build),
+      and [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+      now invoke `pf` CLI commands instead of legacy `/bin/pf-*` scripts in container workloads.
+    references:
+      - type: internal-commit
+        summary: "refactor: migrate bash scripts to TypeScript CLI commands"
+        link: dcfa7211e0afa76c8656bb706b61cac0a5dea76f
+    impacts:
+      - type: iac-module
+        component: kube_buildkit
+        summary: >-
+          Scale-to-zero and cache-clear cron jobs now run `pf buildkit suspend` and
+          `pf buildkit clear-cache` instead of `/bin/pf-buildkit-scale-down` and
+          `/bin/pf-buildkit-clear-cache`
+      - type: iac-module
+        component: kube_disruption_window_controller
+        summary: >-
+          Enabler and disabler cron jobs now run `pf kube enable-disruptions` and
+          `pf kube disable-disruptions` instead of `/bin/pf-voluntary-disruptions-enable`
+          and `/bin/pf-voluntary-disruptions-disable`
+      - type: iac-module
+        component: kube_velero
+        summary: >-
+          Snapshot garbage-collection cron job now runs `pf kube velero-snapshot-gc`
+          instead of `/bin/pf-velero-snapshot-gc`
+      - type: iac-module
+        component: wf_dockerfile_build
+        summary: >-
+          Build, clone, scale-buildkit, and setup scripts now call `pf buildkit` and
+          `pf wf` subcommands instead of legacy `pf-buildkit-*` and `pf-wf-*` scripts
+      - type: iac-module
+        component: wf_tf_deploy
+        summary: >-
+          Deploy and force-unlock scripts now call `pf wf git-checkout`, `pf wf sops-set-profile`,
+          `pf config get`, and `pf iac delete-locks` instead of legacy `pf-*` scripts
+    description: >-
+      These modules previously embedded references to legacy `/bin/pf-*` binary paths in their
+      container command arrays and workflow scripts. They have been updated to use the unified
+      `pf` CLI subcommand interface. Users who re-apply these modules will pick up the updated
+      container commands automatically. No input changes are required.
+  - type: improvement
+    summary: >-
+      [`kube_policies`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_policies)
+      now restricts write access to security-sensitive resources for the `pf:admins` role.
+    references:
+      - type: internal-commit
+        summary: "feat: upgrades kubernetes to 1.31"
+        link: 33d887c36fae56bc624511e72a8ac7f939db47f3
+    impacts:
+      - type: iac-module
+        component: kube_policies
+        summary: >-
+          pf:admins ClusterRole now limits write access to RBAC roles, webhooks, CRDs, flow control,
+          and Kyverno policies to prevent privilege escalation and cluster instability
+    description: >-
+      The `pf:admins` ClusterRole previously granted full write access to all non-secret resources,
+      including RBAC roles/bindings, admission webhooks, CRDs, and Kyverno policies. Unintended
+      mutations to these resources can escalate privileges, bypass policy enforcement, or destabilize
+      the cluster. The role now separates resources into a `sensitive_resources` list — covering
+      cluster roles, role bindings, API services, webhook configurations, flow control objects,
+      CRDs, and Kyverno policies — and grants only `get/list/watch` access to them. Full write
+      access is retained for all other non-secret resources.
+  - type: fix
+    summary: "Fixes `getDomains` using a directory name instead of the full filesystem path."
+    references:
+      - type: internal-commit
+        summary: "feat: adds first CLI unit tests"
+        link: b7b790dd661af18039021d3352666f3ba3fc41c9
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Domain environment path was a short name rather than an absolute path, causing downstream steps to fail when resolving environment files.
+  - type: fix
+    summary: "Fixes CLI config file loading to return null instead of throwing on missing files."
+    references:
+      - type: internal-commit
+        summary: "feat: adds first CLI unit tests"
+        link: b7b790dd661af18039021d3352666f3ba3fc41c9
+  - type: fix
+    summary: >-
+      Fixes CLI subprocess execution where merged stdout/stderr output was silently dropped due to
+      an incorrect `concatStreams` call.
+    references:
+      - type: internal-commit
+        summary: "feat: adds unit tests to the CLI"
+        link: dd36035b968faeb3c4f64406aea69e47353f968a
+    description: >-
+      The `execute` subprocess utility called `concatStreams` with a raw array instead of the
+      expected `{ streams: [...] }` object. This caused the merged output stream (used for logging
+      and retry diagnostics) to be empty on every subprocess invocation. CLI commands that depend
+      on capturing combined stdout/stderr output — such as error messages from terragrunt or
+      kubectl — would silently lose that output. The call site has been corrected to use the proper
+      API signature.
+  - type: addition
+    summary: >-
+      [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+      now creates dedicated workflow-only Karpenter node pools for each existing pool type (burstable,
+      burstable-arm, spot, spot-arm, on-demand, on-demand-arm).
+    references:
+      - type: internal-commit
+        summary: "feat: adds workflow-only node pools"
+        link: 2702b0c70a3f8aed03ea6606ba291b6e2b380885
+    impacts:
+      - type: iac-module
+        component: kube_karpenter_node_pools
+        summary: >-
+          Six new workflow-only NodePool resources added; each mirrors an existing pool but carries a
+          `workflow=true:NoSchedule` taint and a `panfactum.com/workflow-only=true` label
+    description: >-
+      Each existing Karpenter node pool now has a parallel workflow-only counterpart (prefixed with
+      `wf-`). The workflow pools carry a `workflow: "true"` taint with `NoSchedule` effect and label
+      nodes with `panfactum.com/workflow-only: "true"`. This isolates Argo Workflow pods (which
+      tolerate the `workflow` taint) onto their own nodes, preventing long-running workflows from
+      displacing regular workloads. A new `default_termination_grace_period` variable (default
+      `"1h0m0s"`) has also been introduced to control the termination grace period for on-demand
+      node pools, replacing the previously hardcoded value.
+  - type: addition
+    summary: >-
+      Adds `workflow_nodes_required` input to `wf_spec` and `kube_workload_utility` to schedule
+      workflow pods exclusively on workflow-only nodes.
+    description: >-
+      When `workflow_nodes_required = true`, pods are constrained to nodes labeled
+      `panfactum.com/workflow-only=true` (the workflow-only Karpenter pools introduced alongside
+      this change) and are granted the `workflow=true:NoSchedule` taint toleration. This allows
+      long-running, non-resumable Argo Workflows to run on dedicated nodes that regular workloads
+      cannot be scheduled onto, preventing workflow disruption caused by bin-packing pressure from
+      other services.
+    references:
+      - type: internal-commit
+        summary: "feat: adds workflow-only node support to wf_spec"
+        link: 30f40bd6c4414685d5923bfe6b0029557acab1d3
+    impacts:
+      - type: iac-module
+        component: wf_spec
+        summary: New `workflow_nodes_required` input (default false) pins workflow pods to workflow-only nodes
+      - type: iac-module
+        component: kube_workload_utility
+        summary: New `workflow_nodes_required` input and corresponding node selector and taint toleration
+  - type: improvement
+    summary: >-
+      [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      now supports single-node deployments via `replica_count=1`.
+    references:
+      - type: internal-commit
+        summary: "feat: adds the ability to run opensearch in single-node mode"
+        link: 14cb9e692705dfa5b13f113d9699abb6df58b97c
+    impacts:
+      - type: iac-module
+        component: kube_opensearch
+        summary: >-
+          replica_count minimum of 3 removed; setting replica_count=1 now configures
+          discovery.type=single-node and omits multi-node seed hosts configuration
+    description: >-
+      Previously, `kube_opensearch` required at least three replicas and would fail validation
+      for smaller deployments. This change allows single-node deployments by removing the
+      validation constraint and automatically applying the correct OpenSearch cluster discovery
+      configuration: when `replica_count` is set to 1, `discovery.type` is set to `"single-node"`
+      and the `discovery.seed_hosts` / `cluster.initial_cluster_manager_nodes` settings are
+      omitted. This is useful for development environments and smaller workloads where high
+      availability is not required.
+  - type: fix
+    summary: >-
+      Fixes [`kube_aws_creds`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_creds)
+      always creating the IAM user policy even when `iam_policy_json` is null.
+    references:
+      - type: internal-commit
+        summary: "feat: adds the ability to run opensearch in single-node mode"
+        link: 14cb9e692705dfa5b13f113d9699abb6df58b97c
+    impacts:
+      - type: iac-module
+        component: kube_aws_creds
+        summary: >-
+          aws_iam_user_policy now always created using coalesce(var.iam_policy_json, "{}") instead
+          of conditionally omitted when iam_policy_json is null
+  - type: addition
+    summary: >-
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      adds `pg_recovery_target_immediate` input for `targetImmediate` CNPG recovery mode.
+    references:
+      - type: internal-commit
+        summary: "feat(kube_pg_cluster): support targetImmediate recovery (#375)"
+        link: aaa63ac02ce6adee3e990bc8c45c49a1ca2089c0
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: New optional pg_recovery_target_immediate input enables targetImmediate CNPG recovery mode
+    description: >-
+      The new `pg_recovery_target_immediate` input (default `null`) configures the CNPG cluster bootstrap
+      recovery to use `targetImmediate: true`, stopping recovery at the earliest consistent point after the
+      base backup completed. When set, the input is used as the `backupID` in the CNPG `recoveryTarget`
+      block. This is an alternative to `pg_recovery_target_time` — the two cannot be used simultaneously.
+      Existing deployments are unaffected since the input defaults to `null`.
+  - type: addition
+    summary: >-
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      adds `pg_custom_image` input to support custom PostgreSQL container images with extensions.
+    references:
+      - type: internal-commit
+        summary: "feat(kube_pg_cluster): support custom_image (#376)"
+        link: 5809f908864efcc93847361fabefc7abfa764d61
+      - type: external-docs
+        summary: "CloudNativePG blog: building custom PostgreSQL images with Docker Bake"
+        link: https://cloudnative-pg.io/blog/building-images-bake/
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: New optional pg_custom_image input overrides pg_version for image selection when set
+    description: >-
+      The new `pg_custom_image` input (default `null`) allows deploying a custom PostgreSQL container
+      image instead of the default CNPG image selected by `pg_version`. This enables use of PostgreSQL
+      extension images such as `ghcr.io/cloudnative-pg/postgis:17` for PostGIS support, or images built
+      with arbitrary Debian-packaged extensions (e.g., pgvector, pg_cron, TimescaleDB) via Docker Bake.
+      When `pg_custom_image` is set, `pg_version` is ignored for image selection. Note that custom images
+      bypass the ECR pull-through cache, so the cluster must have direct registry access and any required
+      image pull secrets configured.
+  - type: fix
+    summary: >-
+      Fixes [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      cross-account recovery failing due to missing IAM permissions on the remote backup bucket.
+    references:
+      - type: internal-commit
+        summary: "fix: kube pg cluster recover from remote backups (#377)"
+        link: b1168e61fb424a8e66a542c5c232721195300cfc
+      - type: issue-report
+        summary: "Cross-account PG cluster recovery — missing IAM permissions on remote S3 bucket"
+        link: https://github.com/Panfactum/stack/issues/378
+      - type: external-docs
+        summary: "CloudNativePG backup and recovery documentation"
+        link: https://cloudnative-pg.io/documentation/1.20/backup/
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: >-
+          IAM policy now grants s3:* on the pg_recovery_bucket ARNs when set, enabling
+          cross-account and cross-cluster database recovery
+    description: >-
+      When using `pg_recovery_bucket` to restore from a backup stored in a different S3 bucket
+      (e.g., recovering a staging cluster from production backups), the cluster's IAM role
+      previously only had `s3:*` on its own backup bucket. Recovery attempts would fail because
+      the pod could not authenticate to the remote bucket. The IAM policy now includes the remote
+      bucket and its objects when `pg_recovery_bucket` is set.
+  - type: fix
+    summary: >-
+      Fixes [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+      `pg_recovery_target_immediate` causing an OpenTofu manifest schema validation error.
+    references:
+      - type: internal-commit
+        summary: "fix: kube pg cluster recover from remote backups (#377)"
+        link: b1168e61fb424a8e66a542c5c232721195300cfc
+      - type: issue-report
+        summary: "Cross-account PG cluster recovery — manifest schema incompatibility"
+        link: https://github.com/Panfactum/stack/issues/378
+    impacts:
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: >-
+          recoveryTarget block now uses merge() with all fields explicitly set to satisfy
+          the Terraform kubernetes provider's type system; backendID corrected to backupID
+    description: >-
+      The Terraform `kubernetes_manifest` provider requires all fields in a nested object to be
+      explicitly declared (even as `null`) for type validation, even when the CloudNativePG CRD
+      marks those fields as optional. The previous implementation conditionally set only the
+      relevant `recoveryTarget` fields, which triggered a "Manifest configuration incompatible
+      with resource schema" planning error. The fix uses `merge()` to provide all `recoveryTarget`
+      fields, setting unused ones to `null`. Additionally, the `backendID` field was corrected
+      to `backupID` to match the actual CNPG CRD field name.
+  - type: addition
+    summary: >-
+      [`aws_ecr_repos`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now
+      accepts a `lifecycle_policy_json` input to override the default ECR lifecycle policy per repository.
+    references:
+      - type: internal-commit
+        summary: "feat(aws_ecr_repos): support custom lifecycle policies (#379)"
+        link: 292b996bfdc0aef6c102493da0dbe4221548d0e3
+      - type: issue-report
+        summary: "Support custom ECR lifecycle policies in aws_ecr_repos"
+        link: https://github.com/Panfactum/stack/issues/381
+    impacts:
+      - type: iac-module
+        component: aws_ecr_repos
+        summary: >-
+          New optional `lifecycle_policy_json` field on each repository object; overrides built-in
+          expiration rules when set
+    description: >-
+      The built-in expiration rules in `aws_ecr_repos` (`expire_all_images` and `expiration_rules`)
+      cover common cases but are too rigid for teams that need fine-grained control — for example,
+      keeping a minimum number of tagged images regardless of age, or applying complex multi-rule
+      policies. The new `lifecycle_policy_json` field accepts a raw JSON string (matching the AWS
+      ECR lifecycle policy format) and, when set, replaces the module-generated policy entirely.
+      Existing repositories that do not set this field continue to behave exactly as before.
+  - type: improvement
+    summary: The Panfactum DevShell now ships Node.js v25, upgraded from v22.
+    references:
+      - type: internal-commit
+        summary: "feat(website): add slideshow presentation system with Reveal.js"
+        link: eced1ab337f51c01a7a045c34a372cf1aae95321
