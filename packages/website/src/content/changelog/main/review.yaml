@@ -1,4 +1,5 @@
 todo:
+  - "Entries for commit 3e06e130f943907d5409980df2333fbdc813a5bf (.envrc nix check refactor and install.sh build time estimate): no impacts blocks added because packages/cli/src/files/direnv/envrc does not map to any schema impact type (iac-module, cli, devshell, configuration) and packages/installer/install.sh also has no matching impact type. Verify whether a new impact type or a configuration/.envrc component should be added to capture these changes."
   - "Entry 'Fixes compilation error in pf devshell sync' (commit 738389f5a03f39078b5cfcce211254397cd83465): the fix also changes behavior — safeFileExists and createNullWriter were commented out, so known_hosts/connection_info and cluster_info files are no longer deleted before rebuilding. Verify whether this behavioral regression is intentional or should be restored with correct utility imports."
   - "Entry 'Adds a new install.sh bootstrapper script': no impacts added because packages/installer/install.sh does not map to any existing schema impact type (iac-module, cli, devshell, configuration). Consider adding a new impact type (e.g., 'installer') or confirm no impacts are needed."
   - "Entry 'install.sh bootstrapper' updated for commit e7ade5824f74f7dc6a778514a23c7da891c3a4fb: the Nix installer was pinned to v0.38.1 and the --determinate=false flag was removed. Verify the pinned version is intentional and that the flag removal does not affect installation behavior on target platforms."
@@ -8,6 +9,7 @@ todo:
   - "Entries for commit 2ca29499f6d742ee64fe75d3671674e441291bb1 (cert issuers, cert management path fix, vault core resources path fix): no impacts block added to any of the three entries because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add impacts to all three entries."
   - "Entry 'pf cluster install Linkerd automation' (commit b04b36dad98ca97a3d416543ff95e42811665c13): no CLI impact added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'pf cluster install inbound networking automation' (commit 6bc9823b0a576fb0d56a63478ae39872682cf9fc): no CLI impact added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'Fixes pf cluster install Vault ingress verification UX' (commit 35dfbc34d67e5844d6bfb627e35f94e05e14452b): no impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'pf cluster install CloudNativePG automation' (commit 91fb52517c3c24210dee2bd96ee8e89d28293f01): component 'kube_cloudnative_pg' is not in the iac-module schema enum. Verify whether this module exists in the codebase under packages/infrastructure/kube_cloudnative_pg/ and if so, add it to the schema."
   - "Entry 'Fixes pf cluster install VPC setup step hanging due to AWS CLI pager' (commit 9b8ead4095a2fb15c4adc4f55fd21ba2e8de8d9d): no impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'pull_through_cache_enabled defaults to true' (commit dafb4d5782ba675eb6a0c4eff407ea59ab6f815e): classified as breaking_change because it changes default behavior for kube_nats, kube_pg_cluster, kube_redis_sentinel. Verify whether kube_stateful_set also changed pull_through_cache_enabled in this or a nearby commit."
@@ -30,6 +32,9 @@ todo:
   - "Entry 'Fixes install.sh to use pf commands' (commit 485bb8f898b65caacfb8d9180dec0a111f95c88c): show-diff returned '(no diff)' despite detecting user-facing files in packages/installer/. Entry was written from the commit message 'fix: update stage 1 installer to use pf commands' alone. Verify which specific commands were replaced (e.g., pf-update → pf devshell sync, or similar) and update the summary accordingly. Also confirm whether this entry overlaps with the existing install.sh additions or other installer fixes."
   - "Entry 'Fixes SLA value formatting in pf cluster install setSLA step' (commit d8976a0552a5a9f6e4d81b58269c96b219dcb392): show-diff returned '(no diff)' — changed files are not covered by .changelog-include patterns. Entry was written from the commit message 'fix: set sla formatting for cluster install' alone. Verify the exact formatting issue (e.g., wrong enum value, wrong case, serialization format) and update the summary accordingly. Also confirm whether this is distinct from the existing setSLA missing-return-statement entry (commit 5bf5678581290b8c1b786f8756db00b664c62c7f) or if the two should be merged."
   - "Entry 'Fixes step nesting in pf cluster install' (commit 7c80f0a2d2fe0346cb7a1943baa97984d09ba851): show-diff returned '(no diff)' — changed files are not covered by .changelog-include patterns. Entry was written from the commit message 'fix: cluster install step nesting' alone. Verify the exact nesting issue (e.g., Listr task hierarchy, step dependency ordering, or checkpoint group structure) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
+  - "Entry 'Fixes pf cluster install EKS setup initial superuser permissions' (commit d127b6f43fc5e715bed6b714ae08e112cbf4a1ca): show-diff returned '(no diff)' — the changed file packages/cli/src/commands/cluster/install/setupEKS.ts is not covered by .changelog-include patterns. Entry was written from the commit message 'fix: initial cluster permissions' alone. Verify the exact fix (e.g., extra_superuser_principal_arns not set, wrong ARN source, or condition bug) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema."
+  - "Entry 'Fixes color rendering bug in applyColors (dedent order)' (commit b695023a1701ff34709eeee49c64d2c9aaf79050): changed file is packages/cli/src/context/logger.ts, a shared utility class not tied to a specific CLI command path. No impacts block was added. Consider whether a generic 'cli' impact should be added or if a Logger/utility impact type is appropriate."
+  - "Entry 'Panfactum terragrunt hooks add .pf.yaml status file' (commit a316a5dc7cc6eb0a4acc93f1a333d8e40a50036a): changed files are packages/cli/src/files/terragrunt/panfactum.hcl and packages/cli/src/util/devshell/constants.ts. Neither maps cleanly to a schema impact type — panfactum.hcl is a CLI-bundled file (not an iac-module, cli command, devshell tool, or configuration enum entry), and .pf.yaml is a generated file not in the configuration component enum. No impacts block was added. Consider adding a 'configuration' component entry for '.pf.yaml' or a generic CLI/configuration impact."
 validated:
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
@@ -159,3 +164,39 @@ validated:
   - 9bdb249fe7b0b7d439d1601737fe8336f785fa58
   - 7f7db1fa18e34e7751bfbd47b60f9ad8330385e2
   - e9738e4241e1e2925e18e419125b4d56fe5086c3
+  - d127b6f43fc5e715bed6b714ae08e112cbf4a1ca
+  - 3200adaba5619879fd3da810d5e69a46e0fbec39
+  - 1b4bb5bf5d6b1c3f644f1bb955f1dbc1014b37d4
+  - 1983c232d7dd2507df93fc28b8743d1b2afb401d
+  - b695023a1701ff34709eeee49c64d2c9aaf79050
+  - 0d65d646b488645ac3f8ad05d0852c5eedbcd3b1
+  - 9bb03e5270ef399bf42d603795e2c8698394e588
+  - 92da33ac2a718d02d99cd0471e4c653d2426f9ef
+  - 63497c19c9b6cc1faf01c137f7be019fa77ee583
+  - 4f42f9ba484e2b9275588c3522858327b1b17c33
+  - b949ef07943277aebe73c457d477c2235480251d
+  - cc1da7cb297e608219710dc6534d9280821f4719
+  - 4900cd7f365df6fb93b3b20ba94b770a5f6bbc1d
+  - 35dfbc34d67e5844d6bfb627e35f94e05e14452b
+  - 0d1327c722d578fbe23280fc0ff98efaa0f0c10e
+  - 23a2d48fabd479261dbbf07c87101cf0322dc3c8
+  - 11c41aa1fc01f6067bc76d2822199bc39bbfa40d
+  - d8d40050f39848b34c8c9a684211850db03ffe2f
+  - ac01f734d88d02ebfbf26aeaefaf434f8be25df4
+  - 3e06e130f943907d5409980df2333fbdc813a5bf
+  - db4b7e515ee1a16e6fdbd392a2adcbe00024d669
+  - 30521a81a5640d770e5e6e1811c76d2eb5de715b
+  - 4156dcf072d3e93735c7f16361fcbcbe61c8b7cd
+  - b186300f9298fe13d12b7f05abdeb090f4756dd1
+  - a9bb99d813ead7fb63050b375087628e07eea487
+  - 6496caab324c847f53e59b82ecd948e799f7df13
+  - 74894a454a64f7cd6285257ef3bebda2ba19e601
+  - bc4b30db4802ea40f7f9096dc17c1a929103cbc8
+  - 460bafdf28bfb9dc5f31c0de2b00d084309e0c15
+  - 4ed4265aa34302f474654217144017cca60903a8
+  - 03663dd54d9623b344f2bd070617645856ff6feb
+  - 1cfe02357781201fcc0ee25d825572790480709c
+  - de4a60f36ef43cf341131d3fbd80765c66d95693
+  - a316a5dc7cc6eb0a4acc93f1a333d8e40a50036a
+  - 70421c38fa9eb6f3238b5f1e7dfa9101f8a84f7e
+  - c62f63d9eefb4549882e254f15041b7d50c2a3d2

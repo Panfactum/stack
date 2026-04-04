@@ -10,10 +10,12 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(scriptDir, "../../../..");
 
 function runGit(command: string): string {
   try {
     return execSync(command, {
+      cwd: REPO_ROOT,
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env, NO_RTK: "1" },
@@ -46,13 +48,13 @@ function filterFiles(files: string[], patterns: Bun.Glob[]): string[] {
 
 function diffForCommit(hash: string, files: string[]): string {
   const fileArgs = files.map((f) => `"${f}"`).join(" ");
-  return runGit(`git show ${hash} --format="" -- ${fileArgs}`);
+  return runGit(`git -c log.showSignature=false show -W -U10 ${hash} --format="" -- ${fileArgs}`);
 }
 
 function diffForFile(file: string): string {
-  const committed = runGit(`git diff main...HEAD -- "${file}"`);
-  const staged = runGit(`git diff --cached -- "${file}"`);
-  const unstaged = runGit(`git diff -- "${file}"`);
+  const committed = runGit(`git diff -W -U10 main...HEAD -- "${file}"`);
+  const staged = runGit(`git diff -W -U10 --cached -- "${file}"`);
+  const unstaged = runGit(`git diff -W -U10 -- "${file}"`);
 
   const parts: string[] = [];
   if (committed.length > 0) parts.push(`--- committed ---\n${committed}`);
@@ -103,7 +105,7 @@ function main(): void {
 
   if (hash) {
     const commitMessage = runGit(
-      `git log -1 --no-show-signature --format=%B ${hash}`
+      `git -c log.showSignature=false log -1 --format=%B ${hash}`
     ).trim();
     if (commitMessage.length > 0) {
       console.log(`=== Commit Message ===\n${commitMessage}\n`);

@@ -10,10 +10,12 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(scriptDir, "../../../..");
 
 function runGit(command: string): string[] {
   try {
     const output = execSync(command, {
+      cwd: REPO_ROOT,
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env, NO_RTK: "1" },

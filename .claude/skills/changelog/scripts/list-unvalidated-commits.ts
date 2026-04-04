@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { parse } from "yaml";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(scriptDir, "../../../..");
 
 const REVIEW_YAML_PATH = resolve(
   scriptDir,
@@ -23,6 +24,7 @@ interface ReviewData {
 function run(cmd: string): string {
   try {
     return execSync(cmd, {
+      cwd: REPO_ROOT,
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env, NO_RTK: "1" },

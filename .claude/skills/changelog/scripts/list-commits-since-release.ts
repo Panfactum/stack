@@ -2,10 +2,16 @@
 // Lists all commits since the last edge release tag, with their changed files.
 
 import { execSync } from "child_process";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(scriptDir, "../../../..");
 
 function run(cmd: string): string {
   try {
     return execSync(cmd, {
+      cwd: REPO_ROOT,
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env, NO_RTK: "1" },

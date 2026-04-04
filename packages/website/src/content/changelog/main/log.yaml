@@ -264,6 +264,10 @@ changes:
       [`aws_dnssec`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_dnssec).
     action_items:
       - "Re-apply any modules that use `aws_dnssec` to receive the corrected KMS key policy."
+    references:
+      - type: internal-commit
+        summary: "fix: dnssec kms key policy document"
+        link: 460bafdf28bfb9dc5f31c0de2b00d084309e0c15
     impacts:
       - type: iac-module
         component: aws_dnssec
@@ -440,12 +444,12 @@ changes:
         link: 486c6c56ce10edc26253d6a52f789859230978ab
   - type: improvement
     summary: >-
-      The `pf cluster install` command now supports fine-grained step resumability, configuration
+      The `pf cluster add` command now supports fine-grained step resumability, configuration
       caching, and improved error handling. Interrupted installs can resume from the last completed
       sub-step rather than restarting the entire phase, and user-provided inputs (VPC name, cluster
       name, domains, etc.) are persisted to the config file so they are not re-prompted on retry.
     description: >-
-      Previously, if `pf cluster install` failed partway through a phase (e.g., autoscaling), the
+      Previously, if `pf cluster add` failed partway through a phase (e.g., autoscaling), the
       entire phase would restart from scratch on the next run. The command now tracks each sub-step
       individually (e.g., metrics server setup, VPA setup, Karpenter setup) and skips steps that
       already completed. Errors are also written to a debug file for easier troubleshooting. This
@@ -456,14 +460,17 @@ changes:
         link: 733c3c8cf4b9c33e17adc99f6527108c58713144
   - type: breaking_change
     summary: >-
-      The `pf install-cluster` CLI command has been renamed to `pf cluster install`. Any scripts
+      The `pf install-cluster` CLI command has been renamed to `pf cluster add`. Any scripts
       or documentation referencing the old command must be updated.
     action_items:
-      - "Replace all invocations of `pf install-cluster` with `pf cluster install` in your scripts, CI pipelines, and runbooks."
+      - "Replace all invocations of `pf install-cluster` with `pf cluster add` in your scripts, CI pipelines, and runbooks."
     references:
       - type: internal-commit
         summary: "refactor: rename install-cluster to cluster install"
         link: 8c03b01043302de2bced3649ebf6e7cc112be3b1
+      - type: internal-commit
+        summary: "chore: rename 'cluster install' to 'cluster add'"
+        link: 30521a81a5640d770e5e6e1811c76d2eb5de715b
   - type: addition
     summary: >-
       Adds the `pf config get` CLI command, which reads and merges Panfactum configuration
@@ -514,7 +521,7 @@ changes:
         link: 31fd6940342ea29532080d6ff2a3a835bbb55995
   - type: fix
     summary: >-
-      Fixes the `setSLA` step in `pf cluster install` where a missing return statement caused the
+      Fixes the `setSLA` step in `pf cluster add` where a missing return statement caused the
       selected SLA target to be silently discarded, resulting in the cluster install proceeding
       without the user-configured SLA value.
     references:
@@ -523,12 +530,12 @@ changes:
         link: 5bf5678581290b8c1b786f8756db00b664c62c7f
   - type: improvement
     summary: >-
-      `pf cluster install` now automates Vault deployment and initialization. After the CSI
+      `pf cluster add` now automates Vault deployment and initialization. After the CSI
       drivers step, the installer deploys `kube_vault`, waits for all Vault pods to become
       ready, initializes Vault, unseals it, and then deploys `vault_core_resources`. Recovery
       keys and the root token are encrypted and saved to `kube_vault/secrets.yaml`.
     description: >-
-      Previously, Vault setup required manual steps after running `pf cluster install`. These
+      Previously, Vault setup required manual steps after running `pf cluster add`. These
       steps are now fully automated: the installer deploys the `kube_vault` module, polls until
       all pods are running, runs `vault operator init` to obtain recovery keys and the root token,
       unseals Vault with the recovery keys, and then deploys `vault_core_resources` (using a
@@ -543,13 +550,13 @@ changes:
     impacts:
       - type: iac-module
         component: kube_vault
-        summary: Now deployed and initialized automatically by pf cluster install
+        summary: Now deployed and initialized automatically by pf cluster add
       - type: iac-module
         component: vault_core_resources
-        summary: Now deployed automatically by pf cluster install after Vault initialization
+        summary: Now deployed automatically by pf cluster add after Vault initialization
   - type: fix
     summary: >-
-      Fixes a duplicate step ID in `pf cluster install` where the Base EKS Cluster step
+      Fixes a duplicate step ID in `pf cluster add` where the Base EKS Cluster step
       incorrectly shared the `csiDrivers` checkpoint ID with the CSI Drivers step. The EKS
       step is now tracked under the `setupEKS` ID. Users with an existing checkpoint that
       marked `csiDrivers` as the EKS step will see the EKS step re-run once.
@@ -559,7 +566,7 @@ changes:
         link: 6519c292ef148081c10a2aa089a295d63827af27
   - type: improvement
     summary: >-
-      `pf cluster install` now dynamically selects an available port for the Vault kubectl
+      `pf cluster add` now dynamically selects an available port for the Vault kubectl
       port-forward proxy instead of hardcoding port 8200, preventing installation failures
       when port 8200 is already in use on the local machine.
     description: >-
@@ -573,7 +580,7 @@ changes:
         link: 403036045129cbd3a0fe203d9c0d8d4a6d8abdc5
   - type: improvement
     summary: >-
-      `pf cluster install` now tracks the cert manager deployment (`certManagerDeployment`)
+      `pf cluster add` now tracks the cert manager deployment (`certManagerDeployment`)
       as its own resumable checkpoint and deploys `kube_cert_manager` via a Vault proxy
       connection, consistent with how other modules are deployed during cluster installation.
     description: >-
@@ -588,7 +595,7 @@ changes:
         link: ad33083d8f32e1a143531a845d845b5543dcc5a1
   - type: improvement
     summary: >-
-      `pf cluster install` now automates certificate issuer deployment as a resumable step. The
+      `pf cluster add` now automates certificate issuer deployment as a resumable step. The
       installer prompts for an alert email, configures the `kube_cert_issuers` module with the
       correct Route 53 zone data, deploys it via Vault proxy, and then re-applies `kube_cert_manager`
       with `self_generated_certs_enabled = false` to issue the first real certificate — all with
@@ -599,7 +606,7 @@ changes:
         link: 2ca29499f6d742ee64fe75d3671674e441291bb1
   - type: fix
     summary: >-
-      Fixes `pf cluster install` cert management step using the wrong module path (`kube_vault`
+      Fixes `pf cluster add` cert management step using the wrong module path (`kube_vault`
       instead of `kube_cert_manager`) when looking up the `terragrunt.hcl` file to deploy.
     references:
       - type: internal-commit
@@ -607,7 +614,7 @@ changes:
         link: 2ca29499f6d742ee64fe75d3671674e441291bb1
   - type: fix
     summary: >-
-      Fixes `pf cluster install` vault core resources step using the wrong module path (`kube_vault`
+      Fixes `pf cluster add` vault core resources step using the wrong module path (`kube_vault`
       instead of `vault_core_resources`) when initializing the module deployment.
     references:
       - type: internal-commit
@@ -615,12 +622,12 @@ changes:
         link: 2ca29499f6d742ee64fe75d3671674e441291bb1
   - type: improvement
     summary: >-
-      `pf cluster install` now automates Linkerd deployment as a resumable step. After the certificate
+      `pf cluster add` now automates Linkerd deployment as a resumable step. After the certificate
       issuer step, the installer deploys `kube_linkerd` via a Vault proxy connection and then runs
       `linkerd check --cni-namespace=linkerd` to verify the control plane is healthy — each sub-step
       tracked with fine-grained checkpointing so the install can resume from where it left off.
     description: >-
-      Previously, Linkerd had to be deployed manually after `pf cluster install` completed. This step
+      Previously, Linkerd had to be deployed manually after `pf cluster add` completed. This step
       integrates Linkerd installation into the automated cluster install workflow, consistent with how
       other modules such as Vault, cert manager, and cert issuers are handled. The control plane health
       check runs after deployment to catch issues early before subsequent steps proceed.
@@ -631,10 +638,10 @@ changes:
     impacts:
       - type: iac-module
         component: kube_linkerd
-        summary: Now deployed and verified automatically by pf cluster install
+        summary: Now deployed and verified automatically by pf cluster add
   - type: improvement
     summary: >-
-      `pf cluster install` now automates autoscaling deployment as a resumable step. After the Linkerd
+      `pf cluster add` now automates autoscaling deployment as a resumable step. After the Linkerd
       step, the installer deploys the metrics server, vertical pod autoscaler (VPA), Karpenter, node
       pools, the bin-packing scheduler, and KEDA — each sub-step individually tracked so interrupted
       installs can resume from where they left off rather than restarting the entire autoscaling phase.
@@ -652,25 +659,25 @@ changes:
     impacts:
       - type: iac-module
         component: kube_metrics_server
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_vpa
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_karpenter
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_karpenter_node_pools
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_scheduler
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_keda
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
   - type: improvement
     summary: >-
-      `pf cluster install` now fully automates inbound networking deployment as a series of fine-grained
+      `pf cluster add` now fully automates inbound networking deployment as a series of fine-grained
       resumable sub-steps: ExternalDNS, AWS Load Balancer Controller, ingress TLS secret generation,
       Nginx ingress, Vault ingress (with DNS propagation check), Vault address update, Bastion deployment,
       and Bastion connectivity configuration — each individually checkpointed so interrupted installs
@@ -693,19 +700,19 @@ changes:
     impacts:
       - type: iac-module
         component: kube_external_dns
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_aws_lb_controller
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_ingress_nginx
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_bastion
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
   - type: improvement
     summary: >-
-      `pf cluster install` now automates maintenance controllers deployment as a resumable step. After the
+      `pf cluster add` now automates maintenance controllers deployment as a resumable step. After the
       inbound networking step, the installer deploys Reloader, PVC Autoresizer, Descheduler, External
       Snapshotter, and Velero — each sub-step individually checkpointed so interrupted installs can resume
       without restarting the entire maintenance controllers phase.
@@ -722,22 +729,22 @@ changes:
     impacts:
       - type: iac-module
         component: kube_reloader
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_pvc_autoresizer
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_descheduler
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_external_snapshotter
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
       - type: iac-module
         component: kube_velero
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
+        summary: Now deployed automatically by pf cluster add as a resumable sub-step
   - type: improvement
     summary: >-
-      `pf cluster install` now automates Cloud Native PostgreSQL deployment as the final resumable step,
+      `pf cluster add` now automates Cloud Native PostgreSQL deployment as the final resumable step,
       completing the full end-to-end cluster installation workflow. A success message with next steps
       is displayed once all phases have been completed.
     references:
@@ -747,10 +754,10 @@ changes:
     impacts:
       - type: iac-module
         component: kube_cloudnative_pg
-        summary: Now deployed automatically by pf cluster install as the final resumable step
+        summary: Now deployed automatically by pf cluster add as the final resumable step
   - type: fix
     summary: >-
-      Fixes `pf cluster install` inbound networking step where the DH parameter for TLS was generated
+      Fixes `pf cluster add` inbound networking step where the DH parameter for TLS was generated
       using the slow default `openssl dhparam 4096` command. The command now passes `-dsaparam` to use
       DSA-style parameter generation, which is significantly faster.
     description: >-
@@ -763,7 +770,7 @@ changes:
         link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
   - type: improvement
     summary: >-
-      `pf cluster install` now validates that a VPC name does not already exist in AWS before accepting
+      `pf cluster add` now validates that a VPC name does not already exist in AWS before accepting
       it during the VPC setup step, preventing duplicate VPC creation. The default VPC name and description
       now include the region for better disambiguation across environments.
     references:
@@ -772,7 +779,7 @@ changes:
         link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
   - type: improvement
     summary: >-
-      `pf cluster install` now auto-formats EKS cluster name input to lowercase with hyphens,
+      `pf cluster add` now auto-formats EKS cluster name input to lowercase with hyphens,
       transforming typed input in real-time so users can enter a free-form name without worrying about
       invalid characters. The formatted name is saved to config after confirmation.
     references:
@@ -781,7 +788,7 @@ changes:
         link: d966e41f762d8e82e3b088a66bddd8cabb29ff93
   - type: fix
     summary: >-
-      Fixes `pf cluster install` and other CLI commands that call `terragrunt output` to verify
+      Fixes `pf cluster add` and other CLI commands that call `terragrunt output` to verify
       AWS session validity before executing, automatically prompting re-authentication if the
       session has expired rather than failing with a cryptic error.
     description: >-
@@ -807,7 +814,7 @@ changes:
         summary: Fixed compilation error that prevented the command from running
   - type: fix
     summary: >-
-      Fixes `pf cluster install` VPC setup step where the AWS CLI could hang waiting for user
+      Fixes `pf cluster add` VPC setup step where the AWS CLI could hang waiting for user
       input from a pager when listing VPCs. The `--no-cli-pager` flag is now passed to the
       `aws ec2 describe-vpcs` call, ensuring the command always returns output non-interactively.
     references:
@@ -888,7 +895,7 @@ changes:
         summary: Removed update_type variable
   - type: fix
     summary: >-
-      Fixes `pf cluster install` VPC setup step where the checkpoint was tracked under the wrong step ID
+      Fixes `pf cluster add` VPC setup step where the checkpoint was tracked under the wrong step ID
       (`kyvernoIaCSetup` instead of `setupVPCIaC`), causing resumed installs to incorrectly re-run the
       VPC deployment even when it had already completed.
     references:
@@ -922,7 +929,7 @@ changes:
         summary: SSM command polling retries increased from 20 to 60
   - type: fix
     summary: >-
-      Fixes `pf cluster install` vault secrets step where writing encrypted SOPS files would fail
+      Fixes `pf cluster add` vault secrets step where writing encrypted SOPS files would fail
       if the target directory did not yet exist. The CLI now auto-creates the full directory path
       before writing, preventing installation failures when directories have not been created ahead of time.
     references:
@@ -941,7 +948,7 @@ changes:
         link: 8d47487d857f75f57f6b1265beb51266e41c56f8
   - type: fix
     summary: >-
-      Fixes `pf cluster install` so that the SLA target prompt is only shown once per installation
+      Fixes `pf cluster add` so that the SLA target prompt is only shown once per installation
       session. The confirmed SLA target is now persisted via the checkpointer, so resuming an
       interrupted install skips the prompt and uses the previously selected value.
     references:
@@ -970,11 +977,11 @@ changes:
         summary: New module for managing AWS Organization structure and member accounts
   - type: addition
     summary: >-
-      Adds the `pf env install` CLI command, which provides a guided wizard for installing a new
+      Adds the `pf env add` CLI command, which provides a guided wizard for installing a new
       Panfactum environment. The wizard handles AWS Organization setup, account provisioning, IAM
       Identity Center configuration, and foundational IaC bootstrapping in a single interactive flow.
     description: >-
-      `pf env install` walks users through the complete environment setup process — detecting whether
+      `pf env add` walks users through the complete environment setup process — detecting whether
       an AWS Organization exists, provisioning a new AWS account via the organization, bootstrapping
       the Terraform state bucket and lock table, and optionally connecting the environment to AWS SSO.
       This significantly reduces the manual steps required to add a new environment to a Panfactum
@@ -1125,7 +1132,7 @@ changes:
         summary: Now provisions CloudFront service quota increases for origin request, response header, and cache policies
   - type: fix
     summary: >-
-      Fixes `pf cluster install` inbound networking and Linkerd steps where Vault secrets were read
+      Fixes `pf cluster add` inbound networking and Linkerd steps where Vault secrets were read
       from the wrong module directory. Both steps were looking for `secrets.yaml` inside their own
       module directory (`kube_ingress_nginx` and `kube_linkerd` respectively) instead of the correct
       `kube_vault` directory, causing the install to fail when resuming those steps.
@@ -1135,7 +1142,7 @@ changes:
         link: 5de4d4dd0d508552d06d46cf763af56302d80721
   - type: fix
     summary: >-
-      Fixes `pf cluster install` Vault pod readiness check to scope the `kubectl get pods` query to
+      Fixes `pf cluster add` Vault pod readiness check to scope the `kubectl get pods` query to
       the `vault` namespace instead of all namespaces. The retry limit has also been increased from
       20 to 60 attempts to allow more time for Vault pods to become ready.
     references:
@@ -1144,7 +1151,7 @@ changes:
         link: 5de4d4dd0d508552d06d46cf763af56302d80721
   - type: fix
     summary: >-
-      Fixes `pf cluster install` EKS setup step where the `kube_api_server` configuration value was
+      Fixes `pf cluster add` EKS setup step where the `kube_api_server` configuration value was
       saved as an empty string. The step now reads the actual cluster URL from `aws_eks` module output
       and writes it correctly to `region.yaml`.
     references:
@@ -1153,7 +1160,7 @@ changes:
         link: 5de4d4dd0d508552d06d46cf763af56302d80721
   - type: fix
     summary: >-
-      Fixes `pf cluster install` cluster reset step where EC2 instance termination would silently
+      Fixes `pf cluster add` cluster reset step where EC2 instance termination would silently
       skip terminating instances. The step was splitting instance IDs only on newlines rather than
       on all whitespace, and checking the length of the wrong variable, so instances were not passed
       correctly to the AWS CLI terminate command.
@@ -1163,7 +1170,7 @@ changes:
         link: 5de4d4dd0d508552d06d46cf763af56302d80721
   - type: improvement
     summary: >-
-      `pf cluster install` now kills all background processes (such as the Vault proxy) when any
+      `pf cluster add` now kills all background processes (such as the Vault proxy) when any
       install step throws an error. Previously, a step failure could leave orphaned background
       processes running in the terminal session.
     references:
@@ -1172,7 +1179,7 @@ changes:
         link: 5de4d4dd0d508552d06d46cf763af56302d80721
   - type: improvement
     summary: >-
-      `pf cluster install` now streams real-time rolling output during the Linkerd control plane
+      `pf cluster add` now streams real-time rolling output during the Linkerd control plane
       check step. The terminal displays a scrolling window of the last 5 output lines from
       `linkerd check` as it runs, rather than showing nothing until the check completes.
     description: >-
@@ -1186,7 +1193,7 @@ changes:
         link: 989fcf567fb8e3868435b678dd76609ee40b4fff
   - type: fix
     summary: >-
-      Fixes `pf cluster install` inbound networking step where the Vault domain was read from the wrong
+      Fixes `pf cluster add` inbound networking step where the Vault domain was read from the wrong
       YAML key. The step was looking for `vault_addr` at the top level of the module YAML but the value
       is stored under `extra_inputs.vault_domain`, causing the DNS propagation check and subsequent steps
       to use an undefined value.
@@ -1196,7 +1203,7 @@ changes:
         link: 5440599fd7a771ef230de32ee6557731d7a14338
   - type: fix
     summary: >-
-      Fixes `pf cluster install` by removing hardcoded values from the `kube_aws_lb_controller` and
+      Fixes `pf cluster add` by removing hardcoded values from the `kube_aws_lb_controller` and
       `kube_ingress_nginx` Terragrunt templates. The load balancer controller template previously
       hardcoded `subnets = ["PUBLIC_A", "PUBLIC_B"]`, and the Nginx ingress template hardcoded
       `ingress_domains` and `sla_level`, both of which would cause failures when applied against a
@@ -1207,7 +1214,7 @@ changes:
         link: 5440599fd7a771ef230de32ee6557731d7a14338
   - type: fix
     summary: >-
-      Fixes `pf cluster install` support services step where `kube_external_snapshotter` and
+      Fixes `pf cluster add` support services step where `kube_external_snapshotter` and
       `kube_velero` were deployed after the descheduler rather than before it. The two modules are
       now deployed together as a concurrent sub-group earlier in the sequence, matching the intended
       dependency ordering for maintenance controllers.
@@ -1218,10 +1225,10 @@ changes:
     impacts:
       - type: iac-module
         component: kube_external_snapshotter
-        summary: Now deployed before the descheduler during pf cluster install
+        summary: Now deployed before the descheduler during pf cluster add
       - type: iac-module
         component: kube_velero
-        summary: Now deployed before the descheduler during pf cluster install
+        summary: Now deployed before the descheduler during pf cluster add
   - type: fix
     summary: >-
       Fixes `pf env install` where the AWS account alias was incorrectly set to the account ID
@@ -1291,7 +1298,7 @@ changes:
         summary: Can now correctly read zone metadata after aws_registered_domains deployment
   - type: fix
     summary: >-
-      Fixes `pf cluster install` kubectl commands that were missing the `--context` flag, causing
+      Fixes `pf cluster add` kubectl commands that were missing the `--context` flag, causing
       them to operate against the wrong cluster when multiple Kubernetes contexts are present in the
       kubeconfig. The kube context is now explicitly passed to all kubectl invocations during cluster
       installation.
@@ -1338,7 +1345,7 @@ changes:
         summary: Now issues certificates for subdomains of the cluster domain
   - type: improvement
     summary: >-
-      `pf cluster install` now streams real-time output from `terragrunt run-all apply` during the
+      `pf cluster add` now streams real-time output from `terragrunt run-all apply` during the
       autoscaling setup step. Each log line is displayed as it is produced rather than waiting for
       the command to complete.
     description: >-
@@ -1572,7 +1579,7 @@ changes:
         summary: Subzone setup now correctly exits early when no eligible environments are present
   - type: fix
     summary: >-
-      Fixes SLA value formatting in the `pf cluster install` `setSLA` step so that the selected
+      Fixes SLA value formatting in the `pf cluster add` `setSLA` step so that the selected
       SLA target is written in the correct format when persisted to the cluster configuration.
     references:
       - type: internal-commit
@@ -1594,7 +1601,7 @@ changes:
         summary: Fixed failure when running env add against an account that already has an AWS organization
   - type: fix
     summary: >-
-      Fixes step nesting in `pf cluster install` so that install steps are correctly structured
+      Fixes step nesting in `pf cluster add` so that install steps are correctly structured
       in the installation workflow. Incorrectly nested steps could cause steps to run out of order
       or be skipped during cluster installation.
     references:
@@ -1922,6 +1929,16 @@ changes:
       - type: iac-module
         component: kube_buildkit
         summary: Default BuildKit image version updated from v0.18.1-rootless to v0.28.1-rootless
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` EKS setup step where the initial superuser IAM principal ARN
+      was not correctly configured during cluster deployment. The step now properly sets the
+      caller's ARN as the superuser principal so that subsequent install steps have the required
+      cluster access.
+    references:
+      - type: internal-commit
+        summary: "fix: initial cluster permissions"
+        link: d127b6f43fc5e715bed6b714ae08e112cbf4a1ca
   - type: improvement
     summary: >-
       The DevShell now ships OpenTofu 1.9.1 (upgraded from 1.8.x) and Terragrunt 0.78.2 via an updated
@@ -1947,3 +1964,575 @@ changes:
       - type: devshell
         component: terragrunt
         summary: Upgraded to 0.78.2 via nixos-25.05 nixpkgs pin
+  - type: improvement
+    summary: >-
+      `pf domain add` now displays the current AWS registration status (e.g., `PENDING`, `SUCCESSFUL`)
+      alongside the poll attempt counter while waiting for domain registration to complete.
+    references:
+      - type: internal-commit
+        summary: "feat: add domain registration status"
+        link: 3200adaba5619879fd3da810d5e69a46e0fbec39
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Registration polling task title now includes the live AWS status string
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Vault setup step where `kubectl exec` would fail to pass arguments
+      correctly to the Vault process due to a missing `--` argument separator.
+    references:
+      - type: internal-commit
+        summary: "fix: kube exec in vault setup"
+        link: 1b4bb5bf5d6b1c3f644f1bb955f1dbc1014b37d4
+  - type: fix
+    summary: >-
+      Fixes the alert email prompt in the `pf cluster add` cert issuers step. The prompt was
+      missing the `task` parameter, causing it to malfunction within the Listr task context and
+      preventing users from entering a certificate renewal notification email.
+    references:
+      - type: internal-commit
+        summary: "fix: cert issuer email"
+        link: 1983c232d7dd2507df93fc28b8743d1b2afb401d
+  - type: fix
+    summary: >-
+      Fixes several contact information prompts in the `pf domain add` registration flow. The
+      Street Address 2 prompt was missing the `task` parameter, and the City, State/Region, and
+      Postal Code prompts had incorrectly set `required: true`, causing them to reject valid input
+      in some situations.
+    references:
+      - type: internal-commit
+        summary: "fix: cert issuer email"
+        link: 1983c232d7dd2507df93fc28b8743d1b2afb401d
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Fixed contact info prompt issues in domain registration flow
+  - type: fix
+    summary: >-
+      Fixes `pf domain add` so that nameservers are displayed one per line during the manual
+      DNS zone setup step, making it easier to copy each nameserver to the registrar.
+    references:
+      - type: internal-commit
+        summary: "fix: nameserver listing"
+        link: 0d65d646b488645ac3f8ad05d0852c5eedbcd3b1
+      - type: internal-commit
+        summary: "fix: nameservers output in cli"
+        link: 23a2d48fabd479261dbbf07c87101cf0322dc3c8
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Nameservers are now listed one per line during manual DNS zone setup
+  - type: fix
+    summary: >-
+      Fixes `pf aws vpc-network-test` inbound traffic blocking check by replacing a ping-based ICMP
+      check with a TCP connection attempt, ensuring the test correctly verifies that the NAT IP
+      is not accepting inbound TCP connections from the test instance.
+    references:
+      - type: internal-commit
+        summary: "fix: use TCP checkConnection for inbound blocking test in vpc-network-test"
+        link: 9bb03e5270ef399bf42d603795e2c8698394e588
+    impacts:
+      - type: cli
+        component: aws vpc-network-test
+        summary: Inbound blocking check now uses TCP instead of ICMP ping
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` so that the Inbound Networking step runs before the Autoscaling
+      step. The previous ordering caused Autoscaling to run before Vault had an ingress, requiring
+      Vault credentials to be injected into each autoscaling module deployment. With the correct
+      ordering, autoscaling modules no longer need Vault credentials and the install sequence
+      matches the intended dependency graph.
+    references:
+      - type: internal-commit
+        summary: "fix: move inbound networking before autoscaling in cluster auto install"
+        link: 92da33ac2a718d02d99cd0471e4c653d2426f9ef
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Inbound Networking step where the External DNS deployment was
+      missing `VAULT_ADDR` in its environment, preventing External DNS from authenticating with
+      Vault. The variable is now correctly passed alongside `VAULT_TOKEN` for all modules in
+      the step that require Vault access.
+    references:
+      - type: internal-commit
+        summary: "fix: move inbound networking before autoscaling in cluster auto install"
+        link: 92da33ac2a718d02d99cd0471e4c653d2426f9ef
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Inbound Networking step where `kube_ingress_nginx` was deployed
+      with the final `sla_level` value during the initial install, which could cause the deployment
+      to fail before Vault ingress was available. The module is now bootstrapped with `sla_level: 1`
+      and the input is cleaned up via a post-deploy update after the initial apply succeeds.
+    references:
+      - type: internal-commit
+        summary: "fix: move inbound networking before autoscaling in cluster auto install"
+        link: 92da33ac2a718d02d99cd0471e4c653d2426f9ef
+    impacts:
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: Bootstrapped with sla_level=1 during pf cluster add; value removed post-deploy
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Inbound Networking step where the `postDeployInputUpdates` for
+      `kube_ingress_nginx` used `z.undefined()` as the validation schema for `sla_level`, causing
+      the post-deploy cleanup to fail when the existing value was a number. The schema is now
+      `z.number().optional()`, allowing the existing numeric value to be read and then removed.
+    references:
+      - type: internal-commit
+        summary: "fix: nginx post deploy input update"
+        link: 63497c19c9b6cc1faf01c137f7be019fa77ee583
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Inbound Networking step where the AWS Load Balancer Controller
+      and External DNS modules were deployed concurrently, which could cause race conditions or
+      ordering failures. The two modules are now deployed sequentially — AWS Load Balancer
+      Controller first, then External DNS — to ensure correct dependency ordering.
+    references:
+      - type: internal-commit
+        summary: "fix: remove concurrency"
+        link: 4f42f9ba484e2b9275588c3522858327b1b17c33
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` autoscaling and inbound networking steps where the Vault root
+      token was not passed as the `VAULT_TOKEN` environment variable when deploying Metrics Server,
+      VPA, Karpenter, and `vault_core_resources`, causing those Terragrunt deployments to fail
+      authentication against Vault.
+    references:
+      - type: internal-commit
+        summary: "fix: pass vault token"
+        link: b949ef07943277aebe73c457d477c2235480251d
+  - type: improvement
+    summary: >-
+      Upgrades the default `aws-application-loadbalancer-controller` Helm chart version in
+      [`kube_aws_lb_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_lb_controller)
+      from `1.11.0` to `1.12.0`.
+    references:
+      - type: internal-commit
+        summary: "fix: pass vault token"
+        link: b949ef07943277aebe73c457d477c2235480251d
+    impacts:
+      - type: iac-module
+        component: kube_aws_lb_controller
+        summary: Default Helm chart version updated from 1.11.0 to 1.12.0
+  - type: fix
+    summary: >-
+      `vpa_enabled` now defaults to `false` in
+      [`kube_aws_lb_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_lb_controller),
+      [`kube_external_dns`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_external_dns),
+      [`kube_ingress_nginx`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress_nginx),
+      and
+      [`vault_core_resources`](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources).
+      VPA must now be explicitly enabled in these modules rather than being on by default.
+    references:
+      - type: internal-commit
+        summary: "fix: disable vpa by default in ingress modules"
+        link: cc1da7cb297e608219710dc6534d9280821f4719
+    impacts:
+      - type: iac-module
+        component: kube_aws_lb_controller
+        summary: vpa_enabled now defaults to false
+      - type: iac-module
+        component: kube_external_dns
+        summary: vpa_enabled now defaults to false
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: vpa_enabled now defaults to false
+      - type: iac-module
+        component: vault_core_resources
+        summary: vpa_enabled now defaults to false
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Vault ingress verification step to show
+      real-time polling status in the task title and display a warning that
+      DNS propagation may take 10-30 minutes. The polling timeout has been
+      increased from 10 minutes (60 attempts) to 30 minutes (180 attempts)
+      to better accommodate DNS propagation delays.
+    references:
+      - type: internal-commit
+        summary: "fix: better ux for vault ingress"
+        link: 35dfbc34d67e5844d6bfb627e35f94e05e14452b
+  - type: addition
+    summary: >-
+      Adds the `pf welcome` CLI command, which displays an introductory welcome
+      screen for the Panfactum DevShell, orienting new users to key tools and
+      concepts such as the `pf` CLI, IaC modules, and environment structure.
+    references:
+      - type: internal-commit
+        summary: "fix: undefined import"
+        link: 0d1327c722d578fbe23280fc0ff98efaa0f0c10e
+    impacts:
+      - type: cli
+        component: welcome
+        summary: New command added
+  - type: fix
+    summary: >-
+      Fixes a bug in the `pf` CLI's internal module deployment logic where
+      conditional resource imports could fail when `resourceId` resolved to
+      `undefined`. Import tasks now skip gracefully instead of attempting to
+      import an undefined resource ID.
+    references:
+      - type: internal-commit
+        summary: "fix: undefined import"
+        link: 0d1327c722d578fbe23280fc0ff98efaa0f0c10e
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: Internal import task now skips gracefully when resourceId is undefined
+      - type: cli
+        component: env add
+        summary: Internal import task now skips gracefully when resourceId is undefined
+  - type: improvement
+    summary: >-
+      The `pf welcome` screen now includes an expanded explanation of the Panfactum
+      infrastructure layout, describing how Environments, Regions, and Modules map to
+      the repository directory structure, with a concrete example.
+    references:
+      - type: internal-commit
+        summary: "fix: nameservers output in cli"
+        link: 23a2d48fabd479261dbbf07c87101cf0322dc3c8
+    impacts:
+      - type: cli
+        component: welcome
+        summary: Welcome screen now explains Environments/Regions/Modules directory layout
+  - type: improvement
+    summary: >-
+      The `pf welcome` screen now includes "Getting Started" and "Getting Help" sections. The
+      Getting Started section lists the four key setup commands in order (`pf env add`,
+      `pf domain add`, `pf cluster add`, `pf idp add`). The Getting Help section provides
+      links to the Panfactum Discord and the GitHub issue tracker.
+    references:
+      - type: internal-commit
+        summary: "feat: adds welcome screen"
+        link: 11c41aa1fc01f6067bc76d2822199bc39bbfa40d
+    impacts:
+      - type: cli
+        component: welcome
+        summary: Welcome screen now includes Getting Started steps and Getting Help links
+  - type: improvement
+    summary: >-
+      The `pf` CLI now wraps long output lines at 100 characters instead of 128, improving
+      readability on standard 120-column terminals.
+    references:
+      - type: internal-commit
+        summary: "feat: adds welcome screen"
+        link: 11c41aa1fc01f6067bc76d2822199bc39bbfa40d
+  - type: improvement
+    summary: >-
+      The Panfactum DevShell now automatically displays the `pf welcome` screen when the shell
+      launches. The welcome screen text has also been updated with improved wording, bolder section
+      headers, and a clearer description of the version-pinned tools bundled in the DevShell.
+    references:
+      - type: internal-commit
+        summary: "feat: adds welcome screen to devshell launch"
+        link: d8d40050f39848b34c8c9a684211850db03ffe2f
+    impacts:
+      - type: devshell
+        component: enter-shell-local
+        summary: Now calls pf welcome on shell launch to display the onboarding screen
+      - type: cli
+        component: welcome
+        summary: Updated welcome text with improved wording and bolder section headers
+  - type: fix
+    summary: >-
+      Fixes the Nix version check in the DevShell `.envrc` template to correctly parse the installed
+      Nix version by using `$NF` (last field) instead of `$3`, making the check resilient to version
+      strings with more than three whitespace-separated tokens.
+    references:
+      - type: internal-commit
+        summary: "fix: nix version check in envrc"
+        link: ac01f734d88d02ebfbf26aeaefaf434f8be25df4
+  - type: fix
+    summary: >-
+      Refactors the Nix version check in the DevShell `.envrc` template to use a POSIX-compatible
+      `sort -V` comparison instead of a bash-specific array function, and adds a check that prints
+      an installation prompt when Nix is not found on `PATH` at all.
+    references:
+      - type: internal-commit
+        summary: "fix: refactor nix version check in .envrc to match install.sh"
+        link: 3e06e130f943907d5409980df2333fbdc813a5bf
+  - type: fix
+    summary: >-
+      Updates the DevShell build time estimate in `install.sh` from 30 minutes to 15 minutes to
+      better reflect actual build durations.
+    references:
+      - type: internal-commit
+        summary: "fix: refactor nix version check in .envrc to match install.sh"
+        link: 3e06e130f943907d5409980df2333fbdc813a5bf
+  - type: fix
+    summary: >-
+      Fixes `pf env install` where the AWS SDK would fail to load credentials for the management
+      account profile when those credentials were written to disk earlier in the same process run.
+      The `OrganizationsClient` and `STSClient` are now constructed by explicitly reading credentials
+      from the credentials file when available, bypassing the SDK's credential-provider cache and
+      ensuring account provisioning steps succeed without requiring a process restart.
+    references:
+      - type: internal-commit
+        summary: "fix: eks node sizes and aws sdk credentials bug"
+        link: db4b7e515ee1a16e6fdbd392a2adcbe00024d669
+    impacts:
+      - type: cli
+        component: env add
+        summary: AWS SDK clients now load freshly-written credentials from disk instead of relying on the provider cache
+  - type: fix
+    summary: >-
+      Improves the `pf domain add` domain registration check to fall back to a WHOIS database
+      lookup when a domain has no nameservers. Previously, a recently purchased domain with no
+      nameservers configured would be incorrectly reported as unregistered. The WHOIS check
+      (which may be 24–72 hours out-of-date) is now used as a secondary signal so newly registered
+      domains are more reliably detected. The `whois` tool has been added to the Panfactum DevShell
+      to support this check.
+    references:
+      - type: internal-commit
+        summary: "fix: improve domain isRegistered check"
+        link: 4156dcf072d3e93735c7f16361fcbcbe61c8b7cd
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Domain registration detection now falls back to WHOIS lookup when no nameservers are found
+      - type: devshell
+        component: whois
+        summary: Added to the DevShell to support the improved domain registration check
+  - type: fix
+    summary: >-
+      The phone number input prompt in `pf env add` now includes a format example (`+1 555-555-5555`),
+      making it clear that the expected format is E.164-style with a country code prefix.
+    references:
+      - type: internal-commit
+        summary: "fix: phone number format in question"
+        link: b186300f9298fe13d12b7f05abdeb090f4756dd1
+    impacts:
+      - type: cli
+        component: env add
+        summary: Phone number prompt now shows an example format to guide user input
+  - type: fix
+    summary: >-
+      Fixes a color rendering bug in the `pf` CLI where text passed to `applyColors` with
+      `dedent: true` was dedented after ANSI color codes had already been applied. Color escape
+      sequences interfere with indentation analysis, so the fix moves the `dedent` call to run
+      on the raw string before any color styling is applied.
+    references:
+      - type: internal-commit
+        summary: "fix: dedent order in applyColors"
+        link: b695023a1701ff34709eeee49c64d2c9aaf79050
+  - type: fix
+    summary: >-
+      Fixes `pf domain add` to validate that at least one non-management environment exists before
+      proceeding. Previously the command would fail with a cryptic error later in the flow; it now
+      exits early with a clear message directing users to run `pf env add` first.
+    references:
+      - type: internal-commit
+        summary: "fix:domains: at least one env check + 'env install' -> 'env add'"
+        link: a9bb99d813ead7fb63050b375087628e07eea487
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Now validates at least one non-management environment exists before continuing
+  - type: fix
+    summary: >-
+      Fixes `pf domain add` error messages that incorrectly referred to `pf env install` — the
+      command was renamed to `pf env add` and these messages now reflect the correct command name.
+    references:
+      - type: internal-commit
+        summary: "fix:domains: at least one env check + 'env install' -> 'env add'"
+        link: a9bb99d813ead7fb63050b375087628e07eea487
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Error messages now reference pf env add instead of the old pf env install name
+  - type: improvement
+    summary: >-
+      [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) now
+      automatically requests an increase in the EC2 on-demand standard (A, C, D, H, I, M, R, T, Z)
+      vCPU quota to 32. This ensures new accounts have enough vCPU capacity to run typical Panfactum
+      workloads without requiring a manual quota increase request through the AWS console.
+    references:
+      - type: internal-commit
+        summary: "feat: automatically request increase in vcpu quota in aws_account module"
+        link: 6496caab324c847f53e59b82ecd948e799f7df13
+    impacts:
+      - type: iac-module
+        component: aws_account
+        summary: Now requests EC2 on-demand vCPU quota increase to 32 on apply
+  - type: improvement
+    summary: >-
+      The `pf welcome` command now generates and persists a unique `installation_id` (UUID) to
+      `panfactum.yaml` the first time it runs. On subsequent invocations the welcome screen is
+      suppressed, so users only see the onboarding content once per repository.
+    description: >-
+      The `installation_id` field identifies a specific Panfactum repository installation. It is
+      generated automatically on first use of the DevShell and stored in `panfactum.yaml` so it
+      persists across sessions. This lays the groundwork for future telemetry, support tooling,
+      and personalized onboarding flows.
+    references:
+      - type: internal-commit
+        summary: "feat: adds installation_id"
+        link: bc4b30db4802ea40f7f9096dc17c1a929103cbc8
+    impacts:
+      - type: cli
+        component: welcome
+        summary: Now generates a UUID installation_id and saves it to panfactum.yaml on first run; suppresses welcome screen on subsequent runs
+      - type: configuration
+        component: panfactum.yaml
+        summary: New optional installation_id field (UUID) written automatically by pf welcome on first run
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` cert issuers step where cert-manager was not restarted after nginx
+      ingress deployment, causing certificates to remain in an unready state. The step now polls
+      certificate readiness and automatically restarts the cert-manager deployment up to 10 times
+      (90-second intervals) until the certificate is ready.
+    description: >-
+      After deploying the nginx ingress controller, cert-manager sometimes fails to issue certificates
+      because it is unaware of the new ingress. The fix adds a concurrent retry loop that checks
+      whether the certificate labeled `panfactum.com/root-module=kube_cert_issuers` is ready and
+      restarts the cert-manager deployment via `kubectl rollout restart` on each failed attempt.
+      Once the certificate is confirmed ready, the "Deploy The First Certificate" step proceeds
+      sequentially to disable self-generated certs on `kube_cert_manager`.
+    references:
+      - type: internal-commit
+        summary: "fix: reset cert manager on nginx ingress deploy (#350)"
+        link: 74894a454a64f7cd6285257ef3bebda2ba19e601
+    impacts:
+      - type: cli
+        component: cluster add
+        summary: Cert issuers step now restarts cert-manager deployment until certificate is ready
+  - type: fix
+    summary: >-
+      Fixes the Panfactum DevShell boot script to unset `AWS_ACCESS_KEY_ID` and
+      `AWS_SECRET_ACCESS_KEY` on shell entry, preventing static AWS credentials set in the
+      host environment from leaking into the DevShell and overriding the DevShell's own
+      profile-based credential configuration.
+    references:
+      - type: internal-commit
+        summary: "fix: unload AWS_ACCESS_KEY_ID and AWS_SECRET_ACCES_KEY env vars on devshell boot"
+        link: 4ed4265aa34302f474654217144017cca60903a8
+    impacts:
+      - type: devshell
+        component: enter-shell-local
+        summary: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are now unset on shell entry
+  - type: fix
+    summary: >-
+      Fixes the Street Address 2 input validation in `pf env add` contact information prompts.
+      The minimum length requirement was incorrectly set to 5 characters, rejecting valid short
+      values like "Apt 2" or "# 5". The minimum is now 2 characters, matching other address fields.
+    references:
+      - type: internal-commit
+        summary: "fix: address line 2 min length"
+        link: 03663dd54d9623b344f2bd070617645856ff6feb
+    impacts:
+      - type: cli
+        component: env add
+        summary: Street Address 2 minimum length corrected from 5 to 2 characters
+  - type: fix
+    summary: >-
+      Fixes the Street Address 2 input validation in `pf domain add` contact information prompts.
+      The minimum length requirement was incorrectly set to the same constant used for primary
+      address lines (which requires more characters), rejecting valid short values like "Apt 2"
+      or "# 5". The minimum is now 2 characters.
+    references:
+      - type: internal-commit
+        summary: "fix: address line 2 min length"
+        link: 1cfe02357781201fcc0ee25d825572790480709c
+    impacts:
+      - type: cli
+        component: domain add
+        summary: Street Address 2 minimum length corrected to 2 characters in domain registration flow
+  - type: fix
+    summary: >-
+      Fixes `kube_ingress_nginx` to allow multiple nginx replicas to be scheduled on the same host
+      when `sla_target` is set to 1. Previously, host anti-affinity was unconditionally required,
+      preventing SLA 1 deployments (which do not guarantee high availability) from running multiple
+      replicas on a single-node or small cluster.
+    references:
+      - type: internal-commit
+        summary: "fix: allow multiple nginx instances on one host for sla 1"
+        link: de4a60f36ef43cf341131d3fbd80765c66d95693
+    impacts:
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: host_anti_affinity_required is now false when sla_target is 1
+  - type: improvement
+    summary: >-
+      The Panfactum terragrunt configuration now automatically writes a `.pf.yaml` status file to
+      each module directory after a `terragrunt apply` run, recording whether the apply succeeded
+      (`status: applied`) or failed (`status: error`). This file is also added to the environments
+      gitignore so it is never accidentally committed.
+    description: >-
+      This status file enables the Panfactum CLI (e.g., `pf cluster add`) to determine whether a
+      module was successfully applied without requiring users to manually track progress. It lays the
+      groundwork for robust step resumability across multi-step CLI workflows.
+    references:
+      - type: internal-commit
+        summary: "feat: add Panfactum terragrunt hooks"
+        link: a316a5dc7cc6eb0a4acc93f1a333d8e40a50036a
+  - type: improvement
+    summary: >-
+      `pf cluster add` now uses the `.pf.yaml` status file written by terragrunt to determine
+      whether each module deployment step was successfully completed. Previously, the command
+      checked whether the module directory existed, which could cause steps that had failed
+      mid-apply to be incorrectly skipped on the next run.
+    description: >-
+      The checkpointing mechanism in `pf cluster add` has been upgraded to read each module's
+      `.pf.yaml` status file (set to `applied` by the Panfactum terragrunt hooks on success)
+      rather than testing for directory presence. This means a partially-completed or failed
+      apply is no longer treated as complete, making resume behaviour more accurate across all
+      install phases. A new `getLocalModuleStatus` utility reads these files from the
+      environments directory.
+    references:
+      - type: internal-commit
+        summary: "feat: better resumability (#351)"
+        link: 70421c38fa9eb6f3238b5f1e7dfa9101f8a84f7e
+  - type: improvement
+    summary: >-
+      The "Certificate Management" and "Certificate Issuers" steps in `pf cluster add` have
+      been consolidated into a single "Certificates" step. The new step deploys `kube_cert_manager`
+      with self-generated certificates, then deploys `kube_cert_issuers`, and finally re-applies
+      `kube_cert_manager` to switch to real certificates — all within one resumable phase.
+    description: >-
+      Previously, certificate management was split across two separate top-level install steps
+      (`setupCertManagement` and `setupCertIssuers`), each with their own checkpoint ID.
+      This commit merges them into `setupCertificates`, which handles the full certificate
+      lifecycle in one step. Individual sub-tasks within the step remain independently skippable
+      via `skipIfAlreadyApplied`, so interrupted runs still resume from the correct point.
+    references:
+      - type: internal-commit
+        summary: "feat: better resumability (#351)"
+        link: 70421c38fa9eb6f3238b5f1e7dfa9101f8a84f7e
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` so that Vault recovery keys and the root token are saved to
+      `kube_vault/secrets.yaml` immediately after `vault operator init` completes, before the
+      unseal step begins. Previously the keys were only persisted after a successful unseal,
+      meaning a CLI crash or unseal failure would permanently lose the recovery material.
+    references:
+      - type: internal-commit
+        summary: "feat: better resumability (#351)"
+        link: 70421c38fa9eb6f3238b5f1e7dfa9101f8a84f7e
+  - type: fix
+    summary: >-
+      Fixes the Vault `kubectl port-forward` proxy in `pf cluster add` to pass the `--context`
+      flag, ensuring the proxy targets the correct cluster when multiple Kubernetes contexts are
+      present in the kubeconfig. Previously `startVaultProxy` did not accept a kube context and
+      the port-forward could silently connect to the wrong cluster.
+    references:
+      - type: internal-commit
+        summary: "feat: better resumability (#351)"
+        link: 70421c38fa9eb6f3238b5f1e7dfa9101f8a84f7e
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` so that the "Deploy Vault Core Resources with permanent Vault
+      Address" step now runs at the start of the autoscaling phase rather than at the end of the
+      inbound networking phase. This ensures the step executes after the Vault ingress is fully
+      healthy and the updated vault address has been written to `region.yaml`.
+    references:
+      - type: internal-commit
+        summary: "feat: better resumability (#351)"
+        link: 70421c38fa9eb6f3238b5f1e7dfa9101f8a84f7e
+  - type: fix
+    summary: >-
+      Fixes `pf cluster add` Vault ingress verification step to reduce unnecessary waiting during
+      DNS propagation polling. The Bun DNS cache TTL is now set to 5 seconds for the duration of
+      the check, allowing the step to detect DNS propagation as soon as it occurs rather than
+      waiting for the default cache TTL to expire.
+    references:
+      - type: internal-commit
+        summary: "chore: lower bun dns cache ttl"
+        link: c62f63d9eefb4549882e254f15041b7d50c2a3d2
