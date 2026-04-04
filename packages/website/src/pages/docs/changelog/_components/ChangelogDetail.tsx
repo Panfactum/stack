@@ -34,6 +34,7 @@ import {
 import Tooltip from "@/components/ui/Tooltip";
 
 import styles from "./ChangelogAccordion.module.css";
+import { resolveReferenceLink } from "./changelogUtils";
 
 type ChangeType =
   | "breaking_change"
@@ -319,10 +320,13 @@ const ChangeCard: Component<{
                   <For each={props.change.references ?? []}>
                     {(ref) => {
                       const refConfig = () => REFERENCE_TYPE_CONFIG[ref.type];
+                      const href = () =>
+                        resolveReferenceLink(ref.type, ref.link);
                       const ghRef = () => {
+                        const resolvedLink = href();
                         const match =
                           /github\.com\/([^/]+\/[^/]+)\/(?:issues|pull)\/(\d+)/.exec(
-                            ref.link,
+                            resolvedLink,
                           );
                         if (match === null || match.length < 3)
                           return undefined;
@@ -346,7 +350,7 @@ const ChangeCard: Component<{
                             when={ghRef()}
                             fallback={
                               <a
-                                href={ref.link}
+                                href={href()}
                                 class="shrink-0 text-sm underline"
                               >
                                 {ref.summary}
@@ -354,7 +358,7 @@ const ChangeCard: Component<{
                             }
                           >
                             <span class="shrink-0 text-sm">
-                              <a href={ref.link} class="underline">
+                              <a href={href()} class="underline">
                                 {ghRef()}
                               </a>
                               {" — "}

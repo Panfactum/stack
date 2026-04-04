@@ -9,6 +9,7 @@ import {
   contentIdToUrlParam,
   getDirKey,
   getStableChannelFromId,
+  resolveReferenceLink,
 } from "./_components/changelogUtils";
 import { getNameFromId } from "./_components/getNameFromId";
 
@@ -148,7 +149,7 @@ function renderReferences(
   return references
     .map(
       (ref) =>
-        `  - Reference (${ref.type}): [${ref.summary}](${ref.link})`,
+        `  - Reference (${ref.type}): [${ref.summary}](${resolveReferenceLink(ref.type, ref.link)})`,
     )
     .join("\n");
 }

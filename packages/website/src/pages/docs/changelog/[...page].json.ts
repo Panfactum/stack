@@ -5,7 +5,7 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 
-import { contentIdToUrlParam, getStableChannelFromId } from "./_components/changelogUtils";
+import { contentIdToUrlParam, getStableChannelFromId, resolveReferenceLink } from "./_components/changelogUtils";
 import { getNameFromId } from "./_components/getNameFromId";
 
 type ChangesEntry = Awaited<
@@ -101,7 +101,13 @@ export const GET: APIRoute<DetailProps | ListProps> = ({ props }) => {
       skip: entry.data.skip,
       branch: entry.data.branch,
       highlights: entry.data.highlights,
-      changes: entry.data.changes,
+      changes: entry.data.changes?.map((change) => ({
+        ...change,
+        references: change.references?.map((ref) => ({
+          ...ref,
+          link: resolveReferenceLink(ref.type, ref.link),
+        })),
+      })),
       on_upgrade_path: entry.data.upgrade_instructions !== undefined || entry.data.branch !== undefined,
       list_url: `/docs/changelog/${listSlug}.json`,
       llm_txt_url: `/docs/changelog/${urlParam}/llm.txt`,

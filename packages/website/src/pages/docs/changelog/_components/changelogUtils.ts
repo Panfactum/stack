@@ -53,3 +53,17 @@ export function getDirKey(id: string): string {
     const lastSlash = id.lastIndexOf('/');
     return lastSlash >= 0 ? id.slice(0, lastSlash) : id;
 }
+
+const INTERNAL_COMMIT_SHA_RE = /^[0-9a-f]{40}$/;
+
+/**
+ * Resolves a changelog reference link to a full URL.
+ * For internal-commit references the link is a bare 40-character SHA;
+ * this converts it to a GitHub commit URL.
+ */
+export function resolveReferenceLink(type: string, link: string): string {
+    if (type === 'internal-commit' && INTERNAL_COMMIT_SHA_RE.test(link)) {
+        return `https://github.com/Panfactum/stack/commit/${link}`;
+    }
+    return link;
+}
