@@ -309,8 +309,9 @@ function buildLogSchema(
             },
             summary: {
               type: "string",
+              pattern: "^[^ ]*( [^ ]*){0,19}$",
               description:
-                "Inline markdown describing the change. For breaking changes, should explain what changed and why, but detailed migration steps belong in upgrade_instructions.",
+                "Inline markdown describing the change (20 words or fewer). Put detailed information in the description field.",
             },
             description: {
               type: "string",
@@ -364,6 +365,7 @@ function buildLogSchema(
                     then: {
                       properties: {
                         link: {
+                          type: "string",
                           pattern: "^[0-9a-f]{40}$",
                         },
                       },

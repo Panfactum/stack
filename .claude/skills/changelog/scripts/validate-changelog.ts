@@ -1,15 +1,17 @@
 #!/usr/bin/env bun
-// Runs enhanced validation on main/log.yaml beyond schema checking.
-// Checks completeness: missing impacts, missing references, missing action_items, and file existence.
+// Runs validation on main/log.yaml: JSON schema + enhanced completeness checks.
 
+import Ajv from "ajv";
 import { parse as parseYaml } from "yaml";
 import { readFileSync, existsSync } from "fs";
 import { resolve, dirname, join } from "path";
 
-const LOG_YAML_PATH = join(
+const CHANGELOG_DIR = join(
   import.meta.dir,
-  "../../../../packages/website/src/content/changelog/main/log.yaml"
+  "../../../../packages/website/src/content/changelog"
 );
+const LOG_YAML_PATH = join(CHANGELOG_DIR, "main/log.yaml");
+const LOG_SCHEMA_PATH = join(CHANGELOG_DIR, "log.schema.json");
 
 interface Finding {
   level: "WARN" | "INFO";
@@ -155,6 +157,25 @@ function main(): void {
     console.error(`Error: YAML parse failed: ${message}`);
     process.exit(1);
   }
+
+  // JSON schema validation
+  const schemaPath = resolve(LOG_SCHEMA_PATH);
+  if (!existsSync(schemaPath)) {
+    console.error(`Error: log.schema.json not found at ${schemaPath}`);
+    process.exit(1);
+  }
+  const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  const validate = ajv.compile(schema);
+  if (!validate(logData)) {
+    console.log("Schema validation errors:\n");
+    for (const err of validate.errors ?? []) {
+      console.log(`  ${err.instancePath || "/"}: ${err.message}`);
+    }
+    console.log("");
+    process.exit(1);
+  }
+  console.log("Schema validation passed.\n");
 
   const allFindings: Finding[] = [];
   const logDir = dirname(absolutePath);
