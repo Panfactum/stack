@@ -42,7 +42,12 @@ type ChangeType =
   | "addition"
   | "deprecation";
 
-type ImpactType = "iac-module" | "cli" | "devshell" | "configuration";
+type ImpactType =
+  | "iac-module"
+  | "cli"
+  | "devshell"
+  | "configuration"
+  | "installer";
 
 type ReferenceType =
   | "internal-commit"
@@ -137,6 +142,7 @@ const IMPACT_TYPE_LABELS: Record<ImpactType, string> = {
   cli: "CLI",
   devshell: "Dev Shell",
   configuration: "Configuration",
+  installer: "Installer",
 };
 
 interface ReferenceTypeConfig {

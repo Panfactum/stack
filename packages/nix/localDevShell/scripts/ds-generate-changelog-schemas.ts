@@ -218,6 +218,18 @@ function deriveDevshellEnum(): string[] {
 // Configuration file enum — static list of standard config file references
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Installer component enum — static list of installer artifacts
+// ---------------------------------------------------------------------------
+
+const INSTALLER_ENUM: string[] = ["install.sh"];
+
+// ---------------------------------------------------------------------------
+// CLI extra components — shared utilities that don't correspond to a command path
+// ---------------------------------------------------------------------------
+
+const CLI_EXTRA_COMPONENTS: string[] = ["logging"];
+
 const CONFIGURATION_ENUM: string[] = [
   ".env",
   ".nats",
@@ -234,6 +246,7 @@ const CONFIGURATION_ENUM: string[] = [
   "module.secrets.yaml",
   "module.user.yaml",
   "module.yaml",
+  "panfactum.hcl",
   "panfactum.user.yaml",
   "panfactum.yaml",
   "region.secrets.yaml",
@@ -249,7 +262,8 @@ function buildLogSchema(
   iacModuleEnum: string[],
   cliEnum: string[],
   devshellEnum: string[],
-  configurationEnum: string[]
+  configurationEnum: string[],
+  installerEnum: string[]
 ): object {
   return {
     $schema: "http://json-schema.org/draft-07/schema#",
@@ -384,7 +398,7 @@ function buildLogSchema(
                 properties: {
                   type: {
                     type: "string",
-                    enum: ["iac-module", "cli", "devshell", "configuration"],
+                    enum: ["iac-module", "cli", "devshell", "configuration", "installer"],
                     description:
                       "The kind of component affected by this change.",
                   },
@@ -448,6 +462,18 @@ function buildLogSchema(
                       },
                     },
                   },
+                  {
+                    if: {
+                      properties: {
+                        type: { const: "installer" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        component: { enum: installerEnum },
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -468,7 +494,7 @@ function main(): void {
   console.log(`  Found ${iacModuleEnum.length} iac-module entries.`);
 
   console.log("Deriving cli enum from packages/cli/src/commands/...");
-  const cliEnum = deriveCliEnum();
+  const cliEnum = [...deriveCliEnum(), ...CLI_EXTRA_COMPONENTS].sort();
   console.log(`  Found ${cliEnum.length} cli entries.`);
 
   console.log(
@@ -482,7 +508,8 @@ function main(): void {
     iacModuleEnum,
     cliEnum,
     devshellEnum,
-    CONFIGURATION_ENUM
+    CONFIGURATION_ENUM,
+    INSTALLER_ENUM
   );
 
   console.log(`Writing log schema to ${LOG_SCHEMA_OUTPUT_PATH}...`);

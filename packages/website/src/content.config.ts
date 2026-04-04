@@ -39,7 +39,7 @@ const changes = defineCollection({
         link: z.string(),
       })).optional(),
       impacts: z.array(z.object({
-        type: z.enum(["iac-module", "cli", "devshell", "configuration"]),
+        type: z.enum(["iac-module", "cli", "devshell", "configuration", "installer"]),
         component: z.string(),
         summary: z.string(),
       })).optional(),

@@ -139,7 +139,8 @@
                     "iac-module",
                     "cli",
                     "devshell",
-                    "configuration"
+                    "configuration",
+                    "installer"
                   ],
                   "description": "The kind of component affected by this change."
                 },
@@ -327,6 +328,7 @@
                           "kube enable-disruptions",
                           "kube get-token",
                           "kube profile-for-context",
+                          "logging",
                           "sso add",
                           "tunnel",
                           "util get-commit-hash",
@@ -492,11 +494,30 @@
                           "module.secrets.yaml",
                           "module.user.yaml",
                           "module.yaml",
+                          "panfactum.hcl",
                           "panfactum.user.yaml",
                           "panfactum.yaml",
                           "region.secrets.yaml",
                           "region.user.yaml",
                           "region.yaml"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "installer"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "component": {
+                        "enum": [
+                          "install.sh"
                         ]
                       }
                     }

@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
 // Checks whether upgrade instructions are required based on breaking changes
-// and deprecations in main/log.yaml. Exits with code 0 if not required or
-// already present, exits with code 1 if required but missing.
+// and deprecations in main/log.yaml.
+// Exit codes:
+//   0 — No breaking changes or deprecations; upgrade instructions not needed.
+//   1 — Breaking changes exist but upgrade instructions file is missing or unset.
+//   2 — Breaking changes exist and upgrade instructions file already exists.
 
 import { parse as parseYaml } from "yaml";
 import { readFileSync, existsSync } from "fs";
@@ -59,7 +62,7 @@ function main(): void {
     const filePath = join(logDir, upgradeFile);
     if (existsSync(filePath)) {
       console.log(`\nUpgrade instructions file exists: ${upgradeFile}`);
-      process.exit(0);
+      process.exit(2);
     } else {
       console.log(`\nupgrade_instructions is set to "${upgradeFile}" but the file is MISSING.`);
       process.exit(1);

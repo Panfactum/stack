@@ -44,7 +44,12 @@ Run the upgrade instructions check from the skill directory:
 bun ./scripts/upgrade-instructions-required.ts
 ```
 
-If the script exits with code 1 (required but missing), spawn a subagent to run the **GenerateUpgradeInstructions** workflow (via the changelog skill) to create it before continuing.
+Exit codes:
+- **0** — No breaking changes; skip to Step 3.
+- **1** — Breaking changes exist but upgrade instructions file is missing or unset.
+- **2** — Breaking changes exist and upgrade instructions file already exists.
+
+If the script exits with code 1 or 2 (breaking changes present), spawn a subagent to run the **GenerateUpgradeInstructions** workflow (via the changelog skill) to create or update the upgrade instructions before continuing.
 
 ### 3. Review Todo Items
 
