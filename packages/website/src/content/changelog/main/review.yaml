@@ -34,8 +34,11 @@ todo:
   - "Entry 'Fixes step nesting in pf cluster install' (commit 7c80f0a2d2fe0346cb7a1943baa97984d09ba851): show-diff returned '(no diff)' — changed files are not covered by .changelog-include patterns. Entry was written from the commit message 'fix: cluster install step nesting' alone. Verify the exact nesting issue (e.g., Listr task hierarchy, step dependency ordering, or checkpoint group structure) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema. If 'cluster install' is added to the schema, add an impact with type cli and component 'cluster install'."
   - "Entry 'Fixes pf cluster install EKS setup initial superuser permissions' (commit d127b6f43fc5e715bed6b714ae08e112cbf4a1ca): show-diff returned '(no diff)' — the changed file packages/cli/src/commands/cluster/install/setupEKS.ts is not covered by .changelog-include patterns. Entry was written from the commit message 'fix: initial cluster permissions' alone. Verify the exact fix (e.g., extra_superuser_principal_arns not set, wrong ARN source, or condition bug) and update the summary accordingly. No impacts block added because 'cluster install' is not a valid CLI component in the schema."
   - "Entry 'Fixes color rendering bug in applyColors (dedent order)' (commit b695023a1701ff34709eeee49c64d2c9aaf79050): changed file is packages/cli/src/context/logger.ts, a shared utility class not tied to a specific CLI command path. No impacts block was added. Consider whether a generic 'cli' impact should be added or if a Logger/utility impact type is appropriate."
+  - "Entry 'Fixes kube_vault Helm release race condition' (commit ccecb3270b0384feeaeaf62cf47124942071b121): the internal-commit reference summary reuses the git commit message 'fix:cli: initial domain register poll title', which describes the CLI fix in the same commit rather than the kube_vault change. If someone adds a more descriptive commit-level description later, update the reference summary for the kube_vault entry."
   - "Entry 'Panfactum terragrunt hooks add .pf.yaml status file' (commit a316a5dc7cc6eb0a4acc93f1a333d8e40a50036a): changed files are packages/cli/src/files/terragrunt/panfactum.hcl and packages/cli/src/util/devshell/constants.ts. Neither maps cleanly to a schema impact type — panfactum.hcl is a CLI-bundled file (not an iac-module, cli command, devshell tool, or configuration enum entry), and .pf.yaml is a generated file not in the configuration component enum. No impacts block was added. Consider adding a 'configuration' component entry for '.pf.yaml' or a generic CLI/configuration impact."
+  - "Entry 'Fixes panfactum.hcl pf-get-vault-token silencing' (commit 1ac42430c0dd1fc59d2f3b0aab851416fbe099dc): changed file is packages/cli/src/files/terragrunt/panfactum.hcl which is a CLI-bundled config file and does not map cleanly to any schema impact type. No impacts block was added. Consider whether a 'configuration' component for 'panfactum.hcl' should be added to the schema."
 validated:
+  - 829ad02cd9296a82c8918338fdefbdafd5ca2fae
   - 9aa5de525f498086e3f0a9f95f24cf292de8056e
   - e1fa94d5f8fcde71bec61784dc6c3df9bf2b11be
   - 7d7349f621f9b979a1bc660b409d96eef5c0ce3c
@@ -221,4 +224,23 @@ validated:
   - e19f5da99390eed58ae797f556578af89d98532f
   - eaa53405e53cf5eb0926a18daaa6561ea729030c
   - 0ac254981c3829dc40dc6453e0bd355cd187747d
+  - ed1a146dd4c4d3d92866ac369bb653ce9d9f0d19
   - 6a17572cde08a016348a43d09b3e9c1ba014aabc
+  - fd8d7b26d3cffcebc0b3d37491cb92a76dc7d016
+  - e463425f6558d3105371d21787b3a1884414109e
+  - 8f1741f1bc71725e1f769c63ad18ceca916fdd89
+  - 4f0f981677d36b1cb2269a9b4e81287fdbab5217
+  - 0886f756c32dabcfb9ee647b991a3cb4e247d225
+  - f33f0f128c2b05ca31e10fecf2d0be3dd05d1ac2
+  - 5de461d56c09ea025b3bd34f82fe04018fd9ec20
+  - 3d7608ca62c6a10f0216f6bc4c9c2eb514fcf414
+  - 8dddf6bf63532b62b4cf55e7b598421a645b1643
+  - daaa3b2f592d21ef0990170d7efd92bcc13c7d96
+  - d14a548a5cd98b7e2bfee632bbe118459be04b6a
+  - 084e5910a3bad7d214090c78cca30f8caf650036
+  - a30fefc697ec9ecd01f72accdd2f83f6d3b7c413
+  - ccecb3270b0384feeaeaf62cf47124942071b121
+  - e0f0cfecdc27a1da17208d63242d31b21b501104
+  - 1ac42430c0dd1fc59d2f3b0aab851416fbe099dc
+  - cf2ef5abf90ba6c01e78276cdae63fd22bd54288
+  - 27cdbcf16525e9989430f33ef211b5a3f9e17560

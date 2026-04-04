@@ -532,7 +532,7 @@ changes:
       automated: the installer deploys the `kube_vault` module, polls until all pods are running, runs `vault operator
       init` to obtain recovery keys and the root token, unseals Vault with the recovery keys, and then deploys
       `vault_core_resources` (using a `kubectl port-forward` to Vault during the Terraform apply). Recovery keys and the
-      root token are encrypted via SOPS and written to `kube_vault/secrets.yaml`. Users should move these credentials to
+      root token are encrypted via SOPS and written to `region.secrets.yaml` as `vault_token`. Users should move these credentials to
       a secure location after the install completes — they should not remain accessible to all superusers in a shared
       secrets store."
     references:
@@ -2512,7 +2512,7 @@ changes:
     description: "Fixes `pf cluster add` so that Vault recovery keys and the root token are saved immediately after `vault
       operator init` completes, before the unseal step begins. Previously the keys were only persisted after a
       successful unseal, meaning a CLI crash or unseal failure would permanently lose the recovery material. The root
-      token is saved to `kube_vault/secrets.yaml` and the recovery keys are saved to `kube_vault/recovery.yaml`."
+      token is saved to `region.secrets.yaml` as `vault_token` and the recovery keys are saved to `kube_vault/recovery.yaml`."
   - type: "fix"
     summary: "Fixes the Vault `kubectl port-forward` proxy in `pf cluster add` to pass the `--context` flag, ensuring the
       proxy targets the"
@@ -2750,9 +2750,9 @@ changes:
       - type: "cli"
         component: "cluster add"
         summary: "Vault operator init now writes recovery keys to kube_vault/recovery.yaml and root token to
-          kube_vault/secrets.yaml instead of storing both in secrets.yaml"
+          region.secrets.yaml as vault_token instead of storing both in kube_vault/secrets.yaml"
     description: "Fixes `pf cluster add` Vault initialization to store the root token and recovery keys in separate files.
-      The root token is saved to `kube_vault/secrets.yaml` and the recovery keys are saved to a new
+      The root token is saved to `region.secrets.yaml` as `vault_token` and the recovery keys are saved to a new
       `kube_vault/recovery.yaml` file. This separation allows operators to distribute and handle the two credential
       types independently, since recovery keys allow Vault unsealing while the root token grants full administrative
       access."
@@ -2930,3 +2930,545 @@ changes:
       resource IDs and fail. The fix removes the `skip` and instead populates the context values from the
       existing config at the start of the task body, so the bucket name flows correctly to all subsequent steps
       whether this is a fresh run or a resumed one.
+  - type: "breaking_change"
+    summary: >-
+      `aws_organization` now requires a new `alias` input variable for setting the AWS account alias on the
+      management account.
+    action_items:
+      - "Add an `alias` input to your `aws_organization` module configuration with a human-readable string for the management account (e.g., `\"my-org-management\"`)."
+    references:
+      - type: "internal-commit"
+        summary: "fix: set account alias in aws_organization module"
+        link: "fd8d7b26d3cffcebc0b3d37491cb92a76dc7d016"
+    impacts:
+      - type: "iac-module"
+        component: "aws_organization"
+        summary: "New required `alias` string input — management account alias is now managed by this module"
+    description: >-
+      The `aws_organization` module now manages the IAM account alias for the management AWS account via a new
+      required `alias` variable. Previously the alias was only set through `aws_account` (for non-management
+      environments); this change brings the management account into alignment. Existing deployments must add the
+      `alias` input before the next `terragrunt apply`.
+  - type: "fix"
+    summary: >-
+      Fixes `pf env add` where the AWS account alias was not passed to `aws_organization` during management
+      environment bootstrap.
+    references:
+      - type: "internal-commit"
+        summary: "fix: set account alias in aws_organization module"
+        link: "fd8d7b26d3cffcebc0b3d37491cb92a76dc7d016"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "Account alias is now correctly forwarded as an input to the aws_organization module"
+    description: >-
+      When bootstrapping the management environment, `pf env add` collects an account alias from the user but
+      previously did not pass it to the `aws_organization` module's `alias` input. The alias was therefore
+      never persisted for the management account. The fix wires the collected alias through `defineInputUpdate`
+      into the `aws_organization` deployment step, mirroring the existing behavior for non-management
+      environments that use `aws_account`.
+  - type: "improvement"
+    summary: >-
+      `pf env add` now supports resumability — interrupted installations detect partial state and skip
+      completed steps on re-run.
+    references:
+      - type: "internal-commit"
+        summary: "feat:cli: env add resumability"
+        link: "e463425f6558d3105371d21787b3a1884414109e"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: >-
+          Detects partially-deployed environments, skips completed provisioning steps, and restores
+          previously-selected regions on resume
+    description: >-
+      `pf env add` can now resume an interrupted installation without repeating steps that already
+      completed. The command detects whether an AWS account was already provisioned (by checking existing
+      AWS profiles and module status), restores previously-selected primary and secondary regions from
+      config, and offers to copy region configuration from another existing environment to speed up setup.
+      AWS account creation is now performed directly via the AWS SDK before the IaC module is applied,
+      which also enables retrying with a different email address when a duplicate-email error is returned
+      by AWS Organizations.
+  - type: "fix"
+    summary: >-
+      Fixes `pf env add` phone number pre-fill where the value fetched from the AWS Account API used
+      incorrect formatting.
+    references:
+      - type: "internal-commit"
+        summary: "feat:cli: env add resumability"
+        link: "e463425f6558d3105371d21787b3a1884414109e"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "Phone number from AWS Account API is now formatted as dashes (e.g., 555-555-5555) instead of dots"
+  - type: "improvement"
+    summary: >-
+      `pf cluster add` post-installation success message now uses improved formatting with blank lines
+      between numbered steps for better readability.
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli:cluster add: success message format"
+        link: "4f0f981677d36b1cb2269a9b4e81287fdbab5217"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Success message uses improved whitespace formatting between numbered steps"
+  - type: "improvement"
+    summary: >-
+      `pf env add` now suggests an environment-specific IAM username (e.g., `management-superuser`)
+      instead of the hardcoded `pf-bootstrap-user` name.
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli:env add: default username"
+        link: "0886f756c32dabcfb9ee647b991a3cb4e247d225"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "Bootstrap IAM username suggestion is now derived from the environment name"
+    description: >-
+      Previously, `pf env add` always suggested `pf-bootstrap-user` as the IAM username when walking
+      users through creating a new AWS account. The suggested name is now derived from the environment
+      being created (e.g., `management-superuser`), making it consistent with Panfactum's AWS profile
+      naming convention and easier to identify in the IAM console.
+  - type: "fix"
+    summary: >-
+      Fixes `pf env add` credential validation where the `AdministratorAccess` error was misplaced
+      and unknown errors escaped the retry loop.
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli:env add: default username"
+        link: "0886f756c32dabcfb9ee647b991a3cb4e247d225"
+    impacts:
+      - type: "cli"
+        component: "env add"
+        summary: "AdministratorAccess error shown correctly; unknown errors now loop back to re-prompt"
+    description: >-
+      The `AdministratorAccess` policy check in `pf env add` had two issues: the error message was
+      emitted after the `catch` block rather than inside the `if (!hasAdminAccess)` branch, and a
+      `break` on unknown errors caused the outer credentials loop to exit without re-prompting. Both
+      are now fixed. An informational message ("Removing existing credentials and requesting new ones")
+      is also shown when the user chooses not to retry with the same credentials.
+  - type: "fix"
+    summary: >-
+      Fixes `sopsUpsert` failing to overwrite an existing SOPS-encrypted file when merging new values
+      into it.
+    references:
+      - type: "internal-commit"
+        summary: "fix: set overwrite to true for sopsUpsert"
+        link: "f33f0f128c2b05ca31e10fecf2d0be3dd05d1ac2"
+    description: >-
+      The `sopsUpsert` utility merges new key/value pairs into an existing SOPS-encrypted file by
+      decrypting the current contents, spreading in the new values, and re-writing the file. However,
+      the final `sopsWrite` call was missing `overwrite: true`, so writing to an already-existing file
+      would fail. The fix passes `overwrite: true` in the existing-file branch, ensuring the merged
+      result is written back correctly on every call.
+  - type: "fix"
+    summary: >-
+      Fixes `pf cluster add` Vault setup step to read recovery keys from `kube_vault/recovery.yaml`
+      instead of `kube_vault/secrets.yaml`.
+    references:
+      - type: "internal-commit"
+        summary: "fix: reading from recovery.yaml"
+        link: "3d7608ca62c6a10f0216f6bc4c9c2eb514fcf414"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Vault setup step now reads recovery keys from kube_vault/recovery.yaml and vault token from region.secrets.yaml via config"
+    description: >-
+      After the prior split that writes the root token and recovery keys to separate files, the read-side
+      code was not updated to match. The Vault setup step still expected both `root_token` and
+      `recovery_keys` in `kube_vault/secrets.yaml`, which would fail on any cluster where keys had
+      already been split. The fix introduces separate reads: recovery keys from `kube_vault/recovery.yaml`
+      and the root token from `region.secrets.yaml` via `getPanfactumConfig()` as `vault_token`.
+  - type: "improvement"
+    summary: >-
+      `panfactum.hcl` now automatically passes `route53_zones` and `kube_domain` as default module
+      inputs, simplifying `kube_certificates` migration.
+    references:
+      - type: "internal-commit"
+        summary: "fix: kube_certificates migration guide"
+        link: "8dddf6bf63532b62b4cf55e7b598421a645b1643"
+    description: >-
+      The bundled `panfactum.hcl` now injects `route53_zones` (from `local.vars.domains`) and
+      `kube_domain` (from `local.vars.kube_domain`) as global default module inputs. Modules that accept
+      these variables — including `kube_certificates` — will now receive them automatically, eliminating
+      the need to wire those values in manually during migration.
+  - type: "improvement"
+    summary: >-
+      `vault_internal_url` in [`kube_certificates`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_certificates)
+      now has a default value, making it optional to specify explicitly.
+    references:
+      - type: "internal-commit"
+        summary: "fix: kube_certificates migration guide"
+        link: "8dddf6bf63532b62b4cf55e7b598421a645b1643"
+    impacts:
+      - type: "iac-module"
+        component: "kube_certificates"
+        summary: "vault_internal_url now defaults to http://vault-active.vault.svc.cluster.local:8200"
+    description: >-
+      The `vault_internal_url` input in `kube_certificates` now defaults to
+      `http://vault-active.vault.svc.cluster.local:8200`, the standard in-cluster Vault address.
+      Users following the standard Panfactum cluster layout no longer need to specify this variable
+      explicitly, reducing the friction of migrating from the old `kube_cert_manager` and
+      `kube_cert_issuers` modules.
+  - type: "improvement"
+    summary: >-
+      [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      adds OpenSearch Dashboards with ingress and new `log_level`, `slow_request_log_thresholds`, and
+      `extra_cluster_settings` inputs.
+    references:
+      - type: "internal-commit"
+        summary: "fix: kube_certificates migration guide"
+        link: "8dddf6bf63532b62b4cf55e7b598421a645b1643"
+    impacts:
+      - type: "iac-module"
+        component: "kube_opensearch"
+        summary: >-
+          Added OpenSearch Dashboards Helm deployment with ingress; new log_level,
+          slow_request_log_thresholds, and extra_cluster_settings inputs
+    description: >-
+      `kube_opensearch` now deploys OpenSearch Dashboards alongside the OpenSearch cluster using the
+      upstream Helm chart, with a `kube_ingress` resource for external access. The module also adds three
+      new optional inputs: `log_level` (default `WARN`) controls cluster log verbosity;
+      `slow_request_log_thresholds` configures per-level slow-search log thresholds; and
+      `extra_cluster_settings` allows arbitrary `opensearch.yml` settings to be injected or overridden
+      without forking the module. These additions make it easier to operate and observe OpenSearch in
+      production.
+  - type: "fix"
+    summary: >-
+      Fixes [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      S3 segment replication by enabling remote-store repositories for segments and translogs that were
+      previously disabled.
+    references:
+      - type: "internal-commit"
+        summary: "fix: kube_certificates migration guide"
+        link: "8dddf6bf63532b62b4cf55e7b598421a645b1643"
+      - type: "external-commit"
+        summary: "OpenSearch issue #15902 (segment replication remote store)"
+        link: "https://github.com/opensearch-project/OpenSearch/issues/15902"
+    impacts:
+      - type: "iac-module"
+        component: "kube_opensearch"
+        summary: "node.attr.remote_store.segment.repository and node.attr.remote_store.translog.repository re-enabled"
+    description: >-
+      The `node.attr.remote_store.segment.repository` and `node.attr.remote_store.translog.repository`
+      settings had been commented out in the OpenSearch configuration with a reference to a known upstream
+      bug (opensearch-project/OpenSearch#15902). With the resolution of that issue in OpenSearch 3.x,
+      both settings are now enabled, allowing segments and translogs to be stored in S3 for remote
+      replication and recovery.
+  - type: "fix"
+    summary: >-
+      Fixes `panfactum.hcl` so `route53_zones` and `kube_domain` default safely when absent from
+      the Panfactum config.
+    references:
+      - type: "internal-commit"
+        summary: "fix: kube_domain default input"
+        link: "d14a548a5cd98b7e2bfee632bbe118459be04b6a"
+    description: >-
+      The bundled `panfactum.hcl` previously accessed `local.vars.domains` and `local.vars.kube_domain`
+      directly. If either key was missing from the merged Panfactum config (e.g., in environments without
+      a Kubernetes cluster), Terragrunt would fail with an attribute-not-found error. Both fields now use
+      `lookup()` with safe defaults (`{}` for `route53_zones`, `null` for `kube_domain`), allowing the
+      template to work in all environments regardless of whether those config keys are present.
+  - type: "improvement"
+    summary: >-
+      `pf cluster add` and `pf sso add` now skip `terragrunt init` for already-initialized modules,
+      reducing redundant work during installation.
+    references:
+      - type: "internal-commit"
+        summary: "feat: intelligently skip init in deployModuleTask when possible"
+        link: "084e5910a3bad7d214090c78cca30f8caf650036"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Module deploy tasks now skip terragrunt init when init_status is already success"
+      - type: "cli"
+        component: "sso add"
+        summary: "Module deploy tasks now skip terragrunt init when init_status is already success"
+    description: >-
+      Previously, every module deployment task in `pf cluster add` and `pf sso add` ran
+      `terragrunt init` unconditionally before applying, even on resumed installs where the module had
+      already been initialized. The `buildDeployModuleTask` utility now checks the module's `.pf.yaml`
+      `init_status` field (written by the Panfactum terragrunt hooks) before deciding whether to run
+      init. If `init_status` is `"success"` or `"running"`, the init step is skipped. A new
+      `forceInitModule` option can be set to override this behavior when a re-init is explicitly needed.
+
+  - type: "fix"
+    summary: "Fixes `pf cluster add` Vault unseal step incorrectly skipping due to a stale `module.yaml` flag."
+    references:
+      - type: "internal-commit"
+        summary: "fix: using vault status to check if unseal step should be skipped"
+        link: "a30fefc697ec9ecd01f72accdd2f83f6d3b7c413"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Vault unseal step now queries vault status -format=json to determine whether unsealing is needed"
+    description: >-
+      Previously, the `pf cluster add` Vault setup step decided whether to skip unsealing by reading the
+      `extra_inputs.wait` flag from `kube_vault/module.yaml`. This was an indirect heuristic that could
+      produce incorrect results if the config was out of sync with the actual Vault state. The fix
+      replaces the config-file check with a direct call to `vault status -format=json` via `kubectl exec`,
+      and skips unsealing only when Vault reports that it is already unsealed (`sealed: false`).
+
+  - type: "fix"
+    summary: "Fixes `pf domain add` registration poll title showing `undefined` as the initial status label."
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli: initial domain register poll title"
+        link: "ccecb3270b0384feeaeaf62cf47124942071b121"
+    impacts:
+      - type: "cli"
+        component: "domain add"
+        summary: "Poll title no longer shows 'undefined' before the first status response is received"
+
+  - type: "fix"
+    summary: "Fixes `kube_vault` Helm release race condition by adding `module.unseal_key` as an explicit dependency."
+    references:
+      - type: "internal-commit"
+        summary: "fix:cli: initial domain register poll title"
+        link: "ccecb3270b0384feeaeaf62cf47124942071b121"
+    impacts:
+      - type: "iac-module"
+        component: "kube_vault"
+        summary: "Vault Helm release now waits for the KMS unseal key to be fully created before deploying"
+    description: >-
+      Previously, the `helm_release.vault` resource only depended on `module.aws_permissions`, which meant
+      Terraform could attempt to deploy Vault before the KMS unseal key (`module.unseal_key`) was ready.
+      Adding `module.unseal_key` to `depends_on` ensures the unseal key exists before Vault starts,
+      preventing initialization failures caused by a missing key.
+  - type: "improvement"
+    summary: >-
+      `pf cluster add` now reads the Vault root token from `region.secrets.yaml` via
+      `getPanfactumConfig()` instead of directly SOPS-decrypting `kube_vault/secrets.yaml`.
+    references:
+      - type: "internal-commit"
+        summary: "moved vault_token to region.secrets.yaml"
+        link: "829ad02cd9296a82c8918338fdefbdafd5ca2fae"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: "Vault root token is now stored as vault_token in region.secrets.yaml and read through the merged config"
+      - type: "cli"
+        component: "config get"
+        summary: "vault_token is now a recognized field in the Panfactum config schema and will appear in pf config get output"
+    description: >-
+      Previously, each `pf cluster add` setup step (autoscaling, certificates, cluster extensions,
+      inbound networking, Linkerd, Vault) independently called `sopsDecrypt` on `kube_vault/secrets.yaml`
+      to obtain the Vault root token. This was fragile because each step had to know the exact file path
+      and field name (`root_token`). The token is now stored as `vault_token` in `region.secrets.yaml`
+      and surfaced through the standard `getPanfactumConfig()` merge, so all steps read it from the
+      shared `config` object. A `refreshConfig()` helper is also added to re-hydrate the config object
+      after the Vault initialization step writes the token, ensuring downstream steps see the new value
+      without a full restart.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` now automates federated authentication setup with AWS IAM Identity Center
+      as a resumable step.
+    references:
+      - type: "internal-commit"
+        summary: "Federated auth (#360)"
+        link: "daaa3b2f592d21ef0990170d7efd92bcc13c7d96"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Federated auth (AWS SSO SAML + SCIM) is now configured automatically as a resumable step within pf sso add"
+    description: >-
+      Previously, `pf sso add` only installed and configured Authentik itself. Setting up federated
+      authentication — configuring AWS IAM Identity Center as a SAML identity provider, enabling SCIM
+      provisioning, syncing users and groups, and deploying IAM Identity Center permission sets — had
+      to be done separately. The command now includes a "Setup Federated Auth" step that automates
+      the full federated auth workflow. Each sub-step (deploying `authentik_aws_sso`, collecting SCIM
+      credentials, syncing users, deploying `aws_iam_identity_center_permissions`, and updating EKS)
+      is resumable via `.pf.yaml` checkpoint files, so the command can be safely re-run after
+      interruption without repeating completed work.
+  - type: "breaking_change"
+    summary: >-
+      The Authentik API token stored during `pf sso add` has been moved from
+      `authentik_core_resources/secrets.yaml` to `region.secrets.yaml` under the key `authentik_token`.
+    action_items:
+      - >-
+        If you have already run `pf sso add` and have an existing Authentik token stored in
+        `<cluster-path>/authentik_core_resources/secrets.yaml` under the key `authentikUserToken`,
+        copy it to `<region-path>/region.secrets.yaml` under the key `authentik_token`
+        using SOPS (`sops --set '["authentik_token"] "your-token-here"' region.secrets.yaml`).
+      - >-
+        Ensure `authentik_token` is set in `region.secrets.yaml` (SOPS-encrypted) for the
+        Authentik Terraform provider to authenticate via `getPanfactumConfig()`.
+    references:
+      - type: "internal-commit"
+        summary: "Federated auth (#360)"
+        link: "daaa3b2f592d21ef0990170d7efd92bcc13c7d96"
+      - type: "internal-commit"
+        summary: "using config.authentik_token vs module output"
+        link: "27cdbcf16525e9989430f33ef211b5a3f9e17560"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Authentik token is now stored as authentik_token in region.secrets.yaml rather than authentik_core_resources/secrets.yaml"
+      - type: "configuration"
+        component: "region.secrets.yaml"
+        summary: "authentik_token is now expected here for the Authentik Terraform provider"
+    description: >-
+      The `pf sso add` command previously stored the Authentik API token as `authentikUserToken`
+      inside the module-level `authentik_core_resources/secrets.yaml` file. The token has been
+      relocated to the region-level `region.secrets.yaml` under the standardized key
+      `authentik_token`, aligning it with other region-scoped secrets such as `vault_token`.
+      The `authentik_token` field has also been added to `PANFACTUM_CONFIG_SCHEMA` and is now
+      passed directly to the Authentik Terraform provider via the bundled `panfactum.hcl`, so
+      modules that use the Authentik provider will authenticate automatically without manual
+      environment variable configuration.
+  - type: "addition"
+    summary: >-
+      Adds `authentik_token` to the Panfactum config schema and the Authentik Terraform
+      provider is now configured with both `url` and `token`.
+    references:
+      - type: "internal-commit"
+        summary: "Federated auth (#360)"
+        link: "daaa3b2f592d21ef0990170d7efd92bcc13c7d96"
+    impacts:
+      - type: "cli"
+        component: "config get"
+        summary: "authentik_token is now a recognized field in the Panfactum config schema and will appear in pf config get output"
+    description: >-
+      The `authentik_token` field is now part of `PANFACTUM_CONFIG_SCHEMA` and is surfaced
+      through the standard `getPanfactumConfig()` merge. The bundled `authentik.tftpl` provider
+      template has been updated to pass both `url` and `token` to the Authentik provider, so
+      any IaC module that uses the Authentik provider will authenticate automatically when
+      `authentik_token` is present in the merged Panfactum config (e.g., in `region.secrets.yaml`).
+  - type: "improvement"
+    summary: >-
+      `pf cluster add` now auto-loads `vault_token` from Panfactum config YAML via `panfactum.hcl`,
+      removing manual token threading across cluster setup steps.
+    references:
+      - type: "internal-commit"
+        summary: "moved vault_token to autoload in panfactum.hcl"
+        link: "ed1a146dd4c4d3d92866ac369bb653ce9d9f0d19"
+    impacts:
+      - type: "cli"
+        component: "cluster add"
+        summary: >-
+          The vault root token is no longer passed explicitly through step options; it is read
+          automatically by Terragrunt via panfactum.hcl once written to region.secrets.yaml
+    description: >-
+      Previously, `pf cluster add` read `vault_token` from the in-memory config object and
+      injected it as a `VAULT_TOKEN` environment variable for every Terragrunt module deployment
+      across all setup steps (autoscaling, certificates, cluster extensions, inbound networking,
+      Linkerd, and Vault core resources). This required the CLI to carry a mutable config reference
+      and refresh it after Vault initialization so later steps could access the freshly-written
+      token. The `refreshConfig` helper and the `config` field on `InstallClusterStepOptions` have
+      been removed. Instead, `panfactum.hcl` now checks `local.vars.vault_token` first before
+      falling back to `pf-get-vault-token`, so once the token is persisted to `region.secrets.yaml`
+      it is picked up automatically by all subsequent Terragrunt invocations without any explicit
+      environment variable injection.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` now automates Vault SSO setup, deploying `authentik_vault_sso` and
+      `vault_auth_oidc` as resumable steps.
+    references:
+      - type: "internal-commit"
+        summary: "Vault SSO (#361)"
+        link: "cf2ef5abf90ba6c01e78276cdae63fd22bd54288"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "New 'Setup Vault SSO' step deploys authentik_vault_sso and vault_auth_oidc modules automatically"
+      - type: "iac-module"
+        component: "authentik_vault_sso"
+        summary: "Now deployed automatically by pf sso add with vault_name and vault_domain wired from region config"
+      - type: "iac-module"
+        component: "vault_auth_oidc"
+        summary: "Now deployed automatically by pf sso add with OIDC outputs wired from authentik_vault_sso"
+    description: >-
+      `pf sso add` now includes a "Setup Vault SSO" step that deploys both the `authentik_vault_sso`
+      and `vault_auth_oidc` IaC modules automatically. The step reads `kube_config_context` and
+      `vault_addr` from region config to populate module inputs, retrieves OIDC credentials from
+      `authentik_vault_sso` outputs, stores the client secret in a SOPS-encrypted `secrets.yaml`,
+      and wires the OIDC discovery URL, redirect URIs, and issuer into `vault_auth_oidc`. Once
+      complete, the static `vault_addr` entry is removed from region config since the permanent
+      address is now managed by the Vault module itself.
+  - type: "fix"
+    summary: >-
+      Fixes `panfactum.hcl` so that `pf-get-vault-token` no longer produces output when a local
+      Vault token is already configured.
+    description: >-
+      Previously, the `pf-get-vault-token` subprocess ran and produced output even when
+      `vault_token` was already set in the Panfactum config, causing unnecessary noise during
+      Terragrunt runs. The token retrieval command is now invoked with `--noop` whenever a local
+      token is present, silencing the output entirely.
+    references:
+      - type: "internal-commit"
+        summary: "silencing vault output"
+        link: "1ac42430c0dd1fc59d2f3b0aab851416fbe099dc"
+  - type: "fix"
+    summary: >-
+      Fixes `panfactum.hcl` to handle a missing or null `vault_token` in config without error.
+    references:
+      - type: "internal-commit"
+        summary: "using config.authentik_token vs module output"
+        link: "27cdbcf16525e9989430f33ef211b5a3f9e17560"
+    description: >-
+      The `use_local_vault_token` local in `panfactum.hcl` previously evaluated
+      `local.vars.vault_token != null && local.vars.vault_token != ""` directly, which would
+      throw a Terragrunt error if `vault_token` was absent from the config entirely. The
+      expression is now wrapped in `try(...)` so that a missing key gracefully falls back to
+      `false`, preventing spurious errors in environments where Vault SSO has already been
+      configured and `vault_token` is no longer stored in `region.secrets.yaml`.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` no longer requires manual `VAULT_TOKEN` injection and now reads
+      `authentik_token` from `region.secrets.yaml` via the config system.
+    references:
+      - type: "internal-commit"
+        summary: "using config.authentik_token vs module output"
+        link: "27cdbcf16525e9989430f33ef211b5a3f9e17560"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: >-
+          VAULT_TOKEN is no longer passed explicitly to Terragrunt invocations within pf sso add;
+          authentik_token is now read from region.secrets.yaml via getPanfactumConfig()
+    description: >-
+      Previously, `pf sso add` read the Vault root token from a SOPS-encrypted
+      `kube_vault/secrets.yaml` file at startup and injected it as a `VAULT_TOKEN` environment
+      variable for every Terragrunt module deployment in the Authentik and federated auth
+      workflows. The Authentik bootstrap token was also fetched redundantly from Terragrunt
+      outputs multiple times across different task steps. The command now fetches the bootstrap
+      token exactly once (during the ingress verification step) and writes it to
+      `region.secrets.yaml` as `authentik_token`, where it is subsequently read through the
+      standard `getPanfactumConfig()` merge. Vault tokens are no longer threaded manually
+      through module deployments in the SSO workflow, since `panfactum.hcl` picks them up
+      automatically from region config. The "Setup Vault SSO" step now also clears `vault_token`
+      from `region.secrets.yaml` upon completion, since static Vault credentials are no longer
+      needed after Vault OIDC is configured.
+  - type: "fix"
+    summary: >-
+      Fixes `panfactum.hcl` so that the Authentik provider token falls back to the
+      `AUTHENTIK_TOKEN` environment variable when not set in config.
+    references:
+      - type: "internal-commit"
+        summary: "fix: proper fallback for authentik provider & better input instructions"
+        link: "0e5d41b543b20f222ae7afa692e48d283216be37"
+    description: >-
+      Previously, the Authentik Terraform provider in `panfactum.hcl` would receive the sentinel
+      value `@@TERRAGRUNT_INVALID@@` for `authentik_token` when the key was absent from the
+      merged Panfactum config. It now falls back to the `AUTHENTIK_TOKEN` environment variable
+      before using the sentinel, allowing the provider to be configured in contexts where the
+      token is injected via the environment rather than written to a SOPS-encrypted config file.
+  - type: "improvement"
+    summary: >-
+      `pf sso add` federated auth environment selection prompt now uses clearer wording
+      and an explainer describing access levels.
+    references:
+      - type: "internal-commit"
+        summary: "fix: proper fallback for authentik provider & better input instructions"
+        link: "0e5d41b543b20f222ae7afa692e48d283216be37"
+    impacts:
+      - type: "cli"
+        component: "sso add"
+        summary: "Checkbox prompt for selecting security-hardened environments now includes an explainer and clearer label"
+    description: >-
+      The checkbox prompt that asks which environments to security-harden during federated auth
+      setup has been relabeled from "Select your production environment(s)" to "Select the
+      environment(s) you want to security harden:" with an added explainer: "All other
+      environments will grant users full access. This can be changed later." This makes the
+      intent and consequence of the selection clearer for first-time users.
