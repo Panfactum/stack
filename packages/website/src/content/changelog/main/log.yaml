@@ -706,13 +706,13 @@ changes:
   - type: improvement
     summary: >-
       `pf cluster install` now automates maintenance controllers deployment as a resumable step. After the
-      inbound networking step, the installer deploys Reloader, Node Image Cache Controller, PVC Autoresizer,
-      Descheduler, External Snapshotter, and Velero — each sub-step individually checkpointed so interrupted
-      installs can resume without restarting the entire maintenance controllers phase.
+      inbound networking step, the installer deploys Reloader, PVC Autoresizer, Descheduler, External
+      Snapshotter, and Velero — each sub-step individually checkpointed so interrupted installs can resume
+      without restarting the entire maintenance controllers phase.
     description: >-
       Previously, the maintenance controllers phase of cluster installation had to be completed manually
       or from scratch on retry. The installer now tracks each sub-step with fine-grained checkpoints
-      (deployReloader, deployNodeImageCaches, deployPvcAutoresizer, deployDescheduler,
+      (deployReloader, deployPvcAutoresizer, deployDescheduler,
       deployExternalSnapshotter, deployVelero) and skips steps that already completed, consistent with
       how Vault, cert manager, cert issuers, Linkerd, autoscaling, and inbound networking phases are handled.
     references:
@@ -722,9 +722,6 @@ changes:
     impacts:
       - type: iac-module
         component: kube_reloader
-        summary: Now deployed automatically by pf cluster install as a resumable sub-step
-      - type: iac-module
-        component: kube_node_image_cache_controller
         summary: Now deployed automatically by pf cluster install as a resumable sub-step
       - type: iac-module
         component: kube_pvc_autoresizer
@@ -1634,3 +1631,319 @@ changes:
       - type: iac-module
         component: aws_account
         summary: Quota increase resources are now gated on a count check so requests are only submitted when the current value is below the target
+  - type: fix
+    summary: >-
+      Fixes [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) NAT gateway AMI
+      lookups that were failing because the AMI date filter was stale (2024-01-25). The filter has been
+      updated to 2026-01-26, resolving AMI lookup failures during `apply`.
+    references:
+      - type: internal-commit
+        summary: "fix(production): restore production deployments after module errors"
+        link: 8bcb5e0be6c69d0be9a699df62e0f0461b8cccc6
+    impacts:
+      - type: iac-module
+        component: aws_vpc
+        summary: NAT gateway AMI date filter updated from 2024-01-25 to 2026-01-26 to fix lookup failure
+  - type: fix
+    summary: >-
+      Bumps the default OpenSearch version in [`kube_opensearch`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_opensearch)
+      from 3.0.0 to 3.2.0 to resolve a deploy error encountered with the previous default version.
+    references:
+      - type: internal-commit
+        summary: "fix(production): restore production deployments after module errors"
+        link: 8bcb5e0be6c69d0be9a699df62e0f0461b8cccc6
+    impacts:
+      - type: iac-module
+        component: kube_opensearch
+        summary: Default opensearch_version bumped from 3.0.0 to 3.2.0 to fix deploy error
+  - type: fix
+    summary: >-
+      Fixes pod scheduling failures in [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats)
+      by adding the `allowInsecureImages` flag required by the new NATS image manifest format.
+      Without this flag, pods were unable to be scheduled due to image manifest validation errors.
+    references:
+      - type: internal-commit
+        summary: "fix(production): restore production deployments after module errors"
+        link: 8bcb5e0be6c69d0be9a699df62e0f0461b8cccc6
+    impacts:
+      - type: iac-module
+        component: kube_nats
+        summary: Added allowInsecureImages flag to unblock pod scheduling with new NATS image manifest format
+  - type: breaking_change
+    summary: >-
+      The `kube_node_image_cache` and `kube_node_image_cache_controller` modules have been removed from
+      the Panfactum stack. The Kyverno policies backing the node image cache were overloading Kyverno in
+      production clusters and causing active stability issues. Users with active deployments of these
+      modules must destroy their infrastructure before upgrading.
+    description: >-
+      The node image cache system pre-pulled container images onto nodes to reduce pod startup latency.
+      In practice, the Kyverno-based implementation caused Kyverno to consume excessive resources in
+      production clusters, producing real stability issues that outweighed the startup latency benefit.
+      The feature has been removed entirely to improve cluster reliability.
+    action_items:
+      - "Destroy any active `kube_node_image_cache` module deployments before upgrading."
+      - "Destroy any active `kube_node_image_cache_controller` module deployments before upgrading."
+      - "Remove the module directories for `kube_node_image_cache` and `kube_node_image_cache_controller` from your Terragrunt configuration."
+    references:
+      - type: internal-commit
+        summary: "feat(infrastructure): remove node image cache system"
+        link: 525cdf8407c293a329a91221c91cc4eb73e2007b
+    impacts:
+      - type: iac-module
+        component: kube_node_image_cache
+        summary: Module removed entirely
+      - type: iac-module
+        component: kube_node_image_cache_controller
+        summary: Module removed entirely
+  - type: breaking_change
+    summary: >-
+      The `node_image_cached_enabled` and `node_image_cache_enabled` input variables have been removed
+      from all Panfactum IaC modules that previously exposed them. The `image_prepull_enabled` and
+      `image_pin_enabled` fields have been removed from container spec inputs in all workload modules
+      (`kube_pod`, `kube_deployment`, `kube_daemon_set`, `kube_stateful_set`, `kube_cron_job`, `kube_job`).
+      The `panfactum_node_image_cache_enabled` variable has been removed from `kube_policies`.
+      Any Terragrunt configuration setting these variables must remove them to avoid errors on next apply.
+    action_items:
+      - "Remove `node_image_cached_enabled` from any module configurations that set it (affected modules include `kube_airbyte`, `kube_alloy`, `kube_argo_event_bus`, `kube_authentik`, `kube_aws_ebs_csi`, `kube_cloudnative_pg`, `kube_gha_runners`, `kube_ingress_nginx`, `kube_linkerd`, `kube_monitoring`, `kube_nats`, `kube_opensearch`, `kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault`)."
+      - "Remove `node_image_cache_enabled` from any module configurations that set it."
+      - "Remove `image_prepull_enabled` and `image_pin_enabled` from all container spec blocks in `kube_pod`, `kube_deployment`, `kube_daemon_set`, `kube_stateful_set`, `kube_cron_job`, and `kube_job` module configurations."
+      - "Remove `panfactum_node_image_cache_enabled` from any `kube_policies` module configuration."
+    references:
+      - type: internal-commit
+        summary: "feat(infrastructure): remove node image cache system"
+        link: 525cdf8407c293a329a91221c91cc4eb73e2007b
+    impacts:
+      - type: iac-module
+        component: kube_airbyte
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_alloy
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_argo_event_bus
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_authentik
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_cloudnative_pg
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_gha_runners
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_linkerd
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_monitoring
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_nats
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_opensearch
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_pg_cluster
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_redis_sentinel
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_vault
+        summary: node_image_cached_enabled variable removed
+      - type: iac-module
+        component: kube_pod
+        summary: image_prepull_enabled and image_pin_enabled fields removed from container spec inputs
+      - type: iac-module
+        component: kube_deployment
+        summary: image_prepull_enabled and image_pin_enabled fields removed from container spec inputs
+      - type: iac-module
+        component: kube_daemon_set
+        summary: image_prepull_enabled and image_pin_enabled fields removed from container spec inputs
+      - type: iac-module
+        component: kube_stateful_set
+        summary: image_prepull_enabled and image_pin_enabled fields removed from container spec inputs
+      - type: iac-module
+        component: kube_cron_job
+        summary: image_prepull_enabled and image_pin_enabled fields removed from container spec inputs
+      - type: iac-module
+        component: kube_job
+        summary: image_prepull_enabled and image_pin_enabled fields removed from container spec inputs
+      - type: iac-module
+        component: kube_policies
+        summary: panfactum_node_image_cache_enabled variable removed
+  - type: fix
+    summary: >-
+      Image pulls for `kube_nats` and `kube_monitoring` are restored after Bitnami deprecated their
+      public `docker.io/bitnami/*` catalog on August 28, 2025. All affected image references have been
+      migrated to the `docker.io/bitnamilegacy/*` read-only fallback registry.
+    references:
+      - type: internal-commit
+        summary: "fix(infrastructure): migrate bitnami images to bitnamilegacy registry"
+        link: f3f6bd1ecffd9012a0af3fc0b6d58671a1314cd4
+      - type: external-docs
+        summary: "Bitnami deprecated their public docker.io/bitnami/* catalog — bitnamilegacy fallback info"
+        link: https://github.com/bitnami/bitnami-docker-archive
+    impacts:
+      - type: iac-module
+        component: kube_nats
+        summary: Helm image override updated to use bitnamilegacy/nats
+      - type: iac-module
+        component: kube_monitoring
+        summary: Helm image override updated to use bitnamilegacy/thanos
+  - type: improvement
+    summary: >-
+      The default Kubernetes version has been updated to 1.33 from 1.32. Bottlerocket AMI, all addon
+      Helm chart versions, and the `kubectl` Terraform provider have been updated to compatible releases.
+    action_items:
+      - "Review the [Kubernetes 1.33 changelog](https://kubernetes.io/blog/2025/04/23/kubernetes-v1-33-release/) for any deprecated APIs or behavior changes that affect your workloads."
+      - "If you pin `kube_version` explicitly in `aws_eks`, update it to `1.33`. Otherwise, re-apply `aws_eks` to trigger the upgrade."
+    references:
+      - type: internal-commit
+        summary: "feat(infrastructure): upgrade EKS default version to 1.33 with addon updates"
+        link: b5455f09eb40dd2fac7a7fafc40fc6bbfbac5121
+      - type: external-docs
+        summary: "Kubernetes v1.33: Octarine release announcement"
+        link: https://kubernetes.io/blog/2025/04/23/kubernetes-v1-33-release/
+      - type: external-docs
+        summary: "Amazon EKS Kubernetes 1.33 release notes"
+        link: https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions-standard.html
+    impacts:
+      - type: iac-module
+        component: aws_eks
+        summary: Default Kubernetes version updated to 1.33
+  - type: fix
+    summary: >-
+      The `kube_aws_ebs_csi` EBS CSI driver is pinned to Helm chart v2.45.1 to avoid a compatibility
+      breakage introduced in v2.46.0 on Kubernetes 1.33 clusters.
+    description: >-
+      `aws-ebs-csi-driver` Helm chart v2.46.0 cannot be installed on a default Kubernetes 1.33 cluster.
+      The chart has been pinned to v2.45.1 until an upstream fix is available. No user action is required.
+    references:
+      - type: internal-commit
+        summary: "feat(infrastructure): upgrade EKS default version to 1.33 with addon updates"
+        link: b5455f09eb40dd2fac7a7fafc40fc6bbfbac5121
+      - type: issue-report
+        summary: "Helm chart v2.46.0 cannot be installed on a default k8s 1.33 cluster"
+        link: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/issues/2574
+    impacts:
+      - type: iac-module
+        component: kube_aws_ebs_csi
+        summary: EBS CSI driver Helm chart version pinned to v2.45.1 for K8s 1.33 compatibility
+  - type: fix
+    summary: >-
+      `kube_descheduler` has been updated to use the `podProtections.defaultDisabled` API introduced in
+      descheduler v0.35.x, replacing the deprecated flat eviction flags (`evictSystemCriticalPods`,
+      `evictFailedBarePods`, `evictLocalStoragePods`).
+    description: >-
+      Descheduler v0.35.x changed the `DefaultEvictor` plugin API. The previously used flat boolean flags
+      were consolidated into a `podProtections.defaultDisabled` array. Panfactum has migrated the internal
+      configuration automatically. No user action is required.
+    references:
+      - type: internal-commit
+        summary: "feat(infrastructure): upgrade EKS default version to 1.33 with addon updates"
+        link: b5455f09eb40dd2fac7a7fafc40fc6bbfbac5121
+      - type: external-docs
+        summary: "Descheduler v0.35.0 release — adds PodProtections for DefaultEvictorArgs"
+        link: https://github.com/kubernetes-sigs/descheduler/releases/tag/v0.35.0
+    impacts:
+      - type: iac-module
+        component: kube_descheduler
+        summary: DefaultEvictor config migrated from flat flags to podProtections.defaultDisabled array
+  - type: fix
+    summary: >-
+      `kube_ingress_nginx` restores the `annotations-risk-level` setting to `Critical` after
+      ingress-nginx chart v4.12.x changed the default from `Critical` to `High`, which silently
+      rejected snippet-based annotations used by the `kube_ingress` module.
+    description: >-
+      The ingress-nginx chart v4.12.x lowered the default `annotations-risk-level` from `Critical` to
+      `High`. This silently blocked the configuration-snippet annotations that Panfactum's `kube_ingress`
+      module relies on. The setting is now explicitly pinned to `Critical` in `kube_ingress_nginx` to
+      preserve snippet support. No user action is required.
+    references:
+      - type: internal-commit
+        summary: "feat(infrastructure): upgrade EKS default version to 1.33 with addon updates"
+        link: b5455f09eb40dd2fac7a7fafc40fc6bbfbac5121
+      - type: issue-report
+        summary: "After upgrade to 4.12 version there is strange error appeared: annotation group StreamSnippet contains risky annotation"
+        link: https://github.com/kubernetes/ingress-nginx/issues/12656
+    impacts:
+      - type: iac-module
+        component: kube_ingress_nginx
+        summary: annotations-risk-level explicitly set to Critical to preserve snippet annotation support
+      - type: iac-module
+        component: kube_ingress
+        summary: Snippet-based annotations restored after ingress-nginx 4.12.x default change
+  - type: improvement
+    summary: >-
+      The default Authentik Helm chart version in [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+      has been bumped from 2024.8.4 to 2024.10.5, picking up two minor releases worth of upstream fixes and improvements.
+    references:
+      - type: internal-commit
+        summary: "chore(kube_authentik): bump default Authentik helm chart to 2024.10.5"
+        link: 1ab7f7d7f223bd1cfd73d4c8fcd09d5d22b3dde0
+      - type: external-docs
+        summary: "Authentik 2024.10 release notes"
+        link: https://docs.goauthentik.io/releases/2024.10/
+    impacts:
+      - type: iac-module
+        component: kube_authentik
+        summary: Default Helm chart version updated from 2024.8.4 to 2024.10.5
+  - type: fix
+    summary: >-
+      The Panfactum DevShell now unsets the `CI` environment variable instead of setting it to `"false"`.
+      Many tools (e.g. npm, Jest) check for the presence of `CI`, not its value, so `CI="false"` caused
+      them to behave as if running in a CI environment — disabling interactivity and altering output formatting.
+    references:
+      - type: internal-commit
+        summary: "fix(devshell): unset CI instead of setting it to \"false\""
+        link: 9bdb249fe7b0b7d439d1601737fe8336f785fa58
+    impacts:
+      - type: devshell
+        component: enter-shell-local
+        summary: CI is now unset on shell entry instead of being set to "false"
+  - type: improvement
+    summary: >-
+      The default BuildKit image version in `kube_buildkit` has been upgraded from v0.18.1 to v0.28.1,
+      bringing 10 minor releases worth of improvements to cache efficiency, garbage collection, and
+      Dockerfile frontend features.
+    references:
+      - type: internal-commit
+        summary: "feat(buildkit): upgrade BuildKit from v0.18.1 to v0.28.1"
+        link: 7f7db1fa18e34e7751bfbd47b60f9ad8330385e2
+    impacts:
+      - type: iac-module
+        component: kube_buildkit
+        summary: Default BuildKit image version updated from v0.18.1-rootless to v0.28.1-rootless
+  - type: improvement
+    summary: >-
+      The DevShell now ships OpenTofu 1.9.1 (upgraded from 1.8.x) and Terragrunt 0.78.2 via an updated
+      nixos-25.05 nixpkgs pin. OpenTofu 1.9 adds provider `for_each` and the `-exclude` flag for `plan`
+      and `apply`. The `terraform_version_constraint` in `panfactum.hcl` has been updated to `~> 1.9`.
+    description: >-
+      Provider `for_each` allows a single provider block to be instantiated multiple times (e.g., one
+      AWS provider per account) without repetitive configuration. The `-exclude` flag lets you skip
+      specific resources during a `plan` or `apply` without modifying your configuration files.
+      The nixpkgs pin was previously from December 2024; moving to nixos-25.05 reduces the accumulated
+      upgrade cost and keeps devshell tooling closer to current upstream releases.
+    references:
+      - type: internal-commit
+        summary: "build(tooling): upgrade OpenTofu 1.8→1.9 via nixos-25.05 nixpkgs pin"
+        link: e9738e4241e1e2925e18e419125b4d56fe5086c3
+      - type: external-docs
+        summary: "OpenTofu 1.9.0 release announcement — provider for_each"
+        link: https://opentofu.org/blog/opentofu-1-9-0/
+    impacts:
+      - type: devshell
+        component: tofu
+        summary: Upgraded from 1.8.x to 1.9.1; adds provider for_each and -exclude flag
+      - type: devshell
+        component: terragrunt
+        summary: Upgraded to 0.78.2 via nixos-25.05 nixpkgs pin

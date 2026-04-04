@@ -22,8 +22,9 @@ Manage structured changelog entries for the Panfactum stack's main (unreleased) 
    2. Does the user want to validate the changelog? → **ValidateChangelog**
    3. Does the user want to generate a release summary? → **GenerateSummary**
    4. Does the user want to generate upgrade instructions? → **GenerateUpgradeInstructions**
-   5. Does the user want to list current changes? → Run `./scripts/list-changes.ts` directly
-   6. When in doubt: Ask the user which action they want
+   5. Does the user want to condense or merge related entries? → **CondenseEntries**
+   6. Does the user want to list current changes? → Run `./scripts/list-changes.ts` directly
+   7. When in doubt: Ask the user which action they want
 
 5. **Execute workflow**: Report "Running <workflow-name> using the changelog skill..." Read and follow the selected workflow completely.
 
@@ -37,6 +38,7 @@ Manage structured changelog entries for the Panfactum stack's main (unreleased) 
 | [ValidateChangelog](./workflows/ValidateChangelog.md) | "validate", "check", "verify", "review" | Developer wants to check changelog completeness and correctness |
 | [GenerateSummary](./workflows/GenerateSummary.md) | "summarize", "summary", "highlights", "release", "compile" | Preparing a release — generate summary and highlights from changes |
 | [GenerateUpgradeInstructions](./workflows/GenerateUpgradeInstructions.md) | "upgrade", "instructions", "migration" | Developer wants to generate or update upgrade instructions from breaking changes |
+| [CondenseEntries](./workflows/CondenseEntries.md) | "condense", "merge", "collapse", "consolidate", "deduplicate", "reduce" | Developer wants to merge related or redundant entries into consolidated ones |
 
 ## Reference
 
