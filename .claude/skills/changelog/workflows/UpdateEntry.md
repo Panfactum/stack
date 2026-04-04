@@ -59,9 +59,7 @@ For each changed file path, apply the heuristics below to produce suggested `imp
 |---------------------------|-------------|----------------------|
 | `packages/infrastructure/<name>/` | `iac-module` | Directory name (e.g., `aws_eks`) |
 | `packages/cli/src/commands/<path>/` | `cli` | Derived from the command's subcommand path (e.g., `buildkit build`) |
-| `packages/nix/localDevShell/scripts/<name>.sh` | `devshell` | Filename without `.sh` (e.g., `pf-buildkit-build`) |
 | `packages/nix/packages/scripts/<name>.sh` | `devshell` | Filename without `.sh` |
-| Config files at repo root or `environments/` | `configuration` | Filename (e.g., `panfactum.yaml`) |
 
 Files that do not match any pattern should be noted but do not automatically produce a component suggestion.
 
