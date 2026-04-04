@@ -19,6 +19,7 @@ import {
   FiGitCommit,
   FiMessageCircle,
   FiPlusCircle,
+  FiRefreshCw,
   FiTrendingUp,
   FiXCircle,
 } from "solid-icons/fi";
@@ -41,7 +42,8 @@ type ChangeType =
   | "fix"
   | "improvement"
   | "addition"
-  | "deprecation";
+  | "deprecation"
+  | "update";
 
 type ImpactType =
   | "iac-module"
@@ -100,6 +102,7 @@ const CHANGE_TYPE_ORDER: ChangeType[] = [
   "breaking_change",
   "deprecation",
   "addition",
+  "update",
   "improvement",
   "fix",
 ];
@@ -130,6 +133,11 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, ChangeTypeConfig> = {
     label: "Improvement",
     colorClass: "text-brand-300",
     icon: () => <FiTrendingUp size={16} />,
+  },
+  update: {
+    label: "Update",
+    colorClass: "text-brand-300",
+    icon: () => <FiRefreshCw size={16} />,
   },
   fix: {
     label: "Fix",

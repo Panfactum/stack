@@ -9,6 +9,7 @@ import {
   FiClock,
   FiGitBranch,
   FiPlusCircle,
+  FiRefreshCw,
   FiTrendingUp,
   FiXCircle,
 } from "solid-icons/fi";
@@ -23,7 +24,8 @@ type ChangeType =
   | "fix"
   | "improvement"
   | "addition"
-  | "deprecation";
+  | "deprecation"
+  | "update";
 
 interface ChangeItem {
   type: ChangeType;
@@ -82,6 +84,11 @@ const ICON_CONFIG: Record<
     colorClass: "text-warning-400",
     icon: () => <FiClock size={16} />,
   },
+  update: {
+    label: "Updates",
+    colorClass: "text-brand-300",
+    icon: () => <FiRefreshCw size={16} />,
+  },
   skip: {
     label: "Skipped Release",
     colorClass: "text-gray-dark-mode-400",
@@ -112,6 +119,7 @@ const computeTypeCounts = (entry: ChangelogListEntry): TypeCount[] => {
     "breaking_change",
     "deprecation",
     "addition",
+    "update",
     "improvement",
     "fix",
   ];

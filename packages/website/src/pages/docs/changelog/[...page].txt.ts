@@ -53,6 +53,7 @@ function stripMdxComments(mdx: string): string {
 const CHANGE_TYPE_ORDER = [
   "breaking_change",
   "addition",
+  "update",
   "improvement",
   "fix",
   "deprecation",
@@ -61,6 +62,7 @@ const CHANGE_TYPE_ORDER = [
 const CHANGE_TYPE_HEADINGS: Record<string, string> = {
   breaking_change: "Breaking Changes",
   addition: "Additions",
+  update: "Version Updates",
   improvement: "Improvements",
   fix: "Fixes",
   deprecation: "Deprecations",

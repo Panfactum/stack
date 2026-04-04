@@ -40,6 +40,7 @@ These conventions are not captured in the schema but are important for consisten
 - **Be specific in summaries** — vague entries like "Fixes a bug" are unhelpful. Name the component and describe the symptom or effect.
 - **One logical change per entry** — if a diff contains two unrelated fixes, create two separate entries
 - **All change types can have `action_items`** — include them whenever the change requires user action. Required for `breaking_change`; recommended for any type where users need to do something.
+- **Use `update` for version updates to third-party tooling** — when the change is primarily bumping the version of an external dependency (e.g., upgrading Cilium, cert-manager, Linkerd, OpenTofu, etc.), use the `update` type. Include `references` linking to the upstream release notes or changelog.
 - **All change types SHOULD have `references` whenever possible** — link relevant issues, commits, or docs. Use Exa search tools to find references before concluding none exist.
 - **`description` explains the why** — the summary says *what* changed; the description explains the motivation, how it benefits the user, and how it aligns with the short-term and long-term project direction. Include when the change benefits from more context.
 

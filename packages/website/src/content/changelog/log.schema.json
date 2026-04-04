@@ -49,7 +49,8 @@
               "fix",
               "improvement",
               "addition",
-              "deprecation"
+              "deprecation",
+              "update"
             ],
             "description": "The category of change."
           },

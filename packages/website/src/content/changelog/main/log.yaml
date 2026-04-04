@@ -791,7 +791,7 @@ changes:
   description: The `aws.secondary` provider alias and cross-region DynamoDB replica have been removed from [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources).
     Any module configuration that includes a secondary AWS provider alias must remove it to avoid a Terraform error on next
     apply.
-- type: improvement
+- type: update
   summary: Updates `kube_logging` to Loki 6.29.0, sets `max-locked-memory` unlimited in `kube_node_settings`, and drops high-cardinality
     labels in `kube_alloy`.
   references:
@@ -1444,7 +1444,7 @@ changes:
     a `podProtections.defaultDisabled` array. (3) Ingress-nginx v4.12.x lowered the default `annotations-risk-level` from
     `Critical` to `High`, blocking `configuration-snippet` annotations; the setting is now explicitly pinned to `Critical`.
     No user action is required for the compatibility fixes.
-- type: improvement
+- type: update
   summary: The default Authentik Helm chart version in [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
     has been bumped from 2024.8.4 to 2024.10.5, picking up two minor releases
   references:
@@ -1474,7 +1474,7 @@ changes:
   description: The Panfactum DevShell now unsets the `CI` environment variable instead of setting it to `"false"`. Many tools
     (e.g. npm, Jest) check for the presence of `CI`, not its value, so `CI="false"` caused them to behave as if running in
     a CI environment — disabling interactivity and altering output formatting.
-- type: improvement
+- type: update
   summary: The default BuildKit image version in `kube_buildkit` has been upgraded from v0.18.1 to v0.28.1, bringing 10 minor
     releases worth of
   references:
@@ -1501,7 +1501,7 @@ changes:
   - type: cli
     component: cluster add
     summary: Initial superuser IAM principal ARN now correctly set during EKS cluster deployment
-- type: improvement
+- type: update
   summary: The DevShell now ships OpenTofu 1.9.1 (upgraded from 1.8.x) and Terragrunt 0.78.2 via an updated nixos-25.05 nixpkgs
     pin. OpenTofu 1.9
   description: Provider `for_each` allows a single provider block to be instantiated multiple times (e.g., one AWS provider
@@ -3561,7 +3561,7 @@ changes:
     regardless of age, or applying complex multi-rule policies. The new `lifecycle_policy_json` field accepts a raw JSON string
     (matching the AWS ECR lifecycle policy format) and, when set, replaces the module-generated policy entirely. Existing
     repositories that do not set this field continue to behave exactly as before.
-- type: improvement
+- type: update
   summary: The Panfactum DevShell now ships Node.js v25, upgraded from v22.
   references:
   - type: internal-commit
@@ -3591,7 +3591,7 @@ changes:
     entry-point and `loadEnv.sh` now export the new `TG_*` names; `pf-tf-init` calls `terragrunt init --all` and `terragrunt
     run --all -- providers lock`; and `wf_tf_deploy`''s `deploy.sh` calls `terragrunt apply --all --queue-exclude-external`.
     Re-apply `wf_tf_deploy` and re-run `pf-tf-init` to pick up the updated scripts.'
-- type: improvement
+- type: update
   summary: All `authentik_*` modules updated to `goauthentik/authentik` 2024.10.2 and `authentik_aws_sso` adds SAML `invalidation_flow`.
   references:
   - type: internal-commit
@@ -3630,7 +3630,7 @@ changes:
   description: Previously `ds-generate-changelog-schemas` generated both `log.schema.json` and `metadata.schema.json`. The
     metadata schema is static — it has no dynamic enum values derived from the filesystem — so generating it programmatically
     added complexity with no benefit. The metadata schema is now owned by the separate `ds-validate-iac-metadata` tool.
-- type: improvement
+- type: update
   summary: OpenTofu provider versions upgraded across all IaC modules, including major-version bumps for the AWS (5.x→6.x)
     and Helm (2.x→3.x) providers.
   references:
@@ -3707,7 +3707,7 @@ changes:
     component: flake.nix
     summary: '`panfactumPackages` call corrected to `panfactumPackages true` and `usrBinEnv` added to image contents so `/usr/bin/env`
       is available inside the container'
-- type: improvement
+- type: update
   summary: The bastion host image is upgraded from `debian:bookworm` to `debian:trixie` for a newer OpenSSH with up-to-date
     security patches.
   references:

@@ -318,6 +318,7 @@ function buildLogSchema(
                 "improvement",
                 "addition",
                 "deprecation",
+                "update",
               ],
               description: "The category of change.",
             },

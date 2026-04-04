@@ -51,7 +51,7 @@ For each merge set, record:
 
 For each merge set, draft a single replacement entry by combining the source entries:
 
-- **`type`**: Use the most significant type. Priority: `breaking_change` > `deprecation` > `addition` > `improvement` > `fix`. If the set includes a `breaking_change`, the merged entry is a `breaking_change`.
+- **`type`**: Use the most significant type. Priority: `breaking_change` > `deprecation` > `addition` > `update` > `improvement` > `fix`. If the set includes a `breaking_change`, the merged entry is a `breaking_change`.
 - **`summary`**: Write a new summary that covers the full scope of the merged change. Keep it from the end user's perspective — focus on the net effect, not the development journey. Use `>-` block scalar style for multi-line values.
 - **`description`**: Combine descriptions where present. If only some source entries had descriptions, keep the most informative one and incorporate key details from the others. Omit if no source entry had a description.
 - **`action_items`**: Union of all action items from source entries, deduplicated. Remove items that are superseded by later fixes (e.g., "use variable X" when a later fix renamed it to Y — keep only Y).

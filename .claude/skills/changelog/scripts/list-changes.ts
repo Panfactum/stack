@@ -78,6 +78,7 @@ function main(): void {
   const KNOWN_TYPES = [
     "breaking_change",
     "addition",
+    "update",
     "fix",
     "improvement",
     "deprecation",

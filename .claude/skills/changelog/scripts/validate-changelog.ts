@@ -107,8 +107,8 @@ function validateChange(change: Change, index: number): Finding[] {
     });
   }
 
-  // Check: breaking_change and fix entries SHOULD have impacts
-  if (changeType === "breaking_change" || changeType === "fix") {
+  // Check: breaking_change, fix, and update entries SHOULD have impacts
+  if (changeType === "breaking_change" || changeType === "fix" || changeType === "update") {
     const hasImpacts =
       Array.isArray(change.impacts) && change.impacts.length > 0;
     if (!hasImpacts) {

@@ -29,7 +29,7 @@ const changes = defineCollection({
     upgrade_instructions: z.string().regex(/\.mdx$/).optional(),
     highlights: z.array(z.string()).optional(),
     changes: z.array(z.object({
-      type: z.enum(["breaking_change", "fix", "improvement", "addition", "deprecation"]),
+      type: z.enum(["breaking_change", "fix", "improvement", "addition", "deprecation", "update"]),
       summary: z.string(),
       description: z.string().optional(),
       action_items: z.array(z.string()).optional(),

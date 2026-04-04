@@ -69,7 +69,7 @@ After mapping, cross-reference the suggested component names against the valid e
 
 Analyze the diffs and group them into logical changes. Each logical change becomes one entry. Apply these rules:
 
-- **Change type** — Choose from: `breaking_change`, `fix`, `improvement`, `addition`, `deprecation`. Base the choice on the nature of the diff (new files → `addition`, bug fixes → `fix`, removed/renamed public interfaces → `breaking_change`, etc.).
+- **Change type** — Choose from: `breaking_change`, `fix`, `improvement`, `addition`, `deprecation`, `update`. Base the choice on the nature of the diff (new files → `addition`, bug fixes → `fix`, removed/renamed public interfaces → `breaking_change`, version updates to third-party tooling → `update`, etc.).
 - **Summary** — Write a one-to-two sentence description from the end user's perspective. Be specific — name the component and describe the observable effect.
 - **Impacts** — Include the `type` and `component` pairs from Step 3, with a brief `summary` per impact.
 - **action_items** — Include whenever the change requires user action (required for `breaking_change`, recommended for any type where users need to do something). Infer the steps from the diff. If the steps are unclear, write your best guess based on what was removed/renamed/changed.
