@@ -25,7 +25,10 @@ Manage structured changelog entries for the Panfactum stack's main (unreleased) 
    5. Does the user want to condense or merge related entries? → **CondenseEntries**
    6. Does the user want to enhance, improve, or polish a single entry? → **EnhanceEntry**
    7. Does the user want to list current changes? → Run `./scripts/list-changes.ts` directly
-   8. When in doubt: Ask the user which action they want
+   8. Does the user want to list change IDs? → Run `./scripts/list-change-ids.ts` directly
+   9. Does the user want to show a specific change by ID? → Run `./scripts/show-change.ts <id>` directly
+   10. Does the user want to update a specific change by ID? → Run `./scripts/update-change.ts <id> field=value` directly
+   11. When in doubt: Ask the user which action they want
 
 5. **Execute workflow**: Report "Running <workflow-name> using the changelog skill..." Read and follow the selected workflow completely.
 

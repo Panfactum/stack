@@ -6,7 +6,8 @@ highlights:
   - "Node-local image caching now enabled by default in Panfactum submodules"
   - "New `pg_wal_keep_size_gb` and `s3_bucket_access_policy` inputs for `kube_pg_cluster`"
 changes:
-  - type: addition
+  - id: f2311994-2d49-47ac-a9dd-ea10f19f3ba8
+    type: addition
     summary: >-
       Adds
       [`authentik_atlas_mongodb_sso`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
@@ -20,7 +21,8 @@ changes:
       - type: iac-module
         component: mongodb_atlas_identity_provider
         summary: New module for MongoDB Atlas identity provider configuration
-  - type: addition
+  - id: e1b437d0-be33-4bc9-bb32-fb11653ba32f
+    type: addition
     summary: >-
       Adds [`authentik_github_sso`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_github_sso)
       module for setting up Authentik SSO with GitHub.
@@ -28,7 +30,8 @@ changes:
       - type: iac-module
         component: authentik_github_sso
         summary: New module for Authentik SSO integration with GitHub
-  - type: addition
+  - id: 5b75541e-c513-4f01-aaa8-8bc6203c1b8f
+    type: addition
     summary: >-
       Adds new inputs to
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) for configuring
@@ -40,10 +43,12 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: New pg_wal_keep_size_gb and s3_bucket_access_policy inputs
-  - type: improvement
+  - id: e56d499c-8791-46fa-9c12-9b3c13588e65
+    type: improvement
     summary: >-
       Node-local image caching is now enabled by default in Panfactum submodules.
-  - type: fix
+  - id: 8b184c73-73e6-470f-94e2-73debdb6523c
+    type: fix
     summary: >-
       Fixes the service account name not being set for event source pods in
       [`kube_argo_event_source`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source).

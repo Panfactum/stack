@@ -8,7 +8,8 @@ highlights:
   - "New single-platform image support and skip-if-exists logic in `wf_dockerfile_build`"
   - "New `min_node_cpu` input for `kube_karpenter_node_pools`"
 changes:
-  - type: improvement
+  - id: 68526f69-504a-4519-8cff-6bcdae7e94bd
+    type: improvement
     summary: >-
       [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) now
       has faster retry logic for failed builds, and the retry count is configurable via `retry_max_attempts`.
@@ -16,7 +17,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Faster retry logic and configurable retry_max_attempts added
-  - type: addition
+  - id: 3e7fbb88-010f-4a45-b2aa-5efddc04a34f
+    type: addition
     summary: >-
       Adds `min_node_cpu` to
       [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
@@ -25,7 +27,8 @@ changes:
       - type: iac-module
         component: kube_karpenter_node_pools
         summary: New min_node_cpu input for minimum node CPU threshold
-  - type: addition
+  - id: 148bb62c-461b-4424-9d90-165baed1736d
+    type: addition
     summary: >-
       Provides the capability to configure many JetStream Stream settings in
       [`kube_argo_event_bus`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus).
@@ -33,7 +36,8 @@ changes:
       - type: iac-module
         component: kube_argo_event_bus
         summary: New JetStream Stream configuration options available
-  - type: addition
+  - id: 4613b2f3-3181-4d93-b9f0-bef375fb9574
+    type: addition
     summary: >-
       Adds support for single-platform images in
       [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
@@ -41,7 +45,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Single-platform image builds now supported
-  - type: addition
+  - id: 0499f62f-85bc-4212-9bbb-4af206ed3877
+    type: addition
     summary: >-
       Adds support for restoring from an alternate backup bucket in
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
@@ -49,7 +54,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Can now restore from an alternate backup bucket
-  - type: addition
+  - id: 6455639d-2b4e-4f75-bdd9-20cbb02ef3ea
+    type: addition
     summary: >-
       Adds support for unrestricted S3 presigned URLs in
       [`kube_sa_auth_aws`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws).
@@ -57,7 +63,8 @@ changes:
       - type: iac-module
         component: kube_sa_auth_aws
         summary: Unrestricted S3 presigned URL support added
-  - type: fix
+  - id: dd943ab1-8439-4064-9f25-a745b26da63d
+    type: fix
     summary: >-
       Event streams in
       [`kube_argo_event_bus`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
@@ -70,12 +77,11 @@ changes:
       - type: iac-module
         component: kube_argo_event_bus
         summary: Event streams now properly replicated across all NATS servers
-  - type: fix
+  - id: 8f844a31-b563-4138-8b69-7ab5272b9d44
+    type: fix
     summary: >-
-      Resolves issue in
-      [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) that prevented ACKs
-      from being sent when synchronously publishing events in some cases, which could result in an inability to
-      publish events at all until the publisher or NATS server was restarted.
+      Resolves issue in [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats)
+      that prevented ACKs from being sent when synchronously publishing events in some cases, which could result
     references:
       - type: issue-report
         summary: "NATS ACK failures during synchronous event publishing"
@@ -84,7 +90,8 @@ changes:
       - type: iac-module
         component: kube_nats
         summary: Fixed ACK bug that could block event publishing entirely
-  - type: fix
+  - id: eda6f1c4-e000-4ac0-8378-dcd78626ee13
+    type: fix
     summary: >-
       Resolves issue in
       [`kube_argo`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) that prevented resources
@@ -97,19 +104,20 @@ changes:
       - type: iac-module
         component: kube_argo
         summary: Argo Events resources now update without controller restart
-  - type: fix
+  - id: f1ba5203-a6fd-4135-8dac-ee1a06c4a4da
+    type: fix
     summary: >-
       Fixes the nix version check to account for the new version format provided by the Determinate Systems installer.
     references:
       - type: issue-report
         summary: "Nix version check fails with Determinate Systems installer format"
         link: https://github.com/Panfactum/stack/issues/312
-  - type: fix
+  - id: 554d0e27-d027-4c54-8c96-ac405fa7cd00
+    type: fix
     summary: >-
       Fixes a problem in
       [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
-      that caused the workflow to fail if the image already existed in the ECR repository. The workflow now skips
-      the build step if the image already exists.
+      that caused the workflow to fail if the image already existed in the ECR repository.
     references:
       - type: issue-report
         summary: "wf_dockerfile_build fails when image already exists in ECR"
@@ -118,7 +126,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Build now skipped when image already exists in ECR
-  - type: fix
+  - id: 18b77526-8da1-4f59-98a6-6f3e03e98111
+    type: fix
     summary: >-
       Velero backup logs are now available in the `velero` CLI.
     impacts:

@@ -6,25 +6,28 @@ highlights:
   - "New `pg_shutdown_timeout` input for [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
   - "Fixed graceful shutdown for PostgreSQL clusters on spot instances"
 changes:
-  - type: addition
+  - id: 1ecbd8f6-9c32-4eb7-a4b2-c6061b960b4d
+    type: addition
     summary: >-
-      New [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for deploying
-      the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
-      namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
-      the module as a part of the foundational Stack.
-  - type: addition
+      New [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module
+      for deploying the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize
+      ConfigMaps and Secrets across namespaces. Created a [new guide
+  - id: 0e408112-af3e-4c49-9f34-7a5076020b90
+    type: addition
     summary: >-
-      `pg_shutdown_timeout` variable added to [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-      to control how long the postgres instances will wait for active connections to close before shutting down.
+      `pg_shutdown_timeout` variable added to
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to
+      control how long the postgres instances will wait for active connections to close before
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: "New pg_shutdown_timeout variable added"
-  - type: fix
+  - id: 5dce351b-e533-4012-b874-ca4594f7c092
+    type: fix
     summary: >-
       Fixed an issue where simultaneous, graceful shutdown of all postgres nodes in a
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-      would cause unnecessary downtime when the primary was running on a spot instance.
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) would
+      cause unnecessary downtime when the
     impacts:
       - type: iac-module
         component: kube_pg_cluster

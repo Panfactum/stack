@@ -9,6 +9,11 @@ if [[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]]; then
   exit 0
 fi
 
+# Only lint files inside the project directory
+if [[ "$FILE_PATH" != "$CLAUDE_PROJECT_DIR"/* ]]; then
+  exit 0
+fi
+
 # Convert to relative path from project root for path-based matching
 REL_PATH="${FILE_PATH#"$CLAUDE_PROJECT_DIR"/}"
 

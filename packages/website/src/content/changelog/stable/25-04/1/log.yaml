@@ -4,7 +4,8 @@ summary: "Fixes the default value for min_node_cpu of kube_karpenter_node_pools 
 highlights:
   - "Fixed `min_node_cpu` default in `kube_karpenter_node_pools` to prevent deployment errors"
 changes:
-  - type: fix
+  - id: 36ebb141-b1fd-4c54-a719-03005bcb7f2b
+    type: fix
     summary: >-
       Fixes the default value for `min_node_cpu` of
       [`kube_karpenter_node_pools`](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)

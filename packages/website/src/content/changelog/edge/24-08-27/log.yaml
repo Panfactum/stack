@@ -6,17 +6,18 @@ highlights:
   - "Added native backup restoration support to [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
   - "New databases now get an immediate base backup on creation"
 changes:
-  - type: breaking_change
+  - id: b52a79e4-2469-43fb-87ca-23fdc8f4c2c2
+    type: breaking_change
     summary: >-
       The ability to disable S3 backups in
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has been removed.
-      Backups have an extremely low cost impact, significantly improve data durability, and improve automatic recovery
-      during failover events. The risk of misuse outweighed the potential benefits of allowing them to be disabled.
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has
+      been removed. Backups have an extremely low cost impact, significantly improve
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: S3 backup disable option removed; backups now mandatory
-  - type: addition
+  - id: 2f5fe39e-b3bf-4694-9f49-17ecedc0a19c
+    type: addition
     summary: >-
       Added native support for restoring from database backups to the
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) submodule.
@@ -24,28 +25,30 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Native backup restoration support added
-  - type: addition
+  - id: 0b0e1075-ecb7-4ead-b163-8395d057c3ee
+    type: addition
     summary: >-
       Added automatic creation of an immediate base backup for new databases in
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to ensure
-      new databases can be recovered all the way back to their point of creation.
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to
+      ensure new databases can be recovered
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: Immediate base backup created on new database creation
-  - type: fix
+  - id: 42410359-3b8b-4ad4-89fc-8d86232945c2
+    type: fix
     summary: >-
-      Mitigated a rare scenario where disruption in the middle of a database failover would result in
-      PostgreSQL databases being unable to restart without manual intervention in
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+      Mitigated a rare scenario where disruption in the middle of a database failover would result in PostgreSQL
+      databases being unable
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: Fixed restart failure during mid-failover disruption
-  - type: fix
+  - id: 2d767238-55a1-4e01-8834-2cf1494e94b8
+    type: fix
     summary: >-
-      Fixed an issue where `pf-get-repo-variables` would provide the wrong directory for the repository root
-      when run inside a downloaded `.terragrunt-cache` directory.
+      Fixed an issue where `pf-get-repo-variables` would provide the wrong directory for the repository root when
+      run inside a downloaded `.terragrunt-cache`
     references:
       - type: issue-report
         summary: "pf-get-repo-variables returns wrong directory in .terragrunt-cache"

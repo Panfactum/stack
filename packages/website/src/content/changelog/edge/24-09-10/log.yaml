@@ -7,19 +7,22 @@ highlights:
   - "`ports` input moved to container-level in [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)"
   - "New [`kube_service`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service) submodule for optimized Kubernetes Services"
 changes:
-  - type: breaking_change
+  - id: 00349790-35ce-4bfe-ba5a-79953fb33c67
+    type: breaking_change
     summary: >-
-      Karpenter has updated its CRD specification which requires manual intervention during upgrade.
-      See upgrade instructions for the required state manipulation commands.
+      Karpenter has updated its CRD specification which requires manual intervention during upgrade. See upgrade
+      instructions for the required state manipulation
     impacts:
       - type: iac-module
         component: kube_karpenter
         summary: CRD specification updated; requires manual state manipulation
-  - type: breaking_change
+  - id: bef81fc9-5196-4bed-b3c9-8efce6bca9d1
+    type: breaking_change
     summary: >-
-      The `ports` input on [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
-      and [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been
-      moved to a container-level field rather than a top-level field to better align with the Kubernetes API.
+      The `ports` input on
+      [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and
+      [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has
+      been moved to a container-level field rather than a top-level field to
     impacts:
       - type: iac-module
         component: kube_deployment
@@ -27,12 +30,13 @@ changes:
       - type: iac-module
         component: kube_stateful_set
         summary: Ports input moved from top-level to container-level
-  - type: addition
+  - id: c87e55d8-1119-4639-8830-1a19a9a84356
+    type: addition
     summary: >-
       Adds a new submodule,
       [`kube_service`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for defining
-      Kubernetes Services optimized for the Panfactum Stack. Also integrated into `kube_deployment` and `kube_stateful_set`
-      for automatic Service creation.
+      Kubernetes Services optimized for the Panfactum Stack. Also integrated into `kube_deployment` and
+      `kube_stateful_set`
     impacts:
       - type: iac-module
         component: kube_service
@@ -43,7 +47,8 @@ changes:
       - type: iac-module
         component: kube_stateful_set
         summary: Integrated automatic Service creation via kube_service
-  - type: addition
+  - id: 11d3a1af-a33b-4a2a-94e7-6ffff2884787
+    type: addition
     summary: >-
       Adds `extra_storage_classes` input to the
       [`kube_aws_ebs_csi`](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module.
@@ -51,7 +56,8 @@ changes:
       - type: iac-module
         component: kube_aws_ebs_csi
         summary: Added extra_storage_classes input for custom storage classes
-  - type: fix
+  - id: 856d396a-3555-444d-b8fe-fe8e6f01a562
+    type: fix
     summary: >-
       Addressed issue in [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
       where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
@@ -63,7 +69,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Fixed Vault-created credentials lacking non-public schema access
-  - type: fix
+  - id: acee4c22-d89d-4906-92cf-b894db50daa7
+    type: fix
     summary: >-
       Addressed issue where Terragrunt configuration caused version pinning for `goauthentik/authentik` and `alekc/kubectl`
       providers to be removed during `terragrunt init -upgrade`.

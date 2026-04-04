@@ -79,17 +79,15 @@ Spawn a subagent to run the **GenerateSummary** workflow (via the changelog skil
 
 ### 6. Quality Review
 
-Read the full contents of `packages/website/src/content/changelog/main/log.yaml` and review every entry against these quality checks:
+Run the list-change-ids script to get every change ID:
 
-| Check | What to Look For |
-|-------|-----------------|
-| Summary quality | Clear, concise, user-facing; not vague or overly terse. Names the component and describes the observable effect. |
-| Summary specificity | Avoids generic phrasing like "Fixes a bug" or "Improves performance" — should say *what* was fixed or improved. |
-| Markdown consistency | Consistent backtick formatting for code, module names, commands, and config keys across all entries. |
-| Tone consistency | Consistent tense (present), voice (active), and formality across all entries. |
-| Action item quality | Each action item starts with a verb and is specific enough to follow without guessing. |
+```bash
+bun ./scripts/list-change-ids.ts
+```
 
-For each issue found, edit `packages/website/src/content/changelog/main/log.yaml` directly to fix it. Preserve all existing data — only adjust wording, formatting, and tone.
+For each change ID in the output, spawn a subagent to run the **EnhanceEntry** workflow (via the changelog skill), passing the change ID as the entry identifier. Run subagents **in parallel** (up to 5 at a time) since each operates on a single entry independently.
+
+After all subagents complete, collect their before/after reports for the final summary.
 
 ### 7. Run the Automated Validation Script
 
@@ -113,7 +111,7 @@ Present a consolidated report:
 
 1. **Commit coverage** — Summarize how many commits were checked, how many were already covered, how many new entries were created, and how many were skipped as internal-only.
 2. **Validation warnings** — List any warnings from the validation script that remain unresolved.
-3. **Quality fixes** — List any wording, formatting, or tone improvements that were applied in Step 6.
+3. **Quality enhancements** — Summarize the outcome of Step 6: how many entries were enhanced by subagents and what kinds of improvements were made (truncated summaries repaired, references added, etc.).
 4. **Todos reviewed** — Summarize the outcome of Step 3: how many todo items were reviewed, how many the user resolved, and how many remain open.
 5. **Condensation** — Summarize the outcome of Step 4: how many entries were merged and the before/after count.
 6. **Summary generated** — Whether the top-level summary and highlights were created or updated in Step 5.

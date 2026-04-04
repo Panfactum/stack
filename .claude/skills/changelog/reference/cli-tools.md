@@ -40,6 +40,46 @@ Changes:
   [fix] Corrected rate-limit header parsing
 ```
 
+## generate-id.ts
+
+Generates and prints a single UUIDv4 for use as a change entry `id`. Used by the UpdateEntry workflow when creating new entries.
+
+**Usage:**
+
+```bash
+bun ./scripts/generate-id.ts
+```
+
+**Arguments:** None
+
+**Output:** A single UUIDv4 string on stdout. Example:
+
+```
+b4f94e25-c1fb-4a3b-be71-18a37ecf7793
+```
+
+## list-change-ids.ts
+
+Lists all change IDs in `main/log.yaml` with their type and a truncated summary. Useful for quickly finding a change's UUID for use with `show-change.ts` or `update-change.ts`.
+
+**Usage:**
+
+```bash
+bun ./scripts/list-change-ids.ts
+```
+
+**Arguments:** None
+
+**Output:** Each line contains the full UUID, the change type in brackets, and a truncated summary. Example:
+
+```
+=== Change IDs (3) ===
+
+71caae3a-c5e6-4175-9a0b-9fecbeeeca1c  [breaking_change] Removed support for legacy auth tokens
+086087da-86be-41ae-9daf-9838778838fa  [addition] Added new dashboard widget API
+a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d  [fix] Corrected rate-limit header parsing
+```
+
 ## list-changed-files.ts
 
 Lists all files changed relative to `main`, combining committed branch changes, staged changes, and unstaged changes into a single deduplicated list. Used by the UpdateEntry workflow to discover what was modified.
@@ -305,3 +345,68 @@ Summary:
   Info: 1
   Total changes checked: 3
 ```
+
+## show-change.ts
+
+Shows the full content of a single change entry by its UUID. Supports partial ID prefixes for convenience.
+
+**Usage:**
+
+```bash
+bun ./scripts/show-change.ts <change-id>
+```
+
+**Arguments:**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `change-id` | Yes | Full or partial UUID prefix of the change entry. Must match exactly one entry. |
+
+**Output:** The complete YAML representation of the matched change entry, including all fields. Example:
+
+```
+=== Change #3 ===
+
+id: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+type: fix
+summary: Corrected rate-limit header parsing
+references:
+  - type: internal-commit
+    summary: Fix rate-limit header
+    link: 48d67a2721e3df5e482db5e975bc76722451dd2a
+impacts:
+  - type: cli
+    component: api-client
+    summary: Rate-limit headers now parsed correctly
+```
+
+Exits with code `1` if the ID matches zero entries or is ambiguous (matches more than one).
+
+## update-change.ts
+
+Updates specific fields on a single change entry by its UUID. Accepts `field=value` pairs for `type`, `summary`, and `description`.
+
+**Usage:**
+
+```bash
+bun ./scripts/update-change.ts <change-id> <field>=<value> [field=value ...]
+```
+
+**Arguments:**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `change-id` | Yes | Full or partial UUID prefix of the change entry. |
+| `field=value` | Yes | One or more field assignments. Updatable fields: `type`, `summary`, `description`. Use `description=` (empty value) to remove the description field. |
+
+**Output:** A confirmation showing the old and new values for each updated field. Example:
+
+```
+Updated change #3 (a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d):
+  type: fix → improvement
+  summary: Corrected rate-limit header parsing → Improved rate-limit header parsing for edge cases
+
+Note: File was re-serialized. Review the diff to confirm formatting is acceptable.
+```
+
+Exits with code `1` if the ID matches zero entries, is ambiguous, or a field name is invalid.

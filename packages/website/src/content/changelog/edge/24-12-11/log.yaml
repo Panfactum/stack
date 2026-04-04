@@ -7,16 +7,18 @@ highlights:
   - "All Terraform provider versions upgraded — first-party IaC modules must update their provider versions"
   - "New `node_ebs_volume_size_gb` input for `aws_eks` and `kube_karpenter_node_pools`"
 changes:
-  - type: breaking_change
+  - id: 8c3c5a32-df5c-4dde-8630-771f57642198
+    type: breaking_change
     summary: >-
       All terraform provider versions in Panfactum modules have been upgraded. Any first-party IaC modules that
-      utilize Panfactum submodules will need their provider versions upgraded as well.
-  - type: breaking_change
+      utilize Panfactum submodules will need
+  - id: 3a916806-20f2-410d-91a7-133d00cb8487
+    type: breaking_change
     summary: >-
       Major component upgrades: Kubernetes 1.29→1.30, Authentik 2024.4.2→2024.6.4, Argo Workflows 3.5→3.6,
       Karpenter 1.0→1.1, Redis 7.2→7.4, Velero 1.13→1.15, VPA 1.1→1.2, PostgreSQL 16.4→16.6.
-      Review each component's release notes before upgrading.
-  - type: addition
+  - id: 0433a346-6bba-4be6-b48e-7c9682ed6318
+    type: addition
     summary: >-
       [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) and
       [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
@@ -28,6 +30,7 @@ changes:
       - type: iac-module
         component: kube_karpenter_node_pools
         summary: Adds configurable node root EBS volume size
-  - type: fix
+  - id: 12f59f27-66e2-44b4-a511-2fe633f1ab26
+    type: fix
     summary: >-
       Addresses issue where non-HA clusters could not recover when many nodes are disrupted at once.

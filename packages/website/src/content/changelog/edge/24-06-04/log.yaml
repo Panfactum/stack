@@ -6,11 +6,13 @@ highlights:
   - "macOS devenv rebuilds now 10-15x faster (from 10+ minutes down to ~45 seconds)"
   - "Fixed Karpenter autoscaling issue when `extra_tags` was provided"
 changes:
-  - type: breaking_change
+  - id: 6391cff7-23c1-4070-a730-044f0d99a8c1
+    type: breaking_change
     summary: >-
       Upgraded to devenv 1.0. As a part of this upgrade, `.env` file values can no longer be referenced directly
-      inside `.nix` files.
-  - type: addition
+      inside
+  - id: 656bdffb-5fc6-4e21-9642-7c36d512d356
+    type: addition
     summary: >-
       Updated [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) to automatically
       limit client buffer size to prevent OOM issues when processing very bursty traffic.
@@ -18,28 +20,32 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: "Auto-limit client buffer size to prevent OOM issues"
-  - type: addition
+  - id: 9e2bd835-36ec-428e-9dc2-b1fee4148214
+    type: addition
     summary: >-
       Added `pf-update` command that runs all the repository scaffolding commands at once.
-  - type: fix
+  - id: c07a0653-121e-4113-bf98-e9bb0e981b23
+    type: fix
     summary: >-
       Addressed an issue that caused updates to the local devenv to take at least 10 minutes to rebuild on macOS.
-      Rebuilds should now be 10-15x faster, but will still take about 45 seconds at minimum.
-  - type: fix
+  - id: 503d9c2a-a3d5-43d8-9e80-ade8f600d47d
+    type: fix
     summary: >-
       Added missing defaults for `PF_ENVIRONMENTS_DIR` and `PF_IAC_DIR`.
-  - type: fix
+  - id: 0489cee5-bae3-4869-8bdc-fb31378ef788
+    type: fix
     summary: >-
       Resolves an issue where devenv warnings could not be resolved during the initial bootstrapping guide.
-  - type: fix
+  - id: 466036a4-e818-4f7e-a996-4ab239478c2c
+    type: fix
     summary: >-
-      Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced
-      with `.` for both keys and values for both Kubernetes labels and AWS tags.
-  - type: fix
+      Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced with
+      `.` for both keys and
+  - id: 80988172-d59e-418b-b600-c52527622b3c
+    type: fix
     summary: >-
       Fixed core components that were using all Kubernetes labels for `labelSelector` matching rules, which
-      prevented Karpenter from autoscaling when `extra_tags` was provided. This previously manifested as
-      `spec.requirements: Too many: #: must have at most 30 items`.
+      prevented Karpenter from autoscaling when `extra_tags`
     references:
       - type: issue-report
         summary: "Karpenter autoscaling broken when extra_tags provided"
@@ -47,7 +53,8 @@ changes:
       - type: issue-report
         summary: "Too many label selectors preventing Karpenter scaling"
         link: https://github.com/Panfactum/stack/issues/46
-  - type: fix
+  - id: a5117e5e-9c95-434b-9c2a-e089bb2fc4fc
+    type: fix
     summary: >-
       Added extra constraints to [`kube_external_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
       to prevent it from querying zones it isn't managing.
@@ -55,7 +62,8 @@ changes:
       - type: iac-module
         component: kube_external_dns
         summary: "Added constraints to prevent querying unmanaged zones"
-  - type: fix
+  - id: 700aa49c-1f5e-447c-9108-39f91a546d7d
+    type: fix
     summary: >-
       Prevented [`kube_external_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) from
       excluding parent domains of included domains.

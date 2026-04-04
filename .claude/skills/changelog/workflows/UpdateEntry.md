@@ -101,6 +101,7 @@ Write all changes to `packages/website/src/content/changelog/main/log.yaml` — 
 
 MUST follow these rules when writing:
 
+- **Generate a UUIDv4 `id`** for each new entry by running `bun ./scripts/generate-id.ts` (once per entry). Place `id` as the first field in each change object (before `type`).
 - **Create the `changes` key** if it does not exist, with the new entry as the first item.
 - **Append new entries** to the end of the `changes` array.
 - **Modify or remove pre-existing entries only when invalidated** by the current changes (as identified in Step 5). Do not alter entries that are still accurate.

@@ -5,7 +5,8 @@ highlights:
   - "Fixed [`authentik_core_resources`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources) first-create deployment failure"
   - "Authentik no longer experiences downtime during database failover events"
 changes:
-  - type: fix
+  - id: 50c7b54d-8ba7-4588-b98c-ae4db901cfdd
+    type: fix
     summary: >-
       [`authentik_core_resources`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources)
       will no longer fail to apply and end up in an invalid state when first created.
@@ -17,7 +18,8 @@ changes:
       - type: iac-module
         component: authentik_core_resources
         summary: Fixed first-create deployment failure and invalid state
-  - type: fix
+  - id: 2dd918cc-42f8-412a-8b64-c404d8f68fc5
+    type: fix
     summary: >-
       Authentik should no longer experience any downtime during database failover events.
     references:

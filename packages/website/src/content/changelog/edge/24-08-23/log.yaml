@@ -4,7 +4,8 @@ summary: "Fixes PgBouncer permission issues when creating new PostgreSQL cluster
 highlights:
   - "Fixed PgBouncer permissions on new PostgreSQL cluster creation"
 changes:
-  - type: fix
+  - id: 10430f53-5beb-446f-bee7-00c2e5d12b93
+    type: fix
     summary: >-
       Correctly sets PgBouncer permissions on new PostgreSQL cluster creation in
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).

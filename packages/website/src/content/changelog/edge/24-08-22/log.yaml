@@ -7,16 +7,18 @@ highlights:
   - "New [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) for time-based maintenance windows"
   - "New `pg_sync_replication_enabled` input for PostgreSQL synchronous replication"
 changes:
-  - type: breaking_change
+  - id: 138a3af1-0f3d-4c4b-8077-7ce3874225dd
+    type: breaking_change
     summary: >-
-      [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) has been
-      switched to use only RDB for persistence (previously used both AOF and RDB). The `redis_appendfsync` input has been
-      removed. Using AOF with RDB prevents partial resynchronizations after restarts, greatly increasing recovery time.
+      [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+      has been switched to use only RDB for persistence (previously used both AOF and RDB). The `redis_appendfsync`
+      input has
     impacts:
       - type: iac-module
         component: kube_redis_sentinel
         summary: Switched to RDB-only persistence; redis_appendfsync removed
-  - type: breaking_change
+  - id: e905875b-0f74-4671-bfee-2ed75bda3cf0
+    type: breaking_change
     summary: >-
       `token_lifetime_seconds` has been changed to `token_lifetime_hours` in
       [`vault_auth_oidc`](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to avoid a perpetual
@@ -25,7 +27,8 @@ changes:
       - type: iac-module
         component: vault_auth_oidc
         summary: Token lifetime input changed from seconds to hours
-  - type: breaking_change
+  - id: ed71164f-06e9-4bba-9ecf-24eb20e61e35
+    type: breaking_change
     summary: >-
       Removed the daily backups from [`kube_velero`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
       as they were undocumented and had no realistic use case.
@@ -33,12 +36,11 @@ changes:
       - type: iac-module
         component: kube_velero
         summary: Undocumented daily backups removed
-  - type: addition
+  - id: 790a859e-e03c-444c-a9e0-2810134dd955
+    type: addition
     summary: >-
       Adds a new submodule,
-      [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
-      for specifying time-based disruption windows for disruption-sensitive workloads such as databases. Disruption window
-      capabilities have also been added to `kube_pg_cluster` and `kube_redis_sentinel`.
+      [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller), for specifying time-based disruption windows for disruption-sensitive workloads such as databases. Disruption window capabilities have
     impacts:
       - type: iac-module
         component: kube_disruption_window_controller
@@ -49,7 +51,8 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: Disruption window capabilities added
-  - type: addition
+  - id: 1ace0b17-482a-463d-9945-4334ecde7aa0
+    type: addition
     summary: >-
       Adds synchronous replication support to
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
@@ -58,7 +61,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Synchronous replication support added
-  - type: fix
+  - id: 20646e63-ddd6-4014-af72-706f4e6a2f91
+    type: fix
     summary: >-
       Addressed issue where `pg_smart_shutdown_timeout` cannot be set to `0` in
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
@@ -67,7 +71,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Fixed pg_smart_shutdown_timeout zero-value handling
-  - type: fix
+  - id: e2dbeacc-46fe-477a-81fb-0fe8792e728c
+    type: fix
     summary: >-
       Fixed an issue in [`kube_velero`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
       where stale EBS snapshots were not being deleted.

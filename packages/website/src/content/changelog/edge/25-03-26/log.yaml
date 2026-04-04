@@ -9,22 +9,23 @@ highlights:
   - "Automatic garbage collection of orphaned persistent volumes via `kube_policies`"
   - "Node.js heap size now automatically configured from container memory limits"
 changes:
-  - type: breaking_change
+  - id: 94e47609-70e5-43f7-b28f-da26848c9ae9
+    type: breaking_change
     summary: >-
-      Across all Panfactum modules, `burstable_nodes_enabled` no longer automatically adds a spot instance toleration.
-      `spot_nodes_enabled` must now be set to `true` explicitly if spot instances are desired.
-  - type: breaking_change
+      Across all Panfactum modules, `burstable_nodes_enabled` no longer automatically adds a spot instance
+      toleration. `spot_nodes_enabled` must now be set to `true`
+  - id: 34933320-3334-4d20-8a34-adfa537f7926
+    type: breaking_change
     summary: >-
       The backup directory for
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) is now
-      explicitly specified by `pg_backup_directory`. This release will restart your backup history unless you set
-      `pg_backup_directory` to the previous `recovery_directory` output value. The output has been renamed to
-      `backup_directory`. See upgrade instructions.
+      explicitly specified by `pg_backup_directory`. This release will restart your backup history unless you
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: Backup directory now explicitly configured via pg_backup_directory
-  - type: addition
+  - id: 8727cd16-66dd-4d9c-b53d-3cab345ee90e
+    type: addition
     summary: >-
       Adds support for the `transform` parameter in
       [`kube_argo_sensor`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
@@ -33,11 +34,13 @@ changes:
       - type: iac-module
         component: kube_argo_sensor
         summary: New transform parameter added to dependencies input
-  - type: addition
+  - id: a27c926a-ccfc-46e2-9c6c-16f261745a4d
+    type: addition
     summary: >-
       Adds `spot_nodes_enabled`, `burstable_nodes_enabled`, and `controller_nodes_enabled` inputs to all direct
       Kubernetes modules.
-  - type: addition
+  - id: 3fd321c3-6c87-4e01-a74c-10d3768d889e
+    type: addition
     summary: >-
       Adds a `spot_nodes_enabled` input to
       [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to disable spot instances for
@@ -46,7 +49,8 @@ changes:
       - type: iac-module
         component: aws_eks
         summary: New spot_nodes_enabled input to control spot for controller nodes
-  - type: addition
+  - id: 3e31bd7d-6c02-49e2-a297-58232f1fe4d1
+    type: addition
     summary: >-
       Adds support for automatically preventing disruptions when backups are running in
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
@@ -54,7 +58,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Disruptions now automatically prevented during backup runs
-  - type: addition
+  - id: 8bce2aa2-b799-4324-9f1f-6331a0bfdcd8
+    type: addition
     summary: >-
       Adds automatic garbage collection of orphaned persistent volumes via
       [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies).
@@ -62,7 +67,8 @@ changes:
       - type: iac-module
         component: kube_policies
         summary: New policy for automatic orphaned persistent volume cleanup
-  - type: addition
+  - id: 6aaed039-3cb5-4294-a867-0fb0e8ff9b49
+    type: addition
     summary: >-
       Adds automatic garbage collection of failed backups in
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pg_cluster).
@@ -70,7 +76,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Failed backups now automatically garbage collected
-  - type: addition
+  - id: b1b159a9-b781-4fe4-95ec-a0ae12e7b5b8
+    type: addition
     summary: >-
       Adds `min_node_memory_mb` to
       [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
@@ -79,11 +86,13 @@ changes:
       - type: iac-module
         component: kube_karpenter_node_pools
         summary: New min_node_memory_mb input for minimum node memory threshold
-  - type: addition
+  - id: 7f55b3b2-200d-4a5a-a2ab-ccd23417ee40
+    type: addition
     summary: >-
       Adds automatic injection of `NODE_OPTIONS=--max-old-space-size=<memory_request>` into every container to
       allow automatic scaling of the Node.js heap size.
-  - type: fix
+  - id: 8dbfe565-31f5-4798-86ee-df799accfc67
+    type: fix
     summary: >-
       Optimizes the backup process for
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to provide
@@ -92,14 +101,16 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Backup throughput improved by 100x
-  - type: fix
+  - id: d1d9f2af-9ca6-44c6-8337-b3bae3b04bca
+    type: fix
     summary: >-
       Upgrades the `kubectl-cnpg` plugin in the devShell to be compatible with the latest CNPG operator.
     impacts:
       - type: devshell
         component: kubectl-cnpg
         summary: Upgraded to be compatible with latest CNPG operator
-  - type: fix
+  - id: 8421c73a-ef59-48c7-aca4-5eee62a6d33c
+    type: fix
     summary: >-
       Fixes version pinning on first-party modules
       ([issue 237](https://github.com/Panfactum/stack/issues/237)).

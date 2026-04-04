@@ -8,7 +8,8 @@ highlights:
   - "New [`kube_grist`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_grist) module for deploying Grist spreadsheets"
   - "Fixed critical Kyverno cluster deadlock that required manual intervention"
 changes:
-  - type: breaking_change
+  - id: cb7b13cf-a498-45e7-8fb8-8cc79feda189
+    type: breaking_change
     summary: >-
       This release adds additional functionality to Vault which requires
       [`vault_auth_oidc`](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to be upgraded
@@ -17,10 +18,12 @@ changes:
       - type: iac-module
         component: vault_auth_oidc
         summary: Must be upgraded first due to new Vault functionality
-  - type: breaking_change
+  - id: 7a91f5c2-a482-4fbd-b870-87466dd9eee9
+    type: breaking_change
     summary: >-
       The `kube_rbac` and `kube_priority_classes` modules have been removed per the deprecation notice in `edge.24-12-13`.
-  - type: addition
+  - id: c049a738-4eda-4ec5-94d9-624385ff7cc0
+    type: addition
     summary: >-
       Adds a module for deploying [Grist](https://www.getgrist.com/), a next-generation spreadsheet system:
       [`kube_grist`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_grist).
@@ -28,7 +31,8 @@ changes:
       - type: iac-module
         component: kube_grist
         summary: New module for deploying the Grist spreadsheet system
-  - type: addition
+  - id: c196ff18-6adb-4496-aaa4-bd5e9dd87cbe
+    type: addition
     summary: >-
       Adds an alternative mechanism for creating dynamically-rotated AWS credentials when IRSA is not an option:
       [`kube_aws_creds`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_creds).
@@ -36,7 +40,8 @@ changes:
       - type: iac-module
         component: kube_aws_creds
         summary: New module for dynamic AWS credentials without IRSA
-  - type: addition
+  - id: 49d383f2-72ba-40b2-91f7-b34d44de884e
+    type: addition
     summary: >-
       [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and
       [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) now
@@ -48,15 +53,17 @@ changes:
       - type: iac-module
         component: kube_stateful_set
         summary: Adds native support for voluntary disruption windows
-  - type: fix
+  - id: 6114bec6-7e80-462e-a6a5-fef07d868158
+    type: fix
     summary: >-
-      Addressed issue where pods could not be created if all Kyverno admission controllers were disrupted simultaneously,
-      which would result in a cluster deadlock. This degenerate behavior has been fully resolved.
+      Addressed issue where pods could not be created if all Kyverno admission controllers were disrupted
+      simultaneously, which would result in
     impacts:
       - type: iac-module
         component: kube_kyverno
         summary: Resolves cluster deadlock when all admission controllers are disrupted
-  - type: fix
+  - id: 2399147d-de00-406d-9ef5-65224df9a91e
+    type: fix
     summary: >-
       Addressed issue where the Kubernetes API server address was set incorrectly when deploying
       [`kube_cilium`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cilium) with
@@ -68,15 +75,17 @@ changes:
       - type: iac-module
         component: wf_tf_deploy
         summary: Fixes incorrect API server address passed to kube_cilium
-  - type: fix
+  - id: 71b30774-10cb-488e-93c9-c51c9f753cc1
+    type: fix
     summary: >-
       Helm charts deployed by Panfactum modules will no longer be automatically rolled back on deployment failure,
-      preventing several failure cases that previously required manual intervention.
+      preventing several failure cases
     references:
       - type: issue-report
         summary: "Helm auto-rollback on failure causes manual intervention"
         link: https://github.com/Panfactum/stack/issues/318
-  - type: fix
+  - id: 2dec5992-8341-466f-938c-057f6cfa9185
+    type: fix
     summary: >-
       The StatefulSets in
       [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) no longer need to be
@@ -85,7 +94,8 @@ changes:
       - type: iac-module
         component: kube_nats
         summary: Eliminates unnecessary redeployments on tag/label updates
-  - type: fix
+  - id: 649c5995-441c-470b-8377-b02df2207d36
+    type: fix
     summary: >-
       `pf-tunnel` now binds to `127.0.0.1` instead of `localhost` to resolve connectivity problems on diverse
       operating systems.

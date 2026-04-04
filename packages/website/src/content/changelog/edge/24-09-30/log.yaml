@@ -6,7 +6,8 @@ highlights:
   - "New `pf-eks-suspend` and `pf-eks-resume` commands for cluster lifecycle management"
   - "Fixed disruption windows to work in all namespaces (previously only worked in `argo`)"
 changes:
-  - type: addition
+  - id: a5b5bb4f-7db2-4d0b-b4e0-e1131ad348ce
+    type: addition
     summary: >-
       Adds a [new addon for self-hosted GitHub Action runners.](/docs/edge/guides/addons/github-actions/installing)
     impacts:
@@ -16,7 +17,8 @@ changes:
       - type: iac-module
         component: kube_gha_runners
         summary: New module for configuring GitHub Action runner workloads
-  - type: addition
+  - id: 30264273-e4fe-4bd5-a43e-5ebde177442b
+    type: addition
     summary: >-
       Adds the `pf-eks-suspend` and `pf-eks-resume` commands to
       [suspend and resume the EKS cluster](/docs/main/guides/bootstrapping/suspend-kubernetes-cluster).
@@ -27,11 +29,11 @@ changes:
       - type: cli
         component: kube cluster-resume
         summary: New command to resume a suspended EKS cluster
-  - type: fix
+  - id: 217dc751-84fc-461b-b173-986033d9a8f4
+    type: fix
     summary: >-
       Fixes an issue where voluntary disruption windows created by
-      [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
-      would only work for the `argo` namespace. They will now work in all namespaces.
+      [`kube_disruption_window_controller`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) would only work for the `argo` namespace. They will now
     references:
       - type: issue-report
         summary: "Disruption windows only working in argo namespace"

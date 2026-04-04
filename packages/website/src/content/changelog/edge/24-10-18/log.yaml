@@ -8,25 +8,29 @@ highlights:
   - "`pgadmin4` removed from devShell — choose your own database client"
   - "Cilium upgraded to v1.16.3 — 75MB per-node memory reduction"
 changes:
-  - type: breaking_change
+  - id: 377c127c-bccb-4d01-ae57-8c2dba0b65f3
+    type: breaking_change
     summary: >-
       [devenv](https://devenv.sh/) has been removed in favor of plain [nix flakes](https://nixos.wiki/wiki/Flakes).
-      The `flake.nix` syntax has changed and `devenv.nix` files can be removed. See upgrade instructions for migration steps.
+      The `flake.nix` syntax has changed and `devenv.nix` files can be
     impacts:
       - type: configuration
         component: flake.nix
         summary: Syntax changed due to devenv removal; devenv.nix files can be deleted
-  - type: breaking_change
+  - id: 75d5b150-95d9-4578-af54-009fde122fec
+    type: breaking_change
     summary: >-
       `pf-get-version-hash` has been renamed to `pf-get-commit-hash` and now takes named rather than positional arguments.
     impacts:
       - type: devshell
         component: pf-get-commit-hash
         summary: Renamed from pf-get-version-hash with named arguments
-  - type: breaking_change
+  - id: b4b84fc4-4bf1-4873-aca3-73fb182be903
+    type: breaking_change
     summary: >-
       Removes `pgadmin4` from the devShell as it significantly increased build times.
-  - type: improvement
+  - id: 9db3910e-71c2-4576-8a6a-38c50e047175
+    type: improvement
     summary: >-
       Upgrades [`kube_cilium`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3,
       reducing per-node memory usage by 75MB and reducing bootstrapping errors.
@@ -34,7 +38,8 @@ changes:
       - type: iac-module
         component: kube_cilium
         summary: Upgraded to v1.16.3 with 75MB per-node memory reduction
-  - type: improvement
+  - id: 9ff468db-fd47-4ace-8f62-f7f03e5712ec
+    type: improvement
     summary: >-
       Upgrades [`kube_aws_ebs_csi`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36
       for improved node shutdown performance.
@@ -42,7 +47,8 @@ changes:
       - type: iac-module
         component: kube_aws_ebs_csi
         summary: Upgraded to v1.36 for improved node shutdown performance
-  - type: improvement
+  - id: 15ac4871-2240-4f1d-9311-fa2b7a39a35f
+    type: improvement
     summary: >-
       Updates [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
       to support 10 concurrent image builds per module rather than just one.
@@ -50,7 +56,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Now supports 10 concurrent image builds per module
-  - type: addition
+  - id: f7039084-5b99-4d6d-949b-1a4e1f714ffc
+    type: addition
     summary: >-
       Adds `cdn_mode_enabled` to
       [`kube_vault`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) and
@@ -62,7 +69,8 @@ changes:
       - type: iac-module
         component: kube_authentik
         summary: Added cdn_mode_enabled input variable
-  - type: addition
+  - id: cabc61ad-6fea-4bcd-bbdd-0031870501ad
+    type: addition
     summary: >-
       Adds `image_tag_prefix` to
       [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
@@ -70,17 +78,20 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Added image_tag_prefix input variable
-  - type: fix
+  - id: 7e25f086-e863-45ad-b2b4-6dfc2d8644a3
+    type: fix
     summary: >-
       Fixed scheduling constraint bugs that resulted in less-than-optimal resource utilization, especially in tiny clusters.
     references:
       - type: issue-report
         summary: "Scheduling constraint bugs causing poor resource utilization"
         link: https://github.com/Panfactum/stack/issues/167
-  - type: fix
+  - id: 91cd1a4d-19ca-4c6e-975a-a172f111d1cb
+    type: fix
     summary: >-
       Fixed an issue where `pf_stack_version` could not be a commit hash.
-  - type: fix
+  - id: a696ff8a-0fc0-4cbf-a189-40b8fedd77bb
+    type: fix
     summary: >-
       Fixed an issue where `pf-wf-git-checkout` would fail when given a branch name as a git ref.
     impacts:

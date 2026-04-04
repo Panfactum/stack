@@ -4,10 +4,12 @@ summary: "Prevents unnecessary MongoDB provider generation and fixes certificate
 highlights:
   - "Fixed `kube_cert_issuer` to correctly use `cloudflare_zones` input when generating certificates"
 changes:
-  - type: fix
+  - id: a1e7b310-94b4-411c-a879-f0cc78d4ece5
+    type: fix
     summary: >-
       The MongoDB provider is no longer generated when not utilized.
-  - type: fix
+  - id: 8371896c-1adf-421e-9766-4b5c2788ca52
+    type: fix
     summary: >-
       [`kube_cert_issuers`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers) now
       correctly uses the `cloudflare_zones` input when generating TLS certificates.

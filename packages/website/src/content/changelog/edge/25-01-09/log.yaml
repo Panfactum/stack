@@ -5,7 +5,8 @@ highlights:
   - "New `common_env` and `common_secrets` inputs in `kube_policies` for cluster-wide environment variable injection"
   - "Bottlerocket OS AMIs now pinned to prevent unexpected node crashes from AWS AMI updates"
 changes:
-  - type: addition
+  - id: d3e30b27-0604-40cf-b778-acfb244b2a83
+    type: addition
     summary: >-
       [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) now has
       `common_env` and `common_secrets` inputs that inject environment variables into all containers in the cluster.
@@ -13,11 +14,13 @@ changes:
       - type: iac-module
         component: kube_policies
         summary: New common_env and common_secrets inputs for cluster-wide env var injection
-  - type: fix
+  - id: 7ec185ee-2e64-44d6-b038-6ba2d30dfc0c
+    type: fix
     summary: >-
-      Pins Bottlerocket OS AMIs to pre-tested versions as AWS occasionally publishes breaking AMI changes that
-      can crash nodes in the cluster.
-  - type: fix
+      Pins Bottlerocket OS AMIs to pre-tested versions as AWS occasionally publishes breaking AMI changes that can
+      crash nodes in the
+  - id: d72095a7-fa88-4bc1-9b89-f4d063cea9ad
+    type: fix
     summary: >-
       Fixes the pre- and post-condition check for the `aws_eks` module when `sla_target` is set to 1.
     references:

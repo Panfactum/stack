@@ -4,6 +4,7 @@ summary: "The initial edge release of the Panfactum stack."
 highlights:
   - "The initial edge release of the Panfactum stack!"
 changes:
-  - type: addition
+  - id: 89a73024-f7b7-44f4-a022-3d3d39efdb8b
+    type: addition
     summary: >-
       The initial edge release of the Panfactum stack!

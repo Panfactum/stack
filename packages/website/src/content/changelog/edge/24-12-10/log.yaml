@@ -6,10 +6,11 @@ highlights:
   - "TLS certificate provisioning architecture changed — must upgrade `kube_cert_issuers` then `kube_ingress_nginx` in order"
   - "New `bootstrap_cluster_creator_admin_privileges` input in `aws_eks` for backwards compatibility"
 changes:
-  - type: breaking_change
+  - id: 30fbe131-bb91-4789-a67d-7e86e4a5f563
+    type: breaking_change
     summary: >-
       This release changes the way public ingress TLS certificates are provisioned to avoid hitting rate limits on
-      large clusters. Modules must be upgraded in a specific order — see upgrade instructions.
+      large clusters. Modules
     impacts:
       - type: iac-module
         component: kube_cert_issuers
@@ -17,7 +18,8 @@ changes:
       - type: iac-module
         component: kube_ingress_nginx
         summary: Must be upgraded after kube_cert_issuers for new TLS provisioning
-  - type: fix
+  - id: 04548359-d3f0-492d-b671-545b95be03ff
+    type: fix
     summary: >-
       Adds `bootstrap_cluster_creator_admin_privileges` input to
       [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to provide backwards compatibility
@@ -26,7 +28,8 @@ changes:
       - type: iac-module
         component: aws_eks
         summary: Adds backwards-compatible cluster creator admin privileges input
-  - type: fix
+  - id: e560e888-eec7-4ba4-8618-1b188eb11466
+    type: fix
     summary: >-
       Temporary Authentik disruptions caused by PostgreSQL database failovers have been mitigated.
     impacts:

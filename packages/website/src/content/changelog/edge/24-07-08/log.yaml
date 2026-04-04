@@ -8,18 +8,17 @@ highlights:
   - "New [`kube_pvc_annotator`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator) for managing StatefulSet PVC metadata"
   - "Multiple variable renames in `aws_eks` — update your Terragrunt inputs"
 changes:
-  - type: breaking_change
+  - id: 02d032cc-fa31-429e-90ad-79067e4db0b8
+    type: breaking_change
     summary: >-
-      [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) has been refactored to reduce unnecessary
-      options. Users can no longer set the instance type and count for EKS node groups directly. The new `bootstrap_mode_enabled`
-      (default: `false`) controls the appropriate static configuration. `control_plane_version` and
-      `controller_node_kube_version` have been unified into `kube_version`. `controller_node_subnets` renamed to `node_subnets`.
-      `all_nodes_allowed_security_groups` renamed to `node_security_groups`.
+      [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) has been refactored to reduce
+      unnecessary options. Users can no longer set the instance type and count for EKS
     impacts:
       - type: iac-module
         component: aws_eks
         summary: Simplified config with bootstrap_mode_enabled and variable renames
-  - type: breaking_change
+  - id: af746c83-60db-493d-af8c-db9d327b84a4
+    type: breaking_change
     summary: >-
       Incorporating [`kube_pvc_annotator`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator)
       into Panfactum modules requires redeploying StatefulSets. See upgrade instructions for the full process.
@@ -27,12 +26,13 @@ changes:
       - type: iac-module
         component: kube_pvc_annotator
         summary: Requires StatefulSet redeployment for integration
-  - type: addition
+  - id: 9e2ae97e-f5db-4a43-8552-602f818aa888
+    type: addition
     summary: >-
-      Adds [`kube_fledged`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_fledged) to the core stack.
-      The kube-fledged controller adds the ability to pre-pull images to every node to improve pod startup times.
-      Installation guide is [here](docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches).
-  - type: addition
+      Adds [`kube_fledged`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_fledged) to the core
+      stack. The kube-fledged controller adds the ability to pre-pull images to every node to improve
+  - id: d4484fa2-1b5d-4bdd-835a-a485b887522f
+    type: addition
     summary: >-
       Adds the [`kube_pvc_annotator`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator)
       submodule that provisions a CronJob to sync metadata across PVCs created by immutable templates.
@@ -40,7 +40,8 @@ changes:
       - type: iac-module
         component: kube_pvc_annotator
         summary: New submodule for syncing StatefulSet PVC metadata
-  - type: addition
+  - id: 2b80071d-cbd7-4fd0-a161-cbd237654c74
+    type: addition
     summary: >-
       Adds `persistence_backups_enabled` (default: `true`) to
       [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
@@ -49,17 +50,20 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: New option to disable EBS snapshot backups
-  - type: addition
+  - id: bae0aeca-9b3d-44ff-9c2a-f2c3f8527e05
+    type: addition
     summary: >-
       Adds `node_image_cache_enabled` common variable to Panfactum modules to enable pre-pulling images via kube_fledged.
-  - type: addition
+  - id: 99133d78-d71b-463d-9e96-436299abce08
+    type: addition
     summary: >-
       Adds the `pf-buildkit-clear-cache` command for removing unused BuildKit caches.
     impacts:
       - type: cli
         component: "buildkit clear-cache"
         summary: New command for clearing unused BuildKit caches
-  - type: fix
+  - id: 0bec0238-de88-4089-9ad4-8d1c36a3a1cd
+    type: fix
     summary: >-
       Fixes handling of public ECR registries and ECR token caching in `docker-credential-panfactum`.
     references:
@@ -70,14 +74,16 @@ changes:
       - type: cli
         component: "docker credential-helper"
         summary: Fix for public ECR and token caching issues
-  - type: fix
+  - id: 93d5749e-58d7-4b20-8c66-9c35e868857b
+    type: fix
     summary: >-
       Fixes `pf-get-open-port` to be platform-agnostic.
     references:
       - type: issue-report
         summary: "pf-get-open-port not platform-agnostic"
         link: https://github.com/Panfactum/stack/issues/68
-  - type: fix
+  - id: 8aca3c16-6ff8-423f-a356-675552ac84ff
+    type: fix
     summary: >-
       Fixes image paths in the Authentik dashboard for applications provisioned by Panfactum modules.
     references:

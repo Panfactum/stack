@@ -33,6 +33,7 @@ interface ChangeImpact {
 }
 
 interface Change {
+  id: string;
   type: string;
   summary: string;
   description?: string;
@@ -189,6 +190,27 @@ function main(): void {
     const change = changes[i];
     if (change !== undefined) {
       allFindings.push(...validateChange(change, i));
+    }
+  }
+
+  // Check for duplicate id values
+  const idCounts = new Map<string, number[]>();
+  for (let i = 0; i < changes.length; i++) {
+    const change = changes[i];
+    if (change?.id) {
+      const indices = idCounts.get(change.id) ?? [];
+      indices.push(i + 1);
+      idCounts.set(change.id, indices);
+    }
+  }
+  for (const [id, indices] of idCounts) {
+    if (indices.length > 1) {
+      allFindings.push({
+        level: "WARN",
+        changeIndex: indices[0] ?? 0,
+        changeType: "(duplicate id)",
+        message: `Duplicate id "${id}" found in changes #${indices.join(", #")}`,
+      });
     }
   }
 

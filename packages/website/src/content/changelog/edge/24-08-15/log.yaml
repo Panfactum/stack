@@ -6,16 +6,18 @@ highlights:
   - "New shutdown/failover logic reduces PostgreSQL downtime from 60-120s to <5s"
   - "Adds `templateRef` support to [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec) for Workflow composition"
 changes:
-  - type: breaking_change
+  - id: 4df31de4-c16c-4b1b-9469-d0b8c0ab0c24
+    type: breaking_change
     summary: >-
       `pg_shutdown_timeout` has been renamed to `pg_smart_shutdown_timeout` in
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). Additionally,
-      the shutdown and failover logic has been overhauled to reduce failover downtime from 60-120 seconds to under 5 seconds.
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+      Additionally, the shutdown and failover logic has been overhauled to reduce failover
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: Shutdown timeout renamed; failover downtime reduced to under 5s
-  - type: addition
+  - id: ee349e99-928d-444f-8c03-2084698c3b8f
+    type: addition
     summary: >-
       Adds passthrough parameters to
       [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
@@ -23,7 +25,8 @@ changes:
       - type: iac-module
         component: wf_spec
         summary: Passthrough parameters added
-  - type: addition
+  - id: 373a8368-bc41-4094-a54f-662774a36277
+    type: addition
     summary: >-
       Makes `tf_apply_dir` a Workflow parameter in
       [`wf_tf_deploy`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
@@ -32,7 +35,8 @@ changes:
       - type: iac-module
         component: wf_tf_deploy
         summary: tf_apply_dir exposed as a Workflow parameter
-  - type: addition
+  - id: f53fc2ff-5352-4799-a2ab-be3d0e9e9d69
+    type: addition
     summary: >-
       Adds the ability to use `templateRef` to
       [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
@@ -41,7 +45,8 @@ changes:
       - type: iac-module
         component: wf_spec
         summary: templateRef support added for Workflow composition
-  - type: fix
+  - id: 42d023bc-8a61-4b7f-a57d-16e7f957511a
+    type: fix
     summary: >-
       Fixed the working directory in
       [`wf_tf_deploy`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
@@ -54,7 +59,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Working directory fixed to cloned repository
-  - type: fix
+  - id: 0daacb5d-428e-41d3-bc49-82c3241af87f
+    type: fix
     summary: >-
       Addressed OOM errors when using resource templates with
       [`wf_spec`](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).

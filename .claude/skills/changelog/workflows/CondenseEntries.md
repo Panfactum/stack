@@ -51,6 +51,7 @@ For each merge set, record:
 
 For each merge set, draft a single replacement entry by combining the source entries:
 
+- **`id`**: The condensed entry keeps the `id` of the **base** entry. Discard `id` values from the other merged entries.
 - **`type`**: Use the most significant type. Priority: `breaking_change` > `deprecation` > `addition` > `update` > `improvement` > `fix`. If the set includes a `breaking_change`, the merged entry is a `breaking_change`.
 - **`summary`**: Write a new summary that covers the full scope of the merged change. Keep it from the end user's perspective — focus on the net effect, not the development journey. Use `>-` block scalar style for multi-line values.
 - **`description`**: Combine descriptions where present. If only some source entries had descriptions, keep the most informative one and incorporate key details from the others. Omit if no source entry had a description.

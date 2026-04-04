@@ -13,6 +13,7 @@ const LOG_YAML_PATH = resolve(
 );
 
 interface ChangeEntry {
+  id: string;
   type: string;
   summary: string;
   description?: string;
@@ -101,8 +102,9 @@ function main(): void {
   console.log("Changes:");
   for (const change of changes) {
     const changeType = change.type ?? "unknown";
+    const idLabel = change.id ?? "(no id)";
     const summary = truncate(change.summary ?? "(no summary)", 80);
-    console.log(`  [${changeType}] ${summary}`);
+    console.log(`  [${changeType}] (${idLabel}) ${summary}`);
   }
 }
 

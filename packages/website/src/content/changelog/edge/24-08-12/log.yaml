@@ -7,16 +7,17 @@ highlights:
   - "New [Workflow Engine addon](/docs/edge/guides/addons/workflow-engine/installing) (Argo Workflows) and [Event Bus addon](/docs/edge/guides/addons/event-bus/installing) (Argo Events)"
   - "Multiple Argo-related modules graduated to Beta status"
 changes:
-  - type: breaking_change
+  - id: 0e3bfb33-0085-43a2-a973-f00376441248
+    type: breaking_change
     summary: >-
-      [Repository variables](/docs/edge/reference/configuration/repo-variables) must now be defined in a `panfactum.yaml`
-      file at the root of your repository instead of in `devenv.nix`. Variable names are no longer prefixed with `PF_`
-      and are lowercase. For example, `env.PF_REPO_NAME` in `devenv.nix` should now be `repo_name` in `panfactum.yaml`.
+      [Repository variables](/docs/edge/reference/configuration/repo-variables) must now be defined in a
+      `panfactum.yaml` file at the root of your repository instead of in `devenv.nix`.
     impacts:
       - type: configuration
         component: panfactum.yaml
         summary: Repository variables migrated from devenv.nix to panfactum.yaml
-  - type: addition
+  - id: 5cf375bb-a9c3-419b-a079-036dbbec4bcd
+    type: addition
     summary: >-
       New addons: a [Workflow Engine](/docs/edge/guides/addons/workflow-engine/installing) (Argo Workflows)
       and an [Event Bus](/docs/edge/guides/addons/event-bus/installing) (Argo Events).
@@ -27,10 +28,12 @@ changes:
       - type: iac-module
         component: kube_argo_event_bus
         summary: New Event Bus addon added
-  - type: addition
+  - id: 6b420904-0473-43c8-8ca1-9b01fd8233b6
+    type: addition
     summary: >-
       New [guide and best practices](/docs/edge/guides/cicd/getting-started) for setting up CI/CD in the Panfactum Stack.
-  - type: addition
+  - id: f13bb327-e9ca-4213-9fd4-cd6eb5dcb36a
+    type: addition
     summary: >-
       The following infrastructure modules upgraded to Beta status: `kube_argo`, `kube_argo_event_bus`,
       `kube_argo_event_source`, `kube_argo_sensor`, `wf_spec`, `wf_tf_deploy`, `wf_dockerfile_build`.
@@ -56,7 +59,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Upgraded to Beta status
-  - type: addition
+  - id: 864614fb-78b0-4e56-886c-3b067d4c0aa9
+    type: addition
     summary: >-
       Adds `pf-get-repo-variables` which prints a JSON payload of all repository configuration variables with defaults.
     impacts:

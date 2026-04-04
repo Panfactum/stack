@@ -12,7 +12,7 @@ user reviews the output after completion.
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| Entry identifier | Yes | An index number from `list-changes.ts` output, a partial summary text match, or a component name. Used to locate the target entry. |
+| Entry identifier | Yes | A change ID (full or partial UUID), an index number from `list-changes.ts` output, a partial summary text match, or a component name. Used to locate the target entry. |
 | Enhancement focus | No | A specific area to focus on (e.g., "improve references", "add description", "fix action items"). When absent, all areas are enhanced. |
 
 ## Workflow Steps
@@ -31,6 +31,7 @@ bun ./scripts/list-changes.ts
 
 Match the user's identifier against the list output:
 
+- **Change ID**: If the identifier looks like a UUID (or prefix of one), run `bun ./scripts/show-change.ts <id>` to locate the entry directly. If it matches, use that entry and skip the other matching strategies.
 - **Index number**: Match directly against the 1-based entry indices.
 - **Partial summary text**: Find the entry whose summary best matches the provided text.
 - **Component name**: Find the entry whose impacts include the given component.

@@ -389,6 +389,7 @@ if (props.type === 'list') {
 
   // Render inline markdown in change descriptions
   detailChanges = (props.entry.data.changes ?? []).map((change) => ({
+    id: change.id,
     type: change.type,
     descriptionHtml: marked.parseInline(change.summary) as string,
     descriptionDetailHtml: change.description ? marked.parse(change.description) as string : undefined,

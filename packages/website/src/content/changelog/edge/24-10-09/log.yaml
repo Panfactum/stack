@@ -5,19 +5,22 @@ highlights:
   - "New `pf_stack_local_path` Terragrunt variable for testing local Panfactum module changes"
   - "`pf-env-bootstrap` is now idempotent — safe to re-run if it fails midway"
 changes:
-  - type: addition
+  - id: 92c415c7-292b-4f24-9fad-fc1ef6506cbc
+    type: addition
     summary: >-
-      Adds a new [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables), `pf_stack_local_path`,
-      that can be used to deploy local copies of the Panfactum Stack modules for testing changes before submitting
-      pull requests.
-  - type: improvement
+      Adds a new [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables),
+      `pf_stack_local_path`, that can be used to deploy local copies of the Panfactum Stack modules for
+  - id: 1e960f78-8530-4958-af10-c5bd8d792d03
+    type: improvement
     summary: >-
       Loosened the requirements for the [repo variable](/docs/edge/reference/configuration/repo-variables) `repo_url`
       to support users on arbitrary git hosting providers (not just GitHub).
-  - type: improvement
+  - id: c0d1c33d-8c70-4ffe-9ed9-236ea0d3fc9f
+    type: improvement
     summary: >-
       `pf-env-bootstrap` is now idempotent, allowing it to be re-run if it fails in the middle of initial execution.
-  - type: fix
+  - id: 1274b9a1-1eee-4bad-b5d3-1fd85575e15b
+    type: fix
     summary: >-
       Fixes the AMI instance type mismatch when `bootstrap_mode_enabled` is enabled in the
       [`aws_eks`](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.
@@ -29,14 +32,16 @@ changes:
       - type: iac-module
         component: aws_eks
         summary: Fixed AMI instance type mismatch in bootstrap mode
-  - type: fix
+  - id: e29d8936-a036-4bcf-b95f-cad4cf5d5e4c
+    type: fix
     summary: >-
       Fixes issues that prevented bootstrapping scripts from running with new `pf-tf-init` logic.
     references:
       - type: issue-report
         summary: "Bootstrapping scripts broken with new pf-tf-init logic"
         link: https://github.com/Panfactum/stack/issues/154
-  - type: fix
+  - id: 6e412e54-97bb-4143-90cb-2fb6d36882f5
+    type: fix
     summary: >-
       Adjusts the defaults for
       [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) so that

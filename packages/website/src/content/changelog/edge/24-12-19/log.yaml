@@ -8,15 +8,18 @@ highlights:
   - "New arbitrary path rewriting support in `kube_ingress`, `kube_aws_cdn`, `aws_cdn`, and `aws_s3_public_website`"
   - "`wf_dockerfile_build` now supports private ECR base images"
 changes:
-  - type: breaking_change
+  - id: d660a28c-3925-444e-a3d0-4d2d759878a5
+    type: breaking_change
     summary: >-
       Introduces [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels). The
       `enhanced_ha_enabled` input has been removed from all modules. The previous default behavior
-      (`enhanced_ha_enabled = true`) is equivalent to `sla_target = 3` (the new default).
-  - type: breaking_change
+      (`enhanced_ha_enabled = true`)
+  - id: 8bad5cd6-c8a7-453e-ae0a-06adaab4b942
+    type: breaking_change
     summary: >-
       `pf` provider version upgraded from 0.0.5 to 0.0.7. Update this in first-party IaC.
-  - type: addition
+  - id: 1c1a2c5b-a3d1-429d-9e07-8dd5e5da4f3a
+    type: addition
     summary: >-
       Adds support for arbitrary path rewriting in
       [`kube_ingress`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
@@ -36,7 +39,8 @@ changes:
       - type: iac-module
         component: aws_s3_public_website
         summary: Adds support for arbitrary path rewriting rules
-  - type: addition
+  - id: a93b9550-3587-4c8c-8977-7d923b0ae0d3
+    type: addition
     summary: >-
       [`wf_dockerfile_build`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
       now supports sourcing base images from private ECR repositories.
@@ -44,7 +48,8 @@ changes:
       - type: iac-module
         component: wf_dockerfile_build
         summary: Supports sourcing base images from private ECR repositories
-  - type: addition
+  - id: b7bcf48e-aa6b-4f8b-8fb7-5475418a93ea
+    type: addition
     summary: >-
       Adds `not_found_path` to
       [`aws_s3_public_website`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website)
@@ -53,7 +58,8 @@ changes:
       - type: iac-module
         component: aws_s3_public_website
         summary: Adds not_found_path input for custom 404 asset handling
-  - type: addition
+  - id: be12e1e1-512f-4b42-9e5d-ec9d2d8d69fc
+    type: addition
     summary: >-
       Adds `custom_error_responses` to
       [`aws_cdn`](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn)
@@ -62,7 +68,8 @@ changes:
       - type: iac-module
         component: aws_cdn
         summary: Adds custom_error_responses to override upstream error responses
-  - type: fix
+  - id: 18bd6fcc-23b6-41f5-aa4b-5666f72a0495
+    type: fix
     summary: >-
       Addressed conflicting PDB issue with
       [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
@@ -71,12 +78,13 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: Fixes conflicting PDB that prevented vertical autoscaling
-  - type: fix
+  - id: e71b7257-824b-44b1-a203-365442d6d005
+    type: fix
     summary: >-
       Standard Panfactum environment variables for Kubernetes workloads are now injected before user-defined
-      environment variables to make them available for use in dependent variables, and will no longer override
-      user-defined variables.
-  - type: fix
+      environment variables to make them available for use
+  - id: 0a7906f2-9c42-477a-8ef7-44cbab76472d
+    type: fix
     summary: >-
       Fixed CRD auto-upgrade and incorrect AWS permissions in
       [`kube_aws_lb_controller`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).

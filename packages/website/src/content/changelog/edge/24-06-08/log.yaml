@@ -5,13 +5,15 @@ highlights:
   - "[`kube_trust_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) deprecated in favor of [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector)"
   - "New `pf-eks-reset` command consolidates manual cluster reset steps"
 changes:
-  - type: breaking_change
+  - id: 2ff2f051-f3a8-4744-b5af-4f920b190b9a
+    type: breaking_change
     summary: >-
-      [`kube_trust_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) has been deprecated
-      as its functionality was redundant with [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector).
-      To remove it: apply this release, remove dependency blocks in terragrunt.hcl files, run `terragrunt destroy` on the module,
-      and delete the `bundles` CRD.
-  - type: addition
+      [`kube_trust_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) has
+      been deprecated as its functionality was redundant with
+      [`kube_reflector`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector). To remove
+      it: apply this release, remove dependency blocks
+  - id: b54c05f9-7d2a-4ced-908a-33003671de6d
+    type: addition
     summary: >-
       [`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) can now set the
       contact type for each contact.
@@ -19,19 +21,22 @@ changes:
       - type: iac-module
         component: aws_registered_domains
         summary: New contact type configuration per contact
-  - type: addition
+  - id: 733a9bd5-f485-4be1-a8f3-7f1b3c78fb04
+    type: addition
     summary: >-
-      Users can now reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`)
-      in the [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+      Users can now reference availability zones by single character (e.g., `a`) in addition to the full name
+      (e.g., `us-east-2a`) in
     impacts:
       - type: iac-module
         component: aws_vpc
         summary: Supports short availability zone references
-  - type: addition
+  - id: f313e7b9-fd00-4b92-8dd9-538febc997ec
+    type: addition
     summary: >-
-      The manual steps needed to reset new EKS clusters during the bootstrapping guide have been consolidated
-      into a single new command, `pf-eks-reset`.
-  - type: fix
+      The manual steps needed to reset new EKS clusters during the bootstrapping guide have been consolidated into
+      a single new
+  - id: daf492c0-b8f9-4758-92b4-43b799a4f8e1
+    type: fix
     summary: >-
       Addressed issue in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) that caused a temporary,
       harmless error to crash the `terragrunt apply` on initial bootstrapping.
@@ -39,7 +44,8 @@ changes:
       - type: iac-module
         component: aws_vpc
         summary: Fix for apply crash during initial bootstrapping
-  - type: fix
+  - id: a2320e6b-d38b-46a5-a74b-957022e79a8e
+    type: fix
     summary: >-
       Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
       [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) module.

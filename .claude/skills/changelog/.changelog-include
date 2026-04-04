@@ -1,7 +1,7 @@
 # Glob patterns for user-facing paths (one per line).
 # Only files matching at least one pattern will appear in changelog diffs.
 
-packages/nix/**
+packages/nix/packages/**
 packages/infrastructure/**
 packages/cli/**
 packages/installer/**

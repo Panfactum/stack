@@ -7,7 +7,8 @@ highlights:
   - "New `wait` input on Kubernetes modules — set to `false` to skip readiness checks for faster deploys"
   - "`kube_bastion` now always uses two replicas for immediate tunnel reconnection"
 changes:
-  - type: breaking_change
+  - id: d362d2e2-1cb3-442b-8ef6-ca78424d339b
+    type: breaking_change
     summary: >-
       This update requires that you apply
       [`kube_vpa`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) before any other module.
@@ -16,11 +17,12 @@ changes:
       - type: iac-module
         component: kube_vpa
         summary: Must be applied before all other modules in this release
-  - type: addition
+  - id: 78daa817-b163-4355-8169-df7a97204584
+    type: addition
     summary: >-
-      Most Kubernetes modules now have a `wait` input that can be set to `false` to skip waiting for resources
-      to reach a ready state. This significantly improves deployment speed but disables automatic rollback.
-  - type: fix
+      Most Kubernetes modules now have a `wait` input that can be set to `false` to skip waiting for resources to
+  - id: 028b5197-19f3-44f5-b603-62c6059bb9b1
+    type: fix
     summary: >-
       [`kube_bastion`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) now always uses
       two replicas to ensure tunnels can immediately reconnect if one bastion gets restarted.
@@ -32,16 +34,17 @@ changes:
       - type: iac-module
         component: kube_bastion
         summary: Now uses two replicas for immediate tunnel reconnection
-  - type: fix
+  - id: 8ab1887a-082a-41df-a0dd-7d42a5e21e86
+    type: fix
     summary: >-
-      VPA CRDs included in
-      [`kube_vpa`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) were not appropriately
-      updated in the previous release due to a Helm CRD management bug. This release resolves the issue.
+      VPA CRDs included in [`kube_vpa`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa)
+      were not appropriately updated in the previous release due to a Helm CRD management bug.
     impacts:
       - type: iac-module
         component: kube_vpa
         summary: Fix VPA CRDs not being updated due to Helm CRD management bug
-  - type: fix
+  - id: b41349de-0d86-4eae-a3cb-da564cb59f1a
+    type: fix
     summary: >-
       Fixes an issue that prevented
       [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) from being

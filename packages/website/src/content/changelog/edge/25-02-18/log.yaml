@@ -5,7 +5,8 @@ skip: true
 highlights:
   - "Skip this release — causes issues in CI/CD pipelines for IaC deployments (resolved in next release)"
 changes:
-  - type: fix
+  - id: 0cf73934-1f8e-4ab0-861d-e7f90318eaa4
+    type: fix
     summary: >-
       The `pf` provider will now receive Kubernetes metadata regardless of whether the Kubernetes providers are
       enabled in the module tree.
@@ -13,15 +14,17 @@ changes:
       - type: issue-report
         summary: "pf provider missing Kubernetes metadata when K8s providers disabled"
         link: https://github.com/Panfactum/stack/issues/239
-  - type: fix
+  - id: 8591f61b-4cbe-4b0e-97df-0ccdbbf4df80
+    type: fix
     summary: >-
-      Pinning the `version` of first-party IaC modules now works without error regardless of what version of
-      the Panfactum modules are used (including local copies).
+      Pinning the `version` of first-party IaC modules now works without error regardless of what version of the
+      Panfactum modules are
     references:
       - type: issue-report
         summary: "Version pinning broken for first-party IaC modules"
         link: https://github.com/Panfactum/stack/issues/237
-  - type: fix
+  - id: c43c748f-d307-4bd0-83b6-eaef4bfbf51f
+    type: fix
     summary: >-
       `ignore_replica_count` in
       [`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
@@ -39,7 +42,8 @@ changes:
       - type: iac-module
         component: kube_stateful_set
         summary: Properly respects externally mutated replica count
-  - type: fix
+  - id: d59386c2-31d8-4067-918c-93c0c19eecc4
+    type: fix
     summary: >-
       Fixed `webhookConfigurations` to use `{}` instead of `null` in `kube_cert_manager`.
     references:

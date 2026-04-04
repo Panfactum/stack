@@ -8,7 +8,8 @@ highlights:
   - "EKS Node Group nodes now tainted with `controller=true:NoSchedule` — add `controller_nodes_enabled` where needed"
   - "Remove BuildKit StatefulSets before applying this release"
 changes:
-  - type: breaking_change
+  - id: a2e7bd52-b2ac-4e28-8484-b25a847a91a6
+    type: breaking_change
     summary: >-
       Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace
       must be removed if [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed.
@@ -16,10 +17,11 @@ changes:
       - type: iac-module
         component: kube_buildkit
         summary: StatefulSets must be removed before applying this release
-  - type: breaking_change
+  - id: b9787a5b-bd09-45c3-b6f0-ab39ef1889fd
+    type: breaking_change
     summary: >-
       Extensive variable renames across workload submodules including `kube_deployment`, `kube_stateful_set`,
-      `kube_cron_job`, `kube_pod`, `wf_spec`, and `kube_workload_utility`. See upgrade instructions for the full list.
+      `kube_cron_job`, `kube_pod`, `wf_spec`, and `kube_workload_utility`. See upgrade instructions for the full
     impacts:
       - type: iac-module
         component: kube_deployment
@@ -39,10 +41,11 @@ changes:
       - type: iac-module
         component: kube_workload_utility
         summary: Multiple input variables renamed
-  - type: breaking_change
+  - id: d65d38af-a979-4d33-b92d-ff05e7ec0028
+    type: breaking_change
     summary: >-
       The `enhanced_ha_enabled` input has been replaced with more granular tuning knobs in all submodules including
-      `kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault_proxy`, `kube_argo_event_bus`, and `kube_argo_event_source`.
+      `kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault_proxy`, `kube_argo_event_bus`, and
     impacts:
       - type: iac-module
         component: kube_pg_cluster
@@ -59,26 +62,31 @@ changes:
       - type: iac-module
         component: kube_argo_event_source
         summary: Replaced enhanced_ha_enabled with granular HA controls
-  - type: breaking_change
+  - id: 44915c08-85c8-4be1-889d-81805e7d41db
+    type: breaking_change
     summary: >-
       Nodes managed by EKS Node Groups are now tainted with `controller=true:NoSchedule`. Most workload submodules
-      have a new `controller_nodes_enabled` input to allow tolerating this taint if desired.
-  - type: breaking_change
+      have a new `controller_nodes_enabled` input to
+  - id: 2053bf20-a009-4a58-a898-efc9d272c635
+    type: breaking_change
     summary: >-
       Several flags are now enabled by default in workload submodules: `spot_nodes_enabled`, `arm_nodes_enabled`,
       `vpa_enabled`, `panfactum_scheduler_enabled`, and `pull_through_cache_enabled`.
-  - type: addition
+  - id: b3dc52b9-6c48-4e13-89dd-d486d4a90df7
+    type: addition
     summary: >-
       Adds built-in default [downward-api](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/)
       integrations in all workload submodules.
-  - type: addition
+  - id: 499e6924-280a-4952-9a88-c136e3cd3811
+    type: addition
     summary: >-
       All mounted ConfigMaps and Secrets in workload submodules are now mounted as executable to make it easier
       to mount scripts.
-  - type: fix
+  - id: 09a1188a-f2cb-46cb-9337-71bb589a52f4
+    type: fix
     summary: >-
-      Updates Karpenter and EBS CSI Controller to prevent remaining edge cases where nodes were terminated
-      prior to EBS volumes being detached, which caused six-minute delays for rescheduling stateful pods.
+      Updates Karpenter and EBS CSI Controller to prevent remaining edge cases where nodes were terminated prior to
+      EBS volumes being
     impacts:
       - type: iac-module
         component: kube_karpenter
@@ -86,12 +94,12 @@ changes:
       - type: iac-module
         component: kube_aws_ebs_csi
         summary: Updated to prevent premature node termination before EBS detach
-  - type: fix
+  - id: f7637348-1427-4c06-b46a-6f1df8a7c4b1
+    type: fix
     summary: >-
       Removes the `RemoveDuplicates` strategy in
-      [`kube_descheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
-      to allow scheduling multiple pods of the same controller on the same node when `host_anti_affinity_required`
-      is set to `false`.
+      [`kube_descheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler) to allow
+      scheduling multiple pods of the same controller on the same node when
     references:
       - type: issue-report
         summary: "RemoveDuplicates strategy prevents flexible pod scheduling"

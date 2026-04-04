@@ -6,7 +6,8 @@ highlights:
   - "`pg_storage_gb` renamed to `pg_initial_storage_gb` in [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
   - "Node pool inputs (`node_vpc_id`, `node_subnets`, `node_security_group_id`) moved from `kube_karpenter` to `kube_karpenter_node_pools`"
 changes:
-  - type: breaking_change
+  - id: 0e9aecd6-2801-4e6e-9e13-bb49175724c7
+    type: breaking_change
     summary: >-
       `pg_storage_increase_percent` has been changed to `pg_storage_increase_gb` in
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
@@ -15,21 +16,22 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: Storage autoscaling input renamed to pg_storage_increase_gb
-  - type: breaking_change
+  - id: 88d06a4d-bc00-4a87-9acc-af8dd34a2452
+    type: breaking_change
     summary: >-
       `pg_storage_gb` has been changed to `pg_initial_storage_gb` in
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-      to better indicate that this value is only used during initial database provisioning.
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to
+      better indicate that this value is only used during initial database
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: Storage input renamed to pg_initial_storage_gb
-  - type: breaking_change
+  - id: 42c2ce8f-4114-438f-9660-a9af630ea071
+    type: breaking_change
     summary: >-
       `node_vpc_id`, `node_subnets`, and `node_security_group_id` have been moved from
-      [`kube_karpenter`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
-      to [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
-      to simplify subnet/VPC/security group assignment logic. Karpenter auto-discovery tags have also been removed.
+      [`kube_karpenter`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) to
+      [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) to simplify subnet/VPC/security group assignment logic. Karpenter auto-discovery tags
     impacts:
       - type: iac-module
         component: kube_karpenter
@@ -37,23 +39,26 @@ changes:
       - type: iac-module
         component: kube_karpenter_node_pools
         summary: Node pool inputs moved here from kube_karpenter
-  - type: addition
+  - id: 7a4cf177-a2fc-46d9-b08a-da4f44c67cd5
+    type: addition
     summary: >-
       Adds new enhancements to
-      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster): better memory
-      tuning defaults, ability to set arbitrary PostgreSQL parameters, custom backup schedule support, and additional
-      schemas via `extra_schemas`.
+      [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster): better
+      memory tuning defaults, ability to set arbitrary PostgreSQL parameters, custom backup schedule support, and
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: Memory tuning, custom parameters, and extra schemas added
-  - type: addition
+  - id: 9b460085-a742-4e2d-87aa-96805a1b9f6b
+    type: addition
     summary: >-
       Adds another local retry for Terragrunt when providers produce an inconsistent final plan.
-  - type: addition
+  - id: bfe327b4-f043-487b-a948-51effd1bf6e3
+    type: addition
     summary: >-
       Adds check for updated `direnv` version to prevent issues when setting up the local devenv.
-  - type: fix
+  - id: 9069fb54-ce56-4891-91aa-51a64e1830b9
+    type: fix
     summary: >-
       Added deterministic ordering to additional resources in
       [`authentik_core_resources`](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
@@ -61,7 +66,8 @@ changes:
       - type: iac-module
         component: authentik_core_resources
         summary: Deterministic ordering applied to additional resources
-  - type: fix
+  - id: 77fc9003-350b-4a7f-8544-486993dd5ee2
+    type: fix
     summary: >-
       Fixed multiple bugs in `pf-env-bootstrap`: incorrect AWS profile for `.sops.yaml` and missing platform checksums
       in `.terraform.lock.hcl` files.
@@ -69,7 +75,8 @@ changes:
       - type: devshell
         component: pf
         summary: Fixed pf-env-bootstrap AWS profile and checksum bugs
-  - type: fix
+  - id: fea79ed2-cb93-43cc-b99f-e22c49a2ee76
+    type: fix
     summary: >-
       Restores the `pf-db-tunnel` command to the devenv.
     impacts:

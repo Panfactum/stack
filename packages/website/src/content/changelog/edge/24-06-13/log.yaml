@@ -6,7 +6,8 @@ highlights:
   - "New [`kube_open_cost`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_open_cost) module for Kubernetes cost analysis"
   - "Many new PgBouncer configuration inputs in [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)"
 changes:
-  - type: addition
+  - id: c7011ae8-d6be-4b06-8b93-e1a8c3d476a4
+    type: addition
     summary: >-
       Updates [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) with many new
       variables for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
@@ -14,7 +15,8 @@ changes:
       - type: iac-module
         component: kube_pg_cluster
         summary: New PgBouncer configuration variables
-  - type: addition
+  - id: 32533374-54a7-477a-847e-f4382ee0432a
+    type: addition
     summary: >-
       Adds support for `path_prefix` to
       [`kube_vault_proxy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy).
@@ -22,12 +24,13 @@ changes:
       - type: iac-module
         component: kube_vault_proxy
         summary: New path_prefix input support
-  - type: addition
+  - id: 8371b044-6bf3-42a4-8e03-1e4f95ee3052
+    type: addition
     summary: >-
       Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
-      allow for approximately $50/month in cost savings in exchange for reducing availability from 99.995% to 99.9%.
-      This is useful for less critical clusters (e.g., `development`).
-  - type: addition
+      allow for approximately $50/month in
+  - id: e2952df8-b2fc-4a73-bc7a-5b35248b44b5
+    type: addition
     summary: >-
       Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
       to the [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) module.
@@ -35,7 +38,8 @@ changes:
       - type: iac-module
         component: aws_account
         summary: New Spot Data Feed integration
-  - type: addition
+  - id: 24b5980f-e7da-44cf-8964-a3d32366abc4
+    type: addition
     summary: >-
       Adds the [`kube_open_cost`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_open_cost) module
       for calculating the cost of workloads running on Kubernetes.
@@ -43,7 +47,8 @@ changes:
       - type: iac-module
         component: kube_open_cost
         summary: New module for Kubernetes cost analysis
-  - type: fix
+  - id: 44e85fe4-c143-486b-b961-5199c1cdc967
+    type: fix
     summary: >-
       Addressed issue in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) where NAT nodes
       wouldn't restart if NAT setup failed with an exit code other than `1`.
@@ -51,7 +56,8 @@ changes:
       - type: iac-module
         component: aws_vpc
         summary: Fix for NAT node restart on non-1 exit codes
-  - type: fix
+  - id: 048179c4-29da-47f1-90cd-8ba583c23264
+    type: fix
     summary: >-
       Increased the memory floor of the Authentik server in
       [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) to avoid OOM issues.
@@ -59,7 +65,8 @@ changes:
       - type: iac-module
         component: kube_authentik
         summary: Increased memory floor to prevent OOM errors
-  - type: fix
+  - id: 639c4b92-5a30-407e-a426-dc2b2f3798e5
+    type: fix
     summary: >-
       Correctly applies pod labels in
       [`kube_aws_lb_controller`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
@@ -67,7 +74,8 @@ changes:
       - type: iac-module
         component: kube_aws_lb_controller
         summary: Fix for incorrect pod label application
-  - type: fix
+  - id: 9e91aa6f-2f85-451b-a0ef-daf2c84b0bec
+    type: fix
     summary: >-
       Removes node preferences defaults from
       [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility)
@@ -76,7 +84,8 @@ changes:
       - type: iac-module
         component: kube_workload_utility
         summary: Remove defaults blocking node deprovisioning
-  - type: fix
+  - id: 3514ba96-29ed-4adc-89af-0ca3d24575fd
+    type: fix
     summary: >-
       Fixes incorrect SCIM property mapping in
       [`authentik_aws_sso`](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).

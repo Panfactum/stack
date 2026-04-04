@@ -6,28 +6,31 @@ highlights:
   - "New `common_pod_labels` and `common_pod_annotations` inputs in `kube_policies` for cluster-wide pod metadata"
   - "DaemonSet updates now take constant time (previously scaled with node count, causing timeouts)"
 changes:
-  - type: addition
+  - id: 835252d2-9020-46a7-b5d9-74df637fca89
+    type: addition
     summary: >-
-      Adds support for using a private git repository for first-party IaC modules by providing `GIT_USERNAME`
-      and `GIT_PASSWORD` environment variables. See the
-      [updated documentation.](/docs/main/guides/iac/first-party-modules#using-a-private-git-repository)
-  - type: addition
+      Adds support for using a private git repository for first-party IaC modules by providing `GIT_USERNAME` and
+      `GIT_PASSWORD` environment variables. See
+  - id: a570138e-83d9-4de9-aeb6-1067157ee2b4
+    type: addition
     summary: >-
       [`kube_policies`](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies) now takes
-      `common_pod_labels` and `common_pod_annotations` inputs to apply a standard set of labels and/or
-      annotations to all pods in the cluster.
+      `common_pod_labels` and `common_pod_annotations` inputs to apply a standard set of labels and/or annotations
+      to all pods in
     impacts:
       - type: iac-module
         component: kube_policies
         summary: New common_pod_labels and common_pod_annotations inputs for cluster-wide pod metadata
-  - type: fix
+  - id: 1dffa0f2-db71-41e8-95c1-48f5aac9aa7e
+    type: fix
     summary: >-
       Addressed issue where the `.kube/.gitignore` file was not being created.
     references:
       - type: issue-report
         summary: ".kube/.gitignore file not created"
         link: https://github.com/Panfactum/stack/issues/244
-  - type: fix
+  - id: 22fc96df-86c8-4ee7-8d8c-ece65239da34
+    type: fix
     summary: >-
       DaemonSets in the cluster will now update in constant time. Previously update time scaled with node count,
       leading to timeouts.
@@ -35,7 +38,8 @@ changes:
       - type: iac-module
         component: kube_daemon_set
         summary: Updates now complete in constant time regardless of node count
-  - type: fix
+  - id: 60ba37e3-c0e9-458e-80c1-11c1d91846f0
+    type: fix
     summary: >-
       Resolves a bug that caused
       [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) workflows to fail.
@@ -43,7 +47,8 @@ changes:
       - type: iac-module
         component: wf_tf_deploy
         summary: Fix bug causing workflow execution failures
-  - type: fix
+  - id: 503d7c6f-aba7-459b-abf7-a3917bab02f8
+    type: fix
     summary: >-
-      Resolves a bug that caused module deployment to fail if Kubernetes settings were not configured for the region
-      even if Kubernetes was not used.
+      Resolves a bug that caused module deployment to fail if Kubernetes settings were not configured for the
+      region even if

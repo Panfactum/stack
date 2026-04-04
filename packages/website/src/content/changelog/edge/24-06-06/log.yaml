@@ -6,7 +6,8 @@ highlights:
   - "VPC flow logs now disabled by default in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc)"
   - "New `pf-env-scaffold` script for environment bootstrapping setup"
 changes:
-  - type: breaking_change
+  - id: de5d749e-672b-4b9f-a3a3-571da2457eb1
+    type: breaking_change
     summary: >-
       The reloader deployment must be deleted before the next apply of
       [`kube_reloader`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reloader). No inputs have changed.
@@ -14,7 +15,8 @@ changes:
       - type: iac-module
         component: kube_reloader
         summary: Requires redeployment before next apply
-  - type: breaking_change
+  - id: 9179740a-1e9e-49a1-ba00-98701581a893
+    type: breaking_change
     summary: >-
       The alpha module `kube_labels` has been removed in favor of the labels provided by
       [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility).
@@ -22,19 +24,22 @@ changes:
       - type: iac-module
         component: kube_workload_utility
         summary: Replaces removed kube_labels module
-  - type: breaking_change
+  - id: 17b0ddd9-8101-47c6-a013-4ee014f9414c
+    type: breaking_change
     summary: >-
-      VPC flow logs in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) are now disabled by default
-      as they can be fairly expensive. They can be re-enabled by setting `vpc_flow_logs_enabled` to `true`.
+      VPC flow logs in [`aws_vpc`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) are now disabled
+      by default as they can be fairly expensive. They can be re-enabled
     impacts:
       - type: iac-module
         component: aws_vpc
         summary: VPC flow logs now disabled by default
-  - type: addition
+  - id: 97d96c80-b239-4778-80a5-1c61c6f120a4
+    type: addition
     summary: >-
       Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
       [bootstrapping guide](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code).
-  - type: addition
+  - id: 1ffafbb5-fd00-4024-8dd6-c24d1068aa9b
+    type: addition
     summary: >-
       Added [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility)
       to make it easier to create uniform, production-hardened Pod specs that take advantage of all Panfactum stack capabilities.
@@ -42,7 +47,8 @@ changes:
       - type: iac-module
         component: kube_workload_utility
         summary: New submodule for production-hardened Pod specs
-  - type: addition
+  - id: 425eab40-49eb-4f0a-bebd-55c81297ea35
+    type: addition
     summary: >-
       Added [`kube_constants`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) that export
       static configuration values useful when creating resources on Panfactum clusters.
@@ -50,7 +56,8 @@ changes:
       - type: iac-module
         component: kube_constants
         summary: New submodule exporting static cluster config values
-  - type: addition
+  - id: 2d0082a9-a940-4da7-a8a1-081fb31201a9
+    type: addition
     summary: >-
       [`kube_cert_manager`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) will now
       automatically delete Certificate secrets if the Certificate is deleted.
@@ -58,7 +65,8 @@ changes:
       - type: iac-module
         component: kube_cert_manager
         summary: Auto-deletes Certificate secrets on Certificate removal
-  - type: addition
+  - id: 26147a5f-9a88-48be-806c-8d8eb4141df1
+    type: addition
     summary: >-
       [`aws_ses_domain`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain) now takes an optional
       `smtp_allowed_cidrs` input that restricts what IPs can use the generated SMTP credentials.
@@ -66,13 +74,15 @@ changes:
       - type: iac-module
         component: aws_ses_domain
         summary: New smtp_allowed_cidrs input for IP restrictions
-  - type: addition
+  - id: 8a80555c-39f2-40a4-b227-bda29b7bf01b
+    type: addition
     summary: >-
       Terragrunt will now automatically retry on some errors up to three times before exiting with failure.
-  - type: fix
+  - id: 3cb277fe-e76d-4224-bd0e-6dd5af0a7a91
+    type: fix
     summary: >-
-      `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
-      instead of full devenv re-evaluations.
+      `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads instead
+      of full devenv
     references:
       - type: issue-report
         summary: ".env files not loaded into shell environment"
@@ -81,11 +91,13 @@ changes:
       - type: configuration
         component: ".env"
         summary: Proper loading and fast reload on changes
-  - type: fix
+  - id: bafeabd8-b71f-4836-9438-0b72404ef4fd
+    type: fix
     summary: >-
       Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when
       bootstrapping before VPA takes effect.
-  - type: fix
+  - id: 29af2761-21e2-463e-8bea-b16c1993ebad
+    type: fix
     summary: >-
       [`kube_authentik`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) now respects the
       `log_level` input.

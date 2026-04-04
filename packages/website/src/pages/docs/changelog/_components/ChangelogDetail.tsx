@@ -73,6 +73,7 @@ interface ReferenceItem {
 }
 
 export interface RenderedChangeItem {
+  id: string;
   type: ChangeType;
   descriptionHtml: string;
   descriptionDetailHtml?: string;
@@ -199,7 +200,10 @@ const ChangeCard: Component<{
 
   return (
     <Collapsible>
-      <div class="rounded-lg border border-primary bg-secondary">
+      <div
+        id={`change-${props.change.id}`}
+        class="rounded-lg border border-primary bg-secondary"
+      >
         <Collapsible.Trigger
           class={`
             flex w-full cursor-pointer items-center gap-3 border-0
@@ -379,6 +383,13 @@ const ChangeCard: Component<{
                   </For>
                 </div>
               </Show>
+              <p
+                class={`
+                  !mt-6 !mb-0 text-center font-mono text-xs text-secondary
+                `}
+              >
+                Change ID: {props.change.id}
+              </p>
             </div>
           </Collapsible.Content>
         </Show>

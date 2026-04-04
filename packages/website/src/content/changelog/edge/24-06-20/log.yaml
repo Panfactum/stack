@@ -6,25 +6,29 @@ highlights:
   - "New `panfactum_scheduler_enabled` input (default `false`) to opt in to the new scheduler per module"
   - "Automatic descheduling of pods from low-utilization nodes when scheduler is enabled"
 changes:
-  - type: addition
+  - id: 8ef42b21-1a54-420d-9fc8-0acc15a64302
+    type: addition
     summary: >-
-      Adds [`kube_scheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler), an alternative
-      Kubernetes scheduler that improves pod bin-packing on nodes. Tests show an estimated 25-33% reduction in node costs.
-      Installation instructions are [here](/docs/edge/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler).
+      Adds [`kube_scheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler), an
+      alternative Kubernetes scheduler that improves pod bin-packing on nodes. Tests show an estimated 25-33%
+      reduction in node
     impacts:
       - type: iac-module
         component: kube_scheduler
         summary: New bin-packing scheduler for node cost reduction
-  - type: addition
+  - id: 404221c2-c447-441c-84c3-b5f8a28d1f96
+    type: addition
     summary: >-
-      Adds `panfactum_scheduler_enabled` (default: `false`) input to most infrastructure modules. When enabled, uses the
-      scheduler provided by [`kube_scheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
-      instead of the less-efficient EKS scheduler.
+      Adds `panfactum_scheduler_enabled` (default: `false`) input to most infrastructure modules. When enabled,
+      uses the scheduler provided by
+      [`kube_scheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler) instead of
+      the
     impacts:
       - type: iac-module
         component: kube_scheduler
         summary: New panfactum_scheduler_enabled opt-in input
-  - type: addition
+  - id: fd54c0cb-f11f-4a00-8337-52549acc5624
+    type: addition
     summary: >-
       When `panfactum_scheduler_enabled` is `true`, the
       [`kube_descheduler`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
@@ -33,7 +37,8 @@ changes:
       - type: iac-module
         component: kube_descheduler
         summary: Auto-evicts pods from low-utilization nodes
-  - type: fix
+  - id: 64999c36-3398-411e-b0ac-9f6c97817d52
+    type: fix
     summary: >-
       Addresses a bug in the previous release that left
       [`kube_karpenter`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) undeployable.
@@ -41,9 +46,11 @@ changes:
       - type: iac-module
         component: kube_karpenter
         summary: Fix for deployment failure from previous release
-  - type: fix
+  - id: 19a9fb07-b9d7-4d00-9457-b050b40988e2
+    type: fix
     summary: >-
       Addresses an issue where nodes were limited to a hard cap of 29 pods.
-  - type: fix
+  - id: 045d305c-f3bc-4ce9-bcb9-a9bc20dc17b2
+    type: fix
     summary: >-
       Configures Kubernetes nodes to use a fixed amount of system overhead rather than one that scales with node size.

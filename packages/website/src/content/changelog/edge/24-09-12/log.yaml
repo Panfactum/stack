@@ -8,12 +8,14 @@ highlights:
   - "Credential outputs renamed: `superuser_username/password` → `root_username/password` in `kube_pg_cluster` and `kube_redis_sentinel`"
   - "Provider configuration no longer needs to be manually enabled via `module.yaml`"
 changes:
-  - type: breaking_change
+  - id: e24a035d-6f2d-4d08-84ae-d13e7b2644c6
+    type: breaking_change
     summary: >-
-      [`kube_secrets_csi`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) has been deprecated
-      and should be removed from your clusters. The Vault Secrets Operator replaces its functionality with improved
-      security, less memory usage (~150MB per node), and better ergonomics.
-  - type: breaking_change
+      [`kube_secrets_csi`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) has been
+      deprecated and should be removed from your clusters. The Vault Secrets Operator replaces its functionality
+      with improved
+  - id: 42ffd471-706c-424c-b5df-98d140f65b85
+    type: breaking_change
     summary: >-
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
       [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) outputs
@@ -25,24 +27,27 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: Outputs renamed from superuser_* to root_*
-  - type: breaking_change
+  - id: 74a171d5-2102-475d-affc-b6243900dc2c
+    type: breaking_change
     summary: >-
-      `pf-providers-enable` has been renamed to `pf-tf-init` with expanded functionality: now influences every module
-      in the directory tree, runs `init -upgrade` on every module, and has improved runtime performance.
-  - type: breaking_change
+      `pf-providers-enable` has been renamed to `pf-tf-init` with expanded functionality: now influences every
+      module in the directory tree, runs `init -upgrade`
+  - id: b25fd731-98ea-42d7-a945-ba383a0e880d
+    type: breaking_change
     summary: >-
       You no longer need to manually enable providers via the `providers` array in `module.yaml`. Terragrunt now
-      automatically detects required providers at runtime. The `providers` input no longer has any functionality and
-      can be removed from all `module.yaml` files.
+      automatically detects required providers
     impacts:
       - type: configuration
         component: module.yaml
         summary: Manual provider configuration via providers array no longer needed
-  - type: addition
+  - id: 97f0944e-1184-45fc-b667-28e011a496ca
+    type: addition
     summary: >-
       Adds `common_env_from_config_maps` and `common_env_from_secrets` inputs to all standard workload submodules
       to source environment variables from existing ConfigMaps and Secrets, respectively.
-  - type: addition
+  - id: d41e8c70-f4ad-4246-bfad-e585040cef55
+    type: addition
     summary: >-
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
       [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) now
@@ -54,7 +59,8 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: Added Vault-generated credential support for workload auth
-  - type: fix
+  - id: 46b45469-f6ac-4a17-ba8d-7614364d120a
+    type: fix
     summary: >-
       Adds a controller node preference to pods with `controller_nodes_enabled` set to `true`, optimizing resource
-      efficiency by preferring to fill controller nodes before Karpenter nodes.
+      efficiency by preferring to fill controller

@@ -9,26 +9,28 @@ highlights:
   - "New [`kube_vault_proxy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy) to add SSO to web assets without integrated SSO"
   - "`pgbouncer_read_only_enabled` now defaults to `false` — breaking change for read-only pooler users"
 changes:
-  - type: breaking_change
+  - id: 3cda36f3-f411-4732-9008-414137c47c7e
+    type: breaking_change
     summary: >-
       The EKS CoreDNS addon has been removed and replaced with the
-      [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
-      module in order to provide better guarantees about DNS behavior. See upgrade instructions for migration steps.
+      [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) module in
+      order to provide better guarantees about
     impacts:
       - type: iac-module
         component: kube_core_dns
         summary: "New module replacing EKS CoreDNS addon"
-  - type: breaking_change
+  - id: e5782f27-a0a8-4b74-a0dc-4a6a720c3ed4
+    type: breaking_change
     summary: >-
       [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has two
-      new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`),
-      which enable the `r` and `rw` poolers, respectively. This is a breaking change as `pgbouncer_read_only_enabled`
-      now defaults to `false`.
+      new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default
+      `true`), which enable the `r` and `rw` poolers, respectively.
     impacts:
       - type: iac-module
         component: kube_pg_cluster
         summary: "New pgbouncer_read_only_enabled and pgbouncer_read_write_enabled flags"
-  - type: breaking_change
+  - id: c1705857-c3ce-498f-80ae-e043c3a09c88
+    type: breaking_change
     summary: >-
       Label selectors in [`kube_pod`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod) have been
       stabilized but require a one-time manual deletion of already-deployed Deployments (e.g., `bastion/bastion`)
@@ -37,16 +39,18 @@ changes:
       - type: iac-module
         component: kube_pod
         summary: "Stabilized label selectors requiring one-time Deployment deletion"
-  - type: addition
+  - id: 4046b462-3cec-4c71-a8ad-d338089d5fe1
+    type: addition
     summary: >-
-      (Alpha) Added a monitoring stack [`kube_monitoring`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring)
-      which includes HA Prometheus, Prometheus Operator, Thanos metrics storage on S3, Node Exporter,
-      kube-state-metrics, Alertmanager, and Grafana with 20+ custom dashboards.
+      (Alpha) Added a monitoring stack
+      [`kube_monitoring`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring) which
+      includes HA Prometheus, Prometheus Operator, Thanos metrics storage on S3, Node Exporter, kube-state-metrics,
     impacts:
       - type: iac-module
         component: kube_monitoring
         summary: "New module with Prometheus, Thanos, and Grafana monitoring stack"
-  - type: addition
+  - id: 6e150b28-37f4-46fc-aadc-632d2dd8c0a4
+    type: addition
     summary: >-
       (Alpha) Added the Argo Workflow engine to the stack via the
       [`kube_argo`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) module.
@@ -54,7 +58,8 @@ changes:
       - type: iac-module
         component: kube_argo
         summary: "New module providing Argo Workflow engine"
-  - type: addition
+  - id: 3fd8c19b-b09f-4f30-b5b7-b8f152b390b9
+    type: addition
     summary: >-
       New module [`kube_vault_proxy`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy)
       that can be used to add SSO to web assets that do not have integrated SSO.
@@ -62,7 +67,8 @@ changes:
       - type: iac-module
         component: kube_vault_proxy
         summary: "New module for adding SSO to web assets"
-  - type: addition
+  - id: 81517d13-88db-43a3-b370-86a3f8d0c67f
+    type: addition
     summary: >-
       [`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) has a
       new flag, `lfu_cache_enabled`, to configure automatic LFU-based eviction under memory pressure.
@@ -70,7 +76,8 @@ changes:
       - type: iac-module
         component: kube_redis_sentinel
         summary: "New lfu_cache_enabled flag for LFU-based eviction"
-  - type: improvement
+  - id: 0c5ecedf-091a-4dd8-8aa1-90db1e6367c3
+    type: improvement
     summary: >-
       Added the standard Restricted Reader role to Vault instances and updated
       [`vault_auth_oidc`](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to take
@@ -79,14 +86,17 @@ changes:
       - type: iac-module
         component: vault_auth_oidc
         summary: "New restricted_reader_groups input added"
-  - type: improvement
+  - id: 8923a35f-bb7c-4b82-9b41-eb101d965316
+    type: improvement
     summary: >-
       Reduced controller node costs by ~40% by recommending `controller_node_count = 1` and
       `controller_node_instance_types = ["t3a.medium"]` after bootstrapping.
-  - type: improvement
+  - id: 49346523-4462-408e-bf3e-f0007900e550
+    type: improvement
     summary: >-
       Added scheduling constraints to prevent critical workloads from scheduling all pods on the same instance type.
-  - type: fix
+  - id: acd69b59-f092-4294-9816-fb380a321ebc
+    type: fix
     summary: >-
-      PVCs for postgres instances were inadvertently created with duplicated entries for accessModes.
-      This has been fixed (existing PVCs are unaffected as they are immutable).
+      PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has been
+      fixed (existing PVCs are unaffected

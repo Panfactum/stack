@@ -307,9 +307,16 @@ function buildLogSchema(
           "Flat list of all changes in this release, each tagged with a type. Rendered only on the dedicated page for each release, not on the paginated list page.",
         items: {
           type: "object",
-          required: ["type", "summary"],
+          required: ["id", "type", "summary"],
           additionalProperties: false,
           properties: {
+            id: {
+              type: "string",
+              pattern:
+                "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              description:
+                "Stable UUID for deep-linking to this specific change entry. Auto-generated when the entry is created.",
+            },
             type: {
               type: "string",
               enum: [
