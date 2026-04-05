@@ -60,7 +60,7 @@ export default defineConfig({
     defaultStrategy: 'hover'
   },
   build: {
-    inlineStylesheets: 'auto' // Was 'never' when criticalCSS plugin was active; using default now
+    inlineStylesheets: 'never' // Must remain 'never' — Tailwind's split imports rely on cascade ordering that breaks when Astro auto-inlines
   },
   image: {
     service: imageService({
