@@ -25,7 +25,7 @@ bun ./scripts/list-unvalidated-commits.ts
 
 This outputs the full hashes of all non-merge commits since the last `edge.*` tag that are not in the `validated` array in `main/review.yaml`, one per line, in chronological order (earliest first). If there is no output, all commits are validated — skip to Step 2.
 
-For each hash in the output, spawn a `changelog-commit-reviewer` subagent (defined in `.claude/agents/changelog-commit-reviewer.md`), passing the hash. The agent reviews the commit and determines whether a changelog entry is needed.
+For each hash in the output, spawn a `changelog-commit-reviewer` **general-purpose** subagent (defined in `.claude/agents/changelog-commit-reviewer.md`), passing the hash. The agent reviews the commit and determines whether a changelog entry is needed.
 
 **Execution rules:**
 
@@ -49,7 +49,7 @@ Exit codes:
 - **1** — Breaking changes exist but upgrade instructions file is missing or unset.
 - **2** — Breaking changes exist and upgrade instructions file already exists.
 
-If the script exits with code 1 or 2 (breaking changes present), spawn a subagent to run the **GenerateUpgradeInstructions** workflow (via the changelog skill) to create or update the upgrade instructions before continuing.
+If the script exits with code 1 or 2 (breaking changes present), spawn a **general-purpose** subagent to run the **GenerateUpgradeInstructions** workflow (via the changelog skill) to create or update the upgrade instructions before continuing.
 
 ### 3. Review Todo Items
 
@@ -71,11 +71,11 @@ Collect all proposals and present them to the user for review. Do **not** apply 
 
 ### 4. Condense Related Entries
 
-Spawn a `changelog-condenser` subagent (defined in `.claude/agents/changelog-condenser.md`) to review the full changelog and merge related or redundant entries. The agent runs the **CondenseEntries** workflow and returns a summary of what was merged.
+Spawn a `changelog-condenser` **general-purpose** subagent (defined in `.claude/agents/changelog-condenser.md`) to review the full changelog and merge related or redundant entries. The agent runs the **CondenseEntries** workflow and returns a summary of what was merged.
 
 ### 5. Generate Summary
 
-Spawn a subagent to run the **GenerateSummary** workflow (via the changelog skill) to generate or update the top-level `summary` and `highlights` fields based on the final set of condensed entries.
+Spawn a **general-purpose** subagent to run the **GenerateSummary** workflow (via the changelog skill) to generate or update the top-level `summary` and `highlights` fields based on the final set of condensed entries.
 
 ### 6. Quality Review
 
@@ -85,7 +85,7 @@ Run the list-change-ids script to get every change ID:
 bun ./scripts/list-change-ids.ts
 ```
 
-For each change ID in the output, spawn a subagent to run the **EnhanceEntry** workflow (via the changelog skill), passing the change ID as the entry identifier. Run subagents **in parallel** (up to 5 at a time) since each operates on a single entry independently.
+For each change ID in the output, spawn a **general-purpose** subagent to run the **EnhanceEntry** workflow (via the changelog skill), passing the change ID as the entry identifier. Run subagents **in parallel** (up to 5 at a time) since each operates on a single entry independently.
 
 After all subagents complete, collect their before/after reports for the final summary.
 

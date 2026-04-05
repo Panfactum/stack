@@ -41,6 +41,7 @@ Apply these grouping heuristics (in priority order):
 - Have different `type` values where the distinction matters to the user (e.g., a `breaking_change` and a `fix` — unless the fix reverts the breakage entirely)
 - Affect genuinely different components or features, even if introduced in the same commit
 - Are both `breaking_change` entries with distinct action items the user must take separately
+- Are `update` entries for independent third-party systems with separate release cycles (e.g., an EBS CSI driver upgrade and an EKS upgrade belong in separate entries even if they were deployed together). The only exception is components that are genuinely part of the same toolset — for example, `kubectl` and the Kubernetes version in `aws_eks` share a release cycle and may be merged.
 
 For each merge set, record:
 - The indices (1-based) of the entries to merge
@@ -77,7 +78,28 @@ MUST follow these rules when writing:
 - **Maintain consistent indentation** (2 spaces) throughout the file.
 - **Do not touch top-level fields** (`summary`, `highlights`, `upgrade_instructions`, `branch`, `skip`) — they are managed by other workflows.
 
-### 5. Validate the Result
+### 5. Generate Groups
+
+Run the propose-groups script to identify entries that share the same change type and impact set:
+
+```bash
+bun ./scripts/propose-groups.ts
+```
+
+For each proposed group with 2+ entries, add a corresponding object to the top-level `groups` array
+in `log.yaml`. Each group object has three fields:
+
+- **`type`**: The change type from the proposal (e.g., `fix`, `improvement`).
+- **`summary`**: A generic human-readable label following the pattern `"<Type> to <component>"`.
+  Use title case for the type: "Fixes to `pf cluster add`", "Improvements to `pf env add`",
+  "Fixes to `kube_opensearch`".
+- **`changes`**: Array of UUID strings — the `id` values of the entries in the group.
+
+Place the `groups` array after `highlights` and before `changes` in the YAML file.
+Replace any pre-existing `groups` array entirely — do not merge with old groups.
+If the proposal script finds zero groups, omit the `groups` field entirely.
+
+### 6. Validate the Result
 
 Run the validation script:
 
@@ -87,7 +109,7 @@ bun ./scripts/validate-changelog.ts
 
 If there are WARN-level findings for the condensed entries, attempt to fix them (e.g., add missing `action_items` for a `breaking_change`). If a fix cannot be determined, note it in the report.
 
-### 6. Report Results
+### 7. Report Results
 
 Present a consolidated report:
 

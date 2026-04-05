@@ -42,10 +42,17 @@ interface Change {
   impacts?: ChangeImpact[];
 }
 
+interface Group {
+  type: string;
+  summary: string;
+  changes: string[];
+}
+
 interface LogData {
   summary?: string;
   upgrade_instructions?: string;
   highlights?: string[];
+  groups?: Group[];
   changes?: Change[];
 }
 
@@ -211,6 +218,24 @@ function main(): void {
         changeType: "(duplicate id)",
         message: `Duplicate id "${id}" found in changes #${indices.join(", #")}`,
       });
+    }
+  }
+
+  // Check that group change IDs reference real change entries
+  const validIds = new Set(changes.map((c) => c.id).filter(Boolean));
+  const groups = logData.groups ?? [];
+  for (let g = 0; g < groups.length; g++) {
+    const group = groups[g];
+    if (!group) continue;
+    for (const refId of group.changes) {
+      if (!validIds.has(refId)) {
+        allFindings.push({
+          level: "WARN",
+          changeIndex: -1,
+          changeType: "(group)",
+          message: `Group #${g + 1} ("${truncateSummary(group.summary)}") references change id "${refId}" which does not exist in the changes array`,
+        });
+      }
     }
   }
 

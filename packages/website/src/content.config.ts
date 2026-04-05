@@ -35,15 +35,20 @@ const changes = defineCollection({
       description: z.string().optional(),
       action_items: z.array(z.string()).optional(),
       references: z.array(z.object({
-        type: z.enum(["internal-commit", "external-commit", "commit", "issue-report", "external-docs", "internal-docs"]),
+        type: z.enum(["internal-commit", "external-commit", "issue-report", "external-docs", "internal-docs"]),
         summary: z.string(),
         link: z.string(),
       })).optional(),
       impacts: z.array(z.object({
-        type: z.enum(["iac-module", "cli", "devshell", "configuration", "installer"]),
+        type: z.enum(["iac-module", "iac-provider", "cli", "devshell", "configuration", "installer"]),
         component: z.string(),
         summary: z.string(),
       })).optional(),
+    })).optional(),
+    groups: z.array(z.object({
+      type: z.enum(["fix", "improvement", "addition", "deprecation", "update"]),
+      summary: z.string(),
+      changes: z.array(z.string().uuid()),
     })).optional(),
   }),
 });

@@ -31,6 +31,44 @@
       },
       "description": "List of important things to call out from this release. Displayed on the paginated changelog list page as the visible summary for each entry. Each item is inline markdown."
     },
+    "groups": {
+      "type": "array",
+      "description": "Optional groupings of related change entries for styled rendering. Each group collects entries that share the same change type and affect the same components.",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "summary",
+          "changes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "fix",
+              "improvement",
+              "addition",
+              "deprecation",
+              "update"
+            ],
+            "description": "The shared change type for all entries in this group. Breaking changes are never grouped."
+          },
+          "summary": {
+            "type": "string",
+            "description": "A summary describing the group of changes."
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "description": "Array of change entry UUIDs that belong to this group. Each UUID must reference an id in the changes array."
+          }
+        }
+      }
+    },
     "changes": {
       "type": "array",
       "description": "Flat list of all changes in this release, each tagged with a type. Rendered only on the dedicated page for each release, not on the paginated list page.",
@@ -144,6 +182,7 @@
                   "type": "string",
                   "enum": [
                     "iac-module",
+                    "iac-provider",
                     "cli",
                     "devshell",
                     "configuration",
@@ -288,6 +327,37 @@
                           "wf_dockerfile_build",
                           "wf_spec",
                           "wf_tf_deploy"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "iac-provider"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "component": {
+                        "enum": [
+                          "authentik",
+                          "aws",
+                          "aws_global",
+                          "aws_secondary",
+                          "helm",
+                          "kubectl",
+                          "kubernetes",
+                          "local",
+                          "mongodb_atlas",
+                          "pf",
+                          "random",
+                          "time",
+                          "tls",
+                          "vault"
                         ]
                       }
                     }

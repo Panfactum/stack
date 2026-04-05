@@ -59,9 +59,16 @@ For each changed file path, apply the heuristics below to produce suggested `imp
 |---------------------------|-------------|----------------------|
 | `packages/infrastructure/<name>/` | `iac-module` | Directory name (e.g., `aws_eks`) |
 | `packages/cli/src/commands/<path>/` | `cli` | Derived from the command's subcommand path (e.g., `buildkit build`) |
-| `packages/nix/packages/scripts/<name>.sh` | `devshell` | Filename without `.sh` |
+| `packages/cli/src/files/terragrunt/providers/<name>.hcl` | `iac-provider` | Filename without `.hcl` (e.g., `aws`) |
+| `packages/bastion/` | `iac-module` | `kube_bastion` |
+| `packages/vault/` | `iac-module` | `kube_vault` |
+| `packages/installer/` | `installer` | `installer` (single component) |
+| `packages/nix/packages/` | `devshell` | Derived from the diff content, not the file path |
 
-Files that do not match any pattern should be noted but do not automatically produce a component suggestion.
+| `flake.nix` | `devshell` | Likely `devshell`, but may not be user-facing — inspect the diff to determine if the change affects user-consumed packages or is purely internal |
+| `flake.lock` | `devshell` | Likely `devshell`, but may not be user-facing — inspect the diff to determine if the change affects user-consumed packages or is purely internal |
+
+Files that do not match any pattern should still be assigned a component based on the diff context (e.g., what the code does, what it integrates with). If the correct component is uncertain, assign your best guess and add a `todo` item to `review.yaml` noting the uncertainty.
 
 After mapping, cross-reference the suggested component names against the valid enums in the log schema (auto-loaded via the changelog-format reference doc). If a suggested component name is not present in the schema for its impact type, include it anyway and add a `todo` item to `packages/website/src/content/changelog/main/review.yaml` noting it is unverified.
 

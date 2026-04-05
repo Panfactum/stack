@@ -16,6 +16,10 @@ const NIX_PACKAGES_SCRIPTS_DIR = join(
   REPO_ROOT,
   "packages/nix/packages/scripts"
 );
+const IAC_PROVIDERS_DIR = join(
+  REPO_ROOT,
+  "packages/cli/src/files/terragrunt/providers"
+);
 const METADATA_YAML_PATH = join(INFRASTRUCTURE_DIR, "metadata.yaml");
 const LOG_SCHEMA_OUTPUT_PATH = join(
   REPO_ROOT,
@@ -215,6 +219,27 @@ function deriveDevshellEnum(): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Derive iac-provider enum
+//
+// Provider names are derived from file names in packages/cli/src/files/terragrunt/providers/.
+// The file extension (.tftpl, .tf) is stripped to produce the provider name.
+// ---------------------------------------------------------------------------
+
+function deriveIacProviderEnum(): string[] {
+  const entries = readdirSync(IAC_PROVIDERS_DIR, { withFileTypes: true });
+  const names = entries
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        !entry.name.includes("_override") &&
+        (entry.name.endsWith(".tftpl") || entry.name.endsWith(".tf"))
+    )
+    .map((entry) => entry.name.replace(/\.(tftpl|tf)$/, ""))
+    .sort();
+  return [...new Set(names)];
+}
+
+// ---------------------------------------------------------------------------
 // Configuration file enum — static list of standard config file references
 // ---------------------------------------------------------------------------
 
@@ -260,6 +285,7 @@ const CONFIGURATION_ENUM: string[] = [
 
 function buildLogSchema(
   iacModuleEnum: string[],
+  iacProviderEnum: string[],
   cliEnum: string[],
   devshellEnum: string[],
   configurationEnum: string[],
@@ -300,6 +326,44 @@ function buildLogSchema(
         },
         description:
           "List of important things to call out from this release. Displayed on the paginated changelog list page as the visible summary for each entry. Each item is inline markdown.",
+      },
+      groups: {
+        type: "array",
+        description:
+          "Optional groupings of related change entries for styled rendering. Each group collects entries that share the same change type and affect the same components.",
+        items: {
+          type: "object",
+          required: ["type", "summary", "changes"],
+          additionalProperties: false,
+          properties: {
+            type: {
+              type: "string",
+              enum: [
+                "fix",
+                "improvement",
+                "addition",
+                "deprecation",
+                "update",
+              ],
+              description: "The shared change type for all entries in this group. Breaking changes are never grouped.",
+            },
+            summary: {
+              type: "string",
+              description:
+                "A summary describing the group of changes.",
+            },
+            changes: {
+              type: "array",
+              items: {
+                type: "string",
+                pattern:
+                  "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              },
+              description:
+                "Array of change entry UUIDs that belong to this group. Each UUID must reference an id in the changes array.",
+            },
+          },
+        },
       },
       changes: {
         type: "array",
@@ -406,7 +470,7 @@ function buildLogSchema(
                 properties: {
                   type: {
                     type: "string",
-                    enum: ["iac-module", "cli", "devshell", "configuration", "installer"],
+                    enum: ["iac-module", "iac-provider", "cli", "devshell", "configuration", "installer"],
                     description:
                       "The kind of component affected by this change.",
                   },
@@ -431,6 +495,18 @@ function buildLogSchema(
                     then: {
                       properties: {
                         component: { enum: iacModuleEnum },
+                      },
+                    },
+                  },
+                  {
+                    if: {
+                      properties: {
+                        type: { const: "iac-provider" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        component: { enum: iacProviderEnum },
                       },
                     },
                   },
@@ -501,6 +577,12 @@ function main(): void {
   const iacModuleEnum = deriveIacModuleEnum();
   console.log(`  Found ${iacModuleEnum.length} iac-module entries.`);
 
+  console.log(
+    "Deriving iac-provider enum from packages/cli/src/files/terragrunt/providers/..."
+  );
+  const iacProviderEnum = deriveIacProviderEnum();
+  console.log(`  Found ${iacProviderEnum.length} iac-provider entries.`);
+
   console.log("Deriving cli enum from packages/cli/src/commands/...");
   const cliEnum = [...deriveCliEnum(), ...CLI_EXTRA_COMPONENTS].sort();
   console.log(`  Found ${cliEnum.length} cli entries.`);
@@ -514,6 +596,7 @@ function main(): void {
   console.log("Building log schema...");
   const logSchema = buildLogSchema(
     iacModuleEnum,
+    iacProviderEnum,
     cliEnum,
     devshellEnum,
     CONFIGURATION_ENUM,

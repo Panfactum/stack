@@ -9,7 +9,7 @@ import Layout from '@/components/layouts/docs/Layout.astro';
 import { DOCS_VERSIONS } from '@/lib/constants';
 
 import { ChangelogDetail } from './_components/ChangelogDetail';
-import type { RenderedChangeItem } from './_components/ChangelogDetail';
+import type { RenderedChangeItem, RenderedGroup } from './_components/ChangelogDetail';
 import { ChangelogList } from './_components/ChangelogList';
 import type { ChangelogListEntry } from './_components/ChangelogList';
 import { ChannelTabBar } from './_components/ChannelTabBar';
@@ -179,7 +179,7 @@ export async function getStaticPaths() {
   // Unreleased — rendered as a detail page
   const unreleasedEntries = allChanges.filter(entry => entry.id.startsWith('main'));
   const unreleasedPages = unreleasedEntries.map((entry) => ({
-    params: { page: 'main/0' },
+    params: { page: 'main' },
     props: { type: 'detail' as const, entry, upgradeEntry: upgradeInstructionsByDir.get(getDirKey(entry.id)) }
   }));
 
@@ -268,7 +268,7 @@ const sections = DOCS_VERSIONS.map((version) => {
   if (version.slug === 'main') {
     return {
       text: version.label,
-      path: `/${changelogSlug}/0`
+      path: `/${changelogSlug}`
     };
   }
 
@@ -334,6 +334,7 @@ let listPage: ChangelogPage | undefined;
 let UpgradeContent: ((_props: Record<string, unknown>) => unknown) | undefined;
 let detailEntry: ChangesEntry | undefined;
 let detailChanges: RenderedChangeItem[] = [];
+let detailGroups: RenderedGroup[] = [];
 let detailName = "";
 let detailListUrl = "";
 let detailUrl = "";
@@ -396,6 +397,12 @@ if (props.type === 'list') {
     actionItemsHtml: change.action_items?.map(item => marked.parse(item) as string),
     references: change.references,
     impacts: change.impacts,
+  }));
+
+  detailGroups = (props.entry.data.groups ?? []).map((g) => ({
+    type: g.type,
+    summaryHtml: marked.parseInline(g.summary) as string,
+    changes: g.changes,
   }));
 
   // Render upgrade instructions MDX if available
@@ -510,6 +517,7 @@ if (props.type === 'list') {
       summary={detailEntry.data.summary}
       skip={detailEntry.data.skip ?? false}
       changes={detailChanges}
+      groups={detailGroups.length > 0 ? detailGroups : undefined}
       hasUpgradeInstructions={detailEntry.data.upgrade_instructions !== undefined}
       initialTab={props.initialTab}
       detailUrl={detailUrl}

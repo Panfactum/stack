@@ -5,6 +5,7 @@
 
 import { Collapsible } from "@kobalte/core/collapsible";
 import { Tabs } from "@kobalte/core/tabs";
+import { toaster } from "@kobalte/core/toast";
 import { clsx } from "clsx";
 import {
   FiAlertTriangle,
@@ -15,16 +16,25 @@ import {
   FiCheckCircle,
   FiChevronDown,
   FiClock,
+  FiClipboard,
+  FiCloud,
+  FiDatabase,
+  FiDownload,
+  FiSquare,
   FiExternalLink,
   FiGitCommit,
   FiMessageCircle,
+  FiPackage,
   FiPlusCircle,
   FiRefreshCw,
+  FiSliders,
+  FiTerminal,
   FiTrendingUp,
   FiXCircle,
 } from "solid-icons/fi";
 import { TbOutlineBraces, TbOutlineRobot } from "solid-icons/tb";
 import {
+  createMemo,
   For,
   Show,
   type Component,
@@ -32,6 +42,7 @@ import {
   type ParentComponent,
 } from "solid-js";
 
+import Toast from "@/components/ui/Toast";
 import Tooltip from "@/components/ui/Tooltip";
 
 import styles from "./ChangelogAccordion.module.css";
@@ -47,6 +58,7 @@ type ChangeType =
 
 type ImpactType =
   | "iac-module"
+  | "iac-provider"
   | "cli"
   | "devshell"
   | "configuration"
@@ -55,7 +67,6 @@ type ImpactType =
 type ReferenceType =
   | "internal-commit"
   | "external-commit"
-  | "commit"
   | "issue-report"
   | "external-docs"
   | "internal-docs";
@@ -82,12 +93,19 @@ export interface RenderedChangeItem {
   impacts?: ImpactItem[];
 }
 
+export interface RenderedGroup {
+  type: ChangeType;
+  summaryHtml: string;
+  changes: string[];
+}
+
 export interface ChangelogDetailProps {
   id: string;
   name: string;
   summary: string;
   skip: boolean;
   changes?: RenderedChangeItem[];
+  groups?: RenderedGroup[];
   hasUpgradeInstructions: boolean;
   initialTab?: "details" | "upgrade";
   detailUrl: string;
@@ -111,6 +129,7 @@ const CHANGE_TYPE_ORDER: ChangeType[] = [
 interface ChangeTypeConfig {
   label: string;
   colorClass: string;
+  borderColorClass: string;
   icon: () => JSX.Element;
 }
 
@@ -118,41 +137,71 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, ChangeTypeConfig> = {
   breaking_change: {
     label: "Breaking",
     colorClass: "text-error-400",
+    borderColorClass: "border-l-error-400",
     icon: () => <FiAlertTriangle size={16} />,
   },
   deprecation: {
     label: "Deprecation",
     colorClass: "text-warning-400",
+    borderColorClass: "border-l-warning-400",
     icon: () => <FiClock size={16} />,
   },
   addition: {
     label: "Addition",
     colorClass: "text-brand-300",
+    borderColorClass: "border-l-brand-300",
     icon: () => <FiPlusCircle size={16} />,
   },
   improvement: {
     label: "Improvement",
     colorClass: "text-brand-300",
+    borderColorClass: "border-l-brand-300",
     icon: () => <FiTrendingUp size={16} />,
   },
   update: {
     label: "Update",
     colorClass: "text-brand-300",
+    borderColorClass: "border-l-brand-300",
     icon: () => <FiRefreshCw size={16} />,
   },
   fix: {
     label: "Fix",
     colorClass: "text-success-400",
+    borderColorClass: "border-l-success-400",
     icon: () => <FiCheckCircle size={16} />,
   },
 };
 
-const IMPACT_TYPE_LABELS: Record<ImpactType, string> = {
-  "iac-module": "IaC Module",
-  cli: "CLI",
-  devshell: "Dev Shell",
-  configuration: "Configuration",
-  installer: "Installer",
+interface ImpactTypeConfig {
+  label: string;
+  icon: () => JSX.Element;
+}
+
+const IMPACT_TYPE_CONFIG: Record<ImpactType, ImpactTypeConfig> = {
+  "iac-module": {
+    label: "IaC Module",
+    icon: () => <FiCloud size={14} />,
+  },
+  "iac-provider": {
+    label: "IaC Provider",
+    icon: () => <FiDatabase size={14} />,
+  },
+  cli: {
+    label: "CLI",
+    icon: () => <FiTerminal size={14} />,
+  },
+  devshell: {
+    label: "Dev Shell",
+    icon: () => <FiPackage size={14} />,
+  },
+  configuration: {
+    label: "Configuration",
+    icon: () => <FiSliders size={14} />,
+  },
+  installer: {
+    label: "Installer",
+    icon: () => <FiDownload size={14} />,
+  },
 };
 
 interface ReferenceTypeConfig {
@@ -161,6 +210,18 @@ interface ReferenceTypeConfig {
 }
 
 const REFERENCE_TYPE_CONFIG: Record<ReferenceType, ReferenceTypeConfig> = {
+  "issue-report": {
+    label: "Issue",
+    icon: () => <FiMessageCircle size={14} />,
+  },
+  "internal-docs": {
+    label: "Int Docs",
+    icon: () => <FiBookOpen size={14} />,
+  },
+  "external-docs": {
+    label: "Ext Docs",
+    icon: () => <FiExternalLink size={14} />,
+  },
   "internal-commit": {
     label: "Commit",
     icon: () => <FiGitCommit size={14} />,
@@ -169,27 +230,20 @@ const REFERENCE_TYPE_CONFIG: Record<ReferenceType, ReferenceTypeConfig> = {
     label: "Commit",
     icon: () => <FiGitCommit size={14} />,
   },
-  commit: {
-    label: "Commit",
-    icon: () => <FiGitCommit size={14} />,
-  },
-  "issue-report": {
-    label: "Issue",
-    icon: () => <FiMessageCircle size={14} />,
-  },
-  "external-docs": {
-    label: "Ext Docs",
-    icon: () => <FiExternalLink size={14} />,
-  },
-  "internal-docs": {
-    label: "Int Docs",
-    icon: () => <FiBookOpen size={14} />,
-  },
 };
+
+const REFERENCE_TYPE_ORDER: ReferenceType[] = [
+  "issue-report",
+  "internal-docs",
+  "external-docs",
+  "internal-commit",
+  "external-commit",
+];
 
 const ChangeCard: Component<{
   change: RenderedChangeItem;
   index: number;
+  inGroup?: boolean;
 }> = (props) => {
   const config = () => CHANGE_TYPE_CONFIG[props.change.type];
   const hasDetails = () =>
@@ -202,7 +256,15 @@ const ChangeCard: Component<{
     <Collapsible>
       <div
         id={`change-${props.change.id}`}
-        class="rounded-lg border border-primary bg-secondary"
+        class={clsx(
+          "rounded-lg border border-primary bg-secondary",
+          !props.inGroup &&
+            `
+              border-l-4
+              sm:border-l
+            `,
+          !props.inGroup && config().borderColorClass,
+        )}
       >
         <Collapsible.Trigger
           class={`
@@ -210,20 +272,31 @@ const ChangeCard: Component<{
             bg-transparent px-4 py-3 text-left
           `}
         >
-          <span class={clsx("shrink-0", config().colorClass)}>
-            {config().icon()}
-          </span>
-          <span
-            class={clsx(
-              `
-                w-24 shrink-0 rounded-full px-2 py-0.5 text-left text-xs
-                font-semibold
-              `,
-              config().colorClass,
-            )}
-          >
-            {config().label}
-          </span>
+          <Show when={!props.inGroup}>
+            <span
+              class={clsx(
+                `
+                  hidden shrink-0
+                  sm:block
+                `,
+                config().colorClass,
+              )}
+            >
+              {config().icon()}
+            </span>
+            <span
+              class={clsx(
+                `
+                  hidden w-24 shrink-0 rounded-full px-2 py-0.5 text-left
+                  text-xs font-semibold
+                  sm:inline
+                `,
+                config().colorClass,
+              )}
+            >
+              {config().label}
+            </span>
+          </Show>
           <div
             class={`
               flex-1
@@ -266,15 +339,18 @@ const ChangeCard: Component<{
               <Show when={(props.change.actionItemsHtml ?? []).length > 0}>
                 <p
                   class={clsx(
-                    "!my-0 !mb-2 text-xs font-semibold text-secondary",
+                    `
+                      !my-0 !mb-4 text-xs font-semibold text-secondary underline
+                      underline-offset-4
+                    `,
                     props.change.descriptionDetailHtml !== undefined && "!mt-2",
                   )}
                 >
                   Action Items
                 </p>
-                <ul
+                <div
                   class={clsx(
-                    "!my-0 !ml-[1.2rem] list-disc !ps-0 text-sm text-secondary",
+                    "ml-1 flex flex-col gap-2 text-sm text-secondary",
                     ((props.change.impacts ?? []).length > 0 ||
                       (props.change.references ?? []).length > 0) &&
                       "mb-4",
@@ -282,38 +358,65 @@ const ChangeCard: Component<{
                 >
                   <For each={props.change.actionItemsHtml ?? []}>
                     {(itemHtml) => (
-                      <li
-                        class={`
-                          [&_a]:underline
-                          [&_code]:rounded [&_code]:bg-tertiary [&_code]:px-1
-                          [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm
-                          [&_p]:!my-0
-                        `}
-                        innerHTML={itemHtml}
-                      />
-                    )}
-                  </For>
-                </ul>
-              </Show>
-              <Show when={(props.change.impacts ?? []).length > 0}>
-                <p class="!my-0 !mb-4 text-xs font-semibold text-secondary">
-                  Impacted Components
-                </p>
-                <div class="flex flex-col gap-2">
-                  <For each={props.change.impacts ?? []}>
-                    {(impact) => (
-                      <div class="flex items-baseline gap-3 text-sm">
+                      <div class="flex items-start gap-2">
+                        <FiSquare
+                          size={14}
+                          class="mt-1 shrink-0 text-secondary"
+                        />
                         <span
                           class={`
-                            w-28 shrink-0 rounded bg-tertiary px-1.5 py-0.5
-                            font-mono text-xs text-secondary
+                            [&_a]:underline
+                            [&_code]:rounded [&_code]:bg-tertiary [&_code]:px-1
+                            [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm
+                            [&_p]:!my-0
+                          `}
+                          innerHTML={itemHtml}
+                        />
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </Show>
+              <Show when={(props.change.impacts ?? []).length > 0}>
+                <p
+                  class={`
+                    !my-0 !mb-4 text-xs font-semibold text-secondary underline
+                    underline-offset-4
+                  `}
+                >
+                  Impacted Components
+                </p>
+                <div
+                  class={`
+                    flex flex-col gap-4
+                    sm:gap-2
+                  `}
+                >
+                  <For each={props.change.impacts ?? []}>
+                    {(impact) => (
+                      <div
+                        class={`
+                          flex flex-col gap-1 text-sm
+                          sm:flex-row sm:items-center sm:gap-3
+                        `}
+                      >
+                        <span
+                          class={`
+                            flex w-fit shrink-0 items-center gap-1.5 rounded
+                            bg-tertiary px-1.5 py-0.5 text-xs text-secondary
+                            sm:w-28
                           `}
                         >
-                          {IMPACT_TYPE_LABELS[impact.type]}
+                          {IMPACT_TYPE_CONFIG[impact.type].icon()}
+                          {IMPACT_TYPE_CONFIG[impact.type].label}
                         </span>
-                        <code class="shrink-0 text-sm">{impact.component}</code>
-                        <span class="mx-1 text-secondary">—</span>
-                        <span class="text-secondary">{impact.summary}</span>
+                        <div>
+                          <code class="shrink-0 text-sm">
+                            {impact.component}
+                          </code>
+                          <span class="mx-1 text-secondary">—</span>
+                          <span class="text-secondary">{impact.summary}</span>
+                        </div>
                       </div>
                     )}
                   </For>
@@ -322,14 +425,28 @@ const ChangeCard: Component<{
               <Show when={(props.change.references ?? []).length > 0}>
                 <p
                   class={clsx(
-                    "!my-0 !mb-4 text-xs font-semibold text-secondary",
+                    `
+                      !my-0 !mb-4 text-xs font-semibold text-secondary underline
+                      underline-offset-4
+                    `,
                     (props.change.impacts ?? []).length > 0 && "!mt-4",
                   )}
                 >
                   References
                 </p>
-                <div class="flex flex-col gap-2">
-                  <For each={props.change.references ?? []}>
+                <div
+                  class={`
+                    flex flex-col gap-4
+                    sm:gap-2
+                  `}
+                >
+                  <For
+                    each={[...(props.change.references ?? [])].sort(
+                      (a, b) =>
+                        REFERENCE_TYPE_ORDER.indexOf(a.type) -
+                        REFERENCE_TYPE_ORDER.indexOf(b.type),
+                    )}
+                  >
                     {(ref) => {
                       const refConfig = () => REFERENCE_TYPE_CONFIG[ref.type];
                       const href = () =>
@@ -347,12 +464,29 @@ const ChangeCard: Component<{
                           repo === "Panfactum/stack" ? "" : `${repo} `;
                         return `${prefix}#${match[2]}`;
                       };
+                      const shortSha = () => {
+                        if (
+                          ref.type !== "internal-commit" &&
+                          ref.type !== "external-commit"
+                        )
+                          return undefined;
+                        const match = /\/([0-9a-f]{40})(?:[/?#]|$)/.exec(
+                          href(),
+                        );
+                        return match?.[1]?.slice(0, 7);
+                      };
                       return (
-                        <div class="flex items-center gap-3 text-sm">
+                        <div
+                          class={`
+                            flex flex-col gap-1 text-sm
+                            sm:flex-row sm:items-center sm:gap-3
+                          `}
+                        >
                           <span
                             class={`
-                              flex w-28 shrink-0 items-center gap-1.5 rounded
+                              flex w-fit shrink-0 items-center gap-1.5 rounded
                               bg-tertiary px-1.5 py-0.5 text-xs text-secondary
+                              sm:w-28
                             `}
                           >
                             {refConfig().icon()}
@@ -361,12 +495,20 @@ const ChangeCard: Component<{
                           <Show
                             when={ghRef()}
                             fallback={
-                              <a
-                                href={href()}
-                                class="shrink-0 text-sm underline"
-                              >
-                                {ref.summary}
-                              </a>
+                              <span class="shrink-0 text-sm">
+                                <a href={href()} class="underline">
+                                  {ref.summary}
+                                </a>
+                                <Show when={shortSha()}>
+                                  <span
+                                    class={`
+                                      ml-1 font-mono text-xs text-secondary
+                                    `}
+                                  >
+                                    ({shortSha()})
+                                  </span>
+                                </Show>
+                              </span>
                             }
                           >
                             <span class="shrink-0 text-sm">
@@ -385,10 +527,31 @@ const ChangeCard: Component<{
               </Show>
               <p
                 class={`
-                  !mt-6 !mb-0 text-center font-mono text-xs text-secondary
+                  !mt-6 !mb-0 flex items-center justify-center gap-1.5 font-mono
+                  text-xs text-secondary
                 `}
               >
                 Change ID: {props.change.id}
+                <button
+                  type="button"
+                  class={`
+                    cursor-pointer text-secondary
+                    hover:text-primary
+                  `}
+                  title="Copy Change ID"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(props.change.id);
+                    const id = toaster.show((p) => (
+                      <Toast
+                        id={p.toastId}
+                        title="Change ID copied to clipboard"
+                      />
+                    ));
+                    setTimeout(() => toaster.dismiss(id), 2000);
+                  }}
+                >
+                  <FiClipboard size={12} />
+                </button>
               </p>
             </div>
           </Collapsible.Content>
@@ -398,9 +561,159 @@ const ChangeCard: Component<{
   );
 };
 
-const ChangesSection: Component<{ changes: RenderedChangeItem[] }> = (
-  props,
-) => {
+interface GroupCardProps {
+  group: RenderedGroup;
+  changes: RenderedChangeItem[];
+}
+
+const GroupCard: Component<GroupCardProps> = (props) => {
+  const config = () => CHANGE_TYPE_CONFIG[props.group.type];
+
+  return (
+    <Collapsible>
+      <div
+        class={clsx(
+          "rounded-lg border border-primary bg-secondary",
+          `
+            border-l-4
+            sm:border-l
+          `,
+          config().borderColorClass,
+        )}
+      >
+        <Collapsible.Trigger
+          class={`
+            flex w-full cursor-pointer items-center gap-3 border-0
+            bg-transparent px-4 py-3 text-left
+          `}
+        >
+          <span
+            class={clsx(
+              `
+                hidden shrink-0
+                sm:block
+              `,
+              config().colorClass,
+            )}
+          >
+            {config().icon()}
+          </span>
+          <span
+            class={clsx(
+              `
+                hidden w-24 shrink-0 rounded-full px-2 py-0.5 text-left text-xs
+                font-semibold
+                sm:inline
+              `,
+              config().colorClass,
+            )}
+          >
+            {config().label}
+          </span>
+          <div
+            class={`
+              flex-1
+              [&_a]:underline
+              [&_code]:rounded [&_code]:bg-tertiary [&_code]:px-1
+              [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm
+            `}
+            innerHTML={props.group.summaryHtml}
+          />
+          <span
+            class={`
+              shrink-0 rounded-full bg-tertiary px-2 py-0.5 text-xs
+              text-secondary
+            `}
+          >
+            {props.changes.length}
+            {props.changes.length === 1 ? " change" : " changes"}
+          </span>
+          <FiChevronDown
+            size={16}
+            class={`
+              shrink-0 transition-transform duration-200
+              [[data-expanded]_&]:rotate-180
+            `}
+          />
+        </Collapsible.Trigger>
+
+        <Collapsible.Content class={styles.accordionContent}>
+          <div
+            class={`flex flex-col gap-3 border-t border-primary px-4 pt-3 pb-4`}
+          >
+            <For each={props.changes}>
+              {(change, index) => (
+                <ChangeCard change={change} index={index()} inGroup />
+              )}
+            </For>
+          </div>
+        </Collapsible.Content>
+      </div>
+    </Collapsible>
+  );
+};
+
+interface ChangesSectionProps {
+  changes: RenderedChangeItem[];
+  groups?: RenderedGroup[];
+}
+
+type SectionItem =
+  | { kind: "group"; group: RenderedGroup; changes: RenderedChangeItem[] }
+  | { kind: "change"; change: RenderedChangeItem };
+
+const ChangesSection: Component<ChangesSectionProps> = (props) => {
+  const orderedItems = createMemo((): SectionItem[] => {
+    const changeMap = new Map<string, RenderedChangeItem>();
+    for (const c of props.changes) {
+      changeMap.set(c.id, c);
+    }
+
+    const groupedIds = new Set<string>();
+    for (const g of props.groups ?? []) {
+      for (const id of g.changes) {
+        groupedIds.add(id);
+      }
+    }
+
+    // Build items: for each type (in CHANGE_TYPE_ORDER), emit groups of that
+    // type first (sorted alphabetically by summary), then ungrouped changes.
+    const items: SectionItem[] = [];
+
+    for (const type of CHANGE_TYPE_ORDER) {
+      const groupsForType = (props.groups ?? [])
+        .filter((g) => g.type === type)
+        .sort((a, b) => a.summaryHtml.localeCompare(b.summaryHtml));
+
+      for (const group of groupsForType) {
+        const resolved = group.changes
+          .map((id) => changeMap.get(id))
+          .filter((c): c is RenderedChangeItem => c !== undefined);
+        if (resolved.length > 0) {
+          items.push({ kind: "group", group, changes: resolved });
+        }
+      }
+
+      const ungrouped = props.changes.filter(
+        (c) => c.type === type && !groupedIds.has(c.id),
+      );
+      for (const change of ungrouped) {
+        items.push({ kind: "change", change });
+      }
+    }
+
+    // Any changes with types not in CHANGE_TYPE_ORDER
+    const knownTypes = new Set(CHANGE_TYPE_ORDER);
+    const remainder = props.changes.filter(
+      (c) => !knownTypes.has(c.type) && !groupedIds.has(c.id),
+    );
+    for (const change of remainder) {
+      items.push({ kind: "change", change });
+    }
+
+    return items;
+  });
+
   return (
     <Show
       when={props.changes.length > 0}
@@ -412,8 +725,14 @@ const ChangesSection: Component<{ changes: RenderedChangeItem[] }> = (
     >
       <section class="flex flex-col gap-4">
         <div class="flex flex-col gap-3">
-          <For each={props.changes}>
-            {(change, index) => <ChangeCard change={change} index={index()} />}
+          <For each={orderedItems()}>
+            {(item, index) =>
+              item.kind === "group" ? (
+                <GroupCard group={item.group} changes={item.changes} />
+              ) : (
+                <ChangeCard change={item.change} index={index()} />
+              )
+            }
           </For>
         </div>
       </section>
@@ -623,7 +942,9 @@ export const ChangelogDetail: ParentComponent<ChangelogDetailProps> = (
       {/* Content: tabbed when upgrade instructions exist, plain otherwise */}
       <Show
         when={props.hasUpgradeInstructions}
-        fallback={<ChangesSection changes={orderedChanges()} />}
+        fallback={
+          <ChangesSection changes={orderedChanges()} groups={props.groups} />
+        }
       >
         <Tabs
           defaultValue={props.initialTab ?? "details"}
@@ -652,7 +973,7 @@ export const ChangelogDetail: ParentComponent<ChangelogDetailProps> = (
             </Tabs.Trigger>
           </Tabs.List>
           <Tabs.Content value="details" class="pt-6">
-            <ChangesSection changes={orderedChanges()} />
+            <ChangesSection changes={orderedChanges()} groups={props.groups} />
           </Tabs.Content>
           <Tabs.Content value="upgrade" class="pt-6">
             <Show
