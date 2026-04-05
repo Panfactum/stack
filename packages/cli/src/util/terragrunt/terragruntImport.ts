@@ -107,12 +107,12 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
   const { exitCode } = await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
+      "--no-color",
       "state",
       "show",
       "-no-color",
-      resourcePath,
-      "--terragrunt-non-interactive",
-      "--terragrunt-no-color"
+      resourcePath
     ],
     context,
     workingDirectory,
@@ -135,11 +135,11 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
   await execute({
     command: [
       "terragrunt",
+      "--no-color",
       "import",
       "-no-color",
       resourcePath,
-      resourceId,
-      "--terragrunt-no-color"
+      resourceId
     ],
     context,
     workingDirectory,

@@ -94,11 +94,11 @@ export async function terragruntInitAll(input: ITerragruntInitAllInput) {
   await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
       "init",
       "--all",
       "-upgrade",
-      "--queue-exclude-external",
-      "--terragrunt-non-interactive"
+      "--queue-exclude-external"
     ],
     context,
     workingDirectory,
@@ -109,10 +109,10 @@ export async function terragruntInitAll(input: ITerragruntInitAllInput) {
   await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
       "run",
       "--all",
       "--queue-exclude-external",
-      "--terragrunt-non-interactive",
       "--",
       "providers",
       "lock",

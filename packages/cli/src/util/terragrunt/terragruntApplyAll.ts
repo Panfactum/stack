@@ -77,10 +77,10 @@ export async function terragruntApplyAll(input: ITerragruntApplyAllInput): Promi
   await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
       "apply",
       "--all",
       "-auto-approve",
-      "--terragrunt-non-interactive",
     ],
     env,
     context,

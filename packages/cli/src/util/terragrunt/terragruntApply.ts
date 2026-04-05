@@ -32,8 +32,8 @@ interface ITerragruntApplyInput {
  * 
  * - `-auto-approve`: Skips interactive approval prompt
  * - `-no-color`: Disables terminal color codes
- * - `--terragrunt-non-interactive`: Prevents Terragrunt prompts
- * - `--terragrunt-no-color`: Disables Terragrunt color output
+ * - `--non-interactive`: Prevents Terragrunt prompts
+ * - `--no-color`: Disables Terragrunt color output
  * 
  * The apply operation will:
  * 1. Generate an execution plan
@@ -89,11 +89,11 @@ export async function terragruntApply(
   await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
+      "--no-color",
       "apply",
       "-no-color",
       "-auto-approve",
-      "--terragrunt-non-interactive",
-      "--terragrunt-no-color",
     ],
     context,
     env,

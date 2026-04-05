@@ -42,9 +42,9 @@ interface ITerragruntInitInput {
  *    - Create .terraform.lock.hcl file
  * 
  * The function uses several Terragrunt flags:
- * - `--terragrunt-non-interactive`: Prevents interactive prompts
- * - `--terragrunt-no-color`: Disables color output for cleaner logs
- * - `--terragrunt-provider-cache`: Uses shared provider cache
+ * - `--non-interactive`: Prevents interactive prompts
+ * - `--no-color`: Disables color output for cleaner logs
+ * - `--provider-cache`: Uses shared provider cache
  * 
  * This initialization is required before:
  * - Running terragrunt plan or apply
@@ -89,12 +89,12 @@ export async function terragruntInit(
   await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
+      "--no-color",
+      "--provider-cache",
       "init",
       "-upgrade",
-      "-no-color",
-      "--terragrunt-non-interactive",
-      "--terragrunt-no-color",
-      "--terragrunt-provider-cache"
+      "-no-color"
     ],
     context,
     env,
@@ -108,16 +108,18 @@ export async function terragruntInit(
   await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
+      "--no-color",
+      "--provider-cache",
+      "run",
+      "--",
       "providers",
       "lock",
       "-no-color",
       "-platform=linux_amd64",
       "-platform=linux_arm64",
       "-platform=darwin_amd64",
-      "-platform=darwin_arm64",
-      "--terragrunt-non-interactive",
-      "--terragrunt-no-color",
-      "--terragrunt-provider-cache"
+      "-platform=darwin_arm64"
 
     ],
     context,

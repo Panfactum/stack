@@ -112,9 +112,9 @@ export const terragruntOutput = async <T extends z.ZodType<object>>(
   const { stdout } = await execute({
     command: [
       "terragrunt",
+      "--non-interactive",
       "output",
-      "--json",
-      "--terragrunt-non-interactive"
+      "--json"
     ],
     env,
     workingDirectory,
