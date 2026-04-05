@@ -60,7 +60,7 @@ export default defineConfig({
     defaultStrategy: 'hover'
   },
   build: {
-    inlineStylesheets: 'never' // We use the criticalcss plugin for this
+    inlineStylesheets: 'auto' // Was 'never' when criticalCSS plugin was active; using default now
   },
   image: {
     service: imageService({
@@ -112,24 +112,25 @@ export default defineConfig({
     expressiveCode(),
     mdx(),
     sitemap(),
-    criticalCSS({
-      dimensions: [
-        { width: 624, height: 900 },
-        { width: 765, height: 900 },
-        { width: 1023, height: 1500 },
-        { width: 1263, height: 2000 },
-        { width: 1500, height: 2000 }
-      ],
-      strict: false,
-      inline: {
-        // The actual default is "swap" which appears to not work will with astro view transitions
-        // as the stylesheets end up above the inlined styles which breaks styling in some circumstances (the external stylesheets
-        // should have priority and thus must come AFTER the inlined styles). The "default" strategy adds
-        // the external stylesheets to the end of the body which ensures they come after the inlined styles regardless of
-        // the shenanigans that astro does to the <head>
-        strategy: "default"
-      }
-    }),
+    // TODO: Re-enable criticalCSS once build performance is acceptable
+    // criticalCSS({
+    //   dimensions: [
+    //     { width: 624, height: 900 },
+    //     { width: 765, height: 900 },
+    //     { width: 1023, height: 1500 },
+    //     { width: 1263, height: 2000 },
+    //     { width: 1500, height: 2000 }
+    //   ],
+    //   strict: false,
+    //   inline: {
+    //     // The actual default is "swap" which appears to not work will with astro view transitions
+    //     // as the stylesheets end up above the inlined styles which breaks styling in some circumstances (the external stylesheets
+    //     // should have priority and thus must come AFTER the inlined styles). The "default" strategy adds
+    //     // the external stylesheets to the end of the body which ensures they come after the inlined styles regardless of
+    //     // the shenanigans that astro does to the <head>
+    //     strategy: "default"
+    //   }
+    // }),
     compress({
       HTML: {
         "html-minifier-terser": {
