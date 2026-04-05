@@ -40,6 +40,11 @@ case "$FILE_PATH" in
   ;;
 esac
 
+# Path-based checks (not extension-based)
+if [[ "$REL_PATH" == "packages/cli/package.json" ]]; then
+  { REPO_ROOT="$CLAUDE_PROJECT_DIR" bash "$CLAUDE_PROJECT_DIR/packages/nix/localDevShell/scripts/precommit-check-aws-sdk-versions.sh" >"$TMPDIR/aws-sdk-versions" 2>&1 || echo "aws-sdk-versions" >>"$TMPDIR/failed"; } &
+fi
+
 wait
 
 if [[ ! -f "$TMPDIR/failed" ]]; then
@@ -59,6 +64,9 @@ while read -r tool; do
   changelog-validate)
     ERRORS+="changelog-validate: validation errors found in $FILE_PATH"$'\n'
     ERRORS+="$(cat "$TMPDIR/changelog-validate")"$'\n'
+    ;;
+  aws-sdk-versions)
+    ERRORS+="$(cat "$TMPDIR/aws-sdk-versions")"$'\n'
     ;;
   esac
 done <"$TMPDIR/failed"

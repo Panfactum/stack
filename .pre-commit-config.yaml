@@ -91,6 +91,15 @@ repos:
         description: "Runs linting for the CLI code"
         fail_fast: true
 
+      - id: check-aws-sdk-versions
+        name: Check AWS SDK Versions
+        entry: precommit-check-aws-sdk-versions
+        language: system
+        files: ^packages/cli/package\.json$
+        pass_filenames: false
+        description: "Ensures all @aws-sdk/client-* packages use the same exact version"
+        fail_fast: true
+
       - id: validate-changelog-schema
         name: Validate Changelog Schema
         entry: ds-validate-changelog

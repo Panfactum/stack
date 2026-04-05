@@ -4,8 +4,8 @@
 import { Buffer } from 'node:buffer';
 import { URL } from 'node:url';
 import { Sha256 } from '@aws-crypto/sha256-js';
-import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@smithy/protocol-http';
+import { SignatureV4 } from '@smithy/signature-v4';
 import { CLIError } from '../error/error';
 import { getSTSClient } from './clients/getSTSClient';
 import type { PanfactumContext } from '@/util/context/context';
