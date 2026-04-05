@@ -102,5 +102,34 @@ variable "extra_aws_service_access_principals" {
   description = "Additional service access principals to use in addition to the Panfactum defaults"
   type        = list(string)
   default     = []
+}
 
+variable "disabled_aws_service_access_principals" {
+  description = "Service access principals to remove from the Panfactum defaults"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_notifications_access" {
+  description = "Whether to enable AWS User Notifications trusted access in the organization"
+  type        = bool
+  default     = true
+}
+
+variable "enable_support_service_access" {
+  description = "Whether to enable AWS Support service access in the organization. Requires a Business, Enterprise On-Ramp, or Enterprise support plan."
+  type        = bool
+  default     = false
+}
+
+variable "extra_enabled_policy_types" {
+  description = "Additional organization policy types to enable in addition to the Panfactum defaults"
+  type        = list(string)
+  default     = []
+}
+
+variable "disabled_enabled_policy_types" {
+  description = "Organization policy types to remove from the Panfactum defaults"
+  type        = list(string)
+  default     = []
 }

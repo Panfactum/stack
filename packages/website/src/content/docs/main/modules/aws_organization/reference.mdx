@@ -84,9 +84,49 @@ object({
 
 Default: `{}`
 
+### disabled\_aws\_service\_access\_principals
+
+Description: Service access principals to remove from the Panfactum defaults
+
+Type: `list(string)`
+
+Default: `[]`
+
+### disabled\_enabled\_policy\_types
+
+Description: Organization policy types to remove from the Panfactum defaults
+
+Type: `list(string)`
+
+Default: `[]`
+
+### enable\_notifications\_access
+
+Description: Whether to enable AWS User Notifications trusted access in the organization
+
+Type: `bool`
+
+Default: `true`
+
+### enable\_support\_service\_access
+
+Description: Whether to enable AWS Support service access in the organization. Requires a Business, Enterprise On-Ramp, or Enterprise support plan.
+
+Type: `bool`
+
+Default: `false`
+
 ### extra\_aws\_service\_access\_principals
 
 Description: Additional service access principals to use in addition to the Panfactum defaults
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_enabled\_policy\_types
+
+Description: Additional organization policy types to enable in addition to the Panfactum defaults
 
 Type: `list(string)`
 

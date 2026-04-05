@@ -7,4 +7,6 @@ terraform {
   source = include.panfactum.locals.pf_stack_source
 }
 
-inputs = { }
+inputs = {
+  alias = "panfactum-management2"
+}

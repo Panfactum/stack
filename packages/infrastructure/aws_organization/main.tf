@@ -34,15 +34,46 @@ resource "aws_iam_account_alias" "alias" {
 
 resource "aws_organizations_organization" "org" {
   feature_set = "ALL"
-  aws_service_access_principals = tolist(toset(concat([
+  aws_service_access_principals = tolist(setsubtract(toset(concat([
     "iam.amazonaws.com",
     "account.amazonaws.com",
     "config.amazonaws.com",
     "sso.amazonaws.com",
     "compute-optimizer.amazonaws.com",
     "cost-optimization-hub.bcm.amazonaws.com",
-    "servicequotas.amazonaws.com"
-  ], var.extra_aws_service_access_principals)))
+    "servicequotas.amazonaws.com",
+    "health.amazonaws.com",
+    "reporting.trustedadvisor.amazonaws.com",
+    "access-analyzer.amazonaws.com",
+    "securityhub.amazonaws.com",
+    "ec2.capacitymanager.amazonaws.com",
+    "resource-explorer-2.amazonaws.com",
+    "backup.amazonaws.com",
+    "auditmanager.amazonaws.com",
+    "ipam.amazonaws.com",
+    "guardduty.amazonaws.com",
+    "inspector2.amazonaws.com",
+    "license-manager.amazonaws.com",
+    "license-manager.member-account.amazonaws.com",
+    "license-manager-linux-subscriptions.amazonaws.com",
+    "license-management.marketplace.amazonaws.com",
+    "private-marketplace.marketplace.amazonaws.com",
+    "cloudtrail.amazonaws.com",
+    "security-ir.amazonaws.com",
+    "networkmanager.amazonaws.com"
+  ], var.enable_support_service_access ? ["support.amazonaws.com"] : [], var.extra_aws_service_access_principals)), toset(var.disabled_aws_service_access_principals)))
+
+  enabled_policy_types = tolist(setsubtract(toset(concat([
+    "SERVICE_CONTROL_POLICY",
+    "TAG_POLICY"
+  ], var.extra_enabled_policy_types)), toset(var.disabled_enabled_policy_types)))
+}
+
+// Enables trusted access for AWS User Notifications
+// This uses a dedicated resource rather than aws_service_access_principals
+resource "aws_notifications_organizations_access" "org" {
+  enabled    = var.enable_notifications_access
+  depends_on = [aws_organizations_organization.org]
 }
 
 // Enables https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-enable-root-access.html
