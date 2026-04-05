@@ -43,6 +43,7 @@ import { DevShellUpdateCommand } from "./commands/devshell/sync/command.ts";
 import { DockerCredentialHelperCommand } from "./commands/docker/credential-helper/command.ts";
 import { DomainAddCommand } from "./commands/domain/add/command.ts";
 import { DomainRemoveCommand } from "./commands/domain/remove/command.ts";
+import { EnvironmentAddCommand } from "./commands/env/add/command.ts";
 import { EnvironmentRemoveCommand } from "./commands/env/remove/command.ts";
 import DeleteLocksCommand from "./commands/iac/delete-locks/command.ts";
 import { UpdateModuleStatusCommand } from "./commands/iac/update-module-status/command.ts";
@@ -94,6 +95,7 @@ cli.register(RecordBuildCommand)
 cli.register(BuildkitScaleDownCommand)
 cli.register(BuildkitScaleUpCommand)
 cli.register(BuildkitTunnelCommand)
+cli.register(EnvironmentAddCommand)
 cli.register(EnvironmentRemoveCommand)
 cli.register(DomainAddCommand)
 cli.register(DomainRemoveCommand)

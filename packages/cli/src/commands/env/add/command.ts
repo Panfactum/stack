@@ -101,7 +101,7 @@ const DEFAULT_MANAGEMENT_PROFILE = "management-superuser"
  * @see {@link provisionAWSAccount} - AWS account creation
  * @see {@link updateIAMIdentityCenter} - SSO integration
  */
-export class EnvironmentInstallCommand extends PanfactumCommand {
+export class EnvironmentAddCommand extends PanfactumCommand {
     static override paths = [["env", "add"]];
 
     static override usage = Command.Usage({
