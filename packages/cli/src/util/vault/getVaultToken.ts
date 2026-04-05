@@ -150,6 +150,11 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
       }
     }
 
+    // In silent mode, don't attempt interactive OIDC login
+    if (silent) {
+      throw new CLIError('No valid Vault token available');
+    }
+
     // Perform OIDC login to get new token
     const token = await performOIDCLogin(env, context);
     return token;
@@ -158,9 +163,7 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
     if (silent) {
       // In silent mode, log warning but don't throw
       if (context.env['VAULT_ADDR'] !== '@@TERRAGRUNT_INVALID@@') {
-        // In Node.js environment, console is globally available
-        // eslint-disable-next-line no-undef
-        console.error('Warning: getVaultToken failed, but exiting with 0 as --silent is enabled.');
+        context.logger.warn('getVaultToken failed, but continuing as --silent is enabled.');
       }
     }
 
@@ -190,7 +193,11 @@ async function performOIDCLogin(env: Record<string, string | undefined>, context
       command: ['vault', 'login', '-method=oidc', '-field=token'],
       context,
       workingDirectory: context.devshellConfig.repo_root,
-      env
+      env,
+      stdin: 'inherit',
+      onStdErrNewline: (line) => {
+        context.logger.writeRaw(line);
+      },
     });
 
     const token = result.stdout.trim();

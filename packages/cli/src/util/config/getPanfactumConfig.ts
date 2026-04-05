@@ -221,7 +221,7 @@ export const getPanfactumConfig = async ({
         : await getVaultToken({
           context,
           address: values.vault_addr,
-          silent: true,
+          silent: false,
         }).catch(() => '@@TERRAGRUNT_INVALID@@')
       : '@@TERRAGRUNT_INVALID@@';
   }
