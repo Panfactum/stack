@@ -47,6 +47,7 @@ export async function setupCertificates(
       task: async (ctx, task) => {
         const originalInputs = await readYAMLFile({
           throwOnEmpty: false,
+          throwOnMissing: false,
           filePath: path.join(
             clusterPath,
             MODULES.KUBE_CERTIFICATES,

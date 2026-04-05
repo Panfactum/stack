@@ -69,6 +69,7 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
             "module.yaml"
           ),
           context,
+          throwOnMissing: false,
           validationSchema: z
             .object({
               extra_inputs: z

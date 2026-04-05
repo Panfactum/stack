@@ -616,6 +616,7 @@ async function listAccountFromOrgModule(context: PanfactumContext, orgModuleYAML
     const originalInputs = await readYAMLFile({
         filePath: orgModuleYAMLPath,
         context,
+        throwOnMissing: false,
         validationSchema: z.object({
             extra_inputs: z.object({
                 accounts: z.record(z.string(), z.object({

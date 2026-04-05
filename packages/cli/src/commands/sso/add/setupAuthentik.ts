@@ -123,6 +123,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 const originalSESInputs = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AWS_SES_DOMAIN, "module.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             extra_inputs: z
@@ -139,6 +140,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 const originalAuthentikInputs = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             extra_inputs: z
@@ -156,6 +158,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             user_setup_complete: z.boolean().optional(),
@@ -166,6 +169,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 const kubeAuthentikPfYAMLFileData = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.KUBE_AUTHENTIK, ".pf.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             adminEmail: z.string().optional(),
@@ -431,6 +435,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 const originalGlobalConfig = await readYAMLFile({
                     filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z.object({
                         authentik_url: z.string().optional(),
                     }).passthrough(),

@@ -219,6 +219,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 const authentikAwsSSOPfYAMLFileData = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, ".pf.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             first_applied: z.boolean().optional(),
@@ -390,6 +391,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 const authentikAWSSSOPfFileData = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, ".pf.yaml"),
                     context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             userSyncComplete: z.boolean().optional(),

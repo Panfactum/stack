@@ -82,6 +82,7 @@ export async function setupEKS(
             "module.yaml"
           ),
           context,
+          throwOnMissing: false,
           validationSchema: z
             .object({
               extra_inputs: z

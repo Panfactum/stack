@@ -137,6 +137,7 @@ export class SSOAddCommand extends PanfactumCommand {
                 const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
                     filePath: join(selectedRegion.path, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
                     context: this.context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             user_setup_complete: z.boolean().optional(),
@@ -160,6 +161,7 @@ export class SSOAddCommand extends PanfactumCommand {
                 const awsEKSPfYAMLFileData = await readYAMLFile({
                     filePath: join(selectedRegion.path, MODULES.AWS_EKS, ".pf.yaml"),
                     context: this.context,
+                    throwOnMissing: false,
                     validationSchema: z
                         .object({
                             federatedAuthEnabled: z.boolean().optional(),

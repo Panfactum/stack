@@ -62,6 +62,7 @@ export async function setupVPC(
         const originalInputs = await readYAMLFile({
           filePath: path.join(clusterPath, MODULES.AWS_VPC, "module.yaml"),
           context,
+          throwOnMissing: false,
           validationSchema: z
             .object({
               extra_inputs: z
