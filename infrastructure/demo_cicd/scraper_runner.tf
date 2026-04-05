@@ -27,7 +27,7 @@ module "run_scraper_workflow_spec" {
       {
         name        = "sitemap_url"
         description = "The URL of the sitemap to scrape"
-        default     = "https://panfactum.com/sitemap.xml"
+        default     = "https://panfactum.com/sitemap-index.xml"
       },
 
       {

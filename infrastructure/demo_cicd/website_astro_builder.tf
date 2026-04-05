@@ -96,7 +96,7 @@ module "astro_builder_workflow" {
       {
         name        = "sitemap_url"
         description = "The URL of the sitemap to scrape"
-        default     = "https://docs.panfactum.com/sitemap-index.xml"
+        default     = "https://panfactum.com/sitemap-index.xml"
       },
 
       {
@@ -166,6 +166,18 @@ module "astro_builder_workflow" {
             templateRef = {
               name     = module.run_scraper_workflow_spec.name
               template = "entry"
+            }
+            arguments = {
+              parameters = [
+                {
+                  name  = "sitemap_url"
+                  value = "{{workflow.parameters.sitemap_url}}"
+                },
+                {
+                  name  = "algolia_index_name"
+                  value = "{{workflow.parameters.algolia_index_name}}"
+                }
+              ]
             }
             depends = "build-images"
           }
