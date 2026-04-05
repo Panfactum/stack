@@ -11,7 +11,7 @@
     export PF_IAC_DIR="$REPO_ROOT/packages/infrastructure";
     export GOBIN="$REPO_ROOT/go/bin";
     export GOPATH="$REPO_ROOT/go";
-    pre-commit install -c "$REPO_ROOT/.pre-commit-config.yaml"
+    prek install -c "$REPO_ROOT/.pre-commit-config.yaml"
   '';
 
   packages = with pkgs; [
@@ -49,6 +49,6 @@
     shfmt
     nixfmt-rfc-style
     nodePackages.cspell
-    pre-commit
+    prek
   ];
 }
