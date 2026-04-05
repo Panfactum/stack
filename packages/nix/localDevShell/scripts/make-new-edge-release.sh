@@ -19,6 +19,21 @@ if [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
+# Get the new version tag and derive the edge directory name (strip "edge." prefix)
+VERSION_TAG="edge.$(date +'%y-%m-%d')"
+EDGE_DATE="${VERSION_TAG#edge.}"
+EDGE_ENTRY_DIR="$CHANGELOG_DIR/edge/$EDGE_DATE"
+
+# Guard against same-day release collision
+if git tag -l "$VERSION_TAG" | grep -q .; then
+  echo "Error: Tag $VERSION_TAG already exists. Only one edge release per day is supported."
+  exit 1
+fi
+if [ -d "$EDGE_ENTRY_DIR" ]; then
+  echo "Error: Changelog directory $EDGE_ENTRY_DIR already exists. Only one edge release per day is supported."
+  exit 1
+fi
+
 # Remove existing edge release
 rm -rf "$DOCS_DIR/edge"
 
@@ -30,11 +45,6 @@ find "$DOCS_DIR/edge" -type f -exec sed -i -E "s|([\"'(])/docs/main|\1/docs/edge
 
 # Search and replace __PANFACTUM_VERSION_MAIN__ with __PANFACTUM_VERSION_EDGE__ in all files
 find "$DOCS_DIR/edge" -type f -exec sed -i -E "s|__PANFACTUM_VERSION_MAIN__|__PANFACTUM_VERSION_EDGE__|g" {} \;
-
-# Get the new version tag and derive the edge directory name (strip "edge." prefix)
-VERSION_TAG="edge.$(date +'%y-%m-%d')"
-EDGE_DATE="${VERSION_TAG#edge.}"
-EDGE_ENTRY_DIR="$CHANGELOG_DIR/edge/$EDGE_DATE"
 
 # Update the version tag in constants
 jq --arg tag "$VERSION_TAG" '.versions.edge.ref = "\($tag)"' "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
@@ -54,10 +64,16 @@ summary: ""
 changes: []
 EOF
 
+# Reset main/review.yaml for the next release cycle
+cat >"$CHANGELOG_DIR/main/review.yaml" <<'EOF'
+todo: []
+validated: []
+EOF
+
 # Commit the changes and create the tag
 git add "$REPO_ROOT"
 git commit -m "release: $VERSION_TAG"
-git tag --force "$VERSION_TAG"
+git tag "$VERSION_TAG"
 
 # Push the changes
 git push --atomic origin main "$VERSION_TAG"

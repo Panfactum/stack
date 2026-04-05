@@ -16,14 +16,20 @@ When you are ready to cut a new edge release:
 
 The release script will automatically perform the following actions:
 
-* Create the new release name based on today's date.
+* Create the new release name based on today's date (e.g., `edge.26-04-05`).
 
 * Copy all the unreleased documentation (under `packages/website/src/content/docs/main`) to the
-  edge documentation (under `packages/website/src/content/docs/edge`).
+  edge documentation (under `packages/website/src/content/docs/edge`), rewriting internal links
+  and version placeholders.
 
-* Update the Changelog headers to include the new release.
+* Copy the unreleased changelog (`changelog/main/log.yaml`) into a dated edge entry
+  (e.g., `changelog/edge/26-04-05/log.yaml`) and move any `upgrade.mdx` alongside it.
 
-* Create and push the appropriate release tag and commit.
+* Reset `changelog/main/log.yaml` and `changelog/main/review.yaml` for the next release cycle.
+
+* Update `constants.json` with the new edge version ref.
+
+* Create and push the release commit and git tag.
 
 ## Stable Releases
 

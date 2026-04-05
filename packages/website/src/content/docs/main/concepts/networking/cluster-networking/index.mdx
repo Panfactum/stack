@@ -298,7 +298,7 @@ for the following reasons:
 
 Ultimately, inbound traffic to clusters in the Panfactum Stack looks like the following: [^31]
 
-[^31]: For more information on VPCs and subnets, see [these docs.](http://localhost:3000/docs/main/concepts/networking/aws-primitives)
+[^31]: For more information on VPCs and subnets, see [these docs.](/docs/main/concepts/networking/aws-primitives)
 
 <MarkdownSVGImage src={ingressSVG} alt="Inbound network diagram" />
 
@@ -321,7 +321,7 @@ CoreDNS is extremely performant and provides one of the most stable implementati
 This allows your workloads to connect to domains like `my-service.my-namespace.svc.cluster.local`.
 
 We provide a module for deploying CoreDNS to Panfactum Stack clusters, [kube\_core\_dns](/docs/main/modules/kube_core_dns/overview),
-which is set up in [the bootstrapping guide.](http://localhost:3000/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns) [^20]
+which is set up in [the bootstrapping guide.](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns) [^20]
 
 [^20]: Note that EKS also deploys CoreDNS to newly provisioned clusters. However, their implementation is lacking in several
     areas such as in monitoring and high-availability, so we supply our own.

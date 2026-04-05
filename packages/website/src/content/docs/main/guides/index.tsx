@@ -2,8 +2,8 @@ import Button from "@/components/ui/Button.tsx";
 import ContentBlockWithImage, {
   ContentBlockType,
 } from "@/components/ui/ContentBlockWithImage.tsx";
-import Check from "@/content/docs/main/guides/check.tsx";
-import Todo from "@/content/docs/main/guides/todo.tsx";
+import Check from "@/components/ui/CheckCircleIcon.tsx";
+import Todo from "@/components/ui/TodoIcon.tsx";
 
 export function RootDocumentLandingPage() {
   return (

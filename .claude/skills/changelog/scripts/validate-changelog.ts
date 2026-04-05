@@ -14,7 +14,7 @@ const LOG_YAML_PATH = join(CHANGELOG_DIR, "main/log.yaml");
 const LOG_SCHEMA_PATH = join(CHANGELOG_DIR, "log.schema.json");
 
 interface Finding {
-  level: "WARN" | "INFO";
+  level: "ERROR" | "WARN" | "INFO";
   changeIndex: number;
   changeType: string;
   message: string;
@@ -126,6 +126,24 @@ function validateChange(change: Change, index: number): Finding[] {
         changeType,
         message: `${summaryLabel} has no impacts — consider adding affected components`,
       });
+    }
+  }
+
+  // Check: internal-docs references that start with /docs/ MUST use /docs/main/
+  if (Array.isArray(change.references)) {
+    for (const ref of change.references) {
+      if (
+        ref.type === "internal-docs" &&
+        ref.link.startsWith("/docs/") &&
+        !ref.link.startsWith("/docs/main/")
+      ) {
+        findings.push({
+          level: "ERROR",
+          changeIndex: changeNumber,
+          changeType,
+          message: `${summaryLabel} has an internal-docs reference linking to "${ref.link}" — versioned docs references must point to /docs/main/`,
+        });
+      }
     }
   }
 
@@ -248,6 +266,7 @@ function main(): void {
     console.log(`[${finding.level}] ${location}: ${finding.message}`);
   }
 
+  const errorCount = allFindings.filter((f) => f.level === "ERROR").length;
   const warnCount = allFindings.filter((f) => f.level === "WARN").length;
   const infoCount = allFindings.filter((f) => f.level === "INFO").length;
 
@@ -256,11 +275,12 @@ function main(): void {
   }
 
   console.log("Summary:");
+  console.log(`  Errors: ${errorCount}`);
   console.log(`  Warnings: ${warnCount}`);
   console.log(`  Info: ${infoCount}`);
   console.log(`  Total changes checked: ${changes.length}`);
 
-  if (warnCount > 0) {
+  if (errorCount > 0 || warnCount > 0) {
     process.exit(1);
   }
 }

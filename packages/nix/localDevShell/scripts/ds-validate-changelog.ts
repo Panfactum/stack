@@ -91,6 +91,29 @@ function validateFile(
     }
   }
 
+  // Validate that internal-docs references point to /docs/main/
+  const changes = (logData["changes"] ?? []) as Array<{
+    references?: Array<{ type: string; link: string }>;
+  }>;
+  for (let i = 0; i < changes.length; i++) {
+    const refs = changes[i]?.references;
+    if (!Array.isArray(refs)) continue;
+    for (const ref of refs) {
+      if (
+        ref.type === "internal-docs" &&
+        ref.link.startsWith("/docs/") &&
+        !ref.link.startsWith("/docs/main/")
+      ) {
+        result.errors.push(
+          `Field "/changes/${i}/references": internal-docs reference links to "${ref.link}" but versioned docs references must point to /docs/main/`
+        );
+      }
+    }
+  }
+  if (result.errors.length > 0) {
+    return result;
+  }
+
   result.valid = true;
   return result;
 }
