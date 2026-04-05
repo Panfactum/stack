@@ -188,7 +188,7 @@ variable "default_file" {
 }
 
 variable "default_file_strict" {
-  description = "Iff true, then all requests with paths that do not contain a `.` will have the `default_file` appended."
+  description = "Iff true, then all requests with paths that do not end with a file extension (dot followed by alphanumeric characters) will have the `default_file` appended."
   type        = bool
   default     = true
 }

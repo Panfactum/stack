@@ -108,7 +108,19 @@ module "cf" {
             rewrite = "/${var.default_file}"
           },
           {
-            match   = var.default_file_strict ? "^([^.]*[^./])/?$" : "^(.*[^/])/$"
+            # Strict regex: appends default_file to directory-like paths but NOT file paths.
+            # Uses alternation instead of lookaheads because CloudFront Functions (cloudfront-js-2.0) don't support them.
+            # Uses [.] instead of \. to avoid backslash escaping issues in the jsonencode → JS string → JSON.parse chain.
+            #
+            # Branch 1: (.*/)?[^./]+
+            #   Matches paths where the last segment has no dot (e.g., /docs/changelog/summary, /about).
+            #
+            # Branch 2: .*[.][a-zA-Z0-9]*[^a-zA-Z0-9./][^./]*
+            #   Matches paths where the text after the last dot contains a non-alphanumeric character,
+            #   meaning it's not a file extension (e.g., edge.25-04-03 has a hyphen after the dot).
+            #   Does NOT match file paths like style.css, font.woff2, or app.min.js where the text
+            #   after the last dot is purely alphanumeric.
+            match   = var.default_file_strict ? "^((.*/)?[^./]+|.*[.][a-zA-Z0-9]*[^a-zA-Z0-9./][^./]*)/?$" : "^(.*[^/])/$"
             rewrite = "$1/${var.default_file}"
           }
         ] : [],
