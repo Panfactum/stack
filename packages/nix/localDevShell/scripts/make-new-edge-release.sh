@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Script is used to cut a new edge release of the docs and changelog.
 WEBSITE_DIR="$REPO_ROOT/packages/website"

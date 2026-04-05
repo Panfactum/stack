@@ -1,0 +1,81 @@
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+## Inputs
+
+The following input variables are supported:
+
+### alloy\_chart\_version
+
+Description: The version of the grafana/alloy helm chart to deploy
+
+Type: `string`
+
+Default: `"0.3.1"`
+
+### log\_level
+
+Description: The log level for the Alloy pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### monitoring\_enabled
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### vpa\_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+### wait
+
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### namespace
+
+Description: n/a
+
+## Providers
+
+The following providers are needed by this module:
+
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/3.1.1/docs) (3.1.1)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.6/docs) (2.1.6)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.35.0/docs) (2.35.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

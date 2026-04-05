@@ -28,6 +28,10 @@ function loadSchema(schemaPath: string): unknown {
   return JSON.parse(readFileSync(absolutePath, "utf8")) as unknown;
 }
 
+function isMainLog(filePath: string): boolean {
+  return resolve(filePath) === resolve(join(CHANGELOG_DIR, "main/log.yaml"));
+}
+
 function validateFile(
   filePath: string,
   validate: Ajv["validate"]
@@ -91,22 +95,24 @@ function validateFile(
     }
   }
 
-  // Validate that internal-docs references point to /docs/main/
-  const changes = (logData["changes"] ?? []) as Array<{
-    references?: Array<{ type: string; link: string }>;
-  }>;
-  for (let i = 0; i < changes.length; i++) {
-    const refs = changes[i]?.references;
-    if (!Array.isArray(refs)) continue;
-    for (const ref of refs) {
-      if (
-        ref.type === "internal-docs" &&
-        ref.link.startsWith("/docs/") &&
-        !ref.link.startsWith("/docs/main/")
-      ) {
-        result.errors.push(
-          `Field "/changes/${i}/references": internal-docs reference links to "${ref.link}" but versioned docs references must point to /docs/main/`
-        );
+  // Validate that internal-docs references point to /docs/main/ (only for main/log.yaml)
+  if (isMainLog(filePath)) {
+    const changes = (logData["changes"] ?? []) as Array<{
+      references?: Array<{ type: string; link: string }>;
+    }>;
+    for (let i = 0; i < changes.length; i++) {
+      const refs = changes[i]?.references;
+      if (!Array.isArray(refs)) continue;
+      for (const ref of refs) {
+        if (
+          ref.type === "internal-docs" &&
+          ref.link.startsWith("/docs/") &&
+          !ref.link.startsWith("/docs/main/")
+        ) {
+          result.errors.push(
+            `Field "/changes/${i}/references": internal-docs reference links to "${ref.link}" but versioned docs references must point to /docs/main/`
+          );
+        }
       }
     }
   }
