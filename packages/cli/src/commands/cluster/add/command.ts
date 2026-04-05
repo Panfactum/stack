@@ -435,7 +435,7 @@ Already completed steps will be automatically skipped.
       if (step.id === "setupCertificates") {
         // Certificates are a special case because the last module is applied twice during the setup process
         const certificatesModuleInfo = await readYAMLFile({
-          filePath: join(selectedRegion.path, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, validationSchema: z.object({
+          filePath: join(selectedRegion.path, MODULES.KUBE_CERTIFICATES, "module.yaml"), context: this.context, throwOnMissing: false, validationSchema: z.object({
             extra_inputs: z.object({
               self_generated_certs_enabled: z.boolean(),
             }).optional()
