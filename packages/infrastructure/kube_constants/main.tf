@@ -1,4 +1,4 @@
 locals {
-  image_tag      = "cfb4c739cf687095795a2e2a8a0439ef408858fc"
+  image_tag      = "9aab1917f0f4ec17b27c365c724504a8d5e4219e"
   image_registry = "public.ecr.aws"
 }
