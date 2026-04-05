@@ -422,11 +422,12 @@ resource "aws_launch_template" "nats" {
 }
 
 resource "aws_autoscaling_group" "nats" {
-  for_each         = local.nat_subnets
-  name_prefix      = "nat-"
-  max_size         = 1
-  min_size         = 1
-  desired_capacity = 1
+  for_each                  = local.nat_subnets
+  name_prefix               = "nat-"
+  max_size                  = 1
+  min_size                  = 1
+  desired_capacity          = 1
+  wait_for_capacity_timeout = "0" # CLI handles readiness checks
   launch_template {
     name    = aws_launch_template.nats[each.key].name
     version = aws_launch_template.nats[each.key].latest_version

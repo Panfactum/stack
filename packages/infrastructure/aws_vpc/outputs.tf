@@ -15,6 +15,17 @@ output "test_config" {
   }
 }
 
+output "nat_config" {
+  description = "Configuration for NAT ASG readiness checks"
+  value = {
+    region = data.aws_region.region.region,
+    nats = [for name, config in local.nat_subnets : {
+      subnet = name,
+      asg    = aws_autoscaling_group.nats[name].name
+    }]
+  }
+}
+
 output "vpc_id" {
   value = aws_vpc.main.id
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { vpcNetworkTest } from "@/util/aws/vpcNetworkTest";
+import { waitForASGInstance } from "@/util/aws/waitForASGInstance";
 import { parseJson } from "@/util/json/parseJson";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -10,6 +11,7 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -35,6 +37,27 @@ const VPC_NAME = z
     /^[a-zA-Z0-9_-]+$/,
     "Must only contain the letters a-z (case-insensitive), numbers 0-9, hyphens (-), and underscores (_)"
   );
+
+/**
+ * Schema for validating the NAT configuration output from the aws_vpc module
+ *
+ * @remarks
+ * This schema validates the `nat_config` Terraform output which contains
+ * the region and list of NAT ASGs with their associated subnets.
+ */
+const NAT_CONFIG_SCHEMA = z.object({
+  nat_config: z.object({
+    value: z.object({
+      region: z.string(),
+      nats: z.array(
+        z.object({
+          subnet: z.string(),
+          asg: z.string(),
+        })
+      ),
+    }),
+  }),
+});
 
 export async function setupVPC(
   options: IInstallClusterStepOptions,
@@ -171,6 +194,39 @@ export async function setupVPC(
                         }),
                       },
                     }),
+                    {
+                      title: "Verify NAT Gateways",
+                      task: async (_, task) => {
+                        const natOutputs = await terragruntOutput({
+                          awsProfile,
+                          context,
+                          environment,
+                          region,
+                          module: MODULES.AWS_VPC,
+                          validationSchema: NAT_CONFIG_SCHEMA,
+                        });
+
+                        const nats = natOutputs.nat_config.value.nats;
+                        const awsRegion = natOutputs.nat_config.value.region;
+
+                        for (const nat of nats) {
+                          task.output = context.logger.applyColors(
+                            `Waiting for NAT instance in ${nat.subnet}...`,
+                            { style: "subtle" }
+                          );
+
+                          await waitForASGInstance({
+                            asg: nat.asg,
+                            awsProfile,
+                            awsRegion,
+                            context,
+                          });
+                        }
+                      },
+                      rendererOptions: {
+                        outputBar: 5,
+                      },
+                    },
                     {
                       title: "Run the VPC Network Test",
                       task: async (_, task) => {

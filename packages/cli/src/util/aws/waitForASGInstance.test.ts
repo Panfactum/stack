@@ -3,6 +3,7 @@
 
 import { DescribeAutoScalingGroupsCommand } from "@aws-sdk/client-auto-scaling";
 import { describe, test, expect, beforeEach, afterEach, spyOn, mock } from "bun:test";
+import * as checkASGScalingFailureModule from "@/util/aws/checkASGScalingFailure";
 import * as getAutoScalingClientModule from "@/util/aws/clients/getAutoScalingClient";
 import { CLIError } from "@/util/error/error";
 import * as sleepModule from "@/util/util/sleep";
@@ -17,6 +18,7 @@ describe("waitForASGInstance", () => {
   let mockAutoScalingClient: IMockAutoScalingClient;
   let getAutoScalingClientSpy: ReturnType<typeof spyOn<typeof getAutoScalingClientModule, "getAutoScalingClient">>;
   let sleepSpy: ReturnType<typeof spyOn<typeof sleepModule, "sleep">>;
+  let checkASGScalingFailureSpy: ReturnType<typeof spyOn<typeof checkASGScalingFailureModule, "checkASGScalingFailure">>;
   let mockContext: PanfactumContext;
 
   beforeEach(() => {
@@ -32,6 +34,10 @@ describe("waitForASGInstance", () => {
     // Spy on sleep to avoid actual delays
     sleepSpy = spyOn(sleepModule, "sleep");
     sleepSpy.mockResolvedValue(undefined);
+
+    // Spy on checkASGScalingFailure to avoid actual AWS calls
+    checkASGScalingFailureSpy = spyOn(checkASGScalingFailureModule, "checkASGScalingFailure");
+    checkASGScalingFailureSpy.mockResolvedValue(undefined);
 
     // Create mock context
     mockContext = {
@@ -235,14 +241,15 @@ describe("waitForASGInstance", () => {
         asg: "failing-asg",
         awsProfile: "test",
         awsRegion: "us-east-1",
-        context: mockContext
+        context: mockContext,
+        maxRetries: 3
       })
     ).rejects.toThrow(
-      new CLIError("Failed to get instance ID - after 10 retries")
+      new CLIError("Failed to get instance ID - after 3 retries")
     );
 
-    expect(mockAutoScalingClient.send).toHaveBeenCalledTimes(10);
-    expect(sleepSpy).toHaveBeenCalledTimes(9); // No sleep after last attempt
+    expect(mockAutoScalingClient.send).toHaveBeenCalledTimes(3);
+    expect(sleepSpy).toHaveBeenCalledTimes(2); // No sleep after last attempt
   });
 
   test("throws CLIError when DescribeAutoScalingGroups fails", async () => {
@@ -281,7 +288,8 @@ describe("waitForASGInstance", () => {
       asg: "last-chance-asg",
       awsProfile: "test",
       awsRegion: "us-east-1",
-      context: mockContext
+      context: mockContext,
+      maxRetries: 10
     });
 
     expect(result).toBe("i-lastattempt123");
@@ -341,7 +349,7 @@ describe("waitForASGInstance", () => {
     for (const region of regions) {
       getAutoScalingClientSpy.mockClear();
       mockAutoScalingClient.send.mockClear();
-      
+
       mockAutoScalingClient.send.mockResolvedValue({
         AutoScalingGroups: [{
           Instances: [{
@@ -372,7 +380,7 @@ describe("waitForASGInstance", () => {
     for (const profile of profiles) {
       getAutoScalingClientSpy.mockClear();
       mockAutoScalingClient.send.mockClear();
-      
+
       mockAutoScalingClient.send.mockResolvedValue({
         AutoScalingGroups: [{
           Instances: [{
@@ -419,7 +427,7 @@ describe("waitForASGInstance", () => {
 
   test("handles very long ASG names", async () => {
     const longAsgName = "very-long-auto-scaling-group-name-that-exceeds-normal-length-limits-but-should-still-work";
-    
+
     mockAutoScalingClient.send.mockResolvedValue({
       AutoScalingGroups: [{
         Instances: [{
@@ -436,10 +444,126 @@ describe("waitForASGInstance", () => {
     });
 
     expect(result).toBe("i-longname123");
-    
+
     const sentCommand = mockAutoScalingClient.send.mock.calls[0]?.[0] as DescribeAutoScalingGroupsCommand;
     expect(sentCommand.input).toEqual({
       AutoScalingGroupNames: [longAsgName]
     });
+  });
+
+  test("uses default maxRetries of 180 when not specified", async () => {
+    // Always return no instances to exhaust retries
+    mockAutoScalingClient.send.mockResolvedValue({
+      AutoScalingGroups: [{ Instances: [] }]
+    });
+
+    await expect(
+      waitForASGInstance({
+        asg: "default-retries-asg",
+        awsProfile: "test",
+        awsRegion: "us-east-1",
+        context: mockContext
+      })
+    ).rejects.toThrow(CLIError);
+
+    expect(mockAutoScalingClient.send).toHaveBeenCalledTimes(180);
+    expect(sleepSpy).toHaveBeenCalledTimes(179);
+  });
+
+  test("respects custom maxRetries value", async () => {
+    // Always return no instances to exhaust retries
+    mockAutoScalingClient.send.mockResolvedValue({
+      AutoScalingGroups: [{ Instances: [] }]
+    });
+
+    await expect(
+      waitForASGInstance({
+        asg: "custom-retries-asg",
+        awsProfile: "test",
+        awsRegion: "us-east-1",
+        context: mockContext,
+        maxRetries: 5
+      })
+    ).rejects.toThrow(
+      new CLIError("Failed to get instance ID - after 5 retries")
+    );
+
+    expect(mockAutoScalingClient.send).toHaveBeenCalledTimes(5);
+    expect(sleepSpy).toHaveBeenCalledTimes(4);
+  });
+
+  test("calls checkASGScalingFailure on each poll when no instance found", async () => {
+    // Fail 3 times, succeed on 4th
+    mockAutoScalingClient.send
+      .mockResolvedValueOnce({ AutoScalingGroups: [{ Instances: [] }] })
+      .mockResolvedValueOnce({ AutoScalingGroups: [{ Instances: [] }] })
+      .mockResolvedValueOnce({ AutoScalingGroups: [{ Instances: [] }] })
+      .mockResolvedValueOnce({
+        AutoScalingGroups: [{
+          Instances: [{
+            InstanceId: "i-check-failure123"
+          }]
+        }]
+      });
+
+    await waitForASGInstance({
+      asg: "check-failure-asg",
+      awsProfile: "test",
+      awsRegion: "us-east-1",
+      context: mockContext,
+      maxRetries: 10
+    });
+
+    // checkASGScalingFailure should be called once per failed poll (not on success)
+    expect(checkASGScalingFailureSpy).toHaveBeenCalledTimes(3);
+    expect(checkASGScalingFailureSpy).toHaveBeenCalledWith({
+      asg: "check-failure-asg",
+      awsProfile: "test",
+      awsRegion: "us-east-1",
+      context: mockContext
+    });
+  });
+
+  test("does not call checkASGScalingFailure when instance found on first attempt", async () => {
+    mockAutoScalingClient.send.mockResolvedValue({
+      AutoScalingGroups: [{
+        Instances: [{
+          InstanceId: "i-immediate123"
+        }]
+      }]
+    });
+
+    await waitForASGInstance({
+      asg: "immediate-asg",
+      awsProfile: "test",
+      awsRegion: "us-east-1",
+      context: mockContext
+    });
+
+    expect(checkASGScalingFailureSpy).not.toHaveBeenCalled();
+  });
+
+  test("propagates CLIError from checkASGScalingFailure immediately", async () => {
+    // Always return no instances
+    mockAutoScalingClient.send.mockResolvedValue({
+      AutoScalingGroups: [{ Instances: [] }]
+    });
+
+    const capacityError = new CLIError("ASG my-asg scaling activity failed due to insufficient EC2 capacity.");
+    checkASGScalingFailureSpy.mockRejectedValue(capacityError);
+
+    await expect(
+      waitForASGInstance({
+        asg: "capacity-error-asg",
+        awsProfile: "test",
+        awsRegion: "us-east-1",
+        context: mockContext
+      })
+    ).rejects.toThrow(capacityError);
+
+    // Only one send call before the capacity error interrupts the loop
+    expect(mockAutoScalingClient.send).toHaveBeenCalledTimes(1);
+    // No sleep because checkASGScalingFailure throws before sleep is called
+    expect(sleepSpy).not.toHaveBeenCalled();
   });
 });
