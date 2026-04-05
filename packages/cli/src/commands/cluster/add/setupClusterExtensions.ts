@@ -64,6 +64,30 @@ export async function setupClusterExtensions(
     return eksPfData.deploy_status === "success" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
   }
 
+  const shouldSkipVaultAntiAffinityAdjustment = async () => {
+    const vaultModuleInfo = await readYAMLFile({
+      filePath: join(clusterPath, MODULES.KUBE_VAULT, "module.yaml"),
+      context,
+      validationSchema: z.object({
+        extra_inputs: z.object({
+          bootstrap_mode_enabled: z.boolean(),
+        }),
+      }),
+    });
+
+    const vaultPfData = await getModuleStatus({
+      environment,
+      region,
+      module: MODULES.KUBE_VAULT,
+      context,
+    });
+
+    return (
+      vaultPfData.deploy_status === "success" &&
+      vaultModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+    );
+  }
+
   interface IContext {
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -232,6 +256,23 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: await shouldSkipNodePoolsAdjustment(),
               module: MODULES.AWS_EKS,
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Vault Anti-Affinity Adjustment",
+              context,
+              env: {
+                ...process.env,
+              },
+              environment,
+              region,
+              skipIfAlreadyApplied: await shouldSkipVaultAntiAffinityAdjustment(),
+              module: MODULES.KUBE_VAULT,
               inputUpdates: {
                 bootstrap_mode_enabled: defineInputUpdate({
                   schema: z.boolean(),

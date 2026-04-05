@@ -141,6 +141,10 @@ export async function setupVault(
           schema: z.boolean(),
           update: () => false,
         }),
+        bootstrap_mode_enabled: defineInputUpdate({
+          schema: z.boolean(),
+          update: () => true,
+        }),
       },
     }),
     {

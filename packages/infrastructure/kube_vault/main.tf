@@ -48,7 +48,7 @@ module "util_server" {
   controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = var.bootstrap_mode_enabled ? false : var.sla_target == 3
   az_spread_required                   = true // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
 

@@ -92,6 +92,12 @@ variable "panfactum_scheduler_enabled" {
   default     = false
 }
 
+variable "bootstrap_mode_enabled" {
+  description = "Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled"
+  type        = bool
+  default     = false
+}
+
 variable "cors_enabled" {
   description = "Whether to enable CORS handling in the Vault ingress"
   type        = bool
