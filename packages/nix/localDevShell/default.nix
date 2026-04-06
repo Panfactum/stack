@@ -12,6 +12,8 @@
     export GOBIN="$REPO_ROOT/go/bin";
     export GOPATH="$REPO_ROOT/go";
     prek install -c "$REPO_ROOT/.pre-commit-config.yaml"
+    pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
+    bun install --silent --frozen-lockfile &
   '';
 
   packages = with pkgs; [

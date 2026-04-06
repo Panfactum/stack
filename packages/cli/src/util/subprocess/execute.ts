@@ -54,6 +54,7 @@ export interface IExecuteInput {
   | globalThis.ReadableStream
   | globalThis.File
   | globalThis.Blob
+  | Uint8Array
   | number
   | "inherit"
   | null;

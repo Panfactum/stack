@@ -41,8 +41,8 @@ case "$FILE_PATH" in
 esac
 
 # Path-based checks (not extension-based)
-if [[ "$REL_PATH" == "packages/cli/package.json" ]]; then
-  { REPO_ROOT="$CLAUDE_PROJECT_DIR" bash "$CLAUDE_PROJECT_DIR/packages/nix/localDevShell/scripts/precommit-check-aws-sdk-versions.sh" >"$TMPDIR/aws-sdk-versions" 2>&1 || echo "aws-sdk-versions" >>"$TMPDIR/failed"; } &
+if [[ "$(basename "$REL_PATH")" == "package.json" ]]; then
+  { REPO_ROOT="$CLAUDE_PROJECT_DIR" bun run "$CLAUDE_PROJECT_DIR/packages/nix/localDevShell/scripts/precommit-check-package-json.ts" >"$TMPDIR/package-json" 2>&1 || echo "package-json" >>"$TMPDIR/failed"; } &
 fi
 
 wait
@@ -65,8 +65,8 @@ while read -r tool; do
     ERRORS+="changelog-validate: validation errors found in $FILE_PATH"$'\n'
     ERRORS+="$(cat "$TMPDIR/changelog-validate")"$'\n'
     ;;
-  aws-sdk-versions)
-    ERRORS+="$(cat "$TMPDIR/aws-sdk-versions")"$'\n'
+  package-json)
+    ERRORS+="$(cat "$TMPDIR/package-json")"$'\n'
     ;;
   esac
 done <"$TMPDIR/failed"

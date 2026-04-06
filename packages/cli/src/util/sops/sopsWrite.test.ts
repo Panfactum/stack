@@ -86,7 +86,7 @@ describe("sopsWrite", () => {
         ],
         context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.Blob([JSON.stringify(values)])
+        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -142,7 +142,7 @@ describe("sopsWrite", () => {
         ],
         context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.Blob([JSON.stringify(values)])
+        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -301,7 +301,7 @@ describe("sopsWrite", () => {
         ],
         context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.Blob([JSON.stringify(values)])
+        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -347,7 +347,7 @@ describe("sopsWrite", () => {
         ],
         context: mockContext,
         workingDirectory: subDir,
-        stdin: new globalThis.Blob([JSON.stringify(values)])
+        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -389,7 +389,7 @@ describe("sopsWrite", () => {
         ],
         context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.Blob([JSON.stringify({})])
+        stdin: new globalThis.TextEncoder().encode(JSON.stringify({}))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });

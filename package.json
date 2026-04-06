@@ -9,6 +9,6 @@
     "check-dependency-version-consistency": "4.1.0"
   },
   "dependencies": {
-    "yaml": "^2.7.1"
+    "yaml": "2.7.1"
   }
 }

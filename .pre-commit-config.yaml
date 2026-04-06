@@ -72,13 +72,13 @@ repos:
         fail_fast: false
         priority: 0
 
-      - id: check-aws-sdk-versions
-        name: Check AWS SDK Versions
-        entry: precommit-check-aws-sdk-versions
+      - id: check-package-json
+        name: Check Package JSON Consistency
+        entry: bun run packages/nix/localDevShell/scripts/precommit-check-package-json.ts
         language: system
-        files: ^packages/cli/package\.json$
+        files: (^|/)package\.json$
         pass_filenames: false
-        description: "Ensures all @aws-sdk/client-* packages use the same exact version"
+        description: "Ensures all dependencies are pinned and consistent across packages"
         fail_fast: true
         priority: 0
 

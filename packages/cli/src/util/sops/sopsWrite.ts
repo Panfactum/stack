@@ -44,7 +44,7 @@ export const sopsWrite = async (input: ISopsWriteInputs) => {
       ],
       context,
       workingDirectory: dirname(filePath),
-      stdin: new globalThis.Blob([JSON.stringify(values)]),
+      stdin: new globalThis.TextEncoder().encode(JSON.stringify(values)),
     });
   } catch (error) {
     throw new CLIError("Unable to write encrypted data", error);
