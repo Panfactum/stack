@@ -42,7 +42,17 @@ export function createParsedHtmlSections (urlContents: ScrapedUrl[]) {
     .flatMap(parseScrapedUrl)
 
   if (tmpDir) {
-    fs.writeFileSync(`${tmpDir}/sections.json`, JSON.stringify(result))
+    // Write one section per line so we never need to materialise a single
+    // giant JSON string (V8's stringify allocates a contiguous UTF-16 buffer
+    // ~2x the input size, which OOMs the container on large sitemaps).
+    const fd = fs.openSync(`${tmpDir}/sections.ndjson`, 'w')
+    try {
+      for (const section of result) {
+        fs.writeSync(fd, JSON.stringify(section) + '\n')
+      }
+    } finally {
+      fs.closeSync(fd)
+    }
   }
 
   return result
