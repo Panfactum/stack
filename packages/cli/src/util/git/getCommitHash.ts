@@ -10,6 +10,77 @@ import { execute } from '@/util/subprocess/execute';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
+ * The GitHub owner/repo identifier for the Panfactum stack repository
+ */
+const PANFACTUM_STACK_GITHUB_REPO = 'panfactum/stack';
+
+/**
+ * Checks whether a Git repository URL points to the Panfactum stack GitHub repository
+ *
+ * @internal
+ * @param repo - A Git repository URL or path
+ * @returns True if the repo URL resolves to github.com/panfactum/stack
+ */
+function isPanfactumStackRepo(repo: string): boolean {
+  const normalized = repo
+    .replace(/^https?:\/\//, '')
+    .replace(/\.git$/, '')
+    .replace(/\/+$/, '');
+  return normalized === `github.com/${PANFACTUM_STACK_GITHUB_REPO}`;
+}
+
+/**
+ * Result of a GitHub API commit verification attempt
+ */
+interface IGitHubApiVerifyResult {
+  /** Whether the API returned a definitive answer (true) or encountered an error (false) */
+  conclusive: boolean;
+  /** Whether the commit exists in the repository (only meaningful when conclusive is true) */
+  exists: boolean;
+}
+
+/**
+ * Verifies commit existence in the Panfactum stack repo via the GitHub REST API
+ *
+ * @remarks
+ * Uses the unauthenticated GitHub REST API endpoint
+ * `GET /repos/panfactum/stack/git/commits/{sha}`.
+ * Returns a non-conclusive result on network or rate-limit errors
+ * so the caller can fall back to the slower git-fetch verification.
+ *
+ * @internal
+ * @param sha - The 40-character commit SHA to verify
+ * @returns Whether the API call was conclusive and whether the commit exists
+ */
+async function verifyCommitViaGitHubApi(sha: string): Promise<IGitHubApiVerifyResult> {
+  try {
+    const response = await globalThis.fetch(
+      `https://api.github.com/repos/${PANFACTUM_STACK_GITHUB_REPO}/git/commits/${sha}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      return { conclusive: true, exists: true };
+    }
+    if (response.status === 404) {
+      return { conclusive: true, exists: false };
+    }
+
+    // Any other status (403 rate-limit, 5xx, etc.) is inconclusive
+    return { conclusive: false, exists: false };
+  } catch {
+    // Network error — inconclusive
+    return { conclusive: false, exists: false };
+  }
+}
+
+/**
  * Schema for validating 40-character Git SHA hashes
  * 
  * @remarks
@@ -229,6 +300,12 @@ async function resolveRefWithLsRemote(ref: string, repo: string, context: Panfac
  * - **SHA Validation**: Verifies commit exists in the repository
  * - **Remote Support**: Works with custom Git repositories
  * - **Special Cases**: Handles empty repos and local-only refs
+ * - **Panfactum Stack Optimization**: When the target repo is the Panfactum stack
+ *   GitHub repository, commit existence is verified via the GitHub REST API
+ *   (`GET /repos/panfactum/stack/git/commits/{sha}`) instead of a full
+ *   `git fetch`, which is significantly faster. If the API call is
+ *   inconclusive (e.g., rate-limited or network error), the function falls
+ *   back to the standard `git fetch` approach.
  * 
  * Resolution process:
  * 1. If ref is "local", returns "local" (special case)
@@ -303,14 +380,30 @@ export async function getCommitHash(options: IGetCommitHashOptions): Promise<str
   // If ref is already a 40-char SHA
   if (/^[0-9a-f]{40}$/i.test(ref)) {
     if (!noVerify) {
-      const verifyPromise = repo === 'origin'
-        ? verifyCommitInOrigin(ref, context, workingDirectory)
-        : verifyCommitInCustomRepo(ref, repo, context);
-      
-      await verifyPromise
-        .catch((error: unknown) => {
-          throw new CLIError(`Commit ${ref} does not exist in ${repo === 'origin' ? 'the remote origin' : repo}`, error);
-        });
+      if (repo === 'origin') {
+        await verifyCommitInOrigin(ref, context, workingDirectory)
+          .catch((error: unknown) => {
+            throw new CLIError(`Commit ${ref} does not exist in the remote origin`, error);
+          });
+      } else if (isPanfactumStackRepo(repo)) {
+        const apiResult = await verifyCommitViaGitHubApi(ref);
+        if (apiResult.conclusive) {
+          if (!apiResult.exists) {
+            throw new CLIError(`Commit ${ref} does not exist in ${repo}`);
+          }
+        } else {
+          // API was inconclusive (network/rate-limit error); fall back to git fetch
+          await verifyCommitInCustomRepo(ref, repo, context)
+            .catch((error: unknown) => {
+              throw new CLIError(`Commit ${ref} does not exist in ${repo}`, error);
+            });
+        }
+      } else {
+        await verifyCommitInCustomRepo(ref, repo, context)
+          .catch((error: unknown) => {
+            throw new CLIError(`Commit ${ref} does not exist in ${repo}`, error);
+          });
+      }
     }
     return ref;
   }
