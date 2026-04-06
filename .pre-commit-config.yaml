@@ -47,6 +47,7 @@ repos:
         entry: nixfmt
         language: system
         files: ^packages/(nix|cli)/.*\.nix$
+        exclude: (^|/)bun\.nix$
         pass_filenames: true
         description: "Runs nixfmt on Nix files"
         fail_fast: true

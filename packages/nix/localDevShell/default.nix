@@ -11,9 +11,27 @@
     export PF_IAC_DIR="$REPO_ROOT/packages/infrastructure";
     export GOBIN="$REPO_ROOT/go/bin";
     export GOPATH="$REPO_ROOT/go";
-    prek install -c "$REPO_ROOT/.pre-commit-config.yaml"
-    pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
-    bun install --silent --frozen-lockfile &
+    git config --unset-all --local core.hooksPath
+    run_install() {
+      local name="$1"
+      shift
+      local output
+      if ! output=$("$@" 2>&1); then
+        echo "[$name] failed:" >&2
+        echo "$output" >&2
+      fi
+    }
+    # Note: do NOT pass -c here. The bare-repo + worktrees layout means
+    # `.bare/hooks/pre-commit` is shared across worktrees; passing -c bakes
+    # the absolute path of the installing worktree's config into the hook,
+    # so commits from other worktrees would silently use the wrong config.
+    # Without -c, prek resolves .pre-commit-config.yaml from the worktree
+    # being committed to at hook execution time.
+    run_install prek prek install --quiet &
+    run_install pnpm pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
+    run_install "bun (root)" bun install --silent --frozen-lockfile &
+    run_install "bun (cli)" bun install --silent --frozen-lockfile --cwd "$REPO_ROOT/packages/cli" &
+    wait
   '';
 
   packages = with pkgs; [
@@ -49,7 +67,7 @@
     #########################################
     shellcheck
     shfmt
-    nixfmt-rfc-style
+    nixfmt
     nodePackages.cspell
     prek
   ];

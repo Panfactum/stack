@@ -18,4 +18,20 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   exit 0
 fi
 
-prek run --no-progress -c "$CLAUDE_PROJECT_DIR/.pre-commit-config.yaml" --files "${FILES[@]}" 1>&2 || exit 2
+# prek exits non-zero whenever a hook autofixes a file, even when there is
+# no real error. To distinguish autofix from a true failure, snapshot the
+# file contents before the run. If prek fails but the files are unchanged,
+# it's a real error - bail immediately. If files were modified, re-run to
+# confirm whether the autofix resolved everything.
+hash_files() {
+  sha256sum -- "${FILES[@]}" 2>/dev/null | sha256sum
+}
+
+before=$(hash_files)
+if ! prek run --no-progress -c "$CLAUDE_PROJECT_DIR/.pre-commit-config.yaml" --files "${FILES[@]}" 1>&2; then
+  after=$(hash_files)
+  if [[ "$before" == "$after" ]]; then
+    exit 2
+  fi
+  prek run --no-progress -c "$CLAUDE_PROJECT_DIR/.pre-commit-config.yaml" --files "${FILES[@]}" 1>&2 || exit 2
+fi
