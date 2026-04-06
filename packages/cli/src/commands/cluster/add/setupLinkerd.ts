@@ -5,7 +5,10 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { CLIError } from "@/util/error/error";
 import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
-import { buildDeployModuleTask } from "@/util/terragrunt/tasks/deployModuleTask";
+import {
+  buildDeployModuleTask,
+  defineInputUpdate,
+} from "@/util/terragrunt/tasks/deployModuleTask";
 import { startVaultProxy } from "@/util/vault/startVaultProxy";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { IInstallClusterStepOptions } from "./common";
@@ -70,6 +73,12 @@ export async function setupLinkerd(
               skipIfAlreadyApplied: true,
               module: MODULES.KUBE_LINKERD,
               hclIfMissing: await Bun.file(kubeLinkerdTerragruntHcl).text(),
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => true,
+                }),
+              },
             }),
           ],
           { ctx }

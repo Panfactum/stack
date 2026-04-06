@@ -112,6 +112,30 @@ export async function setupClusterExtensions(
     );
   };
 
+  const shouldSkipLinkerdAntiAffinityAdjustment = async () => {
+    const linkerdModuleInfo = await readYAMLFile({
+      filePath: join(clusterPath, MODULES.KUBE_LINKERD, "module.yaml"),
+      context,
+      validationSchema: z.object({
+        extra_inputs: z.object({
+          bootstrap_mode_enabled: z.boolean(),
+        }),
+      }),
+    });
+
+    const linkerdPfData = await getModuleStatus({
+      environment,
+      region,
+      module: MODULES.KUBE_LINKERD,
+      context,
+    });
+
+    return (
+      linkerdPfData.deploy_status === "success" &&
+      linkerdModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+    );
+  };
+
   interface IContext {
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -314,6 +338,23 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: await shouldSkipCertManagerAntiAffinityAdjustment(),
               module: MODULES.KUBE_CERTIFICATES,
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Linkerd Anti-Affinity Adjustment",
+              context,
+              env: {
+                ...process.env,
+              },
+              environment,
+              region,
+              skipIfAlreadyApplied: await shouldSkipLinkerdAntiAffinityAdjustment(),
+              module: MODULES.KUBE_LINKERD,
               inputUpdates: {
                 bootstrap_mode_enabled: defineInputUpdate({
                   schema: z.boolean(),

@@ -86,7 +86,7 @@ module "util_destination" {
   controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = var.bootstrap_mode_enabled ? false : var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
@@ -100,7 +100,7 @@ module "util_identity" {
   controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = var.bootstrap_mode_enabled ? false : var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
@@ -114,7 +114,7 @@ module "util_proxy_injector" {
   controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = var.bootstrap_mode_enabled ? false : var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
