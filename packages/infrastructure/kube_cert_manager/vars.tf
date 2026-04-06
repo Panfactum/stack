@@ -80,3 +80,9 @@ variable "controller_nodes_enabled" {
   type        = bool
   default     = true
 }
+
+variable "bootstrap_mode_enabled" {
+  description = "Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled"
+  type        = bool
+  default     = false
+}

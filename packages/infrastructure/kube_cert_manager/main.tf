@@ -53,7 +53,7 @@ module "util_webhook" {
   source = "../kube_workload_utility"
 
   workload_name                        = "cert-manager-webhook"
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = var.bootstrap_mode_enabled ? false : var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2
   host_anti_affinity_required          = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled

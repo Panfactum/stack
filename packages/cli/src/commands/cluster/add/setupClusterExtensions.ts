@@ -88,6 +88,30 @@ export async function setupClusterExtensions(
     );
   }
 
+  const shouldSkipCertManagerAntiAffinityAdjustment = async () => {
+    const certManagerModuleInfo = await readYAMLFile({
+      filePath: join(clusterPath, MODULES.KUBE_CERTIFICATES, "module.yaml"),
+      context,
+      validationSchema: z.object({
+        extra_inputs: z.object({
+          bootstrap_mode_enabled: z.boolean(),
+        }),
+      }),
+    });
+
+    const certManagerPfData = await getModuleStatus({
+      environment,
+      region,
+      module: MODULES.KUBE_CERTIFICATES,
+      context,
+    });
+
+    return (
+      certManagerPfData.deploy_status === "success" &&
+      certManagerModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+    );
+  };
+
   interface IContext {
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -273,6 +297,23 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: await shouldSkipVaultAntiAffinityAdjustment(),
               module: MODULES.KUBE_VAULT,
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "Cert-Manager Anti-Affinity Adjustment",
+              context,
+              env: {
+                ...process.env,
+              },
+              environment,
+              region,
+              skipIfAlreadyApplied: await shouldSkipCertManagerAntiAffinityAdjustment(),
+              module: MODULES.KUBE_CERTIFICATES,
               inputUpdates: {
                 bootstrap_mode_enabled: defineInputUpdate({
                   schema: z.boolean(),

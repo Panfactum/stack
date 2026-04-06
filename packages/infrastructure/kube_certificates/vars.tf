@@ -81,6 +81,12 @@ variable "controller_nodes_enabled" {
   default     = true
 }
 
+variable "bootstrap_mode_enabled" {
+  description = "Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled"
+  type        = bool
+  default     = false
+}
+
 variable "route53_zones" {
   description = "A mapping of public DNS domains managed by AWS to their configuration; cert-manager uses this to issue public-facing certificates."
   type = map(object({

@@ -135,6 +135,10 @@ export async function setupCertificates(
             module: MODULES.KUBE_CERTIFICATES,
             hclIfMissing: await Bun.file(kubeCertificatesTemplate).text(),
             inputUpdates: {
+              bootstrap_mode_enabled: defineInputUpdate({
+                schema: z.boolean(),
+                update: () => true,
+              }),
               self_generated_certs_enabled: defineInputUpdate({
                 schema: z.boolean(),
                 update: () => true,
