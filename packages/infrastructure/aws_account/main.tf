@@ -85,6 +85,7 @@ locals {
   cf_response_header_policy_desired = 100
   cf_cache_policy_desired           = 100
   ec2_vcpu_quota_desired            = 32
+  ec2_spot_vcpu_quota_desired       = 32
 }
 
 data "aws_servicequotas_service_quota" "cf_origin_request_policy" {
@@ -108,6 +109,12 @@ data "aws_servicequotas_service_quota" "cf_cache_policy" {
 data "aws_servicequotas_service_quota" "ec2_vcpu_quota" {
   provider     = aws.global
   quota_code   = "L-1216C47A"
+  service_code = "ec2"
+}
+
+data "aws_servicequotas_service_quota" "ec2_spot_vcpu_quota" {
+  provider     = aws.global
+  quota_code   = "L-34B43A08"
   service_code = "ec2"
 }
 
@@ -141,6 +148,14 @@ resource "aws_servicequotas_service_quota" "ec2_vcpu_quota" {
   quota_code   = "L-1216C47A"
   service_code = "ec2"
   value        = local.ec2_vcpu_quota_desired
+}
+
+resource "aws_servicequotas_service_quota" "ec2_spot_vcpu_quota" {
+  count        = data.aws_servicequotas_service_quota.ec2_spot_vcpu_quota.value < local.ec2_spot_vcpu_quota_desired ? 1 : 0
+  provider     = aws.global
+  quota_code   = "L-34B43A08"
+  service_code = "ec2"
+  value        = local.ec2_spot_vcpu_quota_desired
 }
 
 ###########################################################################

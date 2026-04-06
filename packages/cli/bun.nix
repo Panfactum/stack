@@ -232,6 +232,36 @@ let
         hash = "sha256-E5QaSdy0M3R2Tp+UHadEzhaDhyt0VLqF/EppnMWkAMQ=";
       };
     };
+    "@aws-sdk/client-cloudwatch" = {
+      out_path = "@aws-sdk/client-cloudwatch";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-cloudwatch@3.1024.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-cloudwatch/-/client-cloudwatch-3.1024.0.tgz";
+        hash = "sha256-BQv067QYSooMAgxbWF2OLykZoBcvnmwz4nydbsEDQ9k=";
+      };
+    };
+    "@aws-sdk/client-cloudwatch/@aws-sdk/types" = {
+      out_path = "@aws-sdk/client-cloudwatch/node_modules/@aws-sdk/node_modules/types";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@aws-sdk/types@3.973.6";
+        url = "https://registry.npmjs.org/@aws-sdk/types/-/types-3.973.6.tgz";
+        hash = "sha256-qcodD8c4cBe8MXdcUWqbeEUEtOZiDGPQZhZePaxPSoo=";
+      };
+    };
+    "@aws-sdk/client-cloudwatch/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-cloudwatch/node_modules/@smithy/node_modules/protocol-http";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.3.12";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.3.12.tgz";
+        hash = "sha256-E5QaSdy0M3R2Tp+UHadEzhaDhyt0VLqF/EppnMWkAMQ=";
+      };
+    };
     "@aws-sdk/client-dynamodb" = {
       out_path = "@aws-sdk/client-dynamodb";
       binaries = {
@@ -2312,6 +2342,26 @@ let
         hash = "sha256-r9hlou1O5oQ8iR4Fwqle6IVlU3ZWfMTpoeT8h/lT6OU=";
       };
     };
+    "@smithy/middleware-compression" = {
+      out_path = "@smithy/middleware-compression";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@smithy/middleware-compression@4.3.42";
+        url = "https://registry.npmjs.org/@smithy/middleware-compression/-/middleware-compression-4.3.42.tgz";
+        hash = "sha256-s8MPY+R6fvrGaUnMHh2kxVAL5qTZBEuNAcP5vp7885M=";
+      };
+    };
+    "@smithy/middleware-compression/@smithy/protocol-http" = {
+      out_path = "@smithy/middleware-compression/node_modules/@smithy/node_modules/protocol-http";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.3.12";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.3.12.tgz";
+        hash = "sha256-E5QaSdy0M3R2Tp+UHadEzhaDhyt0VLqF/EppnMWkAMQ=";
+      };
+    };
     "@smithy/middleware-content-length" = {
       out_path = "@smithy/middleware-content-length";
       binaries = {
@@ -4278,6 +4328,16 @@ let
         name = "fdir@6.4.3";
         url = "https://registry.npmjs.org/fdir/-/fdir-6.4.3.tgz";
         hash = "sha256-C4JeXyLBXQrUHSILSQ1kHVN73p0qvmhI6GxjU1Kc+ak=";
+      };
+    };
+    "fflate" = {
+      out_path = "fflate";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "fflate@0.8.1";
+        url = "https://registry.npmjs.org/fflate/-/fflate-0.8.1.tgz";
+        hash = "sha256-Em9p2bQy2imR5D5CMey70EL6OwnWXWTZbCRaQxaKwlQ=";
       };
     };
     "file-entry-cache" = {
