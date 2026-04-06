@@ -510,30 +510,34 @@ if (props.type === 'list') {
   )}
 
   {props.type === 'detail' && detailEntry && (
-    <ChangelogDetail
-      client:load
-      id={contentIdToUrlParam(detailEntry.id)}
-      name={detailName}
-      summary={detailEntry.data.summary}
-      skip={detailEntry.data.skip ?? false}
-      changes={detailChanges}
-      groups={detailGroups.length > 0 ? detailGroups : undefined}
-      hasUpgradeInstructions={detailEntry.data.upgrade_instructions !== undefined}
-      initialTab={props.initialTab}
-      detailUrl={detailUrl}
-      upgradeUrl={upgradeUrl}
-      listUrl={detailListUrl || undefined}
-      branch={detailEntry.data.branch}
-      branched_from={detailEntry.data.branched_from}
-      nextReleaseId={props.nextReleaseId}
-      previousReleaseId={props.previousReleaseId}
-    >
+    <>
+      <ChangelogDetail
+        client:load
+        id={contentIdToUrlParam(detailEntry.id)}
+        name={detailName}
+        summary={detailEntry.data.summary}
+        skip={detailEntry.data.skip ?? false}
+        changes={detailChanges}
+        groups={detailGroups.length > 0 ? detailGroups : undefined}
+        hasUpgradeInstructions={detailEntry.data.upgrade_instructions !== undefined}
+        initialTab={props.initialTab}
+        detailUrl={detailUrl}
+        upgradeUrl={upgradeUrl}
+        listUrl={detailListUrl || undefined}
+        branch={detailEntry.data.branch}
+        branched_from={detailEntry.data.branched_from}
+        nextReleaseId={props.nextReleaseId}
+        previousReleaseId={props.previousReleaseId}
+      />
       {UpgradeContent && (
-        <div class="[&>*:not(h1,h2,h3,h4,h5,h6)]:!mt-0 [&>*]:!mb-4 [&>:is(h1,h2,h3,h4,h5,h6):first-child]:!mt-0">
+        <div
+          data-detail-tab="upgrade"
+          class:list={["pt-6 [&>*:not(h1,h2,h3,h4,h5,h6)]:!mt-0 [&>*]:!mb-4 [&>:is(h1,h2,h3,h4,h5,h6):first-child]:!mt-0", { hidden: props.initialTab !== "upgrade" }]}
+        >
           <UpgradeContent />
         </div>
       )}
-    </ChangelogDetail>
+    </>
   )}
 
   {props.type === 'stable-channel' && (

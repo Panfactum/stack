@@ -33,14 +33,7 @@ import {
   FiXCircle,
 } from "solid-icons/fi";
 import { TbOutlineBraces, TbOutlineRobot } from "solid-icons/tb";
-import {
-  createMemo,
-  For,
-  Show,
-  type Component,
-  type JSX,
-  type ParentComponent,
-} from "solid-js";
+import { createMemo, For, Show, type Component, type JSX } from "solid-js";
 
 import Toast from "@/components/ui/Toast";
 import Tooltip from "@/components/ui/Tooltip";
@@ -740,9 +733,7 @@ const ChangesSection: Component<ChangesSectionProps> = (props) => {
   );
 };
 
-export const ChangelogDetail: ParentComponent<ChangelogDetailProps> = (
-  props,
-) => {
+export const ChangelogDetail: Component<ChangelogDetailProps> = (props) => {
   const orderedChanges = (): RenderedChangeItem[] => {
     const changes = props.changes ?? [];
     const typeOrder = new Map(CHANGE_TYPE_ORDER.map((type, i) => [type, i]));
@@ -751,7 +742,20 @@ export const ChangelogDetail: ParentComponent<ChangelogDetailProps> = (
     );
   };
 
+  const showDetailTab = (tabValue: string) => {
+    const allPanels =
+      document.querySelectorAll<HTMLElement>("[data-detail-tab]");
+    for (const panel of allPanels) {
+      if (panel.dataset["detailTab"] === tabValue) {
+        panel.classList.remove("hidden");
+      } else {
+        panel.classList.add("hidden");
+      }
+    }
+  };
+
   const handleTabChange = (value: string) => {
+    showDetailTab(value);
     const url = value === "upgrade" ? props.upgradeUrl : props.detailUrl;
     window.history.replaceState(null, "", url);
   };
@@ -974,18 +978,6 @@ export const ChangelogDetail: ParentComponent<ChangelogDetailProps> = (
           </Tabs.List>
           <Tabs.Content value="details" class="pt-6">
             <ChangesSection changes={orderedChanges()} groups={props.groups} />
-          </Tabs.Content>
-          <Tabs.Content value="upgrade" class="pt-6">
-            <Show
-              when={props.children}
-              fallback={
-                <p class="text-secondary italic">
-                  No upgrade instructions available.
-                </p>
-              }
-            >
-              {props.children}
-            </Show>
           </Tabs.Content>
         </Tabs>
       </Show>
