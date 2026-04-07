@@ -211,6 +211,26 @@
         hash = "sha256-46nfa7TkJRbYMAvyzpoWgE7w7FcBuTQ2GSloaQCBgPU=";
       };
     };
+    "@aws-sdk/client-cloudfront" = {
+      out_path = "@aws-sdk/client-cloudfront";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@aws-sdk/client-cloudfront@3.1024.0";
+        url = "https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.1024.0.tgz";
+        hash = "sha256-yj/WvpW39q6YYitwucghMHbvpDdf8YhLbkC9iFyfQ+E=";
+      };
+    };
+    "@aws-sdk/client-cloudfront/@smithy/protocol-http" = {
+      out_path = "@aws-sdk/client-cloudfront/node_modules/@smithy/node_modules/protocol-http";
+      binaries = {
+      };
+      pkg = fetchurl {
+        name = "@smithy/protocol-http@5.3.13";
+        url = "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.3.13.tgz";
+        hash = "sha256-46nfa7TkJRbYMAvyzpoWgE7w7FcBuTQ2GSloaQCBgPU=";
+      };
+    };
     "@aws-sdk/client-cloudwatch" = {
       out_path = "@aws-sdk/client-cloudwatch";
       binaries = {

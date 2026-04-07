@@ -17,6 +17,7 @@ import { CLIError } from "@/util/error/error";
 import {GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { ensureCloudFrontAccountVerified } from "./ensureCloudFrontAccountVerified";
 import { ensureEC2QuotaHeadroom } from "./ensureEC2QuotaHeadroom";
 import { setSLA } from "./setSLA";
 import { setupAutoscaling } from "./setupAutoscaling";
@@ -336,6 +337,14 @@ Already completed steps will be automatically skipped.
       context: this.context,
       profile: awsProfile,
       region: awsRegion,
+    });
+
+    /***********************************************
+     * Confirms the AWS account is verified for CloudFront
+     ***********************************************/
+    await ensureCloudFrontAccountVerified({
+      context: this.context,
+      profile: awsProfile,
     });
 
 
