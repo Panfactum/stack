@@ -81,7 +81,7 @@ module "util" {
   // This does need to be spread across AZs in order to not end up
   // with constant service disruptions
   az_spread_required                   = true
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = var.bootstrap_mode_enabled ? false : var.sla_target == 3
 
   extra_labels = data.pf_kube_labels.labels.labels
 }

@@ -155,6 +155,10 @@ export async function setupInboundNetworking(
                   schema: z.number(),
                   update: () => 1,
                 }),
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => true,
+                }),
               },
               postDeployInputUpdates: {
                 sla_level: defineInputUpdate({

@@ -136,6 +136,30 @@ export async function setupClusterExtensions(
     );
   };
 
+  const shouldSkipNginxIngressAntiAffinityAdjustment = async () => {
+    const nginxIngressModuleInfo = await readYAMLFile({
+      filePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX, "module.yaml"),
+      context,
+      validationSchema: z.object({
+        extra_inputs: z.object({
+          bootstrap_mode_enabled: z.boolean(),
+        }),
+      }),
+    });
+
+    const nginxIngressPfData = await getModuleStatus({
+      environment,
+      region,
+      module: MODULES.KUBE_INGRESS_NGINX,
+      context,
+    });
+
+    return (
+      nginxIngressPfData.deploy_status === "success" &&
+      nginxIngressModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+    );
+  };
+
   interface IContext {
     vaultProxyPid?: number;
     vaultProxyPort?: number;
@@ -355,6 +379,23 @@ export async function setupClusterExtensions(
               region,
               skipIfAlreadyApplied: await shouldSkipLinkerdAntiAffinityAdjustment(),
               module: MODULES.KUBE_LINKERD,
+              inputUpdates: {
+                bootstrap_mode_enabled: defineInputUpdate({
+                  schema: z.boolean(),
+                  update: () => false,
+                }),
+              },
+            }),
+            await buildDeployModuleTask({
+              taskTitle: "NGINX Ingress Anti-Affinity Adjustment",
+              context,
+              env: {
+                ...process.env,
+              },
+              environment,
+              region,
+              skipIfAlreadyApplied: await shouldSkipNginxIngressAntiAffinityAdjustment(),
+              module: MODULES.KUBE_INGRESS_NGINX,
               inputUpdates: {
                 bootstrap_mode_enabled: defineInputUpdate({
                   schema: z.boolean(),
