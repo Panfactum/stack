@@ -161,6 +161,28 @@ module "astro_builder_workflow" {
             template = "build-images"
           },
 
+          # Build the scraper image at the same commit as the website so the
+          # scrape-and-index step always runs the latest code. The
+          # scraper-builder's clone.sh resolves git_ref to a commit hash and
+          # tags the ECR image with it, so git_ref must be a commit hash for
+          # the downstream scrape-and-index task to find the matching tag.
+          # The sensor trigger passes body.after (a commit hash) for this.
+          {
+            name = "build-scraper"
+            templateRef = {
+              name     = module.scraper_builder.name
+              template = module.scraper_builder.entrypoint
+            }
+            arguments = {
+              parameters = [
+                {
+                  name  = "git_ref"
+                  value = "{{workflow.parameters.git_ref}}"
+                }
+              ]
+            }
+          },
+
           {
             name = "scrape-and-index"
             templateRef = {
@@ -176,10 +198,14 @@ module "astro_builder_workflow" {
                 {
                   name  = "algolia_index_name"
                   value = "{{workflow.parameters.algolia_index_name}}"
+                },
+                {
+                  name  = "image_version"
+                  value = "{{workflow.parameters.git_ref}}"
                 }
               ]
             }
-            depends = "build-images"
+            depends = "build-images && build-scraper"
           }
         ]
       }

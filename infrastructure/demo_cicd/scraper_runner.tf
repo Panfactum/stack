@@ -33,6 +33,11 @@ module "run_scraper_workflow_spec" {
       {
         name        = "algolia_index_name"
         description = "The index name in algolia to update"
+      },
+
+      {
+        name        = "image_version"
+        description = "The scraper image tag to run (typically the git commit hash built by scraper-builder)"
       }
     ]
   }
@@ -53,19 +58,42 @@ module "run_scraper_workflow_spec" {
   templates = [
     {
       name = "scrape-and-index",
+      inputs = {
+        parameters = [
+          {
+            name = "image_version"
+          }
+        ]
+      }
       container = {
-        image   = "891377197483.dkr.ecr.us-east-2.amazonaws.com/scraper:${var.scraper_image_version}"
-        command = ["node"]
-        args    = ["index.js", "{{workflow.parameters.sitemap_url}}", "{{workflow.parameters.algolia_index_name}}"]
+        image   = "891377197483.dkr.ecr.us-east-2.amazonaws.com/scraper:{{inputs.parameters.image_version}}"
+        command = ["bun"]
+        args    = ["run", "src/main.ts", "{{workflow.parameters.sitemap_url}}", "{{workflow.parameters.algolia_index_name}}"]
       }
     },
     {
       name = "entry",
+      inputs = {
+        parameters = [
+          {
+            name    = "image_version"
+            default = "{{workflow.parameters.image_version}}"
+          }
+        ]
+      }
       dag = {
         tasks = [
           {
-            name = "scrape-and-index"
-            template : "scrape-and-index"
+            name     = "scrape-and-index"
+            template = "scrape-and-index"
+            arguments = {
+              parameters = [
+                {
+                  name  = "image_version"
+                  value = "{{inputs.parameters.image_version}}"
+                }
+              ]
+            }
           }
         ]
       }

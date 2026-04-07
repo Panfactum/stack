@@ -1,0 +1,25 @@
+# Per-Dockerfile dockerignore for the scraper image build.
+#
+# BuildKit loads this file from the --local dockerfile (packages/scraper/)
+# and applies it to the --local context (repo root). It takes precedence
+# over the root .dockerignore for this Containerfile only.
+#
+# We use an allowlist (deny-everything-then-allow) to keep the build
+# context as small as possible. Without this, the context includes the
+# 77MB packages/website/ tree which the scraper does not need.
+
+*
+
+# Root files needed for the bun workspace install
+!bun.lock
+!package.json
+
+# All workspace members listed in root package.json must have a
+# package.json present at install time, even when filtering, otherwise
+# bun errors with "Workspace not found".
+!packages/cli/package.json
+
+# The actual scraper sources
+!packages/scraper/package.json
+!packages/scraper/tsconfig.json
+!packages/scraper/src

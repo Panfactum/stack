@@ -36,11 +36,6 @@ variable "pull_through_cache_enabled" {
   default     = false
 }
 
-variable "scraper_image_version" {
-  description = "The version of the image to use for the scraper"
-  type        = string
-}
-
 variable "algolia_app_id" {
   description = "The Algolia App ID for the search index"
   type        = string

@@ -1,7 +1,7 @@
 #################################################
 ## Base Image
 #################################################
-FROM node:20-bullseye-slim AS base
+FROM oven/bun:1.2.5-slim AS base
 WORKDIR /code
 
 #################################################
@@ -9,39 +9,35 @@ WORKDIR /code
 #################################################
 FROM base AS deps
 
-# Install package manager
-RUN npm i -g pnpm@9.14.2
-
-# Install Dependencies
-COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
+# Workspace lockfile and members live at the repo root.
+# Copy the least-changing files first so layer caching survives source edits.
+# bun requires every workspace member's package.json to be present at install
+# time even when filtering, otherwise it errors with "Workspace not found".
+COPY package.json bun.lock ./
+COPY packages/cli/package.json packages/cli/
 COPY packages/scraper/package.json packages/scraper/
-COPY packages/eslint/ packages/eslint/
-RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
 
-#################################################
-## Development Image
-#################################################
-
-FROM deps AS development
-WORKDIR /code/packages/scraper
-COPY packages/scraper/ .
-RUN npx ncc build src/main.ts -o dist
-
-#################################################
-## Builder Image
-#################################################
-
-FROM deps AS builder
-ENV NODE_ENV=production
-WORKDIR /code/packages/scraper
-COPY packages/scraper/ .
-RUN npx ncc build src/main.ts -o dist
+# --filter scrape installs only the scraper workspace's deps (skips the
+# 100+ AWS SDK packages that belong to packages/cli). --production drops
+# devDependencies (typescript, @types/node) since bun runs TypeScript natively.
+# The cache mount preserves bun's tarball cache across builds via the BuildKit
+# S3 cache backend, so reinstalls are essentially free.
+RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile --filter scrape --production
 
 #################################################
 ## Production Image
 #################################################
-
 FROM base AS production
 ENV NODE_ENV=production
+
+# COPY --link makes each layer content-addressable so they can be cached
+# independently of preceding layers. Layers are listed most-stable first
+# so source edits only invalidate the final layer.
+COPY --link --from=deps /code/node_modules ./node_modules
+COPY --link package.json ./
+COPY --link packages/scraper/package.json packages/scraper/tsconfig.json packages/scraper/
+COPY --link packages/scraper/src packages/scraper/src
+
 WORKDIR /code/packages/scraper
-COPY --from=builder /code/packages/scraper/dist ./
+CMD ["bun", "run", "src/main.ts"]

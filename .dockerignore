@@ -17,8 +17,6 @@
 !packages/reference-typescript/src
 !packages/reference-typescript/package.json
 !packages/reference-typescript/tsconfig.json
-!packages/eslint/package.json
-!packages/eslint/index.js
 !packages/bastion
 !.npmrc
 !package.json

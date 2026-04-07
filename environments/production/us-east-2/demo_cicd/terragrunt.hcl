@@ -38,7 +38,6 @@ inputs = {
   mongodb_atlas_public_key  = local.secrets.mongodb_atlas_public_key
   mongodb_atlas_private_key = local.secrets.mongodb_atlas_private_key
   site_url                  = "https://panfactum.com"
-  scraper_image_version     = "586d06cee96633a26ffe0ce318d85f26c3f7c27d"
   module_bucket             = dependency.module_bucket.outputs.bucket_name
   installer_bucket          = dependency.installer_bucket.outputs.installer_bucket_name
 }
