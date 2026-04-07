@@ -170,7 +170,7 @@ resource "helm_release" "nginx_ingress" {
 
       controller = {
 
-        replicaCount = var.sla_target >= 2 ? 6 : 3
+        replicaCount = var.bootstrap_mode_enabled ? 3 : (var.sla_target >= 2 ? 6 : 3)
 
         annotations = {
           // Required b/c the webhook certificate doesn't automatically renew
