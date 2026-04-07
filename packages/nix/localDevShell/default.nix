@@ -29,8 +29,7 @@
     # being committed to at hook execution time.
     run_install prek prek install --quiet &
     run_install pnpm pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
-    run_install "bun (root)" bun install --silent --frozen-lockfile &
-    run_install "bun (cli)" bun install --silent --frozen-lockfile --cwd "$REPO_ROOT/packages/cli" &
+    run_install bun bun install --silent --frozen-lockfile &
     wait
   '';
 
