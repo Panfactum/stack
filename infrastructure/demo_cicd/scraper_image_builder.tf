@@ -8,4 +8,5 @@ module "scraper_builder" {
   code_repo       = "github.com/panfactum/stack.git"
   dockerfile_path = "./packages/scraper/Containerfile"
   image_repo      = "scraper"
+  memory_mb       = 150
 }
