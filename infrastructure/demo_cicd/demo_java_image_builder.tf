@@ -10,7 +10,6 @@ module "demo_java_service_builder" {
   dockerfile_path = "./packages/reference-java/Containerfile"
   build_context   = "./packages/reference-java"
   image_repo      = "demo-java-service"
-  memory_mb       = 150
 
   args = {}
 }

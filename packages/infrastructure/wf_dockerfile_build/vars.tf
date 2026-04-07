@@ -42,7 +42,7 @@ variable "cpu_millicores" {
 variable "memory_mb" {
   description = "The amount of memory to allocate to pods in the workflow (in MB)"
   type        = number
-  default     = 100
+  default     = 150
 }
 
 variable "git_ref" {

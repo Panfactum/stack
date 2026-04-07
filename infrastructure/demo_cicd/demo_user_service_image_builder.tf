@@ -8,7 +8,6 @@ module "demo_user_service_builder" {
   code_repo       = "github.com/panfactum/stack.git"
   dockerfile_path = "./packages/reference-typescript/Containerfile"
   image_repo      = "demo-user-service"
-  memory_mb       = 150
 
   args = {}
 }

@@ -9,7 +9,6 @@ module "demo_python_service_builder" {
   dockerfile_path = "./packages/reference-python/Containerfile"
   build_context   = "./packages/reference-python"
   image_repo      = "demo-python-service"
-  memory_mb       = 150
 
   args = {}
 }
