@@ -6,9 +6,8 @@ import { getIdentity } from "@/util/aws/getIdentity";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
-import { CLIError } from "@/util/error/error";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
-import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
@@ -226,13 +225,18 @@ export async function setupVaultSSO(
                     `VAULT_TOKEN=${vaultToken} vault token revoke -self`,
                 ];
 
-                await execute({
+                const revokeResult = await context.subprocessManager.execute({
                     command: vaultTokenRevokeCommand,
-                    context,
                     // todo: utilize context.cwd
                     workingDirectory: process.cwd(),
-                    errorMessage: "Failed to revoke vault token",
-                });
+                }).exited;
+                if (revokeResult.exitCode !== 0) {
+                    throw new CLISubprocessError("Failed to revoke vault token", {
+                        command: vaultTokenRevokeCommand.join(" "),
+                        subprocessLogs: revokeResult.output,
+                        workingDirectory: process.cwd(),
+                    });
+                }
 
                 // todo: utilize config file writer to write to config files
                 await sopsUpsert({

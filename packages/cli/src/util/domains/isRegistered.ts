@@ -1,4 +1,3 @@
-import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -35,27 +34,26 @@ export async function isRegistered(inputs: IIsRegisteredInputs): Promise<boolean
 
     // First: If the domain has nameservers, it is definitely registered.
     try {
-        const result = await execute({
+        const result = await context.subprocessManager.execute({
             command: ["dig", "+short", "NS", domain, "@1.1.1.1"],
-            context,
             workingDirectory: process.cwd(),
-            errorMessage: "Failed to execute dig command"
-        });
-        if (result.stdout.trim() !== "") {
+        }).exited;
+        if (result.exitCode === 0 && result.stdout.trim() !== "") {
             return true;
         }
     } catch {
-        // Ignore
+        // Ignore (only spawn failures throw here)
     }
 
     // Second: Search the whois database (which might be outdated)
     try {
-        const result = await execute({
+        const result = await context.subprocessManager.execute({
             command: ["whois", domain],
-            context,
             workingDirectory: process.cwd(),
-            errorMessage: "Failed to execute whois command"
-        });
+        }).exited;
+        if (result.exitCode !== 0) {
+            return false;
+        }
         return result.stdout.includes(`Domain Name: ${domain}`)
     } catch {
         return false;

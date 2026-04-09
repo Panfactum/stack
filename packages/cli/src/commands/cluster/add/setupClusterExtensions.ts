@@ -161,7 +161,7 @@ export async function setupClusterExtensions(
   };
 
   interface IContext {
-    vaultProxyPid?: number;
+    vaultProxyController?: AbortController;
     vaultProxyPort?: number;
   }
 

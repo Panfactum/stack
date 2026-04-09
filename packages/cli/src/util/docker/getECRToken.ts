@@ -24,7 +24,7 @@ import type { PanfactumContext } from '@/util/context/context'
  * - Password: Temporary authentication token
  */
 const ecrTokenSchema = z.string().transform((token, ctx) => {
-  const decoded = globalThis.Buffer.from(token, 'base64').toString('utf8');
+  const decoded = Buffer.from(token, 'base64').toString('utf8');
   const parts = decoded.split(':');
   
   if (parts.length !== 2 || !parts[0] || !parts[1]) {

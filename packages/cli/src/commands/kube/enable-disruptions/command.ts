@@ -3,10 +3,10 @@
 
 import { Command, Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { CLISubprocessError } from '@/util/error/error';
 import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
 import { getPDBsByWindowId } from '@/util/kube/getPDBs';
 import { PDB_ANNOTATIONS } from '@/util/kube/pdbConstants';
-import { execute } from '@/util/subprocess/execute';
 
 /**
  * Command for enabling voluntary disruptions for Kubernetes PDBs
@@ -78,32 +78,54 @@ and marks the start time of the disruption window.`,
   async execute() {
 
     const enableDisruptions = async (pdb: string, maxUnavailable: number): Promise<void> => {
-      await execute({
-        command: [
-          'kubectl', 'patch', pdb,
-          '-n', this.namespace,
-          '--type=json',
-          '-p=' + JSON.stringify([{
-            op: 'replace',
-            path: '/spec/maxUnavailable',
-            value: maxUnavailable
-          }]),
-        ],
-        context: this.context,
+      const patchCommand = [
+        'kubectl', 'patch', pdb,
+        '-n', this.namespace,
+        '--type=json',
+        '-p=' + JSON.stringify([{
+          op: 'replace',
+          path: '/spec/maxUnavailable',
+          value: maxUnavailable
+        }]),
+      ]
+      const patchResult = await this.context.subprocessManager.execute({
+        command: patchCommand,
         workingDirectory: process.cwd(),
-      });
-      
+      }).exited;
+
+      if (patchResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to patch PDB '${pdb}' to set maxUnavailable=${maxUnavailable}`,
+          {
+            command: patchCommand.join(' '),
+            subprocessLogs: patchResult.output,
+            workingDirectory: process.cwd(),
+          }
+        );
+      }
+
       const currentTime = Math.floor(Date.now() / 1000);
-      await execute({
-        command: [
-          'kubectl', 'annotate', pdb,
-          '-n', this.namespace,
-          `${PDB_ANNOTATIONS.WINDOW_START}=${currentTime}`,
-          '--overwrite',
-        ],
-        context: this.context,
+      const annotateCommand = [
+        'kubectl', 'annotate', pdb,
+        '-n', this.namespace,
+        `${PDB_ANNOTATIONS.WINDOW_START}=${currentTime}`,
+        '--overwrite',
+      ]
+      const annotateResult = await this.context.subprocessManager.execute({
+        command: annotateCommand,
         workingDirectory: process.cwd(),
-      });
+      }).exited;
+
+      if (annotateResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to set window-start annotation on PDB '${pdb}'`,
+          {
+            command: annotateCommand.join(' '),
+            subprocessLogs: annotateResult.output,
+            workingDirectory: process.cwd(),
+          }
+        );
+      }
     };
 
     this.context.logger.info('Finding PDBs with disruption windows...');

@@ -12,7 +12,6 @@ import { listDatabases } from '@/util/db/listDatabases.ts'
 import { databaseTypeSchema, vaultRoleSchema, type DatabaseType } from '@/util/db/types.ts'
 import { CLIError, PanfactumZodError } from '@/util/error/error'
 import { getOpenPort } from '@/util/network/getOpenPort.ts'
-import { execute } from '@/util/subprocess/execute.ts'
 import { createSSHTunnel } from '@/util/tunnel/createSSHTunnel.js'
 import { getVaultToken } from '@/util/vault/getVaultToken'
 
@@ -325,20 +324,28 @@ export class DbTunnelCommand extends PanfactumCommand {
     const cleanup = async () => {
       if (credentials.leaseId) {
         context.logger.info('Revoking database credentials...')
-        const vaultToken = await getVaultToken({ context, address: config.vault_addr! })
-        await execute({
-          command: ['vault', 'lease', 'revoke', credentials.leaseId],
-          context,
-          workingDirectory: process.cwd(),
-          env: {
-            ...process.env,
-            VAULT_ADDR: config.vault_addr,
-            VAULT_TOKEN: vaultToken
-          },
-        }).catch((error) => {
+        try {
+          const vaultToken = await getVaultToken({ context, address: config.vault_addr! })
+          const revokeResult = await context.subprocessManager.execute({
+            command: ['vault', 'lease', 'revoke', credentials.leaseId],
+            workingDirectory: process.cwd(),
+            env: {
+              ...process.env,
+              VAULT_ADDR: config.vault_addr,
+              VAULT_TOKEN: vaultToken
+            },
+          }).exited
+          if (revokeResult.exitCode !== 0) {
+            // Log cleanup errors but don't throw
+            context.logger.debug('Error revoking vault lease during tunnel cleanup', {
+              exitCode: revokeResult.exitCode,
+              output: revokeResult.output,
+            })
+          }
+        } catch (error) {
           // Log cleanup errors but don't throw
           context.logger.debug('Error during tunnel cleanup', { error })
-        })
+        }
       }
       await tunnelHandle.close()
       process.exit(0)

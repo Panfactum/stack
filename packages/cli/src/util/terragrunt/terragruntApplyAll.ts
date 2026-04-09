@@ -2,7 +2,7 @@
 // It executes infrastructure deployments across multiple modules simultaneously
 
 import { join } from "node:path";
-import { execute } from "@/util/subprocess/execute";
+import { CLISubprocessError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -74,19 +74,25 @@ export async function terragruntApplyAll(input: ITerragruntApplyAllInput): Promi
     environment,
     region
   );
-  await execute({
-    command: [
-      "terragrunt",
-      "--non-interactive",
-      "apply",
-      "--all",
-      "-auto-approve",
-    ],
+  const command = [
+    "terragrunt",
+    "--non-interactive",
+    "apply",
+    "--all",
+    "-auto-approve",
+  ];
+  const result = await context.subprocessManager.execute({
+    command,
     env,
-    context,
     workingDirectory,
-    errorMessage: "Failed to apply infrastructure modules",
     onStdOutNewline: onLogLine,
     onStdErrNewline: onLogLine,
-  });
+  }).exited;
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError("Failed to apply infrastructure modules", {
+      command: command.join(" "),
+      subprocessLogs: result.output,
+      workingDirectory,
+    });
+  }
 }

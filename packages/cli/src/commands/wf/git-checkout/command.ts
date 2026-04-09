@@ -4,9 +4,8 @@
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
-import { CLIError } from '@/util/error/error'
+import { CLIError, CLISubprocessError } from '@/util/error/error'
 import { getCommitHash } from '@/util/git/getCommitHash.ts'
-import { execute } from '@/util/subprocess/execute.ts'
 
 /**
  * CLI command for efficient git repository checkout in CI/CD workflows
@@ -192,22 +191,30 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
         task: async () => {
           // Build clone URL with authentication if provided
           let cloneUrl = `https://${this.repoUrl}`
-          if (this.username && !this.password) {
-            throw new Error('If --username is supplied, a --password must also be supplied.')
-          }
-          
+
           if (this.username && this.password) {
             cloneUrl = `https://${this.username}:${this.password}@${this.repoUrl}`
           }
-          
+
           const cloneCmd = ['git', 'clone', '-q', '--depth=1', cloneUrl, targetDirectory]
-          
-          await execute({
-            context,
+
+          const cloneResult = await context.subprocessManager.execute({
             env,
             command: cloneCmd,
             workingDirectory: process.cwd(),
-          })
+          }).exited
+
+          if (cloneResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              `Failed to clone repository ${this.repoUrl}`,
+              {
+                // Rewrite the command to avoid leaking credentials in error output
+                command: ['git', 'clone', '-q', '--depth=1', `https://${this.repoUrl}`, targetDirectory].join(' '),
+                subprocessLogs: cloneResult.output,
+                workingDirectory: process.cwd(),
+              }
+            )
+          }
         },
       },
       {
@@ -216,17 +223,29 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
           // Persist the username/password authentication locally in the repository
           // This enables future git operations to not need explicit credentials
           if (this.username && this.password) {
-            await execute({
+            const configCommand = [
+              'git',
+              'config',
+              `url.https://${this.username}:${this.password}@${this.repoUrl}.insteadOf`,
+              `https://${this.repoUrl}`
+            ]
+            const configResult = await context.subprocessManager.execute({
               env,
-              context,
-              command: [
-                'git', 
-                'config', 
-                `url.https://${this.username}:${this.password}@${this.repoUrl}.insteadOf`,
-                `https://${this.repoUrl}`
-              ],
+              command: configCommand,
               workingDirectory: targetDirectory,
-            })
+            }).exited
+
+            if (configResult.exitCode !== 0) {
+              throw new CLISubprocessError(
+                'Failed to configure git authentication',
+                {
+                  // Avoid leaking credentials in error output
+                  command: ['git', 'config', `url.https://***@${this.repoUrl}.insteadOf`, `https://${this.repoUrl}`].join(' '),
+                  subprocessLogs: configResult.output,
+                  workingDirectory: targetDirectory,
+                }
+              )
+            }
           }
         },
       },
@@ -248,40 +267,84 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
         title: 'Checking out commit',
         task: async () => {
           // Fetch the specific commit
-          await execute({
+          const fetchCommand = ['git', 'fetch', 'origin', commitSha]
+          const fetchResult = await context.subprocessManager.execute({
             env,
-            context,
-            command: ['git', 'fetch', 'origin', commitSha],
+            command: fetchCommand,
             workingDirectory: targetDirectory,
-          })
-          
+          }).exited
+
+          if (fetchResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              `Failed to fetch commit ${commitSha}`,
+              {
+                command: fetchCommand.join(' '),
+                subprocessLogs: fetchResult.output,
+                workingDirectory: targetDirectory,
+              }
+            )
+          }
+
           // Checkout the commit
-          await execute({
+          const checkoutCommand = ['git', 'checkout', commitSha]
+          const checkoutResult = await context.subprocessManager.execute({
             env,
-            context,
-            command: ['git', 'checkout', commitSha],
+            command: checkoutCommand,
             workingDirectory: targetDirectory,
-          })
+          }).exited
+
+          if (checkoutResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              `Failed to checkout commit ${commitSha}`,
+              {
+                command: checkoutCommand.join(' '),
+                subprocessLogs: checkoutResult.output,
+                workingDirectory: targetDirectory,
+              }
+            )
+          }
         },
       },
       {
         title: 'Initializing Git LFS',
         task: async () => {
           // Initialize Git LFS locally
-          await execute({
+          const lfsInstallCommand = ['git', 'lfs', 'install', '--local']
+          const lfsInstallResult = await context.subprocessManager.execute({
             env,
-            context,
-            command: ['git', 'lfs', 'install', '--local'],
+            command: lfsInstallCommand,
             workingDirectory: targetDirectory,
-          })
-          
+          }).exited
+
+          if (lfsInstallResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to initialize Git LFS',
+              {
+                command: lfsInstallCommand.join(' '),
+                subprocessLogs: lfsInstallResult.output,
+                workingDirectory: targetDirectory,
+              }
+            )
+          }
+
           // Pull LFS files
-          await execute({
+          const lfsPullCommand = ['git', 'lfs', 'pull']
+          const lfsPullResult = await context.subprocessManager.execute({
             env,
-            context,
-            command: ['git', 'lfs', 'pull'],
+            command: lfsPullCommand,
             workingDirectory: targetDirectory,
-          })
+          }).exited
+
+          if (lfsPullResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to pull Git LFS files',
+              {
+                command: lfsPullCommand.join(' '),
+                subprocessLogs: lfsPullResult.output,
+                workingDirectory: targetDirectory,
+              }
+            )
+          }
         },
       },
     ], { rendererOptions: { collapseErrors: false } })

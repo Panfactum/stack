@@ -38,7 +38,7 @@ export async function getNewAccountAlias(inputs: IGetNewAccountAliasInput) {
             if (denylist.includes(value)) {
                 return "Account name is already in use by your organization."
             }
-            const response = await globalThis.fetch(`https://${value}.signin.aws.amazon.com`)
+            const response = await fetch(`https://${value}.signin.aws.amazon.com`)
             if (response.status !== 404) {
                 return `Every account must have a globally unique name. Name is already taken.`
             }

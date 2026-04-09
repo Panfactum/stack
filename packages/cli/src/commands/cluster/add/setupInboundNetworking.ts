@@ -1,22 +1,21 @@
 import { join } from "node:path";
 import { z } from "zod";
-
-declare const fetch: typeof globalThis.fetch;
 import awsLbController from "@/templates/kube_aws_lb_controller_terragrunt.hcl" with { type: "file" };
 import kubeExternalDnsTerragruntHcl from "@/templates/kube_external_dns_terragrunt.hcl" with { type: "file" };
 import kubeNginxIngressTerragruntHcl from "@/templates/kube_ingress_nginx_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { CLIError } from "@/util/error/error";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
-import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { sleep } from "@/util/util/sleep";
 import { startVaultProxy } from "@/util/vault/startVaultProxy";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
+import { watchIngressNginxFailure } from "./watchIngressNginxFailure";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -38,7 +37,7 @@ export async function setupInboundNetworking(
   interface IContext {
     kubeContext?: string;
     vaultDomain?: string;
-    vaultProxyPid?: number;
+    vaultProxyController?: AbortController;
     vaultProxyPort?: number;
   }
 
@@ -57,7 +56,7 @@ export async function setupInboundNetworking(
     {
       title: "Start Vault Proxy",
       task: async (ctx) => {
-        const { pid, port } = await startVaultProxy({
+        const { controller, port } = await startVaultProxy({
           context,
           env: {
             ...process.env,
@@ -65,18 +64,29 @@ export async function setupInboundNetworking(
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX),
         });
-        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyController = controller;
         ctx.vaultProxyPort = port;
       },
     },
     {
       title: "Generating a key used for TLS security",
       task: async () => {
-        const { stdout } = await execute({
-          command: ["openssl", "dhparam", "-dsaparam", "4096"],
-          context,
+        const dhparamCommand = ["openssl", "dhparam", "-dsaparam", "4096"]
+        const dhparamResult = await context.subprocessManager.execute({
+          command: dhparamCommand,
           workingDirectory: clusterPath,
-        });
+        }).exited;
+
+        if (dhparamResult.exitCode !== 0) {
+          throw new CLISubprocessError(
+            "Failed to generate DH parameters",
+            {
+              command: dhparamCommand.join(' '),
+              subprocessLogs: dhparamResult.output,
+              workingDirectory: clusterPath,
+            }
+          );
+        }
 
         const secretsPath = join(
           join(clusterPath, MODULES.KUBE_INGRESS_NGINX),
@@ -86,7 +96,7 @@ export async function setupInboundNetworking(
         await sopsUpsert({
           context,
           filePath: secretsPath,
-          values: { dhparam: stdout },
+          values: { dhparam: dhparamResult.stdout },
         });
       },
     },
@@ -132,7 +142,7 @@ export async function setupInboundNetworking(
                 kubeExternalDnsTerragruntHcl
               ).text(),
             }),
-            await buildDeployModuleTask({
+            await buildDeployModuleTask<IContext>({
               taskTitle: "Deploy Ingress NGINX",
               context,
               env: {
@@ -165,7 +175,22 @@ export async function setupInboundNetworking(
                   schema: z.number().optional(),
                   update: () => undefined,
                 })
-              }
+              },
+              // Watch for known fatal Kubernetes-level failures (e.g. the
+              // "OperationNotPermitted: This AWS account currently does not
+              // support creating load balancers" restriction) while the
+              // apply runs, so users see an actionable error in seconds
+              // instead of waiting for the helm/kubectl wait timeout.
+              parallelWatcher: async ({ ctx: watcherCtx, abortSignal }) => {
+                if (!watcherCtx.kubeContext) {
+                  return;
+                }
+                await watchIngressNginxFailure({
+                  context,
+                  kubeContext: watcherCtx.kubeContext,
+                  abortSignal,
+                });
+              },
             }),
             await buildDeployModuleTask({
               taskTitle: "Update Vault to use Ingress",
@@ -249,7 +274,7 @@ export async function setupInboundNetworking(
           attempts++;
 
           if (attempts < maxAttempts) {
-            await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+            await sleep(retryDelay);
           } else {
             task.title = context.logger.applyColors(`Failed to connect to Vault health endpoint after ${maxAttempts} attempts`, { style: "error" });
             throw new CLIError(`Failed to connect to Vault health endpoint after ${maxAttempts} attempts`);
@@ -276,9 +301,7 @@ export async function setupInboundNetworking(
     {
       title: "Stop Vault Proxy",
       task: async (ctx) => {
-        if (ctx.vaultProxyPid) {
-          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
-        }
+        ctx.vaultProxyController?.abort();
       },
     },
   ]);

@@ -2,9 +2,8 @@
 // It ensures BuildKit pods are available before starting builds
 
 import { z } from 'zod'
-import { CLIError, PanfactumZodError } from '@/util/error/error.js'
+import { CLIError, CLISubprocessError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
-import { execute } from '@/util/subprocess/execute.js'
 import { sleep } from '@/util/util/sleep'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from './constants.js'
 import { recordBuildKitBuild } from './recordBuild.js'
@@ -127,20 +126,31 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
   const contextArgs = getKubectlContextArgs(kubectlContext)
 
   // Get current replicas
-  const result = await execute({
-    command: [
-      'kubectl',
-      ...contextArgs,
-      'get',
-      'statefulset',
-      statefulsetName,
-      '--namespace',
-      BUILDKIT_NAMESPACE,
-      '-o=jsonpath={.spec.replicas}'
-    ],
-    context,
+  const getCommand = [
+    'kubectl',
+    ...contextArgs,
+    'get',
+    'statefulset',
+    statefulsetName,
+    '--namespace',
+    BUILDKIT_NAMESPACE,
+    '-o=jsonpath={.spec.replicas}'
+  ]
+  const result = await context.subprocessManager.execute({
+    command: getCommand,
     workingDirectory: process.cwd()
-  })
+  }).exited
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to get replica count for ${statefulsetName}`,
+      {
+        command: getCommand.join(' '),
+        subprocessLogs: result.output,
+        workingDirectory: process.cwd(),
+      }
+    )
+  }
 
   const parseResult = replicaCountSchema.safeParse(result.stdout.trim())
   if (!parseResult.success) {
@@ -154,20 +164,31 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
 
   if (currentReplicas === 0) {
     // Scale up
-    await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'scale',
-        'statefulset',
-        statefulsetName,
-        '--namespace',
-        BUILDKIT_NAMESPACE,
-        '--replicas=1'
-      ],
-      context,
+    const scaleCommand = [
+      'kubectl',
+      ...contextArgs,
+      'scale',
+      'statefulset',
+      statefulsetName,
+      '--namespace',
+      BUILDKIT_NAMESPACE,
+      '--replicas=1'
+    ]
+    const scaleResult = await context.subprocessManager.execute({
+      command: scaleCommand,
       workingDirectory: process.cwd()
-    })
+    }).exited
+
+    if (scaleResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to scale up ${statefulsetName}`,
+        {
+          command: scaleCommand.join(' '),
+          subprocessLogs: scaleResult.output,
+          workingDirectory: process.cwd(),
+        }
+      )
+    }
   }
 
   // Record a "build" to prevent immediate scale-down
@@ -195,20 +216,31 @@ async function waitForScaleUp(
   const contextArgs = getKubectlContextArgs(kubectlContext)
 
   while (true) {
-    const result = await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'get',
-        'statefulset',
-        statefulsetName,
-        '--namespace',
-        BUILDKIT_NAMESPACE,
-        '-o=jsonpath={.status.availableReplicas}'
-      ],
-      context,
+    const waitCommand = [
+      'kubectl',
+      ...contextArgs,
+      'get',
+      'statefulset',
+      statefulsetName,
+      '--namespace',
+      BUILDKIT_NAMESPACE,
+      '-o=jsonpath={.status.availableReplicas}'
+    ]
+    const result = await context.subprocessManager.execute({
+      command: waitCommand,
       workingDirectory: process.cwd()
-    })
+    }).exited
+
+    if (result.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to get available replica count for ${statefulsetName}`,
+        {
+          command: waitCommand.join(' '),
+          subprocessLogs: result.output,
+          workingDirectory: process.cwd(),
+        }
+      )
+    }
 
     const outputValue = result.stdout.trim() || '0'
     const parseResult = replicaCountSchema.safeParse(outputValue)

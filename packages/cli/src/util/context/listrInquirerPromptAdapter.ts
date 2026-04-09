@@ -41,7 +41,7 @@ export class ListrInquirerPromptAdapter extends ListrPromptAdapter {
   /** Current running prompt promise */
   private prompt: Promise<any> | undefined
   /** Controller for cancelling prompts */
-  private abortController = new globalThis.AbortController();
+  private abortController = new AbortController();
   
   /**
    * Gets the current running instance of the Inquirer prompt
@@ -87,7 +87,7 @@ export class ListrInquirerPromptAdapter extends ListrPromptAdapter {
 
     // Animate the task title to show we're waiting for input
     let styled = false;
-    const interval = globalThis.setInterval(() => {
+    const interval = setInterval(() => {
       if (styled) {
         this.task.title = originalTitle + " " + pc.bold(pc.whiteBright(pc.bgBlackBright(" Waiting on user input ")))
       } else {
@@ -108,7 +108,7 @@ export class ListrInquirerPromptAdapter extends ListrPromptAdapter {
 
       throw e
     } finally {
-      globalThis.clearInterval(interval)
+      clearInterval(interval)
       this.task.title = originalTitle
     }
 

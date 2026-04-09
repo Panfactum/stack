@@ -2,10 +2,9 @@
 // It prepares clusters for Panfactum's hardened component installation
 
 import { z } from "zod";
-import { CLIError } from "@/util/error/error";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { parseJson } from "@/util/json/parseJson";
-import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -94,48 +93,72 @@ export async function clusterReset(input: IClusterResetInput) {
   // ############################################################
   // ## Step 5: Delete the addons (using the AWS API)
   // ############################################################
-  const { stdout: awsAddons } = await execute({
-    command: [
-      "aws",
-      "--profile",
-      awsProfile,
-      "eks",
-      "list-addons",
-      "--cluster-name",
-      clusterName,
-      "--region",
-      awsRegion,
-      "--output",
-      "json",
-    ],
-    context,
+  const listAddonsCommand = [
+    "aws",
+    "--profile",
+    awsProfile,
+    "eks",
+    "list-addons",
+    "--cluster-name",
+    clusterName,
+    "--region",
+    awsRegion,
+    "--output",
+    "json",
+  ];
+  const listAddonsResult = await context.subprocessManager.execute({
+    command: listAddonsCommand,
     workingDirectory: clusterPath,
-  });
+  }).exited;
+
+  if (listAddonsResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to list EKS addons for cluster ${clusterName}`,
+      {
+        command: listAddonsCommand.join(" "),
+        subprocessLogs: listAddonsResult.output,
+        workingDirectory: clusterPath,
+      }
+    );
+  }
+
   const addonsToDisable = ["coredns", "kube-proxy", "vpc-cni"];
   const addonsSchema = z.object({
     addons: z.array(z.string()),
   });
-  const addonsJson = parseJson(addonsSchema, awsAddons);
+  const addonsJson = parseJson(addonsSchema, listAddonsResult.stdout);
   for (const addon of addonsJson.addons) {
     if (addonsToDisable.includes(addon)) {
-      await execute({
-        command: [
-          "aws",
-          "--profile",
-          awsProfile,
-          "--region",
-          awsRegion,
-          "eks",
-          "delete-addon",
-          "--cluster-name",
-          clusterName,
-          "--addon-name",
-          addon,
-          "--no-preserve",
-        ],
-        context,
+      const deleteAddonCommand = [
+        "aws",
+        "--profile",
+        awsProfile,
+        "--region",
+        awsRegion,
+        "eks",
+        "delete-addon",
+        "--cluster-name",
+        clusterName,
+        "--addon-name",
+        addon,
+        "--no-preserve",
+      ];
+      const deleteAddonResult = await context.subprocessManager.execute({
+        command: deleteAddonCommand,
         workingDirectory: clusterPath,
-      });
+      }).exited;
+
+      if (deleteAddonResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to delete EKS addon ${addon}`,
+          {
+            command: deleteAddonCommand.join(" "),
+            subprocessLogs: deleteAddonResult.output,
+            workingDirectory: clusterPath,
+          }
+        );
+      }
+
       task.output = context.logger.applyColors(`EKS addon disabled: ${addon}`, {
         style: "subtle",
       });
@@ -165,22 +188,34 @@ export async function clusterReset(input: IClusterResetInput) {
   }: {
     type: string;
     name: string;
-  }) =>
-    execute({
-      command: [
-        "kubectl",
-        "--context",
-        clusterName,
-        "--namespace",
-        "kube-system",
-        "delete",
-        type,
-        name,
-        "--ignore-not-found",
-      ],
-      context,
+  }) => {
+    const command = [
+      "kubectl",
+      "--context",
+      clusterName,
+      "--namespace",
+      "kube-system",
+      "delete",
+      type,
+      name,
+      "--ignore-not-found",
+    ];
+    const result = await context.subprocessManager.execute({
+      command,
       workingDirectory: clusterPath,
-    });
+    }).exited;
+
+    if (result.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to delete ${type}/${name} in kube-system namespace`,
+        {
+          command: command.join(" "),
+          subprocessLogs: result.output,
+          workingDirectory: clusterPath,
+        }
+      );
+    }
+  };
 
   await kubectlDelete({ type: "deployment", name: "coredns" });
   await kubectlDelete({ type: "service", name: "kube-dns" });
@@ -191,60 +226,97 @@ export async function clusterReset(input: IClusterResetInput) {
   await kubectlDelete({ type: "configmap", name: "kube-proxy" });
   await kubectlDelete({ type: "configmap", name: "kube-proxy-config" });
   await kubectlDelete({ type: "configmap", name: "aws-auth" });
-  await execute({
-    command: [
-      "kubectl",
-      "--context",
-      clusterName,
-      "delete",
-      "storageclass",
-      "gp2",
-      "--ignore-not-found",
-    ],
-    context,
+
+  const deleteStorageClassCommand = [
+    "kubectl",
+    "--context",
+    clusterName,
+    "delete",
+    "storageclass",
+    "gp2",
+    "--ignore-not-found",
+  ];
+  const deleteStorageClassResult = await context.subprocessManager.execute({
+    command: deleteStorageClassCommand,
     workingDirectory: clusterPath,
-  });
+  }).exited;
+
+  if (deleteStorageClassResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      "Failed to delete gp2 storage class",
+      {
+        command: deleteStorageClassCommand.join(" "),
+        subprocessLogs: deleteStorageClassResult.output,
+        workingDirectory: clusterPath,
+      }
+    );
+  }
   // ############################################################
   // ## Step 7: Terminate all nodes so old node-local configuration settings are wiped
   // ############################################################
   const tagKey = `kubernetes.io/cluster/${clusterName}`;
   const tagValue = "owned";
-  const { stdout: instanceIds } = await execute({
-    command: [
+  const describeInstancesCommand = [
+    "aws",
+    "--profile",
+    awsProfile,
+    "--region",
+    awsRegion,
+    "ec2",
+    "describe-instances",
+    "--filters",
+    `Name=tag:${tagKey},Values=${tagValue}`,
+    "Name=instance-state-name,Values=pending,running,stopping,stopped",
+    "--query",
+    "Reservations[*].Instances[*].InstanceId",
+    "--output",
+    "text",
+  ];
+  const describeInstancesResult = await context.subprocessManager.execute({
+    command: describeInstancesCommand,
+    workingDirectory: clusterPath,
+  }).exited;
+
+  if (describeInstancesResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to describe EC2 instances for cluster ${clusterName}`,
+      {
+        command: describeInstancesCommand.join(" "),
+        subprocessLogs: describeInstancesResult.output,
+        workingDirectory: clusterPath,
+      }
+    );
+  }
+
+  const instanceIds = describeInstancesResult.stdout;
+  if (instanceIds.trim().length !== 0) {
+    const terminateInstancesCommand = [
       "aws",
       "--profile",
       awsProfile,
       "--region",
       awsRegion,
       "ec2",
-      "describe-instances",
-      "--filters",
-      `Name=tag:${tagKey},Values=${tagValue}`,
-      "Name=instance-state-name,Values=pending,running,stopping,stopped",
-      "--query",
-      "Reservations[*].Instances[*].InstanceId",
-      "--output",
-      "text",
-    ],
-    context,
-    workingDirectory: clusterPath,
-  });
-  if (instanceIds.length !== 0) {
-    await execute({
-      command: [
-        "aws",
-        "--profile",
-        awsProfile,
-        "--region",
-        awsRegion,
-        "ec2",
-        "terminate-instances",
-        "--instance-ids",
-        ...instanceIds.trim().split(/\s+/),
-      ],
-      context,
+      "terminate-instances",
+      "--instance-ids",
+      ...instanceIds.trim().split(/\s+/),
+    ];
+    const terminateInstancesResult = await context.subprocessManager.execute({
+      command: terminateInstancesCommand,
       workingDirectory: clusterPath,
-    });
+    }).exited;
+
+    if (terminateInstancesResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        "Failed to terminate EC2 instances",
+        {
+          command: terminateInstancesCommand.join(" "),
+          subprocessLogs: terminateInstancesResult.output,
+          workingDirectory: clusterPath,
+        }
+      );
+    }
+
     task.output = context.logger.applyColors(
       "Nodes terminated to reset node-local settings.",
       {

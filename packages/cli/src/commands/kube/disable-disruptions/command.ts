@@ -4,11 +4,10 @@
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
-import { PanfactumZodError } from '@/util/error/error';
+import { CLISubprocessError, PanfactumZodError } from '@/util/error/error';
 import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
 import { getPDBsByWindowId } from '@/util/kube/getPDBs';
 import { PDB_ANNOTATIONS } from '@/util/kube/pdbConstants';
-import { execute } from '@/util/subprocess/execute';
 
 /**
  * Schema for validating Unix timestamp strings
@@ -138,31 +137,53 @@ expire based on configured duration.
   async execute() {
 
     const preventDisruptions = async (pdb: string): Promise<void> => {
-      await execute({
-        command: [
-          'kubectl', 'patch', pdb,
-          '-n', this.namespace,
-          '--type=json',
-          '-p=' + JSON.stringify([{
-            op: 'replace',
-            path: '/spec/maxUnavailable',
-            value: 0
-          }]),
-        ],
-        context: this.context,
+      const patchCommand = [
+        'kubectl', 'patch', pdb,
+        '-n', this.namespace,
+        '--type=json',
+        '-p=' + JSON.stringify([{
+          op: 'replace',
+          path: '/spec/maxUnavailable',
+          value: 0
+        }]),
+      ]
+      const patchResult = await this.context.subprocessManager.execute({
+        command: patchCommand,
         workingDirectory: process.cwd(),
-      });
-      
-      await execute({
-        command: [
-          'kubectl', 'annotate', pdb,
-          '-n', this.namespace,
-          `${PDB_ANNOTATIONS.WINDOW_START}-`,
-          '--overwrite',
-        ],
-        context: this.context,
+      }).exited;
+
+      if (patchResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to patch PDB '${pdb}' to set maxUnavailable=0`,
+          {
+            command: patchCommand.join(' '),
+            subprocessLogs: patchResult.output,
+            workingDirectory: process.cwd(),
+          }
+        );
+      }
+
+      const annotateCommand = [
+        'kubectl', 'annotate', pdb,
+        '-n', this.namespace,
+        `${PDB_ANNOTATIONS.WINDOW_START}-`,
+        '--overwrite',
+      ]
+      const annotateResult = await this.context.subprocessManager.execute({
+        command: annotateCommand,
         workingDirectory: process.cwd(),
-      });
+      }).exited;
+
+      if (annotateResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to remove window-start annotation from PDB '${pdb}'`,
+          {
+            command: annotateCommand.join(' '),
+            subprocessLogs: annotateResult.output,
+            workingDirectory: process.cwd(),
+          }
+        );
+      }
     };
 
     this.context.logger.info('Finding PDBs with disruption windows...');

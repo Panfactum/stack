@@ -25,7 +25,7 @@ export async function setupCertificates(
     alertEmail?: string;
     route53Zones?: string[];
     productionEnvironment?: boolean;
-    vaultProxyPid?: number;
+    vaultProxyController?: AbortController;
     vaultProxyPort?: number;
     kubeContext?: string;
   }
@@ -107,7 +107,7 @@ export async function setupCertificates(
     {
       title: "Start Vault Proxy",
       task: async (ctx) => {
-        const { pid, port } = await startVaultProxy({
+        const { controller, port } = await startVaultProxy({
           context,
           env: {
             ...process.env,
@@ -115,7 +115,7 @@ export async function setupCertificates(
           kubeContext: ctx.kubeContext!,
           modulePath: join(clusterPath, MODULES.KUBE_CERTIFICATES),
         });
-        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyController = controller;
         ctx.vaultProxyPort = port;
       },
     },
@@ -195,9 +195,7 @@ export async function setupCertificates(
     {
       title: "Stop Vault Proxy",
       task: async (ctx) => {
-        if (ctx.vaultProxyPid) {
-          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
-        }
+        ctx.vaultProxyController?.abort();
       },
     },
   ], { concurrent: false })

@@ -5,9 +5,8 @@ import { Command, Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getECRToken, parseECRToken } from '@/util/docker/getECRToken.ts'
-import { CLIError } from '@/util/error/error'
+import { CLIError, CLISubprocessError } from '@/util/error/error'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext'
-import { execute } from '@/util/subprocess/execute.ts'
 import type { PanfactumContext } from '@/util/context/context'
 
 /**
@@ -203,17 +202,22 @@ The helper will be called automatically by Docker when pulling/pushing ECR image
         if (error instanceof Error && (error.message?.includes('SSO') || error.message?.includes('sso'))) {
           // Try to login to SSO
           if (awsProfile) {
-            await execute({
-              command: ['aws', 'sso', 'login', '--profile', awsProfile],
-              context,
+            const ssoCommand = ['aws', 'sso', 'login', '--profile', awsProfile]
+            const ssoResult = await context.subprocessManager.execute({
+              command: ssoCommand,
               workingDirectory: process.cwd(),
-            }).catch((ssoError: unknown) => {
-              throw new CLIError(
+            }).exited
+            if (ssoResult.exitCode !== 0) {
+              throw new CLISubprocessError(
                 `Failed to login to AWS SSO for profile '${awsProfile}'`,
-                ssoError
+                {
+                  command: ssoCommand.join(' '),
+                  subprocessLogs: ssoResult.output,
+                  workingDirectory: process.cwd(),
+                }
               )
-            })
-            
+            }
+
             // Retry getting token (skip cache to get fresh token after SSO login)
             return getECRToken({ context, registry, awsProfile, skipCache: true })
               .catch((retryError: unknown) => {
@@ -272,10 +276,10 @@ The helper will be called automatically by Docker when pulling/pushing ECR image
    * @internal
    */
   private async readStdin(): Promise<string> {
-    const chunks: globalThis.Buffer[] = []
+    const chunks: Uint8Array[] = []
     for await (const chunk of this.context.stdin) {
       chunks.push(chunk)
     }
-    return globalThis.Buffer.concat(chunks).toString('utf8')
+    return Buffer.concat(chunks).toString('utf8')
   }
 }

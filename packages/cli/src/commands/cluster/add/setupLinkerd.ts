@@ -2,8 +2,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import kubeLinkerdTerragruntHcl from "@/templates/kube_linkerd_terragrunt.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
-import { CLIError } from "@/util/error/error";
-import { execute } from "@/util/subprocess/execute";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
@@ -22,7 +21,7 @@ export async function setupLinkerd(
 
   interface IContext {
     kubeContext?: string;
-    vaultProxyPid?: number;
+    vaultProxyController?: AbortController;
     vaultProxyPort?: number;
   }
 
@@ -45,7 +44,7 @@ export async function setupLinkerd(
           throw new CLIError("Kube context not found");
         }
 
-        const { pid, port } = await startVaultProxy({
+        const { controller, port } = await startVaultProxy({
           context,
           env: {
             ...process.env,
@@ -53,7 +52,7 @@ export async function setupLinkerd(
           kubeContext: ctx.kubeContext,
           modulePath: join(clusterPath, MODULES.KUBE_LINKERD),
         });
-        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyController = controller;
         ctx.vaultProxyPort = port;
       },
     },
@@ -94,14 +93,11 @@ export async function setupLinkerd(
         if (!kubeContext) {
           throw new CLIError("Kube context not found");
         }
-        await execute({
-          command: ["linkerd", "check", "--cni-namespace=linkerd", "--context", kubeContext],
-          context,
-          workingDirectory: join(clusterPath, MODULES.KUBE_LINKERD),
-          errorMessage: "Linkerd control plane checks failed",
-          isSuccess: ({ exitCode, stdout }) =>
-            exitCode === 0 ||
-            stdout.includes("Status check results are √"),
+        const linkerdCheckCommand = ["linkerd", "check", "--cni-namespace=linkerd", "--context", kubeContext];
+        const linkerdCheckWorkingDir = join(clusterPath, MODULES.KUBE_LINKERD);
+        const linkerdCheckResult = await context.subprocessManager.execute({
+          command: linkerdCheckCommand,
+          workingDirectory: linkerdCheckWorkingDir,
           env: {
             ...process.env,
             VAULT_ADDR: `http://127.0.0.1:${ctx.vaultProxyPort}`,
@@ -112,7 +108,16 @@ export async function setupLinkerd(
           onStdErrNewline: (line) => {
             task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
           },
-        });
+        }).exited;
+        // linkerd check may exit non-zero even on success, so treat either exit
+        // code 0 or the "Status check results are √" stdout marker as success.
+        if (linkerdCheckResult.exitCode !== 0 && !linkerdCheckResult.stdout.includes("Status check results are √")) {
+          throw new CLISubprocessError("Linkerd control plane checks failed", {
+            command: linkerdCheckCommand.join(" "),
+            subprocessLogs: linkerdCheckResult.output,
+            workingDirectory: linkerdCheckWorkingDir,
+          });
+        }
       },
       rendererOptions: {
         outputBar: 5,
@@ -121,9 +126,7 @@ export async function setupLinkerd(
     {
       title: "Stop Vault Proxy",
       task: async (ctx) => {
-        if (ctx.vaultProxyPid) {
-          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
-        }
+        ctx.vaultProxyController?.abort();
       },
     },
   ]);

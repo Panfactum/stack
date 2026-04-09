@@ -40,10 +40,10 @@ export async function getRoot(cwd: string): Promise<string> {
 
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
-    const stderr = await new globalThis.Response(proc.stderr).text();
+    const stderr: string = await new Response(proc.stderr).text();
     throw new CLIError(`Failed to get repository root: ${stderr.trim() || 'git command failed'}`);
   }
-  
-  const stdout = await new globalThis.Response(proc.stdout).text();
+
+  const stdout: string = await new Response(proc.stdout).text();
   return stdout.trim();
 }

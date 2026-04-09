@@ -5,12 +5,11 @@ import { dirname, basename } from 'path'
 import { Option } from 'clipanion'
 import { getBuildKitConfig } from '@/util/buildkit/config.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { CLIError } from '@/util/error/error.js'
+import { CLIError, CLISubprocessError } from '@/util/error/error.js'
 import { directoryExists } from '@/util/fs/directoryExists.js'
 import { fileExists } from '@/util/fs/fileExists.js'
 import { getOpenPorts } from '@/util/network/getOpenPorts.js'
 import { waitForConnection } from '@/util/network/waitForConnection.js'
-import { execute } from '@/util/subprocess/execute.js'
 import type { IBuildKitConfig } from '@/util/buildkit/constants.js'
 
 
@@ -152,16 +151,28 @@ Any additional arguments after -- are passed directly to buildctl.
   rest = Option.Rest()
 
   /**
-   * Process ID of the ARM64 tunnel
+   * Abort controller for the ARM64 tunnel subprocess
+   *
+   * @remarks
+   * This is the controller created by `execute()` when no `abortSignal` is
+   * supplied — we capture it from the returned handle so `cleanup()` can
+   * abort the tunnel subprocess later.
+   *
    * @internal
    */
-  private armTunnelPid?: number
+  private armTunnelController?: AbortController
 
   /**
-   * Process ID of the AMD64 tunnel
+   * Abort controller for the AMD64 tunnel subprocess
+   *
+   * @remarks
+   * This is the controller created by `execute()` when no `abortSignal` is
+   * supplied — we capture it from the returned handle so `cleanup()` can
+   * abort the tunnel subprocess later.
+   *
    * @internal
    */
-  private amdTunnelPid?: number
+  private amdTunnelController?: AbortController
 
   /**
    * Executes the multi-platform build command
@@ -214,8 +225,11 @@ Any additional arguments after -- are passed directly to buildctl.
         throw new CLIError('Failed to get required ports for BuildKit tunnels')
       }
 
-      // Start ARM tunnel
-      const armTunnelResult = await execute({
+      // Start ARM tunnel. We intentionally do NOT await `.exited` — the tunnel
+      // runs until cleanup() aborts its controller. execute() creates its own
+      // AbortController when none is supplied and exposes it on the handle, so
+      // we capture it here for cleanup().
+      const armTunnelHandle = this.context.subprocessManager.execute({
         command: [
           'pf',
           'buildkit',
@@ -223,16 +237,14 @@ Any additional arguments after -- are passed directly to buildctl.
           '--arch', 'arm64',
           '--port', armPort.toString()
         ],
-        context: this.context,
         workingDirectory: process.cwd(),
-        background: true,
-        backgroundDescription: 'BuildKit ARM64 tunnel on port ' + armPort
+        description: 'BuildKit ARM64 tunnel on port ' + armPort,
+        autoEscalateToSigKillMs: 5000
       })
+      this.armTunnelController = armTunnelHandle.abortController
 
-      this.armTunnelPid = armTunnelResult.pid
-
-      // Start AMD tunnel
-      const amdTunnelResult = await execute({
+      // Start AMD tunnel. Same rationale as the ARM tunnel above.
+      const amdTunnelHandle = this.context.subprocessManager.execute({
         command: [
           'pf',
           'buildkit',
@@ -240,13 +252,11 @@ Any additional arguments after -- are passed directly to buildctl.
           '--arch', 'amd64',
           '--port', amdPort.toString()
         ],
-        context: this.context,
         workingDirectory: process.cwd(),
-        background: true,
-        backgroundDescription: 'BuildKit AMD64 tunnel on port ' + amdPort
+        description: 'BuildKit AMD64 tunnel on port ' + amdPort,
+        autoEscalateToSigKillMs: 5000
       })
-
-      this.amdTunnelPid = amdTunnelResult.pid
+      this.amdTunnelController = amdTunnelHandle.abortController
 
       // Wait for tunnels to be ready
       await waitForConnection({ ip: '127.0.0.1', port: armPort })
@@ -263,21 +273,32 @@ Any additional arguments after -- are passed directly to buildctl.
       }
 
       // Create multi-platform manifest
-      await execute({
-        command: [
-          'manifest-tool',
-          'push', 'from-args',
-          '--platforms', 'linux/amd64,linux/arm64',
-          '--template', `${config.registry}/${this.repo}:${this.tag}-ARCH`,
-          '--target', `${config.registry}/${this.repo}:${this.tag}`
-        ],
-        context: this.context,
+      const manifestPushCommand = [
+        'manifest-tool',
+        'push', 'from-args',
+        '--platforms', 'linux/amd64,linux/arm64',
+        '--template', `${config.registry}/${this.repo}:${this.tag}-ARCH`,
+        '--target', `${config.registry}/${this.repo}:${this.tag}`
+      ]
+      const manifestPushResult = await this.context.subprocessManager.execute({
+        command: manifestPushCommand,
         workingDirectory: process.cwd()
-      })
+      }).exited
+
+      if (manifestPushResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to push multi-platform manifest for ${config.registry}/${this.repo}:${this.tag}`,
+          {
+            command: manifestPushCommand.join(' '),
+            subprocessLogs: manifestPushResult.output,
+            workingDirectory: process.cwd(),
+          }
+        )
+      }
 
       return 0
     } finally {
-      await this.cleanup()
+      this.cleanup()
     }
   }
 
@@ -305,7 +326,7 @@ Any additional arguments after -- are passed directly to buildctl.
    */
   private async runBuild(arch: string, port: number, config: IBuildKitConfig): Promise<number> {
     try {
-      const result = await execute({
+      const result = await this.context.subprocessManager.execute({
         command: [
           'buildctl',
           'build',
@@ -320,7 +341,6 @@ Any additional arguments after -- are passed directly to buildctl.
           '--progress', 'plain',
           ...(this.rest || [])
         ],
-        context: this.context,
         workingDirectory: process.cwd(),
         env: {
           ...process.env,
@@ -332,7 +352,7 @@ Any additional arguments after -- are passed directly to buildctl.
         onStdErrNewline: (line) => {
           this.context.logger.writeRaw(`${arch}: ${line}`)
         }
-      })
+      }).exited
 
       return result.exitCode
     } catch (error) {
@@ -343,30 +363,22 @@ Any additional arguments after -- are passed directly to buildctl.
 
   /**
    * Cleans up tunnel processes
-   * 
+   *
    * @remarks
    * Ensures all background tunnel processes are properly terminated.
    * This method is called:
    * - On successful completion
    * - On error conditions
    * - On process interruption (SIGINT/SIGTERM)
-   * 
-   * Uses the centralized killBackgroundProcess utility to ensure
-   * proper process termination across different platforms.
-   * 
+   *
+   * Aborting each controller sends SIGINT to the tunnel subprocess's
+   * process group; execute()'s `autoEscalateToSigKillMs` timer ensures
+   * the subprocess is SIGKILL'd if it does not exit within 5 seconds.
+   *
    * @internal
    */
-  private async cleanup(): Promise<void> {
-    // Kill tunnel processes using the centralized utility
-    if (this.armTunnelPid) {
-      await this.context.backgroundProcessManager.killProcess({
-        pid: this.armTunnelPid
-      })
-    }
-    if (this.amdTunnelPid) {
-      await this.context.backgroundProcessManager.killProcess({
-        pid: this.amdTunnelPid
-      })
-    }
+  private cleanup(): void {
+    this.armTunnelController?.abort()
+    this.amdTunnelController?.abort()
   }
 }

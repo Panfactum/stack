@@ -89,14 +89,14 @@ export function isPortAvailable(
     let isResolved = false;
 
     // Create timeout first so it can be referenced in cleanup
-    const timeoutId = globalThis.setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       server.removeAllListeners();
       server.close(() => {
         // Timeout reached, assume port is unavailable
         safeResolve(false);
       });
       // Force close if normal close doesn't work
-      globalThis.setTimeout(() => {
+      setTimeout(() => {
         if (!isResolved) {
           safeResolve(false);
         }
@@ -107,7 +107,7 @@ export function isPortAvailable(
     const safeResolve = (value: boolean) => {
       if (!isResolved) {
         isResolved = true;
-        globalThis.clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
         resolve(value);
       }
     };
@@ -140,7 +140,7 @@ export function isPortAvailable(
       });
       
       // Ensure we resolve even if close hangs
-      globalThis.setTimeout(() => {
+      setTimeout(() => {
         safeResolve(true);
       }, 100);
     });

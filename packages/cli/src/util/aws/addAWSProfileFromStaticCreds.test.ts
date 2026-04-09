@@ -209,10 +209,10 @@ aws_secret_access_key = old_secret_key`;
     await nodeWriteFile(configFilePath, "invalid ini content [[[", "utf8");
 
     // Mock Bun.file to throw an error
-    const originalBunFile = globalThis.Bun.file;
-    globalThis.Bun.file = (() => {
+    const originalBunFile = Bun.file;
+    Bun.file = (() => {
       throw new Error("Permission denied");
-    }) as typeof globalThis.Bun.file;
+    }) as typeof Bun.file;
 
     try {
       await expect(
@@ -224,7 +224,7 @@ aws_secret_access_key = old_secret_key`;
       ).rejects.toThrow(CLIError);
     } finally {
       // Restore Bun.file
-      globalThis.Bun.file = originalBunFile;
+      Bun.file = originalBunFile;
     }
   });
 
@@ -233,14 +233,14 @@ aws_secret_access_key = old_secret_key`;
     await nodeWriteFile(credentialsFilePath, "valid content", "utf8");
 
     let callCount = 0;
-    const originalBunFile = globalThis.Bun.file;
-    globalThis.Bun.file = ((path: Parameters<typeof originalBunFile>[0]) => {
+    const originalBunFile = Bun.file;
+    Bun.file = ((path: Parameters<typeof originalBunFile>[0]) => {
       callCount++;
       if (callCount === 2 && String(path).includes("credentials")) {
         throw new Error("Permission denied");
       }
       return originalBunFile(path);
-    }) as typeof globalThis.Bun.file;
+    }) as typeof Bun.file;
 
     try {
       await expect(
@@ -252,7 +252,7 @@ aws_secret_access_key = old_secret_key`;
       ).rejects.toThrow(CLIError);
     } finally {
       // Restore Bun.file
-      globalThis.Bun.file = originalBunFile;
+      Bun.file = originalBunFile;
     }
   });
 

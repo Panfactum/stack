@@ -8,6 +8,7 @@ import promise from "eslint-plugin-promise";
 import tsParser from "@typescript-eslint/parser";
 import unusedImports from "eslint-plugin-unused-imports"
 import js from "@eslint/js";
+import globals from "globals";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -35,8 +36,10 @@ export default [
         project: ["./tsconfig.json"],
       },
       globals: {
-        process: "readonly",
+        ...globals.node,
+        ...globals.browser,
         Bun: false,
+        BlobPropertyBag: "readonly",
       },
     },
     settings: {
@@ -117,6 +120,8 @@ export default [
       "no-throw-literal": "error",
       "prefer-const": "error",
       "no-var": "error",
+      "no-dupe-class-members": "off",
+      "@typescript-eslint/no-dupe-class-members": "error",
 
       // Add sonarjs rules directly
       "sonarjs/no-identical-expressions": "error",

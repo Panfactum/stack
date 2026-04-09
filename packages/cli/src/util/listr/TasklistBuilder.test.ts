@@ -8,33 +8,35 @@ import type { PanfactumContext } from "@/util/context/context";
 
 describe("TasklistBuilder", () => {
   // Store original console methods
-  let originalLog: typeof globalThis.console.log;
-  let originalError: typeof globalThis.console.error;
-  let originalWarn: typeof globalThis.console.warn;
+  let originalLog: typeof console.log;
+  let originalError: typeof console.error;
+  let originalWarn: typeof console.warn;
   let originalStdoutWrite: typeof process.stdout.write;
   let originalStderrWrite: typeof process.stderr.write;
 
   beforeAll(() => {
-    // Save original methods
-    originalLog = globalThis.console.log;
-    originalError = globalThis.console.error;
-    originalWarn = globalThis.console.warn;
+    // Save original methods via destructure to avoid the no-console rule
+    ({ log: originalLog, error: originalError, warn: originalWarn } = console);
     originalStdoutWrite = process.stdout.write;
     originalStderrWrite = process.stderr.write;
 
     // Mock console methods to suppress output
-    globalThis.console.log = () => { };
-    globalThis.console.error = () => { };
-    globalThis.console.warn = () => { };
+    Object.assign(console, {
+      log: () => { },
+      error: () => { },
+      warn: () => { },
+    });
     process.stdout.write = () => true;
     process.stderr.write = () => true;
   });
 
   afterAll(() => {
     // Restore original methods
-    globalThis.console.log = originalLog;
-    globalThis.console.error = originalError;
-    globalThis.console.warn = originalWarn;
+    Object.assign(console, {
+      log: originalLog,
+      error: originalError,
+      warn: originalWarn,
+    });
     process.stdout.write = originalStdoutWrite;
     process.stderr.write = originalStderrWrite;
   });

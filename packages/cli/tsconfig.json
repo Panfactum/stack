@@ -5,10 +5,11 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "lib": ["ESNEXT"],
+    "lib": ["ESNext"],
 
     "outDir": "./dist",
     "rootDir": "./src",
+    "types": ["bun"],
 
     // Bundler mode
     "moduleResolution": "bundler",

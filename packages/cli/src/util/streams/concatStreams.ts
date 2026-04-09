@@ -1,8 +1,6 @@
 // This file provides utilities for concatenating multiple ReadableStreams into a single stream
 // It handles sequential stream processing with proper error handling
 
-import type { ReadableStream } from "node:stream/web";
-
 /**
  * Interface for input parameters to the concatStreams function
  */
@@ -42,10 +40,10 @@ interface IConcatStreamsInput {
  * // Reads will return chunks from stream1 first, then stream2
  * ```
  * 
- * @see {@link globalThis.ReadableStream} - For more information about ReadableStreams
+ * @see {@link ReadableStream} - For more information about ReadableStreams
  */
 export const concatStreams = (input: IConcatStreamsInput): ReadableStream => {
-  return new globalThis.ReadableStream({
+  return new ReadableStream({
     async start(controller) {
       try {
         for (const stream of input.streams) {

@@ -127,6 +127,32 @@ export class CLISubprocessError extends CLIError {
 }
 
 /**
+ * Error class for failures that occur while spawning a subprocess
+ *
+ * @remarks
+ * This is a specialization of {@link CLISubprocessError} thrown by
+ * `SubprocessManager.execute` when the underlying call to spawn the
+ * subprocess fails (for example, when the executable cannot be found on
+ * disk). Because the subprocess never started, there is no exit code or
+ * stream output available — only the error reported by the runtime.
+ *
+ * Callers that want to distinguish "failed to start" from "started but
+ * exited with non-success" can catch this subclass specifically.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   manager.execute({ command: ["/nonexistent"], workingDirectory });
+ * } catch (err) {
+ *   if (err instanceof CLISubprocessSpawnError) {
+ *     // Handle missing executable
+ *   }
+ * }
+ * ```
+ */
+export class CLISubprocessSpawnError extends CLISubprocessError { }
+
+/**
  * Error class for Zod validation failures
  * 
  * @remarks

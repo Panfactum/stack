@@ -2,7 +2,6 @@ import { dirname } from "node:path";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { removeFile } from "@/util/fs/removeFile";
-import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -30,7 +29,7 @@ export const sopsWrite = async (input: ISopsWriteInputs) => {
   }
 
   try {
-    await execute({
+    const result = await context.subprocessManager.execute({
       command: [
         "sops",
         "-e",
@@ -42,11 +41,16 @@ export const sopsWrite = async (input: ISopsWriteInputs) => {
         filePath,
         "/dev/stdin",
       ],
-      context,
       workingDirectory: dirname(filePath),
-      stdin: new globalThis.TextEncoder().encode(JSON.stringify(values)),
-    });
+      stdin: new TextEncoder().encode(JSON.stringify(values)),
+    }).exited;
+    if (result.exitCode !== 0) {
+      throw new CLIError(`Unable to write encrypted data: ${result.output}`);
+    }
   } catch (error) {
+    if (error instanceof CLIError) {
+      throw error;
+    }
     throw new CLIError("Unable to write encrypted data", error);
   }
 };

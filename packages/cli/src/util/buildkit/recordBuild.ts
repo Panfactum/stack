@@ -1,7 +1,7 @@
 // This file provides utilities for recording build timestamps on BuildKit StatefulSets
 // It updates annotations to track when BuildKit was last used for builds
 
-import { execute } from '@/util/subprocess/execute.js'
+import { CLISubprocessError } from '@/util/error/error.js'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
@@ -84,19 +84,30 @@ export async function recordBuildKitBuild(
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
 
-  await execute({
-    command: [
-      'kubectl',
-      ...contextArgs,
-      'annotate',
-      'statefulset',
-      statefulsetName,
-      `${BUILDKIT_LAST_BUILD_ANNOTATION_KEY}=${timestamp}`,
-      '--namespace',
-      BUILDKIT_NAMESPACE,
-      '--overwrite'
-    ],
-    context,
+  const command = [
+    'kubectl',
+    ...contextArgs,
+    'annotate',
+    'statefulset',
+    statefulsetName,
+    `${BUILDKIT_LAST_BUILD_ANNOTATION_KEY}=${timestamp}`,
+    '--namespace',
+    BUILDKIT_NAMESPACE,
+    '--overwrite'
+  ]
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory: context.devshellConfig.repo_root
-  })
+  }).exited
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to record last build timestamp on ${statefulsetName}`,
+      {
+        command: command.join(' '),
+        subprocessLogs: result.output,
+        workingDirectory: context.devshellConfig.repo_root,
+      }
+    )
+  }
 }

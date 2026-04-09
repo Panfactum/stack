@@ -2,7 +2,6 @@ import { ChangeResourceRecordSetsCommand, Route53Client } from "@aws-sdk/client-
 import { getIdentity } from "@/util/aws/getIdentity"
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig"
 import { CLIError } from "@/util/error/error"
-import { execute } from "@/util/subprocess/execute"
 import type { IEnvironmentMeta } from "@/util/config/getEnvironments"
 import type { PanfactumContext } from "@/util/context/context"
 import type { ListrTask } from "listr2"
@@ -173,12 +172,14 @@ export async function testDNSResolutionTask<T extends {}>(inputs: ITestDNSResolu
                                         // function don't refresh the DNS results
                                         // data but calling out to an external process fixes
                                         // that issue
-                                        const result = await execute({
+                                        const result = await context.subprocessManager.execute({
                                             command: ["dig", "+short", "TXT", testDomain, "@1.1.1.1"],
-                                            context,
                                             workingDirectory: process.cwd(),
-                                            errorMessage: "Failed to execute dig command"
-                                        });
+                                        }).exited;
+
+                                        if (result.exitCode !== 0) {
+                                            throw new CLIError("Failed to execute dig command")
+                                        }
 
                                         // Check if we got a response
                                         if (!result.stdout.trim()) {
@@ -199,7 +200,7 @@ export async function testDNSResolutionTask<T extends {}>(inputs: ITestDNSResolu
                                                 lowlights: [attemptStr]
                                             })
                                             retries++;
-                                            await new Promise(resolve => globalThis.setTimeout(resolve, 10000));
+                                            await new Promise(resolve => setTimeout(resolve, 10000));
                                         } else {
                                             throw new CLIError(`Failed to resolve TXT record after ${maxRetries} attempts`)
                                         }
@@ -237,12 +238,14 @@ export async function testDNSResolutionTask<T extends {}>(inputs: ITestDNSResolu
                                             // function don't refresh the DNS results
                                             // data but calling out to an external process fixes
                                             // that issue
-                                            const result = await execute({
+                                            const result = await context.subprocessManager.execute({
                                                 command: ["delv", "@1.1.1.1", "txt", testDomain],
-                                                context,
                                                 workingDirectory: process.cwd(),
-                                                errorMessage: "Failed to execute delv command"
-                                            });
+                                            }).exited;
+
+                                            if (result.exitCode !== 0) {
+                                                throw new CLIError("Failed to execute delv command")
+                                            }
 
                                             // Check if we got a response
                                             const output = result.stdout.trim()
@@ -259,7 +262,7 @@ export async function testDNSResolutionTask<T extends {}>(inputs: ITestDNSResolu
                                                     lowlights: [attemptStr]
                                                 })
                                                 retries++;
-                                                await new Promise(resolve => globalThis.setTimeout(resolve, 10000));
+                                                await new Promise(resolve => setTimeout(resolve, 10000));
                                             } else {
                                                 throw new CLIError(`Failed to resolve DNSSEC record after ${maxRetries} attempts`)
                                             }

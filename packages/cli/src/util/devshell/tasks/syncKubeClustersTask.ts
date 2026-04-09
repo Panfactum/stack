@@ -115,7 +115,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(input: IBuildSyncK
                                 });
                                 const name = moduleOutput.cluster_name.value;
                                 ctx.clusterInfo.push({
-                                    caData: globalThis.atob(moduleOutput.cluster_ca_data.value),
+                                    caData: atob(moduleOutput.cluster_ca_data.value),
                                     name,
                                     url: moduleOutput.cluster_url.value,
                                     regionDir,
@@ -156,7 +156,7 @@ export async function buildSyncKubeClustersTask<T extends {}>(input: IBuildSyncK
                             envDir,
                             url,
                             regionDir,
-                            caData: globalThis.btoa(caData),
+                            caData: btoa(caData),
                         };
                     }
                     await writeYAMLFile({

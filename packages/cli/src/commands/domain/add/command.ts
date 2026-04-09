@@ -191,10 +191,10 @@ export class DomainAddCommand extends PanfactumCommand {
         let domainSuffices: string[];
 
         try {
-            const suffixList = await (await globalThis.fetch("https://publicsuffix.org/list/public_suffix_list.dat")).text();
+            const suffixList: string = await (await fetch("https://publicsuffix.org/list/public_suffix_list.dat")).text();
             domainSuffices = suffixList.split("\n")
-                .filter(maybeSuffix => !maybeSuffix.startsWith("//") && !maybeSuffix.startsWith("*") && maybeSuffix !== "")
-                .sort((a, b) => b.length - a.length) // longest first
+                .filter((maybeSuffix: string) => !maybeSuffix.startsWith("//") && !maybeSuffix.startsWith("*") && maybeSuffix !== "")
+                .sort((a: string, b: string) => b.length - a.length) // longest first
         } catch (e) {
             throw new CLIError("Failed to fetch domain apex suffices", e)
         }

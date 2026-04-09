@@ -1,8 +1,8 @@
 import { Command } from 'clipanion';
 import { z } from 'zod';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
-import { execute } from '@/util/subprocess/execute';
 
 interface IVolumeSnapshot {
   namespace: string;
@@ -53,22 +53,38 @@ Velero backups, cleaning up cloud storage resources.`,
 
   async execute() {
     const backupExists = async (backupName: string): Promise<boolean> => {
-      return execute({
-        command: ['kubectl', 'get', 'backup.velero.io', backupName, '-n', 'velero', '--ignore-not-found'],
-        context: this.context,
+      const command = ['kubectl', 'get', 'backup.velero.io', backupName, '-n', 'velero', '--ignore-not-found'];
+      const result = await this.context.subprocessManager.execute({
+        command,
         workingDirectory: process.cwd(),
-      })
-        .then((result) => result.stdout.trim() !== '')
-        .catch(() => false);
+      }).exited;
+
+      if (result.exitCode !== 0) {
+        throw new CLISubprocessError(`Failed to check if Velero backup '${backupName}' exists`, {
+          command: command.join(' '),
+          subprocessLogs: result.output,
+          workingDirectory: process.cwd(),
+        });
+      }
+
+      return result.stdout.trim() !== '';
     };
 
     const getVolumeSnapshots = async (): Promise<IVolumeSnapshot[]> => {
-      const result = await execute({
-        command: ['kubectl', 'get', 'volumesnapshot', '-o', 'json', '-A'],
-        context: this.context,
+      const command = ['kubectl', 'get', 'volumesnapshot', '-o', 'json', '-A'];
+      const result = await this.context.subprocessManager.execute({
+        command,
         workingDirectory: process.cwd(),
-      });
-      
+      }).exited;
+
+      if (result.exitCode !== 0) {
+        throw new CLISubprocessError('Failed to list VolumeSnapshots', {
+          command: command.join(' '),
+          subprocessLogs: result.output,
+          workingDirectory: process.cwd(),
+        });
+      }
+
       const data = parseJson(z.object({
         items: z.array(z.object({
           metadata: z.object({
@@ -118,49 +134,82 @@ Velero backups, cleaning up cloud storage resources.`,
       
       // If a VolumeSnapshotContent is associated, ensure it deletes the backing volume
       if (snapshot.snapshotContentName) {
-        await execute({
-          command: [
-            'kubectl',
-            'patch',
-            'volumesnapshotcontent',
-            snapshot.snapshotContentName,
-            '--type=merge',
-            '-p',
-            `${JSON.stringify({"spec": {"deletionPolicy": "Delete"}})}`,
-          ],
-          context: this.context,
-          workingDirectory: process.cwd(),
-        });
-      }
-      
-      // Delete the VolumeSnapshot
-      await execute({
-        command: [
+        const patchCommand = [
           'kubectl',
-          'delete',
-          '-n',
-          snapshot.namespace,
-          'volumesnapshot',
-          snapshot.name,
-          '--ignore-not-found',
-        ],
-        context: this.context,
+          'patch',
+          'volumesnapshotcontent',
+          snapshot.snapshotContentName,
+          '--type=merge',
+          '-p',
+          `${JSON.stringify({ "spec": { "deletionPolicy": "Delete" } })}`,
+        ];
+        const patchResult = await this.context.subprocessManager.execute({
+          command: patchCommand,
+          workingDirectory: process.cwd(),
+        }).exited;
+
+        if (patchResult.exitCode !== 0) {
+          throw new CLISubprocessError(
+            `Failed to patch VolumeSnapshotContent '${snapshot.snapshotContentName}'`,
+            {
+              command: patchCommand.join(' '),
+              subprocessLogs: patchResult.output,
+              workingDirectory: process.cwd(),
+            }
+          );
+        }
+      }
+
+      // Delete the VolumeSnapshot
+      const deleteSnapshotCommand = [
+        'kubectl',
+        'delete',
+        '-n',
+        snapshot.namespace,
+        'volumesnapshot',
+        snapshot.name,
+        '--ignore-not-found',
+      ];
+      const deleteSnapshotResult = await this.context.subprocessManager.execute({
+        command: deleteSnapshotCommand,
         workingDirectory: process.cwd(),
-      });
-      
+      }).exited;
+
+      if (deleteSnapshotResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to delete VolumeSnapshot '${snapshot.name}' in namespace '${snapshot.namespace}'`,
+          {
+            command: deleteSnapshotCommand.join(' '),
+            subprocessLogs: deleteSnapshotResult.output,
+            workingDirectory: process.cwd(),
+          }
+        );
+      }
+
       // Try to delete the VolumeSnapshotContent if it still exists
       if (snapshot.snapshotContentName) {
-        await execute({
-          command: [
-            'kubectl',
-            'delete',
-            'volumesnapshotcontent',
-            snapshot.snapshotContentName,
-            '--ignore-not-found',
-          ],
-          context: this.context,
+        const deleteContentCommand = [
+          'kubectl',
+          'delete',
+          'volumesnapshotcontent',
+          snapshot.snapshotContentName,
+          '--ignore-not-found',
+        ];
+        const deleteContentResult = await this.context.subprocessManager.execute({
+          command: deleteContentCommand,
           workingDirectory: process.cwd(),
-        });
+        }).exited;
+
+        if (deleteContentResult.exitCode !== 0) {
+          throw new CLISubprocessError(
+            `Failed to delete VolumeSnapshotContent '${snapshot.snapshotContentName}'`,
+            {
+              command: deleteContentCommand.join(' '),
+              subprocessLogs: deleteContentResult.output,
+              workingDirectory: process.cwd(),
+            }
+          );
+        }
       }
     }
 

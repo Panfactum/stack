@@ -1,7 +1,7 @@
 // This file provides utilities for retrieving PodDisruptionBudgets from Kubernetes
 // It filters PDBs based on Panfactum-specific labels
 
-import { execute } from '@/util/subprocess/execute';
+import { CLISubprocessError } from '@/util/error/error';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
@@ -56,19 +56,30 @@ interface IGetPDBsByWindowIdInput {
  */
 export async function getPDBsByWindowId(input: IGetPDBsByWindowIdInput): Promise<string[]> {
   const { context, namespace, windowId } = input;
-  
-  const result = await execute({
-    command: [
-      'kubectl', 'get', 'pdb',
-      '-n', namespace,
-      '-l', `panfactum.com/voluntary-disruption-window-id=${windowId}`,
-      '--ignore-not-found',
-      '-o', 'name',
-    ],
-    context,
+
+  const command = [
+    'kubectl', 'get', 'pdb',
+    '-n', namespace,
+    '-l', `panfactum.com/voluntary-disruption-window-id=${windowId}`,
+    '--ignore-not-found',
+    '-o', 'name',
+  ];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory: process.cwd(),
-  });
-  
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to list PDBs in namespace '${namespace}' with window id '${windowId}'`,
+      {
+        command: command.join(' '),
+        subprocessLogs: result.output,
+        workingDirectory: process.cwd(),
+      }
+    );
+  }
+
   return result.stdout
     .trim()
     .split('\n')

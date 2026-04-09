@@ -2,9 +2,8 @@
 // It integrates with Vault's dynamic secrets engine for database credential management
 
 import { z } from 'zod';
-import { CLIError } from '@/util/error/error';
+import { CLIError, CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
-import { execute } from '@/util/subprocess/execute';
 import { getVaultToken } from './getVaultToken';
 import type { PanfactumContext } from "@/util/context/context.ts";
 
@@ -134,16 +133,25 @@ export async function getDBCreds(options: IGetDbCredsOptions): Promise<IDbCreden
   env['VAULT_TOKEN'] = token;
 
   // Read credentials from Vault
-  const { stdout } = await execute({
-    command: ['vault', 'read', '-format=json', `db/creds/${role}`],
-    context,
+  const command = ['vault', 'read', '-format=json', `db/creds/${role}`];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory: context.devshellConfig.repo_root,
     env
-  }).catch((error: unknown) => {
-    throw new CLIError(`Failed to get database credentials for role '${role}'`, error);
-  });
+  }).exited;
 
-  return parseVaultResponse(stdout);
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to get database credentials for role '${role}'`,
+      {
+        command: command.join(' '),
+        subprocessLogs: result.output,
+        workingDirectory: context.devshellConfig.repo_root,
+      }
+    );
+  }
+
+  return parseVaultResponse(result.stdout);
 }
 
 /**

@@ -36,7 +36,7 @@ const TEST_MESSAGE = "Test message";
 class MockWritableStream extends Writable {
   public written: string[] = [];
 
-  override _write(chunk: globalThis.Buffer | string, _encoding: string, callback: (error?: Error | null) => void): void {
+  override _write(chunk: Buffer | string, _encoding: string, callback: (error?: Error | null) => void): void {
     this.written.push(chunk.toString());
     callback();
   }
@@ -1070,7 +1070,7 @@ describe("Logger", () => {
 
     test("handles async validation", async () => {
       const asyncValidate = async (value: string) => {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 1));
+        await new Promise(resolve => setTimeout(resolve, 1));
         return value.includes("test") || "Must contain 'test'";
       };
 

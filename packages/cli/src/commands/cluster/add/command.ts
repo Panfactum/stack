@@ -475,7 +475,6 @@ Already completed steps will be automatically skipped.
     try {
       await tasks.run();
     } catch (e) {
-      await this.context.backgroundProcessManager.killAllProcesses();
       throw new CLIError("Failed to Install Cluster", e);
     }
 

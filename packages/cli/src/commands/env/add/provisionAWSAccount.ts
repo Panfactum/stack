@@ -17,6 +17,7 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { sleep } from "@/util/util/sleep";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { checkAdminPermissions } from "./checkAdminPermissions";
 import { getAccountEmail } from "./getAccountEmail";
@@ -300,7 +301,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                                         throw new CLIError("Timed out waiting for AWS account creation to complete");
                                     }
                                     // Sleep for 5 seconds before checking the status again
-                                    await new Promise(resolve => globalThis.setTimeout(resolve, 5000));
+                                    await sleep(5000);
                                     retryCount++;
                                 }
                             }

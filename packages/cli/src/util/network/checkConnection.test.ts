@@ -225,7 +225,7 @@ describe("checkConnection", () => {
     ];
 
     // Wait a moment for all connections to be initialized
-    await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     // Simulate different results for each connection
     mockSockets[0]?._callbacks["connect"]?.(); // Success

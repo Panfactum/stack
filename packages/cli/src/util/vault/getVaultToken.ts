@@ -2,9 +2,8 @@
 // It handles token caching, validation, and OIDC-based authentication
 
 import { z } from 'zod';
-import { CLIError } from '@/util/error/error';
+import { CLIError, CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
-import { execute } from '@/util/subprocess/execute';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
@@ -116,37 +115,39 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
 
     // Try to get existing token from vault credential helper
     let existingToken: string | null = null;
-    try {
-      const result = await execute({
-        command: ['vault', 'print', 'token'],
-        context,
-        workingDirectory: context.devshellConfig.repo_root,
-        env
-      });
-      existingToken = result.stdout.trim();
-    } catch {
-      // No existing token, will need to login
+    const printResult = await context.subprocessManager.execute({
+      command: ['vault', 'print', 'token'],
+      workingDirectory: context.devshellConfig.repo_root,
+      env
+    }).exited.catch(() => null);
+
+    if (printResult && printResult.exitCode === 0) {
+      const trimmed = printResult.stdout.trim();
+      if (trimmed) {
+        existingToken = trimmed;
+      }
     }
 
     if (existingToken) {
       // Check token TTL
-      try {
-        const lookupResult = await execute({
-          command: ['vault', 'token', 'lookup', '-format=json'],
-          context,
-          workingDirectory: context.devshellConfig.repo_root,
-          env: { ...env, VAULT_TOKEN: existingToken }
-        });
+      const lookupResult = await context.subprocessManager.execute({
+        command: ['vault', 'token', 'lookup', '-format=json'],
+        workingDirectory: context.devshellConfig.repo_root,
+        env: { ...env, VAULT_TOKEN: existingToken }
+      }).exited.catch(() => null);
 
-        const lookupData = parseJson(VAULT_TOKEN_LOOKUP_SCHEMA, lookupResult.stdout);
-        const ttl = lookupData.data.ttl; // Now already a number from Zod coercion
+      if (lookupResult && lookupResult.exitCode === 0) {
+        try {
+          const lookupData = parseJson(VAULT_TOKEN_LOOKUP_SCHEMA, lookupResult.stdout);
+          const ttl = lookupData.data.ttl; // Now already a number from Zod coercion
 
-        // If token has more than 30 minutes left, use it
-        if (ttl >= 1800) {
-          return existingToken;
+          // If token has more than 30 minutes left, use it
+          if (ttl >= 1800) {
+            return existingToken;
+          }
+        } catch {
+          // Invalid response format; need a new token
         }
-      } catch {
-        // Token lookup failed, need new token
       }
     }
 
@@ -188,26 +189,30 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
  * Throws when OIDC login fails or returns empty token
  */
 async function performOIDCLogin(env: Record<string, string | undefined>, context: PanfactumContext): Promise<string> {
-  try {
-    const result = await execute({
-      command: ['vault', 'login', '-method=oidc', '-field=token'],
-      context,
+  const command = ['vault', 'login', '-method=oidc', '-field=token'];
+  const result = await context.subprocessManager.execute({
+    command,
+    workingDirectory: context.devshellConfig.repo_root,
+    env,
+    stdin: 'inherit',
+    onStdErrNewline: (line) => {
+      context.logger.writeRaw(line);
+    },
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError('Vault OIDC login failed', {
+      command: command.join(' '),
+      subprocessLogs: result.output,
       workingDirectory: context.devshellConfig.repo_root,
-      env,
-      stdin: 'inherit',
-      onStdErrNewline: (line) => {
-        context.logger.writeRaw(line);
-      },
     });
-
-    const token = result.stdout.trim();
-    if (!token) {
-      throw new CLIError('Failed to get token from OIDC login');
-    }
-
-    return token;
-  } catch (error) {
-    throw new CLIError(`Vault OIDC login failed`, error);
   }
+
+  const token = result.stdout.trim();
+  if (!token) {
+    throw new CLIError('Failed to get token from OIDC login');
+  }
+
+  return token;
 }
 

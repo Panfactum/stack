@@ -5,7 +5,6 @@ import { dirname } from "node:path";
 import { type z } from "zod";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
-import { execute } from "@/util/subprocess/execute";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -117,13 +116,24 @@ export const sopsDecrypt = async <T extends z.ZodType<object>>(
     }
   }
 
-  const { stdout } = await execute({
-    command: ["sops", "-d", "--output-type", "json", filePath],
-    context,
-    workingDirectory: dirname(filePath),
-  }).catch((error: unknown) => {
+  let stdout: string;
+  try {
+    const result = await context.subprocessManager.execute({
+      command: ["sops", "-d", "--output-type", "json", filePath],
+      workingDirectory: dirname(filePath),
+    }).exited;
+    if (result.exitCode !== 0) {
+      throw new CLIError(
+        `Failed to decrypt sops file at ${filePath}: ${result.output}`
+      );
+    }
+    stdout = result.stdout;
+  } catch (error: unknown) {
+    if (error instanceof CLIError) {
+      throw error;
+    }
     throw new CLIError(`Failed to decrypt sops file at ${filePath}`, error);
-  });
+  }
 
   // Parse JSON output
   let decryptedData: unknown;

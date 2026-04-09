@@ -3,9 +3,22 @@
 
 import { getDevshellConfig } from "@/util/devshell/getDevshellConfig";
 import { phClient } from "@/util/posthog/tracking";
-import { BackgroundProcessManager } from "@/util/subprocess/BackgroundProcessManager";
+import { SubprocessManager } from "@/util/subprocess/SubprocessManager";
 import { Logger } from "./logger";
 import type { BaseContext } from "clipanion";
+
+/**
+ * Async cleanup hook that runs before the CLI process exits
+ *
+ * @remarks
+ * Hooks are awaited (via {@link Promise.allSettled}) by the top-level
+ * cleanup routine in `index.ts` before the process exits, regardless of
+ * whether the exit is triggered by SIGINT, SIGTERM, normal completion,
+ * or an unhandled error. Use them to release external resources that the
+ * CLI cannot leak between invocations (e.g., a leaked terraform state
+ * lock after a force-killed apply).
+ */
+export type ShutdownHook = () => Promise<void>;
 
 /**
  * Lightweight base context shared by all CLI commands
@@ -23,8 +36,40 @@ export type PanfactumBaseContext = BaseContext & {
   logger: Logger;
   /** PostHog analytics client for usage tracking */
   track: typeof phClient;
-  /** Background process manager for tracking and controlling spawned processes */
-  backgroundProcessManager: BackgroundProcessManager;
+  /**
+   * Unified subprocess manager. Owns the singleton SIGINT/SIGTERM/SIGHUP/SIGQUIT
+   * listeners, dispatches signals to every live registration, and tracks
+   * background processes for observability.
+   */
+  subprocessManager: SubprocessManager;
+  /**
+   * Registers an async cleanup hook that will be awaited before the CLI
+   * process exits.
+   *
+   * @remarks
+   * Use this when a piece of code holds external state that must be
+   * released even if the user interrupts the CLI (e.g., releasing a
+   * leaked terraform state lock after a force-killed `terragrunt apply`).
+   * The returned function unregisters the hook — callers MUST invoke it
+   * once the protected operation completes successfully so the hook does
+   * not run unnecessarily on a later, unrelated shutdown.
+   *
+   * Hooks are awaited via {@link Promise.allSettled}, so a hook that
+   * rejects will not prevent other hooks from running.
+   *
+   * @param hook - Async function to run during shutdown
+   * @returns Function that unregisters the hook
+   */
+  registerShutdownHook: (hook: ShutdownHook) => () => void;
+  /**
+   * Internal set of registered shutdown hooks. Consumers should use
+   * {@link PanfactumBaseContext.registerShutdownHook} instead of
+   * mutating this set directly. Exposed so the top-level cleanup
+   * routine in `index.ts` can iterate it.
+   *
+   * @internal
+   */
+  shutdownHooks: Set<ShutdownHook>;
 };
 
 /**
@@ -91,17 +136,26 @@ export const createPanfactumContext = async (
   const devshellConfig = await getDevshellConfig(opts.cwd);
   const logger = new Logger(context.stderr, opts.debugEnabled);
 
-  // Create the context first, then initialize the background process manager
+  const shutdownHooks = new Set<ShutdownHook>();
+
+  // Create the context first, then initialize the manager that depends on it
   const panfactumContext = {
     ...context,
     devshellConfig,
     logger,
     track: phClient,
-    backgroundProcessManager: null as unknown as BackgroundProcessManager // Temporary placeholder
+    subprocessManager: null as unknown as SubprocessManager, // Temporary placeholder
+    shutdownHooks,
+    registerShutdownHook: (hook: ShutdownHook) => {
+      shutdownHooks.add(hook);
+      return () => {
+        shutdownHooks.delete(hook);
+      };
+    },
   } as PanfactumContext;
 
-  // Initialize the background process manager with the context
-  panfactumContext.backgroundProcessManager = new BackgroundProcessManager(panfactumContext);
+  // Initialize the unified subprocess manager with the context
+  panfactumContext.subprocessManager = new SubprocessManager(panfactumContext);
 
   return panfactumContext;
 };
@@ -135,14 +189,24 @@ export const createPanfactumLightContext = (
 ): PanfactumBaseContext => {
   const logger = new Logger(context.stderr, opts.debugEnabled);
 
+  const shutdownHooks = new Set<ShutdownHook>();
+
   const baseContext = {
     ...context,
     logger,
     track: phClient,
-    backgroundProcessManager: null as unknown as BackgroundProcessManager // Temporary placeholder
+    subprocessManager: null as unknown as SubprocessManager, // Temporary placeholder
+    shutdownHooks,
+    registerShutdownHook: (hook: ShutdownHook) => {
+      shutdownHooks.add(hook);
+      return () => {
+        shutdownHooks.delete(hook);
+      };
+    },
   } as PanfactumBaseContext;
 
-  baseContext.backgroundProcessManager = new BackgroundProcessManager(baseContext);
+  // Initialize the unified subprocess manager with the context
+  baseContext.subprocessManager = new SubprocessManager(baseContext);
 
   return baseContext;
 };

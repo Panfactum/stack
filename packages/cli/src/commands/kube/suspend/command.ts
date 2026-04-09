@@ -31,11 +31,10 @@ import {
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import {getAllRegions} from "@/util/config/getAllRegions.ts";
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
-import { CLIError } from '@/util/error/error'
+import { CLIError, CLISubprocessError } from '@/util/error/error'
 import { parseJson } from '@/util/json/parseJson'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
 import {getKubeContexts} from "@/util/kube/getKubeContexts.ts";
-import { execute } from '@/util/subprocess/execute.ts'
 import type { IEKSClusterInfo, IAutoScalingGroup } from '@/util/eks/types.ts'
 
 /**
@@ -189,12 +188,10 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
         skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           // Check if cert-manager is installed by looking for the Certificate CRD
-          const { exitCode } = await execute({
+          const { exitCode } = await context.subprocessManager.execute({
             command: ['kubectl', '--context', selectedContext.name, 'get', 'crd', 'certificates.cert-manager.io'],
-            context,
             workingDirectory: process.cwd(),
-            isSuccess: () => true, // Don't throw on non-zero exit
-          })
+          }).exited
 
           if (exitCode !== 0) {
             context.logger.debug('Certificate CRD not found, cert-manager not installed, skipping')
@@ -203,18 +200,29 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
 
           const issuerFilter = 'internal'
           const duration = '2160h' // 90 days
-          
+
           // Get all certificates across all namespaces
-          const { stdout } = await execute({
-            command: [
-              'kubectl', '--context', selectedContext.name,
-              'get', 'certificate', '--all-namespaces', '-o', 'json'
-            ],
-            context,
+          const getCertsCommand = [
+            'kubectl', '--context', selectedContext.name,
+            'get', 'certificate', '--all-namespaces', '-o', 'json'
+          ]
+          const getCertsResult = await context.subprocessManager.execute({
+            command: getCertsCommand,
             workingDirectory: process.cwd(),
-          })
-          
-          const certificates = parseJson(CERTIFICATE_ITEMS_SCHEMA, stdout)
+          }).exited
+
+          if (getCertsResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to list certificates',
+              {
+                command: getCertsCommand.join(' '),
+                subprocessLogs: getCertsResult.output,
+                workingDirectory: process.cwd(),
+              }
+            )
+          }
+
+          const certificates = parseJson(CERTIFICATE_ITEMS_SCHEMA, getCertsResult.stdout)
           const certsToUpdate = (certificates.items || []).filter(cert => 
             cert.spec?.issuerRef?.name?.includes(issuerFilter)
           )
@@ -232,15 +240,26 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
             
             context.logger.debug(`Processing certificate: ${certName} in namespace: ${namespace}`)
 
-            await execute({
-              command: [
-                'kubectl', '--context', selectedContext.name,
-                'patch', 'certificate', certName, '-n', namespace,
-                '--type', 'merge', '-p', JSON.stringify({ spec: { duration } })
-              ],
-              context,
+            const patchCertCommand = [
+              'kubectl', '--context', selectedContext.name,
+              'patch', 'certificate', certName, '-n', namespace,
+              '--type', 'merge', '-p', JSON.stringify({ spec: { duration } })
+            ]
+            const patchCertResult = await context.subprocessManager.execute({
+              command: patchCertCommand,
               workingDirectory: process.cwd(),
-            })
+            }).exited
+
+            if (patchCertResult.exitCode !== 0) {
+              throw new CLISubprocessError(
+                `Failed to patch certificate '${certName}' in namespace '${namespace}'`,
+                {
+                  command: patchCertCommand.join(' '),
+                  subprocessLogs: patchCertResult.output,
+                  workingDirectory: process.cwd(),
+                }
+              )
+            }
             context.logger.debug(`Successfully updated certificate '${certName}' in namespace '${namespace}' to ${duration}`)
           }
         },
@@ -250,12 +269,10 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
         skip: (ctx) => !!ctx.clusterAlreadySuspended,
         task: async () => {
           // Check if Karpenter is installed by looking for the CRD
-          const { exitCode } = await execute({
+          const { exitCode } = await context.subprocessManager.execute({
             command: ['kubectl', '--context', selectedContext.name, 'get', 'crd', 'nodepools.karpenter.sh'],
-            context,
             workingDirectory: process.cwd(),
-            isSuccess: () => true, // Don't throw on non-zero exit
-          })
+          }).exited
 
           if (exitCode !== 0) {
             context.logger.debug('Karpenter not installed, skipping nodepool scaling')
@@ -263,26 +280,48 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           }
 
           // Get all Karpenter node pools
-          const { stdout } = await execute({
-            command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
-            context,
+          const getNodePoolsCommand = ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json']
+          const getNodePoolsResult = await context.subprocessManager.execute({
+            command: getNodePoolsCommand,
             workingDirectory: process.cwd(),
-          })
-          
-          const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
+          }).exited
+
+          if (getNodePoolsResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to list Karpenter node pools',
+              {
+                command: getNodePoolsCommand.join(' '),
+                subprocessLogs: getNodePoolsResult.output,
+                workingDirectory: process.cwd(),
+              }
+            )
+          }
+
+          const result = parseJson(KUBERNETES_ITEMS_SCHEMA, getNodePoolsResult.stdout)
           const nodePools = result.items || []
-          
+
           for (const nodePool of nodePools) {
             // Set limits to 0
-            await execute({
-              command: [
-                'kubectl', '--context', selectedContext.name, 
-                'patch', 'nodepool', nodePool.metadata.name, 
-                '--type', 'merge', '-p', '{"spec":{"limits":{"cpu":"0","memory":"0"}}}'
-              ],
-              context,
+            const patchNodePoolCommand = [
+              'kubectl', '--context', selectedContext.name,
+              'patch', 'nodepool', nodePool.metadata.name,
+              '--type', 'merge', '-p', '{"spec":{"limits":{"cpu":"0","memory":"0"}}}'
+            ]
+            const patchNodePoolResult = await context.subprocessManager.execute({
+              command: patchNodePoolCommand,
               workingDirectory: process.cwd(),
-            })
+            }).exited
+
+            if (patchNodePoolResult.exitCode !== 0) {
+              throw new CLISubprocessError(
+                `Failed to set limits on nodepool ${nodePool.metadata.name}`,
+                {
+                  command: patchNodePoolCommand.join(' '),
+                  subprocessLogs: patchNodePoolResult.output,
+                  workingDirectory: process.cwd(),
+                }
+              )
+            }
           }
         },
       },

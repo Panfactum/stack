@@ -363,7 +363,7 @@ output = json
     fileExistsMock.mockResolvedValue(true);
 
     const originalBunFile = Bun.file;
-    Bun.file = (_path: string | globalThis.URL | ArrayBufferLike | Uint8Array | number, _options?: globalThis.BlobPropertyBag) => {
+    Bun.file = (_path: string | URL | ArrayBufferLike | Uint8Array | number, _options?: BlobPropertyBag) => {
       const mockFile = {
         text: async () => {
           throw new Error("Permission denied");

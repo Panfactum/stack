@@ -1,8 +1,7 @@
 // This file provides utilities for discovering BuildKit pod addresses in Kubernetes
 // It selects the least loaded pod for a given architecture for optimal build performance
 
-import { CLIError } from '@/util/error/error'
-import { execute } from '@/util/subprocess/execute.js'
+import { CLIError, CLISubprocessError } from '@/util/error/error'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
@@ -98,19 +97,30 @@ export async function getBuildKitAddress(
 
   // Get running pods filtered by architecture
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
-  const podsResult = await execute({
-    context,
+  const podsCommand = [
+    'kubectl',
+    ...contextArgs,
+    'get',
+    'pods',
+    '-n',
+    BUILDKIT_NAMESPACE,
+    '-o=jsonpath={range .items[?(@.status.phase=="Running")]}{.metadata.name}{"\\n"}'
+  ]
+  const podsResult = await context.subprocessManager.execute({
     workingDirectory,
-    command: [
-      'kubectl',
-      ...contextArgs,
-      'get',
-      'pods',
-      '-n',
-      BUILDKIT_NAMESPACE,
-      '-o=jsonpath={range .items[?(@.status.phase=="Running")]}{.metadata.name}{"\\n"}'
-    ],
-  })
+    command: podsCommand,
+  }).exited
+
+  if (podsResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to list BuildKit pods for architecture ${arch}`,
+      {
+        command: podsCommand.join(' '),
+        subprocessLogs: podsResult.output,
+        workingDirectory,
+      }
+    )
+  }
 
   const pods = podsResult.stdout
     .trim()
@@ -124,36 +134,36 @@ export async function getBuildKitAddress(
   // Sort pods by CPU usage (pods without metrics go first as they're likely unused)
   const podMetrics = await Promise.all(
     pods.map(async (pod: string) => {
-      try {
-        const metricsResult = await execute({
-          context,
-          workingDirectory,
-          command: [
-            'kubectl',
-            ...contextArgs,
-            'get',
-            'pods.metrics.k8s.io',
-            '-n',
-            BUILDKIT_NAMESPACE,
-            pod,
-            '-o=jsonpath={.containers[*].usage.cpu}'
-          ],
-        })
-        // Parse CPU usage (e.g., "100m" -> 100, "1" -> 1000)
-        const cpuUsage = metricsResult.stdout.trim()
-        let cpuValue = 0
-        if (cpuUsage) {
-          if (cpuUsage.endsWith('m')) {
-            cpuValue = parseInt(cpuUsage.slice(0, -1))
-          } else {
-            cpuValue = parseInt(cpuUsage) * 1000
-          }
-        }
-        return { pod, cpuUsage: cpuValue }
-      } catch {
-        // If metrics not available, assume 0 usage
+      const metricsResult = await context.subprocessManager.execute({
+        workingDirectory,
+        command: [
+          'kubectl',
+          ...contextArgs,
+          'get',
+          'pods.metrics.k8s.io',
+          '-n',
+          BUILDKIT_NAMESPACE,
+          pod,
+          '-o=jsonpath={.containers[*].usage.cpu}'
+        ],
+      }).exited.catch(() => null)
+
+      // If metrics server isn't available or command failed, assume 0 usage
+      if (!metricsResult || metricsResult.exitCode !== 0) {
         return { pod, cpuUsage: 0 }
       }
+
+      // Parse CPU usage (e.g., "100m" -> 100, "1" -> 1000)
+      const cpuUsage = metricsResult.stdout.trim()
+      let cpuValue = 0
+      if (cpuUsage) {
+        if (cpuUsage.endsWith('m')) {
+          cpuValue = parseInt(cpuUsage.slice(0, -1))
+        } else {
+          cpuValue = parseInt(cpuUsage) * 1000
+        }
+      }
+      return { pod, cpuUsage: cpuValue }
     })
   )
 
@@ -170,20 +180,31 @@ export async function getBuildKitAddress(
   }
 
   // Get pod IP
-  const ipResult = await execute({
-    context,
+  const ipCommand = [
+    'kubectl',
+    ...contextArgs,
+    'get',
+    'pod',
+    selectedPod,
+    '-n',
+    BUILDKIT_NAMESPACE,
+    '-o=jsonpath={.status.podIP}'
+  ]
+  const ipResult = await context.subprocessManager.execute({
     workingDirectory,
-    command: [
-      'kubectl',
-      ...contextArgs,
-      'get',
-      'pod',
-      selectedPod,
-      '-n',
-      BUILDKIT_NAMESPACE,
-      '-o=jsonpath={.status.podIP}'
-    ],
-  })
+    command: ipCommand,
+  }).exited
+
+  if (ipResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to get IP for BuildKit pod ${selectedPod}`,
+      {
+        command: ipCommand.join(' '),
+        subprocessLogs: ipResult.output,
+        workingDirectory,
+      }
+    )
+  }
 
   const podIP = ipResult.stdout.trim()
   if (!podIP) {

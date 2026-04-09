@@ -125,7 +125,7 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
               "This will be encrypted and stored securely:",
             validate: async (value) => {
               try {
-                const response = await globalThis.fetch(
+                const response = await fetch(
                   "https://hub.docker.com/v2/repositories/library/nginx/tags",
                   {
                     headers: {
@@ -173,7 +173,7 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
               "This will be encrypted and stored securely:",
             validate: async (value) => {
               try {
-                const response = await globalThis.fetch(
+                const response = await fetch(
                   "https://api.github.com/user/packages?package_type=container",
                   {
                     headers: {

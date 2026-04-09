@@ -186,7 +186,8 @@ describe("updateKubeConfig", () => {
                         user: TEST_CLUSTER
                     }
                 }]
-            }
+            },
+            overwrite: true
         });
     });
 
@@ -480,19 +481,24 @@ describe("updateKubeConfig", () => {
         expect(readYAMLFileMock).toHaveBeenNthCalledWith(1, {
             context,
             filePath: join(kubeDir, "clusters.yaml"),
-            validationSchema: CLUSTERS_FILE_SCHEMA
+            validationSchema: CLUSTERS_FILE_SCHEMA,
+            throwOnMissing: false,
+            throwOnEmpty: false
         });
 
         expect(readYAMLFileMock).toHaveBeenNthCalledWith(2, {
             context,
             filePath: join(kubeDir, "config"),
-            validationSchema: expect.any(Object)
+            validationSchema: expect.any(Object),
+            throwOnMissing: false,
+            throwOnEmpty: false
         });
 
         expect(writeYAMLFileMock).toHaveBeenCalledWith({
             context,
             filePath: join(kubeDir, "config"),
-            values: expect.any(Object)
+            values: expect.any(Object),
+            overwrite: true
         });
     });
 
@@ -517,7 +523,8 @@ describe("updateKubeConfig", () => {
                 clusters: [],
                 users: [],
                 contexts: []
-            }
+            },
+            overwrite: true
         });
     });
 

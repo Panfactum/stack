@@ -4,9 +4,9 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { z } from 'zod'
+import { CLISubprocessError } from '@/util/error/error'
 import { parseJson } from '@/util/json/parseJson'
 import { getVaultToken } from '@/util/vault/getVaultToken'
-import { execute } from '../subprocess/execute'
 import type { IDatabaseCredentials, DatabaseType } from './types'
 import type { PanfactumContext } from '@/util/context/context'
 
@@ -106,16 +106,27 @@ export async function getTempCredentials(
     // Remove 'db/creds/' prefix if present, as NATS uses pki/internal/issue path
     const roleNameOnly = vaultRole.replace(/^db\/creds\//, '')
     const commonName = roleNameOnly.replace(/^nats-/, '') // Remove 'nats-' prefix
-    const { stdout } = await execute({
-      command: ['vault', 'write', '-format=json', `pki/internal/issue/${roleNameOnly}`, `common_name=${commonName}`],
-      context,
+    const pkiCommand = ['vault', 'write', '-format=json', `pki/internal/issue/${roleNameOnly}`, `common_name=${commonName}`]
+    const pkiResult = await context.subprocessManager.execute({
+      command: pkiCommand,
       workingDirectory: context.devshellConfig.repo_root,
       env: {
         ...process.env,
         VAULT_TOKEN: vaultToken,
         VAULT_ADDR: vaultAddress,
       },
-    })
+    }).exited
+
+    if (pkiResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to issue NATS PKI certificate for role '${roleNameOnly}'`,
+        {
+          command: pkiCommand.join(' '),
+          subprocessLogs: pkiResult.output,
+          workingDirectory: context.devshellConfig.repo_root,
+        }
+      )
+    }
 
     // Define schema for vault PKI response
     const vaultPKIResponseSchema = z.object({
@@ -132,7 +143,7 @@ export async function getTempCredentials(
     }).describe('Vault PKI certificate response');
 
     // Parse and validate JSON response
-    const result = parseJson(vaultPKIResponseSchema, stdout)
+    const result = parseJson(vaultPKIResponseSchema, pkiResult.stdout)
 
     // Write certificates to files
     const natsDir = context.devshellConfig.nats_dir
@@ -159,16 +170,27 @@ export async function getTempCredentials(
     }
   } else {
     // PostgreSQL and Redis use database credentials
-    const { stdout } = await execute({
-      command: ['vault', 'read', '-format=json', vaultRole],
-      context,
+    const credsCommand = ['vault', 'read', '-format=json', vaultRole]
+    const credsResult = await context.subprocessManager.execute({
+      command: credsCommand,
       workingDirectory: context.devshellConfig.repo_root,
       env: {
         ...process.env,
         VAULT_TOKEN: vaultToken,
         VAULT_ADDR: vaultAddress,
       },
-    })
+    }).exited
+
+    if (credsResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to read database credentials from vault role '${vaultRole}'`,
+        {
+          command: credsCommand.join(' '),
+          subprocessLogs: credsResult.output,
+          workingDirectory: context.devshellConfig.repo_root,
+        }
+      )
+    }
 
     // Define schema for vault database credentials response
     const vaultCredsResponseSchema = z.object({
@@ -183,7 +205,7 @@ export async function getTempCredentials(
     }).describe('Vault database credentials response');
 
     // Parse and validate JSON response
-    const result = parseJson(vaultCredsResponseSchema, stdout)
+    const result = parseJson(vaultCredsResponseSchema, credsResult.stdout)
 
     return {
       username: result.data.username,

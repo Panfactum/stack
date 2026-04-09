@@ -12,11 +12,10 @@ import {
 import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
 import { getAllRegions } from '@/util/config/getAllRegions';
 import { validateRootProfile } from '@/util/eks/validateRootProfile.ts'
-import { CLIError } from '@/util/error/error'
+import { CLIError, CLISubprocessError } from '@/util/error/error'
 import { parseJson } from '@/util/json/parseJson'
 import { getAWSProfileForContext } from '@/util/kube/getAWSProfileForContext.ts'
 import {getKubeContexts} from "@/util/kube/getKubeContexts.ts";
-import { execute } from '@/util/subprocess/execute.ts'
 import {MODULES} from "@/util/terragrunt/constants.ts";
 import {buildDeployModuleTask} from "@/util/terragrunt/tasks/deployModuleTask.ts";
 import { sleep } from '@/util/util/sleep'
@@ -210,15 +209,13 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         title: 'Updating Cilium operator scheduler',
         task: async () => {
           // Check if the Cilium operator deployment exists
-          const { exitCode } = await execute({
+          const { exitCode } = await context.subprocessManager.execute({
             command: [
               'kubectl', '--context', selectedContext.name, '-n', 'cilium',
               'get', 'deployment', 'cilium-operator'
             ],
-            context,
             workingDirectory: process.cwd(),
-            isSuccess: () => true, // Don't throw on non-zero exit
-          })
+          }).exited
 
           if (exitCode !== 0) {
             context.logger.debug('Cilium operator deployment not found, skipping')
@@ -226,23 +223,34 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           }
 
           // Update the scheduler name in the deployment spec to default-scheduler
-          await execute({
-            command: [
-              'kubectl', '--context', selectedContext.name,
-              'patch', 'deployment', 'cilium-operator', '-n', 'cilium',
-              '--patch', JSON.stringify({
-                spec: {
-                  template: {
-                    spec: {
-                      schedulerName: 'default-scheduler'
-                    }
+          const patchCommand = [
+            'kubectl', '--context', selectedContext.name,
+            'patch', 'deployment', 'cilium-operator', '-n', 'cilium',
+            '--patch', JSON.stringify({
+              spec: {
+                template: {
+                  spec: {
+                    schedulerName: 'default-scheduler'
                   }
                 }
-              })
-            ],
-            context,
+              }
+            })
+          ]
+          const patchResult = await context.subprocessManager.execute({
+            command: patchCommand,
             workingDirectory: process.cwd(),
-          })
+          }).exited
+
+          if (patchResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to patch cilium-operator scheduler',
+              {
+                command: patchCommand.join(' '),
+                subprocessLogs: patchResult.output,
+                workingDirectory: process.cwd(),
+              }
+            )
+          }
           context.logger.debug('Updated Cilium operator to use default-scheduler')
         },
       },
@@ -250,20 +258,14 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         title: 'Clearing pending pods',
         task: async () => {
           // Delete all pending pods to force rescheduling
-          try {
-            await execute({
-              command: [
-                'kubectl', '--context', selectedContext.name,
-                'delete', 'pods', '--all-namespaces', '--field-selector=status.phase=Pending'
-              ],
-              context,
-              workingDirectory: process.cwd(),
-              errorMessage: 'Failed to delete pending pods',
-              retries: 1,
-            })
-          } catch {
-            // Ignore errors, some pods might not be deletable
-          }
+          // Ignore failures, some pods might not be deletable
+          await context.subprocessManager.execute({
+            command: [
+              'kubectl', '--context', selectedContext.name,
+              'delete', 'pods', '--all-namespaces', '--field-selector=status.phase=Pending'
+            ],
+            workingDirectory: process.cwd(),
+          }).exited
         },
       },
       await buildDeployModuleTask({
@@ -279,12 +281,10 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         title: 'Removing Karpenter node pool limits',
         task: async () => {
           // Check if Karpenter is installed by looking for the CRD
-          const { exitCode } = await execute({
+          const { exitCode } = await context.subprocessManager.execute({
             command: ['kubectl', '--context', selectedContext.name, 'get', 'crd', 'nodepools.karpenter.sh'],
-            context,
             workingDirectory: process.cwd(),
-            isSuccess: () => true, // Don't throw on non-zero exit
-          })
+          }).exited
 
           if (exitCode !== 0) {
             context.logger.debug('Karpenter not installed, skipping nodepool limits removal')
@@ -292,39 +292,74 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           }
 
           // Karpenter is installed, get all node pools
-          const { stdout } = await execute({
-            command: ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json'],
-            context,
+          const getNodePoolsCommand = ['kubectl', '--context', selectedContext.name, 'get', 'nodepools.karpenter.sh', '-o', 'json']
+          const getNodePoolsResult = await context.subprocessManager.execute({
+            command: getNodePoolsCommand,
             workingDirectory: process.cwd(),
-          })
-          
-          const result = parseJson(KUBERNETES_ITEMS_SCHEMA, stdout)
+          }).exited
+
+          if (getNodePoolsResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to list Karpenter node pools',
+              {
+                command: getNodePoolsCommand.join(' '),
+                subprocessLogs: getNodePoolsResult.output,
+                workingDirectory: process.cwd(),
+              }
+            )
+          }
+
+          const result = parseJson(KUBERNETES_ITEMS_SCHEMA, getNodePoolsResult.stdout)
           const nodePools = result.items || []
-          
+
           for (const nodePool of nodePools) {
             // First check if limits exist
-            const { stdout: limitsCheck } = await execute({
-              command: [
-                'kubectl', '--context', selectedContext.name,
-                'get', 'nodepool', nodePool.metadata.name, 
-                '-o', 'jsonpath={.spec.limits}'
-              ],
-              context,
+            const limitsCommand = [
+              'kubectl', '--context', selectedContext.name,
+              'get', 'nodepool', nodePool.metadata.name,
+              '-o', 'jsonpath={.spec.limits}'
+            ]
+            const limitsResult = await context.subprocessManager.execute({
+              command: limitsCommand,
               workingDirectory: process.cwd(),
-            })
-            
+            }).exited
+
+            if (limitsResult.exitCode !== 0) {
+              throw new CLISubprocessError(
+                `Failed to read limits for nodepool ${nodePool.metadata.name}`,
+                {
+                  command: limitsCommand.join(' '),
+                  subprocessLogs: limitsResult.output,
+                  workingDirectory: process.cwd(),
+                }
+              )
+            }
+
+            const limitsCheck = limitsResult.stdout
+
             // Only patch if limits actually exist
             if (limitsCheck && limitsCheck.trim() !== '') {
-              await execute({
-                command: [
-                  'kubectl', '--context', selectedContext.name,
-                  'patch', 'nodepool', nodePool.metadata.name, 
-                  '--type', 'json', '-p', 
-                  '[{"op": "remove", "path": "/spec/limits/cpu"}, {"op": "remove", "path": "/spec/limits/memory"}]'
-                ],
-                context,
+              const patchNodePoolCommand = [
+                'kubectl', '--context', selectedContext.name,
+                'patch', 'nodepool', nodePool.metadata.name,
+                '--type', 'json', '-p',
+                '[{"op": "remove", "path": "/spec/limits/cpu"}, {"op": "remove", "path": "/spec/limits/memory"}]'
+              ]
+              const patchNodePoolResult = await context.subprocessManager.execute({
+                command: patchNodePoolCommand,
                 workingDirectory: process.cwd(),
-              })
+              }).exited
+
+              if (patchNodePoolResult.exitCode !== 0) {
+                throw new CLISubprocessError(
+                  `Failed to remove limits from nodepool ${nodePool.metadata.name}`,
+                  {
+                    command: patchNodePoolCommand.join(' '),
+                    subprocessLogs: patchNodePoolResult.output,
+                    workingDirectory: process.cwd(),
+                  }
+                )
+              }
               context.logger.debug(`Removed limits from nodepool ${nodePool.metadata.name}`)
             } else {
               context.logger.debug(`No limits found for nodepool ${nodePool.metadata.name}, skipping`)
@@ -336,15 +371,13 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         title: 'Restoring Panfactum scheduler',
         task: async () => {
           // Check if the scheduler deployment exists in the scheduler namespace
-          const { exitCode } = await execute({
+          const { exitCode } = await context.subprocessManager.execute({
             command: [
               'kubectl', '--context', selectedContext.name, '-n', 'scheduler',
               'get', 'deployment', 'scheduler'
             ],
-            context,
             workingDirectory: process.cwd(),
-            isSuccess: () => true, // Don't throw on non-zero exit
-          })
+          }).exited
 
           if (exitCode !== 0) {
             context.logger.debug('Scheduler deployment not found in scheduler namespace, skipping')
@@ -359,16 +392,17 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           context.logger.debug('Waiting for scheduler pod to be running...')
           
           while (elapsed < timeout) {
-            const { stdout: podStatus } = await execute({
+            const podStatusResult = await context.subprocessManager.execute({
               command: [
                 'kubectl', '--context', selectedContext.name, '-n', 'scheduler',
                 'get', 'pod', '-l', 'panfactum.com/workload=scheduler',
                 '-o', 'jsonpath={.items[0].status.phase}'
               ],
-              context,
               workingDirectory: process.cwd(),
-              isSuccess: () => true,
-            })
+            }).exited
+
+            // Non-zero is treated as "pod not yet found" — keep polling.
+            const podStatus = podStatusResult.exitCode === 0 ? podStatusResult.stdout : ''
 
             if (podStatus === 'Running') {
               context.logger.debug('Scheduler pod is running')
@@ -385,23 +419,34 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
           }
 
           // Now update Cilium operator to use the panfactum scheduler
-          await execute({
-            command: [
-              'kubectl', '--context', selectedContext.name,
-              'patch', 'deployment', 'cilium-operator', '-n', 'cilium',
-              '--patch', JSON.stringify({
-                spec: {
-                  template: {
-                    spec: {
-                      schedulerName: 'panfactum'
-                    }
+          const ciliumPatchCommand = [
+            'kubectl', '--context', selectedContext.name,
+            'patch', 'deployment', 'cilium-operator', '-n', 'cilium',
+            '--patch', JSON.stringify({
+              spec: {
+                template: {
+                  spec: {
+                    schedulerName: 'panfactum'
                   }
                 }
-              })
-            ],
-            context,
+              }
+            })
+          ]
+          const ciliumPatchResult = await context.subprocessManager.execute({
+            command: ciliumPatchCommand,
             workingDirectory: process.cwd(),
-          })
+          }).exited
+
+          if (ciliumPatchResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              'Failed to patch cilium-operator to use panfactum scheduler',
+              {
+                command: ciliumPatchCommand.join(' '),
+                subprocessLogs: ciliumPatchResult.output,
+                workingDirectory: process.cwd(),
+              }
+            )
+          }
           context.logger.debug('Updated Cilium operator to use panfactum scheduler')
         },
       },

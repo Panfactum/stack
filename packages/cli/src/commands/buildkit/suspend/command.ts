@@ -4,9 +4,8 @@ import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX
 import { getLastBuildTime } from '@/util/buildkit/getLastBuildTime.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
-import { PanfactumZodError } from '@/util/error/error.js'
+import { CLISubprocessError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
-import { execute } from '@/util/subprocess/execute.js'
 
 /**
  * Command for scaling down BuildKit instances to zero replicas
@@ -136,19 +135,30 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
     }
 
     // Scale down
-    await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'scale',
-        'statefulset',
-        statefulsetName,
-        '--namespace',
-        BUILDKIT_NAMESPACE,
-        '--replicas=0'
-      ],
-      context: this.context,
+    const scaleCommand = [
+      'kubectl',
+      ...contextArgs,
+      'scale',
+      'statefulset',
+      statefulsetName,
+      '--namespace',
+      BUILDKIT_NAMESPACE,
+      '--replicas=0'
+    ]
+    const scaleResult = await this.context.subprocessManager.execute({
+      command: scaleCommand,
       workingDirectory: process.cwd()
-    })
+    }).exited
+
+    if (scaleResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to scale down BuildKit StatefulSet ${statefulsetName}`,
+        {
+          command: scaleCommand.join(' '),
+          subprocessLogs: scaleResult.output,
+          workingDirectory: process.cwd(),
+        }
+      )
+    }
   }
 }

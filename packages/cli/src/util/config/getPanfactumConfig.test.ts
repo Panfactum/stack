@@ -365,7 +365,7 @@ describe("getPanfactumConfig", () => {
     expect(getVaultTokenMock).toHaveBeenCalledWith({
       context: mockContext,
       address: "https://vault.custom.com",
-      silent: true
+      silent: false
     });
   });
 

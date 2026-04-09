@@ -51,7 +51,7 @@ describe("asyncIterMap", () => {
 
     const result = await asyncIterMap(delayedNumbers(), async (x: number) => {
       // Each operation takes 100ms
-      await new Promise(resolve => globalThis.setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
       processingTimes.push(Date.now() - startTime);
       return x * 10;
     });
@@ -78,7 +78,7 @@ describe("asyncIterMap", () => {
     }
 
     const result = await asyncIterMap(items(), async (item) => {
-      await new Promise(resolve => globalThis.setTimeout(resolve, item.delay));
+      await new Promise(resolve => setTimeout(resolve, item.delay));
       return `processed-${item.id}`;
     });
 
@@ -131,16 +131,16 @@ describe("asyncIterMap", () => {
   test("handles async generator with delays between yields", async () => {
     async function* slowGenerator() {
       yield 1;
-      await new Promise(resolve => globalThis.setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 50));
       yield 2;
-      await new Promise(resolve => globalThis.setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 50));
       yield 3;
     }
 
     const startTime = Date.now();
     const result = await asyncIterMap(slowGenerator(), async (x: number) => {
       // Processing is fast compared to generation
-      await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
       return x * 100;
     });
 
@@ -194,7 +194,7 @@ describe("asyncIterMap", () => {
       if (x === 3) {
         throw new Error("Third item failed");
       }
-      await new Promise(resolve => globalThis.setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 50));
       return x * 2;
     })).rejects.toThrow("Third item failed");
   });
@@ -224,7 +224,7 @@ describe("asyncIterMap", () => {
     }
 
     const result = await asyncIterMap(tasks(), async (task) => {
-      await new Promise(resolve => globalThis.setTimeout(resolve, task.duration));
+      await new Promise(resolve => setTimeout(resolve, task.duration));
       sideEffects.push(`${task.name}-completed`);
       return {
         taskName: task.name,
@@ -253,7 +253,7 @@ describe("asyncIterMap", () => {
 
     // Simulate API calls
     const mockFetch = async (url: string) => {
-      await new Promise(resolve => globalThis.setTimeout(resolve, 30));
+      await new Promise(resolve => setTimeout(resolve, 30));
       return {
         url,
         data: { id: url.split("/").pop(), name: `User ${url.split("/").pop()}` }
@@ -299,7 +299,7 @@ describe("asyncIterMap", () => {
     const startTime = Date.now();
     const result = await asyncIterMap(manyNumbers(), async (x: number) => {
       // Small delay to ensure concurrency benefits
-      await new Promise(resolve => globalThis.setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 5));
       return x * x;
     });
     const duration = Date.now() - startTime;
@@ -371,7 +371,7 @@ describe("asyncIterMap", () => {
       // Simulate nested async operation
       const processed = await Promise.all(
         numbers.map(async (n) => {
-          await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+          await new Promise(resolve => setTimeout(resolve, 10));
           return n * 10;
         })
       );

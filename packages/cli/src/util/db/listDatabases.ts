@@ -2,8 +2,8 @@
 // It queries different resource types to find PostgreSQL, Redis, and NATS instances
 
 import { z } from 'zod'
+import { CLISubprocessError } from '@/util/error/error'
 import { parseJson } from '@/util/json/parseJson'
-import { execute } from '../subprocess/execute'
 import type { IDatabase, DatabaseType } from './types'
 import type { PanfactumContext } from '@/util/context/context'
 
@@ -118,16 +118,23 @@ export async function listDatabases(
 
   // List PostgreSQL databases
   if (!type || type === 'postgresql') {
-    const pgCommand = 'kubectl get cluster.postgresql.cnpg.io --all-namespaces -o json'
+    const pgCommand = ['kubectl', 'get', 'cluster.postgresql.cnpg.io', '--all-namespaces', '-o', 'json']
 
-    const { stdout } = await execute({
-      command: pgCommand.split(' '),
-      context,
+    const pgResult = await context.subprocessManager.execute({
+      command: pgCommand,
       workingDirectory: context.devshellConfig.repo_root,
-    })
+    }).exited
+
+    if (pgResult.exitCode !== 0) {
+      throw new CLISubprocessError('Failed to list PostgreSQL clusters', {
+        command: pgCommand.join(' '),
+        subprocessLogs: pgResult.output,
+        workingDirectory: context.devshellConfig.repo_root,
+      })
+    }
 
     // Parse and validate JSON response
-    const result = parseJson(kubectlListSchema, stdout)
+    const result = parseJson(kubectlListSchema, pgResult.stdout)
 
     for (const item of result.items) {
       const annotations = item.metadata.annotations || {}
@@ -146,18 +153,25 @@ export async function listDatabases(
     }
   }
 
-  // List Redis databases  
+  // List Redis databases
   if (!type || type === 'redis') {
-    const stsCommand = 'kubectl get statefulset --all-namespaces -o json'
+    const stsCommand = ['kubectl', 'get', 'statefulset', '--all-namespaces', '-o', 'json']
 
-    const { stdout } = await execute({
-      command: stsCommand.split(' '),
-      context,
+    const redisResult = await context.subprocessManager.execute({
+      command: stsCommand,
       workingDirectory: context.devshellConfig.repo_root,
-    })
+    }).exited
+
+    if (redisResult.exitCode !== 0) {
+      throw new CLISubprocessError('Failed to list StatefulSets for Redis discovery', {
+        command: stsCommand.join(' '),
+        subprocessLogs: redisResult.output,
+        workingDirectory: context.devshellConfig.repo_root,
+      })
+    }
 
     // Parse and validate JSON response
-    const result = parseJson(kubectlListSchema, stdout)
+    const result = parseJson(kubectlListSchema, redisResult.stdout)
 
     // Filter for Redis databases by annotation
     for (const item of result.items) {
@@ -181,16 +195,23 @@ export async function listDatabases(
 
   // List NATS clusters
   if (!type || type === 'nats') {
-    const stsCommand = 'kubectl get statefulset --all-namespaces -o json'
+    const stsCommand = ['kubectl', 'get', 'statefulset', '--all-namespaces', '-o', 'json']
 
-    const { stdout } = await execute({
-      command: stsCommand.split(' '),
-      context,
+    const natsResult = await context.subprocessManager.execute({
+      command: stsCommand,
       workingDirectory: context.devshellConfig.repo_root,
-    })
+    }).exited
+
+    if (natsResult.exitCode !== 0) {
+      throw new CLISubprocessError('Failed to list StatefulSets for NATS discovery', {
+        command: stsCommand.join(' '),
+        subprocessLogs: natsResult.output,
+        workingDirectory: context.devshellConfig.repo_root,
+      })
+    }
 
     // Parse and validate JSON response
-    const result = parseJson(kubectlListSchema, stdout)
+    const result = parseJson(kubectlListSchema, natsResult.stdout)
 
     // Filter for NATS databases by annotation
     for (const item of result.items) {

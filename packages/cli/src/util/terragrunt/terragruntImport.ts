@@ -2,8 +2,7 @@
 // It handles the Terragrunt import command to bring external resources under management
 
 import { join } from "node:path"
-import { CLIError } from "@/util/error/error";
-import { execute } from "@/util/subprocess/execute";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -104,7 +103,10 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
   const workingDirectory = join(context.devshellConfig.environments_dir, environment, region, module)
 
   // Step 1: Check if it already imported
-  const { exitCode } = await execute({
+  // Note: a non-zero exit code here means the resource is not in state,
+  // which is the expected path for an import. We intentionally do not
+  // treat that as an error.
+  const { exitCode } = await context.subprocessManager.execute({
     command: [
       "terragrunt",
       "--non-interactive",
@@ -114,13 +116,10 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
       "-no-color",
       resourcePath
     ],
-    context,
     workingDirectory,
-    errorMessage: "Failed to check state of infrastructure modules",
     onStdErrNewline: onLogLine,
     onStdOutNewline: onLogLine,
-    isSuccess: () => true
-  })
+  }).exited
 
   // That means the resource already exists in the state
   // so we cannot import
@@ -132,19 +131,28 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
   }
 
   // Step 2: Import the resource
-  await execute({
-    command: [
-      "terragrunt",
-      "--no-color",
-      "import",
-      "-no-color",
-      resourcePath,
-      resourceId
-    ],
-    context,
+  const importCommand = [
+    "terragrunt",
+    "--no-color",
+    "import",
+    "-no-color",
+    resourcePath,
+    resourceId,
+  ];
+  const importResult = await context.subprocessManager.execute({
+    command: importCommand,
     workingDirectory,
-    errorMessage: `Failed to import ${resourceId} to ${resourcePath}`,
     onStdOutNewline: onLogLine,
-    onStdErrNewline: onLogLine
-  })
+    onStdErrNewline: onLogLine,
+  }).exited;
+  if (importResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to import ${resourceId} to ${resourcePath}`,
+      {
+        command: importCommand.join(" "),
+        subprocessLogs: importResult.output,
+        workingDirectory,
+      }
+    );
+  }
 }

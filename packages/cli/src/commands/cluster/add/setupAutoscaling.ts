@@ -22,7 +22,7 @@ export async function setupAutoscaling(
     options;
 
   interface IContext {
-    vaultProxyPid?: number;
+    vaultProxyController?: AbortController;
     vaultProxyPort?: number;
   }
 

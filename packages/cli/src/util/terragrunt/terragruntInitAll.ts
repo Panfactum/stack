@@ -2,7 +2,7 @@
 // It runs terragrunt init --all to initialize all modules in parallel
 
 import { join } from "node:path"
-import { execute } from "@/util/subprocess/execute";
+import { CLISubprocessError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -91,38 +91,50 @@ export async function terragruntInitAll(input: ITerragruntInitAllInput) {
 
 
   // Step 1: Init the module and upgrade it's modules
-  await execute({
-    command: [
-      "terragrunt",
-      "--non-interactive",
-      "init",
-      "--all",
-      "-upgrade",
-      "--queue-exclude-external"
-    ],
-    context,
+  const initCommand = [
+    "terragrunt",
+    "--non-interactive",
+    "init",
+    "--all",
+    "-upgrade",
+    "--queue-exclude-external",
+  ];
+  const initResult = await context.subprocessManager.execute({
+    command: initCommand,
     workingDirectory,
-    errorMessage: "Failed to init infrastructure modules"
-  })
+  }).exited;
+  if (initResult.exitCode !== 0) {
+    throw new CLISubprocessError("Failed to init infrastructure modules", {
+      command: initCommand.join(" "),
+      subprocessLogs: initResult.output,
+      workingDirectory,
+    });
+  }
 
   // Step 2: Update the platform locks to include all platforms
-  await execute({
-    command: [
-      "terragrunt",
-      "--non-interactive",
-      "run",
-      "--all",
-      "--queue-exclude-external",
-      "--",
-      "providers",
-      "lock",
-      "-platform=linux_amd64",
-      "-platform=linux_arm64",
-      "-platform=darwin_amd64",
-      "-platform=darwin_arm64"
-    ],
-    context,
+  const lockCommand = [
+    "terragrunt",
+    "--non-interactive",
+    "run",
+    "--all",
+    "--queue-exclude-external",
+    "--",
+    "providers",
+    "lock",
+    "-platform=linux_amd64",
+    "-platform=linux_arm64",
+    "-platform=darwin_amd64",
+    "-platform=darwin_arm64",
+  ];
+  const lockResult = await context.subprocessManager.execute({
+    command: lockCommand,
     workingDirectory,
-    errorMessage: "Failed to generate locks for module providers"
-  })
+  }).exited;
+  if (lockResult.exitCode !== 0) {
+    throw new CLISubprocessError("Failed to generate locks for module providers", {
+      command: lockCommand.join(" "),
+      subprocessLogs: lockResult.output,
+      workingDirectory,
+    });
+  }
 }

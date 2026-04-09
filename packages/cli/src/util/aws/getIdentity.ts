@@ -2,8 +2,8 @@
 // It includes automatic SSO login handling for expired credentials
 
 import { GetCallerIdentityCommand, type GetCallerIdentityCommandOutput } from "@aws-sdk/client-sts";
-import { CLIError } from "@/util/error/error";
-import { execute } from "@/util/subprocess/execute";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
+import { sleep } from "@/util/util/sleep";
 import { getSTSClient } from "./clients/getSTSClient";
 import { getCredsFromFile } from "./getCredsFromFile";
 import type { PanfactumContext } from "@/util/context/context";
@@ -70,18 +70,39 @@ export async function getIdentity(input: IGetIdentityInput): Promise<GetCallerId
                 if (errorMessage.includes(`sso`) || errorMessage.includes(`SSO`)) {
                     if (errorMessage.includes("expired") ||
                         errorMessage.includes("refresh failed")) {
-                        await execute({
-                            context,
+                        const logoutCommand = ["aws", "sso", "logout", "--profile", profile];
+                        const logoutResult = await context.subprocessManager.execute({
                             workingDirectory: process.cwd(),
-                            command: ["aws", "sso", "logout", "--profile", profile]
-                        })
+                            command: logoutCommand,
+                        }).exited
 
+                        if (logoutResult.exitCode !== 0) {
+                            throw new CLISubprocessError(
+                                `Failed to log out of SSO session for profile '${profile}'`,
+                                {
+                                    command: logoutCommand.join(' '),
+                                    subprocessLogs: logoutResult.output,
+                                    workingDirectory: process.cwd(),
+                                }
+                            )
+                        }
                     }
-                    await execute({
-                        context,
+                    const loginCommand = ["aws", "sso", "login", "--profile", profile];
+                    const loginResult = await context.subprocessManager.execute({
                         workingDirectory: process.cwd(),
-                        command: ["aws", "sso", "login", "--profile", profile]
-                    })
+                        command: loginCommand,
+                    }).exited
+
+                    if (loginResult.exitCode !== 0) {
+                        throw new CLISubprocessError(
+                            `Failed to log in to SSO for profile '${profile}'`,
+                            {
+                                command: loginCommand.join(' '),
+                                subprocessLogs: loginResult.output,
+                                workingDirectory: process.cwd(),
+                            }
+                        )
+                    }
                     attemptedSSOFix = true
                     continue
                 }
@@ -90,9 +111,7 @@ export async function getIdentity(input: IGetIdentityInput): Promise<GetCallerId
             if (retries < 5) {
                 // If we are calling this immediately after creating a new user,
                 // it can take some time to update
-                await new Promise((resolve) => {
-                    globalThis.setTimeout(resolve, 5000);
-                });
+                await sleep(5000);
                 retries++
                 continue
             }

@@ -162,7 +162,7 @@ repo_url: "${repoUrl}"
     
     // Mock Bun.file to simulate read error
     const originalBunFile = Bun.file;
-    Bun.file = (_path: string | globalThis.URL | ArrayBufferLike | Uint8Array | number, _options?: globalThis.BlobPropertyBag) => {
+    Bun.file = (_path: string | URL | ArrayBufferLike | Uint8Array | number, _options?: BlobPropertyBag) => {
       const mockFile = {
         exists: () => Promise.resolve(true),
         text: () => Promise.reject(new Error("Permission denied"))
@@ -202,7 +202,7 @@ repo_url: "${TEST_REPO_URL}"
 
     // Mock Bun.file to simulate read error for user config only
     const originalBunFile = Bun.file;
-    Bun.file = (path: string | globalThis.URL | ArrayBufferLike | Uint8Array | number, options?: globalThis.BlobPropertyBag) => {
+    Bun.file = (path: string | URL | ArrayBufferLike | Uint8Array | number, options?: BlobPropertyBag) => {
       if (typeof path === 'string' && path.includes(USER_CONFIG_FILE_NAME)) {
         const mockFile = {
           exists: () => Promise.resolve(true),
@@ -210,7 +210,7 @@ repo_url: "${TEST_REPO_URL}"
         };
         return mockFile as unknown as ReturnType<typeof originalBunFile>;
       }
-      if (typeof path === 'string' || path instanceof globalThis.URL) {
+      if (typeof path === 'string' || path instanceof URL) {
         return originalBunFile(path, options);
       } else if (path instanceof ArrayBuffer || path instanceof Uint8Array || ArrayBuffer.isView(path)) {
         return originalBunFile(path as ArrayBufferLike | Uint8Array, options);

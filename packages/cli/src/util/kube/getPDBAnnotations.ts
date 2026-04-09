@@ -2,9 +2,8 @@
 // It uses kubectl to fetch and parse PDB metadata
 
 import { z } from 'zod';
-import { CLIError } from '@/util/error/error';
+import { CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
-import { execute } from '@/util/subprocess/execute';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
@@ -60,33 +59,39 @@ interface IGetPDBAnnotationsInput {
  * // Output: "v1.2.3"
  * ```
  * 
- * @throws {@link CLIError}
+ * @throws {@link CLISubprocessError}
  * Throws when the PDB doesn't exist or kubectl command fails
- * 
+ *
  * @throws {@link PanfactumZodError}
  * Throws when the annotations cannot be parsed as valid JSON
- * 
+ *
  * @see {@link execute} - For running kubectl commands
  * @see {@link parseJson} - For JSON parsing with validation
  */
 export async function getPDBAnnotations(input: IGetPDBAnnotationsInput): Promise<Record<string, string>> {
   const { context, namespace, pdbName } = input;
-  
-  const { stdout } = await execute({
-    command: [
-      'kubectl', 'get', pdbName,
-      '-n', namespace,
-      '-o', 'jsonpath={.metadata.annotations}',
-    ],
-    context,
+
+  const command = [
+    'kubectl', 'get', pdbName,
+    '-n', namespace,
+    '-o', 'jsonpath={.metadata.annotations}',
+  ];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory: process.cwd(),
-  }).catch((error: unknown) => {
-    throw new CLIError(
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(
       `Failed to get annotations for PodDisruptionBudget '${pdbName}' in namespace '${namespace}'`,
-      error
+      {
+        command: command.join(' '),
+        subprocessLogs: result.output,
+        workingDirectory: process.cwd(),
+      }
     );
-  });
-  
+  }
+
   // parseJson handles validation and throws appropriate errors
-  return parseJson(annotationsSchema, stdout || '{}');
+  return parseJson(annotationsSchema, result.stdout || '{}');
 }

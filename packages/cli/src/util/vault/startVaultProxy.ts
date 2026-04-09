@@ -1,7 +1,6 @@
 // This file provides utilities for creating Vault proxy connections
 // It manages kubectl port-forward processes for Vault access
 
-import { CLISubprocessError } from "@/util/error/error";
 import { getOpenPort } from "@/util/network/getOpenPort";
 import type { PanfactumContext } from "@/util/context/context";
 
@@ -23,37 +22,46 @@ interface IStartVaultProxyInput {
  * Output from starting a Vault proxy
  */
 interface IStartVaultProxyOutput {
-  /** Process ID of the kubectl port-forward */
-  pid: number;
+  /** Aborting this controller terminates the Vault proxy. */
+  controller: AbortController;
   /** Local port where Vault is accessible */
   port: number;
 }
 
 /**
  * Starts a kubectl port-forward proxy to access Vault
- * 
+ *
  * @remarks
  * This function creates a background kubectl port-forward process that
  * proxies connections from a local port to the Vault service in Kubernetes.
  * It automatically finds an available port starting from 8200.
- * 
+ *
+ * The proxy is registered with {@link SubprocessManager} via `execute()`
+ * so that Ctrl+C (SIGINT) is automatically forwarded to the proxy's process
+ * group. To stop the proxy programmatically, abort the returned controller;
+ * `execute()` will send SIGINT to the process group and — after
+ * `autoEscalateToSigKillMs` — SIGKILL if the proxy has not yet exited.
+ *
  * @param input - Configuration for the Vault proxy
- * @returns Process ID and local port information
- * 
+ * @returns An AbortController to stop the proxy and the local port number
+ *
  * @example
  * ```typescript
- * const proxy = await startVaultProxy({
+ * const { controller, port } = await startVaultProxy({
+ *   context,
  *   kubeContext: 'production-cluster',
  *   modulePath: '/path/to/module',
  *   env: process.env
  * });
- * console.log(`Vault available at http://localhost:${proxy.port}`);
+ * console.log(`Vault available at http://localhost:${port}`);
+ * // When done:
+ * controller.abort();
  * ```
- * 
+ *
  * @throws {@link CLISubprocessError}
  * Throws when the kubectl port-forward process fails to start
- * 
- * @see {@link BackgroundProcessManager} - For process tracking
+ *
+ * @see {@link execute} - Subprocess execution with signal management
  */
 export async function startVaultProxy(input: IStartVaultProxyInput): Promise<IStartVaultProxyOutput> {
   const { context, env, kubeContext, modulePath } = input;
@@ -71,30 +79,27 @@ export async function startVaultProxy(input: IStartVaultProxyInput): Promise<ISt
     `${openPort}:8200`,
   ];
 
-  const proc = Bun.spawn(command, {
-    stdout: "pipe",
-    stderr: "pipe",
+  const controller = new AbortController();
+
+  // execute() returns synchronously with a handle; we intentionally do NOT
+  // await `handle.exited` here — the proxy runs until the caller aborts.
+  // The proxy is registered with SubprocessManager so that OS-level signals
+  // are forwarded automatically and so it appears in the tracked process
+  // list. Aborting the controller sends SIGINT to the process group, followed
+  // by SIGKILL after autoEscalateToSigKillMs if the proxy does not exit.
+  context.subprocessManager.execute({
+    command,
+    workingDirectory: process.cwd(),
     env,
+    description: `Vault proxy for ${modulePath}`,
+    abortSignal: controller.signal,
+    autoEscalateToSigKillMs: 5000,
+    onForceKilled: () => {
+      context.logger.warn(
+        `Vault proxy for ${modulePath} was force-killed after failing to exit gracefully`
+      );
+    },
   });
 
-  // Check if the process started successfully
-  if (!proc.pid || proc.exitCode !== null) {
-    throw new CLISubprocessError(
-      `Failed to start Vault proxy for ${modulePath}`,
-      {
-        command: command.join(' '),
-        subprocessLogs: 'Process failed to start',
-        workingDirectory: process.cwd(),
-      }
-    );
-  }
-
-  context.backgroundProcessManager.addProcess({
-    pid: proc.pid,
-    command: command.join(' '),
-    description: `Vault proxy for ${modulePath} on port ${openPort}`
-  });
-  
-  return { pid: proc.pid, port: openPort };
+  return { controller, port: openPort };
 }
-

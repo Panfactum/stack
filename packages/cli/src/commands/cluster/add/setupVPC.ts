@@ -4,8 +4,8 @@ import awsVpcTerragruntHcl from "@/templates/aws_vpc_terragrunt.hcl" with { type
 import { getIdentity } from "@/util/aws/getIdentity";
 import { vpcNetworkTest } from "@/util/aws/vpcNetworkTest";
 import { waitForASGInstance } from "@/util/aws/waitForASGInstance";
+import { CLISubprocessError } from "@/util/error/error";
 import { parseJson } from "@/util/json/parseJson";
-import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
@@ -133,12 +133,23 @@ export async function setupVPC(
                 "--no-cli-pager",
               ];
 
-              const { stdout } = await execute({
+              const vpcListResult = await context.subprocessManager.execute({
                 command: vpcListCommand,
-                context: context,
                 workingDirectory: clusterPath,
-              });
-              const vpcList = parseJson(DESCRIBE_VPCS_SCHEMA, stdout);
+              }).exited;
+
+              if (vpcListResult.exitCode !== 0) {
+                throw new CLISubprocessError(
+                  `Failed to list VPCs with name ${value}`,
+                  {
+                    command: vpcListCommand.join(' '),
+                    subprocessLogs: vpcListResult.output,
+                    workingDirectory: clusterPath,
+                  }
+                );
+              }
+
+              const vpcList = parseJson(DESCRIBE_VPCS_SCHEMA, vpcListResult.stdout);
 
               if (vpcList.Vpcs.length > 0) {
                 return `A VPC already exists in AWS with the name ${value}. Please choose a different name.`;

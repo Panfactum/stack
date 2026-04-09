@@ -30,6 +30,7 @@ import { runTasks } from "@/util/listr/runTasks";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { sleep } from "@/util/util/sleep";
 import { getNewAccountAlias } from "./getNewAccountAlias";
 import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
 import type { PanfactumContext } from "@/util/context/context";
@@ -365,9 +366,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     retryCount++;
                     if (retryCount < maxRetries) {
                         const delay = Math.min(15000, 1000 * Math.pow(2, retryCount)) + Math.random() * 1000;
-                        await new Promise((resolve) => {
-                            globalThis.setTimeout(resolve, delay);
-                        });
+                        await sleep(delay);
                     } else {
                         throw new CLIError("S3 service did not activate after multiple attempts. The AWS account may still be provisioning S3 access.", createError);
                     }
@@ -402,9 +401,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                         context.logger.error(`Retry ${deleteRetries}/${maxDeleteRetries} deleting dummy bucket ${dummyBucketName}`);
                         const delay = Math.min(15000, 1000 * Math.pow(2, deleteRetries)) +
                             (Math.random() * 1000);
-                        await new Promise((resolve) => {
-                            globalThis.setTimeout(resolve, delay);
-                        });
+                        await sleep(delay);
                     }
                 }
             }
@@ -474,7 +471,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     }
 
                     headBucketRetries++;
-                    await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
+                    await sleep(10000);
                 }
             }
 

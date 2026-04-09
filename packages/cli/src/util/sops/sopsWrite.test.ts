@@ -7,28 +7,75 @@ import { test, expect, describe, mock, beforeEach, afterEach, spyOn } from "bun:
 import { CLIError } from "@/util/error/error";
 import * as fileExistsModule from "@/util/fs/fileExists";
 import * as removeFileModule from "@/util/fs/removeFile";
-import * as executeModule from "@/util/subprocess/execute";
+import { SubprocessManager } from "@/util/subprocess/SubprocessManager";
 import { createTestDir } from "@/util/test/createTestDir";
 import { sopsWrite } from "./sopsWrite";
 import type { PanfactumContext } from "@/util/context/context";
+import type { IExecuteHandle, IExecuteOutput } from "@/util/subprocess/SubprocessManager";
 
-const mockContext = {
-  logger: {
-    debug: mock(() => {}),
-    error: mock(() => {}),
-    info: mock(() => {}),
-    warn: mock(() => {})
-  }
-} as unknown as PanfactumContext;
+/**
+ * Creates a minimal {@link IExecuteHandle} whose `exited` promise resolves
+ * with an {@link IExecuteOutput} built from the provided overrides.
+ *
+ * @internal
+ */
+const createMockHandle = (
+  overrides: Partial<IExecuteOutput> = {},
+): IExecuteHandle => {
+  const result: IExecuteOutput = {
+    stdout: "",
+    stderr: "",
+    output: "",
+    exitCode: 0,
+    pid: 0,
+    signalCode: null,
+    aborted: false,
+    ...overrides,
+  };
+  return {
+    pid: result.pid,
+    exited: Promise.resolve(result),
+    abortController: undefined,
+  };
+};
+
+/**
+ * Creates a minimal {@link IExecuteHandle} whose `exited` promise rejects
+ * with the provided error — used to simulate spawn failures.
+ *
+ * @internal
+ */
+const createRejectedHandle = (error: Error): IExecuteHandle => {
+  const exited = Promise.reject(error);
+  exited.catch(() => {});
+  return {
+    pid: 0,
+    exited,
+    abortController: undefined,
+  };
+};
+
+const mockContext = (() => {
+  const ctx = {
+    logger: {
+      debug: mock(() => {}),
+      error: mock(() => {}),
+      info: mock(() => {}),
+      warn: mock(() => {})
+    }
+  } as unknown as PanfactumContext;
+  ctx.subprocessManager = new SubprocessManager(ctx);
+  return ctx;
+})();
 
 describe("sopsWrite", () => {
-  let mockExecute: ReturnType<typeof spyOn<typeof executeModule, "execute">>;
+  let mockExecute: ReturnType<typeof spyOn<SubprocessManager, "execute">>;
   let mockFileExists: ReturnType<typeof spyOn<typeof fileExistsModule, "fileExists">>;
   let mockRemoveFile: ReturnType<typeof spyOn<typeof removeFileModule, "removeFile">>;
 
   beforeEach(() => {
-    // Create spies for module functions
-    mockExecute = spyOn(executeModule, "execute");
+    // Spy on the execute method on the SubprocessManager prototype
+    mockExecute = spyOn(SubprocessManager.prototype, "execute");
     mockFileExists = spyOn(fileExistsModule, "fileExists");
     mockRemoveFile = spyOn(removeFileModule, "removeFile");
   });
@@ -52,12 +99,7 @@ describe("sopsWrite", () => {
       mockFileExists.mockResolvedValueOnce(false);
 
       // Mock successful SOPS encryption
-      mockExecute.mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
-      });
+      mockExecute.mockReturnValueOnce(createMockHandle({ pid: 12345 }));
 
       await sopsWrite({
         values,
@@ -84,9 +126,8 @@ describe("sopsWrite", () => {
           filePath,
           "/dev/stdin"
         ],
-        context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
+        stdin: new TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -110,12 +151,7 @@ describe("sopsWrite", () => {
       mockFileExists.mockResolvedValueOnce(true);
 
       // Mock successful SOPS encryption
-      mockExecute.mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
-      });
+      mockExecute.mockReturnValueOnce(createMockHandle({ pid: 12345 }));
 
       await sopsWrite({
         values,
@@ -140,9 +176,8 @@ describe("sopsWrite", () => {
           filePath,
           "/dev/stdin"
         ],
-        context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
+        stdin: new TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -227,8 +262,8 @@ describe("sopsWrite", () => {
       // Mock file doesn't exist
       mockFileExists.mockResolvedValueOnce(false);
 
-      // Mock SOPS encryption failure
-      mockExecute.mockRejectedValueOnce(new Error("SOPS encryption failed"));
+      // Mock SOPS encryption failure (spawn failure)
+      mockExecute.mockReturnValueOnce(createRejectedHandle(new Error("SOPS encryption failed")));
 
       await expect(sopsWrite({
         values,
@@ -239,13 +274,43 @@ describe("sopsWrite", () => {
       // Mock file doesn't exist again for second test
       mockFileExists.mockResolvedValueOnce(false);
       // Mock SOPS encryption failure again
-      mockExecute.mockRejectedValueOnce(new Error("SOPS encryption failed"));
+      mockExecute.mockReturnValueOnce(createRejectedHandle(new Error("SOPS encryption failed")));
 
       await expect(sopsWrite({
         values,
         filePath,
         context: mockContext
       })).rejects.toThrow("Unable to write encrypted data");
+    } finally {
+      await rm(testDir, { recursive: true, force: true });
+    }
+  });
+
+  test("throws CLIError when SOPS exits with non-zero exit code", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "sopsWrite" });
+    const filePath = join(testDir, "test-file.sops.json");
+
+    const values = {
+      key: "value"
+    };
+
+    try {
+      mockFileExists.mockResolvedValueOnce(false);
+
+      // Mock SOPS returning a non-zero exit code
+      mockExecute.mockReturnValueOnce(createMockHandle({
+        stdout: "",
+        stderr: "sops: unable to encrypt",
+        output: "sops: unable to encrypt",
+        exitCode: 1,
+        pid: 12345,
+      }));
+
+      await expect(sopsWrite({
+        values,
+        filePath,
+        context: mockContext
+      })).rejects.toThrow(CLIError);
     } finally {
       await rm(testDir, { recursive: true, force: true });
     }
@@ -273,12 +338,7 @@ describe("sopsWrite", () => {
 
     try {
       mockFileExists.mockResolvedValueOnce(false);
-      mockExecute.mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
-      });
+      mockExecute.mockReturnValueOnce(createMockHandle({ pid: 12345 }));
 
       await sopsWrite({
         values,
@@ -299,9 +359,8 @@ describe("sopsWrite", () => {
           filePath,
           "/dev/stdin"
         ],
-        context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
+        stdin: new TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -319,12 +378,7 @@ describe("sopsWrite", () => {
 
     try {
       mockFileExists.mockResolvedValueOnce(false);
-      mockExecute.mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
-      });
+      mockExecute.mockReturnValueOnce(createMockHandle({ pid: 12345 }));
 
       await sopsWrite({
         values,
@@ -345,9 +399,8 @@ describe("sopsWrite", () => {
           filePath,
           "/dev/stdin"
         ],
-        context: mockContext,
         workingDirectory: subDir,
-        stdin: new globalThis.TextEncoder().encode(JSON.stringify(values))
+        stdin: new TextEncoder().encode(JSON.stringify(values))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });
@@ -362,12 +415,7 @@ describe("sopsWrite", () => {
 
     try {
       mockFileExists.mockResolvedValueOnce(false);
-      mockExecute.mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
-      });
+      mockExecute.mockReturnValueOnce(createMockHandle({ pid: 12345 }));
 
       await sopsWrite({
         values,
@@ -387,9 +435,8 @@ describe("sopsWrite", () => {
           filePath,
           "/dev/stdin"
         ],
-        context: mockContext,
         workingDirectory: testDir,
-        stdin: new globalThis.TextEncoder().encode(JSON.stringify({}))
+        stdin: new TextEncoder().encode(JSON.stringify({}))
       });
     } finally {
       await rm(testDir, { recursive: true, force: true });

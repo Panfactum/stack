@@ -84,7 +84,7 @@ export async function getModuleHash(modulePath: string): Promise<string> {
   for (const file of files) {
     // File is already an absolute path
     const content = await readFile(file);
-    const hash = createHash('sha1').update(content).digest('hex');
+    const hash = createHash('sha1').update(content as unknown as string).digest('hex');
     hashes.push(`${hash}  ${file}`);
   }
 

@@ -8,7 +8,8 @@
   bun,
   makeWrapper,
   ...
-}: let
+}:
+let
   # Set of Bun packages to install
   packages = {
     "@aws-crypto/crc32" = {
@@ -6343,50 +6344,58 @@
   };
 
   # Build the node modules directory
-  nodeModules = runCommand "node-modules" {
-    nativeBuildInputs = [ 
-      libarchive 
-      makeWrapper
-    ];
-  } ''
-    mkdir -p $out/node_modules/.bin
+  nodeModules =
+    runCommand "node-modules"
+      {
+        nativeBuildInputs = [
+          libarchive
+          makeWrapper
+        ];
+      }
+      ''
+        mkdir -p $out/node_modules/.bin
 
-    # Extract a given package to it's destination
-    extract() {
-      local pkg=$1
-      local dest=$2
-      
-      mkdir -p "$dest"
-      bsdtar --extract \
-        --file "$pkg" \
-        --directory "$dest" \
-        --strip-components=1 \
-        --no-same-owner \
-        --no-same-permissions
+        # Extract a given package to it's destination
+        extract() {
+          local pkg=$1
+          local dest=$2
+          
+          mkdir -p "$dest"
+          bsdtar --extract \
+            --file "$pkg" \
+            --directory "$dest" \
+            --strip-components=1 \
+            --no-same-owner \
+            --no-same-permissions
 
-      chmod -R a+X "$dest"
-    }
+          chmod -R a+X "$dest"
+        }
 
-    # Process each package
-    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: pkg: ''
-      echo "Installing package ${name}..."
+        # Process each package
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (name: pkg: ''
+            echo "Installing package ${name}..."
 
-      mkdir -p "$out/node_modules/${pkg.out_path}"
-      extract "${pkg.pkg}" "$out/node_modules/${pkg.out_path}"
-      
-      # Handle binaries if they exist
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (binName: binPath: ''
-        ln -sf "${binPath}" "$out/node_modules/.bin/${binName}"
-      '') pkg.binaries)}
-    '') packages)}
+            mkdir -p "$out/node_modules/${pkg.out_path}"
+            extract "${pkg.pkg}" "$out/node_modules/${pkg.out_path}"
 
-    # Force bun instead of node for script execution
-    makeWrapper ${bun}/bin/bun $out/bin/node
-    export PATH="$out/bin:$PATH"
+            # Handle binaries if they exist
+            ${lib.concatStringsSep "\n" (
+              lib.mapAttrsToList (binName: binPath: ''
+                ln -sf "${binPath}" "$out/node_modules/.bin/${binName}"
+              '') pkg.binaries
+            )}
+          '') packages
+        )}
 
-    patchShebangs $out/node_modules
-  '';
+        # Force bun instead of node for script execution
+        makeWrapper ${bun}/bin/bun $out/bin/node
+        export PATH="$out/bin:$PATH"
 
-in {
+        patchShebangs $out/node_modules
+      '';
+
+in
+{
   inherit nodeModules packages;
 }

@@ -10,18 +10,18 @@ describe('mergeStreams', () => {
     const startTime = Date.now();
 
     // Stream 1: Slow stream with delays
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       async start(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 30));
+        await new Promise(resolve => setTimeout(resolve, 30));
         controller.enqueue('stream1-chunk1');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 40));
+        await new Promise(resolve => setTimeout(resolve, 40));
         controller.enqueue('stream1-chunk2');
         controller.close();
       }
     });
 
     // Stream 2: Fast stream that emits immediately
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue('stream2-chunk1');
         controller.enqueue('stream2-chunk2');
@@ -30,11 +30,11 @@ describe('mergeStreams', () => {
     });
 
     // Stream 3: Medium speed stream
-    const stream3 = new globalThis.ReadableStream({
+    const stream3 = new ReadableStream({
       async start(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         controller.enqueue('stream3-chunk1');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 30));
+        await new Promise(resolve => setTimeout(resolve, 30));
         controller.enqueue('stream3-chunk2');
         controller.close();
       }
@@ -84,7 +84,7 @@ describe('mergeStreams', () => {
   });
 
   test('handles single stream', async () => {
-    const stream = new globalThis.ReadableStream({
+    const stream = new ReadableStream({
       start(controller) {
         controller.enqueue('chunk1');
         controller.enqueue('chunk2');
@@ -112,7 +112,7 @@ describe('mergeStreams', () => {
 
   test('handles streams that close at different times', async () => {
     // Stream that closes early
-    const shortStream = new globalThis.ReadableStream({
+    const shortStream = new ReadableStream({
       start(controller) {
         controller.enqueue('short-1');
         controller.close();
@@ -120,13 +120,13 @@ describe('mergeStreams', () => {
     });
 
     // Stream that continues longer
-    const longStream = new globalThis.ReadableStream({
+    const longStream = new ReadableStream({
       async start(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         controller.enqueue('long-1');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 20));
+        await new Promise(resolve => setTimeout(resolve, 20));
         controller.enqueue('long-2');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 20));
+        await new Promise(resolve => setTimeout(resolve, 20));
         controller.enqueue('long-3');
         controller.close();
       }
@@ -155,7 +155,7 @@ describe('mergeStreams', () => {
   test('propagates errors from source streams', async () => {
     const errorMessage = 'Stream error';
 
-    const errorStream = new globalThis.ReadableStream({
+    const errorStream = new ReadableStream({
       start(controller) {
         // Error immediately
         controller.error(new Error(errorMessage));
@@ -170,21 +170,21 @@ describe('mergeStreams', () => {
   });
 
   test('handles mixed data types', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue('text');
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue(new Uint8Array([1, 2, 3]));
         controller.close();
       }
     });
 
-    const stream3 = new globalThis.ReadableStream({
+    const stream3 = new ReadableStream({
       start(controller) {
         controller.enqueue({ data: 'object' });
         controller.enqueue(42);
@@ -219,21 +219,21 @@ describe('mergeStreams', () => {
   });
 
   test('handles empty streams mixed with non-empty streams', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue('before');
         controller.close();
       }
     });
 
-    const emptyStream = new globalThis.ReadableStream({
+    const emptyStream = new ReadableStream({
       start(controller) {
         // Close immediately without enqueuing anything
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue('after');
         controller.close();
@@ -261,12 +261,12 @@ describe('mergeStreams', () => {
   test('handles high concurrency with many streams', async () => {
     // Create 10 streams with different speeds
     const streams = Array.from({ length: 10 }, (_, i) =>
-      new globalThis.ReadableStream({
+      new ReadableStream({
         async start(controller) {
           // Each stream has different timing
-          await new Promise(resolve => globalThis.setTimeout(resolve, i * 5));
+          await new Promise(resolve => setTimeout(resolve, i * 5));
           controller.enqueue(`stream${i}-chunk1`);
-          await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+          await new Promise(resolve => setTimeout(resolve, 10));
           controller.enqueue(`stream${i}-chunk2`);
           controller.close();
         }
@@ -300,11 +300,11 @@ describe('mergeStreams', () => {
     let pullCount = 0;
 
     // Stream that tracks pull calls
-    const stream = new globalThis.ReadableStream({
+    const stream = new ReadableStream({
       async pull(controller) {
         pullCount++;
         if (pullCount <= 5) {
-          await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+          await new Promise(resolve => setTimeout(resolve, 10));
           controller.enqueue(`chunk-${pullCount}`);
         } else {
           controller.close();
@@ -322,7 +322,7 @@ describe('mergeStreams', () => {
       chunks.push(value);
 
       // Simulate slow consumer
-      await new Promise(resolve => globalThis.setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 5));
     }
 
     expect(chunks).toMatchInlineSnapshot(`
@@ -343,9 +343,9 @@ describe('mergeStreams', () => {
     let stream1Cancelled = false;
     let stream2Cancelled = false;
 
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       async start(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
         controller.enqueue('never-read');
         controller.close();
       },
@@ -354,9 +354,9 @@ describe('mergeStreams', () => {
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       async start(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
         controller.enqueue('never-read');
         controller.close();
       },
@@ -372,7 +372,7 @@ describe('mergeStreams', () => {
     await reader.cancel();
 
     // Give time for cancellation to propagate
-    await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     expect(stream1Cancelled).toBe(true);
     expect(stream2Cancelled).toBe(true);
@@ -383,22 +383,22 @@ describe('mergeStreams', () => {
     const chunks: { value: string; timestamp: number }[] = [];
 
     // Stream 1: Active stream that produces chunks regularly
-    const activeStream = new globalThis.ReadableStream({
+    const activeStream = new ReadableStream({
       async start(controller) {
         controller.enqueue('active-1');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         controller.enqueue('active-2');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         controller.enqueue('active-3');
         controller.close();
       }
     });
 
     // Stream 2: Slow stream that takes a very long time to produce anything
-    const slowStream = new globalThis.ReadableStream({
+    const slowStream = new ReadableStream({
       async start(controller) {
         // Wait 500ms before producing anything
-        await new Promise(resolve => globalThis.setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         controller.enqueue('slow-1');
         controller.close();
       }
@@ -407,7 +407,7 @@ describe('mergeStreams', () => {
     // Stream 3: Stream that never produces anything (just hangs)
     let stream3Cancelled = false;
     let hangingStreamResolve: (() => void) | undefined;
-    const hangingStream = new globalThis.ReadableStream({
+    const hangingStream = new ReadableStream({
       async start() {
         // This stream just waits forever until cancelled
         await new Promise<void>((resolve) => {
@@ -430,7 +430,7 @@ describe('mergeStreams', () => {
     // Read chunks with a timeout
     const readWithTimeout = async (timeoutMs: number) => {
       const timeoutPromise = new Promise<{ timeout: true }>((resolve) =>
-        globalThis.setTimeout(() => resolve({ timeout: true }), timeoutMs)
+        setTimeout(() => resolve({ timeout: true }), timeoutMs)
       );
 
       const readPromise = reader.read();

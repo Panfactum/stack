@@ -6,21 +6,21 @@ import { concatStreams } from './concatStreams';
 
 describe('concatStreams', () => {
   test('concatenates multiple streams with Uint8Array chunks', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue(new Uint8Array([1, 2, 3]));
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue(new Uint8Array([4, 5, 6]));
         controller.close();
       }
     });
 
-    const stream3 = new globalThis.ReadableStream({
+    const stream3 = new ReadableStream({
       start(controller) {
         controller.enqueue(new Uint8Array([7, 8, 9]));
         controller.close();
@@ -59,7 +59,7 @@ describe('concatStreams', () => {
   });
 
   test('concatenates streams with string chunks', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue('Hello');
         controller.enqueue(' ');
@@ -67,7 +67,7 @@ describe('concatStreams', () => {
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue('World');
         controller.enqueue('!');
@@ -106,7 +106,7 @@ describe('concatStreams', () => {
   });
 
   test('handles single stream', async () => {
-    const stream = new globalThis.ReadableStream({
+    const stream = new ReadableStream({
       start(controller) {
         controller.enqueue('single');
         controller.close();
@@ -131,21 +131,21 @@ describe('concatStreams', () => {
   });
 
   test('handles streams with mixed data types', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue('text');
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue(new Uint8Array([1, 2, 3]));
         controller.close();
       }
     });
 
-    const stream3 = new globalThis.ReadableStream({
+    const stream3 = new ReadableStream({
       start(controller) {
         controller.enqueue({ data: 'object' });
         controller.close();
@@ -178,20 +178,20 @@ describe('concatStreams', () => {
   });
 
   test('handles empty streams', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue('before');
         controller.close();
       }
     });
 
-    const emptyStream = new globalThis.ReadableStream({
+    const emptyStream = new ReadableStream({
       start(controller) {
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         controller.enqueue('after');
         controller.close();
@@ -219,14 +219,14 @@ describe('concatStreams', () => {
   test('propagates errors from source streams', async () => {
     const errorMessage = 'Stream error';
 
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       start(controller) {
         controller.enqueue('first');
         controller.close();
       }
     });
 
-    const errorStream = new globalThis.ReadableStream({
+    const errorStream = new ReadableStream({
       start(controller) {
         controller.error(new Error(errorMessage));
       }
@@ -244,17 +244,17 @@ describe('concatStreams', () => {
   });
 
   test('handles async streams', async () => {
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       async start(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
         controller.enqueue('delayed1');
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       async pull(controller) {
-        await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         controller.enqueue('delayed2');
         controller.close();
       }
@@ -280,7 +280,7 @@ describe('concatStreams', () => {
 
   test('respects stream order', async () => {
     const createNumberStream = (start: number, count: number) => {
-      return new globalThis.ReadableStream({
+      return new ReadableStream({
         start(controller) {
           for (let i = 0; i < count; i++) {
             controller.enqueue(start + i);
@@ -329,19 +329,19 @@ describe('concatStreams', () => {
     const startTime = Date.now();
     
     // Create streams with different timing to show sequential processing
-    const stream1 = new globalThis.ReadableStream({
+    const stream1 = new ReadableStream({
       async start(controller) {
         // Stream 1 has delays between chunks
         controller.enqueue('stream1-chunk1');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 50));
         controller.enqueue('stream1-chunk2');
-        await new Promise(resolve => globalThis.setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 50));
         controller.enqueue('stream1-chunk3');
         controller.close();
       }
     });
 
-    const stream2 = new globalThis.ReadableStream({
+    const stream2 = new ReadableStream({
       start(controller) {
         // Stream 2 emits all chunks immediately
         // But they should only appear AFTER all of stream1
@@ -351,10 +351,10 @@ describe('concatStreams', () => {
       }
     });
 
-    const stream3 = new globalThis.ReadableStream({
+    const stream3 = new ReadableStream({
       async start(controller) {
         // Stream 3 has a small delay
-        await new Promise(resolve => globalThis.setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         controller.enqueue('stream3-chunk1');
         controller.close();
       }

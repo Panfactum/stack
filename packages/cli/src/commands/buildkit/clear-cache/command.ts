@@ -6,9 +6,9 @@ import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
 import { getAllRegions } from '@/util/config/getAllRegions.js'
+import { CLISubprocessError } from '@/util/error/error'
 import { parseJson } from '@/util/json/parseJson'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
-import { execute } from '@/util/subprocess/execute.js'
 
 /**
  * CLI command for clearing BuildKit caches and unused storage
@@ -106,22 +106,33 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
    */
   private async deleteUnusedPVCs(): Promise<void> {
     const contextArgs = getKubectlContextArgs(this.kubectlContext)
-    
+
     // Get all PVCs
-    const pvcsResult = await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'get',
-        'pvc',
-        '--namespace',
-        BUILDKIT_NAMESPACE,
-        '--output',
-        'jsonpath={.items[*].metadata.name}'
-      ],
-      context: this.context,
+    const getPVCsCommand = [
+      'kubectl',
+      ...contextArgs,
+      'get',
+      'pvc',
+      '--namespace',
+      BUILDKIT_NAMESPACE,
+      '--output',
+      'jsonpath={.items[*].metadata.name}'
+    ]
+    const pvcsResult = await this.context.subprocessManager.execute({
+      command: getPVCsCommand,
       workingDirectory: process.cwd()
-    })
+    }).exited
+
+    if (pvcsResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to list PVCs in ${BUILDKIT_NAMESPACE} namespace`,
+        {
+          command: getPVCsCommand.join(' '),
+          subprocessLogs: pvcsResult.output,
+          workingDirectory: process.cwd(),
+        }
+      )
+    }
 
     /*
     1. kubectl output format: The jsonpath={.items[*].metadata.name} returns space-separated PVC names
@@ -134,20 +145,31 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
     const pvcs = pvcsResult.stdout.trim().split(/\s+/).filter(x => x.trim())
 
     // Get pods that use PVCs
-    const podsResult = await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'get',
-        'pods',
-        '--namespace',
-        BUILDKIT_NAMESPACE,
-        '-o',
-        'json'
-      ],
-      context: this.context,
+    const getPodsCommand = [
+      'kubectl',
+      ...contextArgs,
+      'get',
+      'pods',
+      '--namespace',
+      BUILDKIT_NAMESPACE,
+      '-o',
+      'json'
+    ]
+    const podsResult = await this.context.subprocessManager.execute({
+      command: getPodsCommand,
       workingDirectory: process.cwd()
-    })
+    }).exited
+
+    if (podsResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to list pods in ${BUILDKIT_NAMESPACE} namespace`,
+        {
+          command: getPodsCommand.join(' '),
+          subprocessLogs: podsResult.output,
+          workingDirectory: process.cwd(),
+        }
+      )
+    }
 
     const podSchema = z.object({
       spec: z.object({
@@ -177,20 +199,31 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
 
       if (!isUsed) {
         this.context.logger.info(`Deleting unused PVC: ${pvc}`)
-        await execute({
-          command: [
-            'kubectl',
-            ...contextArgs,
-            'delete',
-            'pvc',
-            pvc,
-            '--namespace',
-            BUILDKIT_NAMESPACE,
-            '--wait=false'
-          ],
-          context: this.context,
+        const deletePVCCommand = [
+          'kubectl',
+          ...contextArgs,
+          'delete',
+          'pvc',
+          pvc,
+          '--namespace',
+          BUILDKIT_NAMESPACE,
+          '--wait=false'
+        ]
+        const deletePVCResult = await this.context.subprocessManager.execute({
+          command: deletePVCCommand,
           workingDirectory: process.cwd()
-        })
+        }).exited
+
+        if (deletePVCResult.exitCode !== 0) {
+          throw new CLISubprocessError(
+            `Failed to delete PVC ${pvc}`,
+            {
+              command: deletePVCCommand.join(' '),
+              subprocessLogs: deletePVCResult.output,
+              workingDirectory: process.cwd(),
+            }
+          )
+        }
       } else {
         this.context.logger.info(`PVC in use: ${pvc}`)
       }
@@ -208,22 +241,33 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
    */
   private async prunePodCaches(): Promise<void> {
     const contextArgs = getKubectlContextArgs(this.kubectlContext)
-    
+
     // Get running pods
-    const podsResult = await execute({
-      command: [
-        'kubectl',
-        ...contextArgs,
-        'get',
-        'pods',
-        '-n',
-        BUILDKIT_NAMESPACE,
-        '-o',
-        'jsonpath={range .items[*]}{.metadata.name} {.status.phase}{"\\n"}{end}'
-      ],
-      context: this.context,
+    const getPodsCommand = [
+      'kubectl',
+      ...contextArgs,
+      'get',
+      'pods',
+      '-n',
+      BUILDKIT_NAMESPACE,
+      '-o',
+      'jsonpath={range .items[*]}{.metadata.name} {.status.phase}{"\\n"}{end}'
+    ]
+    const podsResult = await this.context.subprocessManager.execute({
+      command: getPodsCommand,
       workingDirectory: process.cwd()
-    })
+    }).exited
+
+    if (podsResult.exitCode !== 0) {
+      throw new CLISubprocessError(
+        `Failed to list pods in ${BUILDKIT_NAMESPACE} namespace`,
+        {
+          command: getPodsCommand.join(' '),
+          subprocessLogs: podsResult.output,
+          workingDirectory: process.cwd(),
+        }
+      )
+    }
 
     const pods = podsResult.stdout.trim().split('\n').filter(x => x.trim())
 
@@ -232,26 +276,32 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
       
       if (status === 'Running' && podName && podName.includes('buildkit')) {
         this.context.logger.info(`Pruning cache in running BuildKit pod: ${podName}`)
-        
-        await execute({
-          command: [
-            'kubectl',
-            ...contextArgs,
-            'exec',
-            podName,
-            '-c',
-            'buildkitd',
-            '-n',
-            BUILDKIT_NAMESPACE,
-            '--',
-            'buildctl',
-            'prune',
-            '--all'
-          ],
-          context: this.context,
+
+        const pruneCommand = [
+          'kubectl',
+          ...contextArgs,
+          'exec',
+          podName,
+          '-c',
+          'buildkitd',
+          '-n',
+          BUILDKIT_NAMESPACE,
+          '--',
+          'buildctl',
+          'prune',
+          '--all'
+        ]
+        const pruneResult = await this.context.subprocessManager.execute({
+          command: pruneCommand,
           workingDirectory: process.cwd(),
-          errorMessage: `Failed to prune cache in pod ${podName}`
-        })
+        }).exited
+        if (pruneResult.exitCode !== 0) {
+          throw new CLISubprocessError(`Failed to prune cache in pod ${podName}`, {
+            command: pruneCommand.join(' '),
+            subprocessLogs: pruneResult.output,
+            workingDirectory: process.cwd(),
+          })
+        }
       }
     }
   }

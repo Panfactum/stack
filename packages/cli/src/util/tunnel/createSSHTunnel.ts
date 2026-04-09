@@ -1,10 +1,9 @@
 import { join } from 'path';
 import { z } from 'zod';
-import { CLIError, PanfactumZodError } from '@/util/error/error.js';
+import { CLIError, CLISubprocessError, PanfactumZodError } from '@/util/error/error.js';
 import { fileExists } from '@/util/fs/fileExists.js';
 import { removeFile } from '@/util/fs/removeFile.js';
 import { writeFile } from '@/util/fs/writeFile.js';
-import { execute } from '@/util/subprocess/execute.js';
 import { getVaultToken } from '@/util/vault/getVaultToken.js';
 import type { PanfactumContext } from '@/util/context/context.js';
 
@@ -67,7 +66,6 @@ export interface ISSHTunnelOptions {
 }
 
 export interface ISSHTunnelHandle {
-  pid: number;
   localPort: number;
   remoteAddress: string;
   bastionName: string;
@@ -216,52 +214,64 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
     }
 
     // Generate new keys
-    await execute({
-      command: [
-        'ssh-keygen',
-        '-q',
-        '-t', 'ed25519',
-        '-N', '',
-        '-C', bastionName,
-        '-f', keyFile
-      ],
-      context,
+    const keygenCommand = [
+      'ssh-keygen',
+      '-q',
+      '-t', 'ed25519',
+      '-N', '',
+      '-C', bastionName,
+      '-f', keyFile
+    ];
+    const keygenResult = await context.subprocessManager.execute({
+      command: keygenCommand,
       workingDirectory: process.cwd(),
-    }).catch((error: unknown) => {
-      throw new CLIError(
+    }).exited;
+
+    if (keygenResult.exitCode !== 0) {
+      throw new CLISubprocessError(
         `Failed to generate SSH keys for ${bastionName}`,
-        error
+        {
+          command: keygenCommand.join(' '),
+          subprocessLogs: keygenResult.output,
+          workingDirectory: process.cwd(),
+        }
       );
-    });
+    }
   }
 
   // Sign SSH key with Vault
   const vaultToken = await getVaultToken({ context, address: vaultAddress });
 
-  const result = await execute({
-    command: [
-      'vault',
-      'write',
-      '-field',
-      'signed_key',
-      'ssh/sign/default',
-      `public_key=@${publicKeyFile}`
-    ],
-    context,
+  const signCommand = [
+    'vault',
+    'write',
+    '-field',
+    'signed_key',
+    'ssh/sign/default',
+    `public_key=@${publicKeyFile}`
+  ];
+  const signResult = await context.subprocessManager.execute({
+    command: signCommand,
     workingDirectory: process.cwd(),
     env: {
       ...process.env,
       VAULT_ADDR: vaultAddress,
       VAULT_TOKEN: vaultToken
     }
-  }).catch((error: unknown) => {
-    throw new CLIError(
-      `Failed to sign SSH key with Vault for ${bastionName}`,
-      error
-    );
-  });
+  }).exited;
 
-  const signedKey = result.stdout;
+  if (signResult.exitCode !== 0) {
+    throw new CLISubprocessError(
+      `Failed to sign SSH key with Vault for ${bastionName}`,
+      {
+        command: signCommand.join(' '),
+        subprocessLogs: signResult.output,
+        workingDirectory: process.cwd(),
+      }
+    );
+  }
+
+  const signedKey = signResult.stdout;
 
   if (!signedKey || signedKey.trim().length === 0) {
     throw new CLIError(
@@ -282,10 +292,16 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
     );
   });
 
-  // Establish tunnel using execute with background mode
+  // Establish tunnel using execute. We intentionally do NOT await
+  // handle.exited — the tunnel runs until close() aborts the controller.
+  // The AbortController is how close() terminates the autossh subprocess —
+  // abort() sends SIGINT to the subprocess's process group and the shared
+  // escalation timer ensures it is SIGKILL'd if it doesn't exit within 5
+  // seconds.
   const knownHostsFile = join(sshDir, 'known_hosts');
+  const controller = new AbortController();
 
-  const tunnelResult = await execute({
+  context.subprocessManager.execute({
     command: [
       'autossh',
       '-M', '0',
@@ -302,24 +318,27 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
       '-p', bastionPort,
       `panfactum@${bastionDomain}`
     ],
-    context,
     workingDirectory: process.cwd(),
     env: {
       ...process.env,
       AUTOSSH_GATETIME: '0'
     },
-    background: true,
-    backgroundDescription: `SSH tunnel to ${remoteAddress} via ${bastionName}`
+    description: `SSH tunnel to ${remoteAddress} via ${bastionName}`,
+    abortSignal: controller.signal,
+    autoEscalateToSigKillMs: 5000
+  }).exited.then((tunnelResult) => {
+    // The tunnel promise is not awaited by the caller — close() aborts
+    // the process and we just log the exit for debugging.
+    context.logger.debug(
+      `SSH tunnel to ${remoteAddress} via ${bastionName} exited with code ${tunnelResult.exitCode ?? 'null'}`
+    );
   }).catch((error: unknown) => {
-    throw new CLIError(
-      `Failed to establish SSH tunnel to ${remoteAddress} via ${bastionName}`,
-      error
+    // Only a spawn failure will reject this promise now. Log rather than
+    // throw so the rejection doesn't surface as unhandled.
+    context.logger.debug(
+      `SSH tunnel to ${remoteAddress} via ${bastionName} failed to spawn: ${error instanceof Error ? error.message : String(error)}`
     );
   });
-
-  if (!tunnelResult.pid) {
-    throw new CLIError('Failed to start SSH tunnel - no process ID returned');
-  }
 
   context.logger.info(
     `Tunnel established: localhost:${localPort} → ${remoteAddress} via ${bastionName}`
@@ -327,16 +346,12 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
 
   // Return handle for managing the tunnel
   return {
-    pid: tunnelResult.pid,
     localPort,
     remoteAddress,
     bastionName,
     close: async () => {
       context.logger.info('Closing tunnel...');
-      await context.backgroundProcessManager.killProcess({
-        pid: tunnelResult.pid,
-        killChildren: true
-      });
+      controller.abort();
     }
   };
 }

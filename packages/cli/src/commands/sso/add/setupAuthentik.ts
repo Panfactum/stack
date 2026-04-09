@@ -9,15 +9,15 @@ import kubeAuthentikHcl from "@/templates/kube_authentik.hcl" with { type: "file
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { SSO_SUBDOMAIN } from "@/util/domains/consts";
-import { CLIError } from "@/util/error/error";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
-import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
 import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
+import { sleep } from "@/util/util/sleep";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { upsertPFYAMLFile } from "@/util/yaml/upsertPFYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
@@ -409,7 +409,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 while (attempts < maxAttempts) {
                     const statusStr = `attempt ${attempts + 1}/${maxAttempts}`
                     task.title = context.logger.applyColors(`Verifying the Authentik Ingress ${statusStr}`, { lowlights: [statusStr] });
-                    const response = await Bun.fetch(`https://${data.extra_inputs.domain}/-/health/ready/`).catch(() => null);
+                    const response = await fetch(`https://${data.extra_inputs.domain}/-/health/ready/`).catch(() => null);
                     if (response?.status === 200) {
                         task.title = context.logger.applyColors("Authentik ready check successful");
                         break;
@@ -418,7 +418,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                     attempts++;
 
                     if (attempts < maxAttempts) {
-                        await new Promise(resolve => globalThis.setTimeout(resolve, retryDelay));
+                        await sleep(retryDelay);
                     } else {
                         task.title = context.logger.applyColors(`Failed to connect to Authentik ready endpoint after ${maxAttempts} attempts`, { style: "error" });
                         throw new CLIError(`Failed to connect to Authentik ready endpoint after ${maxAttempts} attempts`);
@@ -527,20 +527,31 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 }
 
                 // Disable reloader to prevent it from reloading the Authentik resources
-                await execute({
-                    command: [
-                        "kubectl",
-                        "annotate",
-                        "deployment",
-                        "authentik-server",
-                        "-n",
-                        "authentik",
-                        'reloader.stakater.com/auto="false"',
-                        "--context", kubeConfigContext,
-                    ],
-                    context,
+                const disableReloaderCommand = [
+                    "kubectl",
+                    "annotate",
+                    "deployment",
+                    "authentik-server",
+                    "-n",
+                    "authentik",
+                    'reloader.stakater.com/auto="false"',
+                    "--context", kubeConfigContext,
+                ]
+                const disableReloaderResult = await context.subprocessManager.execute({
+                    command: disableReloaderCommand,
                     workingDirectory: cwd(),
-                })
+                }).exited
+
+                if (disableReloaderResult.exitCode !== 0) {
+                    throw new CLISubprocessError(
+                        "Failed to disable reloader on authentik-server deployment",
+                        {
+                            command: disableReloaderCommand.join(' '),
+                            subprocessLogs: disableReloaderResult.output,
+                            workingDirectory: cwd(),
+                        }
+                    )
+                }
 
                 // FIX: @seth - We have a yaml stringifier??? Don't use raw string manipulation
 
@@ -574,19 +585,30 @@ spec:
                 const tempFile = `temp-pdb-${Date.now()}.yaml`;
                 await writeFile({ context, filePath: join(cwd(), tempFile), contents: yaml, overwrite: true })
 
-                await execute({
-                    command: [
-                        "kubectl",
-                        "apply",
-                        "-f",
-                        tempFile,
-                        "--context", kubeConfigContext,
-                    ],
-                    context,
+                const applyPdbCommand = [
+                    "kubectl",
+                    "apply",
+                    "-f",
+                    tempFile,
+                    "--context", kubeConfigContext,
+                ]
+                const applyPdbResult = await context.subprocessManager.execute({
+                    command: applyPdbCommand,
                     workingDirectory: cwd(),
-                })
+                }).exited
                 const bunFile = Bun.file(tempFile)
                 await bunFile.delete()
+
+                if (applyPdbResult.exitCode !== 0) {
+                    throw new CLISubprocessError(
+                        "Failed to apply Authentik PodDisruptionBudgets",
+                        {
+                            command: applyPdbCommand.join(' '),
+                            subprocessLogs: applyPdbResult.output,
+                            workingDirectory: cwd(),
+                        }
+                    )
+                }
 
                 return parentTask.newListr([
                     await buildDeployModuleTask<IContext>({
@@ -615,30 +637,65 @@ spec:
             title: "Restarting Authentik",
             task: async () => {
                 // Added the --ignore-not-found flag for resumability instead of doing more complex skip logic here
-                await execute({
-                    command: ["kubectl", "delete", "pdb", "authentik-server-pdb", "all-cnpg-clusters-pdb", "-n", "authentik", "--context", kubeConfigContext, "--ignore-not-found"],
-                    context,
+                const deletePdbCommand = ["kubectl", "delete", "pdb", "authentik-server-pdb", "all-cnpg-clusters-pdb", "-n", "authentik", "--context", kubeConfigContext, "--ignore-not-found"]
+                const deletePdbResult = await context.subprocessManager.execute({
+                    command: deletePdbCommand,
                     workingDirectory: cwd(),
-                })
-                await execute({
-                    command: ["kubectl", "annotate", "deployment", "authentik-server", "-n", "authentik", "reloader.stakater.com/auto-", "--context", kubeConfigContext],
-                    context,
+                }).exited
+
+                if (deletePdbResult.exitCode !== 0) {
+                    throw new CLISubprocessError(
+                        "Failed to delete Authentik PodDisruptionBudgets",
+                        {
+                            command: deletePdbCommand.join(' '),
+                            subprocessLogs: deletePdbResult.output,
+                            workingDirectory: cwd(),
+                        }
+                    )
+                }
+
+                const removeAnnotationCommand = ["kubectl", "annotate", "deployment", "authentik-server", "-n", "authentik", "reloader.stakater.com/auto-", "--context", kubeConfigContext]
+                const removeAnnotationResult = await context.subprocessManager.execute({
+                    command: removeAnnotationCommand,
                     workingDirectory: cwd(),
-                })
-                await execute({
-                    command: [
-                        "kubectl",
-                        "rollout",
-                        "restart", "deployment",
-                        "authentik-server",
-                        "-n",
-                        "authentik",
-                        "--context",
-                        kubeConfigContext,
-                    ],
-                    context,
+                }).exited
+
+                if (removeAnnotationResult.exitCode !== 0) {
+                    throw new CLISubprocessError(
+                        "Failed to remove reloader annotation from authentik-server deployment",
+                        {
+                            command: removeAnnotationCommand.join(' '),
+                            subprocessLogs: removeAnnotationResult.output,
+                            workingDirectory: cwd(),
+                        }
+                    )
+                }
+
+                const restartCommand = [
+                    "kubectl",
+                    "rollout",
+                    "restart", "deployment",
+                    "authentik-server",
+                    "-n",
+                    "authentik",
+                    "--context",
+                    kubeConfigContext,
+                ]
+                const restartResult = await context.subprocessManager.execute({
+                    command: restartCommand,
                     workingDirectory: cwd(),
-                })
+                }).exited
+
+                if (restartResult.exitCode !== 0) {
+                    throw new CLISubprocessError(
+                        "Failed to restart authentik-server deployment",
+                        {
+                            command: restartCommand.join(' '),
+                            subprocessLogs: restartResult.output,
+                            workingDirectory: cwd(),
+                        }
+                    )
+                }
             }
         },
         {
@@ -765,7 +822,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                     Look for the token with the identifier '${tokenIdentifier}'`,
                     message: "Copy the token and paste it here:",
                     validate: async (value) => {
-                        const response = await Bun.fetch(
+                        const response = await fetch(
                             `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3/core/groups/`,
                             {
                                 headers: {

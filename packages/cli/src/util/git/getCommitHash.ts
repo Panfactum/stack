@@ -5,8 +5,7 @@ import { mkdtemp, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { CLIError, PanfactumZodError } from '@/util/error/error';
-import { execute } from '@/util/subprocess/execute';
+import { CLIError, CLISubprocessError, PanfactumZodError } from '@/util/error/error';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
@@ -54,7 +53,7 @@ interface IGitHubApiVerifyResult {
  */
 async function verifyCommitViaGitHubApi(sha: string): Promise<IGitHubApiVerifyResult> {
   try {
-    const response = await globalThis.fetch(
+    const response = await fetch(
       `https://api.github.com/repos/${PANFACTUM_STACK_GITHUB_REPO}/git/commits/${sha}`,
       {
         method: 'GET',
@@ -137,15 +136,21 @@ export interface IGetCommitHashOptions {
  * Throws when output is not a valid SHA
  */
 async function getCurrentHead(context: PanfactumContext, workingDirectory: string): Promise<string> {
-  const { stdout } = await execute({
-    command: ['git', 'rev-parse', 'HEAD'],
-    context,
+  const command = ['git', 'rev-parse', 'HEAD'];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory,
-  }).catch((error: unknown) => {
-    throw new CLIError('Failed to get current HEAD commit', error);
-  });
-  
-  const trimmed = stdout.trim();
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError('Failed to get current HEAD commit', {
+      command: command.join(' '),
+      subprocessLogs: result.output,
+      workingDirectory,
+    });
+  }
+
+  const trimmed = result.stdout.trim();
   const outputResult = GIT_OUTPUT_SCHEMA.safeParse(trimmed);
   if (!outputResult.success) {
     throw new PanfactumZodError(
@@ -154,7 +159,7 @@ async function getCurrentHead(context: PanfactumContext, workingDirectory: strin
       outputResult.error
     );
   }
-  
+
   const shaResult = GIT_SHA_SCHEMA.safeParse(outputResult.data);
   if (!shaResult.success) {
     throw new PanfactumZodError(
@@ -163,7 +168,7 @@ async function getCurrentHead(context: PanfactumContext, workingDirectory: strin
       shaResult.error
     );
   }
-  
+
   return shaResult.data;
 }
 
@@ -171,28 +176,32 @@ async function getCurrentHead(context: PanfactumContext, workingDirectory: strin
  * Checks if the repository has any commits (i.e., HEAD exists)
  */
 async function hasCommits(context: PanfactumContext, workingDirectory: string): Promise<boolean> {
-  return execute({
+  const result = await context.subprocessManager.execute({
     command: ['git', 'rev-parse', '--verify', 'HEAD'],
-    context,
     workingDirectory,
-  })
-    .then(() => true)
-    .catch(() => false);
+  }).exited;
+  return result.exitCode === 0;
 }
 
 /**
  * Resolves a git reference to its commit SHA using git rev-parse
  */
 async function resolveRefToSha(ref: string, context: PanfactumContext, workingDirectory: string): Promise<string> {
-  const { stdout } = await execute({
-    command: ['git', 'rev-parse', ref],
-    context,
+  const command = ['git', 'rev-parse', ref];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory,
-  }).catch((error: unknown) => {
-    throw new CLIError(`Failed to resolve git reference '${ref}'`, error);
-  });
-  
-  const trimmed = stdout.trim();
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(`Failed to resolve git reference '${ref}'`, {
+      command: command.join(' '),
+      subprocessLogs: result.output,
+      workingDirectory,
+    });
+  }
+
+  const trimmed = result.stdout.trim();
   const outputResult = GIT_OUTPUT_SCHEMA.safeParse(trimmed);
   if (!outputResult.success) {
     throw new PanfactumZodError(
@@ -218,11 +227,19 @@ async function resolveRefToSha(ref: string, context: PanfactumContext, workingDi
  * Verifies that a commit SHA exists in the origin repository
  */
 async function verifyCommitInOrigin(sha: string, context: PanfactumContext, workingDirectory: string): Promise<void> {
-  await execute({
-    command: ['git', 'fetch', 'origin', sha],
-    context,
+  const command = ['git', 'fetch', 'origin', sha];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory,
-  });
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(`Commit ${sha} does not exist in the remote origin`, {
+      command: command.join(' '),
+      subprocessLogs: result.output,
+      workingDirectory,
+    });
+  }
 }
 
 /**
@@ -232,17 +249,33 @@ async function verifyCommitInCustomRepo(sha: string, repo: string, context: Panf
   const tempDir = await mkdtemp(join(tmpdir(), 'pf-git-'));
 
   try {
-    await execute({
-      command: ['git', 'init', '-q'],
-      context,
+    const initCommand = ['git', 'init', '-q'];
+    const initResult = await context.subprocessManager.execute({
+      command: initCommand,
       workingDirectory: tempDir,
-    });
-    
-    await execute({
-      command: ['git', 'fetch', repo, sha],
-      context,
+    }).exited;
+
+    if (initResult.exitCode !== 0) {
+      throw new CLISubprocessError('Failed to initialize temporary git repository', {
+        command: initCommand.join(' '),
+        subprocessLogs: initResult.output,
+        workingDirectory: tempDir,
+      });
+    }
+
+    const fetchCommand = ['git', 'fetch', repo, sha];
+    const fetchResult = await context.subprocessManager.execute({
+      command: fetchCommand,
       workingDirectory: tempDir,
-    });
+    }).exited;
+
+    if (fetchResult.exitCode !== 0) {
+      throw new CLISubprocessError(`Commit ${sha} does not exist in ${repo}`, {
+        command: fetchCommand.join(' '),
+        subprocessLogs: fetchResult.output,
+        workingDirectory: tempDir,
+      });
+    }
   } finally {
     await rmdir(tempDir, { recursive: true });
   }
@@ -252,15 +285,21 @@ async function verifyCommitInCustomRepo(sha: string, repo: string, context: Panf
  * Resolves a git reference using git ls-remote for custom repositories
  */
 async function resolveRefWithLsRemote(ref: string, repo: string, context: PanfactumContext, workingDirectory: string): Promise<string> {
-  const { stdout } = await execute({
-    command: ['git', 'ls-remote', '--exit-code', repo, ref],
-    context,
+  const command = ['git', 'ls-remote', '--exit-code', repo, ref];
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory,
-  }).catch((error: unknown) => {
-    throw new CLIError(`Failed to resolve git reference '${ref}' in '${repo}'`, error);
-  });
-  
-  const trimmed = stdout.trim();
+  }).exited;
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(`Failed to resolve git reference '${ref}' in '${repo}'`, {
+      command: command.join(' '),
+      subprocessLogs: result.output,
+      workingDirectory,
+    });
+  }
+
+  const trimmed = result.stdout.trim();
   const outputResult = GIT_LS_REMOTE_SCHEMA.safeParse(trimmed);
   if (!outputResult.success) {
     throw new PanfactumZodError(
@@ -381,10 +420,7 @@ export async function getCommitHash(options: IGetCommitHashOptions): Promise<str
   if (/^[0-9a-f]{40}$/i.test(ref)) {
     if (!noVerify) {
       if (repo === 'origin') {
-        await verifyCommitInOrigin(ref, context, workingDirectory)
-          .catch((error: unknown) => {
-            throw new CLIError(`Commit ${ref} does not exist in the remote origin`, error);
-          });
+        await verifyCommitInOrigin(ref, context, workingDirectory);
       } else if (isPanfactumStackRepo(repo)) {
         const apiResult = await verifyCommitViaGitHubApi(ref);
         if (apiResult.conclusive) {
@@ -393,16 +429,10 @@ export async function getCommitHash(options: IGetCommitHashOptions): Promise<str
           }
         } else {
           // API was inconclusive (network/rate-limit error); fall back to git fetch
-          await verifyCommitInCustomRepo(ref, repo, context)
-            .catch((error: unknown) => {
-              throw new CLIError(`Commit ${ref} does not exist in ${repo}`, error);
-            });
+          await verifyCommitInCustomRepo(ref, repo, context);
         }
       } else {
-        await verifyCommitInCustomRepo(ref, repo, context)
-          .catch((error: unknown) => {
-            throw new CLIError(`Commit ${ref} does not exist in ${repo}`, error);
-          });
+        await verifyCommitInCustomRepo(ref, repo, context);
       }
     }
     return ref;

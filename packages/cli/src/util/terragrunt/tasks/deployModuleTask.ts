@@ -69,6 +69,26 @@ interface IBuildDeployModuleTaskInput<T extends {}> {
     skipIfAlreadyApplied?: boolean;
     /** Warning message about deployment time */
     etaWarningMessage?: string;
+    /**
+     * Optional watcher that runs in parallel with the terragrunt apply step.
+     *
+     * @remarks
+     * Receives an {@link AbortSignal} that fires when apply
+     * completes successfully — the watcher MUST exit cleanly when its
+     * signal is aborted. If the watcher rejects before apply completes,
+     * the apply is aborted and the watcher's error is thrown in place of
+     * the (typically much less helpful) terragrunt error.
+     *
+     * Use this to detect Kubernetes-level failures (e.g. cloud provider
+     * errors surfaced as Service events) early, instead of waiting for
+     * a downstream helm/kubectl wait timeout.
+     */
+    parallelWatcher?: (input: {
+        /** Listr task context shared across sibling tasks */
+        ctx: T;
+        /** Signal that fires when the apply completes successfully */
+        abortSignal: AbortSignal;
+    }) => Promise<void>;
 }
 
 export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployModuleTaskInput<T>): Promise<ListrTask<T>> {
@@ -86,7 +106,8 @@ export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployMod
         postDeployInputUpdates,
         skipIfAlreadyApplied,
         etaWarningMessage,
-        env
+        env,
+        parallelWatcher
     } = input;
 
     const moduleDir = join(
@@ -302,7 +323,7 @@ export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployMod
             //////////////////////////////////////////////////////////////
             subtasks.add({
                 title: "Apply module",
-                task: async (_, task) => {
+                task: async (ctx, task) => {
                     // todo: accept eta minutes vs free form string
                     // todo: this should be persistent, ensure it does not disappear until completion
                     task.title = `Applying - Planning changes${etaWarningMessage ? ` (${etaWarningMessage})` : ""}`;
@@ -311,8 +332,13 @@ export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployMod
                     let changeCounter = 0;
                     let deleteCounter = 0;
                     let createCounter = 0;
-                    await terragruntApply({
+
+                    const applyAbort = new AbortController();
+                    const watcherAbort = new AbortController();
+
+                    const applyPromise = terragruntApply({
                         ...inputs,
+                        abortSignal: applyAbort.signal,
                         onLogLine: (line) => {
                             task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
 
@@ -349,6 +375,38 @@ export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployMod
                             }
                         },
                     });
+
+                    // If a parallelWatcher was provided, race it against the
+                    // apply. If the watcher rejects first (e.g. it detected a
+                    // fatal Kubernetes-level failure), abort the apply and
+                    // throw the watcher's diagnostic error instead of waiting
+                    // for the terragrunt/helm timeout. If apply finishes
+                    // first, cancel the watcher cleanly.
+                    if (parallelWatcher) {
+                        const watcherPromise = parallelWatcher({
+                            ctx,
+                            abortSignal: watcherAbort.signal,
+                        });
+
+                        try {
+                            await Promise.race([applyPromise, watcherPromise]);
+                            // Apply finished first (successfully). Cancel the watcher
+                            // and drain it so we don't leak promises.
+                            watcherAbort.abort();
+                            await watcherPromise.catch(() => { });
+                        } catch (err) {
+                            // Either apply or watcher rejected. Ensure both the
+                            // apply subprocess and the watcher are torn down
+                            // before propagating the error.
+                            applyAbort.abort();
+                            watcherAbort.abort();
+                            await Promise.allSettled([applyPromise, watcherPromise]);
+                            throw err;
+                        }
+                    } else {
+                        await applyPromise;
+                    }
+
                     task.title = `Applied module`;
                     parentTask.title =
                         context.logger.applyColors(`${taskTitle} ${module}`, {

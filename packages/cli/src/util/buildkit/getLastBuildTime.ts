@@ -2,9 +2,8 @@
 // It reads annotations to track when BuildKit was last used for builds
 
 import { z } from 'zod'
-import { CLIError } from '@/util/error/error.js'
+import { CLIError, CLISubprocessError } from '@/util/error/error.js'
 import { parseJson } from '@/util/json/parseJson'
-import { execute } from '@/util/subprocess/execute.js'
 import {
   type Architecture,
   BUILDKIT_NAMESPACE,
@@ -106,25 +105,31 @@ export async function getLastBuildTime(
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
 
-  const result = await execute({
-    command: [
-      'kubectl',
-      ...contextArgs,
-      'get',
-      'statefulset',
-      statefulsetName,
-      '--namespace',
-      BUILDKIT_NAMESPACE,
-      '-o=json'
-    ],
-    context,
+  const command = [
+    'kubectl',
+    ...contextArgs,
+    'get',
+    'statefulset',
+    statefulsetName,
+    '--namespace',
+    BUILDKIT_NAMESPACE,
+    '-o=json'
+  ]
+  const result = await context.subprocessManager.execute({
+    command,
     workingDirectory: context.devshellConfig.repo_root
-  }).catch((error: unknown) => {
-    throw new CLIError(
+  }).exited
+
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError(
       `Failed to get statefulset ${statefulsetName} for BuildKit ${arch}`,
-      error
+      {
+        command: command.join(' '),
+        subprocessLogs: result.output,
+        workingDirectory: context.devshellConfig.repo_root,
+      }
     )
-  })
+  }
 
   const statefulSet = parseJson(statefulSetSchema, result.stdout)
 

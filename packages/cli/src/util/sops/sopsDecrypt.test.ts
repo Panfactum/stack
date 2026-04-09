@@ -6,26 +6,73 @@ import { join } from "node:path";
 import { test, expect, describe, mock, beforeEach, afterEach, spyOn } from "bun:test";
 import { z } from "zod";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
-import * as executeModule from "@/util/subprocess/execute";
+import { SubprocessManager } from "@/util/subprocess/SubprocessManager";
 import { createTestDir } from "@/util/test/createTestDir";
 import { sopsDecrypt } from "./sopsDecrypt";
 import type { PanfactumContext } from "@/util/context/context";
+import type { IExecuteHandle, IExecuteOutput } from "@/util/subprocess/SubprocessManager";
 
-const mockContext = {
-  logger: {
-    debug: mock(() => {}),
-    error: mock(() => {}),
-    info: mock(() => {}),
-    warn: mock(() => {})
-  }
-} as unknown as PanfactumContext;
+/**
+ * Creates a minimal {@link IExecuteHandle} whose `exited` promise resolves
+ * with an {@link IExecuteOutput} built from the provided overrides.
+ *
+ * @internal
+ */
+const createMockHandle = (
+  overrides: Partial<IExecuteOutput> = {},
+): IExecuteHandle => {
+  const result: IExecuteOutput = {
+    stdout: "",
+    stderr: "",
+    output: "",
+    exitCode: 0,
+    pid: 0,
+    signalCode: null,
+    aborted: false,
+    ...overrides,
+  };
+  return {
+    pid: result.pid,
+    exited: Promise.resolve(result),
+    abortController: undefined,
+  };
+};
+
+/**
+ * Creates a minimal {@link IExecuteHandle} whose `exited` promise rejects
+ * with the provided error — used to simulate spawn failures.
+ *
+ * @internal
+ */
+const createRejectedHandle = (error: Error): IExecuteHandle => {
+  const exited = Promise.reject(error);
+  exited.catch(() => {});
+  return {
+    pid: 0,
+    exited,
+    abortController: undefined,
+  };
+};
+
+const mockContext = (() => {
+  const ctx = {
+    logger: {
+      debug: mock(() => {}),
+      error: mock(() => {}),
+      info: mock(() => {}),
+      warn: mock(() => {})
+    }
+  } as unknown as PanfactumContext;
+  ctx.subprocessManager = new SubprocessManager(ctx);
+  return ctx;
+})();
 
 describe("sopsDecrypt", () => {
-  let mockExecute: ReturnType<typeof spyOn<typeof executeModule, "execute">>;
+  let mockExecute: ReturnType<typeof spyOn<SubprocessManager, "execute">>;
 
   beforeEach(() => {
-    // Create spies for module functions
-    mockExecute = spyOn(executeModule, "execute");
+    // Spy on the execute method on the SubprocessManager prototype
+    mockExecute = spyOn(SubprocessManager.prototype, "execute");
   });
 
   afterEach(() => {
@@ -47,16 +94,17 @@ describe("sopsDecrypt", () => {
       await fsWriteFile(filePath, "encrypted content");
 
       // Mock successful SOPS decryption
-      mockExecute.mockResolvedValueOnce({
-        stdout: JSON.stringify({
-          username: "testuser", 
-          password: "testpass",
-          host: "localhost"
-        }),
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
+      const successStdout = JSON.stringify({
+        username: "testuser",
+        password: "testpass",
+        host: "localhost"
       });
+      mockExecute.mockReturnValueOnce(createMockHandle({
+        stdout: successStdout,
+        output: successStdout,
+        exitCode: 0,
+        pid: 12345,
+      }));
 
       const result = await sopsDecrypt({
         filePath,
@@ -75,7 +123,6 @@ describe("sopsDecrypt", () => {
 
       expect(mockExecute).toHaveBeenCalledWith({
         command: ["sops", "-d", "--output-type", "json", filePath],
-        context: mockContext,
         workingDirectory: testDir
       });
     } finally {
@@ -150,8 +197,8 @@ describe("sopsDecrypt", () => {
       // Create a file that exists
       await fsWriteFile(filePath, "encrypted content");
 
-      // Mock SOPS failure
-      mockExecute.mockRejectedValueOnce(new Error("SOPS decryption failed"));
+      // Mock SOPS failure (spawn failure)
+      mockExecute.mockReturnValueOnce(createRejectedHandle(new Error("SOPS decryption failed")));
 
       await expect(sopsDecrypt({
         filePath,
@@ -161,7 +208,37 @@ describe("sopsDecrypt", () => {
       })).rejects.toThrow(CLIError);
 
       // Mock SOPS failure again for second test
-      mockExecute.mockRejectedValueOnce(new Error("SOPS decryption failed"));
+      mockExecute.mockReturnValueOnce(createRejectedHandle(new Error("SOPS decryption failed")));
+
+      await expect(sopsDecrypt({
+        filePath,
+        context: mockContext,
+        validationSchema: testSchema,
+        throwOnMissing: true
+      })).rejects.toThrow(`Failed to decrypt sops file at ${filePath}`);
+    } finally {
+      await rm(testDir, { recursive: true, force: true });
+    }
+  });
+
+  test("throws CLIError when SOPS exits with non-zero exit code", async () => {
+    const { path: testDir } = await createTestDir({ functionName: "sopsDecrypt" });
+    const filePath = join(testDir, "test.sops.json");
+
+    const testSchema = z.object({
+      username: z.string(),
+    });
+
+    try {
+      await fsWriteFile(filePath, "encrypted content");
+
+      mockExecute.mockReturnValueOnce(createMockHandle({
+        stdout: "",
+        stderr: "sops: unable to decrypt",
+        output: "sops: unable to decrypt",
+        exitCode: 1,
+        pid: 12345,
+      }));
 
       await expect(sopsDecrypt({
         filePath,
@@ -188,12 +265,12 @@ describe("sopsDecrypt", () => {
       await fsWriteFile(filePath, "encrypted content");
 
       // Mock invalid JSON output
-      mockExecute.mockResolvedValueOnce({
+      mockExecute.mockReturnValueOnce(createMockHandle({
         stdout: "invalid json {{{",
-        stderr: "",
+        output: "invalid json {{{",
         exitCode: 0,
-        pid: 12345
-      });
+        pid: 12345,
+      }));
 
       await expect(sopsDecrypt({
         filePath,
@@ -203,12 +280,12 @@ describe("sopsDecrypt", () => {
       })).rejects.toThrow(CLIError);
 
       // Mock invalid JSON output again for second test
-      mockExecute.mockResolvedValueOnce({
+      mockExecute.mockReturnValueOnce(createMockHandle({
         stdout: "invalid json {{{",
-        stderr: "",
+        output: "invalid json {{{",
         exitCode: 0,
-        pid: 12345
-      });
+        pid: 12345,
+      }));
 
       await expect(sopsDecrypt({
         filePath,
@@ -235,15 +312,16 @@ describe("sopsDecrypt", () => {
       await fsWriteFile(filePath, "encrypted content");
 
       // Mock data that doesn't match schema
-      mockExecute.mockResolvedValueOnce({
-        stdout: JSON.stringify({
-          wrongField: "value",
-          anotherWrongField: 123
-        }),
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
+      const mismatchedStdout = JSON.stringify({
+        wrongField: "value",
+        anotherWrongField: 123
       });
+      mockExecute.mockReturnValueOnce(createMockHandle({
+        stdout: mismatchedStdout,
+        output: mismatchedStdout,
+        exitCode: 0,
+        pid: 12345,
+      }));
 
       await expect(sopsDecrypt({
         filePath,
@@ -265,16 +343,17 @@ describe("sopsDecrypt", () => {
     try {
       await fsWriteFile(filePath, "encrypted content");
 
-      mockExecute.mockResolvedValueOnce({
-        stdout: JSON.stringify({
-          anyKey: "anyValue",
-          anotherKey: 42,
-          nestedKey: { nested: "value" }
-        }),
-        stderr: "",
-        exitCode: 0,
-        pid: 12345
+      const recordStdout = JSON.stringify({
+        anyKey: "anyValue",
+        anotherKey: 42,
+        nestedKey: { nested: "value" }
       });
+      mockExecute.mockReturnValueOnce(createMockHandle({
+        stdout: recordStdout,
+        output: recordStdout,
+        exitCode: 0,
+        pid: 12345,
+      }));
 
       const result = await sopsDecrypt({
         filePath,
@@ -308,15 +387,16 @@ describe("sopsDecrypt", () => {
       // Create the subdirectory first
       const { mkdir } = await import("node:fs/promises");
       await mkdir(subDir, { recursive: true });
-      
+
       await fsWriteFile(filePath, "encrypted content");
 
-      mockExecute.mockResolvedValueOnce({
-        stdout: JSON.stringify({ key: "value" }),
-        stderr: "",
+      const stdoutVal = JSON.stringify({ key: "value" });
+      mockExecute.mockReturnValueOnce(createMockHandle({
+        stdout: stdoutVal,
+        output: stdoutVal,
         exitCode: 0,
-        pid: 12345
-      });
+        pid: 12345,
+      }));
 
       await sopsDecrypt({
         filePath,
@@ -327,7 +407,6 @@ describe("sopsDecrypt", () => {
 
       expect(mockExecute).toHaveBeenCalledWith({
         command: ["sops", "-d", "--output-type", "json", filePath],
-        context: mockContext,
         workingDirectory: subDir
       });
     } finally {

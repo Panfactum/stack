@@ -217,7 +217,7 @@ async function getSSOConfig(ssoRegion: string, context: PanfactumContext, task: 
             }
 
             try {
-                const response = await globalThis.fetch(value)
+                const response = await fetch(value)
                 if (response.status !== 302 && response.status !== 200) {
                     return pc.red(`The access portal URL doesn't appear active. If you just set it, wait a few minutes for DNS updates to propagate. Otherwise, check for typos.`)
                 }

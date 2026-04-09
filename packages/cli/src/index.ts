@@ -134,19 +134,32 @@ let panfactumContextInstance: PanfactumBaseContext | null = null;
 
 /**
  * Performs cleanup operations before CLI termination
- * 
+ *
  * @remarks
- * Ensures all background processes are terminated and analytics
- * are flushed before the process exits. This prevents zombie
- * processes and ensures data is not lost.
- * 
+ * Ensures all registered shutdown hooks finish, all background processes
+ * are terminated, and analytics are flushed before the process exits.
+ * This prevents zombie processes and ensures external state (e.g., a
+ * leaked terraform state lock) is released even when the user
+ * interrupts the CLI.
+ *
+ * Shutdown hooks are awaited via {@link Promise.allSettled} so a single
+ * misbehaving hook cannot block the rest of cleanup. Hooks run BEFORE
+ * subprocesses are signaled, because some hooks (e.g., terragrunt
+ * state lock release) need to spawn additional subprocesses to do their
+ * work.
+ *
  * @internal
  */
 const cleanup = async () => {
   if (!cleanupStarted) {
     cleanupStarted = true;
     if (panfactumContextInstance) {
-      await panfactumContextInstance.backgroundProcessManager.killAllProcesses();
+      const hooks = [...panfactumContextInstance.shutdownHooks];
+      panfactumContextInstance.shutdownHooks.clear();
+      if (hooks.length > 0) {
+        await Promise.allSettled(hooks.map((hook) => hook()));
+      }
+      await panfactumContextInstance.subprocessManager.dispatchSignal("SIGTERM");
     }
     await phClient.shutdown();
   }
@@ -171,13 +184,11 @@ process.on('SIGTERM', async () => {
 });
 
 process.on('exit', () => {
-  // Synchronous cleanup if needed
-  if (!cleanupStarted && panfactumContextInstance) {
-    cleanupStarted = true;
-    // Note: exit handler must be synchronous, but killAllProcesses is async
-    // The async cleanup in signal handlers should handle most cases
-    panfactumContextInstance.backgroundProcessManager.killAllProcesses();
-  }
+  // No synchronous fallback is possible — by this point the async signal
+  // dispatch path has either completed (via the SIGINT/SIGTERM handlers
+  // above) or the parent is exiting too fast for any cleanup to matter.
+  // Subprocesses in the parent's process group will receive the OS-level
+  // SIGHUP from the controlling terminal in interactive contexts.
 });
 
 /**
@@ -234,9 +245,9 @@ try {
   await cli.runExit(proc, panfactumContext);
 } catch (error: unknown) {
   if (error instanceof Error) {
-    globalThis.console.error(error.message)
+    console.error(error.message)
   } else {
-    globalThis.console.error(error);
+    console.error(error);
   }
   process.exitCode = 1;
 } finally {

@@ -5,17 +5,17 @@ import vaultCoreResourcesTemplate from "@/templates/vault_core_resources_terragr
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { upsertConfigValues } from "@/util/config/upsertConfigValues";
-import { CLIError } from "@/util/error/error";
+import { CLIError, CLISubprocessError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
 import { parseJson } from "@/util/json/parseJson";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
-import { execute } from "@/util/subprocess/execute";
 import { MODULES } from "@/util/terragrunt/constants";
 import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { sleep } from "@/util/util/sleep";
 import { startVaultProxy } from "@/util/vault/startVaultProxy";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
@@ -103,7 +103,7 @@ export async function setupVault(
   interface IVaultContext {
     kubeContext?: string;
     rootToken?: string;
-    vaultProxyPid?: number;
+    vaultProxyController?: AbortController;
     vaultProxyPort?: number;
     recoveryKeys?: string[];
   }
@@ -156,36 +156,47 @@ export async function setupVault(
         }
 
         // TODO: @seth Use the kubernetes SDK, not exec
-        await execute({
-          command: ["kubectl", "get", "pods", "-n", "vault", "-o", "json", "--context", kubeConfigContext],
-          context,
-          workingDirectory: clusterPath,
-          errorMessage: "Vault pods failed to start",
-          retries: 60,
-          isSuccess: (result) => {
-            const podsSchema = z.object({
-              items: z.array(
-                z.object({
-                  metadata: z.object({
-                    name: z.string(),
-                    namespace: z.string(),
-                  }),
-                  status: z.object({
-                    phase: z.string(),
-                  }),
-                })
-              ),
-            });
-            try {
-              const pods = parseJson(podsSchema, result.stdout);
-              return pods.items.every(
-                (pod) => pod.status.phase === "Running"
-              );
-            } catch {
-              return false;
-            }
-          },
+        const podsSchema = z.object({
+          items: z.array(
+            z.object({
+              metadata: z.object({
+                name: z.string(),
+                namespace: z.string(),
+              }),
+              status: z.object({
+                phase: z.string(),
+              }),
+            })
+          ),
         });
+        const maxAttempts = 61;
+        const retryDelayMs = 5000;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const getPodsCommand = ["kubectl", "get", "pods", "-n", "vault", "-o", "json", "--context", kubeConfigContext];
+          const result = await context.subprocessManager.execute({
+            command: getPodsCommand,
+            workingDirectory: clusterPath,
+          }).exited;
+          if (result.exitCode !== 0) {
+            throw new CLISubprocessError("Vault pods failed to start", {
+              command: getPodsCommand.join(" "),
+              subprocessLogs: result.output,
+              workingDirectory: clusterPath,
+            });
+          }
+          try {
+            const pods = parseJson(podsSchema, result.stdout);
+            if (pods.items.every((pod) => pod.status.phase === "Running")) {
+              return;
+            }
+          } catch {
+            // Fall through to retry
+          }
+          if (attempt < maxAttempts - 1) {
+            await sleep(retryDelayMs);
+          }
+        }
+        throw new CLIError("Vault pods failed to start");
       },
     },
     {
@@ -213,12 +224,13 @@ export async function setupVault(
           "-format=json",
         ];
 
-        const { stdout } = await execute({
-          command: vaultOperatorInitCommand,
-          context,
-          workingDirectory: clusterPath,
-          errorMessage: "Failed to initialize vault",
-        }).catch(async (error) => {
+        let initResult
+        try {
+          initResult = await context.subprocessManager.execute({
+            command: vaultOperatorInitCommand,
+            workingDirectory: clusterPath,
+          }).exited;
+        } catch (error) {
           await writeYAMLFile({
             context,
             values: {
@@ -228,7 +240,24 @@ export async function setupVault(
             filePath: join(modulePath, ".pf.yaml"),
           });
           throw error;
-        });
+        }
+
+        if (initResult.exitCode !== 0) {
+          await writeYAMLFile({
+            context,
+            values: {
+              status: "error",
+            },
+            overwrite: true,
+            filePath: join(modulePath, ".pf.yaml"),
+          });
+          throw new CLISubprocessError("Failed to initialize vault", {
+            command: vaultOperatorInitCommand.join(" "),
+            subprocessLogs: initResult.output,
+            workingDirectory: clusterPath,
+          });
+        }
+        const { stdout } = initResult;
 
         const recoveryKeys = parseJson(RECOVER_KEYS_SCHEMA, stdout.trim());
 
@@ -263,30 +292,41 @@ export async function setupVault(
           throw new CLIError("Kube context not found");
         }
 
-        const { stdout } = await execute({
-          command: [
-            "kubectl",
-            "exec",
-            "-i",
-            "vault-0",
-            "--namespace=vault",
-            "--context",
-            ctx.kubeContext,
-            "--",
-            "vault",
-            "status",
-            "-format=json",
-          ],
-          context,
+        const vaultStatusCommand = [
+          "kubectl",
+          "exec",
+          "-i",
+          "vault-0",
+          "--namespace=vault",
+          "--context",
+          ctx.kubeContext,
+          "--",
+          "vault",
+          "status",
+          "-format=json",
+        ];
+        // `vault status` returns exit code 2 when sealed, which is a
+        // legitimate state we need to detect here. We therefore do not check
+        // the exit code and instead rely on the JSON output being parseable.
+        const statusResult = await context.subprocessManager.execute({
+          command: vaultStatusCommand,
           workingDirectory: clusterPath,
-          errorMessage: "Failed to check Vault status",
-        });
+        }).exited;
 
         const statusSchema = z.object({
           sealed: z.boolean(),
         });
 
-        const statusData = parseJson(statusSchema, stdout.trim());
+        let statusData: z.infer<typeof statusSchema>;
+        try {
+          statusData = parseJson(statusSchema, statusResult.stdout.trim());
+        } catch {
+          throw new CLISubprocessError("Failed to check Vault status", {
+            command: vaultStatusCommand.join(" "),
+            subprocessLogs: statusResult.output,
+            workingDirectory: clusterPath,
+          });
+        }
 
         return !statusData.sealed
       },
@@ -313,14 +353,19 @@ export async function setupVault(
             "-format=json",
             key,
           ];
-          const { stdout } = await execute({
+          const unsealResult = await context.subprocessManager.execute({
             command: vaultUnsealCommand,
-            context,
             workingDirectory: clusterPath,
-            errorMessage: "Failed to unseal Vault",
-          });
+          }).exited;
+          if (unsealResult.exitCode !== 0) {
+            throw new CLISubprocessError("Failed to unseal Vault", {
+              command: vaultUnsealCommand.join(" "),
+              subprocessLogs: unsealResult.output,
+              workingDirectory: clusterPath,
+            });
+          }
 
-          const unsealOutput = parseJson(UNSEAL_OUTPUT_SCHEMA, stdout.trim());
+          const unsealOutput = parseJson(UNSEAL_OUTPUT_SCHEMA, unsealResult.stdout.trim());
           sealedStatus = unsealOutput.sealed;
           if (!sealedStatus) {
             break;
@@ -356,13 +401,13 @@ export async function setupVault(
         const env = {
           ...process.env,
         };
-        const { pid, port } = await startVaultProxy({
+        const { controller, port } = await startVaultProxy({
           context,
           env,
           modulePath,
           kubeContext: ctx.kubeContext,
         });
-        ctx.vaultProxyPid = pid;
+        ctx.vaultProxyController = controller;
         ctx.vaultProxyPort = port;
       },
     },
@@ -393,9 +438,7 @@ export async function setupVault(
     {
       title: "Stop Vault Proxy",
       task: async (ctx) => {
-        if (ctx.vaultProxyPid) {
-          await context.backgroundProcessManager.killProcess({ pid: ctx.vaultProxyPid });
-        }
+        ctx.vaultProxyController?.abort();
       },
     },
   ])

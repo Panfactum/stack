@@ -5,8 +5,7 @@ import { join } from "node:path"
 import { z } from "zod";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
-import { CLIError, PanfactumZodError } from "@/util/error/error";
-import { execute } from "@/util/subprocess/execute";
+import { CLIError, CLISubprocessError, PanfactumZodError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
 /**
@@ -109,18 +108,25 @@ export const terragruntOutput = async <T extends z.ZodType<object>>(
     await getIdentity({ context, profile: profileToUse })
   }
 
-  const { stdout } = await execute({
-    command: [
-      "terragrunt",
-      "--non-interactive",
-      "output",
-      "--json"
-    ],
+  const command = [
+    "terragrunt",
+    "--non-interactive",
+    "output",
+    "--json",
+  ];
+  const result = await context.subprocessManager.execute({
+    command,
     env,
     workingDirectory,
-    context,
-    errorMessage: "Failed to get outputs from infrastructure module",
-  });
+  }).exited;
+  if (result.exitCode !== 0) {
+    throw new CLISubprocessError("Failed to get outputs from infrastructure module", {
+      command: command.join(" "),
+      subprocessLogs: result.output,
+      workingDirectory,
+    });
+  }
+  const { stdout } = result;
 
   // Parse JSON output
   let parsedOutput: unknown;

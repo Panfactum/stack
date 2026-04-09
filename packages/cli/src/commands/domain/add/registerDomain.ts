@@ -529,7 +529,7 @@ export async function registerDomain(input: IRegisterDomainInput): Promise<Domai
                     lastStatus = status
                 }
 
-                await new Promise((r) => globalThis.setTimeout(r, 15000));
+                await new Promise((r) => setTimeout(r, 15000));
             }
 
             throw new CLIError(

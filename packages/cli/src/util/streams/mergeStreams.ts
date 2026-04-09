@@ -1,8 +1,6 @@
 // This file provides utilities for merging multiple ReadableStreams into a single stream
 // It handles concurrent stream processing with proper error handling and interleaving
 
-import type { ReadableStream, ReadableStreamDefaultReader } from "node:stream/web";
-
 /**
  * Interface for input parameters to the mergeStreams function
  */
@@ -56,13 +54,13 @@ interface IMergeStreamsInput {
  * Throws when any of the source streams encounter an error
  * 
  * @see {@link concatStreams} - For sequential stream processing
- * @see {@link globalThis.ReadableStream} - For more information about ReadableStreams
+ * @see {@link ReadableStream} - For more information about ReadableStreams
  */
 export const mergeStreams = (input: IMergeStreamsInput): ReadableStream => {
   // Store readers at the closure level for cancel access
-  let storedReaders: ReadableStreamDefaultReader[] = [];
+  let storedReaders: ReturnType<ReadableStream["getReader"]>[] = [];
   
-  return new globalThis.ReadableStream({
+  return new ReadableStream({
     async start(controller) {
       const { streams } = input;
       
@@ -109,7 +107,7 @@ export const mergeStreams = (input: IMergeStreamsInput): ReadableStream => {
               // Schedule next read from this stream
               if (activeStreams.has(readerIndex)) {
                 // Use setTimeout to avoid stack overflow and allow error propagation
-                globalThis.setTimeout(() => {
+                setTimeout(() => {
                   readFromStream(readerIndex).catch(() => {
                     // Error is handled inside readFromStream
                   });
