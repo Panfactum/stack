@@ -13,7 +13,8 @@ paths:
 - Before writing Inquirer prompts, always look up the appropriate syntax using exa
 
 ## Subprocess Execution
-- NEVER use `spawn`, `exec`, or `execSync` — ALWAYS use the `execute` utility from `src/util/subprocess/execute.ts`
+- NEVER use `spawn`, `exec`, or `execSync` — ALWAYS launch subprocesses via `SubprocessManager.execute()` from `src/util/subprocess/SubprocessManager.ts`
+- Access the `SubprocessManager` instance through `PanfactumContext` — never instantiate it directly
 
 ## Linting
 - Lint individual files: `bun eslint --fix [file_path]`
