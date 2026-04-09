@@ -149,7 +149,7 @@
             withPFCLI ? true,
           }:
           pkgs.mkShell {
-            name = name;
+            inherit name;
             buildInputs = (panfactumPackages withPFCLI) ++ packages;
             shellHook = ''
               ${if activateDefaultShellHook then "source enter-shell-local" else ""}
@@ -193,8 +193,8 @@
         devShell = mkDevShell {
           withPFCLI = true;
           activateDefaultShellHook = true;
-          shellHook = localDevShell.shellHook;
-          packages = localDevShell.packages;
+          inherit (localDevShell) shellHook;
+          inherit (localDevShell) packages;
         };
       }
     );

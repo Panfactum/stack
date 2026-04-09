@@ -1,11 +1,11 @@
-{ pkgs, bun2nix, ... }:
+{ pkgs, ... }:
 let
   bunDeps = pkgs.callPackage ./bun.nix { };
-  packageJson = (builtins.fromJSON (builtins.readFile ./package.json));
+  packageJson = builtins.fromJSON (builtins.readFile ./package.json);
 in
 pkgs.stdenv.mkDerivation {
-  name = packageJson.name;
-  version = packageJson.version;
+  inherit (packageJson) name;
+  inherit (packageJson) version;
 
   src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
 

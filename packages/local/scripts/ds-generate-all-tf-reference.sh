@@ -13,7 +13,7 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
     MODULE=$(basename "$d")
 
     # Generate docs for this module
-    generate-tf-reference "$MODULE"
+    ds-generate-tf-reference "$MODULE"
   fi
 done
 

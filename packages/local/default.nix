@@ -3,10 +3,14 @@
   bunPkgs,
   bun2nix,
 }:
+let
+  prekConfig = import ./lint.nix { inherit pkgs; };
+in
 {
 
   shellHook = ''
     export REPO_ROOT=$(git rev-parse --show-toplevel)
+    install -m 644 ${prekConfig} "$REPO_ROOT/.pre-commit-config.yaml"
     export TERRAFORM_MODULES_DIR="$REPO_ROOT/packages/infrastructure";
     export PF_IAC_DIR="$REPO_ROOT/packages/infrastructure";
     export GOBIN="$REPO_ROOT/go/bin";
@@ -63,9 +67,9 @@
     # so commits from other worktrees would silently use the wrong config.
     # Without -c, prek resolves .pre-commit-config.yaml from the worktree
     # being committed to at hook execution time.
-    run_install prek prek install --quiet &
-    run_install pnpm pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
-    run_install bun bun install --silent --frozen-lockfile &
+    run_install prek ${pkgs.prek}/bin/prek install --quiet &
+    run_install pnpm ${pkgs.pnpm}/bin/pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
+    run_install bun ${bunPkgs.bun}/bin/bun install --silent --frozen-lockfile &
     wait
   '';
 
@@ -79,7 +83,7 @@
     # Programming Langauges
     ####################################
     nodejs_25 # nodejs runtime
-    nodePackages_latest.pnpm # nodejs package manager
+    pnpm # nodejs package manager
     go # go programming language
     upx # compressing go binaries
     bunPkgs.bun # bun runtime
@@ -103,7 +107,9 @@
     shellcheck
     shfmt
     nixfmt
-    nodePackages.cspell
+    statix
+    deadnix
+    cspell
     prek
   ];
 }
