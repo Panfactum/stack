@@ -1,12 +1,10 @@
-#!/usr/bin/env bash
+#!@bash@
 # PreToolUse hook: block direct `git show` and `git diff` commands.
 # Diffs should come from changelog scripts (show-diff.ts), not raw git commands.
-export NO_RTK=1
-
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+COMMAND=$(echo "$INPUT" | @jq@ -r '.tool_input.command // empty')
 
-if echo "$COMMAND" | grep -qE '\bgit\s+(show|diff)\b'; then
+if echo "$COMMAND" | @grep@ -qE '\bgit\s+(show|diff)\b'; then
   echo "BLOCKED: Do not run git show/diff directly. Use the show-diff.ts script instead." >&2
   exit 2
 fi

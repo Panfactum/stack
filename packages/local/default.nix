@@ -5,12 +5,15 @@
 }:
 let
   prekConfig = import ./lint.nix { inherit pkgs; };
+  scripts = import ./scripts { inherit pkgs; };
+  hooksConfig = import ./hooks { inherit pkgs scripts; };
 in
 {
 
   shellHook = ''
     export REPO_ROOT=$(git rev-parse --show-toplevel)
     install -m 644 ${prekConfig} "$REPO_ROOT/.pre-commit-config.yaml"
+    install -m 644 ${hooksConfig.settingsJson} "$REPO_ROOT/.claude/settings.json"
     export TERRAFORM_MODULES_DIR="$REPO_ROOT/packages/infrastructure";
     export PF_IAC_DIR="$REPO_ROOT/packages/infrastructure";
     export GOBIN="$REPO_ROOT/go/bin";
@@ -77,7 +80,8 @@ in
     ####################################
     # Custom Scripts
     ####################################
-    (import ./scripts { inherit pkgs; })
+    scripts
+    hooksConfig.package
 
     ####################################
     # Programming Langauges

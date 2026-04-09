@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!@bash@
 # PostToolUse hook: run linters on edited files.
 # Dispatches linters based on file extension and path, running applicable tools in parallel.
 
 INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+FILE_PATH=$(echo "$INPUT" | @jq@ -r '.tool_input.file_path // empty')
 
 if [[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]]; then
   exit 0
@@ -22,27 +22,27 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 case "$FILE_PATH" in
 *.md | *.mdx)
-  { cspell lint --no-progress --gitignore "$FILE_PATH" >"$TMPDIR/cspell" 2>&1 || echo "cspell" >>"$TMPDIR/failed"; } &
+  { @cspell@ lint --no-progress --gitignore "$FILE_PATH" >"$TMPDIR/cspell" 2>&1 || echo "cspell" >>"$TMPDIR/failed"; } &
   ;;
 *.sh | *.bash)
   if [[ "$REL_PATH" =~ ^packages/(nix|installer|infrastructure)/ ]]; then
-    { shellcheck "$FILE_PATH" >"$TMPDIR/shellcheck" 2>&1 || echo "shellcheck" >>"$TMPDIR/failed"; } &
+    { @shellcheck@ "$FILE_PATH" >"$TMPDIR/shellcheck" 2>&1 || echo "shellcheck" >>"$TMPDIR/failed"; } &
   fi
   ;;
 *.yaml)
   if [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/.*log\.yaml$ ]]; then
-    { ds-validate-changelog "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+    { @validateChangelog@ "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   elif [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/.*review\.yaml$ ]]; then
-    { ds-validate-changelog-review "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+    { @validateChangelogReview@ "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   elif [[ "$REL_PATH" == "packages/infrastructure/metadata.yaml" ]]; then
-    { ds-validate-iac-metadata "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+    { @validateIacMetadata@ "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   fi
   ;;
 esac
 
 # Path-based checks (not extension-based)
 if [[ "$(basename "$REL_PATH")" == "package.json" ]]; then
-  { REPO_ROOT="$CLAUDE_PROJECT_DIR" bun run "$CLAUDE_PROJECT_DIR/packages/nix/localDevShell/scripts/precommit-check-package-json.ts" >"$TMPDIR/package-json" 2>&1 || echo "package-json" >>"$TMPDIR/failed"; } &
+  { @checkPackageJson@ >"$TMPDIR/package-json" 2>&1 || echo "package-json" >>"$TMPDIR/failed"; } &
 fi
 
 wait
