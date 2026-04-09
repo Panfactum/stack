@@ -2,9 +2,10 @@
 
 - `bastion/` - Containerized SSH bastion host for secure access to private infrastructure.
 - `cli/` - TypeScript-based command-line interface for Panfactum infrastructure setup and management, built with Bun.
+- `devshell/` - Custom Nix package definitions and scripts providing the Panfactum framework tooling available in the developer shell.
 - `infrastructure/` - OpenTofu/Terraform modules for provisioning and managing AWS and Kubernetes infrastructure.
 - `installer/` - Installation scripts for bootstrapping the Panfactum Framework on a new system.
-- `nix/` - Nix-based development shell and tooling packages for reproducible local development environments.
+- `local/` - Nix derivation and scripts that define the local development shell environment, including shell hooks and developer tooling.
 - `reference-go/` - Reference Go service (demo tracker) demonstrating a containerized Go application deployed via the Panfactum framework.
 - `reference-java/` - Reference Java service (demo task service) demonstrating a containerized Java/Spring application deployed via the Panfactum framework.
 - `reference-python/` - Reference Python service (demo Python service) demonstrating a containerized Python application deployed via the Panfactum framework.

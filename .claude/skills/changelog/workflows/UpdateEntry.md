@@ -63,7 +63,7 @@ For each changed file path, apply the heuristics below to produce suggested `imp
 | `packages/bastion/` | `iac-module` | `kube_bastion` |
 | `packages/vault/` | `iac-module` | `kube_vault` |
 | `packages/installer/` | `installer` | `installer` (single component) |
-| `packages/nix/packages/` | `devshell` | Derived from the diff content, not the file path |
+| `packages/devshell/` | `devshell` | Derived from the diff content, not the file path |
 
 | `flake.nix` | `devshell` | Likely `devshell`, but may not be user-facing — inspect the diff to determine if the change affects user-consumed packages or is purely internal |
 | `flake.lock` | `devshell` | Likely `devshell`, but may not be user-facing — inspect the diff to determine if the change affects user-consumed packages or is purely internal |

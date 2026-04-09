@@ -119,7 +119,7 @@
         bun2nix = inputs.bun2nix.defaultPackage.${system};
         panfactumPackages =
           withPFCLI:
-          import ./packages/nix/packages {
+          import ./packages/devshell {
             inherit
               pkgs
               kubeUtilsPkgs
@@ -138,7 +138,7 @@
               ;
           };
 
-        localDevShell = import ./packages/nix/localDevShell { inherit pkgs bunPkgs bun2nix; };
+        localDevShell = import ./packages/local { inherit pkgs bunPkgs bun2nix; };
 
         mkDevShell =
           {

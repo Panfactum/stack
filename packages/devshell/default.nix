@@ -180,7 +180,7 @@ with pkgs;
 ++ (
   if withPFCLI then
     [
-      (pkgs.callPackage ../../cli/default.nix {
+      (pkgs.callPackage ../cli/default.nix {
         inherit bun2nix;
         pkgs = bunPkgs;
       })

@@ -97,7 +97,7 @@ bun ./scripts/list-changed-files.ts
 ```
 === Changed Files (3) ===
 packages/infrastructure/aws_eks/main.tf
-packages/nix/packages/default.nix
+packages/devshell/default.nix
 packages/website/src/content/changelog/main/log.yaml
 ```
 
@@ -127,9 +127,9 @@ bun ./scripts/show-diff.ts [commit-hash]
 diff --git a/packages/infrastructure/aws_eks/main.tf b/packages/infrastructure/aws_eks/main.tf
 ...
 
-=== packages/nix/packages/default.nix ===
+=== packages/devshell/default.nix ===
 --- unstaged ---
-diff --git a/packages/nix/packages/default.nix b/packages/nix/packages/default.nix
+diff --git a/packages/devshell/default.nix b/packages/devshell/default.nix
 ...
 
 (2 non-user-facing files filtered out)

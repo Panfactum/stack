@@ -129,7 +129,7 @@ This script introspects the codebase to build the valid `component` enums dynami
 |-----------------|----------------------|
 | `iac-module`    | Directory names under `packages/infrastructure/`, plus old/removed names from `packages/infrastructure/metadata.yaml` |
 | `cli`           | `static override paths` declarations in `packages/cli/src/commands/**/command.ts` |
-| `devshell`      | `.sh` scripts in `packages/nix/localDevShell/scripts/` and `packages/nix/packages/scripts/`, plus a static list of well-known nix binaries |
+| `devshell`      | `.sh` scripts in `packages/local/scripts/` and `packages/devshell/scripts/`, plus a static list of well-known nix binaries |
 | `configuration` | A static list of standard Panfactum config files (e.g., `panfactum.yaml`, `region.yaml`) |
 
 ### Runtime Validation
@@ -145,8 +145,8 @@ access in the website code.
 | Changelog entries        | `packages/website/src/content/changelog/[channel]/[release]/log.yaml` |
 | Upgrade instructions     | `packages/website/src/content/changelog/[channel]/[release]/upgrade.mdx` |
 | Log schema (generated)   | `packages/website/src/content/changelog/log.schema.json` |
-| Schema generator         | `packages/nix/localDevShell/scripts/ds-generate-changelog-schemas.ts` |
-| Changelog validator      | `packages/nix/localDevShell/scripts/ds-validate-changelog.ts` |
+| Schema generator         | `packages/local/scripts/ds-generate-changelog-schemas.ts` |
+| Changelog validator      | `packages/local/scripts/ds-validate-changelog.ts` |
 | Astro content config     | `packages/website/src/content.config.ts` |
 | Changelog page routes    | `packages/website/src/pages/docs/changelog/[...page].astro` |
 | Pre-commit config        | `.pre-commit-config.yaml` |

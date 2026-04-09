@@ -75,7 +75,7 @@ repos:
 
       - id: check-package-json
         name: Check Package JSON Consistency
-        entry: bun run packages/nix/localDevShell/scripts/precommit-check-package-json.ts
+        entry: bun run packages/local/scripts/precommit-check-package-json.ts
         language: system
         files: (^|/)package\.json$
         pass_filenames: false

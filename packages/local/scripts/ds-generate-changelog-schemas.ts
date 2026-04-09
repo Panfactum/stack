@@ -10,11 +10,11 @@ const INFRASTRUCTURE_DIR = join(REPO_ROOT, "packages/infrastructure");
 const CLI_COMMANDS_DIR = join(REPO_ROOT, "packages/cli/src/commands");
 const LOCAL_DEV_SHELL_SCRIPTS_DIR = join(
   REPO_ROOT,
-  "packages/nix/localDevShell/scripts"
+  "packages/local/scripts"
 );
 const NIX_PACKAGES_SCRIPTS_DIR = join(
   REPO_ROOT,
-  "packages/nix/packages/scripts"
+  "packages/devshell/scripts"
 );
 const IAC_PROVIDERS_DIR = join(
   REPO_ROOT,
@@ -123,16 +123,16 @@ function deriveCliEnum(): string[] {
 // Derive devshell enum
 //
 // Collects binary names from:
-//   1. Shell scripts in packages/nix/localDevShell/scripts/ (strip .sh)
-//   2. Shell scripts in packages/nix/packages/scripts/ (strip .sh)
+//   1. Shell scripts in packages/local/scripts/ (strip .sh)
+//   2. Shell scripts in packages/devshell/scripts/ (strip .sh)
 //   3. A static list of well-known binaries provided by nix packages
 //      (since their binary names cannot be dynamically parsed from nix
 //      expressions without running nix itself)
 // ---------------------------------------------------------------------------
 
 // Well-known binary names exposed by nix packages in the devshell.
-// Sourced from the package lists in packages/nix/packages/default.nix and
-// packages/nix/localDevShell/default.nix.
+// Sourced from the package lists in packages/devshell/default.nix and
+// packages/local/default.nix.
 const NIX_PACKAGE_BINARIES: string[] = [
   "argo",
   "autossh",
@@ -588,7 +588,7 @@ function main(): void {
   console.log(`  Found ${cliEnum.length} cli entries.`);
 
   console.log(
-    "Deriving devshell enum from packages/nix/ script directories..."
+    "Deriving devshell enum from packages/local/ and packages/devshell/ script directories..."
   );
   const devshellEnum = deriveDevshellEnum();
   console.log(`  Found ${devshellEnum.length} devshell entries.`);
