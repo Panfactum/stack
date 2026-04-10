@@ -535,7 +535,6 @@ Already completed steps will be automatically skipped.
       The recovery keys allow root access to the vault instance and thus all infrastructure.
       These keys ${pc.bold("SHOULD NOT")} be left here as they will allow for privilege escalation.
       Decide how your organization recommends superusers store these keys.
-      This should ${pc.bold("NOT")} be in a location that is accessible by all superusers (e.g. a company password vault).
     `)
   }
 }
