@@ -516,12 +516,36 @@ resource "helm_release" "alb_controller" {
       // The ONLY alb ingress in our system should be the LB services in the repo;
       // EVERYTHING else should go through NGINX.
       // That means we can scope this controller to specific namespaces which will
-      // limit the blast radius if the webhooks in this chart go down
+      // limit the blast radius if the webhooks in this chart go down.
+      // Critically, this prevents webhooks with failurePolicy:Fail from blocking
+      // resource creation in kube-system (e.g., the DNS service) when the
+      // controller is unavailable due to a DNS failure — which would otherwise
+      // create an unrecoverable bootstrap deadlock.
       webhookNamespaceSelectors = [{
         key      = "loadbalancer/enabled"
         operator = "In"
         values   = ["true"]
       }]
+      // The service mutator webhook defaults to failurePolicy:Fail and applies
+      // cluster-wide unless restricted. Without this, a downed controller blocks
+      // Service creation in kube-system (e.g. kube-dns).
+      serviceMutatorWebhookConfig = {
+        namespaceSelectors = [{
+          key      = "loadbalancer/enabled"
+          operator = "In"
+          values   = ["true"]
+        }]
+      }
+      // Restrict ingress validation to the same namespaces for consistency.
+      webhookConfig = {
+        ingressValidationNamespaceSelector = {
+          matchExpressions = [{
+            key      = "loadbalancer/enabled"
+            operator = "In"
+            values   = ["true"]
+          }]
+        }
+      }
 
       // This is necessary for zero-downtime rollovers of the nginx ingress pods
       // https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/deploy/pod_readiness_gate/
