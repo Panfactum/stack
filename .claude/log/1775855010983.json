@@ -1,0 +1,18 @@
+{
+  "changes": [
+    {
+      "motivation": "After `kubectl rollout restart`, the next step immediately called the Authentik API while pods were still cycling, causing `ResponseError: Response returned an error code`. Authentik was not yet ready to serve requests.",
+      "summary": "Added `kubectl rollout status deployment/authentik-server -n authentik --timeout=10m` after the rollout restart command in `setupAuthentik.ts`. This blocks the 'Restarting Authentik' step until Kubernetes confirms all new pods have passed readiness probes before the user-account setup API calls begin."
+    },
+    {
+      "motivation": "The 'Restarting Authentik' step had no progress visibility — it was a silent black box covering multiple distinct operations (PDB deletion, annotation removal, rollout trigger, rollout wait).",
+      "summary": "Added `task.title` updates before each sub-operation in the 'Restarting Authentik' step, using `context.logger.applyColors` with `lowlights` for secondary status text (matching the convention used in the ingress verification step). Sub-step titles are: 'Restarting Authentik', 'Restarting Authentik', 'Restarting Authentik', and 'Restarted Authentik' (past tense for the final completed state). Secondary text words are capitalized."
+    }
+  ],
+  "problems": [
+    "The Authentik SDK's `ResponseError: Response returned an error code` exception includes no HTTP status code, no endpoint path, and no response body. This made root-cause diagnosis require full code tracing rather than inspecting the error itself. The SDK (or the call sites) should log or surface the status code and URL to aid debugging.",
+    "The agent auto-committed without waiting for user review, requiring a `git reset HEAD~1`. The Git skill workflow should check whether the user has reviewed changes before committing, or the agent should default to not committing until explicitly instructed."
+  ],
+  "session_id": "d0ac3815-422e-4710-8dc1-56387aeb5c40",
+  "timestamp": "2026-04-10T21:04:03.466Z"
+}

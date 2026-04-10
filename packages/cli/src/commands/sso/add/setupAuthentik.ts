@@ -549,7 +549,8 @@ spec:
         },
         {
             title: "Restarting Authentik",
-            task: async () => {
+            task: async (_ctx, task) => {
+                task.title = context.logger.applyColors("Restarting Authentik Deleting PodDisruptionBudgets", { lowlights: ["Deleting PodDisruptionBudgets"] })
                 // Added the --ignore-not-found flag for resumability instead of doing more complex skip logic here
                 const deletePdbCommand = ["kubectl", "delete", "pdb", "authentik-server-pdb", "all-cnpg-clusters-pdb", "-n", "authentik", "--context", kubeConfigContext, "--ignore-not-found"]
                 const deletePdbResult = await context.subprocessManager.execute({
@@ -568,6 +569,7 @@ spec:
                     )
                 }
 
+                task.title = context.logger.applyColors("Restarting Authentik Removing reloader annotation", { lowlights: ["Removing reloader annotation"] })
                 const removeAnnotationCommand = ["kubectl", "annotate", "deployment", "authentik-server", "-n", "authentik", "reloader.stakater.com/auto-", "--context", kubeConfigContext]
                 const removeAnnotationResult = await context.subprocessManager.execute({
                     command: removeAnnotationCommand,
@@ -585,6 +587,7 @@ spec:
                     )
                 }
 
+                task.title = context.logger.applyColors("Restarting Authentik Triggering rollout", { lowlights: ["Triggering rollout"] })
                 const restartCommand = [
                     "kubectl",
                     "rollout",
@@ -610,6 +613,35 @@ spec:
                         }
                     )
                 }
+
+                task.title = context.logger.applyColors("Restarting Authentik Waiting for pods to be ready", { lowlights: ["Waiting for pods to be ready"] })
+                const rolloutStatusCommand = [
+                    "kubectl",
+                    "rollout",
+                    "status",
+                    "deployment/authentik-server",
+                    "-n",
+                    "authentik",
+                    "--context", kubeConfigContext,
+                    "--timeout=10m",
+                ]
+                const rolloutStatusResult = await context.subprocessManager.execute({
+                    command: rolloutStatusCommand,
+                    workingDirectory: cwd(),
+                }).exited
+
+                if (rolloutStatusResult.exitCode !== 0) {
+                    throw new CLISubprocessError(
+                        "Authentik deployment did not become ready after restart",
+                        {
+                            command: rolloutStatusCommand.join(' '),
+                            subprocessLogs: rolloutStatusResult.output,
+                            workingDirectory: cwd(),
+                        }
+                    )
+                }
+
+                task.title = "Restarted Authentik"
             }
         },
         {
