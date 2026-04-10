@@ -36,6 +36,7 @@ import BuildkitScaleDownCommand from "./commands/buildkit/suspend/command.ts";
 import BuildkitTunnelCommand from "./commands/buildkit/tunnel/command.ts";
 import { ClusterAddCommand } from "./commands/cluster/add/command.ts";
 import { ClusterEnableCommand } from "./commands/cluster/enable/command.ts";
+import { ClusterResetCommand } from "./commands/cluster/reset/command.ts";
 import { ConfigGetCommand } from "./commands/config/get/command.ts";
 import { GetDbCredsCommand } from "./commands/db/get-creds/command.ts";
 import { DbTunnelCommand } from "./commands/db/tunnel/command.ts";
@@ -81,6 +82,7 @@ cli.register(Builtins.VersionCommand);
 // Commands
 cli.register(ClusterAddCommand);
 cli.register(ClusterEnableCommand);
+cli.register(ClusterResetCommand);
 cli.register(DevShellUpdateCommand)
 cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)

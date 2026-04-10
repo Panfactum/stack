@@ -24,6 +24,11 @@ interface IClusterResetInput {
   task: PanfactumTaskWrapper;
   /** File system path to cluster configuration */
   clusterPath: string;
+  /**
+   * When true, deletes resources even if they carry the `panfactum.com/workload` label.
+   * Defaults to false to protect Panfactum-managed resources during resumed installations.
+   */
+  force?: boolean;
 }
 
 /**
@@ -46,7 +51,11 @@ interface IClusterResetInput {
  * 
  * This function is idempotent and safe to run multiple times.
  * Resources that don't exist are ignored.
- * 
+ *
+ * Resources that carry the `panfactum.com/workload` label are skipped unless
+ * `force` is set to `true`. This prevents Panfactum-managed resources from
+ * being accidentally removed during resumed installations.
+ *
  * @param input - Configuration for the cluster reset operation
  * 
  * @example
@@ -75,6 +84,7 @@ export async function clusterReset(input: IClusterResetInput) {
     awsRegion,
     task,
     clusterPath,
+    force = false,
   } = input;
   // ############################################################
   // ## Step 0: Validation
@@ -174,11 +184,12 @@ export async function clusterReset(input: IClusterResetInput) {
 
   /**
    * Helper to delete Kubernetes resources
-   * 
+   *
    * @remarks
-   * Deletes resources in the kube-system namespace, ignoring
-   * resources that don't exist.
-   * 
+   * Deletes resources in the kube-system namespace, ignoring resources that
+   * don't exist. Resources that carry the `panfactum.com/workload` label are
+   * skipped unless `force` is `true`.
+   *
    * @internal
    */
   // FIX: @seth - Use Kubernetes SDK
@@ -189,6 +200,53 @@ export async function clusterReset(input: IClusterResetInput) {
     type: string;
     name: string;
   }) => {
+    if (!force) {
+      const getCommand = [
+        "kubectl",
+        "--context",
+        clusterName,
+        "--namespace",
+        "kube-system",
+        "get",
+        type,
+        name,
+        "-o",
+        "json",
+        "--ignore-not-found",
+      ];
+      const getResult = await context.subprocessManager.execute({
+        command: getCommand,
+        workingDirectory: clusterPath,
+      }).exited;
+
+      if (getResult.exitCode !== 0) {
+        throw new CLISubprocessError(
+          `Failed to get ${type}/${name} in kube-system namespace`,
+          {
+            command: getCommand.join(" "),
+            subprocessLogs: getResult.output,
+            workingDirectory: clusterPath,
+          }
+        );
+      }
+
+      if (getResult.stdout.trim().length > 0) {
+        const resourceSchema = z.object({
+          metadata: z.object({
+            labels: z.record(z.string()).optional(),
+          }),
+        });
+        const resource = parseJson(resourceSchema, getResult.stdout);
+        if (resource.metadata.labels?.["panfactum.com/workload"] !== undefined) {
+          task.output = context.logger.applyColors(
+            `Skipped ${type}/${name}: has panfactum.com/workload label (use --force to override)`,
+            { style: "subtle" }
+          );
+          return;
+        }
+      }
+    }
+
     const command = [
       "kubectl",
       "--context",

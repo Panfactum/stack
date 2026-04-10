@@ -47,7 +47,7 @@ const clusterNameFormatter = (input: string): string => {
 
 export async function setupEKS(
   options: IInstallClusterStepOptions,
-  mainTask: PanfactumTaskWrapper
+  mainTask: PanfactumTaskWrapper,
 ) {
   const { awsProfile, clusterPath, context, environment, region, awsRegion, slaTarget } =
     options;
@@ -194,7 +194,7 @@ export async function setupEKS(
           context,
           awsRegion,
           task,
-          clusterPath
+          clusterPath,
         });
       },
       rendererOptions: {

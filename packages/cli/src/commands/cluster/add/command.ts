@@ -494,7 +494,7 @@ Already completed steps will be automatically skipped.
       region,
       awsRegion,
       clusterPath: selectedRegion.path,
-      slaTarget: confirmedSLATarget
+      slaTarget: confirmedSLATarget,
     };
 
     for (const [_, { setup, label, completed }] of SETUP_STEPS.entries()) {
