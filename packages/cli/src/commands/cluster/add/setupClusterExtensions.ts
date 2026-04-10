@@ -13,6 +13,9 @@ import {getPanfactumConfig} from "@/util/config/getPanfactumConfig.ts";
 import { buildSyncSSHTask } from "@/util/devshell/tasks/syncSSHTask";
 import { BASTION_SUBDOMAIN } from "@/util/domains/consts";
 import { CLIError } from "@/util/error/error";
+import { createDirectory } from "@/util/fs/createDirectory";
+import { fileExists } from "@/util/fs/fileExists";
+import { writeFile } from "@/util/fs/writeFile";
 import {findAuthentikLocation} from "@/util/sso/getAuthenticPath.ts";
 import {setupVaultSSO} from "@/util/sso/tasks/setupVaultSSO.ts";
 import { MODULES } from "@/util/terragrunt/constants";
@@ -21,6 +24,7 @@ import {
   buildDeployModuleTask,
   defineInputUpdate,
 } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntInitAll } from "@/util/terragrunt/terragruntInitAll";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
@@ -42,6 +46,17 @@ export async function setupClusterExtensions(
   }
 
   const bastionDomain = `${BASTION_SUBDOMAIN}.${config.kube_domain}`;
+
+  const NEW_MODULES = [
+    { module: MODULES.KUBE_BASTION, hcl: await Bun.file(kubeBastionTerragruntHcl).text() },
+    { module: MODULES.KUBE_EXTERNAL_SNAPSHOTTER, hcl: await Bun.file(kubeExternalSnapshotterTerragruntHcl).text() },
+    { module: MODULES.KUBE_VELERO, hcl: await Bun.file(kubeVeleroTerragruntHcl).text() },
+    { module: MODULES.KUBE_KEDA, hcl: await Bun.file(kubeKedaTerragruntHcl).text() },
+    { module: MODULES.KUBE_RELOADER, hcl: await Bun.file(kubeReloaderTerragruntHcl).text() },
+    { module: MODULES.KUBE_PVC_AUTORESIZER, hcl: await Bun.file(kubePvcAutoresizerTerragruntHcl).text() },
+    { module: MODULES.KUBE_DESCHEDULER, hcl: await Bun.file(kubeDeschedulerTerragruntHcl).text() },
+    { module: MODULES.KUBE_CLOUDNATIVE_PG, hcl: await Bun.file(postgresTerragruntHcl).text() },
+  ];
 
   const shouldSkipNodePoolsAdjustment = async () => {
     const eksModuleInfo = await readYAMLFile({
@@ -175,6 +190,44 @@ export async function setupClusterExtensions(
       title: "Verify access",
       task: async () => {
         await getIdentity({ context, profile: awsProfile });
+      },
+    },
+    {
+      title: "Create module configurations",
+      task: async () => {
+        for (const { module, hcl } of NEW_MODULES) {
+          const moduleDir = join(context.devshellConfig.environments_dir, environment, region, module);
+          const hclPath = join(moduleDir, "terragrunt.hcl");
+          if (!(await fileExists({ filePath: hclPath }))) {
+            await createDirectory({ dirPath: moduleDir });
+            await writeFile({ context, filePath: hclPath, contents: hcl });
+          }
+        }
+      },
+    },
+    {
+      title: "Initialize cluster extension modules",
+      task: async () => {
+        const statuses = await Promise.all(
+          NEW_MODULES.map(async ({ module }) => ({
+            module,
+            status: await getModuleStatus({ context, environment, region, module }),
+          }))
+        );
+        const uninitedModules = statuses
+          .filter(({ status }) => status.init_status !== "success")
+          .map(({ module }) => module);
+
+        if (uninitedModules.length === 0) {
+          return;
+        }
+
+        await terragruntInitAll({
+          context,
+          environment,
+          region,
+          modules: uninitedModules,
+        });
       },
     },
     {

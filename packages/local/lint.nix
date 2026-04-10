@@ -32,7 +32,7 @@ let
     (
       cd "$REPO_ROOT"
       export NODE_OPTIONS=--max-old-space-size=8192
-      ${pkgs.bun}/bin/bunx eslint --fix "$@"
+      ${pkgs.bun}/bin/bunx eslint --fix --config packages/cli/eslint.config.js "$@"
     )
   '';
 
