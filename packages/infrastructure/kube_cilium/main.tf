@@ -262,9 +262,14 @@ resource "helm_release" "cilium" {
             effect   = module.constants.linkerd_taint.effect
           },
 
-          // This is required b/c otherwise networking will break during node shutdown
+          // These are required b/c otherwise networking will break during node shutdown
           {
             key      = "karpenter.sh/disruption"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+          {
+            key      = "karpenter.sh/disrupted"
             operator = "Exists"
             effect   = "NoSchedule"
           },
