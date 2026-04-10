@@ -1,6 +1,7 @@
 import { fixupPluginRules } from "@eslint/compat";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import _import from "eslint-plugin-import";
+import importX from "eslint-plugin-import-x";
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import prettier from "eslint-plugin-prettier";
 import sonarjs from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
@@ -20,12 +21,12 @@ export default [
     files: ["**/*.ts", "**/*.tsx"],
     plugins: {
       "@typescript-eslint": fixupPluginRules(typescriptEslint),
-      import: fixupPluginRules(_import),
+      "import-x": importX,
       prettier,
-      sonarjs: fixupPluginRules(sonarjs),
-      unicorn: fixupPluginRules(unicorn),
+      sonarjs,
+      unicorn,
       promise: fixupPluginRules(promise),
-      "unused-imports": fixupPluginRules(unusedImports) 
+      "unused-imports": unusedImports,
     },
     languageOptions: {
       parser: tsParser,
@@ -43,9 +44,7 @@ export default [
       },
     },
     settings: {
-      "import/resolver": {
-        typescript: {},
-      },
+      "import-x/resolver-next": [createTypeScriptImportResolver({ project: __dirname + "/tsconfig.json" })],
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
@@ -85,8 +84,8 @@ export default [
         },
       ],
 
-      "import/no-unresolved": "error",
-      "import/order": [
+      "import-x/no-unresolved": ["error", { ignore: ["^bun:"] }],
+      "import-x/order": [
         "error",
         {
           groups: [
@@ -105,9 +104,9 @@ export default [
         },
       ],
 
-      "import/no-cycle": "error",
-      "import/no-duplicates": "error",
-      "import/no-useless-path-segments": "error",
+      "import-x/no-cycle": "error",
+      "import-x/no-duplicates": "error",
+      "import-x/no-useless-path-segments": "error",
       "no-console": [
         "warn",
         {

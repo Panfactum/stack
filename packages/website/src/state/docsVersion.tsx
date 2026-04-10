@@ -43,7 +43,7 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
       const pathname = window.location.pathname;
       if (pathname.startsWith(`/docs/${_docsVersion()}`)) {
         const suffix = pathname.substring(`/docs/${_docsVersion()}`.length);
-        /* eslint-disable-next-line @typescript-eslint/no-unsafe-call */
+
         void navigate(`/docs/${newVersion}${suffix}`);
       }
       setTimeout(() => {

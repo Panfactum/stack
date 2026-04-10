@@ -153,12 +153,10 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
 
   // Handle keyboard navigation
   const handleKeyDown = (event: KeyboardEvent, currentIndex: number) => {
-    let newIndex = currentIndex;
-
     switch (event.key) {
       case "ArrowLeft": {
         event.preventDefault();
-        newIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
         handleTabClick(newIndex);
         // Focus the new tab
         const prevButton = document.querySelector(
@@ -169,7 +167,7 @@ export const ScaleSection: Component<IScaleSectionProps> = (props) => {
       }
       case "ArrowRight": {
         event.preventDefault();
-        newIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
+        const newIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
         handleTabClick(newIndex);
         // Focus the new tab
         const nextButton = document.querySelector(

@@ -14,7 +14,7 @@ settings:
 content: |-
   {/* lint disable no-duplicate-headings */}
 
-  {/* eslint-disable import/order */}
+  {/* eslint-disable import-x/order */}
 
   {{ .Inputs }}
 
@@ -22,7 +22,7 @@ content: |-
 
   {{ .Requirements }}
 
-  {/* eslint-enable import/order */}
+  {/* eslint-enable import-x/order */}
 
   {/* lint enable no-duplicate-headings */}
 

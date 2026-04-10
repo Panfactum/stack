@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 
 // Defines Astro content collections for the website, including changelog YAML data and MDX upgrade instructions.
 

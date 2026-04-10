@@ -158,7 +158,7 @@ export const SpiralingCosts: Component<ISpiralingCostsProps> = (props) => {
     setAnimationComplete(false);
     setHoveredBar(null);
     setDisplayedBar(null);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
     if (numberAnimationRef) {
       cancelAnimationFrame(numberAnimationRef);
     }
@@ -271,7 +271,6 @@ export const SpiralingCosts: Component<ISpiralingCostsProps> = (props) => {
   };
 
   onCleanup(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (numberAnimationRef) {
       cancelAnimationFrame(numberAnimationRef);
     }

@@ -385,11 +385,9 @@ export async function setupVault(
         if (!ctx.kubeContext) {
           throw new CLIError("Kube context not found");
         }
-        let vaultUnsealCommand: string[] = [];
-
         let sealedStatus = true;
         for (const key of vaultRecoveryKeys || ctx.recoveryKeys!) {
-          vaultUnsealCommand = [
+          const vaultUnsealCommand = [
             "kubectl",
             "exec",
             "-i",

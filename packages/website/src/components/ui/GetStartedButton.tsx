@@ -27,7 +27,7 @@ const _GetStartedButton: Component<GetStartedProps> = (props) => {
           transition-colors
           hover:bg-brand-700
         `,
-        // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
+        // eslint-disable-next-line better-tailwindcss/no-unknown-classes
         sizeClasses[props.size || "md"],
         props.class,
       )}

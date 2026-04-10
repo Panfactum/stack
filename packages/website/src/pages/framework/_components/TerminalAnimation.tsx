@@ -65,7 +65,7 @@ export const TerminalAnimation: Component<TerminalAnimationProps> = (props) => {
         setIsCopied(false);
         toaster.dismiss(toastID);
       }, 2000);
-    } catch (err) {
+    } catch {
       // Failed to copy to clipboard
     }
   };

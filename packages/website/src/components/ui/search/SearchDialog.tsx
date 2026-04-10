@@ -80,7 +80,7 @@ const fetchSearchResults = async (input: {
     );
 
     return response.hits;
-  } catch (err) {
+  } catch {
     return [];
   }
 };

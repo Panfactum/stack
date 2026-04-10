@@ -184,7 +184,7 @@ export const PresentationViewer: Component<IPresentationViewerProps> = (
 
   return (
     <Show when={!props.isPrintPdf}>
-      {/* eslint-disable better-tailwindcss/no-unregistered-classes -- CSS hook for presentation toolbar */}
+      {}
       <div
         class={clsx(
           "presentation-controls",
@@ -298,7 +298,7 @@ export const PresentationViewer: Component<IPresentationViewerProps> = (
           </button>
         </div>
       </div>
-      {/* eslint-enable better-tailwindcss/no-unregistered-classes */}
+      {}
     </Show>
   );
 };

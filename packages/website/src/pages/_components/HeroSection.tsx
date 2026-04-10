@@ -128,6 +128,7 @@ const TESTIMONIALS: Array<{
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface IHeroSectionProps {
   // Empty interface for future extensibility
 }

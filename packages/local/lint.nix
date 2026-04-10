@@ -14,8 +14,7 @@ let
       cd "$REPO_ROOT"
       export NODE_OPTIONS=--max-old-space-size=8192
       export LINT=true
-      export ESLINT_USE_FLAT_CONFIG=false
-      ${pkgs.bun}/bin/bunx eslint --fix --config packages/website/.eslintrc.cjs "$@"
+      ${pkgs.bun}/bin/bunx eslint --fix --config packages/website/eslint.config.js "$@"
     )
   '';
 

@@ -16,7 +16,7 @@ export interface IGetAdminAccessCredentialsOutput {
 export async function getAdminAccessCredentials(context: PanfactumContext): Promise<IGetAdminAccessCredentialsOutput> {
     let accessKeyId: string;
     let secretAccessKey: string;
-    let username = ""
+    let username: string
 
     while (true) {
         while (true) {

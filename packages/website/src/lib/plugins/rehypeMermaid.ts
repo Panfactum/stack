@@ -42,7 +42,6 @@ const isMermaidPreNode = (node: Element): boolean => {
   );
   if (!codeChild) return false;
 
-  // eslint-disable-next-line better-tailwindcss/no-unregistered-classes
   const className = codeChild.properties["className"];
   if (!Array.isArray(className)) return false;
   return className.some(

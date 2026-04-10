@@ -65,7 +65,6 @@ const renderedSlides = await Promise.all(
 
 <Layout title={`Panfactum: ${title}`} description={description}>
   <div id="presentation-container" class="relative w-full">
-    {/* eslint-disable better-tailwindcss/no-unregistered-classes -- CSS hooks for fullscreen and Reveal.js styling */}
     <a
       href="/presentations"
       class="back-link mb-4 inline-flex items-center gap-2 text-sm text-secondary transition-colors hover:text-primary"
@@ -102,7 +101,6 @@ const renderedSlides = await Promise.all(
           }
         </div>
       </div>
-    {/* eslint-enable better-tailwindcss/no-unregistered-classes */}
     </div>
   </div>
 </Layout>

@@ -265,7 +265,7 @@ export class DbTunnelCommand extends PanfactumCommand {
   Namespace: ${selectedDb.namespace}`);
 
 
-    let connectionDetails = ''
+    let connectionDetails: string
     if (selectedDb.type === 'nats') {
       const { ca, cert, key } = credentials.certs || {};
 

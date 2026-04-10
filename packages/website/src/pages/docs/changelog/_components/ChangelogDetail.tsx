@@ -38,7 +38,7 @@ import { createMemo, For, Show, type Component, type JSX } from "solid-js";
 import Toast from "@/components/ui/Toast";
 import Tooltip from "@/components/ui/Tooltip";
 
-import styles from "./ChangelogAccordion.module.css";
+import styles from "./ChangelogDetail.module.css";
 import { resolveReferenceLink } from "./changelogUtils";
 
 type ChangeType =

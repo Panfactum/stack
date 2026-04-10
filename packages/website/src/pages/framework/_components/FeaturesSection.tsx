@@ -832,7 +832,6 @@ export const FeaturesSection: Component = () => {
     animationFrame = requestAnimationFrame(animate);
 
     onCleanup(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (animationFrame) cancelAnimationFrame(animationFrame);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (pauseTimeoutId) clearTimeout(pauseTimeoutId);
