@@ -17,8 +17,29 @@ import { getServiceQuotasClient } from "@/util/aws/clients/getServiceQuotasClien
 import { CLIError } from "@/util/error/error";
 import type { PanfactumContext } from "@/util/context/context";
 
-/** Minimum number of vCPU headroom required before requesting a quota increase */
-const REQUIRED_VCPU_HEADROOM = 32;
+/** Minimum number of vCPU headroom required for SLA 1 clusters before requesting a quota increase */
+const REQUIRED_VCPU_HEADROOM_SLA1 = 16;
+
+/** Minimum number of vCPU headroom required for SLA 2/3 clusters before requesting a quota increase */
+const REQUIRED_VCPU_HEADROOM_DEFAULT = 32;
+
+/**
+ * vCPUs consumed by the VPC module that can be subtracted from required headroom
+ * when the VPC is already deployed, for SLA 2/3 clusters
+ */
+const VPC_VCPU_REDUCTION_DEFAULT = 6;
+
+/**
+ * vCPUs consumed by the VPC module that can be subtracted from required headroom
+ * when the VPC is already deployed, for SLA 1 clusters (single-AZ, fewer NAT instances)
+ */
+const VPC_VCPU_REDUCTION_SLA1 = 2;
+
+/**
+ * vCPUs consumed by the EKS module (managed node group instances, etc.)
+ * that can be subtracted from required headroom when EKS is already deployed
+ */
+const EKS_VCPU_REDUCTION = 6;
 
 /** AWS service code for EC2 */
 const EC2_SERVICE_CODE = "ec2";
@@ -57,6 +78,25 @@ export interface IEnsureEC2QuotaHeadroomInput {
   profile: string;
   /** AWS region to check quotas in */
   region: string;
+  /**
+   * SLA target level for the cluster (1, 2, or 3).
+   * SLA 1 requires only {@link REQUIRED_VCPU_HEADROOM_SLA1} vCPUs of headroom;
+   * SLA 2/3 (or unknown) requires {@link REQUIRED_VCPU_HEADROOM_DEFAULT}.
+   */
+  slaTarget: number | undefined;
+  /**
+   * Whether the `aws_vpc` module has already been successfully deployed.
+   * When true, {@link VPC_VCPU_REDUCTION_SLA1} or {@link VPC_VCPU_REDUCTION_DEFAULT} vCPUs
+   * are subtracted from the required headroom (depending on SLA target) because those
+   * instances are already running and reflected in current usage.
+   */
+  vpcAlreadyDeployed: boolean;
+  /**
+   * Whether the `aws_eks` module has already been successfully deployed.
+   * When true, an additional {@link EKS_VCPU_REDUCTION} vCPUs are subtracted from the
+   * required headroom because those instances are already running and reflected in current usage.
+   */
+  eksAlreadyDeployed: boolean;
 }
 
 /**
@@ -66,8 +106,8 @@ export interface IEnsureEC2QuotaHeadroomInput {
  * This function checks both the EC2 On-Demand Standard vCPU quota (`L-1216C47A`) and
  * the EC2 Spot Standard vCPU quota (`L-34B43A08`). For each quota, it compares the
  * current value against the usage reported by CloudWatch (via the `UsageMetric` field
- * returned by Service Quotas) and ensures at least {@link REQUIRED_VCPU_HEADROOM}
- * vCPUs of headroom remain.
+ * returned by Service Quotas) and ensures sufficient vCPUs of headroom remain
+ * (determined by {@link IEnsureEC2QuotaHeadroomInput.slaTarget} and {@link IEnsureEC2QuotaHeadroomInput.vpcAlreadyDeployed}).
  *
  * If headroom is insufficient for either quota, it checks for any pending quota
  * increase requests before submitting a new one.
@@ -88,6 +128,8 @@ export interface IEnsureEC2QuotaHeadroomInput {
  *   context,
  *   profile: 'production',
  *   region: 'us-east-1',
+ *   slaTarget: 2,
+ *   vpcAlreadyDeployed: true,
  * });
  * ```
  *
@@ -100,7 +142,15 @@ export interface IEnsureEC2QuotaHeadroomInput {
 export async function ensureEC2QuotaHeadroom(
   input: IEnsureEC2QuotaHeadroomInput
 ): Promise<void> {
-  const { context, profile, region } = input;
+  const { context, profile, region, slaTarget, vpcAlreadyDeployed, eksAlreadyDeployed } = input;
+
+  const isSLA1 = slaTarget === 1;
+  const baseHeadroom = isSLA1 ? REQUIRED_VCPU_HEADROOM_SLA1 : REQUIRED_VCPU_HEADROOM_DEFAULT;
+  const vpcReduction = vpcAlreadyDeployed
+    ? (isSLA1 ? VPC_VCPU_REDUCTION_SLA1 : VPC_VCPU_REDUCTION_DEFAULT)
+    : 0;
+  const eksReduction = eksAlreadyDeployed ? EKS_VCPU_REDUCTION : 0;
+  const requiredVcpuHeadroom = baseHeadroom - vpcReduction - eksReduction;
 
   const serviceQuotasClient = await getServiceQuotasClient({
     context,
@@ -120,6 +170,7 @@ export async function ensureEC2QuotaHeadroom(
       cloudWatchClient,
       quotaCode: check.quotaCode,
       label: check.label,
+      requiredVcpuHeadroom,
     });
   }
 }
@@ -138,6 +189,8 @@ interface IEnsureSingleQuotaHeadroomInput {
   quotaCode: string;
   /** Human-readable label used in log/warning messages */
   label: string;
+  /** Minimum number of vCPUs of headroom required */
+  requiredVcpuHeadroom: number;
 }
 
 /**
@@ -152,7 +205,7 @@ interface IEnsureSingleQuotaHeadroomInput {
 async function ensureSingleQuotaHeadroom(
   input: IEnsureSingleQuotaHeadroomInput
 ): Promise<void> {
-  const { context, serviceQuotasClient, cloudWatchClient, quotaCode, label } =
+  const { context, serviceQuotasClient, cloudWatchClient, quotaCode, label, requiredVcpuHeadroom } =
     input;
 
   try {
@@ -267,7 +320,7 @@ async function ensureSingleQuotaHeadroom(
     /***********************************************
      * Step 4: Return early if headroom is sufficient
      ***********************************************/
-    if (headroom >= REQUIRED_VCPU_HEADROOM) {
+    if (headroom >= requiredVcpuHeadroom) {
       return;
     }
 
@@ -275,7 +328,7 @@ async function ensureSingleQuotaHeadroom(
      * Step 5: Handle insufficient headroom
      ***********************************************/
     context.logger.warn(
-      `${label} quota headroom is insufficient (headroom: ${headroom}, required: ${REQUIRED_VCPU_HEADROOM}). Checking for pending quota increase requests...`
+      `${label} quota headroom is insufficient (headroom: ${headroom}, required: ${requiredVcpuHeadroom}). Checking for pending quota increase requests...`
     );
 
     // Check for pending quota increase requests
@@ -309,7 +362,7 @@ async function ensureSingleQuotaHeadroom(
 
     if (pendingRequests.length > 0) {
       const sufficientRequest = pendingRequests.find(
-        (req) => req.desiredValue - currentVcpuUsage >= REQUIRED_VCPU_HEADROOM
+        (req) => req.desiredValue - currentVcpuUsage >= requiredVcpuHeadroom
       );
 
       if (sufficientRequest) {
@@ -326,14 +379,14 @@ async function ensureSingleQuotaHeadroom(
       );
       context.logger.warn(
         `A ${label} quota increase to ${maxPendingValue} is already pending, but it will not provide sufficient headroom ` +
-          `(required headroom: ${REQUIRED_VCPU_HEADROOM}, current usage: ${currentVcpuUsage}). ` +
+          `(required headroom: ${requiredVcpuHeadroom}, current usage: ${currentVcpuUsage}). ` +
           `Please manually request a higher quota value via the AWS console: https://console.aws.amazon.com/servicequotas/home`
       );
       return;
     }
 
     // No pending request — submit a new quota increase request
-    const desiredValue = currentVcpuUsage + REQUIRED_VCPU_HEADROOM;
+    const desiredValue = currentVcpuUsage + requiredVcpuHeadroom;
 
     try {
       await serviceQuotasClient.send(

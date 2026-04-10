@@ -332,12 +332,38 @@ Already completed steps will be automatically skipped.
 
     /***********************************************
      * Confirms the vCPU quota headroom is sufficient
+     * (skipped if Karpenter is already installed)
      ***********************************************/
-    await ensureEC2QuotaHeadroom({
-      context: this.context,
-      profile: awsProfile,
-      region: awsRegion,
-    });
+    const [karpenterStatus, vpcStatus, eksStatus] = await Promise.all([
+      getModuleStatus({
+        context: this.context,
+        environment,
+        region,
+        module: MODULES.KUBE_KARPENTER,
+      }),
+      getModuleStatus({
+        context: this.context,
+        environment,
+        region,
+        module: MODULES.AWS_VPC,
+      }),
+      getModuleStatus({
+        context: this.context,
+        environment,
+        region,
+        module: MODULES.AWS_EKS,
+      }),
+    ]);
+    if (karpenterStatus.deploy_status !== "success") {
+      await ensureEC2QuotaHeadroom({
+        context: this.context,
+        profile: awsProfile,
+        region: awsRegion,
+        slaTarget,
+        vpcAlreadyDeployed: vpcStatus.deploy_status === "success",
+        eksAlreadyDeployed: eksStatus.deploy_status === "success",
+      });
+    }
 
     /***********************************************
      * Confirms the AWS account is verified for CloudFront
