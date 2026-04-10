@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "On first-time runs of `pf sso add`, the `authentik_aws_sso/module.yaml` file does not yet exist. `getInputsFromAuthentikAWSSSOModule` called `readYAMLFile` without `throwOnMissing: false`, causing it to throw instead of returning an empty object, which aborted the setup flow before any prompts were shown.",
+      "summary": "Added `throwOnMissing: false` to the `readYAMLFile` call inside `getInputsFromAuthentikAWSSSOModule` in `packages/cli/src/commands/sso/add/setupFederatedAuth.ts`. This makes the function return `undefined` (and thus `{}` via the nullish coalesce) when the module file is absent, allowing first-time setup to proceed correctly."
+    }
+  ],
+  "problems": [
+    "The `readYAMLFile` utility defaults `throwOnMissing` to `true`, but callers that want to optionally read a config file that may not exist must remember to explicitly pass `throwOnMissing: false`. This is a footgun: the silent omission of that flag in `getInputsFromAuthentikAWSSSOModule` caused a hard crash on every first-time run. The function signature or its documentation should make the default more visible, or a separate `readOptionalYAMLFile` wrapper should be provided to make optional reads the path of least resistance."
+  ],
+  "session_id": "77fd83a3-d3ff-48bc-bfa1-7cb60c6775f4",
+  "timestamp": "2026-04-10T23:21:14.071Z"
+}

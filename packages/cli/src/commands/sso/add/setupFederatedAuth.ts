@@ -543,6 +543,7 @@ async function getInputsFromAuthentikAWSSSOModule(context: PanfactumContext, org
     const originalInputs = await readYAMLFile({
         filePath: orgModuleYAMLPath,
         context,
+        throwOnMissing: false,
         validationSchema: z.object({
             extra_inputs: z.object({
                 aws_acs_url: z.string().optional(),
