@@ -50,6 +50,7 @@
     "@aws-sdk/client-route-53-domains": "3.1024.0",
     "@aws-sdk/client-s3": "3.1024.0",
     "@aws-sdk/client-service-quotas": "3.1024.0",
+    "@aws-sdk/client-sesv2": "3.1024.0",
     "@aws-sdk/client-ssm": "3.1024.0",
     "@aws-sdk/client-sts": "3.1024.0",
     "@goauthentik/api": "2025.4.0-1746018955",

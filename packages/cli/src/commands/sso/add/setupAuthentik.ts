@@ -1,11 +1,13 @@
 import { randomBytes } from "node:crypto";
 import path, { join } from "node:path";
 import { cwd } from "node:process";
+import { GetAccountCommand, PutAccountDetailsCommand } from "@aws-sdk/client-sesv2";
 import { CoreApi, Configuration, type User, IntentEnum } from "@goauthentik/api";
 import { z } from "zod";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
 import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file" };
 import kubeAuthentikHcl from "@/templates/kube_authentik.hcl" with { type: "file" };
+import { getSESv2Client } from "@/util/aws/clients/getSESv2Client";
 import { getIdentity } from "@/util/aws/getIdentity";
 import { GLOBAL_USER_CONFIG } from "@/util/config/constants";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
@@ -25,6 +27,25 @@ import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 /**
+ * Mutable output object written to by setupAuthentik tasks.
+ * The caller reads this after tasks complete to print contextual messaging.
+ */
+export interface ISetupAuthentikResult {
+    /** The outcome of the SES production access step */
+    sesStatus?: "already_enabled" | "pending" | "denied" | "requested";
+    /** AWS Support case ID associated with the SES review, if available */
+    sesCaseId?: string;
+    /** Authentik web UI URL, set when user setup completes */
+    authentikWebUI?: string;
+    /** Authentik admin username, set when user setup completes */
+    authentikUsername?: string;
+    /** Generated Authentik admin password, set when user setup completes */
+    authentikPassword?: string;
+    /** Path where the Authentik API token was saved, set when user setup completes */
+    authentikTokenPath?: string;
+}
+
+/**
  * Interface for setupAuthentik function inputs
  */
 interface ISetupAuthentikInput {
@@ -34,6 +55,8 @@ interface ISetupAuthentikInput {
     mainTask: PanfactumTaskWrapper;
     /** Path to the region directory where Authentik will be deployed */
     regionPath: string;
+    /** Mutable object written to by tasks for the caller to act on after completion */
+    result: ISetupAuthentikResult;
 }
 
 /**
@@ -58,7 +81,7 @@ interface ISetupAuthentikInput {
  * Throws when Terragrunt deployments fail
  */
 export async function setupAuthentik(input: ISetupAuthentikInput) {
-    const { context, mainTask, regionPath } = input;
+    const { context, mainTask, regionPath, result } = input;
     const config = await getPanfactumConfig({
         context,
         directory: regionPath,
@@ -257,6 +280,88 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             },
             skipIfAlreadyApplied: true,
         }),
+        {
+            title: context.logger.applyColors("Request SES Production Access"),
+            task: async (ctx, task) => {
+                if (!ctx.ancestorDomain || !ctx.orgName || !ctx.authentikRootEmail) {
+                    throw new CLIError("Required context values missing for SES production access request");
+                }
+
+                const sesClient = await getSESv2Client({ context, profile: awsProfile, region });
+
+                task.title = context.logger.applyColors("Request SES Production Access Checking account status", { lowlights: ["Checking account status"] });
+
+                const account = await sesClient.send(new GetAccountCommand({})).catch((error: unknown) => {
+                    throw new CLIError("Failed to retrieve SES account status", error);
+                });
+
+                if (account.ProductionAccessEnabled) {
+                    result.sesStatus = "already_enabled";
+                    task.title = context.logger.applyColors("SES production access already enabled");
+                    return;
+                }
+
+                const reviewStatus = account.Details?.ReviewDetails?.Status;
+                const caseId = account.Details?.ReviewDetails?.CaseId;
+
+                if (reviewStatus === "GRANTED") {
+                    result.sesStatus = "already_enabled";
+                    task.title = context.logger.applyColors("SES production access already granted");
+                    return;
+                }
+
+                if (reviewStatus === "PENDING") {
+                    result.sesStatus = "pending";
+                    result.sesCaseId = caseId;
+                    const pendingTitle = caseId
+                        ? `SES production access pending review Case ${caseId}`
+                        : "SES production access pending review";
+                    task.title = context.logger.applyColors(pendingTitle, caseId ? { lowlights: [`Case ${caseId}`] } : {});
+                    return;
+                }
+
+                if (reviewStatus === "DENIED") {
+                    result.sesStatus = "denied";
+                    result.sesCaseId = caseId;
+                    const deniedTitle = caseId
+                        ? `WARNING: SES production access denied Appeal via Case ${caseId}`
+                        : "WARNING: SES production access denied Appeal via AWS Support";
+                    task.title = context.logger.applyColors(deniedTitle, caseId ? { style: "warning", lowlights: [`Appeal via Case ${caseId}`] } : { style: "warning", lowlights: ["Appeal via AWS Support"] });
+                    return;
+                }
+
+                // Status is FAILED or no prior request — proceed to submit
+                task.title = context.logger.applyColors("Request SES Production Access Submitting request", { lowlights: ["Submitting request"] });
+
+                await sesClient.send(new PutAccountDetailsCommand({
+                    MailType: "TRANSACTIONAL",
+                    WebsiteURL: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`,
+                    ContactLanguage: "EN",
+                    UseCaseDescription: `Transactional emails sent by Authentik identity provider for password resets, user invitations, and MFA notifications for ${ctx.orgName}.`,
+                    AdditionalContactEmailAddresses: [ctx.authentikRootEmail],
+                    ProductionAccessEnabled: true,
+                })).catch((error: unknown) => {
+                    // A concurrent review was somehow already in progress — treat as pending
+                    if (error instanceof Error && error.name === "ConflictException") {
+                        result.sesStatus = "pending";
+                        task.title = context.logger.applyColors("SES production access pending review");
+                        return;
+                    }
+                    throw new CLIError("Failed to submit SES production access request", error);
+                });
+
+                // Retrieve the case ID created by the submission
+                const updated = await sesClient.send(new GetAccountCommand({})).catch(() => null);
+                const newCaseId = updated?.Details?.ReviewDetails?.CaseId;
+
+                result.sesStatus = "requested";
+                result.sesCaseId = newCaseId;
+                const submittedTitle = newCaseId
+                    ? `SES production access requested Case ${newCaseId}`
+                    : "SES production access requested";
+                task.title = context.logger.applyColors(submittedTitle, newCaseId ? { lowlights: [`Case ${newCaseId}`] } : {});
+            },
+        },
         await buildDeployModuleTask<IContext>({
             taskTitle: "Deploy Authentik",
             context,
@@ -803,16 +908,10 @@ spec:
                     }
                 })
 
-                const webUIURL = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
-                const globalUserConfigPath = join(context.devshellConfig.environments_dir, GLOBAL_USER_CONFIG)
-                context.logger.info([
-                    `Authentik setup complete!`,
-                    ``,
-                    `  Web UI:   ${webUIURL}`,
-                    `  Username: ${ctx.authentikAdminEmail}`,
-                    `  Password: ${generatedPassword}`,
-                    `  API token: Saved to ${globalUserConfigPath}`,
-                ].join("\n"))
+                result.authentikWebUI = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
+                result.authentikUsername = ctx.authentikAdminEmail
+                result.authentikPassword = generatedPassword
+                result.authentikTokenPath = join(context.devshellConfig.environments_dir, GLOBAL_USER_CONFIG)
             }
         }
     ])

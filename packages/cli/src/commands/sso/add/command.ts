@@ -14,6 +14,7 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setupAuthentik } from "./setupAuthentik";
 import { setupFederatedAuth } from "./setupFederatedAuth";
+import type { ISetupAuthentikResult } from "./setupAuthentik";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 /**
@@ -131,6 +132,8 @@ export class SSOAddCommand extends PanfactumCommand {
 
         const tasks = new Listr([], { rendererOptions: { collapseErrors: false } });
 
+        const result = {} as ISetupAuthentikResult;
+
         tasks.add({
             title: this.context.logger.applyColors("Setup Authentik"),
             skip: async () => {
@@ -151,7 +154,8 @@ export class SSOAddCommand extends PanfactumCommand {
                 return setupAuthentik({
                     context: this.context,
                     mainTask: mainTask as PanfactumTaskWrapper,
-                    regionPath: selectedRegion.path
+                    regionPath: selectedRegion.path,
+                    result,
                 });
             }
         });
@@ -190,5 +194,48 @@ export class SSOAddCommand extends PanfactumCommand {
         await tasks.run().catch((e: unknown) => {
             throw new CLIError("Failed to Install Authentik", e);
         })
+
+        if (result.authentikWebUI) {
+            this.context.logger.info([
+                `Authentik setup complete!`,
+                ``,
+                `  Web UI:   ${result.authentikWebUI}`,
+                `  Username: ${result.authentikUsername}`,
+                `  Password: ${result.authentikPassword}`,
+                `  API token: Saved to ${result.authentikTokenPath}`,
+            ].join("\n"));
+        }
+
+        if (result.sesStatus === "requested") {
+            const lines = [
+                "AWS SES production access has been requested.",
+                "AWS Trust & Safety will review within 24 hours and email your account's root address.",
+                "Until approved, Authentik can only send emails to verified addresses in your AWS account.",
+            ];
+            if (result.sesCaseId) {
+                lines.push(`Track the review: AWS Support case ${result.sesCaseId}`);
+            }
+            this.context.logger.info(lines.join("\n"));
+        } else if (result.sesStatus === "pending") {
+            const lines = [
+                "Your SES production access request is under review by AWS Trust & Safety.",
+                "Until approved, Authentik can only send emails to verified addresses in your AWS account.",
+            ];
+            if (result.sesCaseId) {
+                lines.push(`Track the review: AWS Support case ${result.sesCaseId}`);
+            }
+            this.context.logger.info(lines.join("\n"));
+        } else if (result.sesStatus === "denied") {
+            const lines = [
+                "Your SES production access request was denied.",
+                "Authentik can only send emails to verified addresses in your AWS account until this is resolved.",
+            ];
+            if (result.sesCaseId) {
+                lines.push(`To appeal, respond to AWS Support case ${result.sesCaseId}`);
+            } else {
+                lines.push("To appeal, respond to the AWS Support case for this request.");
+            }
+            this.context.logger.warn(lines.join("\n"));
+        }
     }
 }

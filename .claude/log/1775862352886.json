@@ -1,0 +1,24 @@
+{
+  "changes": [
+    {
+      "motivation": "AWS SES production access cannot be requested via Terraform (no provider resource exists; open issue since 2023 was abandoned due to no clean destroy path and side-effecting on every apply). The CLI is the correct place to automate this step.",
+      "summary": "Added `@aws-sdk/client-sesv2` dependency and created `getSESv2Client.ts` following the existing client factory pattern."
+    },
+    {
+      "motivation": "Automate the SES sandbox → production promotion step that was previously manual, using context already collected from earlier `pf sso add` tasks.",
+      "summary": "Added a 'Request SES Production Access' task inline in `setupAuthentik.ts` after 'Deploy AWS SES Domain'. Calls `GetAccountCommand` each run to branch on live status (already enabled, granted, pending, denied, failed/absent). On submit, calls `PutAccountDetailsCommand` with pre-filled values: `MailType=TRANSACTIONAL`, `WebsiteURL` set to the Authentik URL, org-specific `UseCaseDescription`, and the user's email as additional contact. Surfaces the AWS Support case ID in the task title using lowlighted formatting."
+    },
+    {
+      "motivation": "Post-run info about SES review status and Authentik credentials must appear after Listr completes to render in the correct terminal location.",
+      "summary": "Introduced `ISetupAuthentikResult` returned from `setupAuthentik` holding both SES fields (`sesStatus`, `sesCaseId`) and Authentik completion fields (`authentikWebUI`, `authentikUsername`, `authentikPassword`, `authentikTokenPath`). The 'Setting up your Authentik user account' task now writes to this result instead of calling `context.logger.info`. `command.ts` prints the Authentik completion block and SES status message after `tasks.run()`."
+    }
+  ],
+  "problems": [
+    "AWS SESv2 SDK command input fields use PascalCase (e.g., `MailType`, `WebsiteURL`, `UseCaseDescription`), not camelCase. This caused TypeScript errors that required a fix pass. The SDK docs and types make this clear in hindsight but the inconsistency with typical JS conventions is a common footgun.",
+    "Listr `task.output` disappears immediately when the task completes — only text in `task.title` persists. This is a known Listr behaviour that wasn't documented in the codebase, leading to an initial implementation that used `task.output` and had to be reworked.",
+    "Listr task titles and `context.logger.info` calls made inside tasks do not render in the correct terminal location relative to post-task output. The Authentik completion messages were inside Listr tasks and needed to be moved out to `command.ts`. This pattern (post-Listr output in command.ts) wasn't explicitly established or documented anywhere in the project.",
+    "Initial implementation placed the SES logic in a separate `requestSESProductionAccess.ts` file, which the user immediately asked to remove and inline into `setupAuthentik.ts`. The project convention of keeping command-specific logic inline rather than extracted to a utility file was not documented."
+  ],
+  "session_id": "7e0da0f3-8d00-434f-9076-3662f981d65f",
+  "timestamp": "2026-04-10T23:06:27.759Z"
+}
