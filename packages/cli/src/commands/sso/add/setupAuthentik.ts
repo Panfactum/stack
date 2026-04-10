@@ -102,7 +102,6 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
 
     interface IContext {
         ancestorDomain?: string;
-        authentikRootEmail?: string;
         authentikAdminEmail?: string;
         authentikAdminName?: string;
         orgName?: string;
@@ -149,12 +148,11 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
 
 
                 ctx.ancestorDomain = sesModuleConfig.extra_inputs?.['domain'] as string | undefined;
-                ctx.authentikRootEmail = authentikModuleConfig.extra_inputs?.['akadmin_email'] as string | undefined;
                 ctx.authentikAdminEmail = kubeAuthentikPfYAMLFileData?.adminEmail;
                 ctx.authentikAdminName = kubeAuthentikPfYAMLFileData?.adminName;
                 ctx.orgName = authentikModuleConfig.extra_inputs?.['organization_name'] as string | undefined;
 
-                if (ctx.ancestorDomain && ctx.authentikAdminEmail && ctx.authentikRootEmail && ctx.authentikAdminName && ctx.orgName) {
+                if (ctx.ancestorDomain && ctx.authentikAdminEmail && ctx.authentikAdminName && ctx.orgName) {
                     task.skip("Already have Authentik configuration, skipping...");
                     return;
                 }
@@ -183,24 +181,6 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                             message: "Environment domain:",
                             choices: Object.keys(domains).map(domain => ({ value: domain, name: `${SSO_SUBDOMAIN}.${domain}` })),
                         });
-                    }
-
-                    if (!ctx.authentikRootEmail) {
-                        const defaultRootEmail = `authentik-root@${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
-                        ctx.authentikRootEmail = await context.logger.input({
-                            task,
-                            default: defaultRootEmail,
-                            explainer: "This email will be used for the initial Authentik root user.",
-                            message: "Email:",
-                            validate: (value: string) => {
-                                const { error } = z.string().email().safeParse(value);
-                                if (error) {
-                                    return error.issues[0]?.message || "Please enter a valid email address";
-                                }
-
-                                return true;
-                            }
-                        })
                     }
 
                     if (!ctx.orgName) {
@@ -294,7 +274,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 }),
                 akadmin_email: defineInputUpdate({
                     schema: z.string(),
-                    update: (_, ctx) => ctx.authentikRootEmail!
+                    update: (_, ctx) => `akadmin@${SSO_SUBDOMAIN}.${ctx.ancestorDomain!}`
                 }),
                 organization_name: defineInputUpdate({
                     schema: z.string(),
@@ -657,7 +637,7 @@ spec:
                     });
                 }
 
-                if (!ctx.authentikAdminEmail || !ctx.authentikAdminName || !ctx.authentikRootEmail) {
+                if (!ctx.authentikAdminEmail || !ctx.authentikAdminName) {
                     throw new CLIError("Authentik admin email or name not found");
                 }
 

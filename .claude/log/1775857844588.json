@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "The bootstrap `akadmin` user created by Authentik is immediately disabled after setup, so prompting users for its email adds unnecessary friction with no benefit.",
+      "summary": "Removed `authentikRootEmail` from `IContext`, removed its prompt and `.pf.yaml` read/write, and hardcoded the `akadmin_email` terraform input to `akadmin@${SSO_SUBDOMAIN}.${ctx.ancestorDomain}` directly in the `kube_authentik` deploy task. The real human admin user email (`authentikAdminEmail`) remains prompted and unchanged."
+    }
+  ],
+  "problems": [
+    "The agent initially removed `authentikAdminEmail` (the real human admin user) instead of `authentikRootEmail` (the bootstrap user). The two similarly-named variables in `IContext` lacked comments distinguishing which user each belonged to, making it easy to confuse them. Adding inline comments like `// Bootstrap akadmin user — disabled at end of setup` and `// Real human admin user — stays active` would have prevented this.",
+    "Using `replace_all` on `authentikAdminEmail` hit the `IContext` interface definition and also accidentally introduced `ctx.ctx.authentikAdminEmail` double-prefixes in usage sites. The operation required two follow-up fixes. More targeted edits with sufficient surrounding context would have avoided this."
+  ],
+  "session_id": "d6e65ab3-7584-4735-8273-a4cb5eac6fc1",
+  "timestamp": "2026-04-10T21:51:14.444Z"
+}
