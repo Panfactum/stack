@@ -1,7 +1,7 @@
 #################################################
 ## Base Image
 #################################################
-FROM node:25-bookworm-slim AS base
+FROM oven/bun:1-debian AS base
 WORKDIR /code
 
 #################################################
@@ -10,7 +10,7 @@ WORKDIR /code
 FROM base AS deps
 ARG BUILDARCH
 
-# Install package manager, puppeteer dependencies (for inlining css), pnpm, and the aws cli (for uploading content to s3)
+# Install puppeteer dependencies (for inlining css) and the aws cli (for uploading content to s3)
 RUN apt update && \
   apt install -y \
     curl \
@@ -40,17 +40,16 @@ RUN apt update && \
   ./aws/install && \
   apt-get clean autoclean && \
   apt-get autoremove -y && \
-  rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
-  npm i -g pnpm@9.14.2
+  rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # Use the debian version of chrome
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Install Dependencies
-COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
+COPY package.json bun.lock .
 COPY packages/website/package.json packages/website/
-RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile --shamefully-hoist
+RUN --mount=type=cache,id=bun,target=/root/.bun bun install --frozen-lockfile
 
 
 #################################################
@@ -74,7 +73,7 @@ RUN --mount=type=cache,id=website-build,target=/code/packages/website/.cache \
   ALGOLIA_INDEX_NAME=${ALGOLIA_INDEX_NAME} \
   SITE_URL=${SITE_URL} \
   NODE_OPTIONS=--max-old-space-size=8192 \
-  pnpm run build
+  bun run build
 
 RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_ID \
   --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,target=/run/secrets/AWS_SECRET_ACCESS_KEY \

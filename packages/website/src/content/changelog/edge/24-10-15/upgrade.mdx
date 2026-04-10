@@ -1,4 +1,5 @@
 {/* Upgrade instructions for edge release 24-10-15. */}
+
 {/* Covers the Panfactum provider integration and module simplification changes. */}
 
 ## Panfactum Provider Integration
@@ -11,6 +12,7 @@ variables in module `source` fields. Two new inputs are now passed to every modu
 and `pf_module_ref`.
 
 **Before:**
+
 ```hcl
 module "namespace" {
   source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
@@ -30,6 +32,7 @@ module "namespace" {
 ```
 
 **After:**
+
 ```hcl
 module "namespace" {
   source = "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
@@ -42,12 +45,12 @@ module "namespace" {
 
 Terragrunt no longer passes the following inputs to modules by default (they are now accessed via the Panfactum provider):
 
-- `pf_stack_version`
-- `pf_stack_commit`
-- `environment`
-- `region`
-- `pf_root_module`
-- `is_local`
+* `pf_stack_version`
+* `pf_stack_commit`
+* `environment`
+* `region`
+* `pf_root_module`
+* `is_local`
 
 ### Removed Tooling
 

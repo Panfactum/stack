@@ -1,4 +1,5 @@
 {/* Upgrade instructions for edge release 24-11-13. */}
+
 {/* Covers Kyverno installation, kube_fledged/kube_reflector deprecation, and kube_pg_cluster VPA changes. */}
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
@@ -23,34 +24,34 @@ Both `kube_fledged` and `kube_reflector` have been deprecated in favor of Kyvern
 **Important:** These modules must be removed from your clusters **before upgrading to the next version**. Do not
 remove them until Kyverno is installed.
 
-- **Replacement for `kube_fledged`:** Follow [this guide](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches)
+* **Replacement for `kube_fledged`:** Follow [this guide](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches)
   and use the new [`kube_node_image_cache`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) module.
-- **Replacement for `kube_reflector`:**
-  - To sync ConfigMaps, use [`kube_sync_config_map`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map).
-  - To sync Secrets, use [`kube_sync_secret`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret).
+* **Replacement for `kube_reflector`:**
+  * To sync ConfigMaps, use [`kube_sync_config_map`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map).
+  * To sync Secrets, use [`kube_sync_secret`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret).
 
 ## Update `kube_pg_cluster` VPA Inputs
 
 Vertical pod autoscaling now works for PostgreSQL clusters. The following variables have been removed:
 
-- `pg_memory_mb`
-- `pg_cpu_millicores`
+* `pg_memory_mb`
+* `pg_cpu_millicores`
 
 And the following variables have been added:
 
-- `pg_minimum_memory_mb`
-- `pg_maximum_memory_mb`
-- `pg_minimum_cpu_millicores`
-- `pg_maximum_cpu_millicores`
-- `pgbouncer_minimum_memory_mb`
-- `pgbouncer_maximum_memory_mb`
-- `pgbouncer_minimum_cpu_millicores`
-- `pgbouncer_maximum_cpu_millicores`
+* `pg_minimum_memory_mb`
+* `pg_maximum_memory_mb`
+* `pg_minimum_cpu_millicores`
+* `pg_maximum_cpu_millicores`
+* `pgbouncer_minimum_memory_mb`
+* `pgbouncer_maximum_memory_mb`
+* `pgbouncer_minimum_cpu_millicores`
+* `pgbouncer_maximum_cpu_millicores`
 
 ## Automatic ARM64 and Spot Tolerations
 
 All pods in Panfactum clusters will now automatically tolerate `arm64` and `spot` node taints regardless of whether
 they were created by Panfactum modules. To disable these tolerations for a specific pod, add the labels:
 
-- `panfactum.com/arm64-enabled = "false"` to disable arm64 tolerance
-- `panfactum.com/spot-enabled = "false"` to disable spot tolerance
+* `panfactum.com/arm64-enabled = "false"` to disable arm64 tolerance
+* `panfactum.com/spot-enabled = "false"` to disable spot tolerance

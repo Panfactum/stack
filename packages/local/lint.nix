@@ -11,10 +11,11 @@ let
   lintWebsite = pkgs.writeShellScript "ds-lint-website" ''
     set -eo pipefail
     (
-      cd "$REPO_ROOT/packages/website"
+      cd "$REPO_ROOT"
       export NODE_OPTIONS=--max-old-space-size=8192
       export LINT=true
-      pnpm exec eslint --fix "../../$1"
+      export ESLINT_USE_FLAT_CONFIG=false
+      ${pkgs.bun}/bin/bunx eslint --fix --config packages/website/.eslintrc.cjs "$@"
     )
   '';
 
@@ -23,16 +24,16 @@ let
     (
       cd "$REPO_ROOT/packages/website"
       export NODE_OPTIONS=--max-old-space-size=8192
-      pnpm check
+      ${pkgs.bun}/bin/bun run check
     )
   '';
 
   lintCli = pkgs.writeShellScript "ds-lint-cli" ''
     set -eo pipefail
     (
-      cd "$REPO_ROOT/packages/cli"
+      cd "$REPO_ROOT"
       export NODE_OPTIONS=--max-old-space-size=8192
-      bun run eslint --fix "../../$1"
+      ${pkgs.bun}/bin/bunx eslint --fix "$@"
     )
   '';
 
@@ -41,7 +42,7 @@ let
     (
       cd "$REPO_ROOT/packages/cli"
       export NODE_OPTIONS=--max-old-space-size=8192
-      bun check
+      ${pkgs.bun}/bin/bun check
     )
   '';
 

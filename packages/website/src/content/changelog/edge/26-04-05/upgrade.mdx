@@ -1,4 +1,5 @@
 {/* Upgrade instructions for the next unreleased edge release. */}
+
 {/* Covers: aws_organization alias, contact info consolidation, aws_dns_zones restructure, kube_domain DNS zone, tf_bootstrap_resources secondary provider removal and backup vault rename, Authentik token migration, Authentik sso subdomain, Authentik org name, KEDA installation, node image cache removal, Kubernetes 1.33 upgrade, kube_certificates consolidation, pull_through_cache_enabled review, kube_cron_job update_type removal, burstable_nodes_enabled review, PF_SKIP_REPO_CHECK rename, pf cluster add rename, pf CLI initialization. */}
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
@@ -143,13 +144,13 @@ The `kube_node_image_cache` and `kube_node_image_cache_controller` modules have 
 3. Remove the module directories for `kube_node_image_cache` and `kube_node_image_cache_controller` from your
    Terragrunt configuration.
 4. Remove the following input variables from any module configurations that set them:
-   - `node_image_cached_enabled` — from `kube_airbyte`, `kube_alloy`, `kube_argo_event_bus`, `kube_authentik`,
+   * `node_image_cached_enabled` — from `kube_airbyte`, `kube_alloy`, `kube_argo_event_bus`, `kube_authentik`,
      `kube_aws_ebs_csi`, `kube_cloudnative_pg`, `kube_gha_runners`, `kube_ingress_nginx`, `kube_linkerd`,
      `kube_monitoring`, `kube_nats`, `kube_opensearch`, `kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault`
-   - `node_image_cache_enabled` — from any module that sets it
-   - `image_prepull_enabled` and `image_pin_enabled` — from container spec blocks in `kube_pod`, `kube_deployment`,
+   * `node_image_cache_enabled` — from any module that sets it
+   * `image_prepull_enabled` and `image_pin_enabled` — from container spec blocks in `kube_pod`, `kube_deployment`,
      `kube_daemon_set`, `kube_stateful_set`, `kube_cron_job`, and `kube_job`
-   - `panfactum_node_image_cache_enabled` — from `kube_policies`
+   * `panfactum_node_image_cache_enabled` — from `kube_policies`
 
 ## Upgrade Kubernetes to 1.33
 
@@ -235,9 +236,9 @@ pulls for these modules will fail.
 
 Choose one of the following options:
 
-- **Option A**: Deploy the [`aws_ecr_pull_through_cache`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache)
+* **Option A**: Deploy the [`aws_ecr_pull_through_cache`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache)
   module to enable pull-through caching before re-applying these modules.
-- **Option B**: Explicitly set `pull_through_cache_enabled = false` on each of `kube_nats`, `kube_pg_cluster`,
+* **Option B**: Explicitly set `pull_through_cache_enabled = false` on each of `kube_nats`, `kube_pg_cluster`,
   `kube_redis_sentinel`, `kube_stateful_set`, and `kube_deployment` in your module configurations.
 
 ## Remove `update_type` from `kube_cron_job`

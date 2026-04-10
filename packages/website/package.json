@@ -9,7 +9,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
-    "lint": "eslint src --fix"
+    "lint": "ESLINT_USE_FLAT_CONFIG=false bunx eslint src --fix"
   },
   "remarkConfig": {
     "settings": {

@@ -46,7 +46,7 @@ const SidebarMenuButton: Component<SidebarMenuButtonProps> = (props) => {
         <li class={clsx(props.isChild && "pl-4")}>
           <SavedLink
             defaultHref={props.href || "#"}
-            id={`${props.text.toLowerCase()}`}
+            id={props.text.toLowerCase()}
             saveEnabled={props.saveUserLocation}
           >
             <button class={buttonClasses()}>
