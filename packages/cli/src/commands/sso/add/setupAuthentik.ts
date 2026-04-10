@@ -532,6 +532,7 @@ spec:
                         region,
                         env: {
                             ...context.env,
+                            AUTHENTIK_TOKEN: config.authentik_token,
                         },
                         skipIfAlreadyApplied: true,
                         module: MODULES.AUTHENTIK_CORE_RESOURCES,

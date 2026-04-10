@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "The authentik_core_resources Terragrunt module uses the Authentik Terraform provider, which requires an API token to authenticate. The bootstrap token is retrieved earlier in the flow but was not being forwarded as AUTHENTIK_TOKEN into the deployment environment, causing the provider to fail authentication.",
+      "summary": "Added AUTHENTIK_TOKEN: config.authentik_token to the env object passed to the buildDeployModuleTask call for the AUTHENTIK_CORE_RESOURCES module in setupAuthentik.ts. This enables panfactum.hcl to pick up the token via get_env(\"AUTHENTIK_TOKEN\") and pass it to the Authentik Terraform provider."
+    }
+  ],
+  "problems": [],
+  "session_id": "e7adcab7-f633-487d-92be-84ef33b2198d",
+  "timestamp": "2026-04-10T21:41:38.683Z"
+}
