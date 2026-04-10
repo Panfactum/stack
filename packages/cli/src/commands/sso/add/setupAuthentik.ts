@@ -1,26 +1,26 @@
+import { randomBytes } from "node:crypto";
 import path, { join } from "node:path";
 import { cwd } from "node:process";
 import { CoreApi, Configuration, type User, IntentEnum } from "@goauthentik/api";
-import open from "open";
 import { z } from "zod";
 import authentikCoreResourcesHcl from "@/templates/authentk_core_resources.hcl" with { type: "file" };
 import kubeSESDomainHcl from "@/templates/aws_ses_domain.hcl" with { type: "file" };
 import kubeAuthentikHcl from "@/templates/kube_authentik.hcl" with { type: "file" };
 import { getIdentity } from "@/util/aws/getIdentity";
+import { GLOBAL_USER_CONFIG } from "@/util/config/constants";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
+import { upsertConfigValues } from "@/util/config/upsertConfigValues";
 import { SSO_SUBDOMAIN } from "@/util/domains/consts";
 import { CLIError, CLISubprocessError } from "@/util/error/error";
-import { fileExists } from "@/util/fs/fileExists";
 import { writeFile } from "@/util/fs/writeFile";
-import { sopsUpsert } from "@/util/sops/sopsUpsert";
+import { getAuthentikBootstrapToken } from "@/util/sso/getAuthentikBootstrapToken";
 import { MODULES } from "@/util/terragrunt/constants";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
-import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { sleep } from "@/util/util/sleep";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { upsertPFYAMLFile } from "@/util/yaml/upsertPFYAMLFile";
-import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
+
 import type { PanfactumContext } from "@/util/context/context";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
@@ -98,7 +98,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
         environment
     );
     const clusterPath = path.join(environmentPath, region);
-    const authentikSecretsPath = join(clusterPath, "region.secrets.yaml")
+
 
     interface IContext {
         ancestorDomain?: string;
@@ -119,41 +119,10 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             title: "Get Authentik User Configuration",
             task: async (ctx, task) => {
 
-                // FIX: @seth - You should NEVER read the module.yaml files directly. use get panfactum config
-                const originalSESInputs = await readYAMLFile({
-                    filePath: path.join(clusterPath, MODULES.AWS_SES_DOMAIN, "module.yaml"),
-                    context,
-                    throwOnMissing: false,
-                    validationSchema: z
-                        .object({
-                            extra_inputs: z
-                                .object({
-                                    domain: z.string().optional(),
-                                })
-                                .passthrough()
-                                .optional()
-                                .default({}),
-                        }).passthrough(),
-                });
-
-                // FIX: @seth - You should NEVER read the module.yaml files directly.
-                const originalAuthentikInputs = await readYAMLFile({
-                    filePath: path.join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml"),
-                    context,
-                    throwOnMissing: false,
-                    validationSchema: z
-                        .object({
-                            extra_inputs: z
-                                .object({
-                                    akadmin_email: z.string().optional(),
-                                    organization_name: z.string().optional(),
-                                })
-                                .passthrough()
-                                .optional()
-                                .default({}),
-                        })
-                        .passthrough(),
-                });
+                const [sesModuleConfig, authentikModuleConfig] = await Promise.all([
+                    getPanfactumConfig({ context, directory: path.join(clusterPath, MODULES.AWS_SES_DOMAIN) }),
+                    getPanfactumConfig({ context, directory: path.join(clusterPath, MODULES.KUBE_AUTHENTIK) }),
+                ]);
 
                 const authentikCoreResourcesPfYAMLFileData = await readYAMLFile({
                     filePath: path.join(clusterPath, MODULES.AUTHENTIK_CORE_RESOURCES, ".pf.yaml"),
@@ -179,11 +148,11 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 });
 
 
-                ctx.ancestorDomain = originalSESInputs?.extra_inputs.domain;
-                ctx.authentikRootEmail = originalAuthentikInputs?.extra_inputs.akadmin_email;
+                ctx.ancestorDomain = sesModuleConfig.extra_inputs?.['domain'] as string | undefined;
+                ctx.authentikRootEmail = authentikModuleConfig.extra_inputs?.['akadmin_email'] as string | undefined;
                 ctx.authentikAdminEmail = kubeAuthentikPfYAMLFileData?.adminEmail;
                 ctx.authentikAdminName = kubeAuthentikPfYAMLFileData?.adminName;
-                ctx.orgName = originalAuthentikInputs?.extra_inputs.organization_name;
+                ctx.orgName = authentikModuleConfig.extra_inputs?.['organization_name'] as string | undefined;
 
                 if (ctx.ancestorDomain && ctx.authentikAdminEmail && ctx.authentikRootEmail && ctx.authentikAdminName && ctx.orgName) {
                     task.skip("Already have Authentik configuration, skipping...");
@@ -338,39 +307,12 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             title: "Verify the Authentik Ingress",
             task: async (_, task) => {
                 if (!config.authentik_token) {
-                    const outputs = await terragruntOutput({
+                    config.authentik_token = await getAuthentikBootstrapToken({
                         context,
                         environment,
                         region,
-                        env: {
-                            ...context.env,
-                        },
-                        module: MODULES.KUBE_AUTHENTIK,
-                        validationSchema: z.record(
-                            z.string(),
-                            z.object({
-                                sensitive: z.boolean(),
-                                type: z.string(),
-                                value: z.string(),
-                            })
-                        )
-                    })
-
-                    const authentikBootstrapToken = outputs["akadmin_bootstrap_token"]?.value
-
-                    if (!authentikBootstrapToken) {
-                        throw new CLIError("akadmin_bootstrap_token not found in Authentik module outputs")
-                    }
-
-                    await sopsUpsert({
-                        filePath: authentikSecretsPath,
-                        context,
-                        values: {
-                            authentik_token: authentikBootstrapToken
-                        }
-                    })
-
-                    config.authentik_token = authentikBootstrapToken
+                        env: { ...context.env },
+                    });
                 }
 
 
@@ -430,22 +372,16 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             },
         },
         {
-            skip: async () => {
-                // FIX: @seth - NEVER read to the config files directly
-                const originalGlobalConfig = await readYAMLFile({
-                    filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
-                    context,
-                    throwOnMissing: false,
-                    validationSchema: z.object({
-                        authentik_url: z.string().optional(),
-                    }).passthrough(),
-                })
-                return !!originalGlobalConfig?.authentik_url
-            },
+            skip: () => !!config.authentik_url,
             title: "Disabling default Authentik resources",
             task: async (ctx) => {
                 if (!config.authentik_token) {
-                    throw new CLIError("authentik boostrap token not found in config variables")
+                    config.authentik_token = await getAuthentikBootstrapToken({
+                        context,
+                        environment,
+                        region,
+                        env: { ...context.env },
+                    });
                 }
 
                 const configuration = new Configuration({
@@ -476,37 +412,10 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                     })
                 }
 
-                // FIX: @seth - NEVER read to the config files directly
-                if (await fileExists({ filePath: path.join(context.devshellConfig.environments_dir, "global.yaml") })) {
-                    // FIX: @seth - NEVER read to the config files directly
-                    const originalGlobalConfig = await readYAMLFile({
-                        filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
-                        context,
-                        validationSchema: z.object({
-                            authentik_url: z.string().optional(),
-                        }).passthrough(),
-                    })
-                    const newGlobalConfig = {
-                        ...originalGlobalConfig,
-                        authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
-                    }
-                    // FIX: @seth - NEVER write to the config files directly
-                    await writeYAMLFile({
-                        context,
-                        filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
-                        values: newGlobalConfig,
-                        overwrite: true,
-                    })
-                } else {
-                    // FIX: @seth - NEVER write to the config files directly
-                    await writeYAMLFile({
-                        context,
-                        filePath: path.join(context.devshellConfig.environments_dir, "global.yaml"),
-                        values: {
-                            authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
-                        }
-                    })
-                }
+                await upsertConfigValues({
+                    context,
+                    values: { authentik_url: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}` },
+                })
             }
         },
         {
@@ -517,7 +426,12 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             },
             task: async (ctx, parentTask) => {
                 if (!config.authentik_token) {
-                    throw new CLIError("authentik boostrap token not found in config variables")
+                    config.authentik_token = await getAuthentikBootstrapToken({
+                        context,
+                        environment,
+                        region,
+                        env: { ...context.env },
+                    });
                 }
                 if (!ctx.orgName) {
                     throw new CLIError("orgName not found in Authentik context")
@@ -700,9 +614,14 @@ spec:
         },
         {
             title: "Setting up your Authentik user account",
-            task: async (ctx, task) => {
+            task: async (ctx, _task) => {
                 if (!config.authentik_token) {
-                    throw new CLIError("authentik boostrap token not found in config variables")
+                    config.authentik_token = await getAuthentikBootstrapToken({
+                        context,
+                        environment,
+                        region,
+                        env: { ...context.env },
+                    });
                 }
 
                 if (!ctx.authentikAdminEmail || !ctx.authentikAdminName || !ctx.authentikRootEmail) {
@@ -756,47 +675,31 @@ spec:
                 }
                 const userId = user.pk;
 
-                const passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
+                // Generate a secure password and set it via API
+                const generatedPassword = randomBytes(32).toString("hex");
+                await originalAuthentikClient.coreUsersSetPasswordCreate({
                     id: userId,
-                }).catch((error: unknown) => {
-                    throw new CLIError("Failed to get password reset link in Authentik", error);
-                })
-                const passwordResetLink = passwordReset.link;
-
-                const openBrowser = await context.logger.confirm({
-                    task,
-                    explainer: `We will now open your browser so you can finish setting up your Authentik account.
-You will need to enter your user email(${ctx.authentikAdminEmail}) in the browser that opens. ${passwordResetLink}`,
-                    message: "Ready?",
-                    default: true,
-                })
-
-                if (openBrowser) {
-                    await open(passwordResetLink)
-                } else {
-                    throw new CLIError("You must complete the account setup before continuing.")
-                }
-
-                const accountSetupComplete = await context.logger.confirm({
-                    task,
-                    message: "Have you setup your Authentik account?",
-                    default: true,
-                })
-
-                if (!accountSetupComplete) {
-                    const accountSetupCompleteAgain = await context.logger.confirm({
-                        task,
-                        message: "Have you setup your Authentik account? You must complete that before continuing.",
-                        default: true,
-                    });
-                    if (!accountSetupCompleteAgain) {
-                        throw new CLIError("You must complete the account setup before continuing.")
+                    userPasswordSetRequest: {
+                        password: generatedPassword,
                     }
-                }
+                }).catch((error: unknown) => {
+                    throw new CLIError("Failed to set password for Authentik user", error);
+                })
 
-                // Get a new token
-                // If they manually disable the token we will run into identifier collisions
-                const tokenIdentifier = `local-framework-token${String(Date.now())}`
+                // Rotate the installer API token: delete if exists, then always create fresh
+                const tokenIdentifier = "local-pf-installer-token"
+                const existingTokens = await originalAuthentikClient.coreTokensList({
+                    identifier: tokenIdentifier,
+                }).catch((error: unknown) => {
+                    throw new CLIError("Failed to list API tokens in Authentik", error);
+                })
+                if (existingTokens.results.length > 0) {
+                    await originalAuthentikClient.coreTokensDestroy({
+                        identifier: tokenIdentifier,
+                    }).catch((error: unknown) => {
+                        throw new CLIError("Failed to delete existing installer token in Authentik", error);
+                    })
+                }
                 await originalAuthentikClient.coreTokensCreate({
                     tokenRequest: {
                         identifier: tokenIdentifier,
@@ -804,47 +707,30 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                         user: userId,
                         expiring: false,
                         description:
-                            "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
+                            "Created by the Panfactum CLI installer and used to interact with Authentik from the local machine.",
                     }
                 }).catch((error: unknown) => {
                     throw new CLIError("Failed to create API token in Authentik", error);
                 })
 
-                const tokenLink = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/if/user/#/settings;%7B%22page%22%3A%22page-tokens%22%7D`
-                await open(tokenLink)
+                // Retrieve the plaintext token value
+                const tokenView = await originalAuthentikClient.coreTokensViewKeyRetrieve({
+                    identifier: tokenIdentifier,
+                }).catch((error: unknown) => {
+                    throw new CLIError("Failed to retrieve API token key from Authentik", error);
+                })
+                const authentikUserToken = tokenView.key;
 
-                // replace bootstrap token with API token
-                const authentikUserToken = await context.logger.password({
-                    task,
-                    explainer: `
-                    We have created a new temporary API token to use                    
-                    Go to ${tokenLink}
-                    Look for the token with the identifier '${tokenIdentifier}'`,
-                    message: "Copy the token and paste it here:",
-                    validate: async (value) => {
-                        const response = await fetch(
-                            `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3/core/groups/`,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${value}`,
-                                },
-                            }
-                        ).catch(() => null);
-                        if (!response || response.status !== 200) {
-                            return response ? "This does not appear to be a valid Authentik Access Token. Please try again." : "Error validating Authentik Access Token, please try again.";
-                        }
-                        return true;
-                    },
-                });
-
-                await sopsUpsert({
-                    filePath: authentikSecretsPath,
+                // Store the token in global.user.yaml (gitignored, user-local)
+                await upsertConfigValues({
                     context,
+                    filePath: join(context.devshellConfig.environments_dir, GLOBAL_USER_CONFIG),
                     values: {
-                        authentik_token: authentikUserToken
+                        authentik_token: authentikUserToken,
                     }
                 })
 
+                // Build a new client using the user token
                 const newAuthentikClient = new CoreApi(new Configuration({
                     basePath: `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}/api/v3`,
                     headers: {
@@ -852,39 +738,48 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                     }
                 }))
 
-                // delete the bootstrap token
-                // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-destroy
-                await originalAuthentikClient.coreTokensDestroy({
-                    identifier: "authentik-bootstrap-token",
-                }).catch((error: unknown) => {
-                    throw new CLIError("Failed to delete bootstrap token in Authentik", error);
-                })
-
-                // get all the users
+                // Verify the new token works before deleting the bootstrap token
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-list
                 const allUsers = await newAuthentikClient.coreUsersList().catch((error: unknown) => {
-                    throw new CLIError("Failed to get users from Authentik", error);
+                    throw new CLIError("Failed to verify new Authentik token — user list request failed", error);
                 })
+
+                // delete the bootstrap token now that the new token is confirmed working
+                // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-list
+                // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-destroy
+                const bootstrapTokens = await originalAuthentikClient.coreTokensList({
+                    identifier: "authentik-bootstrap-token",
+                }).catch((error: unknown) => {
+                    throw new CLIError("Failed to list tokens in Authentik", error);
+                })
+                if (bootstrapTokens.results.length === 0) {
+                    context.logger.debug("Bootstrap token 'authentik-bootstrap-token' not found in Authentik — skipping deletion");
+                } else {
+                    await originalAuthentikClient.coreTokensDestroy({
+                        identifier: "authentik-bootstrap-token",
+                    }).catch((error: unknown) => {
+                        throw new CLIError("Failed to delete bootstrap token in Authentik", error);
+                    })
+                }
                 const bootstrapUser = allUsers.results.find(
                     (user) => user.username === "akadmin"
                 );
                 if (!bootstrapUser) {
-                    throw new CLIError("Bootstrap user not found in Authentik");
+                    context.logger.debug("Bootstrap user 'akadmin' not found in Authentik — skipping disable");
+                } else {
+                    // disable the bootstrap user
+                    // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-update
+                    await newAuthentikClient.coreUsersUpdate({
+                        id: bootstrapUser.pk,
+                        userRequest: {
+                            username: "akadmin",
+                            name: 'Authentik Root User',
+                            isActive: false,
+                        }
+                    }).catch((error: unknown) => {
+                        throw new CLIError("Failed to disable bootstrap user in Authentik", error);
+                    })
                 }
-                const bootstrapUserUuid = bootstrapUser.pk;
-
-                // disable the bootstrap user
-                // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-update
-                await newAuthentikClient.coreUsersUpdate({
-                    id: bootstrapUserUuid,
-                    userRequest: {
-                        username: "akadmin",
-                        name: 'Authentik Root User',
-                        isActive: false,
-                    }
-                }).catch((error: unknown) => {
-                    throw new CLIError("Failed to disable bootstrap user in Authentik", error);
-                })
 
                 await upsertPFYAMLFile({
                     context,
@@ -895,6 +790,17 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                         user_setup_complete: true
                     }
                 })
+
+                const webUIURL = `https://${SSO_SUBDOMAIN}.${ctx.ancestorDomain}`
+                const globalUserConfigPath = join(context.devshellConfig.environments_dir, GLOBAL_USER_CONFIG)
+                context.logger.info([
+                    `Authentik setup complete!`,
+                    ``,
+                    `  Web UI:   ${webUIURL}`,
+                    `  Username: ${ctx.authentikAdminEmail}`,
+                    `  Password: ${generatedPassword}`,
+                    `  API token: Saved to ${globalUserConfigPath}`,
+                ].join("\n"))
             }
         }
     ])
