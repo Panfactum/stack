@@ -47,6 +47,7 @@ export async function setupClusterExtensions(
     const eksModuleInfo = await readYAMLFile({
       filePath: join(clusterPath, MODULES.AWS_EKS, "module.yaml"),
       context,
+      throwOnMissing: false,
       validationSchema: z.object({
         extra_inputs: z.object({
           bootstrap_mode_enabled: z.boolean(),
@@ -68,6 +69,7 @@ export async function setupClusterExtensions(
     const vaultModuleInfo = await readYAMLFile({
       filePath: join(clusterPath, MODULES.KUBE_VAULT, "module.yaml"),
       context,
+      throwOnMissing: false,
       validationSchema: z.object({
         extra_inputs: z.object({
           bootstrap_mode_enabled: z.boolean(),
@@ -92,6 +94,7 @@ export async function setupClusterExtensions(
     const certManagerModuleInfo = await readYAMLFile({
       filePath: join(clusterPath, MODULES.KUBE_CERTIFICATES, "module.yaml"),
       context,
+      throwOnMissing: false,
       validationSchema: z.object({
         extra_inputs: z.object({
           bootstrap_mode_enabled: z.boolean(),
@@ -116,6 +119,7 @@ export async function setupClusterExtensions(
     const linkerdModuleInfo = await readYAMLFile({
       filePath: join(clusterPath, MODULES.KUBE_LINKERD, "module.yaml"),
       context,
+      throwOnMissing: false,
       validationSchema: z.object({
         extra_inputs: z.object({
           bootstrap_mode_enabled: z.boolean(),
@@ -140,6 +144,7 @@ export async function setupClusterExtensions(
     const nginxIngressModuleInfo = await readYAMLFile({
       filePath: join(clusterPath, MODULES.KUBE_INGRESS_NGINX, "module.yaml"),
       context,
+      throwOnMissing: false,
       validationSchema: z.object({
         extra_inputs: z.object({
           bootstrap_mode_enabled: z.boolean(),
