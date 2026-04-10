@@ -7,12 +7,7 @@ terraform {
   source = include.panfactum.locals.pf_stack_source
 }
 
-dependency "cert_manager" {
-  config_path  = "../kube_certificates"
-  skip_outputs = true
-}
-
-dependency "cert_issuers" {
+dependency "kube_certificates" {
   config_path = "../kube_certificates"
 }
 
@@ -22,7 +17,7 @@ dependency "kyverno" {
 }
 
 inputs = {
-  vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
+  vault_ca_crt = dependency.kube_certificates.outputs.vault_ca_crt
 
   # You should keep monitoring of this module disabled unless you need
   # granular request / tcp packet inspection as this adds significant
