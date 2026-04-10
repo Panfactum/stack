@@ -201,6 +201,9 @@
     },
   },
   "trustedDependencies": [
+    "@tailwindcss/oxide",
+    "sharp",
+    "esbuild",
     "panfactum-cli",
   ],
   "packages": {
