@@ -352,7 +352,6 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
             },
         },
         {
-            skip: () => !!config.authentik_url,
             title: "Disabling default Authentik resources",
             task: async (ctx) => {
                 if (!config.authentik_token) {
@@ -380,7 +379,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                 const authentikDefaultBrand = brands.results.find(
                     (brand) => brand.domain === "authentik-default"
                 );
-                if (authentikDefaultBrand) {
+                if (authentikDefaultBrand?._default) {
                     await authentikClient.coreBrandsUpdate({
                         brandUuid: authentikDefaultBrand.brandUuid,
                         brandRequest: {

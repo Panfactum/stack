@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "The 'Disabling default Authentik resources' task was incorrectly skipped whenever `authentik_url` was present in config, regardless of whether the brand-disabling step had actually run. This caused silent skips when the URL was set by any other means.",
+      "summary": "Removed `skip: () => !!config.authentik_url` from the 'Disabling default Authentik resources' task in `setupAuthentik.ts`. Added a guard so the brand update API call only fires when the brand's `_default` field is still `true`, making the step idempotent without relying on the skip condition."
+    }
+  ],
+  "problems": [
+    "The skip condition for 'Disabling default Authentik resources' used `authentik_url` as a completion marker, but `authentik_url` is a general-purpose config value that can be present from sources unrelated to this step. No dedicated completion flag was used (unlike other steps that use `user_setup_complete`), making the skip logic misleading and fragile. Better documentation or a dedicated idempotency guard on the actual API response would have prevented this."
+  ],
+  "session_id": "a0b1684f-52fd-4c8e-98ca-9084b3d0246e",
+  "timestamp": "2026-04-10T22:48:07.365Z"
+}
