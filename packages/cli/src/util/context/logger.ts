@@ -188,9 +188,10 @@ export class Logger {
    * ```
    */
   public applyColors(str: string, config?: IApplyColorsConfig) {
-    // Handle null/undefined gracefully
+    // Defensive guard — callers may pass unexpected values at runtime
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (str === null || str === undefined) {
-      str = String(str);
+      return str;
     }
 
     // Return empty strings immediately without applying any color styling
@@ -235,7 +236,7 @@ export class Logger {
 
 
     // Process highlights more efficiently by using a single pass approach
-    if (allHighlights && allHighlights.length > 0) {
+    if (allHighlights.length > 0) {
       // Create a map of positions to highlight information
       const positions: Array<{
         start: number;

@@ -107,7 +107,7 @@ export async function createEnvironmentSubzones(input: ICreateEnvironmentSubzone
     if (environmentsForSubzones.length > 0) {
         context.logger.info(`Deploying subzones for ${domain}...`)
         environmentsForSubzones.forEach(env =>
-            context.logger.addIdentifier(`${env.subdomain}.${domain}`)
+            { context.logger.addIdentifier(`${env.subdomain}.${domain}`); }
         )
         if (ancestorDomainConfig) {
             await createDescendentZones({
@@ -116,7 +116,7 @@ export async function createEnvironmentSubzones(input: ICreateEnvironmentSubzone
                 descendentZones: Object.fromEntries(environmentsForSubzones.map(env => ([`${env.subdomain}.${domain} `, { env }])))
             })
             environmentsForSubzones.forEach(env =>
-                context.logger.success(`${env.subdomain}.${domain} added to ${env.name} successfully!`)
+                { context.logger.success(`${env.subdomain}.${domain} added to ${env.name} successfully!`); }
             )
         } else {
             for (const env of environmentsForSubzones) {

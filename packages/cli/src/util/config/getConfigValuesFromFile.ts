@@ -54,9 +54,7 @@ interface IModuleConfigInput extends IRegionConfigInput {
 /**
  * Configuration input for global config
  */
-interface IGlobalConfigInput extends IBaseConfigInput {
-    // No additional fields needed for global config
-}
+type IGlobalConfigInput = IBaseConfigInput;
 
 /**
  * Union type for all configuration input variants

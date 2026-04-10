@@ -84,7 +84,7 @@ export async function updateIAMIdentityCenter(inputs: IUpdateIAMIdentityCenterIn
             title: context.logger.applyColors(`Retrieve AWS account ID for ${environmentName} environment`),
             task: async (ctx, task) => {
                 task.title = context.logger.applyColors(`Retrieving AWS account ID for ${environmentName} environment`)
-                const identity = await getIdentity({ context, profile: environmentProfile }).catch((e) => {
+                const identity = await getIdentity({ context, profile: environmentProfile }).catch((e: unknown) => {
                     throw new CLIError(`Was not able to get identity for environment's profile '${environmentProfile}'`, e)
                 })
                 ctx.accountId = identity.Account
@@ -226,7 +226,7 @@ export async function updateIAMIdentityCenter(inputs: IUpdateIAMIdentityCenterIn
                 // Delete the access key
                 await iamClient.send(new DeleteAccessKeyCommand({
                     AccessKeyId: creds!.accessKeyId
-                })).catch((error) => {
+                })).catch((error: unknown) => {
                     throw new CLIError(`Failed to revoke IAM access key ${creds!.accessKeyId}`, error)
                 })
             }

@@ -82,14 +82,14 @@ export interface IRegionMeta {
  * @see {@link isBastionDeployed} - For checking bastion deployment status
  */
 export async function getRegions(context: PanfactumContext, envPath: string): Promise<Array<IRegionMeta>> {
-    const { tf_state_region: primaryRegion } = await getPanfactumConfig({ context, directory: envPath }) || {}
+    const { tf_state_region: primaryRegion } = await getPanfactumConfig({ context, directory: envPath })
     const glob = new Glob("*/region.yaml");
 
     return asyncIterMap(glob.scan({ cwd: envPath }), async path => {
         const filePath = join(envPath, path)
         const regionPath = dirname(filePath);
         try {
-            const { region, aws_region: awsRegion, aws_profile: awsProfile, kube_api_server: kubeApiServer, environment, kube_config_context: kubeConfigContext, vault_addr: vaultAddr } = await getPanfactumConfig({ directory: regionPath, context }) || {}
+            const { region, aws_region: awsRegion, aws_profile: awsProfile, kube_api_server: kubeApiServer, environment, kube_config_context: kubeConfigContext, vault_addr: vaultAddr } = await getPanfactumConfig({ directory: regionPath, context })
 
             const name = region ?? basename(regionPath)
 

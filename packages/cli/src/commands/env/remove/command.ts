@@ -85,6 +85,7 @@ For manual environment removal:
      * @throws {@link CLIError}
      * Always throws with "Command not implemented" message
      */
+    // eslint-disable-next-line @typescript-eslint/require-await
     async execute() {
         this.context.logger.warn(`
             This command is not yet implemented.

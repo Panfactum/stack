@@ -9,7 +9,7 @@ interface IMockSocket {
   end: ReturnType<typeof mock>;
   destroy: ReturnType<typeof mock>;
   on: ReturnType<typeof mock>;
-  _callbacks: Record<string, Function | undefined>;
+  _callbacks: Record<string, ((...args: unknown[]) => void) | undefined>;
 }
 
 describe("checkConnection", () => {
@@ -21,9 +21,8 @@ describe("checkConnection", () => {
     mockSocket = {
       end: mock(() => {}),
       destroy: mock(() => {}),
-      on: mock((event: string, callback: Function) => {
+      on: mock((event: string, callback: (...args: unknown[]) => void) => {
         // Store callbacks for manual triggering in tests
-        mockSocket._callbacks = mockSocket._callbacks || {};
         mockSocket._callbacks[event] = callback;
       }),
       _callbacks: {}
@@ -205,7 +204,7 @@ describe("checkConnection", () => {
       };
       
       // Override the on method to store callbacks
-      socket.on = mock((event: string, callback: Function) => {
+      socket.on = mock((event: string, callback: (...args: unknown[]) => void) => {
         socket._callbacks[event] = callback;
       });
       

@@ -252,7 +252,7 @@ async function getExistingContactInfo(profile: string, context: PanfactumContext
     const getContactInfoCommand = new GetContactInformationCommand({});
 
     // Send the command to AWS
-    const response = await accountClient.send(getContactInfoCommand).catch((error) => {
+    const response = await accountClient.send(getContactInfoCommand).catch((error: unknown) => {
         // If we can't get the contact info, just log and continue
         context.logger.debug(
             `Could not retrieve primary contact information from AWS: ${error instanceof Error ? error.message : String(error)}`);

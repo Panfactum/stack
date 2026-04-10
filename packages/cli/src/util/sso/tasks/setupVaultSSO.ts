@@ -66,7 +66,7 @@ export async function setupVaultSSO(
         );
     }
 
-    if (!regionConfig?.vault_addr) {
+    if (!regionConfig.vault_addr) {
         throw new CLIError(
             "Vault address not found in region config."
         );
@@ -248,7 +248,7 @@ export async function setupVaultSSO(
                 });
             },
         },
-        await buildSyncAWSIdentityCenterTask({ context, startURL: authentikAWSSSOConfig.extra_inputs["aws_sign_in_url"] })
+        await buildSyncAWSIdentityCenterTask({ context, startURL: authentikAWSSSOConfig.extra_inputs["aws_sign_in_url"] as string })
     ])
 
     return tasks

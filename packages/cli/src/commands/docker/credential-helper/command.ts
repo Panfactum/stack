@@ -131,7 +131,7 @@ The helper will be called automatically by Docker when pulling/pushing ECR image
         // No-op for ECR as tokens are temporary
         break
       case 'list':
-        await this.handleList()
+        this.handleList()
         break
       default:
         throw new CLIError(`Unknown action: ${this.action}`)
@@ -199,7 +199,7 @@ The helper will be called automatically by Docker when pulling/pushing ECR image
     const token = await getECRToken({ context, registry, awsProfile })
       .catch(async (error: unknown) => {
         // Check if SSO login is needed
-        if (error instanceof Error && (error.message?.includes('SSO') || error.message?.includes('sso'))) {
+        if (error instanceof Error && (error.message.includes('SSO') || error.message.includes('sso'))) {
           // Try to login to SSO
           if (awsProfile) {
             const ssoCommand = ['aws', 'sso', 'login', '--profile', awsProfile]
@@ -252,7 +252,7 @@ The helper will be called automatically by Docker when pulling/pushing ECR image
    * 
    * @internal
    */
-  private async handleList() {
+  private handleList() {
     // Return empty object as we don't store permanent credentials
     this.context.stdout.write('{}')
   }
@@ -278,7 +278,7 @@ The helper will be called automatically by Docker when pulling/pushing ECR image
   private async readStdin(): Promise<string> {
     const chunks: Uint8Array[] = []
     for await (const chunk of this.context.stdin) {
-      chunks.push(chunk)
+      chunks.push(chunk as Uint8Array)
     }
     return Buffer.concat(chunks).toString('utf8')
   }

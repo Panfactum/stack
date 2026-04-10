@@ -88,6 +88,7 @@ cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)
 cli.register(AWSProfileListCommand)
 cli.register(AWSVPCNetworkTestCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(ProfileForContextCommand)
 cli.register(AwsEcrWaitOnImageCommand)
 cli.register(BuildkitBuildCommand)
@@ -101,22 +102,30 @@ cli.register(EnvironmentAddCommand)
 cli.register(EnvironmentRemoveCommand)
 cli.register(DomainAddCommand)
 cli.register(DomainRemoveCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(WelcomeCommand)
 cli.register(SSOAddCommand)
 cli.register(GetModuleHashCommand)
 cli.register(GetCommitHashCommand)
 cli.register(GetVaultTokenCommand)
 cli.register(GetDbCredsCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(K8sDisruptionsDisableCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(K8sDisruptionsEnableCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(K8sGetTokenCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(K8sVeleroSnapshotGcCommand)
 cli.register(SopsSetProfileCommand)
 cli.register(DeleteLocksCommand)
 cli.register(TunnelCommand)
 cli.register(DbTunnelCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(DockerCredentialHelperCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(K8sClusterSuspendCommand)
+// eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility
 cli.register(K8sClusterResumeCommand)
 cli.register(WorkflowGitCheckoutCommand)
 
@@ -175,14 +184,16 @@ const cleanup = async () => {
  * to ensure proper cleanup before process termination. Uses
  * standard exit codes for signal-based termination.
  */
-process.on('SIGINT', async () => {
-  await cleanup();
-  process.exit(130); // Standard exit code for SIGINT
+process.on('SIGINT', () => {
+  void cleanup().then(() => {
+    process.exit(130); // Standard exit code for SIGINT
+  });
 });
 
-process.on('SIGTERM', async () => {
-  await cleanup();
-  process.exit(143); // Standard exit code for SIGTERM
+process.on('SIGTERM', () => {
+  void cleanup().then(() => {
+    process.exit(143); // Standard exit code for SIGTERM
+  });
 });
 
 process.on('exit', () => {
@@ -230,7 +241,7 @@ try {
   if (needsDevshell) {
     const { devshellConfig } = panfactumContext as PanfactumContext;
     if (devshellConfig.user_id) {
-      phClient.captureImmediate({
+      void phClient.captureImmediate({
         event: 'cli-start',
         distinctId: devshellConfig.user_id,
         // todo: pass in sub command level command arguments

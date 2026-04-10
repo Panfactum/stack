@@ -230,7 +230,7 @@ async function ensureSingleQuotaHeadroom(
         })
       );
       const value = quotaResponse.Quota?.Value;
-      if (value === undefined || value === null) {
+      if (value === undefined) {
         throw new CLIError(
           `Unable to check ${label} quota: quota value was not returned by AWS`
         );
@@ -298,7 +298,10 @@ async function ensureSingleQuotaHeadroom(
             (a, b) =>
               (b.Timestamp?.getTime() ?? 0) - (a.Timestamp?.getTime() ?? 0)
           );
-          const latest = sorted[0]!;
+          const latest = sorted[0];
+          if (!latest) {
+            throw new CLIError(`Unable to get CloudWatch usage metrics for ${label}: no datapoints found after sorting`);
+          }
           currentVcpuUsage =
             latest.Maximum ?? latest.Average ?? latest.Sum ?? 0;
         }

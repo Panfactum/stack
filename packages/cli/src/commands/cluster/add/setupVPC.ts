@@ -59,6 +59,7 @@ const NAT_CONFIG_SCHEMA = z.object({
   }),
 });
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function setupVPC(
   options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
@@ -119,7 +120,7 @@ export async function setupVPC(
           validate: async (value) => {
             const { error } = VPC_NAME.safeParse(value);
             if (error) {
-              return error?.issues[0]?.message ?? "Invalid name";
+              return error.issues[0]?.message ?? "Invalid name";
             } else {
               // FIX: @seth - Use AWS SDK
               const vpcListCommand = [
@@ -164,7 +165,7 @@ export async function setupVPC(
           message: "Enter a description for your VPC:",
           default: `Panfactum VPC for the ${environment} environment in the ${region} region`,
           required: true,
-          validate: async (value) => {
+          validate: (value) => {
             const { error } = VPC_DESCRIPTION.safeParse(value);
             if (error) {
               return error.issues[0]?.message ?? "Invalid description";
@@ -178,7 +179,7 @@ export async function setupVPC(
 
     {
       title: "Deploy the Modules",
-      task: async (ctx, parentTask) => {
+      task: (ctx, parentTask) => {
         return parentTask.newListr<IContext>(
           [
             {

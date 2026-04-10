@@ -83,15 +83,15 @@ export class ListrInquirerPromptAdapter extends ListrPromptAdapter {
 
     this.prompt = prompt(config, { ...context, signal: this.abortController.signal })
 
-    const originalTitle = this.task.title
+    const originalTitle = this.task.title ?? ""
 
     // Animate the task title to show we're waiting for input
     let styled = false;
     const interval = setInterval(() => {
       if (styled) {
-        this.task.title = originalTitle + " " + pc.bold(pc.whiteBright(pc.bgBlackBright(" Waiting on user input ")))
+        this.task.title = `${originalTitle} ${pc.bold(pc.whiteBright(pc.bgBlackBright(" Waiting on user input ")))}`
       } else {
-        this.task.title = originalTitle + " " + pc.bold(pc.dim(pc.black(pc.bgWhiteBright(" Waiting on user input "))))
+        this.task.title = `${originalTitle} ${pc.bold(pc.dim(pc.black(pc.bgWhiteBright(" Waiting on user input "))))}`
       }
       styled = !styled;
     }, 1000)
@@ -100,7 +100,7 @@ export class ListrInquirerPromptAdapter extends ListrPromptAdapter {
 
 
     try {
-      result = await this.prompt
+      result = await this.prompt as ReturnType<T>
 
       this.reportCompleted()
     } catch (e) {

@@ -134,7 +134,7 @@ export class DbTunnelCommand extends PanfactumCommand {
    * @throws {@link PanfactumZodError}
    * Throws when input validation fails
    */
-  async execute(): Promise<number | void> {
+  async execute(): Promise<number | undefined> {
     const { context } = this
 
     // Validate type if provided and get properly typed value
@@ -169,7 +169,7 @@ export class DbTunnelCommand extends PanfactumCommand {
       message: "Select the region for the cluster:",
       choices: regions.map(region => ({
         value: region,
-        name: `${region.name}`
+        name: region.name
       })),
     });
 
@@ -293,7 +293,7 @@ export class DbTunnelCommand extends PanfactumCommand {
   Password: ${credentials.password}`
     }
 
-    context.logger.info(`${connectionDetails}`)
+    context.logger.info(connectionDetails)
 
     let connectionString = ''
     if (selectedDb.type === 'postgresql') {
@@ -347,12 +347,12 @@ export class DbTunnelCommand extends PanfactumCommand {
           context.logger.debug('Error during tunnel cleanup', { error })
         }
       }
-      await tunnelHandle.close()
+      tunnelHandle.close()
       process.exit(0)
     }
 
-    process.on('SIGINT', cleanup)
-    process.on('SIGTERM', cleanup)
+    process.on('SIGINT', () => { void cleanup() })
+    process.on('SIGTERM', () => { void cleanup() })
 
     // Keep the command running until terminated
     return new Promise(() => {

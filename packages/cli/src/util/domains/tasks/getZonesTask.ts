@@ -22,14 +22,14 @@ interface IGetZonesTaskInput {
 /**
  * Interface for getZonesTask function output
  */
-interface IGetZonesTaskOutput<T extends {}> {
+interface IGetZonesTaskOutput<T extends object> {
     /** Listr task for DNS zone retrieval */
     task: ListrTask<T>;
     /** Domain configurations retrieved from DNS zones */
     domainConfigs: DomainConfigs;
 }
 
-export async function getZonesTask<T extends {}>(inputs: IGetZonesTaskInput): Promise<IGetZonesTaskOutput<T>> {
+export function getZonesTask<T extends object>(inputs: IGetZonesTaskInput): IGetZonesTaskOutput<T> {
 
     const { context } = inputs;
 
@@ -39,14 +39,14 @@ export async function getZonesTask<T extends {}>(inputs: IGetZonesTaskInput): Pr
         domainConfigs,
         task: {
             title: "Retrieve DNS zone info",
-            task: async (_, parentTask) => {
+            task: (_, parentTask) => {
                 const subtasks = parentTask.newListr([])
 
 
                 ////////////////////////////////////////////////////////
                 // Get Zones from registered domains module
                 ////////////////////////////////////////////////////////
-                const { task: registeredDomainsTask, domainConfigs: registeredDomainsConfigs } = await getRegisteredDomainsTask<T>({ context })
+                const { task: registeredDomainsTask, domainConfigs: registeredDomainsConfigs } = getRegisteredDomainsTask<T>({ context })
                 subtasks.add(registeredDomainsTask)
 
                 ////////////////////////////////////////////////////////

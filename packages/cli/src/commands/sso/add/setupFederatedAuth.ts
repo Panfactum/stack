@@ -145,10 +145,10 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
 
                 const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
 
-                ctx.awsAcsUrl = originalInputs?.aws_acs_url
-                ctx.awsSignInUrl = originalInputs?.aws_sign_in_url
-                ctx.awsIssuer = originalInputs?.aws_issuer
-                ctx.awsScimUrl = originalInputs?.aws_scim_url
+                ctx.awsAcsUrl = originalInputs.aws_acs_url
+                ctx.awsSignInUrl = originalInputs.aws_sign_in_url
+                ctx.awsIssuer = originalInputs.aws_issuer
+                ctx.awsScimUrl = originalInputs.aws_scim_url
 
                 if (ctx.awsScimUrl) {
                     task.skip("Already have Federated Auth configuration, skipping...");
@@ -280,7 +280,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
             title: "Get SCIM User Configuration",
             skip: async (ctx) => {
                 const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
-                ctx.awsScimUrl = originalInputs?.aws_scim_url
+                ctx.awsScimUrl = originalInputs.aws_scim_url
 
                 const secrets = await sopsDecrypt({
                     context,
@@ -329,7 +329,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 }
 
                 const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
-                ctx.awsScimUrl = originalInputs?.aws_scim_url
+                ctx.awsScimUrl = originalInputs.aws_scim_url
 
                 const skimToken = await sopsDecrypt({
                     context,
@@ -496,7 +496,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
             context,
             environment: MANAGEMENT_ENVIRONMENT,
             region: GLOBAL_REGION,
-            module: MODULES.AWS_IAM_IDENTITY_CENTER_PERMISSIONS,
+            module: MODULES.IAM_IDENTIY_CENTER_PERMISSIONS,
             hclIfMissing: await Bun.file(awsIamIdentityCenterPermissions).text(),
             skipIfAlreadyApplied: true,
             inputUpdates: {

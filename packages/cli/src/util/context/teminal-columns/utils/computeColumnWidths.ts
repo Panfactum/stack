@@ -66,10 +66,10 @@ const initColumns = (
 const resolveColumnWidths: <T extends ColumnWidth>(
     columnMetas: InternalColumnMeta<T>[],
     stdoutWidth: number,
-) => asserts columnMetas is InternalColumnMeta<Exclude<T, 'content-width' | 'auto' | string>>[] = <T extends ColumnWidth>(
+) => asserts columnMetas is InternalColumnMeta<Exclude<T, string>>[] = <T extends ColumnWidth>(
     columnMetas: InternalColumnMeta<T>[],
     stdoutWidth: number,
-): asserts columnMetas is InternalColumnMeta<Exclude<T, 'content-width' | 'auto' | string>>[] => {
+): asserts columnMetas is InternalColumnMeta<Exclude<T, string>>[] => {
         for (const column of columnMetas) {
             const { width } = column;
 
@@ -156,7 +156,7 @@ const balanceAuto = (
         const usedWidth = columns.reduce(
             (sum, column) => (
                 sum
-                + (column.width as number)
+                + (column.width)
                 + column.horizontalPadding
             ),
             0,

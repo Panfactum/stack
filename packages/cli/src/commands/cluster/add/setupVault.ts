@@ -486,7 +486,7 @@ export async function setupVault(
     },
     {
       title: "Stop Vault Proxy",
-      task: async (ctx) => {
+      task: (ctx) => {
         ctx.vaultProxyController?.abort();
       },
     },

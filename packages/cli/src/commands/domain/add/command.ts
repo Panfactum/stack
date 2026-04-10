@@ -182,7 +182,7 @@ export class DomainAddCommand extends PanfactumCommand {
         } else if (environments.filter(env => env.name !== MANAGEMENT_ENVIRONMENT).length === 0) {
             throw new CLIError(`You must have at least one environment to add a domain: \`pf env add\``)
         }
-        environments.forEach(env => context.logger.addIdentifier(` ${env.name} `))
+        environments.forEach(env => { context.logger.addIdentifier(` ${env.name} `); })
 
         /////////////////////////////////////////////////////////////////////////
         // Download valid domain suffices
@@ -210,7 +210,7 @@ export class DomainAddCommand extends PanfactumCommand {
                     host resources on the environment's domains (or subdomains of those domains).
                 `,
                 message: "Enter domain:",
-                validate: async (val) => {
+                validate: (val) => {
                     const { error } = DOMAIN.safeParse(val)
                     if (error) {
                         return error.issues[0]?.message ?? "Invalid domain"

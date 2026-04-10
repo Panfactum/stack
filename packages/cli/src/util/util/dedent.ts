@@ -137,7 +137,7 @@ export function dedent(text: string): string {
       paragraphs.push(currentParagraph);
       currentParagraph = [line];
       inListContext = false;
-    } else if (line !== undefined) {
+    } else {
       currentParagraph.push(line);
     }
   }

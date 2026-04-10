@@ -20,7 +20,7 @@ describe("isPortAvailable", () => {
     const server = createServer();
     
     await new Promise<void>((resolve) => {
-      server.listen(port, () => resolve());
+      server.listen(port, () => { resolve(); });
     });
 
     try {
@@ -29,7 +29,7 @@ describe("isPortAvailable", () => {
     } finally {
       // Clean up
       await new Promise<void>((resolve) => {
-        server.close(() => resolve());
+        server.close(() => { resolve(); });
       });
     }
   });
@@ -63,12 +63,12 @@ describe("isPortAvailable", () => {
       const server = createServer();
       await new Promise<void>((resolve, reject) => {
         server.once('error', reject);
-        server.listen(port, () => resolve());
+        server.listen(port, () => { resolve(); });
       });
       
       // Clean up
       await new Promise<void>((resolve) => {
-        server.close(() => resolve());
+        server.close(() => { resolve(); });
       });
     }
   });
@@ -174,6 +174,6 @@ describe("isPortAvailable", () => {
     // All results should be boolean values (some might be false if ports are in use)
     expect(results.every(r => typeof r === 'boolean')).toBe(true);
     // At least some should be available
-    expect(results.filter(r => r === true).length).toBeGreaterThan(0);
+    expect(results.filter(r => r).length).toBeGreaterThan(0);
   });
 });

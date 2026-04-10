@@ -59,9 +59,7 @@ interface IModuleUpsertInput extends IRegionUpsertInput {
 /**
  * Input for updating global configuration
  */
-interface IGlobalUpsertInput extends IBaseUpsertInput {
-    // No additional fields needed for global config
-}
+type IGlobalUpsertInput = IBaseUpsertInput;
 
 /**
  * Union type for all configuration update variants

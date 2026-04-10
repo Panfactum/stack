@@ -319,7 +319,7 @@ export async function registerDomain(input: IRegisterDomainInput): Promise<Domai
                             if (!value) {
                                 return true;
                             } else if (value.length < 2) {
-                                return `Must be at least ${2} characters`;
+                                return `Must be at least 2 characters`;
                             } else if (value.length > MAX_LENGTH) {
                                 return `Cannot be greater than ${MAX_LENGTH} characters`;
                             } else {
@@ -590,7 +590,7 @@ export async function registerDomain(input: IRegisterDomainInput): Promise<Domai
             hclIfMissing: await Bun.file(moduleHCL).text(),
             imports: {
                 [`aws_route53_zone.zones["${domain}"]`]: {
-                    resourceId: async (ctx) => ctx.zoneId
+                    resourceId: (ctx) => Promise.resolve(ctx.zoneId)
                 }
             },
             inputUpdates: {

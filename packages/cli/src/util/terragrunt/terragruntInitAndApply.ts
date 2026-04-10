@@ -90,6 +90,7 @@ interface ITerragruntInitAndApplyInput {
  * @see {@link terragruntApply} - For deployment details
  * @see {@link terragruntInitAndApplyAll} - For bulk operations
  */
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 export async function terragruntInitAndApply(input: ITerragruntInitAndApplyInput): Promise<void | CLIError> {
   await terragruntInit(input);
   return terragruntApply(input);

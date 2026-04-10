@@ -300,7 +300,7 @@ export async function setupInboundNetworking(
     },
     {
       title: "Stop Vault Proxy",
-      task: async (ctx) => {
+      task: (ctx) => {
         ctx.vaultProxyController?.abort();
       },
     },

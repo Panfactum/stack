@@ -1,6 +1,6 @@
 export type Row = string[];
 
-export type ColumnWidth = number | 'content-width' | 'auto' | string;
+export type ColumnWidth = number | string;
 
 type Alignment = 'left' | 'right';
 

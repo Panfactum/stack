@@ -87,7 +87,7 @@ interface IRunTasksInput<T> {
 export async function runTasks<T>(input: IRunTasksInput<T>): Promise<T> {
     const { context, tasks, errorMessage } = input;
     try {
-        return tasks.run().then((res) => {
+        return await tasks.run().then((res) => {
             context.logger.write("") // Need a newline after tasks for spacing
             return res
         })

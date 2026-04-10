@@ -32,14 +32,14 @@ interface IGetRegisteredDomainsTaskInput {
 /**
  * Interface for getRegisteredDomainsTask function output
  */
-interface IGetRegisteredDomainsTaskOutput<T extends {}> {
+interface IGetRegisteredDomainsTaskOutput<T extends object> {
     /** Listr task for registered domain retrieval */
     task: ListrTask<T>;
     /** Domain configurations retrieved from registered domains */
     domainConfigs: DomainConfigs;
 }
 
-export async function getRegisteredDomainsTask<T extends {}>(inputs: IGetRegisteredDomainsTaskInput): Promise<IGetRegisteredDomainsTaskOutput<T>> {
+export function getRegisteredDomainsTask<T extends object>(inputs: IGetRegisteredDomainsTaskInput): IGetRegisteredDomainsTaskOutput<T> {
     const { context } = inputs;
     const domainConfigs: DomainConfigs = {}
     const { environments_dir: environmentsDir } = inputs.context.devshellConfig;

@@ -91,6 +91,7 @@ export abstract class PanfactumCommand extends Command<PanfactumContext> {
      * @internal
      * @override
      */
+    // eslint-disable-next-line @typescript-eslint/require-await
     override async catch(error: unknown) {
         if (error instanceof Error) {
             this.context.logger.error(error.message)

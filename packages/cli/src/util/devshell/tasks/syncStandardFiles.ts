@@ -15,12 +15,12 @@ interface ISyncStandardFilesTaskInput {
     context: PanfactumContext;
 }
 
-export async function syncStandardFilesTask<T extends {}>(inputs: ISyncStandardFilesTaskInput): Promise<ListrTask<T>> {
+export function syncStandardFilesTask<T extends object>(inputs: ISyncStandardFilesTaskInput): ListrTask<T> {
     const { context } = inputs;
 
     return {
         title: "Sync standard files",
-        task: async (_, parentTask) => {
+        task: (_, parentTask) => {
 
             const subtasks = parentTask.newListr([], { concurrent: true })
 

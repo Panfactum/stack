@@ -115,7 +115,6 @@ export enum MODULES {
     KUBE_AUTHENTIK = "kube_authentik",
     AUTHENTIK_CORE_RESOURCES = "authentik_core_resources",
     AUTHENTIK_AWS_SSO = "authentik_aws_sso",
-    AWS_IAM_IDENTITY_CENTER_PERMISSIONS = "aws_iam_identity_center_permissions",
     AUTHENTIK_VAULT_SSO = "authentik_vault_sso",
     VAULT_AUTH_OIDC = "vault_auth_oidc"
 }

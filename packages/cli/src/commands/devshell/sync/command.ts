@@ -100,19 +100,19 @@ export class DevShellUpdateCommand extends PanfactumCommand {
     const tasks = new Listr([], { rendererOptions: { collapseErrors: false } })
 
     tasks.add(
-      await syncStandardFilesTask({ context })
+      syncStandardFilesTask({ context })
     )
 
     tasks.add(
-      await syncDomainsTask({ context })
+      syncDomainsTask({ context })
     )
 
     tasks.add(
-      await buildSyncKubeClustersTask({ context }),
+      buildSyncKubeClustersTask({ context }),
     )
 
     tasks.add(
-      await buildSyncSSHTask({ context })
+      buildSyncSSHTask({ context })
     )
 
     tasks.add(

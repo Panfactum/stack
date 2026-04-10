@@ -238,7 +238,7 @@ Any additional arguments after -- are passed directly to buildctl.
           '--port', armPort.toString()
         ],
         workingDirectory: process.cwd(),
-        description: 'BuildKit ARM64 tunnel on port ' + armPort,
+        description: `BuildKit ARM64 tunnel on port ${String(armPort)}`,
         autoEscalateToSigKillMs: 5000
       })
       this.armTunnelController = armTunnelHandle.abortController
@@ -253,7 +253,7 @@ Any additional arguments after -- are passed directly to buildctl.
           '--port', amdPort.toString()
         ],
         workingDirectory: process.cwd(),
-        description: 'BuildKit AMD64 tunnel on port ' + amdPort,
+        description: `BuildKit AMD64 tunnel on port ${String(amdPort)}`,
         autoEscalateToSigKillMs: 5000
       })
       this.amdTunnelController = amdTunnelHandle.abortController
@@ -339,7 +339,7 @@ Any additional arguments after -- are passed directly to buildctl.
           '--export-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
           '--import-cache', `type=s3,region=${config.cache_bucket_region},bucket=${config.cache_bucket},name=${config.registry}/${this.repo}`,
           '--progress', 'plain',
-          ...(this.rest || [])
+          ...this.rest
         ],
         workingDirectory: process.cwd(),
         env: {

@@ -89,7 +89,7 @@ export class K8sClusterResumeCommand extends PanfactumCommand {
         message: "Select the Cluster context you want to resume:",
         choices: kubeContexts.map(context => ({
           value: context,
-          name: `${context.name}`,
+          name: context.name,
         })),
       });
 

@@ -25,11 +25,11 @@ interface ITestDNSResolutionTaskInput {
   }
 }
 
-export async function testDNSResolutionTask<T extends {}>(inputs: ITestDNSResolutionTaskInput): Promise<ListrTask<T>> {
+export function testDNSResolutionTask<T extends object>(inputs: ITestDNSResolutionTaskInput): ListrTask<T> {
     const { context, zones } = inputs
     return {
         title: "Test DNS resolution",
-        task: async (_, parentTask) => {
+        task: (_, parentTask) => {
             const subtasks = parentTask.newListr([], { concurrent: false })
             interface IConnectTask { nameServers?: string[] }
             for (const [domain, config] of Object.entries(zones)) {

@@ -226,7 +226,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                             validate: (value: string) => {
                                 const { error } = z.string().email().safeParse(value);
                                 if (error) {
-                                    return error.issues?.[0]?.message || "Please enter a valid email address";
+                                    return error.issues[0]?.message || "Please enter a valid email address";
                                 }
 
                                 return true;
@@ -250,7 +250,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                             validate: (value: string) => {
                                 const { error } = z.string().email().safeParse(value);
                                 if (error) {
-                                    return error.issues?.[0]?.message || "Please enter a valid email address";
+                                    return error.issues[0]?.message || "Please enter a valid email address";
                                 }
 
                                 return true;
@@ -457,7 +457,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
 
                 const authentikClient = new CoreApi(configuration)
 
-                const brands = await authentikClient.coreBrandsList().catch((error) => {
+                const brands = await authentikClient.coreBrandsList().catch((error: unknown) => {
                     throw new CLIError("Failed to get brands from Authentik", error);
                 })
 
@@ -471,7 +471,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
                             domain: authentikDefaultBrand.domain,
                             _default: false,
                         }
-                    }).catch((error) => {
+                    }).catch((error: unknown) => {
                         throw new CLIError("Failed to update default brand in Authentik", error);
                     })
                 }
@@ -718,7 +718,7 @@ spec:
 
                 // get superusers group uuid
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-groups-list
-                const groups = await originalAuthentikClient.coreGroupsList().catch((error) => {
+                const groups = await originalAuthentikClient.coreGroupsList().catch((error: unknown) => {
                     throw new CLIError("Failed to get groups in Authentik", error);
                 })
                 const superusersGroup = groups.results.find(
@@ -732,7 +732,7 @@ spec:
                 // create the user via API
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-create
                 let user: User | undefined
-                const existingUsers = await originalAuthentikClient.coreUsersList().catch((error) => {
+                const existingUsers = await originalAuthentikClient.coreUsersList().catch((error: unknown) => {
                     throw new CLIError("Failed to get users from Authentik", error);
                 })
                 user = existingUsers.results.find(
@@ -750,7 +750,7 @@ spec:
                             path: "users",
                             type: "internal",
                         }
-                    }).catch((error) => {
+                    }).catch((error: unknown) => {
                         throw new CLIError("Failed to create user in Authentik", error);
                     })
                 }
@@ -758,7 +758,7 @@ spec:
 
                 const passwordReset = await originalAuthentikClient.coreUsersRecoveryCreate({
                     id: userId,
-                }).catch((error) => {
+                }).catch((error: unknown) => {
                     throw new CLIError("Failed to get password reset link in Authentik", error);
                 })
                 const passwordResetLink = passwordReset.link;
@@ -796,7 +796,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
 
                 // Get a new token
                 // If they manually disable the token we will run into identifier collisions
-                const tokenIdentifier = "local-framework-token" + Date.now()
+                const tokenIdentifier = `local-framework-token${String(Date.now())}`
                 await originalAuthentikClient.coreTokensCreate({
                     tokenRequest: {
                         identifier: tokenIdentifier,
@@ -806,7 +806,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                         description:
                             "Created while running the Panfactum CLI and used to interact with Authentik from the local machine.",
                     }
-                }).catch((error) => {
+                }).catch((error: unknown) => {
                     throw new CLIError("Failed to create API token in Authentik", error);
                 })
 
@@ -856,13 +856,13 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-tokens-destroy
                 await originalAuthentikClient.coreTokensDestroy({
                     identifier: "authentik-bootstrap-token",
-                }).catch((error) => {
+                }).catch((error: unknown) => {
                     throw new CLIError("Failed to delete bootstrap token in Authentik", error);
                 })
 
                 // get all the users
                 // https://docs.goauthentik.io/docs/developer-docs/api/reference/core-users-list
-                const allUsers = await newAuthentikClient.coreUsersList().catch((error) => {
+                const allUsers = await newAuthentikClient.coreUsersList().catch((error: unknown) => {
                     throw new CLIError("Failed to get users from Authentik", error);
                 })
                 const bootstrapUser = allUsers.results.find(
@@ -882,7 +882,7 @@ You will need to enter your user email(${ctx.authentikAdminEmail}) in the browse
                         name: 'Authentik Root User',
                         isActive: false,
                     }
-                }).catch((error) => {
+                }).catch((error: unknown) => {
                     throw new CLIError("Failed to disable bootstrap user in Authentik", error);
                 })
 

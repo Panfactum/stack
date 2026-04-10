@@ -15,7 +15,7 @@ import type { Subprocess } from "bun";
 // directly instead of an object with streams property.
 // NOTE: This uses global mock.module() intentionally to work around the bug.
 // Do not refactor to spyOn pattern until the underlying bug is fixed.
-mock.module("@/util/streams/concatStreams", () => ({
+void mock.module("@/util/streams/concatStreams", () => ({
   concatStreams: (
     streamsOrInput:
       | ReadableStream[]

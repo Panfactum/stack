@@ -34,6 +34,7 @@ import { sleep } from "@/util/util/sleep";
 import { getNewAccountAlias } from "./getNewAccountAlias";
 import { getPrimaryContactInfo } from "./getPrimaryContactInfo";
 import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 /**
  * Interface for bootstrapEnvironment function inputs
@@ -116,7 +117,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
             if (!await fileExists({ filePath: flakeFilePath })) {
                 throw new CLIError("No flake.nix found at repo root")
             }
-            const flakeContents = await Bun.file(flakeFilePath).text().catch((error) => {
+            const flakeContents = await Bun.file(flakeFilePath).text().catch((error: unknown) => {
                 throw new CLIError("Was not able to get the framework version from the repo's flake.nix file.", error)
             })
             const match = flakeContents.match(/panfactum\/stack\/([-.0-9a-zA-Z]+)/i);
@@ -170,10 +171,10 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                                 const roleName = isAssumedRole ? profileIdentityARN?.split('/')[1] : profileIdentityARN?.split('/').pop() || "";
                                 const userPoliciesResponse = await iamClient.send(new ListAttachedRolePoliciesCommand({
                                     RoleName: roleName
-                                })).catch((error) => {
+                                })).catch((error: unknown) => {
                                     throw new CLIError(`Failed to list attached policies for role ${roleName}`, error)
                                 });
-                                const hasAdminAccess = userPoliciesResponse?.AttachedPolicies?.some(
+                                const hasAdminAccess = userPoliciesResponse.AttachedPolicies?.some(
                                     (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
                                 );
 
@@ -184,10 +185,10 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                                 const userName = profileIdentityARN?.split('/').pop() || "";
                                 const userPoliciesResponse = await iamClient.send(new ListAttachedUserPoliciesCommand({
                                     UserName: userName
-                                })).catch((error) => {
+                                })).catch((error: unknown) => {
                                     throw new CLIError(`Failed to list attached policies for user ${userName}`, error)
                                 });
-                                const hasAdminAccess = userPoliciesResponse?.AttachedPolicies?.some(
+                                const hasAdminAccess = userPoliciesResponse.AttachedPolicies?.some(
                                     (policy: { PolicyName?: string }) => policy.PolicyName === "AdministratorAccess"
                                 );
                                 if (!hasAdminAccess) {
@@ -258,7 +259,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     const primaryRegionMeta = regions.find(region => region.primary)
                     if (primaryRegionMeta) {
                         const primaryRegionOption = primaryRegionMeta.name
-                        const { aws_secondary_region: secondaryRegionOption } = await getPanfactumConfig({ context, directory: primaryRegionMeta.path }) || {}
+                        const { aws_secondary_region: secondaryRegionOption } = await getPanfactumConfig({ context, directory: primaryRegionMeta.path })
                         if (secondaryRegionOption) {
                             const useEnv = await context.logger.confirm({
                                 task,
@@ -291,7 +292,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     explainer: { message: `Every environment must have a primary AWS region where resources like the infrastructure state bucket will live.`, highlights: ["primary"] },
                     message: "Select primary AWS region:",
                     task,
-                    source: async (input) => {
+                    source: (input) => {
                         const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
                         return filertedRegions.map(region => ({
                             name: region,
@@ -309,7 +310,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     explainer: { message: `Every environment must have a secondary AWS region where resources like backups will live.`, highlights: ["secondary"] },
                     message: "Select secondary AWS region:",
                     task,
-                    source: async (input) => {
+                    source: (input) => {
                         const filertedRegions = input ? AWS_REGIONS.filter(region => region.includes(input)) : AWS_REGIONS
                         return filertedRegions
                             .filter(region => region !== primaryRegion)
@@ -355,7 +356,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                 let createError: unknown = null;
                 await s3Client.send(new CreateBucketCommand({
                     Bucket: dummyBucketName
-                })).catch((error) => {
+                })).catch((error: unknown) => {
                     createError = error;
                 });
 
@@ -385,8 +386,8 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     const deleteResult = await s3Client.send(new DeleteBucketCommand({
                         Bucket: dummyBucketName
                     })).then(() => true)
-                        .catch((error) => {
-                            context.logger.debug(`Failed to delete test bucket on attempt ${deleteRetries + 1}: ${error}`);
+                        .catch((error: unknown) => {
+                            context.logger.debug(`Failed to delete test bucket on attempt ${deleteRetries + 1}: ${String(error)}`);
                             return false;
                         });
 
@@ -424,7 +425,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
             }
 
             while (!ctx.bucketName || !ctx.locktableName) {
-                const randomString = [...new Array(8)]
+                const randomString = Array.from({ length: 8 })
                     .map(() => Math.floor(Math.random() * 36).toString(36))
                     .join('')
                     .toLowerCase();
@@ -448,7 +449,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                         Bucket: proposedBucketName
                     }))
                         .then(() => false)
-                        .catch((error) => {
+                        .catch((error: unknown) => {
                             if (error instanceof Error && error.name === 'NotFound') {
                                 return true;
                             }
@@ -500,7 +501,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                     context,
                     environment: environmentName,
                     values: {
-                        environment: environmentName ?? existingConfig.environment,
+                        environment: environmentName,
                         aws_account_id: ctx.accountId ?? existingConfig.aws_account_id,
                         aws_profile: ctx.profile ?? existingConfig.aws_profile,
                         pf_stack_version: ctx.version ?? existingConfig.pf_stack_version,
@@ -556,10 +557,10 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
             skipIfAlreadyApplied: true,
             imports: {
                 "aws_s3_bucket.state": {
-                    resourceId: async (ctx) => ctx.bucketName
+                    resourceId: (ctx) => Promise.resolve(ctx.bucketName)
                 },
                 "aws_dynamodb_table.lock": {
-                    resourceId: async (ctx) => ctx.locktableName
+                    resourceId: (ctx) => Promise.resolve(ctx.locktableName)
                 }
             }
         })
@@ -675,7 +676,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                 if (existingModuleConfig) {
                     const { extra_inputs: inputs } = existingModuleConfig;
                     if (inputs) {
-                        const { alias } = inputs;
+                        const alias = inputs["alias"] as string | undefined;
                         if (alias) {
                             ctx.newAccountName = alias
                         }
@@ -685,7 +686,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                 if (!ctx.newAccountName) {
                     ctx.newAccountName = await getNewAccountAlias({
                         context,
-                        task,
+                        task: task as PanfactumTaskWrapper,
                         defaultAlias: `${environmentName}-${Math.random().toString(36).substring(2, 10)}`
                     })
                 }
@@ -731,7 +732,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                                 AWS requires contact information to ensure you receive important infrastructure notifications.
                                 This will be automatically synced across all your environments.
                             `, { style: "warning", dedent: true })
-                            ctx.primaryContactInfo = await getPrimaryContactInfo({ context, parentTask, profile })
+                            ctx.primaryContactInfo = await getPrimaryContactInfo({ context, parentTask: parentTask as PanfactumTaskWrapper, profile })
                         }
                     },
 
@@ -748,7 +749,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                                 resourceId: async () => {
                                     const organizationsClient = await getOrganizationsClient({ context, profile })
                                     const describeOrgCommand = new DescribeOrganizationCommand({});
-                                    const orgResponse = await organizationsClient.send(describeOrgCommand).catch((error) => {
+                                    const orgResponse = await organizationsClient.send(describeOrgCommand).catch((error: unknown) => {
                                         // If the error is because organization doesn't exist, return null
                                         if (error instanceof AWSOrganizationsNotInUseException || (error instanceof Error && error.name === 'AWSOrganizationsNotInUseException')) {
                                             return null;
@@ -840,7 +841,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
                                 RoleName: 'AWSServiceRoleForEC2Spot'
                             });
 
-                            const role = await iamClient.send(getRoleCommand).catch((error) => {
+                            const role = await iamClient.send(getRoleCommand).catch((error: unknown) => {
                                 if (error instanceof NoSuchEntityException) {
                                     return null;
                                 } else {

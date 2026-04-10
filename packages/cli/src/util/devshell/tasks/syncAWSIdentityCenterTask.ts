@@ -1,6 +1,6 @@
 import { join } from "node:path"
 import { stringify, parse } from "ini";
-import { DefaultRenderer, ListrTaskWrapper, SimpleRenderer, type ListrTask } from "listr2";
+import { DefaultRenderer, Listr, ListrTaskWrapper, SimpleRenderer, type ListrTask } from "listr2";
 import pc from "picocolors";
 import { z } from "zod";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
@@ -39,7 +39,7 @@ interface IBuildSyncAWSIdentityCenterTaskInput {
     startURL?: string;
 }
 
-export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuildSyncAWSIdentityCenterTaskInput): Promise<ListrTask<T>> {
+export async function buildSyncAWSIdentityCenterTask<T extends object>(inputs: IBuildSyncAWSIdentityCenterTaskInput): Promise<ListrTask<T>> {
     const { context, startURL } = inputs;
 
     const modulePath = join(
@@ -65,7 +65,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuil
 
     return {
         title: "Sync AWS Identity Center",
-        task: async (_, parentTask) => {
+        task: (_, parentTask) => {
             const subtasks = parentTask.newListr<ITaskContext>([], {
                 ctx: {
                     profiles: {}
@@ -142,7 +142,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuil
                                 ...configUpdate
                             }
                             if (!originalAWSConfig["sso-session sso"]) {
-                                config["sso-session sso"] = ssoSessionSSO ?? await getSSOConfig(ssoRegion, context, task)
+                                config["sso-session sso"] = ssoSessionSSO ?? await getSSOConfig(ssoRegion, context, task as ListrTaskWrapper<ITaskContext, typeof DefaultRenderer, typeof SimpleRenderer>)
                             }
                         } catch (e) {
                             throw new CLIError(`Failed to read existing AWS config at ${configFilePath}`, e)
@@ -150,7 +150,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuil
                     } else {
                         config = {
                             ...configUpdate,
-                            ["sso-session sso"]: ssoSessionSSO ?? await getSSOConfig(ssoRegion, context, task)
+                            ["sso-session sso"]: ssoSessionSSO ?? await getSSOConfig(ssoRegion, context, task as ListrTaskWrapper<ITaskContext, typeof DefaultRenderer, typeof SimpleRenderer>)
                         }
                     }
 
@@ -190,7 +190,7 @@ export async function buildSyncAWSIdentityCenterTask<T extends {}>(inputs: IBuil
                 }
             })
 
-            return subtasks;
+            return subtasks as unknown as Listr<T>;
         }
     }
 }

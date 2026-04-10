@@ -7,6 +7,7 @@ import {
   buildSyncKubeClustersTask,
   EKS_MODULE_OUTPUT_SCHEMA,
 } from "@/util/devshell/tasks/syncKubeClustersTask";
+import { CLIError } from "@/util/error/error";
 import { MODULES } from "@/util/terragrunt/constants";
 
 import {
@@ -159,15 +160,24 @@ export async function setupEKS(
       inputUpdates: {
         extra_superuser_principal_arns: defineInputUpdate({
           schema: z.array(z.string()),
-          update: (_, ctx) => ctx.isSSO ? [] : [ctx.callerArn!]
+          update: (_, ctx) => {
+            if (!ctx.callerArn) throw new CLIError("callerArn not set");
+            return ctx.isSSO ? [] : [ctx.callerArn];
+          }
         }),
         cluster_name: defineInputUpdate({
           schema: z.string(),
-          update: (_, ctx) => ctx.clusterName!,
+          update: (_, ctx) => {
+            if (!ctx.clusterName) throw new CLIError("clusterName not set");
+            return ctx.clusterName;
+          },
         }),
         cluster_description: defineInputUpdate({
           schema: z.string(),
-          update: (_, ctx) => ctx.clusterDescription!,
+          update: (_, ctx) => {
+            if (!ctx.clusterDescription) throw new CLIError("clusterDescription not set");
+            return ctx.clusterDescription;
+          },
         }),
         // TODO: @jack - Move to region.yaml
         bootstrap_mode_enabled: defineInputUpdate({
@@ -181,16 +191,17 @@ export async function setupEKS(
       },
       etaWarningMessage: 'This may take up to 15 minutes.',
     }),
-    await buildSyncKubeClustersTask({
+    buildSyncKubeClustersTask({
       context,
     }),
     {
       title: "Reset the cluster",
       task: async (ctx, task) => {
+        if (!ctx.clusterName) throw new CLIError("clusterName not set");
         // TODO: @seth - Would be good if this had its own subtask
         await clusterReset({
           awsProfile,
-          clusterName: ctx.clusterName!,
+          clusterName: ctx.clusterName,
           context,
           awsRegion,
           task,
@@ -204,6 +215,7 @@ export async function setupEKS(
     {
       title: "Update Configuration File",
       task: async (ctx) => {
+        if (!ctx.clusterName) throw new CLIError("clusterName not set");
         // TODO: @seth - This is unnecessary
         // as we can read from `.kube/clusters.yaml
         const moduleOutput = await terragruntOutput({
@@ -219,7 +231,7 @@ export async function setupEKS(
           environment,
           region,
           values: {
-            kube_config_context: ctx.clusterName!,
+            kube_config_context: ctx.clusterName,
             kube_api_server: moduleOutput.cluster_url.value,
           },
         });

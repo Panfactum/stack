@@ -141,7 +141,7 @@ Velero backups, cleaning up cloud storage resources.`,
           snapshot.snapshotContentName,
           '--type=merge',
           '-p',
-          `${JSON.stringify({ "spec": { "deletionPolicy": "Delete" } })}`,
+          JSON.stringify({ "spec": { "deletionPolicy": "Delete" } }),
         ];
         const patchResult = await this.context.subprocessManager.execute({
           command: patchCommand,

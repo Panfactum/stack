@@ -13,7 +13,7 @@ export const terminalColumns = (
     tableData: Row[],
     options?: Options | OptionsFunction,
 ) => {
-    if (!tableData || tableData.length === 0) {
+    if (tableData.length === 0) {
         return '';
     }
 

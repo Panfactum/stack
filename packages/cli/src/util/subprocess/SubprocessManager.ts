@@ -16,8 +16,7 @@ import type { Subprocess } from "bun";
  *
  * @internal
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type IPipedOutputSubprocess = Subprocess<any, "pipe", "pipe">;
+type IPipedOutputSubprocess = Subprocess<"ignore" | "pipe" | "inherit" | null, "pipe", "pipe">;
 
 /**
  * Per-signal handler for a registered subprocess.
@@ -757,9 +756,9 @@ export class SubprocessManager {
     } = inputs;
 
     // eslint-disable-next-line prefer-const
-    let [stdoutForMerge, stdoutForCapture] = proc.stdout!.tee();
+    let [stdoutForMerge, stdoutForCapture] = proc.stdout.tee();
     // eslint-disable-next-line prefer-const
-    let [stderrForMerge, stderrForCapture] = proc.stderr!.tee();
+    let [stderrForMerge, stderrForCapture] = proc.stderr.tee();
 
     let stdoutCallbackPromise = Promise.resolve();
     let stderrCallbackPromise = Promise.resolve();

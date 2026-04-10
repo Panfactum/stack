@@ -84,20 +84,22 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
             .passthrough(),
         });
 
-        ctx.dockerHubUsername = originalInputs?.extra_inputs.docker_hub_username;
-        ctx.githubUsername = originalInputs?.extra_inputs.github_username;
-
-        if (
-          originalInputs?.extra_inputs?.docker_hub_username &&
-          originalInputs?.extra_inputs?.github_username &&
-          dhPAT &&
-          ghPAT
-        ) {
-          ctx.dockerHubUsername =
-            originalInputs.extra_inputs.docker_hub_username;
+        if (originalInputs) {
+          ctx.dockerHubUsername = originalInputs.extra_inputs.docker_hub_username;
           ctx.githubUsername = originalInputs.extra_inputs.github_username;
-          task.skip("Skip: Already have ECR configuration");
-          return;
+
+          if (
+            originalInputs.extra_inputs.docker_hub_username &&
+            originalInputs.extra_inputs.github_username &&
+            dhPAT &&
+            ghPAT
+          ) {
+            ctx.dockerHubUsername =
+              originalInputs.extra_inputs.docker_hub_username;
+            ctx.githubUsername = originalInputs.extra_inputs.github_username;
+            task.skip("Skip: Already have ECR configuration");
+            return;
+          }
         }
 
         if (!ctx.dockerHubUsername) {
@@ -105,7 +107,7 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
             task,
             message: "Enter your Docker Hub username:",
             required: true,
-            validate: async (value) => {
+            validate: (value) => {
               const { error } = DOCKERHUB_USERNAME.safeParse(value);
               if (error) {
                 return error.issues[0]?.message ?? "Invalid username";
@@ -153,7 +155,7 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
           ctx.githubUsername = await context.logger.input({
             task,
             message: "Enter your GitHub username:",
-            validate: async (value) => {
+            validate: (value) => {
               const { error } = GITHUB_USERNAME.safeParse(value);
               if (error) {
                 return error.issues[0]?.message ?? "Invalid username";

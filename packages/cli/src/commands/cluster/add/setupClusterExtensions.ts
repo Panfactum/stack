@@ -77,7 +77,7 @@ export async function setupClusterExtensions(
       context,
     });
 
-    return eksPfData.deploy_status === "success" && eksModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false;
+    return eksPfData.deploy_status === "success" && eksModuleInfo?.extra_inputs.bootstrap_mode_enabled === false;
   }
 
   const shouldSkipVaultAntiAffinityAdjustment = async () => {
@@ -101,7 +101,7 @@ export async function setupClusterExtensions(
 
     return (
       vaultPfData.deploy_status === "success" &&
-      vaultModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+      vaultModuleInfo?.extra_inputs.bootstrap_mode_enabled === false
     );
   }
 
@@ -126,7 +126,7 @@ export async function setupClusterExtensions(
 
     return (
       certManagerPfData.deploy_status === "success" &&
-      certManagerModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+      certManagerModuleInfo?.extra_inputs.bootstrap_mode_enabled === false
     );
   };
 
@@ -151,7 +151,7 @@ export async function setupClusterExtensions(
 
     return (
       linkerdPfData.deploy_status === "success" &&
-      linkerdModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+      linkerdModuleInfo?.extra_inputs.bootstrap_mode_enabled === false
     );
   };
 
@@ -176,7 +176,7 @@ export async function setupClusterExtensions(
 
     return (
       nginxIngressPfData.deploy_status === "success" &&
-      nginxIngressModuleInfo?.extra_inputs?.bootstrap_mode_enabled === false
+      nginxIngressModuleInfo?.extra_inputs.bootstrap_mode_enabled === false
     );
   };
 
@@ -262,8 +262,8 @@ export async function setupClusterExtensions(
                     }),
                     {
                       title: "Configuring Bastion Connectivity",
-                      task: async () => {
-                        await buildSyncSSHTask({
+                      task: () => {
+                        buildSyncSSHTask({
                           context,
                         });
                       },

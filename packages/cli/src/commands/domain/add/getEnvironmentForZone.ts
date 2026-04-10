@@ -38,7 +38,7 @@ export async function getEnvironmentForZone(input: IGetEnvironmentForZoneInput):
         }
     }
     if (possibleEnvironment.length === 1) {
-        const environment = possibleEnvironment[0]?.name!
+        const environment = possibleEnvironment[0]!.name
 
         const confirmEnvironment = await context.logger.confirm({
             explainer: `You only have one environment: ${environment}.`,

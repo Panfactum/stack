@@ -13,6 +13,7 @@ import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import type { IInstallClusterStepOptions } from "./common";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function setupLinkerd(
   options: IInstallClusterStepOptions,
   mainTask: PanfactumTaskWrapper
@@ -125,7 +126,7 @@ export async function setupLinkerd(
     },
     {
       title: "Stop Vault Proxy",
-      task: async (ctx) => {
+      task: (ctx) => {
         ctx.vaultProxyController?.abort();
       },
     },

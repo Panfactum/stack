@@ -281,13 +281,13 @@ export default class TunnelCommand extends PanfactumCommand {
       this.context.logger.info(`Press Ctrl+C to close the tunnel.`);
 
       // Handle process termination
-      const cleanup = async () => {
-        await tunnelHandle.close();
+      const cleanup = () => {
+        tunnelHandle.close();
         process.exit(0);
       };
 
-      process.on('SIGINT', cleanup);
-      process.on('SIGTERM', cleanup);
+      process.on('SIGINT', () => { void cleanup() });
+      process.on('SIGTERM', () => { void cleanup() });
 
       // Keep the command running until terminated
       return new Promise(() => {

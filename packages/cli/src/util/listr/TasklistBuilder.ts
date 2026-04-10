@@ -19,6 +19,7 @@ import type { ListrTask, ListrDefaultRenderer, ListrOptions } from "listr2";
  * This approach ensures that each task in the sequence can access all properties
  * added by previous tasks while maintaining compile-time type safety.
  */
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- void is intentionally used in conditional type to detect task functions with no return value
 type MergeContext<TContext, TAddition> = TAddition extends void
   ? TContext
   : TContext & TAddition;
@@ -46,7 +47,7 @@ type DeepPartial<T> = T extends Date
   ? Set<DeepPartial<U>>
   : T extends Array<infer U>
   ? Array<DeepPartial<U>>
-  : T extends Function
+  : T extends (...args: never[]) => unknown
   ? T
   : T extends object
   ? {
@@ -64,6 +65,7 @@ type DeepPartial<T> = T extends Date
  */
 type ConditionalMergeContext<TContext, TAddition, IsConditional extends boolean> =
   IsConditional extends true
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- void is intentionally used to detect task functions with no return value
   ? TAddition extends void
   ? TContext
   : TContext & DeepPartial<TAddition>
@@ -227,7 +229,7 @@ export class TasklistBuilder<TContext> {
     }
 
     if (Array.isArray(context)) {
-      return context.map(item => this.deepCloneContext(item)) as TContext;
+      return context.map((item: TContext) => this.deepCloneContext(item)) as TContext;
     }
 
     const cloned = {} as TContext;
@@ -286,17 +288,18 @@ export class TasklistBuilder<TContext> {
    * 
    * @internal
    */
-  private updateContextInPlace<TNewContext>(
+  private updateContextInPlace(
     targetContext: TContext,
-    newValues: TNewContext
+    newValues: unknown
   ): void {
     // Clear existing properties
-    Object.keys(targetContext as Record<string, unknown>).forEach(key => {
-      delete (targetContext as Record<string, unknown>)[key];
-    });
+    const target = targetContext as Record<string, unknown>;
+    for (const key of Object.keys(target)) {
+      Reflect.deleteProperty(target, key);
+    }
 
     // Apply new values
-    Object.assign(targetContext as Record<string, unknown>, newValues);
+    Object.assign(target, newValues);
   }
 
   /**
@@ -414,10 +417,10 @@ export class TasklistBuilder<TContext> {
         this.snapshots.push(snapshot);
 
         try {
-          const result = await task(ctx, taskWrapper);
+          const result = await task(ctx, taskWrapper as PanfactumTaskWrapper<TContext>);
 
           // Merge result into context immutably if it's not void/null/undefined
-          if (result !== undefined && result !== null && typeof result === 'object') {
+          if ((result as unknown) !== undefined && (result as unknown) !== null && typeof result === 'object') {
             // Create new merged context using immutable merging strategy
             const mergedContext = this.mergeContextImmutably(ctx, result);
 
@@ -451,7 +454,7 @@ export class TasklistBuilder<TContext> {
         listrTask as ListrTask<ConditionalMergeContext<TContext, TAddition, true>, ListrDefaultRenderer>
       ];
       newBuilder.snapshots = this.snapshots as Array<IContextSnapshot<ConditionalMergeContext<TContext, TAddition, true>>>;
-      return newBuilder as TasklistBuilder<ConditionalMergeContext<TContext, TAddition, true>>;
+      return newBuilder;
     } else {
       const newBuilder = new TasklistBuilder<MergeContext<TContext, TAddition>>(
         this.initialContext as MergeContext<TContext, TAddition>
@@ -462,7 +465,7 @@ export class TasklistBuilder<TContext> {
         listrTask as ListrTask<MergeContext<TContext, TAddition>, ListrDefaultRenderer>
       ];
       newBuilder.snapshots = this.snapshots as Array<IContextSnapshot<MergeContext<TContext, TAddition>>>;
-      return newBuilder as TasklistBuilder<MergeContext<TContext, TAddition>>;
+      return newBuilder;
     }
   }
 
@@ -548,13 +551,13 @@ export class TasklistBuilder<TContext> {
 
           // Create and run the subtask Listr
           const subtaskListr = builtSubtasks.buildListr();
-          const subtaskContext = await subtaskListr.run(this.deepCloneContext(ctx) as MergeContext<TContext, TAddition>) as MergeContext<TContext, TAddition>;
+          const subtaskContext = await subtaskListr.run(this.deepCloneContext(ctx) as MergeContext<TContext, TAddition>);
 
           // Extract the additions from subtask context by comparing with original context
-          const additions = this.extractContextAdditions(ctx as MergeContext<TContext, TAddition>, subtaskContext);
+          const additions = this.extractContextAdditions(ctx as Record<string, unknown>, subtaskContext);
 
           // Merge additions into parent context immutably
-          if (additions && Object.keys(additions).length > 0) {
+          if (Object.keys(additions).length > 0) {
             const mergedContext = this.mergeContextImmutably(ctx, additions);
             this.updateContextInPlace(ctx, mergedContext);
           }
@@ -600,8 +603,8 @@ export class TasklistBuilder<TContext> {
    * 
    * @internal
    */
-  private extractContextAdditions<TOriginal, TModified>(
-    originalContext: TOriginal,
+  private extractContextAdditions<TModified>(
+    originalContext: Record<string, unknown>,
     modifiedContext: TModified
   ): Partial<TModified> {
     const additions: Record<string, unknown> = {};
@@ -609,11 +612,11 @@ export class TasklistBuilder<TContext> {
     // Find properties in modified context that don't exist in original or have different values
     for (const key in modifiedContext as Record<string, unknown>) {
       if (Object.prototype.hasOwnProperty.call(modifiedContext, key)) {
-        const originalValue = (originalContext as Record<string, unknown>)[key];
+        const originalValue = originalContext[key];
         const modifiedValue = (modifiedContext as Record<string, unknown>)[key];
 
         // Include property if it's new or has a different value
-        if (!(key in (originalContext as Record<string, unknown>)) || originalValue !== modifiedValue) {
+        if (!(key in originalContext) || originalValue !== modifiedValue) {
           additions[key] = modifiedValue;
         }
       }

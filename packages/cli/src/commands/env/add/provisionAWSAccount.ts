@@ -23,6 +23,7 @@ import { checkAdminPermissions } from "./checkAdminPermissions";
 import { getAccountEmail } from "./getAccountEmail";
 import { getNewAccountAlias } from "./getNewAccountAlias";
 import type { PanfactumContext } from "@/util/context/context"
+import type { PanfactumTaskWrapper } from "@/util/listr/types"
 
 /**
  * Interface for provisionAWSAccount function inputs
@@ -116,7 +117,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
             // already exists
             return (await getAWSProfiles(context)).includes(environmentProfile)
         },
-        task: async (parentContext, parentTask) => {
+        task: (parentContext, parentTask) => {
 
             interface IProvisionAccountCtx {
                 newAccountName?: string,
@@ -157,7 +158,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                         const existingNames = existingNamesFromModule.concat(existingNamesFromAPI)
                         ctx.newAccountName = await getNewAccountAlias({
                             context,
-                            task,
+                            task: task as PanfactumTaskWrapper,
                             denylist: existingNames,
                             defaultAlias: `${environmentName}-${Math.random().toString(36).substring(2, 10)}`
                         })
@@ -292,7 +293,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                                     }))
 
                                     if (statusResponse.CreateAccountStatus?.State === "FAILED") {
-                                        failureReason = statusResponse.CreateAccountStatus?.FailureReason
+                                        failureReason = statusResponse.CreateAccountStatus.FailureReason
                                         break;
                                     } else if (statusResponse.CreateAccountStatus?.State === "SUCCEEDED") {
                                         parentContext.newAccountId = statusResponse.CreateAccountStatus.AccountId
@@ -408,7 +409,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
 
                     }
                 }
-            ], { ctx: { existingEmails: [] } })
+            ], { ctx: { existingEmails: [] } }) as unknown as Listr<ITaskContext>
         }
     })
 
@@ -433,7 +434,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                 return false
             }
         },
-        task: async (parentContext, parentTask) => {
+        task: (parentContext, parentTask) => {
             return parentTask.newListr<IBootstrapUserTaskCtx>([
                 {
                     title: "Retrieve new AWS account ID",
@@ -500,7 +501,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                         const createUserCommand = new CreateUserCommand({
                             UserName: adminUsername
                         });
-                        await ctx.iamClient.send(createUserCommand).catch((e) => {
+                        await ctx.iamClient.send(createUserCommand).catch((e: unknown) => {
                             throw new CLIError(`Was not able to create the IAM user ${adminUsername}`, e)
                         })
 
@@ -517,7 +518,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                             PolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess"
                         });
 
-                        await ctx.iamClient.send(attachPolicyCommand).catch((e) => {
+                        await ctx.iamClient.send(attachPolicyCommand).catch((e: unknown) => {
                             throw new CLIError(`Was not able to attach 'AdministratorAccess' policy to the the IAM user ${adminUsername}`, e)
                         })
                     }
@@ -532,7 +533,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                             UserName: adminUsername
                         });
 
-                        const accessKeyResponse = await ctx.iamClient.send(createAccessKeyCommand).catch((e) => {
+                        const accessKeyResponse = await ctx.iamClient.send(createAccessKeyCommand).catch((e: unknown) => {
                             throw new CLIError("Failed to create access key for the admin user", e);
                         })
 
@@ -570,7 +571,7 @@ export async function provisionAWSAccount(inputs: IProvisionAWSAccountInputs): P
                     }
                 },
 
-            ], { ctx: boostrapUserTaskCtx })
+            ], { ctx: boostrapUserTaskCtx }) as unknown as Listr<ITaskContext>
         }
     })
 
@@ -597,7 +598,7 @@ async function listAccounts(orgClient: OrganizationsClient) {
     let nextToken: string | undefined;
     while (true) {
         const listAccountsCommand = new ListAccountsCommand({ MaxResults: 10, NextToken: nextToken });
-        const response = await orgClient.send(listAccountsCommand).catch((e) => {
+        const response = await orgClient.send(listAccountsCommand).catch((e: unknown) => {
             throw new CLIError("Failed to list AWS organization accounts", e);
         });
         existingAccounts = existingAccounts.concat((response.Accounts || []).map(account => ({

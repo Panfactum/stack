@@ -19,7 +19,8 @@ import type { PanfactumContext } from "@/util/context/context";
  * Helper for definining input updates that are properly typed
  * DO NOT CHANGE!!!!!!!
  */
-export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- C is captured via ReturnType in the InputUpdates type alias
+export function defineInputUpdate<T extends z.ZodType, C extends object>(config: {
     /** Zod schema for input validation */
     schema: T;
     /** Function to update old input with new context */
@@ -28,7 +29,7 @@ export function defineInputUpdate<T extends z.ZodType, C extends {}>(config: {
     return config;
 }
 
-type InputUpdates<T extends {}> = {
+type InputUpdates<T extends object> = {
     [inputName: string]: ReturnType<typeof defineInputUpdate<z.ZodType, T>>;
 }
 
@@ -36,7 +37,7 @@ type InputUpdates<T extends {}> = {
 /**
  * Interface for buildDeployModuleTask function inputs
  */
-interface IBuildDeployModuleTaskInput<T extends {}> {
+interface IBuildDeployModuleTaskInput<T extends object> {
     /** Panfactum context for operations */
     context: PanfactumContext;
     /** Environment variables for the deployment */
@@ -91,7 +92,7 @@ interface IBuildDeployModuleTaskInput<T extends {}> {
     }) => Promise<void>;
 }
 
-export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployModuleTaskInput<T>): Promise<ListrTask<T>> {
+export async function buildDeployModuleTask<T extends object>(input: IBuildDeployModuleTaskInput<T>): Promise<ListrTask<T>> {
     const {
         hclIfMissing,
         context,
@@ -427,7 +428,7 @@ export async function buildDeployModuleTask<T extends {}>(input: IBuildDeployMod
                 subtasks.add({
                     title: "Post-deploy input updates",
                     task: async () => {
-                        await updateModuleYAML(postDeployInputUpdates || {}, ctx)
+                        await updateModuleYAML(postDeployInputUpdates, ctx)
                     },
                 });
             }

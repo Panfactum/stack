@@ -467,7 +467,7 @@ export class EnvironmentAddCommand extends PanfactumCommand {
             context,
             environment: MANAGEMENT_ENVIRONMENT,
             region: GLOBAL_REGION,
-            module: MODULES.AWS_IAM_IDENTITY_CENTER_PERMISSIONS
+            module: MODULES.IAM_IDENTIY_CENTER_PERMISSIONS
         })).deploy_status === "success") {
             await updateIAMIdentityCenter({
                 context,

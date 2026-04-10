@@ -114,7 +114,7 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
         message: "Select the Cluster context you want to suspend:",
         choices: kubeContexts.map(context => ({
           value: context,
-          name: `${context.name}`,
+          name: context.name,
         })),
       });
 
@@ -223,8 +223,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           }
 
           const certificates = parseJson(CERTIFICATE_ITEMS_SCHEMA, getCertsResult.stdout)
-          const certsToUpdate = (certificates.items || []).filter(cert => 
-            cert.spec?.issuerRef?.name?.includes(issuerFilter)
+          const certsToUpdate = (certificates.items || []).filter(cert =>
+            cert.spec?.issuerRef?.name.includes(issuerFilter)
           )
           
           if (certsToUpdate.length === 0) {
@@ -233,8 +233,8 @@ export class K8sClusterSuspendCommand extends PanfactumCommand {
           }
           
           for (const cert of certsToUpdate) {
-            const namespace = cert.metadata?.namespace
-            const certName = cert.metadata?.name
+            const namespace = cert.metadata.namespace
+            const certName = cert.metadata.name
             
             if (!namespace || !certName) continue
             

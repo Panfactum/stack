@@ -81,6 +81,7 @@ export class DomainRemoveCommand extends PanfactumCommand {
      * @throws {@link CLIError}
      * Currently always throws as command is not implemented
      */
+    // eslint-disable-next-line @typescript-eslint/require-await
     async execute() {
         throw new CLIError("Command not implemented.")
     }

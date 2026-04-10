@@ -43,7 +43,7 @@ interface IBuildSyncKubeClustersTaskInput {
 }
 
 // TODO: Verify access to each cluster...
-export async function buildSyncKubeClustersTask<T extends {}>(input: IBuildSyncKubeClustersTaskInput): Promise<ListrTask<T>> {
+export function buildSyncKubeClustersTask<T extends object>(input: IBuildSyncKubeClustersTaskInput): ListrTask<T> {
     const { context } = input;
 
     return {

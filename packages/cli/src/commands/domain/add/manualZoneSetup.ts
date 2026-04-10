@@ -142,7 +142,7 @@ export async function manualZoneSetup(inputs: IManualZoneSetupInput): Promise<Do
     // Test DNS Resolution
     ///////////////////////////////////////////////////////
 
-    tasks.add(await testDNSResolutionTask({
+    tasks.add(testDNSResolutionTask({
         context,
         zones: { [domain]: domainConfig } as DomainConfigs
     }))

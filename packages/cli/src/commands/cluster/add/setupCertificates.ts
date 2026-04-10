@@ -19,7 +19,11 @@ export async function setupCertificates(
 ) {
   const { awsProfile, clusterPath, context, domains, environment, region } = options;
 
-  const kubeDomain = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) }).then((data) => data!.kube_domain);
+  const kubeDomainData = await readYAMLFile({ filePath: join(clusterPath, "region.yaml"), context, validationSchema: z.object({ kube_domain: z.string() }) });
+  if (!kubeDomainData) {
+    throw new CLIError("Failed to read kube_domain from region.yaml");
+  }
+  const kubeDomain = kubeDomainData.kube_domain;
 
   interface IContext {
     alertEmail?: string;
@@ -76,7 +80,7 @@ export async function setupCertificates(
             .passthrough(),
         });
 
-        if (originalInputs?.extra_inputs?.alert_email) {
+        if (originalInputs?.extra_inputs.alert_email) {
           ctx.alertEmail = originalInputs.extra_inputs.alert_email;
           task.skip(
             "Already have Certificates configuration, skipping..."
@@ -96,7 +100,7 @@ export async function setupCertificates(
           validate: (value: string) => {
             const { error } = z.string().email().safeParse(value);
             if (error) {
-              return error.issues?.[0]?.message || "Please enter a valid email address";
+              return error.issues[0]?.message ?? "Please enter a valid email address";
             }
 
             return true;
@@ -107,12 +111,15 @@ export async function setupCertificates(
     {
       title: "Start Vault Proxy",
       task: async (ctx) => {
+        if (!ctx.kubeContext) {
+          throw new CLIError("kubeContext not set");
+        }
         const { controller, port } = await startVaultProxy({
           context,
           env: {
             ...process.env,
           },
-          kubeContext: ctx.kubeContext!,
+          kubeContext: ctx.kubeContext,
           modulePath: join(clusterPath, MODULES.KUBE_CERTIFICATES),
         });
         ctx.vaultProxyController = controller;
@@ -145,7 +152,12 @@ export async function setupCertificates(
               }),
               alert_email: defineInputUpdate({
                 schema: z.string(),
-                update: (_, ctx) => ctx.alertEmail!,
+                update: (_, ctx) => {
+                  if (!ctx.alertEmail) {
+                    throw new CLIError("alertEmail not set");
+                  }
+                  return ctx.alertEmail;
+                },
               }),
               route53_zones: defineInputUpdate({
                 schema: z
@@ -194,7 +206,7 @@ export async function setupCertificates(
     },
     {
       title: "Stop Vault Proxy",
-      task: async (ctx) => {
+      task: (ctx) => {
         ctx.vaultProxyController?.abort();
       },
     },

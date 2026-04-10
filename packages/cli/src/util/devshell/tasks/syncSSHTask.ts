@@ -26,10 +26,10 @@ interface IBuildSyncSSHTaskInput {
     /** Panfactum context for operations */
     context: PanfactumContext;
     /** Whether to exit on error (defaults to false) */
-    exitOnError?: false;
+    exitOnError?: boolean;
 }
 
-export async function buildSyncSSHTask<T extends {}>(input: IBuildSyncSSHTaskInput): Promise<ListrTask<T>> {
+export function buildSyncSSHTask<T extends object>(input: IBuildSyncSSHTaskInput): ListrTask<T> {
     const { context, exitOnError = false } = input;
 
 
@@ -91,7 +91,7 @@ export async function buildSyncSSHTask<T extends {}>(input: IBuildSyncSSHTaskInp
             ///////////////////////////////////////////////////////
             subtasks.add({
                 title: "Retrieve bastion info",
-                task: async (_, subtask) => {
+                task: (_, subtask) => {
                     const subsubtasks = subtask.newListr([], { concurrent: true })
                     bastionHCLPaths.forEach((bastionHCLPath) => {
                         const moduleDirectory = dirname(bastionHCLPath);

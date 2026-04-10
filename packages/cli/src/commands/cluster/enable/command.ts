@@ -33,7 +33,7 @@ const featureSchema = z.enum([
 
 /**
  * Constants for available cluster features
- * 
+ *
  * @remarks
  * Provides type-safe references to feature names for use in
  * switch statements and conditional logic.
@@ -179,8 +179,6 @@ Available Features:
         featureResult.error
       );
     }
-    const validatedFeature = featureResult.data;
-
     /*******************************************
      * Select Environment and Region
      *******************************************/
@@ -196,7 +194,7 @@ Available Features:
       message: "Select the environment for the cluster:",
       choices: environments.map(env => ({
         value: env,
-        name: `${env.name}`
+        name: env.name
       })),
     });
 
@@ -212,14 +210,15 @@ Available Features:
       message: "Select the region for the cluster:",
       choices: regions.map(region => ({
         value: region,
-        name: `${region.name}`
+        name: region.name
       })),
     });
 
-    // Use the validated feature in the implementation
+    const validatedFeature = featureResult.data;
+
     switch (validatedFeature) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- exhaustiveness guard for when new features are added
       case FEATURE.ECR_PULL_THROUGH_CACHE: {
-        // Implement ECR pull-through cache logic
         const tasks = await setupECR({
           environment: selectedEnvironment.name,
           region: selectedRegion.name,
@@ -229,9 +228,6 @@ Available Features:
         await tasks.run()
         break;
       }
-      // Add cases for other features as needed
-      default:
-        throw new CLIError(`Unhandled feature: ${String(validatedFeature)}`);
     }
   }
 }

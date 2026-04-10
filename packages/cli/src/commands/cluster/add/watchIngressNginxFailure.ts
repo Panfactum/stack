@@ -331,9 +331,6 @@ interface ISleepUntilAbortInput {
  */
 async function sleepUntilAbort(input: ISleepUntilAbortInput): Promise<void> {
   const { ms, abortSignal } = input;
-  if (abortSignal.aborted) {
-    return;
-  }
   // Poll at short intervals so we stay responsive to abortSignal without
   // needing to wire an AbortSignal-aware timer.
   const stepMs = 250;

@@ -6,7 +6,7 @@
  */
 interface IConcatStreamsInput {
   /** The array of ReadableStreams to concatenate sequentially */
-  streams: ReadableStream[];
+  streams: ReadableStream<Uint8Array>[];
 }
 
 /**

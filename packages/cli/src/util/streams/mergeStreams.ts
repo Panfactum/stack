@@ -6,7 +6,7 @@
  */
 interface IMergeStreamsInput {
   /** The array of ReadableStreams to merge concurrently */
-  streams: ReadableStream[];
+  streams: ReadableStream<Uint8Array>[];
 }
 
 /**
@@ -76,34 +76,38 @@ export const mergeStreams = (input: IMergeStreamsInput): ReadableStream => {
       // Track which streams are still active
       const activeStreams = new Set(readers.map((_, index) => index));
       
-      // Flag to track if we're shutting down
-      let isShuttingDown = false;
-      
+      // Flag to track if we're shutting down. Accessed through a getter
+      // to prevent TypeScript's control-flow narrowing from incorrectly
+      // assuming it stays `false` across async boundaries.
+      let _shuttingDown = false;
+      const isShuttingDown = () => _shuttingDown;
+      const setShuttingDown = () => { _shuttingDown = true; };
+
       /**
        * Reads continuously from a specific stream
-       * 
+       *
        * @internal
        * @param readerIndex - Index of the reader to read from
        */
       const readFromStream = async (readerIndex: number): Promise<void> => {
         const reader = readers[readerIndex];
-        if (!reader || !activeStreams.has(readerIndex) || isShuttingDown) return;
-        
+        if (!reader || !activeStreams.has(readerIndex) || isShuttingDown()) return;
+
         try {
           const { done, value } = await reader.read();
-          
+
           if (done) {
             activeStreams.delete(readerIndex);
-            
+
             // If all streams are done, close the controller
-            if (activeStreams.size === 0 && !isShuttingDown) {
+            if (activeStreams.size === 0 && !isShuttingDown()) {
               controller.close();
             }
           } else {
             // Enqueue the value and continue reading
-            if (!isShuttingDown) {
+            if (!isShuttingDown()) {
               controller.enqueue(value);
-              
+
               // Schedule next read from this stream
               if (activeStreams.has(readerIndex)) {
                 // Use setTimeout to avoid stack overflow and allow error propagation
@@ -116,12 +120,12 @@ export const mergeStreams = (input: IMergeStreamsInput): ReadableStream => {
             }
           }
         } catch (error) {
-          if (!isShuttingDown) {
-            isShuttingDown = true;
-            
+          if (!isShuttingDown()) {
+            setShuttingDown();
+
             // Remove this stream from active set
             activeStreams.delete(readerIndex);
-            
+
             // Release all readers
             await Promise.all(readers.map(async r => {
               try {
@@ -130,13 +134,13 @@ export const mergeStreams = (input: IMergeStreamsInput): ReadableStream => {
                 // Ignore cancellation errors
               }
             }));
-            
+
             // Propagate the error
             controller.error(error);
           }
         }
       };
-      
+
       // Start reading from all streams concurrently
       try {
         await Promise.all(
@@ -144,8 +148,8 @@ export const mergeStreams = (input: IMergeStreamsInput): ReadableStream => {
         );
       } catch (error) {
         // If any initial read fails, ensure cleanup
-        if (!isShuttingDown) {
-          isShuttingDown = true;
+        if (!isShuttingDown()) {
+          setShuttingDown();
           await Promise.all(readers.map(r => r.cancel().catch(() => {})));
           controller.error(error);
         }

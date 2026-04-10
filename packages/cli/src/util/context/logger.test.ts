@@ -11,7 +11,7 @@ import * as terminalColumnsModule from "./teminal-columns/terminalColumns";
 import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 // Mock picocolors to always apply colors in tests
-mock.module("picocolors", () => ({
+void mock.module("picocolors", () => ({
   default: {
     white: (str: string) => `\u001B[37m${str}\u001B[39m`,
     red: (str: string) => `\u001B[31m${str}\u001B[39m`,
@@ -57,7 +57,7 @@ const createMockTask = (): PanfactumTaskWrapper => ({
   prompt: <T>(_adapter: new (...args: unknown[]) => T): T => {
     // Return a mock instance that has a run method
     return {
-      run: async (_promptFn: Function, config: unknown) => {
+      run: async (_promptFn: (...args: unknown[]) => unknown, config: unknown) => {
         // Mock prompt execution - return default values based on prompt type
         if (config && typeof config === "object" && "default" in config) {
           return (config as { default: unknown }).default;
@@ -486,13 +486,13 @@ describe("Logger", () => {
 
       // Verify data structure: [[icon, message]]
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
+      expect(data[0]).toHaveLength(2);
 
       // Verify icon contains the info symbol and is styled
-      expect(data![0]![0]).toMatch(/🛈/);
+      expect(data[0]![0]).toMatch(/🛈/);
 
       // Verify message has been colored by picocolors (white)
-      expect(data![0]![1]).toBe("\u001B[37mInformation message\u001B[39m");
+      expect(data[0]![1]).toBe("\u001B[37mInformation message\u001B[39m");
 
       // Verify breakpoints are provided
       expect(breakpoints).toBeDefined();
@@ -514,14 +514,14 @@ describe("Logger", () => {
 
       // Verify data structure
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
+      expect(data[0]).toHaveLength(2);
 
       // Verify icon
-      expect(data![0]![0]).toMatch(/🛈/);
+      expect(data[0]![0]).toMatch(/🛈/);
 
       // Verify message contains highlighted text
-      expect(data![0]![1]).toContain("Message with");
-      expect(data![0]![1]).toContain("highlights");
+      expect(data[0]![1]).toContain("Message with");
+      expect(data[0]![1]).toContain("highlights");
 
       // Verify breakpoints provided
       expect(breakpoints).toBeDefined();
@@ -540,9 +540,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🛈/);
-      expect(data![0]![1]).toBe("\u001B[37mLine 1\nLine 2\nLine 3\u001B[39m"); // Dedent mock returns trimmed input, then colored
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🛈/);
+      expect(data[0]![1]).toBe("\u001B[37mLine 1\nLine 2\nLine 3\u001B[39m"); // Dedent mock returns trimmed input, then colored
       expect(breakpoints).toBeDefined();
     });
 
@@ -556,9 +556,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🛈/); // Info icon with important styling
-      expect(data![0]![1]).toBe("\u001B[37mStyled message\u001B[39m"); // Message with default white styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🛈/); // Info icon with important styling
+      expect(data[0]![1]).toBe("\u001B[37mStyled message\u001B[39m"); // Message with default white styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -575,9 +575,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🛈/);
-      expect(data![0]![1]).toBe("\u001B[37mTest message\u001B[39m");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🛈/);
+      expect(data[0]![1]).toBe("\u001B[37mTest message\u001B[39m");
       expect(breakpoints).toBeDefined();
     });
 
@@ -594,9 +594,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🛈/);
-      expect(data![0]![1]).toBe(""); // Empty message should remain empty after applyColors
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🛈/);
+      expect(data[0]![1]).toBe(""); // Empty message should remain empty after applyColors
       expect(breakpoints).toBeDefined();
     });
 
@@ -614,11 +614,11 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🛈/);
-      expect(data![0]![1]).toContain("Deploying to");
-      expect(data![0]![1]).toContain("production");
-      expect(data![0]![1]).toContain("environment");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🛈/);
+      expect(data[0]![1]).toContain("Deploying to");
+      expect(data[0]![1]).toContain("production");
+      expect(data[0]![1]).toContain("environment");
       expect(breakpoints).toBeDefined();
     });
   });
@@ -637,9 +637,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/❗/); // Warning icon with yellow styling
-      expect(data![0]![1]).toBe("\u001B[33mWarning message\u001B[39m"); // Message with warning (yellow) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/❗/); // Warning icon with yellow styling
+      expect(data[0]![1]).toBe("\u001B[33mWarning message\u001B[39m"); // Message with warning (yellow) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -653,9 +653,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/❗/); // Warning icon with yellow styling
-      expect(data![0]![1]).toBe("\u001B[33mWarning text\u001B[39m"); // Message with warning (yellow) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/❗/); // Warning icon with yellow styling
+      expect(data[0]![1]).toBe("\u001B[33mWarning text\u001B[39m"); // Message with warning (yellow) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -674,10 +674,10 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/❗/);
-      expect(data![0]![1]).toContain("Warning with");
-      expect(data![0]![1]).toContain("highlights");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/❗/);
+      expect(data[0]![1]).toContain("Warning with");
+      expect(data[0]![1]).toContain("highlights");
       expect(breakpoints).toBeDefined();
     });
 
@@ -694,9 +694,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/❗/);
-      expect(data![0]![1]).toBe(""); // Empty message should remain empty after applyColors
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/❗/);
+      expect(data[0]![1]).toBe(""); // Empty message should remain empty after applyColors
       expect(breakpoints).toBeDefined();
     });
   });
@@ -715,9 +715,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/✓/); // Success checkmark with green styling
-      expect(data![0]![1]).toBe("\u001B[32mSuccess message\u001B[39m"); // Message with success (green) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/✓/); // Success checkmark with green styling
+      expect(data[0]![1]).toBe("\u001B[32mSuccess message\u001B[39m"); // Message with success (green) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -731,9 +731,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/✓/); // Success checkmark with green styling
-      expect(data![0]![1]).toBe("\u001B[32mSuccess text\u001B[39m"); // Message with success (green) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/✓/); // Success checkmark with green styling
+      expect(data[0]![1]).toBe("\u001B[32mSuccess text\u001B[39m"); // Message with success (green) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -752,10 +752,10 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/✓/);
-      expect(data![0]![1]).toContain("Success with");
-      expect(data![0]![1]).toContain("highlights");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/✓/);
+      expect(data[0]![1]).toContain("Success with");
+      expect(data[0]![1]).toContain("highlights");
       expect(breakpoints).toBeDefined();
     });
   });
@@ -774,9 +774,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🆇/); // Error icon with red styling
-      expect(data![0]![1]).toBe("\u001B[31mError message\u001B[39m"); // Message with error (red) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🆇/); // Error icon with red styling
+      expect(data[0]![1]).toBe("\u001B[31mError message\u001B[39m"); // Message with error (red) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -790,9 +790,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🆇/); // Error icon with red styling
-      expect(data![0]![1]).toBe("\u001B[31mError text\u001B[39m"); // Message with error (red) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🆇/); // Error icon with red styling
+      expect(data[0]![1]).toBe("\u001B[31mError text\u001B[39m"); // Message with error (red) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -811,10 +811,10 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toMatch(/🆇/);
-      expect(data![0]![1]).toContain("Error with");
-      expect(data![0]![1]).toContain("highlights");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toMatch(/🆇/);
+      expect(data[0]![1]).toContain("Error with");
+      expect(data[0]![1]).toContain("highlights");
       expect(breakpoints).toBeDefined();
     });
   });
@@ -833,9 +833,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toBe(""); // No icon
-      expect(data![0]![1]).toBe("\u001B[37mPlain text\u001B[39m"); // Message with default (white) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toBe(""); // No icon
+      expect(data[0]![1]).toBe("\u001B[37mPlain text\u001B[39m"); // Message with default (white) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -852,9 +852,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toBe("");
-      expect(data![0]![1]).toBe("\u001B[33mStyled text\u001B[39m"); // Message with warning (yellow) styling
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toBe("");
+      expect(data[0]![1]).toBe("\u001B[33mStyled text\u001B[39m"); // Message with warning (yellow) styling
       expect(breakpoints).toBeDefined();
     });
 
@@ -868,9 +868,9 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toBe("");
-      expect(data![0]![1]).toBe("\u001B[37mIndented text\u001B[39m");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toBe("");
+      expect(data[0]![1]).toBe("\u001B[37mIndented text\u001B[39m");
       expect(breakpoints).toEqual([0, 100]); // Different breakpoint for removeIndent
     });
 
@@ -889,10 +889,10 @@ describe("Logger", () => {
       const [data, breakpoints] = callArgs!;
 
       expect(data).toHaveLength(1);
-      expect(data![0]).toHaveLength(2);
-      expect(data![0]![0]).toBe("");
-      expect(data![0]![1]).toContain("Text with");
-      expect(data![0]![1]).toContain("highlights");
+      expect(data[0]).toHaveLength(2);
+      expect(data[0]![0]).toBe("");
+      expect(data[0]![1]).toContain("Text with");
+      expect(data[0]![1]).toContain("highlights");
       expect(breakpoints).toBeDefined();
     });
   });
@@ -1082,7 +1082,7 @@ describe("Logger", () => {
       const callArgs = inputMock.mock.calls[0];
       expect(callArgs).toBeDefined();
       const config = callArgs![0];
-      if (config?.validate) {
+      if (config.validate) {
         const result = await config.validate("test-value");
         expect(result).toBe(true);
       }
@@ -1497,7 +1497,7 @@ describe("Logger", () => {
       const callArgs = searchMock.mock.calls[0];
       expect(callArgs).toBeDefined();
       const config = callArgs![0];
-      expect(config?.validate).toBeDefined();
+      expect(config.validate).toBeDefined();
     });
 
     test("handles default value", async () => {
@@ -1727,11 +1727,11 @@ describe("Logger", () => {
   describe("edge cases and error handling", () => {
     test("handles null/undefined messages gracefully", () => {
       // @ts-expect-error Testing edge case
-      expect(() => logger.info(null)).not.toThrow();
+      expect(() => { logger.info(null); }).not.toThrow();
       mockStream.clear();
 
-      // @ts-expect-error Testing edge case  
-      expect(() => logger.warn(undefined)).not.toThrow();
+      // @ts-expect-error Testing edge case
+      expect(() => { logger.warn(undefined); }).not.toThrow();
     });
 
     test("handles very long messages", () => {

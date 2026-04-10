@@ -1,40 +1,28 @@
 import { fixupPluginRules } from "@eslint/compat";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import importX from "eslint-plugin-import-x";
+import js from "@eslint/js";
 import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
+import importX from "eslint-plugin-import-x";
 import prettier from "eslint-plugin-prettier";
+import promise from "eslint-plugin-promise";
 import sonarjs from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
-import promise from "eslint-plugin-promise";
-import tsParser from "@typescript-eslint/parser";
-import unusedImports from "eslint-plugin-unused-imports"
-import js from "@eslint/js";
+import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import tseslint from "typescript-eslint";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default [
+export default tseslint.config(
   js.configs.recommended,
+  ...tseslint.configs.strictTypeChecked,
   {
     files: ["**/*.ts", "**/*.tsx"],
-    plugins: {
-      "@typescript-eslint": fixupPluginRules(typescriptEslint),
-      "import-x": importX,
-      prettier,
-      sonarjs,
-      unicorn,
-      promise: fixupPluginRules(promise),
-      "unused-imports": unusedImports,
-    },
     languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 2021,
-      sourceType: "module",
       parserOptions: {
+        projectService: true,
         tsconfigRootDir: __dirname,
-        project: ["./tsconfig.json"],
       },
       globals: {
         ...globals.node,
@@ -43,26 +31,38 @@ export default [
         BlobPropertyBag: "readonly",
       },
     },
+    plugins: {
+      "import-x": importX,
+      prettier,
+      sonarjs,
+      unicorn,
+      promise: fixupPluginRules(promise),
+      "unused-imports": unusedImports,
+    },
     settings: {
       "import-x/resolver-next": [createTypeScriptImportResolver({ project: __dirname + "/tsconfig.json" })],
     },
     rules: {
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unsafe-member-access": "warn",
-      "@typescript-eslint/no-unsafe-return": "error",
-      "@typescript-eslint/restrict-template-expressions": "error",
+      // Override strictTypeChecked defaults
+      "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
+      "@typescript-eslint/no-unnecessary-condition": ["error", { allowConstantLoopConditions: true }],
+      "@typescript-eslint/no-non-null-assertion": "off",
+
+      // Unused vars/imports
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "error",
         {
-          "vars": "all",
-          "varsIgnorePattern": "^_",
-          "args": "after-used",
-          "argsIgnorePattern": "^_",
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
         },
       ],
+
+      // Naming conventions
       "@typescript-eslint/naming-convention": [
         "error",
         {
@@ -84,6 +84,7 @@ export default [
         },
       ],
 
+      // Import rules
       "import-x/no-unresolved": ["error", { ignore: ["^bun:"] }],
       "import-x/order": [
         "error",
@@ -103,10 +104,11 @@ export default [
           },
         },
       ],
-
       "import-x/no-cycle": "error",
       "import-x/no-duplicates": "error",
       "import-x/no-useless-path-segments": "error",
+
+      // Console
       "no-console": [
         "warn",
         {
@@ -114,15 +116,14 @@ export default [
         },
       ],
 
+      // General
       eqeqeq: "error",
-      "no-return-await": "error",
-      "no-throw-literal": "error",
       "prefer-const": "error",
       "no-var": "error",
       "no-dupe-class-members": "off",
       "@typescript-eslint/no-dupe-class-members": "error",
 
-      // Add sonarjs rules directly
+      // Sonarjs
       "sonarjs/no-identical-expressions": "error",
       "sonarjs/no-identical-functions": "error",
       "sonarjs/no-redundant-jump": "error",
@@ -136,7 +137,21 @@ export default [
       "sonarjs/no-collection-size-mischeck": "error",
       "sonarjs/prefer-object-literal": "error",
       "sonarjs/prefer-single-boolean-return": "error",
-      "sonarjs/no-duplicate-string": ["error", { threshold: 10 }]
+      "sonarjs/no-duplicate-string": ["error", { threshold: 10 }],
     },
   },
-];
+
+  // Test file overrides — bun:test types return void instead of Promise<void>
+  // for .rejects/.resolves matchers, causing false positives
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "@typescript-eslint/await-thenable": "off",
+      "@typescript-eslint/no-confusing-void-expression": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/unbound-method": "off",
+      "@typescript-eslint/require-await": "off",
+    },
+  },
+);

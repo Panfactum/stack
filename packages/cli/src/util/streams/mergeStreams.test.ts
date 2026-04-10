@@ -430,7 +430,7 @@ describe('mergeStreams', () => {
     // Read chunks with a timeout
     const readWithTimeout = async (timeoutMs: number) => {
       const timeoutPromise = new Promise<{ timeout: true }>((resolve) =>
-        setTimeout(() => resolve({ timeout: true }), timeoutMs)
+        setTimeout(() => { resolve({ timeout: true }); }, timeoutMs)
       );
 
       const readPromise = reader.read();

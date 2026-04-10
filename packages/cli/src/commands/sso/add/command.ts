@@ -14,6 +14,7 @@ import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrun
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { setupAuthentik } from "./setupAuthentik";
 import { setupFederatedAuth } from "./setupFederatedAuth";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 /**
  * CLI command for installing Authentik SSO in a Panfactum cluster
@@ -108,7 +109,7 @@ export class SSOAddCommand extends PanfactumCommand {
             message: "Select the environment for where SSO will be deployed:",
             choices: environments.map(env => ({
                 value: env,
-                name: `${env.name}`
+                name: env.name
             })),
         });
 
@@ -124,7 +125,7 @@ export class SSOAddCommand extends PanfactumCommand {
             message: "Select the region for the SSO deployment:",
             choices: regions.map(region => ({
                 value: region,
-                name: `${region.name}`
+                name: region.name
             })),
         });
 
@@ -149,7 +150,7 @@ export class SSOAddCommand extends PanfactumCommand {
             task: async (_, mainTask) => {
                 return setupAuthentik({
                     context: this.context,
-                    mainTask,
+                    mainTask: mainTask as PanfactumTaskWrapper,
                     regionPath: selectedRegion.path
                 });
             }
@@ -173,7 +174,7 @@ export class SSOAddCommand extends PanfactumCommand {
             task: async (_, mainTask) => {
                 return setupFederatedAuth({
                     context: this.context,
-                    mainTask,
+                    mainTask: mainTask as PanfactumTaskWrapper,
                     regionPath: selectedRegion.path
                 });
             }
@@ -182,11 +183,11 @@ export class SSOAddCommand extends PanfactumCommand {
         tasks.add({
             title: this.context.logger.applyColors("Setup Vault Federated SSO"),
             task: async (_, mainTask) => {
-                return setupVaultSSO(this.context, mainTask, selectedRegion.path);
+                return setupVaultSSO(this.context, mainTask as PanfactumTaskWrapper, selectedRegion.path);
             }
         })
 
-        await tasks.run().catch((e) => {
+        await tasks.run().catch((e: unknown) => {
             throw new CLIError("Failed to Install Authentik", e);
         })
     }

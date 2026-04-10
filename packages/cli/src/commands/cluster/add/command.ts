@@ -274,7 +274,7 @@ Already completed steps will be automatically skipped.
       message: "Select the environment for the cluster:",
       choices: environments.map(env => ({
         value: env,
-        name: `${env.name}`
+        name: env.name
       })),
     });
 
@@ -290,7 +290,7 @@ Already completed steps will be automatically skipped.
       message: "Select the region for the cluster:",
       choices: regions.map(region => ({
         value: region,
-        name: `${region.name}`
+        name: region.name
       })),
     });
 
@@ -414,7 +414,7 @@ Already completed steps will be automatically skipped.
 
             // Read and parse the region.yaml file
             const yamlContent = await readYAMLFile({ filePath: regionFile, context: this.context, validationSchema: z.object({ kube_domain: z.string() }) })
-              .catch((error) => {
+              .catch((error: unknown) => {
                 this.context.logger.debug(`Error checking existing domains: ${JSON.stringify(error, null, 2)}`);
                 return null;
               });
@@ -502,7 +502,7 @@ Already completed steps will be automatically skipped.
         title: this.context.logger.applyColors(`${label} ${completed ? "(skipped)" : ""}`, { lowlights: ["(skipped)"] }),
         skip: () => completed,
         task: async (_, mainTask) => {
-          return setup(options, mainTask);
+          return setup(options, mainTask as PanfactumTaskWrapper);
         }
       });
     }

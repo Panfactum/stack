@@ -4,7 +4,7 @@ import { getZonesTask } from "@/util/domains/tasks/getZonesTask";
 
 
 import type { PanfactumContext } from "@/util/context/context";
-import type { ListrTask } from "listr2";
+import type { Listr, ListrTask } from "listr2";
 
 /**
  * Interface for syncDomainsTask function inputs
@@ -14,19 +14,19 @@ interface ISyncDomainsTaskInput {
     context: PanfactumContext;
 }
 
-export async function syncDomainsTask<T extends {}>(input: ISyncDomainsTaskInput): Promise<ListrTask<T>> {
+export function syncDomainsTask<T extends object>(input: ISyncDomainsTaskInput): ListrTask<T> {
     const { context } = input;
 
     return {
         title: "Sync domains",
-        task: async (_, parentTask) => {
+        task: (_, parentTask) => {
 
-            const subtasks = parentTask.newListr<{}>([]);
+            const subtasks = parentTask.newListr<Record<string, unknown>>([]);
 
             ///////////////////////////////////////////////////////
             // Get the zone information
             ///////////////////////////////////////////////////////
-            const { task, domainConfigs } = await getZonesTask({
+            const { task, domainConfigs } = getZonesTask({
                 context
             })
             subtasks.add(task)
@@ -37,7 +37,7 @@ export async function syncDomainsTask<T extends {}>(input: ISyncDomainsTaskInput
             subtasks.add({
                 title: `Writing zone info to DevShell config`,
                 task: async () => {
-                    const updates = Object.entries(domainConfigs).reduce((acc, [domain, config]) => {
+                    const updates = Object.entries(domainConfigs).reduce<{ [path: string]: { [domain: string]: { zone_id: string, record_manager_role_arn: string } } }>((acc, [domain, config]) => {
                         return {
                             ...acc,
                             ...{
@@ -52,7 +52,7 @@ export async function syncDomainsTask<T extends {}>(input: ISyncDomainsTaskInput
                                 }
                             }
                         }
-                    }, {} as { [path: string]: { [domain: string]: { zone_id: string, record_manager_role_arn: string } } })
+                    }, {})
 
                     await Promise.all(Object.entries(updates).map(([path, domains]) => {
                         return upsertConfigValues({
@@ -66,7 +66,7 @@ export async function syncDomainsTask<T extends {}>(input: ISyncDomainsTaskInput
                 },
             });
 
-            return subtasks
+            return subtasks as unknown as Listr<T>
         },
     };
 }

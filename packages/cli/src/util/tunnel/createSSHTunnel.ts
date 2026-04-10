@@ -69,7 +69,7 @@ export interface ISSHTunnelHandle {
   localPort: number;
   remoteAddress: string;
   bastionName: string;
-  close: () => Promise<void>;
+  close: () => void;
 }
 
 export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHTunnelHandle> {
@@ -330,7 +330,7 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
     // The tunnel promise is not awaited by the caller — close() aborts
     // the process and we just log the exit for debugging.
     context.logger.debug(
-      `SSH tunnel to ${remoteAddress} via ${bastionName} exited with code ${tunnelResult.exitCode ?? 'null'}`
+      `SSH tunnel to ${remoteAddress} via ${bastionName} exited with code ${tunnelResult.exitCode}`
     );
   }).catch((error: unknown) => {
     // Only a spawn failure will reject this promise now. Log rather than
@@ -349,7 +349,7 @@ export async function createSSHTunnel(options: ISSHTunnelOptions): Promise<ISSHT
     localPort,
     remoteAddress,
     bastionName,
-    close: async () => {
+    close: () => {
       context.logger.info('Closing tunnel...');
       controller.abort();
     }

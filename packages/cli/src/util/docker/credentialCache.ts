@@ -46,7 +46,7 @@ const CACHE_TTL = 4 * 60 * 60 * 1000
  * @param context - Panfactum context
  * @returns Path to creds.json file
  */
-async function getCredsFilePath(context: PanfactumContext): Promise<string> {
+function getCredsFilePath(context: PanfactumContext): string {
   const buildkitDir = context.devshellConfig.buildkit_dir
   return join(buildkitDir, 'creds.json')
 }
@@ -59,7 +59,7 @@ async function getCredsFilePath(context: PanfactumContext): Promise<string> {
  * @returns Parsed credentials file or empty object
  */
 async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile> {
-  const credsFile = await getCredsFilePath(context)
+  const credsFile = getCredsFilePath(context)
 
   const result = await readJSONFile({
     context,
@@ -80,7 +80,7 @@ async function readCredsFile(context: PanfactumContext): Promise<CredentialsFile
  * @param creds - Credentials to write
  */
 async function writeCredsFile(context: PanfactumContext, creds: CredentialsFile): Promise<void> {
-  const credsFile = await getCredsFilePath(context)
+  const credsFile = getCredsFilePath(context)
   const buildkitDir = context.devshellConfig.buildkit_dir
 
   // Ensure buildkit directory exists
@@ -183,8 +183,8 @@ export async function getCachedCredential(
   const now = Date.now()
   if (now >= expiresTimestamp) {
     // Credential is expired, remove it
-    delete creds[registry]
-    await writeCredsFile(context, creds)
+    const { [registry]: _, ...remaining } = creds
+    await writeCredsFile(context, remaining)
     return null
   }
 

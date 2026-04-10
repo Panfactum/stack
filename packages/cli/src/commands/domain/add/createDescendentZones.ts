@@ -48,7 +48,7 @@ export async function createDescendentZones(inputs: ICreateDescendentZonesInput)
             `Create and connect descendent DNS zones to ancestor ${ancestorZone.domain}`,
             { lowlights: [ancestorZone.domain] }
         ),
-        task: async (_, grandParentTask) => {
+        task: (_, grandParentTask) => {
             const subtasks = grandParentTask.newListr([])
 
             interface IConnectTask { nameServers?: string[], dsRecord?: string }
@@ -183,7 +183,7 @@ export async function createDescendentZones(inputs: ICreateDescendentZonesInput)
     // Test DNS Resolution
     ///////////////////////////////////////////////////////
 
-    tasks.add(await testDNSResolutionTask({
+    tasks.add(testDNSResolutionTask({
         context,
         zones: { ...domainConfigs, verifyDNSSEC: true } as DomainConfigs & { verifyDNSSEC: boolean }
     }))

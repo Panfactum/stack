@@ -107,9 +107,6 @@ export async function getAWSProfileForContext(
 
   // Extract AWS profile from exec config
   const execConfig = userConfig.user.exec;
-  if (!execConfig) {
-    throw new CLIError(`No exec configuration found for user '${userName}' in context '${kubeContext}'`);
-  }
 
   // First, check if AWS profile is set via environment variable
   if (execConfig.env && Array.isArray(execConfig.env)) {

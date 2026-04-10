@@ -10,6 +10,7 @@ import { getPanfactumConfig } from "@/util/config/getPanfactumConfig.ts";
 import { CLIError } from "@/util/error/error";
 import { GLOBAL_REGION, MODULES } from "@/util/terragrunt/constants.ts";
 import { getModuleStatus } from "@/util/terragrunt/getModuleStatus.ts";
+import type { PanfactumTaskWrapper } from "@/util/listr/types";
 
 /**
  * Command for testing VPC network connectivity
@@ -92,7 +93,7 @@ export class AWSVPCNetworkTestCommand extends PanfactumCommand {
       message: "Select the region where aws_vpc is deployed:",
       choices: regions.map(region => ({
         value: region,
-        name: `${region.name}`
+        name: region.name
       })),
     });
 
@@ -128,7 +129,7 @@ export class AWSVPCNetworkTestCommand extends PanfactumCommand {
           context: this.context,
           environment: selectedRegion.environment,
           region: selectedRegion.name,
-          task: task,
+          task: task as PanfactumTaskWrapper,
         });
       }
     })
