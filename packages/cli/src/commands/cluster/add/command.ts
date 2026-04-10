@@ -439,6 +439,15 @@ Already completed steps will be automatically skipped.
           })
         })
         step.completed = pfData.deploy_status === "success" && certificatesModuleInfo?.extra_inputs?.self_generated_certs_enabled === false;
+      } else if (step.id === "setupVault") {
+        // Special case: vault and vault_core_resources are deployed multiple times,
+        // so we also check if a non-local vault_addr already exists (indicating Vault is already accessible)
+        const vaultAddr = config.vault_addr;
+        const hasNonLocalVaultAddr = !!vaultAddr
+          && vaultAddr !== '@@TERRAGRUNT_INVALID@@'
+          && !vaultAddr.startsWith('http://127.0.0.1')
+          && !vaultAddr.startsWith('http://localhost');
+        step.completed = pfData.deploy_status === "success" || hasNonLocalVaultAddr;
       } else if (step.id === "setupClusterExtensions") {
         // Due to the concurrent nature of this step, we let the step handle it's own completion logic
         step.completed = false;

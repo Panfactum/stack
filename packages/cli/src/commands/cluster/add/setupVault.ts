@@ -81,7 +81,7 @@ export async function setupVault(
   let vaultRootToken: string | undefined;
   let vaultRecoveryKeys: string[] | undefined;
 
-  if (await fileExists({ filePath: join(clusterPath, MODULES.KUBE_VAULT, "secrets.yaml") })) {
+  if (await fileExists({ filePath: join(clusterPath, MODULES.KUBE_VAULT, "recovery.yaml") })) {
     const vaultRecovery = await sopsDecrypt({
       filePath: join(clusterPath, MODULES.KUBE_VAULT, "recovery.yaml"),
       context,
@@ -97,6 +97,18 @@ export async function setupVault(
     const { recovery_keys: recoveryKeys } = vaultRecovery;
 
     vaultRecoveryKeys = recoveryKeys;
+  }
+
+  if (await fileExists({ filePath: join(clusterPath, "region.secrets.yaml") })) {
+    const regionSecrets = await sopsDecrypt({
+      filePath: join(clusterPath, "region.secrets.yaml"),
+      context,
+      validationSchema: z.object({
+        vault_token: z.string().optional(),
+      }),
+    });
+
+    vaultRootToken = regionSecrets?.vault_token;
   }
 
 
@@ -206,6 +218,45 @@ export async function setupVault(
         if (!ctx.kubeContext) {
           throw new CLIError("Kube context not found");
         }
+
+        // Check if vault is already initialized before attempting init
+        const vaultStatusCommand = [
+          "kubectl",
+          "exec",
+          "-i",
+          "vault-0",
+          "--namespace=vault",
+          "--context",
+          ctx.kubeContext,
+          "--",
+          "vault",
+          "status",
+          "-format=json",
+        ];
+        // `vault status` returns exit code 2 when sealed, which is a
+        // legitimate state we need to detect here. We therefore do not check
+        // for exit code 2 and instead rely on the JSON output being parseable.
+        const statusResult = await context.subprocessManager.execute({
+          command: vaultStatusCommand,
+          workingDirectory: clusterPath,
+        }).exited;
+
+        if (statusResult.exitCode !== 0 && statusResult.exitCode !== 2) {
+          context.logger.debug(`Vault status check returned exit code ${statusResult.exitCode}, proceeding with initialization`);
+        } else {
+          const statusData = parseJson(
+            z.object({ initialized: z.boolean() }),
+            statusResult.stdout.trim()
+          );
+          if (statusData.initialized) {
+            // Vault is already initialized; use recovery keys from files if available
+            if (vaultRecoveryKeys && vaultRecoveryKeys.length > 0) {
+              ctx.recoveryKeys = vaultRecoveryKeys;
+            }
+            return;
+          }
+        }
+
         const modulePath = join(clusterPath, MODULES.KUBE_VAULT);
         const vaultOperatorInitCommand = [
           "kubectl",
