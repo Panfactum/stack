@@ -561,11 +561,19 @@ async function getAuthentikDomainFromModule(context: PanfactumContext, orgModule
     const data = await readYAMLFile({
         filePath: orgModuleYAMLPath,
         context,
+        throwOnMissing: false,
         validationSchema: z.object({
             extra_inputs: z.object({
-                domain: z.string(),
-            }).passthrough(),
+                domain: z.string().optional(),
+            }).passthrough().optional(),
         }).passthrough(),
     })
-    return data?.extra_inputs.domain
+    const domain = data?.extra_inputs?.domain
+    if (!domain) {
+        throw new CLIError(
+            `Authentik domain not found in kube_authentik module configuration at ${orgModuleYAMLPath}. ` +
+            "Ensure kube_authentik has been deployed and its 'domain' input is set."
+        )
+    }
+    return domain
 }
