@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "Allow ESLint to be invoked directly from the repository root without needing to cd into a workspace package.",
+      "summary": "Added `\"eslint\": \"10.2.0\"` to `devDependencies` in the root `package.json`, matching the version already used by the `cli` and `website` workspace packages."
+    }
+  ],
+  "problems": [],
+  "session_id": "d40dfef2-c852-43b3-b2b8-5e67c4b5288d",
+  "timestamp": "2026-04-11T18:42:37.861Z"
+}
