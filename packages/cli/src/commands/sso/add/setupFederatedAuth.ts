@@ -10,10 +10,12 @@ import { getEnvironments, type IEnvironmentMeta } from "@/util/config/getEnviron
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
 import { CLIError } from "@/util/error/error";
 import { removeFile } from "@/util/fs/removeFile";
+import { writeFile } from "@/util/fs/writeFile";
 import { sopsDecrypt } from "@/util/sops/sopsDecrypt";
 import { sopsUpsert } from "@/util/sops/sopsUpsert";
 import { GLOBAL_REGION, MANAGEMENT_ENVIRONMENT, MODULES } from "@/util/terragrunt/constants";
 import { buildDeployModuleTask, defineInputUpdate } from "@/util/terragrunt/tasks/deployModuleTask";
+import { terragruntOutput } from "@/util/terragrunt/terragruntOutput";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { upsertPFYAMLFile } from "@/util/yaml/upsertPFYAMLFile";
 import type { PanfactumContext } from "@/util/context/context";
@@ -324,26 +326,34 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 return !!secrets?.aws_scim_token && !!ctx.awsScimUrl
             },
             task: async (ctx, task) => {
-                const authentikModuleFilePath = join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml")
-                const domain = await getAuthentikDomainFromModule(context, authentikModuleFilePath)
+                // Retrieve SAML metadata from the deployed Authentik AWS SSO module
+                const metadataOutputs = await terragruntOutput({
+                    context,
+                    environment,
+                    region,
+                    module: MODULES.AUTHENTIK_AWS_SSO,
+                    validationSchema: z.object({
+                        saml_metadata: z.object({
+                            value: z.string(),
+                        }),
+                    }),
+                })
+                const samlMetadata = metadataOutputs.saml_metadata.value
 
-                await context.logger.confirm({
-                    task,
-                    explainer: "Next we will setup user synchronization from Authentik to AWS IAM Identity Center.\n\n" +
-                        `1. Login to the Authentik dashboard at https://${domain}\n\n` +
-                        "2. Click the \"Admin interface\" button in the top right.\n\n" +
-                        "3. Navigate to \"Applications\" > \"Providers\" and select the \"aws\" provider.\n\n" +
-                        "4. Under \"Related objects\" click the \"Download\" button for the Metadata object.",
-                    message: "Have you downloaded the metadata from Authentik?",
-                    default: true,
-                    validate: (value) => value || "You must download the metadata from Authentik before continuing.",
+                // Save metadata to disk
+                const metadataFilePath = join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "saml_metadata.xml")
+                await writeFile({
+                    context,
+                    filePath: metadataFilePath,
+                    contents: samlMetadata,
+                    overwrite: true,
                 })
 
                 await context.logger.confirm({
                     task,
                     explainer: "Next we will upload the metadata to AWS IAM Identity Center.\n\n" +
                         "1. Go back to AWS Identity Center which you opened earlier.\n\n" +
-                        "2. Under \"IdP SAML metadata,\" use the \"Choose file\" button to upload the metadata you just downloaded.\n\n" +
+                        `2. Under "IdP SAML metadata," use the "Choose file" button to upload the metadata file saved at:\n   ${metadataFilePath}\n\n` +
                         "3. When that is done click \"Next\".\n\n" +
                         "4. Type \"ACCEPT\" and click \"Change identity source.\"\n\n" +
                         "5. You should now see a notification in the middle of the screen titled \"Automatic provisioning\".\n\n" +
@@ -579,23 +589,3 @@ async function getInputsFromAuthentikAWSSSOModule(context: PanfactumContext, org
     return originalInputs?.extra_inputs ?? {}
 }
 
-async function getAuthentikDomainFromModule(context: PanfactumContext, orgModuleYAMLPath: string) {
-    const data = await readYAMLFile({
-        filePath: orgModuleYAMLPath,
-        context,
-        throwOnMissing: false,
-        validationSchema: z.object({
-            extra_inputs: z.object({
-                domain: z.string().optional(),
-            }).passthrough().optional(),
-        }).passthrough(),
-    })
-    const domain = data?.extra_inputs?.domain
-    if (!domain) {
-        throw new CLIError(
-            `Authentik domain not found in kube_authentik module configuration at ${orgModuleYAMLPath}. ` +
-            "Ensure kube_authentik has been deployed and its 'domain' input is set."
-        )
-    }
-    return domain
-}
