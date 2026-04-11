@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "The Nix CLI build failed because @aws-sdk/client-sesv2 was added to package.json and source code but was never reflected in packages/cli/bun.lock or bun.nix, which the Nix derivation uses to build node_modules.",
+      "summary": "Manually added @aws-sdk/client-sesv2 (and its transitive dependencies middleware-sdk-s3 and util-arn-parser) to packages/cli/bun.lock, then re-ran bun2nix to regenerate bun.nix with the new package entries. This unblocked the Nix build."
+    }
+  ],
+  "problems": [
+    "The project is a bun workspace monorepo (root bun.lock at stack/main/bun.lock), but packages/cli also has its own bun.lock. When `bun install` is run from packages/cli, bun detects the workspace root and writes to the root lockfile, leaving packages/cli/bun.lock stale. The postinstall script runs `bun2nix -o bun.nix` which reads ./bun.lock (the stale local one), so new packages added to package.json never appear in bun.nix. There is no documentation or warning about this workspace/lockfile split, and nothing prevents the local bun.lock from silently going out of sync.",
+    "bun2nix v1.3.1 (in use) panics with a parse error when pointed at the root workspace lockfile via `bun2nix -l ../../bun.lock`, because it cannot handle workspace-style package entries (e.g. `panfactum-cli` with fewer than 4 values). The upgrade path to v2.0.8 (which handles workspaces natively) is not documented anywhere in the repo, so the workaround of keeping a redundant local bun.lock is invisible to developers."
+  ],
+  "session_id": "66a78d57-3344-4ff2-bb78-9b44446adf01",
+  "timestamp": "2026-04-11T01:39:39.885Z"
+}

@@ -14,12 +14,11 @@
     kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/0aeb7297ae709defc8cce9078e00b96b45d72efa";
     natsPkgsSrc.url = "github:NixOS/nixpkgs/34a626458d686f1b58139620a8b2793e9e123bba";
     opensearchPkgsSrc.url = "github:NixOS/nixpkgs/67d2b8200c828903b36a6dd0fb952fe424aa0606";
-    bunPkgsSrc.url = "github:NixOS/nixpkgs/573c650e8a14b2faa0041645ab18aed7e60f0c9a";
+    bunPkgsSrc.url = "github:NixOS/nixpkgs/80d901ec0377e19ac3f7bb8c035201e2e098cc97";
     bun2nix = {
-      url = "github:baileyluTCD/bun2nix/b23a63c44bba437a37f012e5bcbf0f06bb902f17";
+      url = "github:baileyluTCD/bun2nix/c843f477b15f51151f8c6bcc886954699440a6e1";
       inputs = {
         nixpkgs.follows = "bunPkgsSrc";
-        flake-utils.follows = "flake-utils";
       };
     };
   };
@@ -116,7 +115,7 @@
             allowUnfree = true;
           };
         };
-        bun2nix = inputs.bun2nix.defaultPackage.${system};
+        bun2nix = inputs.bun2nix.packages.${system}.default;
         panfactumPackages =
           withPFCLI:
           import ./packages/devshell {

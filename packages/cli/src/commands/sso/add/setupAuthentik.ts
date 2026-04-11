@@ -127,6 +127,7 @@ export async function setupAuthentik(input: ISetupAuthentikInput) {
         ancestorDomain?: string;
         authentikAdminEmail?: string;
         authentikAdminName?: string;
+        authentikRootEmail?: string;
         orgName?: string;
     }
 

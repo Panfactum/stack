@@ -4,7 +4,7 @@
   bun2nix,
 }:
 let
-  prekConfig = import ./lint.nix { inherit pkgs; };
+  prekConfig = import ./lint.nix { inherit pkgs bunPkgs; };
   scripts = import ./scripts { inherit pkgs; };
   hooksConfig = import ./hooks { inherit pkgs scripts; };
 in
@@ -91,7 +91,7 @@ in
     go # go programming language
     upx # compressing go binaries
     bunPkgs.bun # bun runtime
-    bun2nix.bin # utility for building nix derivations from bun projects
+    bun2nix # utility for building nix derivations from bun projects
     uv # Installing python utilities
 
     ####################################

@@ -4,7 +4,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ListrPromptAdapter, ListrTaskEventType, ListrTaskState } from 'listr2'
 import pc from "picocolors";
-import type { Prompt } from '@inquirer/type'
+ 
+type PromptContext = { output?: NodeJS.WritableStream; signal?: AbortSignal; [key: string]: any }
+ 
+type Prompt<V = any, C = any> = (config: C, context?: PromptContext) => Promise<V>
 
 /**
  * Adapter for running Inquirer prompts within Listr2 tasks
@@ -69,7 +72,7 @@ export class ListrInquirerPromptAdapter extends ListrPromptAdapter {
    * 
    * @throws Propagates any errors from the prompt execution
    */
-  public async run<T extends Prompt<any, any>>(prompt: T, ...[config, context]: Parameters<T>): Promise<ReturnType<T>> {
+  public async run<T extends Prompt>(prompt: T, ...[config, context]: Parameters<T>): Promise<ReturnType<T>> {
     context ??= {}
     context.output ??= this.wrapper.stdout(ListrTaskEventType.PROMPT)
 

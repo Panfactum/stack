@@ -1,11 +1,11 @@
-{ pkgs }:
+{ pkgs, bunPkgs }:
 let
   yamlFormat = pkgs.formats.yaml { };
 
   checkPackageJson = pkgs.writeShellScript "ds-check-package-json" ''
     export NODE_PATH="$REPO_ROOT/packages/website/node_modules"
     cd "$REPO_ROOT"
-    exec ${pkgs.bun}/bin/bun run ${./scripts/ds-check-package-json.ts} "$@"
+    exec ${bunPkgs.bun}/bin/bun run ${./scripts/ds-check-package-json.ts} "$@"
   '';
 
   lintWebsite = pkgs.writeShellScript "ds-lint-website" ''
@@ -14,7 +14,7 @@ let
       cd "$REPO_ROOT"
       export NODE_OPTIONS=--max-old-space-size=8192
       export LINT=true
-      ${pkgs.bun}/bin/bunx eslint --fix --config packages/website/eslint.config.js "$@"
+      ${bunPkgs.bun}/bin/bunx eslint --fix --config packages/website/eslint.config.js "$@"
     )
   '';
 
@@ -23,7 +23,7 @@ let
     (
       cd "$REPO_ROOT/packages/website"
       export NODE_OPTIONS=--max-old-space-size=8192
-      ${pkgs.bun}/bin/bun run check
+      ${bunPkgs.bun}/bin/bun run check
     )
   '';
 
@@ -32,7 +32,7 @@ let
     (
       cd "$REPO_ROOT"
       export NODE_OPTIONS=--max-old-space-size=8192
-      ${pkgs.bun}/bin/bunx eslint --fix --config packages/cli/eslint.config.js "$@"
+      ${bunPkgs.bun}/bin/bunx eslint --fix --config packages/cli/eslint.config.js "$@"
     )
   '';
 
@@ -41,7 +41,7 @@ let
     (
       cd "$REPO_ROOT/packages/cli"
       export NODE_OPTIONS=--max-old-space-size=8192
-      ${pkgs.bun}/bin/bun check
+      ${bunPkgs.bun}/bin/bun check
     )
   '';
 
@@ -69,7 +69,7 @@ let
       if [[ ''${#test_files[@]} -eq 0 ]]; then
         exit 0
       fi
-      ${pkgs.bun}/bin/bun test "''${test_files[@]}"
+      ${bunPkgs.bun}/bin/bun test "''${test_files[@]}"
     )
   '';
 

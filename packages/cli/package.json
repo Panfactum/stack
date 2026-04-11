@@ -10,7 +10,7 @@
     "lint:fix": "eslint src --fix",
     "test": "bun test src/**/*.test.ts",
     "test:watch": "bun test --watch src/**/*.test.ts",
-    "postinstall": "bun2nix -o bun.nix"
+    "postinstall": "bun2nix -l ../../bun.lock -o bun.nix && sed -i '/= copyPathToStore /d' bun.nix"
   },
   "devDependencies": {
     "@eslint/compat": "2.0.5",
