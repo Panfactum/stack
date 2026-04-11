@@ -4,6 +4,7 @@ import authentikAwsSSO from "@/templates/authentik_aws_sso.hcl";
 import authentikAwsSSOWithSCIM from "@/templates/authentik_aws_sso_with_scim.hcl";
 import awsIamIdentityCenterPermissions from "@/templates/aws_iam_identity_center_permissions.hcl";
 import { getIdentity } from "@/util/aws/getIdentity";
+import { getIdentityCenterInstanceId } from "@/util/aws/getIdentityCenterInstanceId";
 import { getConfigValuesFromFile } from "@/util/config/getConfigValuesFromFile";
 import { getEnvironments, type IEnvironmentMeta } from "@/util/config/getEnvironments";
 import { getPanfactumConfig } from "@/util/config/getPanfactumConfig";
@@ -143,6 +144,8 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                     throw new CLIError("No region found in management/region.yaml")
                 }
 
+                const awsRegion = globalRegionData.aws_region;
+
                 const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
 
                 ctx.awsAcsUrl = originalInputs.aws_acs_url
@@ -156,36 +159,64 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 }
 
                 if (!ctx.awsAcsUrl || !ctx.awsSignInUrl || !ctx.awsIssuer) {
-                    if (!ctx.awsSignInUrl) {
-                        const identityCenterURLChanged = await context.logger.confirm({
+                    // Step 1: Ensure IAM Identity Center is enabled and get the instance ID
+                    const instanceId = await getIdentityCenterInstanceId({
+                        context,
+                        profile: awsProfile,
+                        region: awsRegion,
+                    }).catch(async () => {
+                        let resolvedId: string | undefined;
+
+                        await context.logger.confirm({
                             task,
-                            explainer: `We need to setup IAM Identity Center in the ${globalRegionData.aws_region} region.\n\n` +
+                            explainer: `IAM Identity Center is not yet enabled in the ${awsRegion} region.\n\n` +
+                                `1. Open the IAM Identity Center console: https://${awsRegion}.console.aws.amazon.com/singlesignon/home?region=${awsRegion}\n\n` +
+                                "2. Click the \"Enable\" button to enable the service.\n\n" +
+                                "3. Wait for the service to finish enabling.",
+                            message: "Have you enabled IAM Identity Center?",
+                            default: true,
+                            validate: async (value) => {
+                                if (!value) {
+                                    return "You must enable IAM Identity Center before continuing.";
+                                }
+                                resolvedId = await getIdentityCenterInstanceId({
+                                    context,
+                                    profile: awsProfile,
+                                    region: awsRegion,
+                                }).catch(() => undefined);
+                                return resolvedId !== undefined || `IAM Identity Center does not appear to be enabled in the ${awsRegion} region. Make sure you enabled it in the correct region and try again.`;
+                            },
+                        });
+
+                        return resolvedId!;
+                    });
+
+                    // Step 2: Set the portal URL (only needed on first run)
+                    if (!ctx.awsSignInUrl) {
+                        await context.logger.confirm({
+                            task,
+                            explainer: `Next, we need to set the IAM Identity Center portal URL in the ${awsRegion} region.\n\n` +
                                 "Follow these instruction to change the portal URL:\n\n" +
                                 "https://docs.aws.amazon.com/singlesignon/latest/userguide/howtochangeURL.html\n\n" +
                                 "Keep the page open when you're done.",
                             message: "Have you changed your portal URL?",
                             default: true,
-                        })
-
-                        if (!identityCenterURLChanged) {
-                            throw new CLIError("You must change your portal URL before continuing.")
-                        }
+                            validate: (value) => value || "You must change your portal URL before continuing.",
+                        });
                     }
 
-                    const navigatedToExternIdPPage = await context.logger.confirm({
+                    const identitySourceWizardUrl = `https://${awsRegion}.console.aws.amazon.com/singlesignon/home?region=${awsRegion}#/instances/${instanceId}/settings$identitySourceWizard`;
+
+                    await context.logger.confirm({
                         task,
                         explainer: "We need some additional information from the IAM Identity Center page.\n\n" +
-                            "1. Select \"Settings\" from the side panel.\n\n" +
-                            "2. Under the 'Identity Source' tab, select \"Change Identity Source\" from the \"Actions\" dropdown.\n\n" +
-                            "3. Select \"External Identity Provider\" and click \"Next\".\n\n" +
+                            `1. Open the IAM Identity Center settings: ${identitySourceWizardUrl}\n\n` +
+                            "2. Select \"External Identity Provider\" and click \"Next\".\n\n" +
                             "Keep this page open as we will need to copy some information from it now.",
                         message: "Do you have the External Identity Provider page open?",
                         default: true,
+                        validate: (value) => value || "You must have the External Identity Provider page open before continuing.",
                     })
-
-                    if (!navigatedToExternIdPPage) {
-                        throw new CLIError("You must have the External Identity Provider page open before continuing.")
-                    }
 
                     if (!ctx.awsSignInUrl) {
                         ctx.awsSignInUrl = await context.logger.input({
@@ -296,7 +327,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 const authentikModuleFilePath = join(clusterPath, MODULES.KUBE_AUTHENTIK, "module.yaml")
                 const domain = await getAuthentikDomainFromModule(context, authentikModuleFilePath)
 
-                const identityCenterURLChanged = await context.logger.confirm({
+                await context.logger.confirm({
                     task,
                     explainer: "Next we will setup user synchronization from Authentik to AWS IAM Identity Center.\n\n" +
                         `1. Login to the Authentik dashboard at https://${domain}\n\n` +
@@ -305,13 +336,10 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                         "4. Under \"Related objects\" click the \"Download\" button for the Metadata object.",
                     message: "Have you downloaded the metadata from Authentik?",
                     default: true,
+                    validate: (value) => value || "You must download the metadata from Authentik before continuing.",
                 })
 
-                if (!identityCenterURLChanged) {
-                    throw new CLIError("You must download the metadata from Authentik before continuing.")
-                }
-
-                const uploadedMetadataToAWS = await context.logger.confirm({
+                await context.logger.confirm({
                     task,
                     explainer: "Next we will upload the metadata to AWS IAM Identity Center.\n\n" +
                         "1. Go back to AWS Identity Center which you opened earlier.\n\n" +
@@ -322,11 +350,8 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                         "6. Click the \"Enable\" button and keep the modal open.",
                     message: "Have you completed the steps above?",
                     default: true,
+                    validate: (value) => value || "You must upload the metadata to AWS before continuing.",
                 })
-
-                if (!uploadedMetadataToAWS) {
-                    throw new CLIError("You must upload the metadata to AWS before continuing.")
-                }
 
                 const originalInputs = await getInputsFromAuthentikAWSSSOModule(context, join(clusterPath, MODULES.AUTHENTIK_AWS_SSO, "module.yaml"))
                 ctx.awsScimUrl = originalInputs.aws_scim_url
@@ -402,7 +427,7 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                 return !!authentikAWSSSOPfFileData?.userSyncComplete
             },
             task: async (_, task) => {
-                const reRanSync = await context.logger.confirm({
+                await context.logger.confirm({
                     task,
                     explainer: "Next we will sync the users for the first time.\n\n" +
                         "1. Login to the Authentik dashboard.\n\n" +
@@ -410,11 +435,8 @@ export async function setupFederatedAuth(input: ISetupFederatedAuthInput) {
                         "3. Under \"Sync status\" click \"Run sync again\".",
                     message: "Have you run the sync?",
                     default: true,
+                    validate: (value) => value || "You must re-run the sync before continuing.",
                 })
-
-                if (!reRanSync) {
-                    throw new CLIError("You must re-run the sync before continuing.")
-                }
 
                 await upsertPFYAMLFile({
                     context,

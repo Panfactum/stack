@@ -5,6 +5,7 @@ import { Writable } from "node:stream";
 import { input, confirm, search, checkbox, select, password } from "@inquirer/prompts";
 import pc from "picocolors";
 import { dedent } from "@/util/util/dedent";
+import { confirmWithValidate } from "./confirmWithValidate";
 import { ListrInquirerPromptAdapter } from "./listrInquirerPromptAdapter";
 import { breakpoints } from "./teminal-columns/breakpoints";
 import { terminalColumns } from "./teminal-columns/terminalColumns";
@@ -732,37 +733,62 @@ export class Logger {
 
   /**
    * Prompts for yes/no confirmation
-   * 
+   *
+   * @remarks
+   * When `validate` is provided, the prompt re-displays until the validation
+   * function returns `true`. A string return value is shown as an error message
+   * before the prompt is repeated. A `false` return value silently re-prompts.
+   *
+   * Note: unlike Inquirer's native prompts, validation is implemented as a
+   * re-prompt loop because `@inquirer/confirm` does not support inline
+   * validation.
+   *
    * @param config - Confirm prompt configuration
    * @returns Promise resolving to boolean
-   * 
+   *
    * @example
    * ```typescript
    * const proceed = await logger.confirm({
    *   message: "Do you want to continue?",
-   *   default: true
+   *   default: true,
+   *   validate: async (value) => {
+   *     if (!value) return true;
+   *     const ok = await checkSomething();
+   *     return ok || "Not ready yet, please try again.";
+   *   }
    * });
    * ```
    */
   public confirm = (config: {
     message: string | { message: string } & HighlightsConfig;
     default?: boolean;
+    validate?: (value: boolean) => boolean | string | Promise<string | boolean>;
     explainer?: string | { message: string } & HighlightsConfig;
     task?: PanfactumTaskWrapper
-  }) => {
-    const { message, explainer, task } = config;
+  }): Promise<boolean> => {
+    const { message, explainer, task, validate, ...confirmConfig } = config;
 
     this.printExplainer(explainer, task)
 
-    const wrappedConfig = {
-      ...config,
-      message: this.formatQuestionMessage(message),
-      theme: this.getDefaultInquirerTheme({ task, answerSameLine: true })
+    const theme = this.getDefaultInquirerTheme({ task, answerSameLine: true })
+    const formattedMessage = this.formatQuestionMessage(message)
+
+    if (!validate) {
+      const wrappedConfig = { ...confirmConfig, message: formattedMessage, theme }
+      return task ?
+        task.prompt(ListrInquirerPromptAdapter).run(confirm, wrappedConfig) as unknown as Promise<boolean> :
+        confirm(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
     }
 
+    const wrappedValidate = async (val: boolean) => {
+      const retVal = await validate(val)
+      return typeof retVal === "string" ? this.applyColors(retVal, { style: "error" }) : retVal
+    }
+
+    const wrappedConfig = { ...confirmConfig, message: formattedMessage, theme, validate: wrappedValidate }
     return task ?
-      task.prompt(ListrInquirerPromptAdapter).run(confirm, wrappedConfig) :
-      confirm(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
+      task.prompt(ListrInquirerPromptAdapter).run(confirmWithValidate, wrappedConfig) as unknown as Promise<boolean> :
+      confirmWithValidate(wrappedConfig).then((res) => { this.stream.write("\n"); return res; })
   }
 
 

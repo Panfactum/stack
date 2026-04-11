@@ -1,0 +1,33 @@
+{
+  "changes": [
+    {
+      "motivation": "Users needed explicit instructions to enable AWS IAM Identity Center before the portal URL step, since the workflow previously jumped straight to URL configuration without verifying the service was active.",
+      "summary": "Added a two-step structure to the 'Get Federated Auth User Configuration' task in `setupFederatedAuth.ts`: Step 1 attempts `getIdentityCenterInstanceId` and, on failure, shows a confirm prompt with a direct console link (`https://{region}.console.aws.amazon.com/singlesignon/home?region={region}`) instructing the user to enable the service. The validate callback re-runs the lookup after the user confirms, looping until it succeeds or the user refuses. Step 2 retains the original portal URL change prompt, now gated on `!ctx.awsSignInUrl` separately."
+    },
+    {
+      "motivation": "The `navigatedToExternIdPPage` deep link URL required the account-specific IAM Identity Center instance ID, which varies per AWS account and could not be hardcoded.",
+      "summary": "Created `packages/cli/src/util/aws/clients/getSSOAdminClient.ts` (factory following the existing `createAWSClient` pattern) and `packages/cli/src/util/aws/getIdentityCenterInstanceId.ts` (calls `ListInstancesCommand`, extracts the instance ID from the ARN, throws `CLIError` if none found). The instance ID is resolved in Step 1 and reused to build the `#/instances/{id}/settings$identitySourceWizard` deep link for the External IdP page prompt."
+    },
+    {
+      "motivation": "`@inquirer/confirm` has no native `validate` option, and a while-loop workaround rendered errors outside the Listr task output rather than inline under the prompt — inconsistent with how `@inquirer/input` and `@inquirer/password` display validation errors.",
+      "summary": "Created `packages/cli/src/util/context/confirmWithValidate.ts`: a custom Inquirer prompt built with `createPrompt` from `@inquirer/core`, mirroring `@inquirer/confirm` source but adding `errorMsg` state and returning `[promptLine, errorLine]` on validation failure — matching the exact inline error UX of `@inquirer/input`. Updated `Logger.confirm` in `logger.ts` to accept an optional `validate: (value: boolean) => boolean | string | Promise<string | boolean>` parameter; when provided, uses `confirmWithValidate` instead of the native confirm, with error-color styling applied to string return values."
+    },
+    {
+      "motivation": "All confirm prompts in the SSO add flow previously threw `CLIError` when the user answered 'no', causing hard crashes with no opportunity to retry. Inline validation provides a better UX by keeping the user in the prompt loop.",
+      "summary": "Converted all five `confirm → if (!confirmed) throw CLIError` patterns in `setupFederatedAuth.ts` to use the new `validate` option: the IAM Identity Center enable prompt, portal URL change prompt, External IdP page navigation prompt, metadata download prompt, metadata upload prompt, and sync re-run prompt all now return the error string on invalid answers (including 'no'), re-displaying the prompt inline until the user completes the step."
+    },
+    {
+      "motivation": "New AWS SDK and Inquirer dependencies were needed for the instance ID lookup and custom confirm prompt.",
+      "summary": "Added `@aws-sdk/client-sso-admin@3.1024.0`, `@inquirer/core@10.3.2`, and `@inquirer/type@3.0.10` to `packages/cli/package.json`. Removed `@inquirer/type` from the root `package.json` where it had been incorrectly installed."
+    }
+  ],
+  "problems": [
+    "`replace_all: true` on `globalRegionData.aws_region` also replaced the right-hand side of its own initializer (`const awsRegion = globalRegionData.aws_region` became `const awsRegion = awsRegion`), requiring a manual follow-up fix. The self-referential assignment caused a TypeScript error that was only caught on the next `tsc --noEmit` run.",
+    "`bun add @inquirer/type` was run from the repo root instead of `packages/cli/`, silently installing the package into the root `package.json`. The monorepo workspace structure means package installs must be run from the correct sub-package directory, but there is no guard or warning about this.",
+    "`@inquirer/confirm` silently ignores unknown config keys — passing a `validate` key to the native prompt caused no error or warning, making it non-obvious that validation was being silently dropped. Discovering this required reading the `@inquirer/confirm` type definitions.",
+    "The `ListrInquirerPromptAdapter.run()` return type is `Promise<Promise<T> & { cancel: () => void }>` rather than `Promise<T>`, requiring an `as unknown as Promise<boolean>` cast. This is an undocumented quirk of the Listr prompt adapter integration that had to be discovered through a TypeScript compiler error.",
+    "TypeScript loses narrowing of `globalRegionData.aws_region` (typed `string | undefined`) when it is referenced inside async `.catch()` callbacks, even after a null-check guard earlier in the same block. The existing codebase pattern of passing `globalRegionData.aws_region` directly to inline functions did not make this hazard visible until a compiler error surfaced it."
+  ],
+  "session_id": "ebf9536a-0ce9-4baf-9d9c-58c38f25f0b5",
+  "timestamp": "2026-04-11T18:40:54.273Z"
+}

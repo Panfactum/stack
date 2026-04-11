@@ -197,6 +197,10 @@
     url = "https://registry.npmjs.org/@aws-sdk/client-ssm/-/client-ssm-3.1024.0.tgz";
     hash = "sha512-EaP/ybMwj2JkNvWByGQCFRLoTyXYXxxyme+zNpDmYnVJNtkUjyF9Bl4Jm8HtYo7sNalgVxUH1py1ms50LdG7KQ==";
   };
+  "@aws-sdk/client-sso-admin@3.1024.0" = fetchurl {
+    url = "https://registry.npmjs.org/@aws-sdk/client-sso-admin/-/client-sso-admin-3.1024.0.tgz";
+    hash = "sha512-v0k3Dw8fp5VCnmqLtV3/EJYCZ4gX6saCNBB4lhO/wiPLBhk/+TAGixboZw7qT1+7wfMMGfui9OX1Fw3Ma/y8RQ==";
+  };
   "@aws-sdk/client-sts@3.1024.0" = fetchurl {
     url = "https://registry.npmjs.org/@aws-sdk/client-sts/-/client-sts-3.1024.0.tgz";
     hash = "sha512-LQYfWXsZ6ty68zSMMBGyoj9Lf2bEvVcI593nU5wepaHOTb0HCdOS5BUuQdSkjQ+MUxE3UKlLpCsmEnfEFyNGNQ==";
