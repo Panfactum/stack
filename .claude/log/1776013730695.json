@@ -1,0 +1,24 @@
+{
+  "changes": [
+    {
+      "motivation": "Docker deprecated using a PAT directly as a Bearer token to hub.docker.com (now returns 403), and removed the /v2/users/login/ endpoint in Feb 2025. The old validation check was therefore always failing for valid tokens.",
+      "summary": "Replaced the broken Docker Hub PAT validation in setupECR.ts with the correct Docker registry token flow: GET auth.docker.io/token?service=registry.docker.io&scope=repository:library/nginx:pull with Authorization: Basic base64(username:PAT), which is the same flow ECR pull-through cache uses."
+    },
+    {
+      "motivation": "The pre-commit hook ran `bun check` which called bare `tsc`, but tsc was not on PATH in the hook subprocess environment, causing the stop hook to fail on every commit.",
+      "summary": "Changed the `check` script in packages/cli/package.json from `tsc` to `bunx tsc` so Bun resolves tsc from the project's node_modules."
+    },
+    {
+      "motivation": "TypeScript could not resolve @types/bun (required by tsconfig's `\"types\": [\"bun\"]`) because node_modules did not exist, causing tsc to error even after fixing the check script.",
+      "summary": "Ran `bun install` to create node_modules and install @types/bun@1.2.5; bun.lock was updated accordingly."
+    }
+  ],
+  "problems": [
+    "Docker Hub silently changed PAT behavior (direct Bearer token usage now returns 403) with no clear error message distinguishing an invalid token from a deprecated auth flow, making the root cause hard to diagnose from the user-facing error alone.",
+    "The `check` script in packages/cli/package.json called bare `tsc` instead of `bunx tsc`, but there was no comment or documentation explaining that tsc must be invoked via bunx in this project. The failure mode (command not found in hook subprocess) was not obvious from the script itself.",
+    "node_modules did not exist in the repo (not committed, not auto-created), so @types/bun was missing and tsc failed with TS2688. There was no README note or setup instruction indicating that `bun install` must be run before typechecking works.",
+    "typescript is listed as a peerDependency rather than a devDependency in packages/cli/package.json. This means bun does not install it automatically into node_modules/.bin, making bunx resolution non-obvious and inconsistent with how other tools in the project are invoked."
+  ],
+  "session_id": "ea810537-c58f-47e6-ab49-fbb765e62fc6",
+  "timestamp": "2026-04-12T17:09:34.922Z"
+}

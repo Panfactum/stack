@@ -5,7 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "build:binary": "bun build --compile --minify --sourcemap ./src/index.ts ./src/files/**/*.* --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
-    "check": "tsc",
+    "check": "bunx tsc",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "bun test src/**/*.test.ts",

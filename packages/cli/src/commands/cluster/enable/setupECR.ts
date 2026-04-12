@@ -127,11 +127,16 @@ export async function setupECR({context, clusterPath, region, environment}: IFea
               "This will be encrypted and stored securely:",
             validate: async (value) => {
               try {
+                // Validate via the Docker registry token endpoint using Basic Auth (username:PAT).
+                // This is the correct auth flow for pulling images — the same one ECR pull-through
+                // cache uses — and works with the current dckr_pat_ token format. Using a PAT
+                // directly as a Bearer token to the Hub API now results in a 403.
+                const credentials = btoa(`${ctx.dockerHubUsername}:${value}`);
                 const response = await fetch(
-                  "https://hub.docker.com/v2/repositories/library/nginx/tags",
+                  "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/nginx:pull",
                   {
                     headers: {
-                      Authorization: `Bearer ${value}`,
+                      Authorization: `Basic ${credentials}`,
                     },
                   }
                 );
