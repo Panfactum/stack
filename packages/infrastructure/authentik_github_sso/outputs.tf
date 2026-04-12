@@ -5,7 +5,7 @@ output "saml_metadata" {
 
 output "sso_post_url" {
   description = "The URL where SAML authentication requests are sent from the Service Provider (GitHub)"
-  value       = authentik_provider_saml.github.url_sso_redirect
+  value       = authentik_provider_saml.github.url_sso_post
 }
 
 output "issuer_url" {
