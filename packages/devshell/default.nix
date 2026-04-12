@@ -12,7 +12,10 @@
   opensearchPkgs,
   bunPkgs,
   bun2nix,
-  withPFCLI,
+  cli ? {
+    enabled = false;
+    smol = false;
+  },
 }:
 let
   # Custom Packages
@@ -178,10 +181,11 @@ with pkgs;
   opensearchPkgs.opensearch-cli
 ]
 ++ (
-  if withPFCLI then
+  if cli.enabled then
     [
       (pkgs.callPackage ../cli/default.nix {
         inherit bun2nix;
+        inherit (cli) smol;
         pkgs = bunPkgs;
       })
     ]

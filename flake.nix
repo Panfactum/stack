@@ -117,7 +117,12 @@
         };
         bun2nix = inputs.bun2nix.packages.${system}.default;
         panfactumPackages =
-          withPFCLI:
+          {
+            cli ? {
+              enabled = false;
+              smol = false;
+            },
+          }:
           import ./packages/devshell {
             inherit
               pkgs
@@ -133,7 +138,7 @@
               opensearchPkgs
               bunPkgs
               bun2nix
-              withPFCLI
+              cli
               ;
           };
 
@@ -145,11 +150,14 @@
             packages ? [ ],
             shellHook ? "",
             activateDefaultShellHook ? true,
-            withPFCLI ? true,
+            cli ? {
+              enabled = true;
+              smol = false;
+            },
           }:
           pkgs.mkShell {
             inherit name;
-            buildInputs = (panfactumPackages withPFCLI) ++ packages;
+            buildInputs = (panfactumPackages { inherit cli; }) ++ packages;
             shellHook = ''
               ${if activateDefaultShellHook then "source enter-shell-local" else ""}
               ${shellHook}
@@ -166,7 +174,12 @@
             contents = with pkgs.dockerTools; [
               (pkgs.buildEnv {
                 name = "image-root";
-                paths = panfactumPackages true;
+                paths = panfactumPackages {
+                  cli = {
+                    enabled = true;
+                    smol = true;
+                  };
+                };
                 pathsToLink = [ "/bin" ];
               })
               usrBinEnv
@@ -190,7 +203,10 @@
         formatter = pkgs.nixfmt;
 
         devShell = mkDevShell {
-          withPFCLI = true;
+          cli = {
+            enabled = true;
+            smol = false;
+          };
           activateDefaultShellHook = true;
           inherit (localDevShell) shellHook;
           inherit (localDevShell) packages;

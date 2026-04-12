@@ -1,4 +1,9 @@
-{ pkgs, bun2nix, ... }:
+{
+  pkgs,
+  bun2nix,
+  smol ? false,
+  ...
+}:
 let
   bunDeps = bun2nix.fetchBunDeps { bunNix = ./bun.nix; };
   packageJson = builtins.fromJSON (builtins.readFile ./package.json);
@@ -44,7 +49,7 @@ pkgs.stdenv.mkDerivation {
 
   buildPhase = ''
     runHook preBuild
-    bun build:binary
+    bun ${if smol then "build:binary:smol" else "build:binary"}
     runHook postBuild
   '';
 
