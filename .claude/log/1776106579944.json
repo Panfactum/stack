@@ -1,0 +1,11 @@
+{
+  "changes": [],
+  "problems": [
+    "bunx silently exits 1 with no error output when the target script file is empty — there's no diagnostic message indicating what went wrong, making it very hard to diagnose. A clearer error like 'entrypoint file is empty or missing' would save significant debugging time.",
+    "bun install does not validate file contents after installation — it checks inode/metadata but not whether JS files actually have content. This means a corrupted install (all files 0 bytes) passes silently and bun reports success, leaving the user with a broken node_modules that appears valid.",
+    "The presence of a hook-guard-npx wrapper in the devshell added an extra layer of indirection during debugging, making it unclear which component was intercepting execution at each step.",
+    "All installed JS files in node_modules were 0 bytes despite bun install reporting success. The root cause (likely ZFS sparse file or copy-on-write issue) was never confirmed, and `rm -rf node_modules && bun install` did not resolve it — suggesting bun may be reading from a corrupted cache rather than re-downloading."
+  ],
+  "session_id": "c4303328-69a6-48d3-a9ba-af8d606d9fea",
+  "timestamp": "2026-04-13T18:56:39.026Z"
+}

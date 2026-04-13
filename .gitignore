@@ -4,6 +4,7 @@
 .podman
 go
 !.envrc
+.bun/
 .pnpm/
 .cspell/
 node_modules/
