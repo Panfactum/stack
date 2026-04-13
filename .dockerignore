@@ -18,8 +18,6 @@
 !packages/reference-typescript/package.json
 !packages/reference-typescript/tsconfig.json
 !packages/bastion
-!.npmrc
 !package.json
-!pnpm-lock.yaml
-!pnpm-workspace.yaml
+!bun.lock
 

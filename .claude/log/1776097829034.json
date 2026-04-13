@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "After migrating from pnpm to bun, the Containerfile was updated to COPY bun.lock instead of pnpm-lock.yaml, but .dockerignore was never updated. The .dockerignore uses a deny-all * pattern and whitelists specific files, so bun.lock was silently excluded from the Docker build context, causing the build to fail.",
+      "summary": "Updated .dockerignore to replace !pnpm-lock.yaml and !pnpm-workspace.yaml with !bun.lock, ensuring bun.lock is included in the Docker build context."
+    }
+  ],
+  "problems": [
+    "Incomplete pnpm-to-bun migration: the Containerfile was updated to reference bun.lock but .dockerignore was not updated in the same changeset. Since .dockerignore uses a deny-all * pattern at the top and then whitelists files, adding a new lockfile requires a corresponding whitelist entry — this coupling was not obvious and not documented anywhere near the Containerfile or migration commit."
+  ],
+  "session_id": "fa5ce7de-3ab6-436a-a25e-1d5406f6d30b",
+  "timestamp": "2026-04-13T16:30:41.991Z"
+}
