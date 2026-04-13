@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "bun validates all workspaces listed in the root package.json exist at install time, even when using --filter to restrict which package gets installed. The Containerfile was copying package.json stubs for packages/cli and packages/scraper but missing packages/website, causing the build to fail with 'Workspace not found packages/website'.",
+      "summary": "Added COPY packages/website/package.json packages/website/package.json to packages/scraper/Containerfile so bun can resolve all three workspace members declared in the root package.json before running bun install --filter scrape --production."
+    }
+  ],
+  "problems": [
+    "The Containerfile comment explicitly documents the pattern of copying package.json stubs for workspace resolution, but packages/website was omitted. The comment should have listed all three workspaces or referenced the root package.json workspaces array to make it obvious all members need stubs.",
+    "Bun's behavior of validating all workspaces even when --filter is used is not obvious from the CLI documentation. This caused a non-intuitive failure: the filter restricts installation to one package, but all workspace members must still have resolvable package.json files on disk."
+  ],
+  "session_id": "54a9a741-294c-40b2-baf0-f54a68fcf58a",
+  "timestamp": "2026-04-13T19:06:24.218Z"
+}

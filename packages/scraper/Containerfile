@@ -16,6 +16,7 @@ FROM base AS deps
 COPY package.json bun.lock ./
 COPY packages/cli/package.json packages/cli/
 COPY packages/scraper/package.json packages/scraper/
+COPY packages/website/package.json packages/website/
 
 # --filter scrape installs only the scraper workspace's deps (skips the
 # 100+ AWS SDK packages that belong to packages/cli). --production drops
