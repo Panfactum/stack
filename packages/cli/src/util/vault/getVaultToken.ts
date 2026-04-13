@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import { CLIError, CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
+import { getOpenPort } from '@/util/network/getOpenPort';
 import type { PanfactumContext } from '@/util/context/context';
 
 /**
@@ -174,22 +175,27 @@ export async function getVaultToken(options: IGetVaultTokenOptions): Promise<str
 
 /**
  * Performs OIDC login to obtain a new Vault token
- * 
+ *
  * @internal
  * @remarks
  * This function executes `vault login -method=oidc` to authenticate
  * via OpenID Connect. The OIDC method typically opens a browser
  * window for the user to authenticate with their identity provider.
- * 
+ *
+ * An available port is dynamically selected for the local OIDC callback
+ * listener, preventing port contention when multiple authentication
+ * attempts run in parallel (vault defaults to port 8250 for all calls).
+ *
  * @param env - Environment variables including VAULT_ADDR
  * @param context - Panfactum context for command execution
  * @returns New Vault authentication token
- * 
+ *
  * @throws {@link CLIError}
  * Throws when OIDC login fails or returns empty token
  */
 async function performOIDCLogin(env: Record<string, string | undefined>, context: PanfactumContext): Promise<string> {
-  const command = ['vault', 'login', '-method=oidc', '-field=token'];
+  const port = await getOpenPort({});
+  const command = ['vault', 'login', '-method=oidc', '-field=token', `port=${port}`];
   const result = await context.subprocessManager.execute({
     command,
     workingDirectory: context.devshellConfig.repo_root,

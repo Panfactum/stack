@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "vault login -method=oidc always binds its OAuth2 callback listener to port 8250 by default, causing resource contention and failures when multiple processes attempt OIDC authentication in parallel (e.g. concurrent Terragrunt runs).",
+      "summary": "Modified src/util/vault/getVaultToken.ts to import the existing getOpenPort utility and pass a dynamically allocated ephemeral port via the port=<n> K=V argument to vault login. Each parallel authentication attempt now gets its own unique port, eliminating the bind conflict."
+    }
+  ],
+  "problems": [],
+  "session_id": "e871e85e-2835-4041-b64e-bb5f7003a926",
+  "timestamp": "2026-04-13T14:16:15.137Z"
+}
