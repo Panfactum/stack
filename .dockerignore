@@ -10,6 +10,7 @@
 !packages/website/astro.config.mjs
 !packages/website/.prettierrc.mjs
 !packages/website/postcss.config.cjs
+!packages/cli/package.json
 !packages/scraper/package.json
 !packages/scraper/src
 !packages/scraper/.eslintrc.js

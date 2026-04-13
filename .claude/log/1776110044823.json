@@ -1,0 +1,32 @@
+{
+  "changes": [
+    {
+      "motivation": "Both Containerfiles (website and scraper) copy packages/cli/package.json for bun workspace installation, but it was being excluded by the .dockerignore, causing Docker builds to fail with a file-not-found error.",
+      "summary": "Added `!packages/cli/package.json` to .dockerignore to whitelist it from the packages/* exclusion rule."
+    },
+    {
+      "motivation": "babel-preset-solid@1.9.12 (pulled in by @astrojs/solid-js@5.1.3) generates setStyleProperty() calls, but that function was only added in solid-js@1.9.8. The mismatch caused a Rollup build error at compile time.",
+      "summary": "Upgraded solid-js from 1.9.7 to 1.9.12 in packages/website/package.json to match the babel preset version."
+    },
+    {
+      "motivation": "SVG imports in Astro return a SvgComponent & ImageMetadata composite type, not a plain string. Passing the object directly to <img src> failed TypeScript type checking.",
+      "summary": "Changed logoWhite to logoWhite.src in packages/website/src/pages/presentations/[slug].astro to extract the URL string."
+    },
+    {
+      "motivation": "eslint.config.js in the website package directly imports the globals package, but it was not declared as an explicit dependency. Bun does not hoist transitive dependencies, so it was missing from node_modules.",
+      "summary": "Added globals@17.4.0 as an explicit dependency in packages/website/package.json."
+    },
+    {
+      "motivation": "eslint-plugin-solid@0.14.5 pins @typescript-eslint/utils@8.26.1, which references eslint/use-at-your-own-risk — an internal API removed in ESLint 10.x. This caused lint to crash with a module-not-found error.",
+      "summary": "Added an overrides entry in the root package.json forcing @typescript-eslint/utils to 8.58.1, which supports ESLint 10.x. Ran bun install --force to apply the override to nested dependency trees."
+    }
+  ],
+  "problems": [
+    "Running `bun install --force` corrupted the TypeScript 5.6.2 package in bun's global cache (~/.cache/.bun/install/cache/typescript@5.6.2@@@1/) — all binary files (tsc, tsserver) were replaced with 0-byte files. Recovery required manually deleting both the project-level node_modules/.bun/typescript@5.6.2 directory and the global cache entry, then reinstalling.",
+    "The version mismatch between babel-preset-solid (1.9.12, pulled in transitively by @astrojs/solid-js) and the pinned solid-js (1.9.7) was not surfaced at install time — it only appeared as a cryptic Rollup 'not exported by' error at build time. The @astrojs/solid-js package should document or enforce its required solid-js peer version range.",
+    "The globals package was imported directly in eslint.config.js but was not declared as a dependency in package.json. Because bun does not hoist transitive dependencies to the workspace root in the same way npm/pnpm do, this silently failed to resolve. The missing explicit dependency was not flagged during install.",
+    "eslint-plugin-solid@0.14.5 is incompatible with ESLint 10.x due to its pinned @typescript-eslint/utils@8.26.1, but this incompatibility is not documented in the plugin's README or changelog. The failure mode (module 'eslint/use-at-your-own-risk' not found) is misleading because the error points to eslint internals rather than the plugin version mismatch."
+  ],
+  "session_id": "566b3d70-9793-428b-9442-24caca9eca0e",
+  "timestamp": "2026-04-13T19:54:39.762Z"
+}
