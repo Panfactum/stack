@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "The existing memory allocations were insufficient for the nix image builder CI/CD workflows, requiring a doubling of resources.",
+      "summary": "Doubled memory requests and limits for all four containers in infrastructure/demo_cicd/nix_image_builder.tf: check-image (256Mi→512Mi), init-store (250Mi req→500Mi, 400Mi limit→800Mi), main/build-and-push (8Gi→16Gi), and merge-and-copy (500Mi req→1000Mi, 750Mi limit→1500Mi)."
+    }
+  ],
+  "problems": [],
+  "session_id": "03f0fe8c-837e-494b-ac59-96abcc1e8dae",
+  "timestamp": "2026-04-13T15:53:03.180Z"
+}

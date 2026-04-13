@@ -282,11 +282,11 @@ module "nix_image_builder_workflow" {
         )
         resources = {
           requests = {
-            memory = "256Mi"
+            memory = "512Mi"
             cpu    = "100m"
           }
           limits = {
-            memory = "256Mi"
+            memory = "512Mi"
           }
         }
       }
@@ -359,11 +359,11 @@ module "nix_image_builder_workflow" {
             )
             resources = {
               requests = {
-                memory = "250Mi"
+                memory = "500Mi"
                 cpu    = "100m"
               }
               limits = {
-                memory = "400Mi"
+                memory = "800Mi"
               }
             }
           },
@@ -388,11 +388,11 @@ module "nix_image_builder_workflow" {
             )
             resources = {
               requests = {
-                memory = "8Gi"
+                memory = "16Gi"
                 cpu    = "1000m"
               }
               limits = {
-                memory = "8Gi"
+                memory = "16Gi"
               }
             }
             dependencies = ["init-store"]
@@ -442,11 +442,11 @@ module "nix_image_builder_workflow" {
         )
         resources = {
           requests = {
-            memory = "500Mi"
+            memory = "1000Mi"
             cpu    = "100m"
           }
           limits = {
-            memory = "750Mi"
+            memory = "1500Mi"
           }
         }
       }
