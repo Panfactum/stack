@@ -257,9 +257,9 @@ export class WorkflowGitCheckoutCommand extends PanfactumCommand {
           commitSha = await getCommitHash({
             repo: `https://${this.repoUrl}`,
             ref: this.ref,
-            noVerify: false,
+            noVerify: true,
             context: context,
-            workingDirectory: process.cwd(),
+            workingDirectory: targetDirectory,
           })
         },
       },

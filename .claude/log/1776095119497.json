@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "The TypeScript port of `pf wf git-checkout` had two bugs in the `getCommitHash` call that caused failures with private repos. The bash original used `--no-verify` to skip pre-verification entirely, since the subsequent `git fetch origin` inside the cloned repo would catch invalid refs anyway.",
+      "summary": "Fixed two bugs in `packages/cli/src/commands/wf/git-checkout/command.ts` at line ~260: (1) Changed `noVerify: false` to `noVerify: true` to match the bash script's `--no-verify` behavior, skipping the redundant unauthenticated pre-verification step. (2) Changed `workingDirectory: process.cwd()` to `workingDirectory: targetDirectory` so the hash resolution runs inside the cloned repo where the `url.insteadOf` credential config was set up."
+    }
+  ],
+  "problems": [
+    "The TypeScript port of the git-checkout command silently diverged from the bash original on two semantically important arguments (`noVerify` and `workingDirectory`). There was no test or comment documenting why `noVerify: true` is required, or that `workingDirectory` must be the cloned repo with credential config — making the bug invisible until it failed on private repos at runtime."
+  ],
+  "session_id": "a429c092-a4e7-4f0d-a96a-0bce719ca392",
+  "timestamp": "2026-04-13T15:45:58.904Z"
+}
