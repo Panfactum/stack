@@ -47,11 +47,11 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Install Dependencies
-COPY package.json bun.lock .
+COPY package.json bun.lock bunfig.toml .
 COPY packages/cli/package.json packages/cli/
 COPY packages/scraper/package.json packages/scraper/
 COPY packages/website/package.json packages/website/
-RUN --mount=type=cache,id=bun,target=/root/.bun bun install --frozen-lockfile
+RUN --mount=type=cache,id=bun,target=/code/.bun bun install --frozen-lockfile
 
 
 #################################################

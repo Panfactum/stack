@@ -1,0 +1,37 @@
+{
+  "changes": [
+    {
+      "motivation": "The bun2nix postinstall script in the CLI package ran unconditionally, but bun2nix is a Nix-only tool not available in Docker, causing container builds to fail at the install step.",
+      "summary": "Made the postinstall script in packages/cli/package.json conditional: `if command -v bun2nix >/dev/null 2>&1; then ...; fi` so it is a no-op in Docker but still regenerates bun.nix in the Nix devshell."
+    },
+    {
+      "motivation": "ec.config.mjs is required by the astro-expressive-code integration at build time but was not whitelisted in .dockerignore, causing it to be excluded from the Docker build context. Several other entries were stale (files that no longer exist) or had wrong filenames.",
+      "summary": "Updated .dockerignore to add !packages/website/ec.config.mjs and !packages/website/bunfig.toml; removed stale entries for tailwind.config.mjs, panfactum-theme.mjs, and components.json; corrected filenames for .eslintrc.js→eslint.config.js and .prettierrc.mjs→.prettier.mjs."
+    },
+    {
+      "motivation": "bunfig.toml was never copied into the container, so its cache dir setting was ignored. The bun cache mount target was also wrong — it pointed to /root/.bun instead of /code/.bun (the path set by bunfig.toml's dir setting).",
+      "summary": "Updated packages/website/Containerfile to COPY bunfig.toml and changed the RUN --mount=type=cache target from /root/.bun to /code/.bun to match the bunfig.toml configuration."
+    },
+    {
+      "motivation": "logoWhite was typed as SvgComponent & ImageMetadata but used directly as an img src attribute which requires a string, causing a TypeScript type error during astro check.",
+      "summary": "Fixed packages/website/src/pages/presentations/[slug].astro line 84 to use logoWhite.src instead of logoWhite to satisfy the img src string type requirement."
+    },
+    {
+      "motivation": "The website's eslint.config.js imported the globals package, but globals was only declared in the CLI package's devDependencies, not the website's. This caused lint failures when running eslint from the website package directory.",
+      "summary": "Added globals@17.4.0 to devDependencies in packages/website/package.json to explicitly declare the dependency used in eslint.config.js."
+    },
+    {
+      "motivation": "eslint-plugin-solid@0.14.5 depends on @typescript-eslint/utils@8.26.1 which references eslint/use-at-your-own-risk's FlatESLint export — an API removed in eslint v10 — causing crashes when linting.",
+      "summary": "Added a Bun overrides entry in the root package.json to force @typescript-eslint/utils to 8.58.1, which has a fallback for the missing FlatESLint export and is compatible with eslint v10."
+    }
+  ],
+  "problems": [
+    "packages/cli/package.json postinstall ran bun2nix unconditionally with no documentation or guard indicating it is a Nix-environment-only tool. This silently broke Docker builds because bun2nix is not available outside the Nix devshell.",
+    ".dockerignore contained stale entries for several files that no longer exist (tailwind.config.mjs, panfactum-theme.mjs, components.json) and used wrong filenames for files that do exist (.eslintrc.js instead of eslint.config.js, .prettierrc.mjs instead of .prettier.mjs). ec.config.mjs — required for the Expressive Code Astro integration — was never whitelisted despite the integration being present.",
+    "The website's eslint.config.js imported globals without it being declared in the website's own package.json. It worked accidentally in monorepo contexts where workspace hoisting made it available, but failed when eslint ran scoped to the website package.",
+    "eslint-plugin-solid@0.14.5 is incompatible with eslint v10 (which removed the FlatESLint export from use-at-your-own-risk) but this was not caught at install time or reflected in any version constraints. The fix required discovering the incompatibility by tracing the error through multiple layers of dependency resolution.",
+    "The website Containerfile mounted the bun cache at /root/.bun but bunfig.toml configured dir = \".bun\" (relative to WORKDIR /code), making the cache mount point incorrect. Additionally, bunfig.toml was never copied into the container, so neither the cache location config nor the local pin setting had any effect."
+  ],
+  "session_id": "c23d24ac-2c4c-4628-90e4-ac1ab60b5a0e",
+  "timestamp": "2026-04-13T22:53:07.415Z"
+}
