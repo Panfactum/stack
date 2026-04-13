@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "Pre-commit hooks pass file paths relative to the repo root, but ESLint configs and module resolution work best when run from within the package directory. Other scripts (typecheckWebsite, typecheckCli, testCli) already followed this pattern; lintWebsite and lintCli did not.",
+      "summary": "Updated lintWebsite and lintCli in packages/local/lint.nix to cd into their respective package directories (packages/website and packages/cli) before running ESLint, and to strip the package path prefix from file arguments passed by the pre-commit hook. This makes the linters consistent with the typecheck and test scripts."
+    }
+  ],
+  "problems": [
+    "packages/local/lint.nix had inconsistent behavior between lint scripts (ran from $REPO_ROOT) and typecheck/test scripts (ran from package subdirectory). This inconsistency was not documented, requiring the agent to discover it by reading multiple scripts and comparing patterns."
+  ],
+  "session_id": "ce0a4b6a-751d-4c7b-917d-08ef5787c460",
+  "timestamp": "2026-04-13T21:49:51.335Z"
+}

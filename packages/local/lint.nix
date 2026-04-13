@@ -11,10 +11,14 @@ let
   lintWebsite = pkgs.writeShellScript "ds-lint-website" ''
     set -eo pipefail
     (
-      cd "$REPO_ROOT"
+      cd "$REPO_ROOT/packages/website"
       export NODE_OPTIONS=--max-old-space-size=8192
       export LINT=true
-      ${bunPkgs.bun}/bin/bunx eslint --fix --config packages/website/eslint.config.js "$@"
+      files=()
+      for file in "$@"; do
+        files+=("''${file#packages/website/}")
+      done
+      ${bunPkgs.bun}/bin/bunx eslint --fix --config eslint.config.js "''${files[@]}"
     )
   '';
 
@@ -30,9 +34,13 @@ let
   lintCli = pkgs.writeShellScript "ds-lint-cli" ''
     set -eo pipefail
     (
-      cd "$REPO_ROOT"
+      cd "$REPO_ROOT/packages/cli"
       export NODE_OPTIONS=--max-old-space-size=8192
-      ${bunPkgs.bun}/bin/bunx eslint --fix --config packages/cli/eslint.config.js "$@"
+      files=()
+      for file in "$@"; do
+        files+=("''${file#packages/cli/}")
+      done
+      ${bunPkgs.bun}/bin/bunx eslint --fix --config eslint.config.js "''${files[@]}"
     )
   '';
 

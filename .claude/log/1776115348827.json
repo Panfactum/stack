@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "Bun was using a shared/global cache that got corrupted (30,067 empty JS files), causing linting errors in worktrees due to broken node_modules. Pinning the cache to a local `.bun` directory at the repo root prevents cross-environment cache corruption.",
+      "summary": "Created `bunfig.toml` at the repo root to configure Bun's cache directory to `.bun` (local to the repo). Added `.bun/` to `.gitignore` to prevent the local cache from being committed."
+    }
+  ],
+  "problems": [
+    "The Bun global cache silently accumulated 30,067 empty JS files (vs 3,870 non-empty), causing apparent linting errors in worktrees that didn't reproduce on main. There is no warning or error from Bun when cached files are empty/corrupted — the corruption is invisible until downstream tools (like ESLint) fail.",
+    "The repository had no `bunfig.toml` despite managing a large monorepo with worktrees, leaving Bun defaulting to a shared global cache. Sharing a global cache across worktrees and multiple install invocations is fragile. This should have been documented or pre-configured."
+  ],
+  "session_id": "1325a340-15eb-4780-94cd-2a8cc360daab",
+  "timestamp": "2026-04-13T21:22:41.125Z"
+}
