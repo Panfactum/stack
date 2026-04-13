@@ -11,6 +11,7 @@ import { getModuleStatus } from "@/util/terragrunt/getModuleStatus";
 import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { terragruntApply } from "../terragruntApply";
+import { terragruntBackendBootstrap } from "../terragruntBackendBootstrap";
 import { terragruntImport } from "../terragruntImport";
 import { terragruntInit } from "../terragruntInit";
 import type { PanfactumContext } from "@/util/context/context";
@@ -90,6 +91,8 @@ interface IBuildDeployModuleTaskInput<T extends object> {
         /** Signal that fires when the apply completes successfully */
         abortSignal: AbortSignal;
     }) => Promise<void>;
+    /** Bootstrap the Terragrunt remote state backend before initializing */
+    bootstrapBackend?: boolean;
 }
 
 export async function buildDeployModuleTask<T extends object>(input: IBuildDeployModuleTaskInput<T>): Promise<ListrTask<T>> {
@@ -108,7 +111,8 @@ export async function buildDeployModuleTask<T extends object>(input: IBuildDeplo
         skipIfAlreadyApplied,
         etaWarningMessage,
         env,
-        parallelWatcher
+        parallelWatcher,
+        bootstrapBackend
     } = input;
 
     const moduleDir = join(
@@ -250,6 +254,31 @@ export async function buildDeployModuleTask<T extends object>(input: IBuildDeplo
                     task: async (_, task) => {
                         await updateModuleYAML(inputUpdates || {}, ctx)
                         task.title = "Updated module inputs";
+                    },
+                });
+            }
+
+            //////////////////////////////////////////////////////////////
+            // If needed, bootstrap the backend
+            //////////////////////////////////////////////////////////////
+            if (bootstrapBackend && ((status.init_status !== "success" && status.init_status !== "running") || forceInitModule)) {
+                subtasks.add({
+                    title: "Bootstrap backend",
+                    task: async (_, task) => {
+                        task.title = "Bootstrapping backend";
+                        await terragruntBackendBootstrap({
+                            context,
+                            environment,
+                            region,
+                            module,
+                            onLogLine: (line) => {
+                                task.output = context.logger.applyColors(line, { style: "subtle", highlighterDisabled: true });
+                            },
+                        });
+                        task.title = "Bootstrapped backend";
+                    },
+                    rendererOptions: {
+                        outputBar: 5,
                     },
                 });
             }

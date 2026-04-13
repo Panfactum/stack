@@ -555,6 +555,7 @@ export async function bootstrapEnvironment(inputs: IBootstrapEnvironmentInputs) 
             hclIfMissing: await Bun.file(tfBootstrapResourcesHCL).text(),
             taskTitle: "Deploy IaC state bucket",
             skipIfAlreadyApplied: true,
+            bootstrapBackend: true,
             imports: {
                 "aws_s3_bucket.state": {
                     resourceId: (ctx) => Promise.resolve(ctx.bucketName)

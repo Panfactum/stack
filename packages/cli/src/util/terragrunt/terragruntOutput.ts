@@ -111,6 +111,8 @@ export const terragruntOutput = async <T extends z.ZodType<object>>(
   const command = [
     "terragrunt",
     "--non-interactive",
+    "run",
+    "--",
     "output",
     "--json",
   ];

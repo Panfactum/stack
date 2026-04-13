@@ -31,7 +31,7 @@ interface ITerragruntInitInput {
  * 
  * 1. **Module Initialization**: Runs `terragrunt init -upgrade` to:
  *    - Download required Terraform providers
- *    - Initialize backend configuration
+ *    - Initialize backend configuration (requires pre-existing backend)
  *    - Upgrade to latest provider versions
  *    - Set up module dependencies
  * 
@@ -45,6 +45,7 @@ interface ITerragruntInitInput {
  * - `--non-interactive`: Prevents interactive prompts
  * - `--no-color`: Disables color output for cleaner logs
  * - `--provider-cache`: Uses shared provider cache
+ * - `--backend-require-bootstrap`: Requires pre-existing backend (no auto-creation)
  * 
  * This initialization is required before:
  * - Running terragrunt plan or apply
@@ -90,7 +91,10 @@ export async function terragruntInit(
     "terragrunt",
     "--non-interactive",
     "--no-color",
+    "run",
     "--provider-cache",
+    "--backend-require-bootstrap",
+    "--",
     "init",
     "-upgrade",
     "-no-color",
@@ -115,8 +119,8 @@ export async function terragruntInit(
     "terragrunt",
     "--non-interactive",
     "--no-color",
-    "--provider-cache",
     "run",
+    "--provider-cache",
     "--",
     "providers",
     "lock",

@@ -17,9 +17,10 @@ usage() {
 # and (b) upgrade their provider versions
 ####################################################################
 
-terragrunt init --all \
-  -upgrade \
-  --queue-exclude-external
+terragrunt run --all \
+  --queue-exclude-external \
+  -- init \
+  -upgrade
 
 ####################################################################
 # Step 2: Update the platform locks to include all platforms

@@ -114,6 +114,8 @@ export async function terragruntApply(
     "terragrunt",
     "--non-interactive",
     "--no-color",
+    "run",
+    "--",
     "apply",
     "-no-color",
     "-auto-approve",

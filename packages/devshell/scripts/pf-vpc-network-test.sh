@@ -48,7 +48,7 @@ if [[ ! -d $MODULE_PATH ]]; then
 fi
 
 echo "Retrieving test configuration from $MODULE_PATH..." >&2
-TEST_CONFIG="$(terragrunt output --json --terragrunt-working-dir="$MODULE_PATH" | jq -r '.test_config.value')"
+TEST_CONFIG="$(terragrunt --working-dir="$MODULE_PATH" run -- output --json | jq -r '.test_config.value')"
 echo -e "Done.\n" >&2
 
 AWS_REGION="$(echo "$TEST_CONFIG" | jq -r '.region')"

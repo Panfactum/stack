@@ -32,7 +32,7 @@ interface ITerragruntInitAllInput {
  * 1. **Parallel Initialization**: Runs `terragrunt init --all -upgrade` to:
  *    - Initialize all modules in the directory tree (or specified subset)
  *    - Download required Terraform providers for each module
- *    - Set up backend configurations
+ *    - Set up backend configurations (requires pre-existing backends)
  *    - Upgrade to latest provider versions
  *    - Respect module dependencies but ignore external ones
  *
@@ -47,10 +47,9 @@ interface ITerragruntInitAllInput {
  * - If region is omitted: initializes all modules in the entire environment
  * - If modules is provided: scopes initialization to only the specified module directories
  * - If modules is omitted: initializes all modules in the directory tree
- * - Uses `--queue-exclude-external` to skip modules outside the tree
- * - Uses `--queue-strict-include` when modules are specified to ensure only those directories are processed
  * - Runs non-interactively to prevent prompts
  * - Processes modules in parallel for performance
+ * - Requires pre-existing backends (uses `--backend-require-bootstrap`)
  *
  * Common use cases:
  * - Setting up a new environment for the first time
@@ -111,18 +110,23 @@ export async function terragruntInitAll(input: ITerragruntInitAllInput) {
   const initCommand = [
     "terragrunt",
     "--non-interactive",
-    "init",
+    "run",
     "--all",
-    "-upgrade",
     "--queue-exclude-external",
+    "--backend-require-bootstrap",
+    "--",
+    "init",
+    "-upgrade",
   ];
 
   // If modules are specified, add queue flags to scope initialization
   if (modules && modules.length > 0) {
+    // Insert queue flags before the "--" separator
+    const initSeparatorIndex = initCommand.indexOf("--");
     for (const module of modules) {
-      initCommand.push("--queue-include-dir", module);
+      initCommand.splice(initSeparatorIndex, 0, "--queue-include-dir", module);
     }
-    initCommand.push("--queue-strict-include");
+    initCommand.splice(initCommand.indexOf("--"), 0, "--queue-strict-include");
   }
   const initResult = await context.subprocessManager.execute({
     command: initCommand,

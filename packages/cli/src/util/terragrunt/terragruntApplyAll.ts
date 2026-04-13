@@ -77,8 +77,12 @@ export async function terragruntApplyAll(input: ITerragruntApplyAllInput): Promi
   const command = [
     "terragrunt",
     "--non-interactive",
-    "apply",
+    "--no-color",
+    "run",
     "--all",
+    "--",
+    "apply",
+    "-no-color",
     "-auto-approve",
   ];
   const result = await context.subprocessManager.execute({

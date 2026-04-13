@@ -111,6 +111,8 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
       "terragrunt",
       "--non-interactive",
       "--no-color",
+      "run",
+      "--",
       "state",
       "show",
       "-no-color",
@@ -133,7 +135,10 @@ export async function terragruntImport(input: ITerragruntImportInput): Promise<v
   // Step 2: Import the resource
   const importCommand = [
     "terragrunt",
+    "--non-interactive",
     "--no-color",
+    "run",
+    "--",
     "import",
     "-no-color",
     resourcePath,
