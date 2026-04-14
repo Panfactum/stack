@@ -1,0 +1,22 @@
+{
+  "changes": [
+    {
+      "motivation": "Helm's upgrade with `atomic = true` used optimistic concurrency (resourceVersion) when replacing the `ebs-csi-controller` PodDisruptionBudget. If any controller (e.g. Kyverno, VPA) modified the PDB between Helm's read and write, Kubernetes rejected the update with a 409 conflict, causing the entire release to roll back and fail intermittently.",
+      "summary": "In `packages/infrastructure/kube_aws_ebs_csi/main.tf`: disabled the Helm chart's built-in PDB via `controller.podDisruptionBudget.enabled = false`, and added a `kubectl_manifest \"pdb_controller\"` resource with `server_side_apply = true` and `force_conflicts = true` to manage the PDB through Kubernetes server-side apply, which uses field ownership instead of resourceVersion and is immune to the race condition."
+    },
+    {
+      "motivation": "The `Generate Terraform Reference` pre-commit hook automatically regenerated the module docs to reflect the new `kubectl_manifest.pdb_controller` resource added to the module.",
+      "summary": "Auto-generated update to `packages/website/src/content/docs/main/modules/kube_aws_ebs_csi/reference.mdx` by the pre-commit hook."
+    },
+    {
+      "motivation": "The website package was missing `@types/html-minifier-terser`, causing TypeScript typecheck errors in the compress plugin that blocked commits.",
+      "summary": "Added `@types/html-minifier-terser` to `packages/website/package.json` and ran `bun i` to resolve the pre-existing typecheck failure."
+    }
+  ],
+  "problems": [
+    "The `Generate Terraform Reference` pre-commit hook modifies tracked files and causes the commit to fail with 'files were modified by following hooks', requiring the user to stage the auto-generated file and re-run the commit. This workflow is non-obvious and not documented anywhere visible in the repository.",
+    "The website had a pre-existing TypeScript typecheck failure (`@types/html-minifier-terser` missing) unrelated to the changes being made, but it blocked every commit attempt. Missing dev-dependency type declarations should be caught earlier (e.g. in CI or at install time) rather than surfacing only during pre-commit hooks."
+  ],
+  "session_id": "882a73f7-d926-4586-92da-9d276c695807",
+  "timestamp": "2026-04-14T15:38:21.647Z"
+}

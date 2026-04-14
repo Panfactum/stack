@@ -142,6 +142,9 @@ resource "helm_release" "ebs_csi_driver" {
         tolerations               = module.util_controller.tolerations
         affinity                  = module.util_controller.affinity
         topologySpreadConstraints = module.util_controller.topology_spread_constraints
+        podDisruptionBudget = {
+          enabled = false // Managed via kubectl_manifest below to avoid Helm upgrade race conditions
+        }
         serviceAccount = {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
@@ -304,6 +307,28 @@ resource "helm_release" "ebs_csi_driver" {
   }
 
   depends_on = [module.aws_permissions]
+}
+
+resource "kubectl_manifest" "pdb_controller" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "ebs-csi-controller"
+      namespace = local.namespace
+      labels    = module.util_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_controller.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.ebs_csi_driver]
 }
 
 /***************************************
