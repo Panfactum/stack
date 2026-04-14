@@ -1,0 +1,18 @@
+{
+  "changes": [
+    {
+      "motivation": "The cilium operator only ran 1 replica for SLA 1 clusters, which risked availability during operator pod disruptions.",
+      "summary": "Changed `replicas` in `packages/infrastructure/kube_cilium/main.tf` from a conditional (`var.sla_target >= 2 ? 2 : 1`) to a hardcoded `2`, so the cilium operator always runs 2 replicas regardless of SLA level."
+    },
+    {
+      "motivation": "The `html-minifier-terser` package used in the website's compress integration had no TypeScript type declarations, causing typecheck failures.",
+      "summary": "Added a `declare module 'html-minifier-terser'` block with `minify` function and `Options` interface typings to `packages/website/src/extends.d.ts`, following the existing pattern for untyped packages in that file."
+    }
+  ],
+  "problems": [
+    "The pre-commit hook auto-regenerates `packages/website/src/content/docs/main/modules/kube_cilium/reference.mdx` from `main.tf`, but the hook output (modified files) isn't staged before the commit check runs, causing a 'Files were modified by following hooks' failure. This is a known workflow friction point with no documentation or mitigation guidance in the repo.",
+    "`html-minifier-terser` is used directly in `packages/website/src/lib/plugins/compress.ts` but ships without TypeScript types and has no `@types/html-minifier-terser` package, requiring a manual ambient module declaration. This was undocumented — no comment in `compress.ts` or `extends.d.ts` explains why the declaration is needed there."
+  ],
+  "session_id": "e5865e1d-2bf4-4ab4-8362-38f2e4c0ae51",
+  "timestamp": "2026-04-14T15:23:37.281Z"
+}

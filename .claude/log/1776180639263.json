@@ -1,0 +1,17 @@
+{
+  "changes": [
+    {
+      "motivation": "Fix TypeScript errors caused by missing type definitions for html-minifier-terser.",
+      "summary": "Added `@types/html-minifier-terser@7.0.2` as a pinned devDependency in `packages/website/package.json` and updated `bun.lock` accordingly."
+    },
+    {
+      "motivation": "The manual module declaration in extends.d.ts was a workaround that became redundant once the official `@types` package was installed.",
+      "summary": "Removed the manual `declare module 'html-minifier-terser'` block from `packages/website/src/extends.d.ts`."
+    }
+  ],
+  "problems": [
+    "The `extends.d.ts` file contained a manual type declaration for `html-minifier-terser` that was added as a workaround but never cleaned up when official `@types` were available, requiring discovery by inspection rather than being self-documenting about why the manual declaration existed or when it could be removed."
+  ],
+  "session_id": "8ee9a541-69c8-4d4d-ae60-a000ad8bf87a",
+  "timestamp": "2026-04-14T15:31:11.250Z"
+}

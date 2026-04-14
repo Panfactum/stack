@@ -345,7 +345,7 @@ resource "helm_release" "cilium" {
       }
 
       operator = {
-        replicas = var.sla_target >= 2 ? 2 : 1
+        replicas = 2
         tolerations = concat([
           // These are needed b/c the cilium agents on each node need the operator
           // to be running in order for them to remove this taint
