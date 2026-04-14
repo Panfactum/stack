@@ -21,6 +21,13 @@ pkgs.stdenv.mkDerivation {
 
   inherit bunDeps;
 
+  # Fix read-only permissions on cache files copied from /nix/store.
+  # Without this, bun fails with EPERM when trying to hardlink packages.
+  # See: https://github.com/nix-community/bun2nix/issues/73
+  postBunSetInstallCacheDirPhase = ''
+    chmod -R u+rwx "$BUN_INSTALL_CACHE_DIR"
+  '';
+
   # Disable lifecycle scripts (postinstall runs bun2nix which isn't needed in the build)
   dontRunLifecycleScripts = true;
 

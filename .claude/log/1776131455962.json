@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "bun install was failing with EPERM errors in CI because bun2nix copies pre-fetched packages from the Nix store (read-only, mode 444) into the cache dir, and bun then fails to hardlink those files. This is a known bun2nix issue (#73).",
+      "summary": "Added postBunSetInstallCacheDirPhase hook to packages/cli/default.nix that runs `chmod -R u+rwx \"$BUN_INSTALL_CACHE_DIR\"` after the cache copy, making files writable so bun can hardlink them during install."
+    }
+  ],
+  "problems": [
+    "bun2nix does not document that cp -r of the Nix store cache retains read-only permissions (444), causing EPERM when bun tries to hardlink files. The postBunSetInstallCacheDirPhase hook that works around this is also undocumented — the agent had to find it via an external GitHub issue (#73) rather than bun2nix docs or inline comments.",
+    "Agent used `sudo locate` initially (which failed/was denied) before being corrected to use plain `locate` per project instructions. The CLAUDE.md instruction to use `locate` instead of `find` for /nix/store searches should have been followed from the start."
+  ],
+  "session_id": "bba39895-eb85-4c19-b99c-0ddbf1676b09",
+  "timestamp": "2026-04-14T01:51:21.702Z"
+}
