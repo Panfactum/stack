@@ -279,7 +279,7 @@ Already completed steps will be automatically skipped.
     });
 
     const regions = (await getRegions(this.context, selectedEnvironment.path)).filter(region => region.name !== GLOBAL_REGION && !region.clusterDeployed);
-    
+
     if (regions.length === 0) {
       throw new CLIError([
         `No available regions found in environment ${selectedEnvironment.name}.`,

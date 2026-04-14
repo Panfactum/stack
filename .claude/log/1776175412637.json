@@ -1,0 +1,19 @@
+{
+  "changes": [
+    {
+      "motivation": "When `pf cluster add` fails mid-way through `setupClusterExtensions`, the old `isClusterDeployed` check used `KUBE_RELOADER` as its sole proxy for 'cluster exists'. Since `KUBE_RELOADER` runs concurrently with other tasks and can succeed while others fail, subsequent re-runs incorrectly filtered out the partially-installed region, making recovery impossible.",
+      "summary": "Rewrote `isClusterDeployed.ts` to require all 8 `setupClusterExtensions` modules (`KUBE_BASTION`, `KUBE_EXTERNAL_SNAPSHOTTER`, `KUBE_VELERO`, `KUBE_KEDA`, `KUBE_RELOADER`, `KUBE_PVC_AUTORESIZER`, `KUBE_DESCHEDULER`, `KUBE_CLOUDNATIVE_PG`) to have `deploy_status === 'success'`, AND all 5 anti-affinity-adjusted modules (`AWS_EKS`, `KUBE_VAULT`, `KUBE_CERTIFICATES`, `KUBE_LINKERD`, `KUBE_INGRESS_NGINX`) to have `bootstrap_mode_enabled !== true` in their `module.yaml`. Missing files or missing fields pass through without blocking (treating unknown state as non-blocking)."
+    },
+    {
+      "motivation": "Tests needed to reflect the new two-part check logic in `isClusterDeployed`, including the graceful handling of missing `module.yaml` files and missing `bootstrap_mode_enabled` fields.",
+      "summary": "Rewrote `isClusterDeployed.test.ts` with 11 tests covering: all modules successful with anti-affinity done, incomplete extension module deployment, missing module.yaml (should pass), missing bootstrap_mode_enabled field (should pass), and explicit `bootstrap_mode_enabled: true` (should block)."
+    }
+  ],
+  "problems": [
+    "The single-module proxy pattern (`KUBE_RELOADER` as a stand-in for 'cluster is deployed') was never documented in `isClusterDeployed.ts`. The function name implies a complete deployment check but historically only verified one module, making the semantic gap invisible to future developers.",
+    "The concurrent execution model in `setupClusterExtensions` (tasks run in parallel, any can fail independently) was not documented at the call site or in `isClusterDeployed`, so the race condition between partial success and the deployment gate was not obvious.",
+    "The `module.yaml` anti-affinity check originally used `=== false` (strict equality), which silently treated missing files and missing fields as blocking. This was incorrect behavior — discovered only after the initial implementation was reviewed — and should have been `!== true` from the start. The intent (only block when explicitly set to `true`) was not captured in the original code or comments."
+  ],
+  "session_id": "2a21f034-877a-499c-b067-ff1f893e120c",
+  "timestamp": "2026-04-14T14:03:52.287Z"
+}
