@@ -2,7 +2,6 @@
 // It extends Clipanion's base context with Panfactum-specific functionality
 
 import { getDevshellConfig } from "@/util/devshell/getDevshellConfig";
-import { phClient } from "@/util/posthog/tracking";
 import { SubprocessManager } from "@/util/subprocess/SubprocessManager";
 import { Logger } from "./logger";
 import type { BaseContext } from "clipanion";
@@ -25,17 +24,15 @@ export type ShutdownHook = () => Promise<void>;
  *
  * @remarks
  * This context provides the minimal set of properties every command needs:
- * logging, analytics tracking, and background process management. Commands
- * that don't require devshell configuration (e.g., workflow commands that
- * run before a git repo exists) use this context directly.
+ * logging and background process management. Commands that don't require
+ * devshell configuration (e.g., workflow commands that run before a git repo
+ * exists) use this context directly.
  *
  * @see {@link PanfactumContext} - Full context with devshell configuration
  */
 export type PanfactumBaseContext = BaseContext & {
   /** Logger instance for formatted console output */
   logger: Logger;
-  /** PostHog analytics client for usage tracking */
-  track: typeof phClient;
   /**
    * Unified subprocess manager. Owns the singleton SIGINT/SIGTERM/SIGHUP/SIGQUIT
    * listeners, dispatches signals to every live registration, and tracks
@@ -103,20 +100,19 @@ interface ICreatePanfactumContextOptions {
 
 /**
  * Creates a Panfactum context object with all required properties
- * 
+ *
  * @remarks
  * This function initializes the Panfactum context by:
  * 1. Loading devshell configuration from the filesystem
  * 2. Creating a logger instance with the appropriate debug level
- * 3. Attaching the analytics tracking client
- * 
+ *
  * The context is created once during CLI initialization and passed
  * to all commands through Clipanion's command execution pipeline.
- * 
+ *
  * @param context - Base Clipanion context to extend
  * @param opts - Configuration options for context creation
  * @returns Complete Panfactum context ready for command execution
- * 
+ *
  * @example
  * ```typescript
  * const pfContext = await createPanfactumContext(baseContext, {
@@ -124,7 +120,7 @@ interface ICreatePanfactumContextOptions {
  *   cwd: process.cwd()
  * });
  * ```
- * 
+ *
  * @see {@link PanfactumContext} - The context type definition
  * @see {@link getDevshellConfig} - For devshell configuration loading
  * @see {@link Logger} - For logging functionality
@@ -143,7 +139,6 @@ export const createPanfactumContext = async (
     ...context,
     devshellConfig,
     logger,
-    track: phClient,
     subprocessManager: null as unknown as SubprocessManager, // Temporary placeholder
     shutdownHooks,
     registerShutdownHook: (hook: ShutdownHook) => {
@@ -194,7 +189,6 @@ export const createPanfactumLightContext = (
   const baseContext = {
     ...context,
     logger,
-    track: phClient,
     subprocessManager: null as unknown as SubprocessManager, // Temporary placeholder
     shutdownHooks,
     registerShutdownHook: (hook: ShutdownHook) => {

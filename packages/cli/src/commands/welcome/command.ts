@@ -9,7 +9,6 @@ import { PanfactumCommand } from "@/util/command/panfactumCommand";
 import { upsertDevshellConfig } from "@/util/devshell/upsertDevshellConfig";
 import { fileExists } from "@/util/fs/fileExists";
 import { getRelativeFromRoot } from "@/util/fs/getRelativeFromRoot";
-import { sleep } from "@/util/util/sleep";
 
 /**
  * Command for displaying the DevShell welcome screen
@@ -99,7 +98,6 @@ The welcome screen provides:
      * - Shows the Panfactum logo
      * - Displays comprehensive welcome text
      * - Generates installation and user IDs
-     * - Tracks the installation event
      * - Saves IDs for future detection
      * 
      * The welcome text includes:
@@ -108,10 +106,6 @@ The welcome screen provides:
      * - Core concepts explanation
      * - Help resources
      * 
-     * Analytics tracking helps understand:
-     * - New installation rates
-     * - Repository metadata
-     * - User engagement
      */
     async execute() {
         const { context } = this;
@@ -231,33 +225,6 @@ The welcome screen provides:
                 },
                 user: true
             })
-
-            const groupProperties = {
-                name: this.context.devshellConfig.repo_name,
-                repo_url: this.context.devshellConfig.repo_url,
-                date_installed: new Date().toISOString(),
-            }
-
-            // ensure group fires before the capture
-            this.context.track.groupIdentify({
-                distinctId: installationId,
-                groupType: "repo",
-                groupKey: installationId,
-                properties: groupProperties,
-            })
-
-            this.context.track.capture({
-                event: "cli-welcome",
-                distinctId: userId,
-                groups: {
-                    repo: installationId,
-                }
-            })
-
-            // delay and double flush required to ensure the group is created before the capture
-            await this.context.track.flush()
-            await sleep(1000);
-            await this.context.track.flush()
         }
     } // todo: we want to capture when the devshell is initialized
 }

@@ -12,7 +12,6 @@
  * - Context initialization with devshell configuration
  * - Signal handling for graceful shutdown
  * - Background process cleanup
- * - Analytics tracking initialization
  * - Global error handling
  * 
  * The CLI follows a plugin architecture where each command is a separate
@@ -65,7 +64,6 @@ import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
 import { createPanfactumContext, createPanfactumLightContext, type PanfactumContext, type PanfactumBaseContext } from "./util/context/context.ts";
-import { phClient } from "./util/posthog/tracking.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
 // Create a CLI instance
@@ -149,11 +147,10 @@ let panfactumContextInstance: PanfactumBaseContext | null = null;
  * Performs cleanup operations before CLI termination
  *
  * @remarks
- * Ensures all registered shutdown hooks finish, all background processes
- * are terminated, and analytics are flushed before the process exits.
- * This prevents zombie processes and ensures external state (e.g., a
- * leaked terraform state lock) is released even when the user
- * interrupts the CLI.
+ * Ensures all registered shutdown hooks finish and all background processes
+ * are terminated before the process exits. This prevents zombie processes
+ * and ensures external state (e.g., a leaked terraform state lock) is
+ * released even when the user interrupts the CLI.
  *
  * Shutdown hooks are awaited via {@link Promise.allSettled} so a single
  * misbehaving hook cannot block the rest of cleanup. Hooks run BEFORE
@@ -174,7 +171,6 @@ const cleanup = async () => {
       }
       await panfactumContextInstance.subprocessManager.dispatchSignal("SIGTERM");
     }
-    await phClient.shutdown();
   }
 };
 
@@ -239,23 +235,6 @@ try {
 
   // Store context for cleanup
   panfactumContextInstance = panfactumContext;
-
-  if (needsDevshell) {
-    const { devshellConfig } = panfactumContext as PanfactumContext;
-    if (devshellConfig.user_id) {
-      void phClient.captureImmediate({
-        event: 'cli-start',
-        distinctId: devshellConfig.user_id,
-        // todo: pass in sub command level command arguments
-        properties: {
-          path: proc.path.join(" "),
-          help: proc.help,
-          debugEnabled: proc.debugEnabled,
-          cwd: proc.cwd,
-        }
-      })
-    }
-  }
 
   await cli.runExit(proc, panfactumContext);
 } catch (error: unknown) {

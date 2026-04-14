@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "Remove PostHog analytics telemetry from the CLI to eliminate user tracking and the posthog-node dependency.",
+      "summary": "Deleted src/util/posthog/tracking.ts (PostHog client module). Removed the `track` field and `phClient` import from PanfactumBaseContext in context.ts. Removed PostHog import, CLI-start capture call, and shutdown call from index.ts. Removed all groupIdentify/capture/flush tracking calls from welcome/command.ts. Removed posthog-node from package.json dependencies. Regenerated bun.lock and bun.nix via bun install, which also removed the transitive axios dependency brought in by posthog-node."
+    }
+  ],
+  "problems": [],
+  "session_id": "e6669399-3b6f-4916-ba81-9d9cd7b52548",
+  "timestamp": "2026-04-14T16:01:56.549Z"
+}
