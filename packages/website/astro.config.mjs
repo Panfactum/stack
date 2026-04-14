@@ -147,6 +147,16 @@ export default defineConfig({
     })
   ],
   vite: {
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // @kobalte/utils imports mergeRefs from @solid-primitives/refs but
+          // never uses it — upstream issue, safe to ignore.
+          if (warning.code === "UNUSED_EXTERNAL_IMPORT" && warning.exporter === "@solid-primitives/refs") return;
+          warn(warning);
+        }
+      }
+    },
     ssr: {
       // Externalize isomorphic-mermaid and its transitive deps (jsdom, svgdom,
       // etc.) so Vite delegates them to native Node.js imports. Without this,

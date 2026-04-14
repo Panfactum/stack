@@ -1,0 +1,27 @@
+{
+  "changes": [
+    {
+      "motivation": "vite-plugin-solid 2.11.12 pulled in babel-preset-solid 1.9.12 which generates code using setStyleProperty (added in solid-js 1.9.9+), but solid-js was pinned to 1.9.7 causing a runtime import error",
+      "summary": "Bumped solid-js from 1.9.7 to 1.9.12 in packages/website/package.json and regenerated bun.lock"
+    },
+    {
+      "motivation": "expressive-code requires lowercase language identifiers; Dockerfile code fences used mixed-case 'Dockerfile' which triggered a 'language not found' warning at build time",
+      "summary": "Changed ```Dockerfile to ```dockerfile in packages/website/src/content/docs/main/modules/wf_dockerfile_build/overview.mdx"
+    },
+    {
+      "motivation": "@kobalte/utils 0.9.1 (latest) has an unused mergeRefs import that causes a Rollup warning on every build; upstream fix is not available",
+      "summary": "Added a rollupOptions.onwarn handler in astro.config.mjs to suppress the specific @kobalte/utils mergeRefs unused import warning"
+    },
+    {
+      "motivation": "The repo was refactored to use per-package lockfiles (packages/scraper/bun.lock) but the scraper's Containerfile.dockerignore still referenced the old workspace-level bun.lock path, causing the Docker build context to exclude the lockfile",
+      "summary": "Updated packages/scraper/Containerfile.dockerignore: added !packages/scraper/bun.lock and !packages/scraper/bunfig.toml, removed stale workspace-level !bun.lock, !package.json, and !packages/cli/package.json entries"
+    }
+  ],
+  "problems": [
+    "The scraper Containerfile.dockerignore was not updated alongside the bun workspace-to-per-package-lockfile refactor (commit 6127695e), leaving the build broken silently until the next Docker build run. The refactor commit should have included dockerignore updates for all affected packages.",
+    "babel-preset-solid is a transitive dependency of vite-plugin-solid with a loose semver range (^1.8.4), so it can advance to a version that generates code requiring a newer solid-js runtime than what is pinned in package.json. There is no documentation or comment in package.json warning that solid-js, vite-plugin-solid, and babel-preset-solid must be kept in sync.",
+    "The edge/ docs directory is auto-generated from main/ by a release script, but this is only enforced by a pre-tool hook with no README or TOC.md explaining the constraint. The agent had to discover this by triggering the hook block rather than from documentation."
+  ],
+  "session_id": "c641961f-bfe0-44c9-913e-712f3753c3e4",
+  "timestamp": "2026-04-14T01:33:01.520Z"
+}

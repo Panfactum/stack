@@ -10,16 +10,9 @@
 
 *
 
-# Root files needed for the bun workspace install
-!bun.lock
-!package.json
-
-# All workspace members listed in root package.json must have a
-# package.json present at install time, even when filtering, otherwise
-# bun errors with "Workspace not found".
-!packages/cli/package.json
-
 # The actual scraper sources
 !packages/scraper/package.json
+!packages/scraper/bun.lock
+!packages/scraper/bunfig.toml
 !packages/scraper/tsconfig.json
 !packages/scraper/src
