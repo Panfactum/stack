@@ -1,0 +1,22 @@
+{
+  "changes": [
+    {
+      "motivation": "Avoid overwriting user's existing pre-commit hooks when Panfactum activates its own hooks at shell entry, and allow users to add custom hooks alongside Panfactum's",
+      "summary": "Created `packages/cli/src/commands/precommit/install/command.ts` implementing `pf precommit install --config <path>`. The command reads the Nix-generated Panfactum config, optionally reads `.pre-commit-config.custom.yaml` from the repo root, merges both (user repos first, Panfactum repos appended), and writes the result to `.pre-commit-config.yaml`. If `.pre-commit-config.yaml` is already git-tracked, it warns with migration instructions including how to move hooks to `.pre-commit-config.custom.yaml`, gitignore the generated file, disable Panfactum precommit checks via `precommit.enable = false`, and run `direnv reload`. The warning also describes prek as the faster pre-commit replacement being used."
+    },
+    {
+      "motivation": "Register the new PrecommitInstallCommand so it is reachable via the `pf` CLI",
+      "summary": "Added import and `cli.register(PrecommitInstallCommand)` to `packages/cli/src/index.ts`."
+    },
+    {
+      "motivation": "Replace the naive `cp`/`chmod` overwrite of `.pre-commit-config.yaml` with the new merge-aware CLI command",
+      "summary": "Updated `packages/devshell/scripts/enter-shell-local.sh` to call `pf precommit install --config \"$PF_PRECOMMIT_CONFIG\"` followed by `prek install --quiet` instead of directly copying the Nix-generated config file."
+    }
+  ],
+  "problems": [
+    "The initial warning message omitted key context (what prek is, that it is a faster pre-commit replacement, and that `direnv reload` is needed after migration), requiring four separate edit rounds to reach the final text. The plan should have drafted the full warning message so the implementer could write it correctly in one pass.",
+    "ESLint flagged unnecessary `??` operators on fields that Zod's `.default([])` guarantees are always defined after parsing. The plan's code snippet used `??` on these fields without noting this subtlety, causing a lint failure and a follow-up edit."
+  ],
+  "session_id": "8b60d971-071b-4cb2-9c23-d4888641c8d5",
+  "timestamp": "2026-04-14T13:29:34.569Z"
+}

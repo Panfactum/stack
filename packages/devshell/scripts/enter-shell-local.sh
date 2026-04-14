@@ -72,6 +72,15 @@ export REGISTRY_AUTH_FILE="$BUILDKIT_DIR/config.json"
 export DOCKER_CONFIG=$BUILDKIT_DIR # Needed for buildkit to work
 
 #############################################
+## Pre-commit Hooks
+#############################################
+
+if [[ -n "$PF_PRECOMMIT_CONFIG" && -f "$PF_PRECOMMIT_CONFIG" ]]; then
+  pf precommit install --config "$PF_PRECOMMIT_CONFIG"
+  prek install --quiet
+fi
+
+#############################################
 ## Welcome Screen
 #############################################
 

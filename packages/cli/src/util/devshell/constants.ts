@@ -41,6 +41,7 @@ export const EXPECTED_GITIGNORE_CONTENTS = {
         ".terraformrc.dev",
         ".nats",
         "*.user.yaml",
+        ".pre-commit-config.yaml",
     ]
 }
 

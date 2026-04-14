@@ -16,8 +16,15 @@
     enabled = false;
     smol = false;
   },
+  precommit ? {
+    enable = false;
+    tf_fmt = true;
+    hcl_fmt = true;
+  },
 }:
 let
+  precommitEnabled = precommit.enable or false;
+
   # Custom Packages
   customTerragrunt = pkgs.writeShellScriptBin "terragrunt" ''
     #!/bin/env bash
@@ -53,142 +60,157 @@ let
         --add-flags "-n cilium"
     '';
   };
-in
-with pkgs;
-[
 
-  ####################################
-  # Custom Panfactum Scripts
-  ####################################
-  (import ./scripts { inherit pkgs; })
-
-  ####################################
-  # Kubernetes
-  ####################################
-  kubeUtilsPkgs.kubectl # kubernetes CLI
-  kubeUtilsPkgs.kubectx # switching between namespaces and contexts
-  kubeUtilsPkgs.kustomize # tool for editing manifests programatically
-  kubeUtilsPkgs.kubernetes-helm # for working with Helm charts
-  kubeUtilsPkgs.kube-capacity # for visualizing resource utilization in the cluster
-  kubeUtilsPkgs.kubectl-evict-pod # for initiating pod evictions
-  (pkgs.callPackage ./linkerd-edge.nix { }) # utility for working with the service mesh
-  cilium # for managing the cilium CNI
-  kubeUtilsPkgs.argo # utility for working with argo workflows
-  kubeUtilsPkgs.cmctl # for working with cert-manager
-  kubeUtilsPkgs.stern # log aggregator for quick cli log inspection
-  kubeUtilsPkgs.velero # backups of cluster state
-  kubeUtilsPkgs.k9s # kubernetes tui
-  kyvernoPkgs.kyverno # kubernetes policy engine cli
-
-  ####################################
-  # Hashicorp Vault
-  ####################################
-  vaultPkgs.vault # provides the vault cli for interacting with vault
-
-  ####################################
-  # Infrastructure-as-Code
-  ####################################
-  tfUtilsPkgs.opentofu # declarative iac tool (open alternative to terraform)
-  customTerragrunt # opentofu-runner
-  tfUtilsPkgs.terraform-ls # language server for editors
-
-  ####################################
-  # Editors
-  ####################################
-  micro # a nano alternative with better keybindings
-  less # better pager
-
-  ####################################
-  # Bash Scripting Utilities
-  ####################################
-  coreutils # GNU core utilities
-  bash # shell
-  parallel # run bash commands in parallel
-  ripgrep # better alternative to grep
-  rsync # file synchronization
-  unzip # extraction utility for zip format
-  zx # General purpose data compression utility
-  entr # Re-running scripts when files change
-  bc # bash calculator
-  jq # json
-  jaq # json/yaml processor (supports --from yaml)
-  yq # yaml
-  fzf # fuzzy selector
-  getopt # for parsing command-line arguments
-  envsubst # environment substitution in files
-  gawk # awk
-  gnused # sed
-  gnugrep # grep
-  gnutar # tar
-  findutils # find
-  gzip # compression programs
-  procps # process info
-  lsof # query for open files and (and other fds like ports)
-  mktemp # utility for making temporary directories and files
-  hcl2json # utility for converting HCL to JSON
-
-  ####################################
-  # AWS Utilities
-  ####################################
-  awsUtilsPkgs.awscli2 # aws CLI
-  awsUtilsPkgs.ssm-session-manager-plugin # for connecting to hardened ec2 nodes
-  awsUtilsPkgs.aws-nuke # nukes resources in aws accounts
-
-  ####################################
-  # Secrets Management
-  ####################################
-  croc # P2P secret sharing
-  sops # terminal editor for secrets stored on disk; integrates with tf ecosystem for config-as-code
-
-  ####################################
-  # Version Control
-  ####################################
-  git # vcs CLI
-  git-lfs # stores binary files in git host
-
-  ####################################
-  # Container Utilities
-  ####################################
-  buildkitPkgs.buildkit # used for building containers using moby/buildkit
-  buildkitPkgs.skopeo # used for moving images around
-  buildkitPkgs.manifest-tool # for working with image manifests
-
-  ####################################
-  # Network Utilities
-  ####################################
-  dig # dns lookup
-  mtr # better traceroute alternative
-  openssh # ssh client and server
-  autossh # automatically restart tunnels
-  step-cli # working with certificates
-  curl # submit network requests from the CLI
-  whois # domain registration details
-
-  ####################################
-  # Database Tools
-  ####################################
-  redisPkgs.redis # redis-cli
-  postgresPkgs.postgresql_16 # psql, cli for working with postgres
-  natsPkgs.natscli # cli for NATS
-  natsPkgs.nsc # cli for configuring NATS accounts
-  natsPkgs.nats-top # cli for configuring NATS accounts
-  postgresPkgs.kubectl-cnpg # for managing the cnpg postgres databases
-  # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
-
-  ####################################
-  # Opensearch Tools
-  ####################################
-  opensearchPkgs.opensearch-cli
-]
-++ (
-  if cli.enabled then
+  packages =
+    with pkgs;
     [
-      (pkgs.callPackage ../cli/default.nix {
-        inherit bun2nix;
-        inherit (cli) smol;
-        pkgs = bunPkgs;
-      })
+
+      ####################################
+      # Custom Panfactum Scripts
+      ####################################
+      (import ./scripts { inherit pkgs; })
+
+      ####################################
+      # Kubernetes
+      ####################################
+      kubeUtilsPkgs.kubectl # kubernetes CLI
+      kubeUtilsPkgs.kubectx # switching between namespaces and contexts
+      kubeUtilsPkgs.kustomize # tool for editing manifests programatically
+      kubeUtilsPkgs.kubernetes-helm # for working with Helm charts
+      kubeUtilsPkgs.kube-capacity # for visualizing resource utilization in the cluster
+      kubeUtilsPkgs.kubectl-evict-pod # for initiating pod evictions
+      (pkgs.callPackage ./linkerd-edge.nix { }) # utility for working with the service mesh
+      cilium # for managing the cilium CNI
+      kubeUtilsPkgs.argo # utility for working with argo workflows
+      kubeUtilsPkgs.cmctl # for working with cert-manager
+      kubeUtilsPkgs.stern # log aggregator for quick cli log inspection
+      kubeUtilsPkgs.velero # backups of cluster state
+      kubeUtilsPkgs.k9s # kubernetes tui
+      kyvernoPkgs.kyverno # kubernetes policy engine cli
+
+      ####################################
+      # Hashicorp Vault
+      ####################################
+      vaultPkgs.vault # provides the vault cli for interacting with vault
+
+      ####################################
+      # Infrastructure-as-Code
+      ####################################
+      tfUtilsPkgs.opentofu # declarative iac tool (open alternative to terraform)
+      customTerragrunt # opentofu-runner
+      tfUtilsPkgs.terraform-ls # language server for editors
+
+      ####################################
+      # Editors
+      ####################################
+      micro # a nano alternative with better keybindings
+      less # better pager
+
+      ####################################
+      # Bash Scripting Utilities
+      ####################################
+      coreutils # GNU core utilities
+      bash # shell
+      parallel # run bash commands in parallel
+      ripgrep # better alternative to grep
+      rsync # file synchronization
+      unzip # extraction utility for zip format
+      zx # General purpose data compression utility
+      entr # Re-running scripts when files change
+      bc # bash calculator
+      jq # json
+      jaq # json/yaml processor (supports --from yaml)
+      yq # yaml
+      fzf # fuzzy selector
+      getopt # for parsing command-line arguments
+      envsubst # environment substitution in files
+      gawk # awk
+      gnused # sed
+      gnugrep # grep
+      gnutar # tar
+      findutils # find
+      gzip # compression programs
+      procps # process info
+      lsof # query for open files and (and other fds like ports)
+      mktemp # utility for making temporary directories and files
+      hcl2json # utility for converting HCL to JSON
+
+      ####################################
+      # AWS Utilities
+      ####################################
+      awsUtilsPkgs.awscli2 # aws CLI
+      awsUtilsPkgs.ssm-session-manager-plugin # for connecting to hardened ec2 nodes
+      awsUtilsPkgs.aws-nuke # nukes resources in aws accounts
+
+      ####################################
+      # Secrets Management
+      ####################################
+      croc # P2P secret sharing
+      sops # terminal editor for secrets stored on disk; integrates with tf ecosystem for config-as-code
+
+      ####################################
+      # Version Control
+      ####################################
+      git # vcs CLI
+      git-lfs # stores binary files in git host
+
+      ####################################
+      # Container Utilities
+      ####################################
+      buildkitPkgs.buildkit # used for building containers using moby/buildkit
+      buildkitPkgs.skopeo # used for moving images around
+      buildkitPkgs.manifest-tool # for working with image manifests
+
+      ####################################
+      # Network Utilities
+      ####################################
+      dig # dns lookup
+      mtr # better traceroute alternative
+      openssh # ssh client and server
+      autossh # automatically restart tunnels
+      step-cli # working with certificates
+      curl # submit network requests from the CLI
+      whois # domain registration details
+
+      ####################################
+      # Database Tools
+      ####################################
+      redisPkgs.redis # redis-cli
+      postgresPkgs.postgresql_16 # psql, cli for working with postgres
+      natsPkgs.natscli # cli for NATS
+      natsPkgs.nsc # cli for configuring NATS accounts
+      natsPkgs.nats-top # cli for configuring NATS accounts
+      postgresPkgs.kubectl-cnpg # for managing the cnpg postgres databases
+      # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
+
+      ####################################
+      # Opensearch Tools
+      ####################################
+      opensearchPkgs.opensearch-cli
     ]
-  else
-    [ ]
-)
+    ++ (
+      if cli.enabled then
+        [
+          (pkgs.callPackage ../cli/default.nix {
+            inherit bun2nix;
+            inherit (cli) smol;
+            pkgs = bunPkgs;
+          })
+        ]
+      else
+        [ ]
+    )
+    ++ pkgs.lib.optionals precommitEnabled [ pkgs.prek ];
+
+  shellHook =
+    if precommitEnabled then
+      let
+        prekConfig = import ./precommit.nix { inherit pkgs tfUtilsPkgs precommit; };
+      in
+      ''export PF_PRECOMMIT_CONFIG="${prekConfig}"''
+    else
+      "";
+in
+{
+  inherit packages shellHook;
+}

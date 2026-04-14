@@ -132,6 +132,11 @@
               enabled = false;
               smol = false;
             },
+            precommit ? {
+              enable = false;
+              tf_fmt = true;
+              hcl_fmt = true;
+            },
           }:
           import ./packages/devshell {
             inherit
@@ -149,6 +154,7 @@
               bunPkgs
               bun2nix
               cli
+              precommit
               ;
           };
 
@@ -164,11 +170,20 @@
               enabled = true;
               smol = false;
             },
+            precommit ? {
+              enable = true;
+              tf_fmt = true;
+              hcl_fmt = true;
+            },
           }:
+          let
+            devshell = panfactumPackages { inherit cli precommit; };
+          in
           pkgs.mkShell {
             inherit name;
-            buildInputs = (panfactumPackages { inherit cli; }) ++ packages;
+            buildInputs = devshell.packages ++ packages;
             shellHook = ''
+              ${devshell.shellHook}
               ${if activateDefaultShellHook then "source enter-shell-local" else ""}
               ${shellHook}
             '';
@@ -184,12 +199,13 @@
             contents = with pkgs.dockerTools; [
               (pkgs.buildEnv {
                 name = "image-root";
-                paths = panfactumPackages {
-                  cli = {
-                    enabled = true;
-                    smol = true;
-                  };
-                };
+                paths =
+                  (panfactumPackages {
+                    cli = {
+                      enabled = true;
+                      smol = true;
+                    };
+                  }).packages;
                 pathsToLink = [ "/bin" ];
               })
               usrBinEnv
