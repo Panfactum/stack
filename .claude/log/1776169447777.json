@@ -1,0 +1,19 @@
+{
+  "changes": [
+    {
+      "motivation": "bun install was failing with EPERM during hardlinking because the bun-cache derivation is a symlinkJoin — all entries are symlinks to read-only nix store paths. The previous fix used `cp -r` which preserves symlinks, so `chmod -R u+rwx` was a no-op (Linux chmod does not follow symlinks by default). bun then tried to hardlink from the still-read-only nix store paths and was denied.",
+      "summary": "Changed `cp -r` to `cp -rL` in the bun cache setup in `packages/cli/default.nix` so that symlinks are dereferenced into real files before `chmod` is applied, making the copied cache files writable for bun's hardlink step."
+    },
+    {
+      "motivation": "GNU parallel re-released the `parallel-20260122.tar.bz2` tarball with different content (a known recurring practice of the project), causing the hash stored in the pinned nixpkgs commit to no longer match, breaking the image build.",
+      "summary": "Added a nixpkgs overlay in `flake.nix` that overrides the `parallel` package with the correct `sha256` hash for the re-released tarball."
+    }
+  ],
+  "problems": [
+    "The prior EPERM fix (commit a689ba3e) used `cp -r` followed by `chmod -R u+rwx`, which silently fails because `cp -r` copies symlinks as symlinks and Linux `chmod` does not follow symlinks — the actual files in the read-only nix store are never made writable. A comment or note in the derivation explaining that the bun-cache is a symlinkJoin and why `cp -rL` is required would have prevented this confusion.",
+    "There is no documentation anywhere in the repo explaining that GNU parallel periodically re-releases tarballs with changed content, which silently breaks pinned nixpkgs hashes. The overlay fix will also silently break the next time GNU parallel does this, and future developers will have no context for why the overlay exists or how to update it.",
+    "`nix build --rebuild` does not force a full rebuild as one might expect — it is not a valid flag. This should be noted somewhere (e.g., in developer docs or CLAUDE.md) with the correct workaround: delete store paths manually before rebuilding."
+  ],
+  "session_id": "33e23b05-0e97-4da4-b0b7-ceaa05192c45",
+  "timestamp": "2026-04-14T12:24:35.269Z"
+}

@@ -21,11 +21,17 @@ pkgs.stdenv.mkDerivation {
 
   inherit bunDeps;
 
-  # Fix read-only permissions on cache files copied from /nix/store.
-  # Without this, bun fails with EPERM when trying to hardlink packages.
+  # The bun-cache derivation is a symlinkJoin whose entries are symlinks to
+  # read-only nix store paths. The bun2nix hook copies them with `cp -r` which
+  # preserves symlinks, so chmod alone can't fix the read-only permissions on the
+  # actual files. We re-copy with -rL to dereference symlinks into real files,
+  # then chmod so bun can hardlink them during install.
   # See: https://github.com/nix-community/bun2nix/issues/73
   postBunSetInstallCacheDirPhase = ''
-    chmod -R u+rwx "$BUN_INSTALL_CACHE_DIR"
+    DEREF_CACHE=$(mktemp -d)
+    cp -rL "$BUN_INSTALL_CACHE_DIR/." "$DEREF_CACHE/"
+    chmod -R u+rwx "$DEREF_CACHE"
+    export BUN_INSTALL_CACHE_DIR="$DEREF_CACHE"
   '';
 
   # Disable lifecycle scripts (postinstall runs bun2nix which isn't needed in the build)

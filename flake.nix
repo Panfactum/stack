@@ -48,6 +48,16 @@
           config = {
             allowUnfree = true;
           };
+          overlays = [
+            (_final: prev: {
+              parallel = prev.parallel.overrideAttrs (old: {
+                src = prev.fetchurl {
+                  inherit (old.src) url;
+                  hash = "sha256-gx944B8/KKwkQeZrEBcVYscaAwA1OJOqBbvCd/E8xZY=";
+                };
+              });
+            })
+          ];
         };
         kubeUtilsPkgs = import kubeUtilsPkgsSrc {
           inherit system;
