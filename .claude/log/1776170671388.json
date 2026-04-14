@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "The demo user service CI/CD build was failing because the Containerfile's COPY commands referenced root-level pnpm files (package.json, pnpm-lock.yaml, .npmrc, pnpm-workspace.yaml) that were all excluded from the Docker build context by the .dockerignore's top-level `*` rule.",
+      "summary": "Added !package.json, !pnpm-lock.yaml, !.npmrc, and !pnpm-workspace.yaml whitelist entries to .dockerignore so the pnpm workspace files are included in the Docker build context for the demo user service Containerfile."
+    }
+  ],
+  "problems": [
+    "The .dockerignore uses a `*` deny-all pattern with explicit whitelist exceptions, but there was no documented convention or check to ensure Containerfile COPY sources are always whitelisted. The pnpm workspace files were never added when the Containerfile's COPY commands were introduced, and package.json was silently removed from the whitelist during a bun refactor that only intended to remove bun-specific files — neither omission produced an obvious error until CI/CD ran.",
+    "The bun refactor commit that removed bun.lock and bunfig.toml also removed !package.json from .dockerignore without checking whether package.json was still required by other build targets (the pnpm-based demo user service Containerfile still needed it). Cross-cutting impact of .dockerignore changes on multiple Containerfiles was not documented anywhere."
+  ],
+  "session_id": "9f30c712-6886-4fa8-af19-5ba4d48517a0",
+  "timestamp": "2026-04-14T12:44:49.072Z"
+}

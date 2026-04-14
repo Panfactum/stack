@@ -1,0 +1,29 @@
+{
+  "changes": [
+    {
+      "motivation": "The root pnpm workspace caused Docker build failures because .dockerignore excluded root-level files needed by the workspace-aware Containerfile. Mirroring the bun refactor pattern, the fix gives reference-typescript its own standalone lockfile so the Docker build only needs files within its own package directory.",
+      "summary": "Dissolved root pnpm workspace: deleted pnpm-workspace.yaml, removed 'workspaces' field from root package.json, deleted root pnpm-lock.yaml, and generated a standalone pnpm-lock.yaml inside packages/reference-typescript/ (single '.' importer, no workspace entries). Created packages/reference-typescript/.npmrc with store-dir=.pnpm-store to configure a local pnpm store for Docker cache mounting."
+    },
+    {
+      "motivation": "The Containerfile was copying root workspace files (pnpm-workspace.yaml, root package.json, root pnpm-lock.yaml) that were not whitelisted in .dockerignore, breaking the Docker build context.",
+      "summary": "Rewrote packages/reference-typescript/Containerfile to copy only package-level files (package.json, pnpm-lock.yaml, .npmrc), mount the cache at /code/.pnpm-store, run pnpm install --frozen-lockfile without --filter, and removed the dead 'development' stage that had no CMD and was never used as a base."
+    },
+    {
+      "motivation": "The .dockerignore root-pnpm entries (!package.json, !pnpm-lock.yaml, !.npmrc, !pnpm-workspace.yaml) were added as a previous fix but are now stale and would unnecessarily expose root files to the build context.",
+      "summary": "Updated .dockerignore: removed root-level pnpm whitelist entries and added per-package entries (!packages/reference-typescript/pnpm-lock.yaml and !packages/reference-typescript/.npmrc) to match the standalone lockfile approach."
+    },
+    {
+      "motivation": "The devshell install hook used pnpm install --recursive which assumes a workspace; with the workspace dissolved it would fail or install nothing.",
+      "summary": "Updated packages/local/default.nix to replace 'pnpm install --recursive --frozen-lockfile' with 'cd $REPO_ROOT/packages/reference-typescript && pnpm install --frozen-lockfile', matching the per-package install pattern used for bun packages."
+    },
+    {
+      "motivation": ".npmrc configured store-dir=.pnpm-store, which would create a local .pnpm-store/ directory that was not gitignored, risking it being accidentally committed.",
+      "summary": "Added .pnpm-store to packages/reference-typescript/.gitignore after the user pointed out the omission."
+    }
+  ],
+  "problems": [
+    "The implementation plan specified creating .npmrc with store-dir=.pnpm-store but did not include a corresponding .gitignore update. The local store directory created by that setting would have been untracked by git, requiring the user to catch the gap and prompt a fix. The plan should have included .gitignore as a file to update."
+  ],
+  "session_id": "d112a2ec-6de6-4f29-b170-ce4ff79b1556",
+  "timestamp": "2026-04-14T12:49:01.971Z"
+}

@@ -4,8 +4,5 @@
   "engines": {
     "node": ">=20",
     "pnpm": ">=8"
-  },
-  "workspaces": [
-    "packages/reference-typescript"
-  ]
+  }
 }

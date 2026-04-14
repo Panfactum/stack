@@ -9,24 +9,11 @@ WORKDIR /code
 #################################################
 FROM base AS deps
 
-# Install package manager
 RUN npm i -g pnpm@9.14.2
 
-# Install Dependencies (workspace lockfile lives at the repo root)
-COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml ./
-COPY packages/website/package.json packages/website/
-COPY packages/scraper/package.json packages/scraper/
-COPY packages/reference-typescript/package.json packages/reference-typescript/
-RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile --filter demo-user-service
-
-#################################################
-## Development Image
-#################################################
-
-FROM deps AS development
-WORKDIR /code/packages/reference-typescript
-COPY packages/reference-typescript/ .
-RUN npx ncc build src/main.ts -o dist
+COPY packages/reference-typescript/package.json packages/reference-typescript/pnpm-lock.yaml packages/reference-typescript/.npmrc ./
+RUN --mount=type=cache,id=pnpm-demo-user-service,target=/code/.pnpm-store \
+    pnpm install --frozen-lockfile
 
 #################################################
 ## Builder Image
@@ -34,8 +21,8 @@ RUN npx ncc build src/main.ts -o dist
 
 FROM deps AS builder
 ENV NODE_ENV=production
-WORKDIR /code/packages/reference-typescript
-COPY packages/reference-typescript/ .
+COPY packages/reference-typescript/tsconfig.json ./
+COPY packages/reference-typescript/src ./src
 RUN npx ncc build src/main.ts -o dist
 
 #################################################
@@ -44,5 +31,4 @@ RUN npx ncc build src/main.ts -o dist
 
 FROM base AS production
 ENV NODE_ENV=production
-WORKDIR /code/packages/reference-typescript
-COPY --from=builder /code/packages/reference-typescript/dist ./
+COPY --from=builder /code/dist ./

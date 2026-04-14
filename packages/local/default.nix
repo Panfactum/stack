@@ -71,7 +71,7 @@ in
     # Without -c, prek resolves .pre-commit-config.yaml from the worktree
     # being committed to at hook execution time.
     run_install prek ${pkgs.prek}/bin/prek install --quiet &
-    run_install pnpm ${pkgs.pnpm}/bin/pnpm install --recursive --frozen-lockfile --prefer-offline --silent &
+    run_install pnpm sh -c 'cd "$REPO_ROOT/packages/reference-typescript" && ${pkgs.pnpm}/bin/pnpm install --frozen-lockfile --prefer-offline --silent' &
     run_install bun-cli sh -c 'cd "$REPO_ROOT/packages/cli" && ${bunPkgs.bun}/bin/bun install --silent --frozen-lockfile' &
     run_install bun-scraper sh -c 'cd "$REPO_ROOT/packages/scraper" && ${bunPkgs.bun}/bin/bun install --silent --frozen-lockfile' &
     run_install bun-website sh -c 'cd "$REPO_ROOT/packages/website" && ${bunPkgs.bun}/bin/bun install --silent --frozen-lockfile' &
