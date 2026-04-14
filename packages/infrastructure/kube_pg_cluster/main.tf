@@ -442,6 +442,11 @@ resource "kubernetes_manifest" "postgres_cluster" {
             // See above
             "REVOKE ALL ON SCHEMA public FROM PUBLIC;",
 
+            // Create any extra schemas
+            [
+              for schema in var.extra_schemas : "CREATE SCHEMA IF NOT EXISTS ${schema};"
+            ],
+
             // Creates the user groups that we assign dynamic roles to
             "CREATE ROLE reader NOINHERIT;",
             "GRANT pg_read_all_data TO reader;",

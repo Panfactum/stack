@@ -1,0 +1,25 @@
+{
+  "changes": [
+    {
+      "motivation": "Provide a self-hosted Temporal workflow orchestration server on Kubernetes following all Panfactum conventions (VPA, PDB, monitoring, Linkerd mTLS, workload utility, SLA target awareness).",
+      "summary": "Created new Panfactum IaC module at packages/infrastructure/kube_temporal/ with main.tf (905 lines), vars.tf (188 lines), outputs.tf (44 lines), config.yaml (type: direct, status: alpha, group: kubernetes), and FOOTER.md. Implements 4 Temporal server deployments (frontend:7233, history:7234, matching:7235, worker:7239), a schema-init Job that creates both `temporal` and `temporal_visibility` PostgreSQL databases via kube_pg_cluster, a namespace-registration Job, a Web UI deployment (temporalio/ui:2.20.0), and an optional Ingress. Uses an init container with sed substitution to inject DB credentials into the static Temporal config YAML from a shared emptyDir volume."
+    },
+    {
+      "motivation": "tofu validate failed because prd-worker subagents incorrectly referenced az_spread_preferred, instance_type_anti_affinity_required, and host_anti_affinity_required as outputs of standalone kube_workload_utility module calls, when those are inputs — not outputs — of kube_workload_utility, and kube_deployment handles kube_workload_utility internally.",
+      "summary": "Removed 5 standalone module \"util_*\" blocks (util_frontend, util_history, util_matching, util_worker, util_ui) from main.tf and replaced all module.util_*.{az_spread_preferred,instance_type_anti_affinity_required,host_anti_affinity_required} references with inline expressions: sla_target >= 2, sla_target == 3, and local.{service}_replicas >= 2 respectively. tofu validate now passes."
+    },
+    {
+      "motivation": "cspell flagged Temporal-specific terms and Terraform template keywords used in prose text outside code blocks in the spec files.",
+      "summary": "Added temporalio, envsubst, templatefile, heredoc, and tmpfs to the words list in cspell.config.yaml."
+    },
+    {
+      "motivation": "Test the new kube_temporal module in the production environment without affecting other modules' source resolution.",
+      "summary": "Created environments/production/us-east-2/kube_temporal/module.yaml (pf_stack_version: local) to override the environment-wide version for this module only, and environments/production/us-east-2/kube_temporal/terragrunt.hcl with dependencies on kube_cloudnative_pg, kube_kyverno, and kube_ingress_nginx, with ingress_domains set to [\"temporal.prod.panfactum.com\"] and all other inputs at defaults."
+    }
+  ],
+  "problems": [
+    "kube_workload_utility outputs vs inputs are not clearly documented: the module accepts scheduling parameters (az_spread_preferred, instance_type_anti_affinity_required, host_anti_affinity_required) as inputs but its actual outputs are labels, match_labels, tolerations, affinity, and topology_spread_constraints. Because kube_deployment calls kube_workload_utility internally, callers should never instantiate kube_workload_utility directly just to get scheduling args — they pass them straight to kube_deployment. The prd-worker subagents made this mistake in Tasks 4 and 6, generating standalone module \"util_*\" blocks and trying to read non-existent outputs, causing a tofu validate failure that required manual diagnosis and a separate fix pass. The kube_workload_utility module's outputs.tf or README should explicitly state which attributes are outputs vs inputs, and note that kube_deployment wraps it internally so direct instantiation for scheduling purposes is never needed."
+  ],
+  "session_id": "6c6cc8e5-1aff-4437-9d0d-62e5360c71c3",
+  "timestamp": "2026-04-13T19:08:08.593Z"
+}

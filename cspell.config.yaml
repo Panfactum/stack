@@ -243,6 +243,11 @@ words:
     "Workmux",
     "gastown",
     "unvalidated",
+    "temporalio",
+    "envsubst",
+    "templatefile",
+    "heredoc",
+    "tmpfs",
   ]
 languageSettings:
   - languageId:
