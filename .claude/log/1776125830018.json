@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "User requested increasing the minimum memory for the Authentik PostgreSQL instance to 1GB for better performance/stability.",
+      "summary": "Updated `pg_minimum_memory_mb` from `500` to `1000` in `packages/infrastructure/kube_authentik/main.tf:95`."
+    }
+  ],
+  "problems": [],
+  "session_id": "8eedf69f-850d-4de8-8135-4fda11ef89a9",
+  "timestamp": "2026-04-14T00:17:33.201Z"
+}
