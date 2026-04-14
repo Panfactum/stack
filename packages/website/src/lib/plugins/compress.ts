@@ -56,7 +56,10 @@ export default function compress(
   const cacheDir = options.cacheDir ?? ".astro-compress";
   const htmlOptions = {
     collapseWhitespace: true,
-    removeComments: true,
+    // Do NOT set removeComments: true — SolidJS uses HTML comment nodes
+    // (e.g. <!--$-->, <!--/-->, <!--!-->) as hydration markers. Stripping
+    // them causes "can't access property 'nextSibling', o is null" at runtime.
+    removeComments: false,
     minifyCSS: true,
     minifyJS: true,
     continueOnParseError: true,

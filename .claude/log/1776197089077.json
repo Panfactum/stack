@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "SolidJS uses HTML comment nodes (e.g. <!--$-->, <!--->, <!--!-->) as hydration boundary markers. The HTML compression plugin had removeComments: true, which stripped these markers from built pages. During client-side hydration, the DOM walker called nextSibling past a null comment node, causing the TypeError crash on the DocsSidebar island.",
+      "summary": "Changed removeComments from true to false in the htmlOptions defaults in packages/website/src/lib/plugins/compress.ts to preserve SolidJS hydration marker comments."
+    }
+  ],
+  "problems": [
+    "The custom HTML compression plugin (compress.ts) set removeComments: true as a default option. This is unsafe for frameworks like SolidJS and React that embed hydration metadata in HTML comments. The option should have been false (or omitted) by default, since stripping comments is not safe for SSR-hydrated pages. The intent of the option was likely cosmetic (smaller HTML), but it silently broke runtime hydration with no warning. This class of bug is hard to trace because the error appears in minified SolidJS internals far removed from the compression step."
+  ],
+  "session_id": "500852f8-36ea-4913-96cc-fbb56709519d",
+  "timestamp": "2026-04-14T20:05:19.418Z"
+}
