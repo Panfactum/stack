@@ -1,0 +1,23 @@
+{
+  "changes": [
+    {
+      "motivation": "The authentik_vault_sso module was updated to support regex redirect URIs for Authentik (to allow any localhost port), but its oidc_redirect_uris output was blindly passing all URIs including the regex to vault_auth_oidc. Vault does not support regex redirect URIs — it handles localhost port-agnosticism natively via RFC 8252.",
+      "summary": "Fixed authentik_vault_sso/outputs.tf to filter oidc_redirect_uris output to only 'strict' matching_mode URIs, excluding the regex localhost URI from what gets passed to Vault."
+    },
+    {
+      "motivation": "Vault needs a localhost redirect URI registered to support the OIDC browser-based login flow (vault login -method=oidc), but callers of vault_auth_oidc were expected to supply it manually. Since Vault ignores the port on localhost URIs per RFC 8252, the module should own this URI itself.",
+      "summary": "Added a hardcoded http://localhost:8250/oidc/callback to vault_auth_oidc/main.tf as a local, merged with the oidc_redirect_uris input variable, so callers only need to supply domain-specific URIs."
+    },
+    {
+      "motivation": "Other modules and use cases (e.g., ArgoCD, Grafana OIDC clients) need access to the full set of redirect URIs including the regex localhost pattern for Authentik configuration, while the existing oidc_redirect_uris output only exposes strict URIs.",
+      "summary": "Added a new output oidc_redirect_uris_including_regexes to authentik_vault_sso/outputs.tf that includes all URIs (both strict and regex) for callers that need the complete set for Authentik OIDC client configuration."
+    }
+  ],
+  "problems": [
+    "The authentik_vault_sso module's oidc_redirect_uris output had no documentation or type annotation indicating it only returned strict URIs — a consumer (vault_auth_oidc) silently received a regex URI that Vault couldn't handle. The output name gave no hint about this filtering.",
+    "There was no documentation on vault_auth_oidc's vars.tf clarifying that oidc_redirect_uris must contain only strict (non-regex) URIs, nor that the module itself would inject the localhost URI — both were discoverable only by reading main.tf internals.",
+    "The split responsibility between Authentik (regex localhost matching) and Vault (RFC 8252 port-agnostic localhost matching) was undocumented. A developer wiring the two modules together had no way to know they needed different URI sets without understanding RFC 8252 behavior."
+  ],
+  "session_id": "fc14a024-822f-4c95-b6b5-3b3049e9e833",
+  "timestamp": "2026-04-14T16:24:46.923Z"
+}

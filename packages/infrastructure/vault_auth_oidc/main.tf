@@ -28,6 +28,12 @@ resource "vault_jwt_auth_backend" "oidc" {
   }
 }
 
+locals {
+  // Vault ignores the port on localhost URIs per RFC 8252, so any port matches.
+  // We hardcode one localhost URI here so callers don't need to supply it.
+  allowed_redirect_uris = concat(var.oidc_redirect_uris, ["http://localhost:8250/oidc/callback"])
+}
+
 resource "vault_jwt_auth_backend_role" "default" {
   backend      = vault_jwt_auth_backend.oidc.path
   role_name    = "default"
@@ -38,7 +44,7 @@ resource "vault_jwt_auth_backend_role" "default" {
     email = "email"
     name  = "name"
   }
-  allowed_redirect_uris  = var.oidc_redirect_uris
+  allowed_redirect_uris  = local.allowed_redirect_uris
   max_age                = var.token_lifetime_hours * 60 * 60
   token_explicit_max_ttl = var.token_lifetime_hours * 60 * 60
   verbose_oidc_logging   = true

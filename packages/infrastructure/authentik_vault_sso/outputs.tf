@@ -16,6 +16,11 @@ output "oidc_discovery_url" {
 
 output "oidc_redirect_uris" {
   description = "The redirect URIs to use for the auth/oidc auth method in Vault"
+  value       = [for uri in local.redirect_uris : uri.url if uri.matching_mode == "strict"]
+}
+
+output "oidc_redirect_uris_including_regexes" {
+  description = "All redirect URIs including regex patterns, suitable for OIDC providers that support regex matching"
   value       = [for uri in local.redirect_uris : uri.url]
 }
 
