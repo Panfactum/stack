@@ -4,6 +4,7 @@ locals {
     { original = "^ghcr\\.io/(.*)$", new = "github/$1" },
     { original = "^cr\\.l5d\\.io/(.*)$", new = "github/$1" }, // Linkerd uses their own registry, but also hosts the images on GitHub
     { original = "^docker\\.io/(.*)$", new = "docker-hub/$1" },
+    { original = "^index\\.docker\\.io/(.*)$", new = "docker-hub/$1" },
     { original = "^quay\\.io/(.*)$", new = "quay/$1" },
     { original = "^registry\\.k8s\\.io/(.*)$", new = "kubernetes/$1" },
     { original = "^public\\.ecr\\.aws/(.*)$", new = "ecr-public/$1" },

@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "The Kyverno mutating policy that rewrites image registries to the ECR pull-through cache only handled `docker.io`, not `index.docker.io` — the canonical Docker Hub hostname. Images referenced with `index.docker.io` bypassed the cache entirely.",
+      "summary": "Added `index.docker.io` → `docker-hub/` to `registry_replacements` in `kube_policies/pull_through_image_cache.tf`, so both `docker.io` and `index.docker.io` are routed through the ECR pull-through cache."
+    }
+  ],
+  "problems": [
+    "The pull-through cache Kyverno policy had no comment or documentation explaining that `index.docker.io` is a valid canonical alias for Docker Hub — the omission was only discoverable by noticing pull-through wasn't working for images using that hostname. A comment in `registry_replacements` listing known Docker Hub hostnames (`docker.io`, `index.docker.io`, `registry-1.docker.io`) would have prevented the gap.",
+    "The `kube_temporal` module used `image_registry = \"index.docker.io\"` while all other modules in the codebase used `docker.io`. This inconsistency was undocumented, making it unclear which form was canonical and causing the pull-through cache miss. A note in `kube_constants` or a shared variable for the Docker Hub registry string would enforce consistency."
+  ],
+  "session_id": "83bac039-65b9-4b0d-bd35-2320ab5ae9f0",
+  "timestamp": "2026-04-14T01:11:03.319Z"
+}
