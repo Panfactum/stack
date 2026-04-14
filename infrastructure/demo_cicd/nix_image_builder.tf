@@ -3,45 +3,6 @@ locals {
 }
 
 #############################################################
-# Nix Store PVCs
-#
-# We save the nix store in a PVC so that we can re-use
-# it across runs. We maintain a nix store both for x86 and arm
-# builders.
-#############################################################
-
-resource "kubectl_manifest" "pvc" {
-  for_each = toset(["amd64", "arm64"])
-  yaml_body = yamlencode({
-    apiVersion = "v1"
-    kind       = "PersistentVolumeClaim"
-    metadata = {
-      name      = "nix-store-${each.key}"
-      namespace = local.namespace
-      annotations = {
-        "resize.topolvm.io/inodes-threshold" = "20%"
-        "resize.topolvm.io/threshold"        = "20%"
-        "resize.topolvm.io/increase"         = "10Gi"
-        "resize.topolvm.io/storage_limit"    = "100Gi"
-      }
-    }
-    spec = {
-      resources = {
-        requests = {
-          storage = "20Gi"
-        }
-      }
-      accessModes      = ["ReadWriteOnce"]
-      storageClassName = "ebs-standard"
-    }
-  })
-  server_side_apply = true
-  force_conflicts   = true
-
-  ignore_fields = ["spec.resources"]
-}
-
-#############################################################
 # AWS Permissions
 #
 # This policy gives the Workflow the ability to upload
@@ -113,12 +74,6 @@ data "aws_iam_policy_document" "nix_builder_ecr" {
 #   that mostly implement the same logic, just on different
 #   host architectures
 #
-# - Each builder has a pre-step that initializes the store.
-#   This is because we replace the /nix directory in the 'nixos/nix'
-#   images with our cached /nix PVC to improve build times.
-#   However, the PVC has to be setup when it is first created
-#   or the builder will fail as the /nix directory will be empty.
-#
 # - Building nix in containers is a PITA and the only way that it
 #   could work is by lifting many of the security guards. As a result,
 #   this should NOT be taken as an example of how to run workflows
@@ -139,7 +94,6 @@ resource "kubernetes_config_map" "nix_image_builder_scripts" {
   data = {
     "build-and-push.sh" = file("${path.module}/nix_image_builder/build-and-push.sh")
     "check-image.sh"    = file("${path.module}/nix_image_builder/check-image.sh")
-    "init-store.sh"     = file("${path.module}/nix_image_builder/init-store.sh")
     "merge-and-copy.sh" = file("${path.module}/nix_image_builder/merge-and-copy.sh")
   }
 }
@@ -323,15 +277,6 @@ module "nix_image_builder_workflow" {
           effect   = "NoSchedule"
         }]
       )
-      volumes = concat(
-        module.nix_image_builder_workflow.volumes,
-        [{
-          name = "nix-store"
-          persistentVolumeClaim = {
-            claimName = "nix-store-{{inputs.parameters.arch}}"
-          }
-        }]
-      )
       outputs = {
         parameters = [
           {
@@ -342,62 +287,28 @@ module "nix_image_builder_workflow" {
           }
         ]
       }
-      containerSet = {
-        containers = [
-          {
-            name  = "init-store"
-            image = "${module.pull_through.docker_hub_registry}/nixos/nix:2.34.4"
-            command = [
-              "/scripts/init-store.sh"
-            ]
-            volumeMounts = concat(
-              module.nix_image_builder_workflow.volume_mounts,
-              [{
-                name      = "nix-store"
-                mountPath = "/nix2"
-              }]
-            )
-            resources = {
-              requests = {
-                memory = "500Mi"
-                cpu    = "100m"
-              }
-              limits = {
-                memory = "800Mi"
-              }
-            }
-          },
-          {
-            name  = "main"
-            image = "${module.pull_through.docker_hub_registry}/nixos/nix:2.34.4"
-            command = [
-              "/scripts/build-and-push.sh"
-            ]
-            env = concat(
-              module.nix_image_builder_workflow.env,
-              [
-                { name = "ARCH", value = "{{inputs.parameters.arch}}" }
-              ]
-            )
-            volumeMounts = concat(
-              module.nix_image_builder_workflow.volume_mounts,
-              [{
-                name      = "nix-store"
-                mountPath = "/nix"
-              }]
-            )
-            resources = {
-              requests = {
-                memory = "32Gi"
-                cpu    = "1000m"
-              }
-              limits = {
-                memory = "32Gi"
-              }
-            }
-            dependencies = ["init-store"]
-          }
+      container = {
+        name  = "main"
+        image = "${module.pull_through.docker_hub_registry}/nixos/nix:2.34.4"
+        command = [
+          "/scripts/build-and-push.sh"
         ]
+        env = concat(
+          module.nix_image_builder_workflow.env,
+          [
+            { name = "ARCH", value = "{{inputs.parameters.arch}}" }
+          ]
+        )
+        volumeMounts = module.nix_image_builder_workflow.volume_mounts
+        resources = {
+          requests = {
+            memory = "32Gi"
+            cpu    = "1000m"
+          }
+          limits = {
+            memory = "32Gi"
+          }
+        }
       }
     },
     {
@@ -409,15 +320,6 @@ module "nix_image_builder_workflow" {
           operator = "Equal"
           value    = "true"
           effect   = "NoSchedule"
-        }]
-      )
-      volumes = concat(
-        module.nix_image_builder_workflow.volumes,
-        [{
-          name = "nix-store"
-          persistentVolumeClaim = {
-            claimName = "nix-store-arm64"
-          }
         }]
       )
       inputs = {
@@ -486,9 +388,5 @@ resource "kubectl_manifest" "nix_workflow_template" {
 
   server_side_apply = true
   force_conflicts   = true
-
-  depends_on = [
-    kubectl_manifest.pvc
-  ]
 }
 

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "motivation": "The init-store step was a workaround that pre-populated a PVC with the Nix store from the nixos/nix container image so that the build-and-push step could mount it at /nix. This was unnecessary complexity — the build-and-push container can use the Nix image's built-in ephemeral store directly.",
+      "summary": "Removed the init-store CI/CD step from the Nix image builder Argo Workflow. Deleted infrastructure/demo_cicd/nix_image_builder/init-store.sh, removed the kubectl_manifest.pvc resource (amd64/arm64 nix-store PVCs), removed init-store.sh from the nix_image_builder_scripts ConfigMap, converted the build-and-push template from a containerSet (init-store + main containers) to a single container, removed the nix-store PVC volume from the merge-and-copy template, removed the depends_on = [kubectl_manifest.pvc] from the WorkflowTemplate manifest, and updated the comment block describing the workflow steps."
+    }
+  ],
+  "problems": [],
+  "session_id": "70f779a1-d28b-4c5a-947b-71c5aa695a19",
+  "timestamp": "2026-04-14T12:06:35.658Z"
+}
