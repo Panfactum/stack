@@ -1,6 +1,6 @@
 import { Command } from 'clipanion';
 import { z } from 'zod';
-import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand';
 import { CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
 
@@ -39,9 +39,8 @@ interface IVolumeSnapshot {
  * pf k8s velero snapshot-gc --kube-context production
  * ```
  */
-export class K8sVeleroSnapshotGcCommand extends PanfactumCommand {
+export class K8sVeleroSnapshotGcCommand extends PanfactumLightCommand {
   static override paths = [['k8s', 'velero', 'snapshot-gc']];
-  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Remove orphaned VolumeSnapshots and VolumeSnapshotContents',

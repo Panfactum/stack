@@ -2,7 +2,7 @@
 // It generates deterministic hashes for Terraform/Terragrunt module contents
 
 import { Command, Option } from 'clipanion';
-import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand';
 import { getModuleHash } from '@/util/terragrunt/getModuleHash';
 
 /**
@@ -52,9 +52,8 @@ import { getModuleHash } from '@/util/terragrunt/getModuleHash';
  * 
  * @see {@link getModuleHash} - Core hash computation logic
  */
-export class GetModuleHashCommand extends PanfactumCommand {
+export class GetModuleHashCommand extends PanfactumLightCommand {
   static override paths = [['util', 'get-module-hash']];
-  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Generate SHA1 hash of Terraform module contents',

@@ -193,7 +193,8 @@ BuildKit instances as if they were running locally.
       context: this.context,
       architectures: [validatedArch],
       kubectlContext: config.cluster,
-      wait: true
+      wait: true,
+      workingDirectory: process.cwd()
     })
 
     // Get the address of a free instance
@@ -201,7 +202,8 @@ BuildKit instances as if they were running locally.
       arch: validatedArch,
       kubectlContext: config.cluster,
       omitProtocol: true,
-      context: this.context
+      context: this.context,
+      workingDirectory: process.cwd()
     })
 
     // Get region info for vault address

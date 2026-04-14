@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { CLIError, CLISubprocessError, PanfactumZodError } from '@/util/error/error';
-import type { PanfactumContext } from '@/util/context/context';
+import type { PanfactumBaseContext } from '@/util/context/context';
 
 /**
  * The GitHub owner/repo identifier for the Panfactum stack repository
@@ -116,7 +116,7 @@ export interface IGetCommitHashOptions {
   /** Skip verification that commit exists in remote (default: false) */
   noVerify?: boolean;
   /** Panfactum context for command execution */
-  context: PanfactumContext;
+  context: PanfactumBaseContext;
   /** Directory containing the Git repository */
   workingDirectory: string;
 }
@@ -135,7 +135,7 @@ export interface IGetCommitHashOptions {
  * @throws {@link PanfactumZodError}
  * Throws when output is not a valid SHA
  */
-async function getCurrentHead(context: PanfactumContext, workingDirectory: string): Promise<string> {
+async function getCurrentHead(context: PanfactumBaseContext, workingDirectory: string): Promise<string> {
   const command = ['git', 'rev-parse', 'HEAD'];
   const result = await context.subprocessManager.execute({
     command,
@@ -175,7 +175,7 @@ async function getCurrentHead(context: PanfactumContext, workingDirectory: strin
 /**
  * Checks if the repository has any commits (i.e., HEAD exists)
  */
-async function hasCommits(context: PanfactumContext, workingDirectory: string): Promise<boolean> {
+async function hasCommits(context: PanfactumBaseContext, workingDirectory: string): Promise<boolean> {
   const result = await context.subprocessManager.execute({
     command: ['git', 'rev-parse', '--verify', 'HEAD'],
     workingDirectory,
@@ -186,7 +186,7 @@ async function hasCommits(context: PanfactumContext, workingDirectory: string): 
 /**
  * Resolves a git reference to its commit SHA using git rev-parse
  */
-async function resolveRefToSha(ref: string, context: PanfactumContext, workingDirectory: string): Promise<string> {
+async function resolveRefToSha(ref: string, context: PanfactumBaseContext, workingDirectory: string): Promise<string> {
   const command = ['git', 'rev-parse', ref];
   const result = await context.subprocessManager.execute({
     command,
@@ -226,7 +226,7 @@ async function resolveRefToSha(ref: string, context: PanfactumContext, workingDi
 /**
  * Verifies that a commit SHA exists in the origin repository
  */
-async function verifyCommitInOrigin(sha: string, context: PanfactumContext, workingDirectory: string): Promise<void> {
+async function verifyCommitInOrigin(sha: string, context: PanfactumBaseContext, workingDirectory: string): Promise<void> {
   const command = ['git', 'fetch', 'origin', sha];
   const result = await context.subprocessManager.execute({
     command,
@@ -245,7 +245,7 @@ async function verifyCommitInOrigin(sha: string, context: PanfactumContext, work
 /**
  * Verifies that a commit SHA exists in a custom repository using a temporary directory
  */
-async function verifyCommitInCustomRepo(sha: string, repo: string, context: PanfactumContext): Promise<void> {
+async function verifyCommitInCustomRepo(sha: string, repo: string, context: PanfactumBaseContext): Promise<void> {
   const tempDir = await mkdtemp(join(tmpdir(), 'pf-git-'));
 
   try {
@@ -284,7 +284,7 @@ async function verifyCommitInCustomRepo(sha: string, repo: string, context: Panf
 /**
  * Resolves a git reference using git ls-remote for custom repositories
  */
-async function resolveRefWithLsRemote(ref: string, repo: string, context: PanfactumContext, workingDirectory: string): Promise<string> {
+async function resolveRefWithLsRemote(ref: string, repo: string, context: PanfactumBaseContext, workingDirectory: string): Promise<string> {
   const command = ['git', 'ls-remote', '--exit-code', repo, ref];
   const result = await context.subprocessManager.execute({
     command,

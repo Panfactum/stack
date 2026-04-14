@@ -22,7 +22,7 @@
  * @see {@link createPanfactumContext} - Context initialization
  */
 
-import { Builtins, Cli, type BaseContext } from "clipanion";
+import { Builtins, Cli, Command, type BaseContext } from "clipanion";
 import { AWSVPCNetworkTestCommand } from "@/commands/aws/vpcNetworkTest/command.ts";
 import { AwsEcrWaitOnImageCommand } from "./commands/aws/ecr/wait-on-image/command.ts";
 import { AWSProfileListCommand } from "./commands/aws/profiles/list/command.ts";
@@ -63,11 +63,36 @@ import { GetVaultTokenCommand } from "./commands/vault/get-token/command.ts";
 import { WelcomeCommand } from "./commands/welcome/command.ts";
 import { WorkflowGitCheckoutCommand } from "./commands/wf/git-checkout/command.ts";
 import { SopsSetProfileCommand } from "./commands/wf/sops-set-profile/command.ts";
+import { AlreadyLoggedError, PanfactumLightCommand } from "./util/command/panfactumCommand.ts";
 import { createPanfactumContext, createPanfactumLightContext, type PanfactumContext, type PanfactumBaseContext } from "./util/context/context.ts";
 import type { PanfactumCommand } from "./util/command/panfactumCommand.ts";
 
+type PanfactumCliContext = PanfactumContext | PanfactumBaseContext | BaseContext;
+
+/**
+ * Panfactum CLI class that suppresses Clipanion's built-in error formatting
+ * for errors that have already been logged by our own error handler.
+ *
+ * @remarks
+ * When a command's `catch()` rethrows an {@link AlreadyLoggedError}, Clipanion
+ * catches it internally and calls `this.error()` to format it before writing to
+ * `context.stdout`. Without this override, users would see a confusing
+ * "Already Logged Error:" message printed after the actual error output.
+ *
+ * @internal
+ */
+class PanfactumCli extends Cli<PanfactumCliContext> {
+  override error(
+    error: Error,
+    opts?: { command?: Command<PanfactumCliContext> | null }
+  ): string {
+    if (error instanceof AlreadyLoggedError) return '';
+    return super.error(error, opts);
+  }
+}
+
 // Create a CLI instance
-const cli = new Cli<PanfactumContext | PanfactumBaseContext | BaseContext>({
+const cli = new PanfactumCli({
   binaryName: "pf",
   binaryLabel: "Panfactum CLI"
 });
@@ -218,14 +243,13 @@ process.on('exit', () => {
  * always occurs, even on unexpected errors.
  */
 try {
-  const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand
+  const proc = cli.process({ input: process.argv.slice(2) }) as PanfactumCommand | PanfactumLightCommand
   const contextOpts = {
     debugEnabled: proc.debugEnabled ?? false,
     cwd: process.env["CWD"] || process.cwd()
   };
 
-  // Check the static requiresDevshell flag on the command's class
-  const needsDevshell = (proc.constructor as { requiresDevshell?: boolean }).requiresDevshell !== false;
+  const needsDevshell = !(proc instanceof PanfactumLightCommand);
 
   // Create a lightweight context for commands that don't need devshell config
   // (e.g., workflow commands that run before a git repo exists)
@@ -238,10 +262,12 @@ try {
 
   await cli.runExit(proc, panfactumContext);
 } catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error(error.message)
-  } else {
-    console.error(error);
+  if (!(error instanceof AlreadyLoggedError)) {
+    if (error instanceof Error) {
+      console.error(error.message)
+    } else {
+      console.error(error);
+    }
   }
   process.exitCode = 1;
 } finally {

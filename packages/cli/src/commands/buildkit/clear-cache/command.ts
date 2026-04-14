@@ -4,8 +4,7 @@
 import { Option } from 'clipanion'
 import { z } from 'zod'
 import { BUILDKIT_NAMESPACE } from '@/util/buildkit/constants.js'
-import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { getAllRegions } from '@/util/config/getAllRegions.js'
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand.js'
 import { CLISubprocessError } from '@/util/error/error'
 import { parseJson } from '@/util/json/parseJson'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
@@ -48,10 +47,10 @@ import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
  * @see {@link BUILDKIT_NAMESPACE} - Kubernetes namespace for BuildKit
  * @see {@link execute} - For running kubectl commands
  */
-export default class BuildkitClearCacheCommand extends PanfactumCommand {
+export default class BuildkitClearCacheCommand extends PanfactumLightCommand {
   static override paths = [['buildkit', 'clear-cache']]
 
-  static override usage = PanfactumCommand.Usage({
+  static override usage = PanfactumLightCommand.Usage({
     description: 'Clears BuildKit cache by pruning all caches in running pods and deleting unused persistent volumes.',
     category: 'BuildKit',
   })
@@ -75,17 +74,6 @@ export default class BuildkitClearCacheCommand extends PanfactumCommand {
    * Throws when kubectl commands fail
    */
   async execute(): Promise<number> {
-    // Validate context if provided
-    if (this.kubectlContext) {
-      const allRegions = await getAllRegions(this.context)
-      const matchingRegion = allRegions.find(region => region.clusterContextName === this.kubectlContext)
-
-      if (!matchingRegion) {
-        this.context.logger.error(`'${this.kubectlContext}' not found in any configured region.`)
-        return 1
-      }
-    }
-
     // Delete unused PVCs
     await this.deleteUnusedPVCs()
 

@@ -5,14 +5,14 @@ import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { CLIError } from "@/util/error/error";
 import { fileExists } from "./fileExists";
-import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumBaseContext } from "@/util/context/context";
 
 /**
  * Options for writing a file to the filesystem
  */
 interface IWriteFileInput {
   /** Panfactum context for logging */
-  context: PanfactumContext;
+  context: PanfactumBaseContext;
   /** Path where the file should be written */
   filePath: string;
   /** Content to write to the file */

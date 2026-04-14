@@ -4,7 +4,7 @@
 import { Command, Option } from 'clipanion'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { getBuildKitAddress } from '@/util/buildkit/getAddress.js'
-import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand.js'
 import { PanfactumZodError } from '@/util/error/error.js'
 
 /**
@@ -39,7 +39,7 @@ import { PanfactumZodError } from '@/util/error/error.js'
  * @see {@link getBuildKitAddress} - Core address retrieval logic
  * @see {@link architectureSchema} - Architecture validation schema
  */
-export class GetAddressCommand extends PanfactumCommand {
+export class GetAddressCommand extends PanfactumLightCommand {
   static override paths = [['buildkit', 'get-address']]
 
   static override usage = Command.Usage({
@@ -95,7 +95,8 @@ export class GetAddressCommand extends PanfactumCommand {
       arch: validatedArch,
       kubectlContext: this.kubectlContext,
       omitProtocol: this.omitProtocol,
-      context: this.context
+      context: this.context,
+      workingDirectory: process.cwd()
     })
 
     this.context.stdout.write(address + '\n')

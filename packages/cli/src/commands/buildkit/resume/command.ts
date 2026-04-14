@@ -2,7 +2,7 @@ import { Option } from 'clipanion'
 import { z } from 'zod'
 import { type Architecture, architectureSchema } from '@/util/buildkit/constants.js'
 import { scaleUpBuildKit } from '@/util/buildkit/scaleUp.js'
-import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand.js'
 import { PanfactumZodError } from '@/util/error/error.js'
 
 // Zod schemas for input validation
@@ -46,11 +46,10 @@ const timeoutSchema = z.string().regex(/^\d+$/, 'Timeout must be a positive inte
  * @see {@link scaleUpBuildKit} - Core scaling logic
  * @see {@link BuildkitScaleDownCommand} - For suspending BuildKit
  */
-export default class BuildkitScaleUpCommand extends PanfactumCommand {
-  static override requiresDevshell = false;
+export default class BuildkitScaleUpCommand extends PanfactumLightCommand {
   static override paths = [['buildkit', 'scale', 'up']]
 
-  static override usage = PanfactumCommand.Usage({
+  static override usage = PanfactumLightCommand.Usage({
     description: 'Scales up BuildKit from 0. Helper to be used prior to a build.',
     category: 'BuildKit',
   })
@@ -109,7 +108,8 @@ export default class BuildkitScaleUpCommand extends PanfactumCommand {
       architectures,
       kubectlContext: this.kubectlContext,
       wait: this.wait,
-      timeoutSeconds
+      timeoutSeconds,
+      workingDirectory: process.cwd()
     })
 
     return 0

@@ -3,7 +3,7 @@
 
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
-import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand';
 import { CLISubprocessError, PanfactumZodError } from '@/util/error/error';
 import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
 import { getPDBsByWindowId } from '@/util/kube/getPDBs';
@@ -78,9 +78,8 @@ const timestampSchema = z.string()
  * @see {@link getPDBsByWindowId} - For finding relevant PDBs
  * @see {@link getPDBAnnotations} - For reading PDB metadata
  */
-export class K8sDisruptionsDisableCommand extends PanfactumCommand {
+export class K8sDisruptionsDisableCommand extends PanfactumLightCommand {
   static override paths = [['kube', 'disable-disruptions']];
-  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Disable voluntary disruptions for expired maintenance windows',
@@ -190,7 +189,8 @@ expire based on configured duration.
     const pdbs = await getPDBsByWindowId({
       context: this.context,
       namespace: this.namespace,
-      windowId: this.windowId
+      windowId: this.windowId,
+      workingDirectory: process.cwd()
     });
     
     if (pdbs.length === 0) {
@@ -208,7 +208,8 @@ expire based on configured duration.
       const annotations = await getPDBAnnotations({
         context: this.context,
         namespace: this.namespace,
-        pdbName: pdb
+        pdbName: pdb,
+        workingDirectory: process.cwd()
       });
       const startTime = annotations[PDB_ANNOTATIONS.WINDOW_START];
       let lengthSeconds = 3600;

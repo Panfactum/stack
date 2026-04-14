@@ -9,7 +9,7 @@ import { readYAMLFile } from "@/util/yaml/readYAMLFile";
 import { writeYAMLFile } from "@/util/yaml/writeYAMLFile";
 import { MODULE_STATUS_FILE } from "./constants";
 import { MODULE_STATUS_FILE_SCHEMA, type DEPLOY_STATUS_SCHEMA, type INIT_STATUS_SCHEMA } from "./schemas"
-import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumBaseContext } from "@/util/context/context";
 import type { z } from "zod"
 
 /**
@@ -19,7 +19,7 @@ interface IUpdateModuleStatusInput {
     /** Full path to the module directory */
     moduleDirectory: string;
     /** Panfactum context for configuration */
-    context: PanfactumContext;
+    context: PanfactumBaseContext;
     /** New initialization status (optional) */
     initStatus?: z.infer<typeof INIT_STATUS_SCHEMA>;
     /** New deployment status (optional) */

@@ -2,7 +2,7 @@ import { Option } from 'clipanion'
 import { z } from 'zod'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
 import { getLastBuildTime } from '@/util/buildkit/getLastBuildTime.js'
-import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand.js'
 import { CLISubprocessError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 
@@ -45,11 +45,10 @@ import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
  * @see {@link BuildkitScaleUpCommand} - For resuming BuildKit
  * @see {@link getLastBuildTime} - For checking build activity
  */
-export default class BuildkitScaleDownCommand extends PanfactumCommand {
-  static override requiresDevshell = false;
+export default class BuildkitScaleDownCommand extends PanfactumLightCommand {
   static override paths = [['buildkit', 'suspend']]
 
-  static override usage = PanfactumCommand.Usage({
+  static override usage = PanfactumLightCommand.Usage({
     description: 'Scales the BuildKit instances to 0 replicas.',
     category: 'BuildKit',
   })
@@ -103,7 +102,7 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
 
     if (timeoutSeconds !== undefined) {
       // Check last build time
-      const lastBuildTime = await getLastBuildTime({ arch, kubectlContext: this.kubectlContext, context: this.context })
+      const lastBuildTime = await getLastBuildTime({ arch, kubectlContext: this.kubectlContext, context: this.context, workingDirectory: process.cwd() })
       
       this.context.logger.info(`${arch}: The last recorded build was: ${lastBuildTime || '<none>'}`)
 

@@ -1,13 +1,13 @@
 import { stringify } from "yaml";
 import { writeFile } from "@/util/fs/writeFile";
-import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumBaseContext } from "@/util/context/context";
 
 /**
  * Interface for writeYAMLFile function inputs
  */
 interface IWriteYAMLFileInputs {
   /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
+  context: PanfactumBaseContext;
   /** The values to write to the YAML file */
   values: unknown;
   /** Whether to overwrite existing file */

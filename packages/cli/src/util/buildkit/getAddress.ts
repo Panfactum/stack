@@ -7,7 +7,7 @@ import {
   BUILDKIT_NAMESPACE,
   BUILDKIT_PORT
 } from './constants.js'
-import type { PanfactumContext } from '@/util/context/context.js'
+import type { PanfactumBaseContext } from '@/util/context/context.js'
 
 /**
  * Input parameters for retrieving BuildKit pod address
@@ -20,7 +20,9 @@ interface IGetBuildKitAddressInput {
   /** Whether to omit the tcp:// protocol prefix from the address */
   omitProtocol?: boolean
   /** Panfactum context for configuration and logging */
-  context: PanfactumContext
+  context: PanfactumBaseContext
+  /** Working directory for subprocess execution */
+  workingDirectory: string
 }
 
 /**
@@ -91,9 +93,7 @@ interface IGetBuildKitAddressInput {
 export async function getBuildKitAddress(
   input: IGetBuildKitAddressInput
 ): Promise<string> {
-  const { arch, kubectlContext, omitProtocol = false, context } = input;
-
-  const workingDirectory = context.devshellConfig.repo_root
+  const { arch, kubectlContext, omitProtocol = false, context, workingDirectory } = input;
 
   // Get running pods filtered by architecture
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []

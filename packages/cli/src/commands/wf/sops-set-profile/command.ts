@@ -4,7 +4,7 @@
 import { Glob } from 'bun';
 import { Command, Option } from 'clipanion';
 import { z } from 'zod';
-import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand';
 import { CLIError } from '@/util/error/error';
 import { fileContains } from '@/util/fs/fileContains';
 import { readYAMLFile } from '@/util/yaml/readYAMLFile';
@@ -74,8 +74,7 @@ interface IUpdateResult {
  * @see {@link readYAMLFile} - For safe YAML parsing
  * @see {@link writeYAMLFile} - For preserving YAML structure
  */
-export class SopsSetProfileCommand extends PanfactumCommand {
-  static override requiresDevshell = false;
+export class SopsSetProfileCommand extends PanfactumLightCommand {
   static override paths = [['wf', 'sops-set-profile']];
 
   static override usage = Command.Usage({

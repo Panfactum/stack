@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { CLISubprocessError } from '@/util/error/error';
 import { parseJson } from '@/util/json/parseJson';
-import type { PanfactumContext } from '@/util/context/context';
+import type { PanfactumBaseContext } from '@/util/context/context';
 
 /**
  * Schema for validating Kubernetes annotations
@@ -21,11 +21,13 @@ const annotationsSchema = z.record(z.string())
  */
 interface IGetPDBAnnotationsInput {
   /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
+  context: PanfactumBaseContext;
   /** Kubernetes namespace containing the PDB */
   namespace: string;
   /** Name of the PodDisruptionBudget */
   pdbName: string;
+  /** Working directory for subprocess execution */
+  workingDirectory: string;
 }
 
 /**
@@ -69,7 +71,7 @@ interface IGetPDBAnnotationsInput {
  * @see {@link parseJson} - For JSON parsing with validation
  */
 export async function getPDBAnnotations(input: IGetPDBAnnotationsInput): Promise<Record<string, string>> {
-  const { context, namespace, pdbName } = input;
+  const { context, namespace, pdbName, workingDirectory } = input;
 
   const command = [
     'kubectl', 'get', pdbName,
@@ -78,7 +80,7 @@ export async function getPDBAnnotations(input: IGetPDBAnnotationsInput): Promise
   ];
   const result = await context.subprocessManager.execute({
     command,
-    workingDirectory: process.cwd(),
+    workingDirectory: workingDirectory,
   }).exited;
 
   if (result.exitCode !== 0) {
@@ -87,7 +89,7 @@ export async function getPDBAnnotations(input: IGetPDBAnnotationsInput): Promise
       {
         command: command.join(' '),
         subprocessLogs: result.output,
-        workingDirectory: process.cwd(),
+        workingDirectory: workingDirectory,
       }
     );
   }

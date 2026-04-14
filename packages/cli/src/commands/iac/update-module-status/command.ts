@@ -2,7 +2,7 @@
 // It's used internally by the framework to track module state
 
 import { Command, Option } from "clipanion";
-import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { PanfactumLightCommand } from "@/util/command/panfactumCommand";
 import { PanfactumZodError } from "@/util/error/error";
 import { DEPLOY_STATUS_SCHEMA, INIT_STATUS_SCHEMA } from "@/util/terragrunt/schemas";
 import { updateModuleStatus } from "@/util/terragrunt/updateModuleStatus";
@@ -55,9 +55,8 @@ import { updateModuleStatus } from "@/util/terragrunt/updateModuleStatus";
  * @see {@link updateModuleStatus} - Core status update logic
  * @see {@link getModuleStatus} - For reading module status
  */
-export class UpdateModuleStatusCommand extends PanfactumCommand {
+export class UpdateModuleStatusCommand extends PanfactumLightCommand {
   static override paths = [["iac", "update-module-status"]];
-  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: "Updates the local status file for a particular IaC module",

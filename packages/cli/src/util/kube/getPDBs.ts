@@ -2,18 +2,20 @@
 // It filters PDBs based on Panfactum-specific labels
 
 import { CLISubprocessError } from '@/util/error/error';
-import type { PanfactumContext } from '@/util/context/context';
+import type { PanfactumBaseContext } from '@/util/context/context';
 
 /**
  * Input parameters for getting PDBs by window ID
  */
 interface IGetPDBsByWindowIdInput {
   /** Panfactum context for logging and configuration */
-  context: PanfactumContext;
+  context: PanfactumBaseContext;
   /** Kubernetes namespace to search in */
   namespace: string;
   /** Voluntary disruption window ID to filter by */
   windowId: string;
+  /** Working directory for subprocess execution */
+  workingDirectory: string;
 }
 
 /**
@@ -55,7 +57,7 @@ interface IGetPDBsByWindowIdInput {
  * @see {@link pdbConstants} - For PDB-related constants and labels
  */
 export async function getPDBsByWindowId(input: IGetPDBsByWindowIdInput): Promise<string[]> {
-  const { context, namespace, windowId } = input;
+  const { context, namespace, windowId, workingDirectory } = input;
 
   const command = [
     'kubectl', 'get', 'pdb',
@@ -66,7 +68,7 @@ export async function getPDBsByWindowId(input: IGetPDBsByWindowIdInput): Promise
   ];
   const result = await context.subprocessManager.execute({
     command,
-    workingDirectory: process.cwd(),
+    workingDirectory: workingDirectory,
   }).exited;
 
   if (result.exitCode !== 0) {
@@ -75,7 +77,7 @@ export async function getPDBsByWindowId(input: IGetPDBsByWindowIdInput): Promise
       {
         command: command.join(' '),
         subprocessLogs: result.output,
-        workingDirectory: process.cwd(),
+        workingDirectory: workingDirectory,
       }
     );
   }

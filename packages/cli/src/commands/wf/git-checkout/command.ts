@@ -3,7 +3,7 @@
 
 import { Command, Option } from 'clipanion'
 import { Listr } from 'listr2'
-import { PanfactumCommand } from '@/util/command/panfactumCommand.ts'
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand.ts'
 import { CLIError, CLISubprocessError } from '@/util/error/error'
 import { getCommitHash } from '@/util/git/getCommitHash.ts'
 
@@ -63,8 +63,7 @@ import { getCommitHash } from '@/util/git/getCommitHash.ts'
  * @see {@link getCommitHash} - For reference resolution
  * @see {@link execute} - For git command execution
  */
-export class WorkflowGitCheckoutCommand extends PanfactumCommand {
-  static override requiresDevshell = false;
+export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
   static override paths = [['wf', 'git-checkout']]
 
   static override usage = Command.Usage({

@@ -8,7 +8,7 @@ import {
   BUILDKIT_STATEFULSET_NAME_PREFIX,
   BUILDKIT_LAST_BUILD_ANNOTATION_KEY
 } from './constants.js'
-import type { PanfactumContext } from '@/util/context/context.js'
+import type { PanfactumBaseContext } from '@/util/context/context.js'
 
 /**
  * Input parameters for recording a BuildKit build
@@ -19,7 +19,9 @@ interface IRecordBuildKitBuildInput {
   /** Kubernetes context to use (optional) */
   kubectlContext?: string
   /** Panfactum context for configuration and logging */
-  context: PanfactumContext
+  context: PanfactumBaseContext
+  /** Working directory for subprocess execution */
+  workingDirectory: string
 }
 
 /**
@@ -79,7 +81,7 @@ interface IRecordBuildKitBuildInput {
 export async function recordBuildKitBuild(
   input: IRecordBuildKitBuildInput
 ): Promise<void> {
-  const { arch, kubectlContext, context } = input;
+  const { arch, kubectlContext, context, workingDirectory } = input;
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const contextArgs = kubectlContext ? ['--context', kubectlContext] : []
@@ -97,7 +99,7 @@ export async function recordBuildKitBuild(
   ]
   const result = await context.subprocessManager.execute({
     command,
-    workingDirectory: context.devshellConfig.repo_root
+    workingDirectory: workingDirectory
   }).exited
 
   if (result.exitCode !== 0) {
@@ -106,7 +108,7 @@ export async function recordBuildKitBuild(
       {
         command: command.join(' '),
         subprocessLogs: result.output,
-        workingDirectory: context.devshellConfig.repo_root,
+        workingDirectory: workingDirectory,
       }
     )
   }

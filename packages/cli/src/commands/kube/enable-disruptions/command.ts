@@ -2,7 +2,7 @@
 // It's part of the deprecated kube command group
 
 import { Command, Option } from 'clipanion';
-import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand';
 import { CLISubprocessError } from '@/util/error/error';
 import { getPDBAnnotations } from '@/util/kube/getPDBAnnotations';
 import { getPDBsByWindowId } from '@/util/kube/getPDBs';
@@ -39,9 +39,8 @@ import { PDB_ANNOTATIONS } from '@/util/kube/pdbConstants';
  * 
  * @see {@link K8sDisruptionsDisableCommand} - For disabling disruptions after maintenance
  */
-export class K8sDisruptionsEnableCommand extends PanfactumCommand {
+export class K8sDisruptionsEnableCommand extends PanfactumLightCommand {
   static override paths = [['kube', 'enable-disruptions']];
-  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Enable voluntary disruptions for maintenance windows',
@@ -132,7 +131,8 @@ and marks the start time of the disruption window.`,
     const pdbs = await getPDBsByWindowId({
       context: this.context,
       namespace: this.namespace,
-      windowId: this.windowId
+      windowId: this.windowId,
+      workingDirectory: process.cwd()
     });
     
     if (pdbs.length === 0) {
@@ -149,7 +149,8 @@ and marks the start time of the disruption window.`,
       const annotations = await getPDBAnnotations({
         context: this.context,
         namespace: this.namespace,
-        pdbName: pdb
+        pdbName: pdb,
+        workingDirectory: process.cwd()
       });
       const maxUnavailableStr = annotations[PDB_ANNOTATIONS.MAX_UNAVAILABLE];
       let maxUnavailable: number;

@@ -2,7 +2,7 @@
 // It provides a CLI interface to convert branches, tags, and refs to commit SHAs
 
 import { Command, Option } from 'clipanion';
-import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand';
 import { getCommitHash } from '@/util/git/getCommitHash';
 
 /**
@@ -41,9 +41,8 @@ import { getCommitHash } from '@/util/git/getCommitHash';
  * 
  * @see {@link getCommitHash} - The underlying utility function
  */
-export class GetCommitHashCommand extends PanfactumCommand {
+export class GetCommitHashCommand extends PanfactumLightCommand {
   static override paths = [['util', 'get-commit-hash']];
-  static override requiresDevshell = false;
 
   static override usage = Command.Usage({
     description: 'Resolve git references to commit SHAs',

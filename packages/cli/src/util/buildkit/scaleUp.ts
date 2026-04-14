@@ -7,7 +7,7 @@ import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 import { sleep } from '@/util/util/sleep'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from './constants.js'
 import { recordBuildKitBuild } from './recordBuild.js'
-import type { PanfactumContext } from '@/util/context/context.js'
+import type { PanfactumBaseContext } from '@/util/context/context.js'
 
 /**
  * Zod schema for validating Kubernetes replica counts
@@ -22,7 +22,7 @@ const replicaCountSchema = z.string()
  */
 export interface IScaleUpBuildKitInput {
   /** Panfactum context for configuration and logging */
-  context: PanfactumContext
+  context: PanfactumBaseContext
   /** Architectures to scale up (defaults to all) */
   architectures?: Architecture[]
   /** Kubernetes context to use */
@@ -31,6 +31,8 @@ export interface IScaleUpBuildKitInput {
   wait?: boolean
   /** Maximum time to wait for scale-up (default: 600 seconds) */
   timeoutSeconds?: number
+  /** Working directory for subprocess execution */
+  workingDirectory: string
 }
 
 /**
@@ -97,18 +99,19 @@ export async function scaleUpBuildKit(input: IScaleUpBuildKitInput): Promise<voi
     architectures: archsToScale = architectures,
     kubectlContext,
     wait = false,
-    timeoutSeconds = 600
+    timeoutSeconds = 600,
+    workingDirectory
   } = input;
 
   // Scale up each architecture in parallel
-  await Promise.all(archsToScale.map(arch => scaleUp(arch, context, kubectlContext)))
+  await Promise.all(archsToScale.map(arch => scaleUp(arch, context, kubectlContext, workingDirectory)))
 
   // Wait for scale-up if requested
   if (wait) {
     const startTime = Date.now()
 
     for (const arch of archsToScale) {
-      await waitForScaleUp(arch, context, kubectlContext, startTime, timeoutSeconds)
+      await waitForScaleUp(arch, context, kubectlContext, startTime, timeoutSeconds, workingDirectory)
     }
   }
 }
@@ -120,8 +123,9 @@ export async function scaleUpBuildKit(input: IScaleUpBuildKitInput): Promise<voi
  * @param arch - Target architecture
  * @param context - Panfactum context
  * @param kubectlContext - Optional Kubernetes context
+ * @param workingDirectory - Working directory for subprocess execution
  */
-async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlContext?: string): Promise<void> {
+async function scaleUp(arch: Architecture, context: PanfactumBaseContext, kubectlContext: string | undefined, workingDirectory: string): Promise<void> {
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
   const contextArgs = getKubectlContextArgs(kubectlContext)
 
@@ -138,7 +142,7 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
   ]
   const result = await context.subprocessManager.execute({
     command: getCommand,
-    workingDirectory: process.cwd()
+    workingDirectory: workingDirectory
   }).exited
 
   if (result.exitCode !== 0) {
@@ -147,7 +151,7 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
       {
         command: getCommand.join(' '),
         subprocessLogs: result.output,
-        workingDirectory: process.cwd(),
+        workingDirectory: workingDirectory,
       }
     )
   }
@@ -176,7 +180,7 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
     ]
     const scaleResult = await context.subprocessManager.execute({
       command: scaleCommand,
-      workingDirectory: process.cwd()
+      workingDirectory: workingDirectory
     }).exited
 
     if (scaleResult.exitCode !== 0) {
@@ -185,14 +189,14 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
         {
           command: scaleCommand.join(' '),
           subprocessLogs: scaleResult.output,
-          workingDirectory: process.cwd(),
+          workingDirectory: workingDirectory,
         }
       )
     }
   }
 
   // Record a "build" to prevent immediate scale-down
-  await recordBuildKitBuild({ arch, kubectlContext, context })
+  await recordBuildKitBuild({ arch, kubectlContext, context, workingDirectory })
 }
 
 /**
@@ -204,13 +208,15 @@ async function scaleUp(arch: Architecture, context: PanfactumContext, kubectlCon
  * @param kubectlContext - Optional Kubernetes context
  * @param startTime - Start time for timeout calculation
  * @param timeoutSeconds - Maximum wait time
+ * @param workingDirectory - Working directory for subprocess execution
  */
 async function waitForScaleUp(
-  arch: Architecture, 
-  context: PanfactumContext, 
+  arch: Architecture,
+  context: PanfactumBaseContext,
   kubectlContext: string | undefined,
-  startTime: number, 
-  timeoutSeconds: number
+  startTime: number,
+  timeoutSeconds: number,
+  workingDirectory: string
 ): Promise<void> {
   const statefulsetName = `${BUILDKIT_STATEFULSET_NAME_PREFIX}${arch}`
   const contextArgs = getKubectlContextArgs(kubectlContext)
@@ -228,7 +234,7 @@ async function waitForScaleUp(
     ]
     const result = await context.subprocessManager.execute({
       command: waitCommand,
-      workingDirectory: process.cwd()
+      workingDirectory: workingDirectory
     }).exited
 
     if (result.exitCode !== 0) {
@@ -237,7 +243,7 @@ async function waitForScaleUp(
         {
           command: waitCommand.join(' '),
           subprocessLogs: result.output,
-          workingDirectory: process.cwd(),
+          workingDirectory: workingDirectory,
         }
       )
     }

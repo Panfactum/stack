@@ -32,7 +32,6 @@ import { CLIError } from '@/util/error/error'
  */
 export default class K8sGetTokenCommand extends PanfactumCommand {
   static override paths = [['kube', 'get-token']]
-  static override requiresDevshell = true;
 
   static override usage = PanfactumCommand.Usage({
     description: 'Get an EKS authentication token with automatic SSO login',

@@ -4,7 +4,7 @@
 import { Command, Option } from 'clipanion'
 import { architectureSchema } from '@/util/buildkit/constants.js'
 import { recordBuildKitBuild } from '@/util/buildkit/recordBuild.js'
-import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
+import { PanfactumLightCommand } from '@/util/command/panfactumCommand.js'
 import { PanfactumZodError } from '@/util/error/error.js'
 
 /**
@@ -37,7 +37,7 @@ import { PanfactumZodError } from '@/util/error/error.js'
  * @see {@link recordBuildKitBuild} - Core timestamp recording logic
  * @see {@link architectureSchema} - Architecture validation schema
  */
-export class RecordBuildCommand extends PanfactumCommand {
+export class RecordBuildCommand extends PanfactumLightCommand {
   static override paths = [['buildkit', 'record-build']]
 
   static override usage = Command.Usage({
@@ -88,7 +88,8 @@ export class RecordBuildCommand extends PanfactumCommand {
     await recordBuildKitBuild({
       arch: validatedArch,
       kubectlContext: this.kubectlContext,
-      context: this.context
+      context: this.context,
+      workingDirectory: process.cwd()
     })
 
     this.context.stdout.write(`Successfully recorded build timestamp for ${validatedArch} BuildKit\n`)

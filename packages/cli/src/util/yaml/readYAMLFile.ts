@@ -5,14 +5,14 @@ import { parse } from "yaml";
 import { z } from "zod";
 import { CLIError, PanfactumZodError } from "@/util/error/error";
 import { fileExists } from "@/util/fs/fileExists";
-import type { PanfactumContext } from "@/util/context/context";
+import type { PanfactumBaseContext } from "@/util/context/context";
 
 /**
  * Input parameters for reading and validating YAML files
  */
 interface IReadYAMLFileInput<T extends z.ZodType<object>> {
     /** Panfactum context for logging */
-    context: PanfactumContext;
+    context: PanfactumBaseContext;
     /** Path to the YAML file to read */
     filePath: string;
     /** Zod schema for validating the parsed content */
