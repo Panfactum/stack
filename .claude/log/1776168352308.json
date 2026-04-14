@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "NATS pods had label `panfactum.com/pull-through-cache-enabled: false`, causing the Kyverno ClusterPolicy to skip image URL rewriting. The production config set `pull_through_cache_enabled = true` on the `demo_cicd` module, but that value was never forwarded down the chain to `kube_argo_event_bus`, leaving its default of `false` in effect.",
+      "summary": "Added `pull_through_cache_enabled = var.pull_through_cache_enabled` to the `kube_argo_event_bus` module call in `infrastructure/demo_cicd/event_bus.tf` so the top-level setting propagates to the NATS pods."
+    }
+  ],
+  "problems": [
+    "The agent initially misdiagnosed the root cause as a bad default value in `kube_argo_event_bus/vars.tf` rather than a missing variable forwarding in `event_bus.tf`. The actual issue was that `event_bus.tf` simply never passed `pull_through_cache_enabled` to the module, despite the parent module receiving it correctly. Better naming or a lint check for unforwarded pass-through variables would have made this more obvious.",
+    "The `kube_argo_event_bus` module's `pull_through_cache_enabled` variable defaulted to `false` while analogous modules like `kube_nats` default to `true`. This inconsistency obscured the root cause and made diagnosis harder — a uniform default of `true` across all modules would prevent silent failures when callers omit the variable."
+  ],
+  "session_id": "99bb5788-1d06-40c2-b68b-aae869a595dd",
+  "timestamp": "2026-04-14T12:06:12.159Z"
+}
