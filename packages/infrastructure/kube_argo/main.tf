@@ -427,11 +427,11 @@ resource "helm_release" "argo" {
       executor = {
         resources = {
           requests = {
-            memory = "50Mi"
+            memory = "75Mi"
             cpu    = "10m"
           }
           limits = {
-            memory = "70Mi"
+            memory = "100Mi"
           }
         }
       }

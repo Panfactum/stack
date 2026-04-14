@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "Increase memory allocation for the Argo Workflows executor (exec) container to better handle workloads that were likely hitting the previous lower limits.",
+      "summary": "Updated executor container memory resources in `packages/infrastructure/kube_argo/main.tf`: request increased from 50Mi to 75Mi, limit increased from 70Mi to 100Mi. The accompanying auto-generated Terraform reference docs in `packages/website/src/content/docs/main/modules/kube_argo/reference.mdx` were updated automatically by a post-edit hook."
+    }
+  ],
+  "problems": [
+    "The agent attempted to run `show-diff.ts` as a bare command multiple times (via `which`, `find`, and `locate`) before discovering its path via Glob. The script lives at `.claude/skills/changelog/scripts/show-diff.ts` but is not in PATH, so plain invocations failed. A comment or README near the script noting that it must be invoked with its full path (or via `bun`/`ts-node`) would prevent repeated failed lookups."
+  ],
+  "session_id": "6ea09ae0-4568-4451-9185-9c2a0b602c07",
+  "timestamp": "2026-04-14T19:48:11.198Z"
+}
