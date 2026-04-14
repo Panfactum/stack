@@ -474,6 +474,16 @@ Already completed steps will be automatically skipped.
           && !vaultAddr.startsWith('http://127.0.0.1')
           && !vaultAddr.startsWith('http://localhost');
         step.completed = pfData.deploy_status === "success" || hasNonLocalVaultAddr;
+      } else if (step.id === "setupInboundNetworking") {
+        // Special case: even if KUBE_INGRESS_NGINX is deployed, vault_addr must have been updated
+        // to a public URL. DNS propagation can cause the health-check/vault_addr-update to fail
+        // after NGINX is already applied, so we must not skip this step until vault_addr is set.
+        const vaultAddr = config.vault_addr;
+        const hasNonLocalVaultAddr = !!vaultAddr
+          && vaultAddr !== '@@TERRAGRUNT_INVALID@@'
+          && !vaultAddr.startsWith('http://127.0.0.1')
+          && !vaultAddr.startsWith('http://localhost');
+        step.completed = pfData.deploy_status === "success" && hasNonLocalVaultAddr;
       } else if (step.id === "setupClusterExtensions") {
         // Due to the concurrent nature of this step, we let the step handle it's own completion logic
         step.completed = false;

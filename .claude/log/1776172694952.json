@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "When switching Vault to ingress mode, DNS propagation can exceed the timeout for 'Verifying the Vault Ingress', causing 'Updating the Vault Address' to never run. On retry, the entire setupInboundNetworking step is skipped because KUBE_INGRESS_NGINX already has deploy_status=success, so vault_addr is permanently stuck as a local address.",
+      "summary": "Added a special completion check for the setupInboundNetworking step in command.ts (lines ~477-486): the step is now considered complete only when both KUBE_INGRESS_NGINX is deployed AND vault_addr has been updated to a non-local URL. This mirrors the existing setupVault completion check pattern, ensuring the step re-runs on retry to write the correct vault_addr even after a DNS timeout failure."
+    }
+  ],
+  "problems": [
+    "The step completion logic for setupInboundNetworking was keyed solely on the last module's deploy_status (KUBE_INGRESS_NGINX), with no indication in the code or comments that vault_addr also needs to be updated as part of this step's success criteria. This mismatch between 'last deployed module' and 'step fully complete' was not documented, requiring trace-through of multiple files to discover. A comment on the lastModule field or in the step definition noting sub-tasks that must complete beyond module deployment would prevent this class of bug."
+  ],
+  "session_id": "ce6ea136-1931-4cc5-a6c2-2f65c7d272fd",
+  "timestamp": "2026-04-14T13:18:44.502Z"
+}
