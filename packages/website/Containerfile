@@ -47,11 +47,8 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Install Dependencies
-COPY package.json bun.lock bunfig.toml .
-COPY packages/cli/package.json packages/cli/
-COPY packages/scraper/package.json packages/scraper/
-COPY packages/website/package.json packages/website/
-RUN --mount=type=cache,id=bun,target=/code/.bun bun install --frozen-lockfile
+COPY packages/website/package.json packages/website/bun.lock packages/website/bunfig.toml ./
+RUN --mount=type=cache,id=bun-website,target=/code/.bun bun install --frozen-lockfile
 
 
 #################################################
@@ -65,11 +62,10 @@ ARG ALGOLIA_INDEX_NAME
 ARG SITE_URL
 
 ENV NODE_ENV=production
-WORKDIR /code/packages/website
 COPY packages/website .
 
-RUN mkdir /code/packages/website/dist
-RUN --mount=type=cache,id=website-build,target=/code/packages/website/.cache \
+RUN mkdir dist
+RUN --mount=type=cache,id=website-build,target=/code/.cache \
   ALGOLIA_APP_ID=${ALGOLIA_APP_ID} \
   ALGOLIA_SEARCH_API_KEY=${ALGOLIA_SEARCH_API_KEY} \
   ALGOLIA_INDEX_NAME=${ALGOLIA_INDEX_NAME} \

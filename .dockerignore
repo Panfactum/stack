@@ -8,16 +8,16 @@
 !packages/website/ec.config.mjs
 !packages/website/.prettier.mjs
 !packages/website/postcss.config.cjs
-!packages/cli/package.json
+!packages/website/bun.lock
+!packages/website/bunfig.toml
 !packages/scraper/package.json
 !packages/scraper/src
 !packages/scraper/.eslintrc.js
 !packages/scraper/tsconfig.json
+!packages/scraper/bun.lock
+!packages/scraper/bunfig.toml
 !packages/reference-typescript/src
 !packages/reference-typescript/package.json
 !packages/reference-typescript/tsconfig.json
 !packages/bastion
-!package.json
-!bun.lock
-!bunfig.toml
 

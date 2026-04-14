@@ -11,7 +11,7 @@
     "lint:fix": "eslint src --fix",
     "test": "bun test src/**/*.test.ts",
     "test:watch": "bun test --watch src/**/*.test.ts",
-    "postinstall": "if command -v bun2nix >/dev/null 2>&1; then bun2nix -l ../../bun.lock -o bun.nix && sed -i '/= copyPathToStore /d' bun.nix; fi"
+    "postinstall": "if command -v bun2nix >/dev/null 2>&1; then bun2nix -l bun.lock -o bun.nix && sed -i '/= copyPathToStore /d' bun.nix; fi"
   },
   "devDependencies": {
     "@eslint/compat": "2.0.5",
@@ -28,10 +28,15 @@
     "eslint-plugin-unicorn": "64.0.0",
     "prettier": "3.5.3",
     "eslint-plugin-import-x": "4.16.2",
-    "globals": "17.4.0"
+    "globals": "17.4.0",
+    "typescript": "5.6.2"
   },
   "peerDependencies": {
-    "typescript": "5.8.3"
+    "typescript": "5.6.2"
+  },
+  "trustedDependencies": ["panfactum-cli", "esbuild"],
+  "overrides": {
+    "@typescript-eslint/utils": "8.58.1"
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "5.2.0",
@@ -77,6 +82,6 @@
     "typanion": "3.14.0",
     "wrap-ansi": "9.0.0",
     "yaml": "2.7.1",
-    "zod": "3.24.2"
+    "zod": "3.25.76"
   }
 }

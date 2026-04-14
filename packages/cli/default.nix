@@ -7,37 +7,19 @@
 let
   bunDeps = bun2nix.fetchBunDeps { bunNix = ./bun.nix; };
   packageJson = builtins.fromJSON (builtins.readFile ./package.json);
-
-  # Transform the workspace root lockfile into a standalone lockfile for the CLI.
-  # The root bun.lock uses JSONC (trailing commas) and references workspace packages
-  # that don't exist in the isolated build. We strip trailing commas, promote the
-  # CLI workspace entry to root, and remove workspace package references.
-  standaloneLockfile = pkgs.runCommand "cli-bun-lock" { nativeBuildInputs = [ pkgs.jq ]; } ''
-    # Strip trailing commas to produce valid JSON, then transform the workspace
-    # lockfile into a standalone lockfile with only the CLI's dependencies
-    sed -zE 's/,\n(\s*[])}])/\n\1/g' ${../../bun.lock} \
-      | jq '{
-          lockfileVersion: .lockfileVersion,
-          workspaces: {"": .workspaces["packages/cli"]},
-          packages: (.packages | with_entries(select(.value[0] | test("@workspace:") | not)))
-        }' > $out
-  '';
 in
 pkgs.stdenv.mkDerivation {
   inherit (packageJson) name version;
-  src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
+  # Exclude bunfig.toml from the Nix source — its [install.cache] dir = ".bun" setting
+  # redirects bun's cache lookup away from BUN_INSTALL_CACHE_DIR (set by bun2nix.hook),
+  # causing bun to download npm manifests which fails in the sandbox.
+  src = pkgs.nix-gitignore.gitignoreSource [ "bunfig.toml" ] ./.;
 
   nativeBuildInputs = with pkgs; [
-    jq
     bun2nix.hook
   ];
 
   inherit bunDeps;
-
-  # Copy the transformed standalone lockfile into the build
-  postUnpack = ''
-    cp ${standaloneLockfile} $sourceRoot/bun.lock
-  '';
 
   # Disable lifecycle scripts (postinstall runs bun2nix which isn't needed in the build)
   dontRunLifecycleScripts = true;

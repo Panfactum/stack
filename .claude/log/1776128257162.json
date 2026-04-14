@@ -1,0 +1,58 @@
+{
+  "changes": [
+    {
+      "motivation": "The shared bun workspace caused ongoing Docker build failures, corrupt shared caches, and a fragile Nix lockfile transformation hack (sed+jq to extract a standalone lockfile from the root bun.lock). Removing workspaces eliminates these failure modes by giving each package full ownership of its dependencies.",
+      "summary": "Removed bun workspaces. Deleted root bun.lock and bunfig.toml. Stripped root package.json to minimal (private, engines only). Each of cli, scraper, and website now has its own standalone bun.lock and bunfig.toml with a local .bun cache dir."
+    },
+    {
+      "motivation": "The CLI Nix build previously used a multi-step sed+jq transformation to extract a standalone lockfile from the root workspace bun.lock. With a standalone bun.lock in packages/cli, this hack is no longer needed.",
+      "summary": "Simplified packages/cli/default.nix: removed the standaloneLockfile derivation and postUnpack transformation. The CLI Nix build now uses the standalone packages/cli/bun.lock directly via bun2nix.fetchBunDeps."
+    },
+    {
+      "motivation": "The bun2nix hook sets BUN_INSTALL_CACHE_DIR but bunfig.toml [install.cache] dir = '.bun' overrides it with an empty sandbox directory, causing all package resolutions to fail with ConnectionRefused on the sandboxed remote builder.",
+      "summary": "Excluded bunfig.toml from the CLI Nix source (nix-gitignoreSource) so the bun2nix-provided cache dir is respected during the build. bunfig.toml is still present locally for development."
+    },
+    {
+      "motivation": "The devshell previously ran a single root-level bun install which no longer makes sense without a workspace. Each package needs its own install.",
+      "summary": "Updated packages/local/default.nix to run three parallel per-package bun installs (bun-cli, bun-scraper, bun-website) instead of one root-level install."
+    },
+    {
+      "motivation": "The Containerfiles were copying multiple workspace package.json files and using --filter flags, which was workspace-specific complexity. With per-package lockfiles, each container only needs its own package files.",
+      "summary": "Simplified scraper and website Containerfiles to copy only their own package.json, bun.lock, and bunfig.toml. Removed workspace-specific COPY patterns and --filter flags."
+    },
+    {
+      "motivation": "oven/bun:1-debian (website) pulled bun v1.1.46 and oven/bun:1.2.5-slim (scraper) — both older than the devshell's bun 1.3.9. The new standalone lockfiles use lockfileVersion 1 format introduced in bun 1.3.x, which older versions cannot read.",
+      "summary": "Pinned both Containerfile base images to their respective bun 1.3.9 tags (oven/bun:1.3.9-debian for website, oven/bun:1.3.9-slim for scraper) to match the devshell version."
+    },
+    {
+      "motivation": "astro@5.17.3 requires zod@^3.25.76, but the website pinned zod@3.24.2. zod-to-json-schema@3.25.2 (transitive dep) also requires the ./v3 export subpath only available in zod 3.25+. The consistency checker requires matching versions across packages.",
+      "summary": "Upgraded zod from 3.24.2 to 3.25.76 in both packages/cli and packages/website package.json files. Regenerated both lockfiles."
+    },
+    {
+      "motivation": "Without a workspace to hoist TypeScript, bun auto-resolved the CLI's peer dep 'typescript: 5.8.3' to TypeScript 6.0.2, which deprecated tsconfig baseUrl and broke the CLI typecheck.",
+      "summary": "Added typescript@5.6.2 to packages/cli devDependencies and updated peerDependencies to match, preventing bun from auto-installing TS 6. Regenerated the CLI lockfile."
+    },
+    {
+      "motivation": "check-dependency-version-consistency was only useful for enforcing consistent versions across workspace packages. The project already has a custom ds-check-package-json.ts pre-commit hook that does the same job.",
+      "summary": "Removed check-dependency-version-consistency from root package.json devDependencies. Ran pnpm install to update pnpm-lock.yaml."
+    },
+    {
+      "motivation": "The .dockerignore whitelisted root-level bun.lock, bunfig.toml, and workspace package.json paths, which no longer exist. Per-package files need to be whitelisted instead.",
+      "summary": "Updated .dockerignore to remove root-level bun whitelist entries and add per-package !packages/*/bun.lock and !packages/*/bunfig.toml entries."
+    },
+    {
+      "motivation": "trustedDependencies and overrides were previously hoisted to the root workspace. With independent packages, each package that needs them must declare them directly.",
+      "summary": "Added trustedDependencies (panfactum-cli, esbuild for CLI; @tailwindcss/oxide, esbuild, sharp for website) and overrides (@typescript-eslint/utils: 8.58.1) to packages/cli and packages/website package.json files."
+    }
+  ],
+  "problems": [
+    "bun2nix's bunNodeModulesInstallPhase does not pass --frozen-lockfile by default, so bun downloads package manifests from npm even when all tarballs are pre-fetched via BUN_INSTALL_CACHE_DIR. This is undocumented behavior that causes silent failures in sandboxed/offline builds. The fix (discovered by trial and error) is either passing --frozen-lockfile via bunInstallFlagsArray or excluding network-interfering config files from the Nix source.",
+    "bunfig.toml [install.cache] dir silently overrides BUN_INSTALL_CACHE_DIR set by the bun2nix hook. There is no documentation warning that including bunfig.toml in the Nix source will break the pre-fetched cache mechanism. The fix is to exclude bunfig.toml from nix-gitignoreSource.",
+    "bun2nix's bunInstallFlagsArray requires declaration as a bash array (declare -a) for the concatTo helper to work correctly. Setting it as a Nix list string (the natural Nix way) causes concatTo to treat it as a singleton, breaking flag parsing. This is documented only by a runtime warning ('treating as a singleton. This will become an error in future') rather than a clear error or documentation.",
+    "oven/bun:1 and oven/bun:1-debian are floating Docker tags that do not track the latest bun 1.x release — the tag resolved to bun v1.1.46, which is over a year old and cannot read lockfileVersion 1 format (introduced in bun 1.3.x). Using floating major-version tags for bun Docker images is unreliable; specific version pinning is required.",
+    "The bun peer dependency range 'typescript: 5.8.3' was specified as an exact version string but bun treated it as a minimum range and auto-resolved to TypeScript 6.0.2, breaking tsconfig baseUrl. The distinction between exact and range peer deps in bun's resolution is not documented clearly and required trial-and-error to discover.",
+    "check-dependency-version-consistency was present in root package.json devDependencies but was never referenced in any script, pre-commit hook, or CI step. The actual version consistency check was performed by ds-check-package-json.ts. This dead dependency was not obvious without searching the entire codebase."
+  ],
+  "session_id": "3f177c33-aa1f-4328-9dee-b124977b16bb",
+  "timestamp": "2026-04-14T01:06:21.582Z"
+}
