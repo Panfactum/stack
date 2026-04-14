@@ -39,8 +39,8 @@ locals {
       url           = "https://${var.vault_domain}/oidc/callback"
     },
     {
-      matching_mode = "strict"
-      url           = "http://localhost:8250/oidc/callback"
+      matching_mode = "regex"
+      url           = "http://localhost:[0-9]+/oidc/callback"
     }
   ]
 }
