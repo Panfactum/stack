@@ -9,6 +9,7 @@ build
 .astro/
 # build cache
 .cache
+.astro-compress
 
 
 # dependencies

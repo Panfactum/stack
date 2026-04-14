@@ -35,6 +35,7 @@ const { title, description, redirect } = Astro.props;
               display: "swap",
               selector: "body",
               fallback: "sans-serif",
+              fallbackName: "_inter_fallback",
             },
             {
               name: "neue-machina",
@@ -67,6 +68,7 @@ const { title, description, redirect } = Astro.props;
               display: "swap",
               selector: ".font-machina",
               fallback: "sans-serif",
+              fallbackName: "_machina_fallback",
             },
             {
               name: "neue-montreal-mono",
@@ -96,6 +98,7 @@ const { title, description, redirect } = Astro.props;
               display: "swap",
               selector: ".font-mono",
               fallback: "sans-serif",
+              fallbackName: "_mono_fallback",
             },
           ]}
   />

@@ -9,7 +9,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeWrap from "rehype-wrap-all";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import compress from "@playform/compress"
+import compress from "./src/lib/plugins/compress.ts"
 import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -132,18 +132,12 @@ export default defineConfig({
     //   }
     // }),
     compress({
-      HTML: {
-        "html-minifier-terser": {
-          minifyCSS: true,
-          minifyJS: true,
-          removeComments: true,
-          removeRedundantAttributes: true,
-          removeEmptyAttributes: true,
-          sortClassName: true,
-          sortAttributes: true
-        }
-      },
-      Image: false // Image compression is tackled by the image service
+      html: {
+        removeRedundantAttributes: true,
+        removeEmptyAttributes: true,
+        sortClassName: true,
+        sortAttributes: true
+      }
     })
   ],
   vite: {

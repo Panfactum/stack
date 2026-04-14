@@ -1,0 +1,29 @@
+{
+  "changes": [
+    {
+      "motivation": "The original @playform/compress integration had no caching and re-ran on every build (~75s unconditionally). A custom local integration was written to replace it, supporting only HTML minification and SVG optimization (JS/CSS/Image are already handled by Vite and @unpic/astro), with a manifest-based cache keyed on source file hashes.",
+      "summary": "Replaced @playform/compress with a local Astro integration at src/lib/plugins/compress.ts. Uses html-minifier-terser for HTML and svgo for SVG. Skips files whose source hash matches the manifest cache (.astro-compress/manifest.json). Added html-minifier-terser and svgo as direct dependencies, removed @playform/compress and gab-astro-compress."
+    },
+    {
+      "motivation": "Every HTML page was non-deterministic between builds because astro-font generated fallback font-family names using Math.random()*Date.now(), causing all HTML cache entries to miss on every build.",
+      "summary": "Added static fallbackName properties to all three font configs in CommonHead.astro (Barlow → pf_barlow_fallback, JetBrains Mono → pf_mono_fallback, Font Awesome → pf_icons_fallback), making HTML output deterministic across builds and enabling the compress cache to hit ~91% of HTML files."
+    },
+    {
+      "motivation": "The .astro-compress cache directory created by the new compress plugin needed to be persisted between Docker builds to get caching benefits.",
+      "summary": "Added a third cache mount to the Containerfile builder stage: --mount=type=cache,id=website-compress,target=/code/.astro-compress"
+    },
+    {
+      "motivation": "The new cache directories (.astro-compress) needed to be excluded from git tracking.",
+      "summary": "Added .astro-compress to packages/website/.gitignore"
+    }
+  ],
+  "problems": [
+    "The @playform/compress README and npm page do not document that it has zero caching — the build-time cost only becomes apparent through empirical measurement. Replacing it required trial-and-error with gab-astro-compress (wrong API, no disable support for individual types) before settling on a custom implementation.",
+    "gab-astro-compress uses different config key names (lowercase html, svg, js) than @playform/compress (uppercase HTML, Image, JavaScript, CSS), which is not prominently documented. Setting keys to false/null does not disable compression — the library uses 'key in config' checks so even falsy values trigger processing. This required reading minified source to understand.",
+    "astro-font generates font fallback names with Math.floor(Math.random()*Date.now()) by default, making every HTML page non-deterministic between builds. This is not documented in the package README. The fallbackName escape hatch exists but is not mentioned as necessary for deterministic builds or caching use cases.",
+    "rollup-plugin-smart-cache appears to support skipping builds on cache hit but only skips re-writing its own cache when Vite is used — it cannot short-circuit Vite's internal Rollup pipeline. The README does not clarify this Vite incompatibility, and the 'Cache hit' log message is misleading since the actual Vite build still runs in full.",
+    "The Astro astro:build:done hook fires before all output files are fully flushed to disk on some systems, causing ENOENT errors when reading HTML files immediately after the build. This is undocumented behavior that required moving readFileSync inside a try/catch and adding exists checks."
+  ],
+  "session_id": "1dba062c-0cec-400b-b65a-3552a04bc59a",
+  "timestamp": "2026-04-14T14:55:10.454Z"
+}
