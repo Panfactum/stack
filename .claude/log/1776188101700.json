@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "motivation": "The `pf buildkit suspend` command was crashing inside its Kubernetes pod because the CLI's startup routine calls `getDevshellConfig` → `getRoot` → `git rev-parse --show-toplevel`, which requires a git repository that doesn't exist in-container. The sibling `resume` command already had `requiresDevshell = false` set correctly, but `suspend` was missing it.",
+      "summary": "Added `static override requiresDevshell = false` to `BuildkitScaleDownCommand` in `src/commands/buildkit/suspend/command.ts`, removed the `getAllRegions` import and the `--context` option validation block that depended on it (since `getAllRegions` also requires devshell config), and updated a stale `@remarks` comment in `execute()`."
+    }
+  ],
+  "problems": [
+    "The `requiresDevshell` flag is the single mechanism preventing the CLI startup from running `git rev-parse --show-toplevel`, but this is not documented on the base class or in command authoring guides. A developer adding a new command that runs in a container has no signal that omitting this flag will cause a git lookup failure at runtime.",
+    "The `suspend` and `resume` commands are symmetric operations deployed in the same pod, but only `resume` had `requiresDevshell = false`. The asymmetry was silent — no tests or CI checks caught that `suspend` would fail in-cluster.",
+    "`getAllRegions` performs devshell-dependent work, but its name gives no indication of this constraint. A developer using it in a `requiresDevshell = false` command would not realise the dependency until a runtime failure."
+  ],
+  "session_id": "2e9d28ed-ab3a-4fa9-9a3c-3ebdc253b0ce",
+  "timestamp": "2026-04-14T17:35:16.537Z"
+}

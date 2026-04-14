@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { type Architecture, BUILDKIT_NAMESPACE, BUILDKIT_STATEFULSET_NAME_PREFIX, architectures } from '@/util/buildkit/constants.js'
 import { getLastBuildTime } from '@/util/buildkit/getLastBuildTime.js'
 import { PanfactumCommand } from '@/util/command/panfactumCommand.js'
-import { getAllRegions } from '@/util/config/getAllRegions.js'
 import { CLISubprocessError, PanfactumZodError } from '@/util/error/error.js'
 import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
 
@@ -47,6 +46,7 @@ import { getKubectlContextArgs } from '@/util/kube/getKubectlContextArgs.js'
  * @see {@link getLastBuildTime} - For checking build activity
  */
 export default class BuildkitScaleDownCommand extends PanfactumCommand {
+  static override requiresDevshell = false;
   static override paths = [['buildkit', 'suspend']]
 
   static override usage = PanfactumCommand.Usage({
@@ -67,8 +67,7 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
    * 
    * @remarks
    * Validates timeout parameters, checks last build timestamps (if timeout specified),
-   * and scales down BuildKit StatefulSets to 0 replicas. The command operates across
-   * all configured regions and architectures.
+   * and scales down BuildKit StatefulSets to 0 replicas.
    * 
    * @returns Exit code (0 for success, 1 for failure)
    * 
@@ -88,17 +87,6 @@ export default class BuildkitScaleDownCommand extends PanfactumCommand {
         throw new PanfactumZodError('Invalid timeout value', 'timeout', result.error);
       }
       timeoutSeconds = result.data;
-    }
-
-    // Validate context if provided
-    if (this.kubectlContext) {
-      const allRegions = await getAllRegions(this.context)
-      const matchingRegion = allRegions.find(region => region.clusterContextName === this.kubectlContext)
-
-      if (!matchingRegion) {
-        this.context.logger.error(`'${this.kubectlContext}' not found in any configured region.`)
-        return 1
-      }
     }
 
     // Scale down each architecture
