@@ -139,6 +139,12 @@ resource "authentik_stage_user_login" "login" {
   terminate_other_sessions = true
 }
 
+resource "authentik_stage_user_login" "recovery_login" {
+  name                     = "panfactum-recovery-login"
+  session_duration         = var.recovery_session_duration
+  terminate_other_sessions = true
+}
+
 ###########################################################################
 ## MFA Stages
 ###########################################################################
@@ -336,7 +342,7 @@ resource "authentik_flow_stage_binding" "recovery_write" {
 
 resource "authentik_flow_stage_binding" "recovery_login" {
   target                  = authentik_flow.recovery.uuid
-  stage                   = authentik_stage_user_login.login.id
+  stage                   = authentik_stage_user_login.recovery_login.id
   order                   = 100
   evaluate_on_plan        = true
   re_evaluate_policies    = false

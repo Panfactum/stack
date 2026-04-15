@@ -1,0 +1,23 @@
+{
+  "changes": [
+    {
+      "motivation": "Reduce re-authentication friction for end users by aligning session duration with industry norms (30 days), while preserving a shorter recovery flow session for security.",
+      "summary": "Changed the default value of `session_duration` in `authentik_core_resources/vars.tf` from `hours=8;minutes=0;seconds=0` to `days=30;hours=0;minutes=0;seconds=0`, and added a new `recovery_session_duration` variable defaulting to `hours=8;minutes=0;seconds=0`."
+    },
+    {
+      "motivation": "The single shared `authentik_stage_user_login.login` resource was used by both the authentication flow and the recovery flow; a 30-day session on a recovery flow would be a security risk.",
+      "summary": "Added a second `authentik_stage_user_login.recovery_login` resource in `main.tf` and updated the recovery flow stage binding to reference it, while leaving the auth flow binding pointing to the original `login` stage. Both stages retain `terminate_other_sessions = true`."
+    },
+    {
+      "motivation": "A post-task hook auto-regenerates Terraform reference documentation when variables change.",
+      "summary": "The `packages/website/src/content/docs/main/modules/authentik_core_resources/reference.mdx` file was auto-updated by the `Generate Terraform Reference` hook to document the new `recovery_session_duration` variable."
+    }
+  ],
+  "problems": [
+    "The Authentik docs show commas as separators in session duration strings (e.g. `hours=1,minutes=2,seconds=3`), but the codebase uses semicolons (e.g. `hours=8;minutes=0;seconds=0`). This discrepancy required additional research to confirm that the semicolon format is correct, and is not documented anywhere in the local codebase or module. A comment in `vars.tf` explaining the accepted format and pointing to the upstream source would prevent future confusion.",
+    "The `days=` unit is supported by Authentik for session duration, but this is not mentioned in any local variable description or documentation. The agent had to look it up via external research. The variable description in `vars.tf` should document the supported units and format.",
+    "Browser cookie limits (Safari ~7 days, Chrome 400 days) impose a practical ceiling on usable session durations, but this constraint is not documented anywhere in the module. A user setting a 30-day session would get silently broken behaviour on Safari without any warning. This should be documented as a known limitation in the variable description or module README."
+  ],
+  "session_id": "d1b99a8c-b512-4846-9801-cf365307e5cb",
+  "timestamp": "2026-04-15T16:42:35.324Z"
+}

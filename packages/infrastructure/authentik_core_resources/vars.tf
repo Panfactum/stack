@@ -1,6 +1,12 @@
 variable "session_duration" {
   description = "The session duration for user logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/"
   type        = string
+  default     = "days=30;hours=0;minutes=0;seconds=0"
+}
+
+variable "recovery_session_duration" {
+  description = "The session duration for recovery flow logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/"
+  type        = string
   default     = "hours=8;minutes=0;seconds=0"
 }
 
