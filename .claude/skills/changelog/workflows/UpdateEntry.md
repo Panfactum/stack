@@ -41,6 +41,18 @@ When a commit hash is provided, the output begins with the full commit message u
 
 Understanding the actual changes (not just which files changed) is critical for writing accurate summaries and choosing the correct change type. Skim all diffs before proceeding.
 
+### 1b. Look Up Relevant Session Logs
+
+Session logs in `.claude/log/` contain developer notes written during the work that produced each commit. Each log file contains `changes[].motivation` (the *why* behind each change) and `changes[].summary` (a description of what was done). These are valuable for writing accurate `description` and `summary` fields in changelog entries.
+
+Run the list-log-entries script from the skill directory. **If a commit hash was provided**, pass it as an argument to scope to that commit's time window; otherwise omit it to scan the full branch range:
+
+```bash
+bun ./scripts/list-log-entries.ts [<hash>]
+```
+
+If the output says "No session log entries found", skip this step and continue.
+
 ### 2. Gather Context
 
 Run the following command from the skill directory (`.claude/skills/changelog/`):
@@ -81,7 +93,7 @@ Analyze the diffs and group them into logical changes. Each logical change becom
 - **Impacts** — Include the `type` and `component` pairs from Step 3, with a brief `summary` per impact.
 - **action_items** — Include whenever the change requires user action (required for `breaking_change`, recommended for any type where users need to do something). Infer the steps from the diff. If the steps are unclear, write your best guess based on what was removed/renamed/changed.
 - **references** — Include whenever the diff or commit message references a GitHub issue, PR, commit, or relevant docs. Applicable to all change types, not just fixes. Use the Exa search tools (`mcp__exa__web_search_exa`, `mcp__exa__get_code_context_exa`) to find relevant GitHub issues, PRs, upstream documentation, or migration guides that provide context for each change. For example, search for the component name + error symptom to find related issues, or search for upstream library changelogs when a dependency version changed. **If a commit hash was provided**, always include an `internal-commit` reference with the commit's subject as the `summary` and the full 40-character commit SHA as the `link`.
-- **description** — Include when the change benefits from more context. Focus on the motivation behind the change, how it benefits the user, and how it aligns with the short-term and long-term project direction. The summary says *what* changed; the description explains *why* and *where this is heading*.
+- **description** — Include when the change benefits from more context. Focus on the motivation behind the change, how it benefits the user, and how it aligns with the short-term and long-term project direction. The summary says *what* changed; the description explains *why* and *where this is heading*. **If session log entries were found in Step 1b**, use their `motivation` fields as the primary source for writing descriptions — they capture the developer's original intent directly.
 
 Omit optional fields entirely when not applicable.
 

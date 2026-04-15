@@ -1,0 +1,23 @@
+{
+  "changes": [
+    {
+      "motivation": "Changelog entries lack developer context (the 'why') because the UpdateEntry workflow had no way to surface session log data recorded during development.",
+      "summary": "Added Step 1b to the UpdateEntry.md workflow instructing the agent to look up `.claude/log/*.json` files committed in the target commit and use their `motivation` fields as the primary source for changelog `description` fields."
+    },
+    {
+      "motivation": "Step 1b needed a concrete, repeatable way to surface session log entries for a commit without manual shell scripting.",
+      "summary": "Created `.claude/skills/changelog/scripts/list-log-entries.ts` — a Bun script that runs `git diff-tree` on the given commit hash, finds any `.claude/log/*.json` files added in that commit, reads them at the correct git ref, and prints all `changes` entries (summary + motivation) to stdout. With no argument it scans all commits since `main`. Output is clean bullet points with no timestamps or counts."
+    },
+    {
+      "motivation": "The workflow's Step 1b previously described a manual git + directory-scan approach; the new script makes it a single command.",
+      "summary": "Updated Step 1b in UpdateEntry.md to call `bun ./scripts/list-log-entries.ts [<hash>]` instead of the manual shell instructions."
+    }
+  ],
+  "problems": [
+    "The agent's initial interpretation of 'log files for a commit' was time-based proximity (±24h window around commit timestamp) rather than 'which log files were committed as part of that commit.' This required two rounds of user correction. The correct approach — using `git diff-tree` to find files added in the commit — was not considered until the user said 'I want log entries that were added in the commit hash provided.' Better naming or a README note explaining that `.claude/log/` files are committed alongside code changes as part of the workflow would have prevented this misunderstanding.",
+    "The content-based filtering approach (matching changed source files against log entry text) produced false positives (the token `log` matched `logoWhite`). This entire approach was unnecessary complexity that arose from the wrong initial assumption. It was only added and then discarded, wasting effort.",
+    "The script output initially included per-file headers with timestamps and a total change count, which the user did not want. The output format should have matched the minimal style of existing scripts in the same directory (`list-commits-since-release.ts`, `list-summary-inputs.ts`) before presenting it to the user."
+  ],
+  "session_id": "05bd29f7-ba46-44bd-b5b1-8af088d8388d",
+  "timestamp": "2026-04-15T22:10:30.972Z"
+}
