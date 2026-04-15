@@ -12,3 +12,8 @@ output "spot_data_feed_bucket_region" {
   description = "The region of the bucket for the spot data feed"
   value       = data.aws_region.current.region
 }
+
+output "quota_notification_configuration_arn" {
+  description = "The ARN of the AWS User Notifications configuration for quota alerts"
+  value       = local.quota_notifications_enabled ? aws_notifications_notification_configuration.quotas[0].arn : null
+}

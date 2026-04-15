@@ -6,7 +6,7 @@ terraform {
     }
     aws = {
       source                = "hashicorp/aws"
-      version               = "6.38.0"
+      version               = "6.40.0"
       configuration_aliases = [aws.global]
     }
     pf = {

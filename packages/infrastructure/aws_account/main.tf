@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.38.0"
+      version = "6.40.0"
     }
     pf = {
       source  = "panfactum/pf"
@@ -156,6 +156,63 @@ resource "aws_servicequotas_service_quota" "ec2_spot_vcpu_quota" {
   quota_code   = "L-34B43A08"
   service_code = "ec2"
   value        = local.ec2_spot_vcpu_quota_desired
+}
+
+###########################################################################
+## Service Quotas Automatic Management
+## Opts the account into AWS's proactive quota monitoring and (optionally)
+## automatic quota-increase requests. When operations_contact is set,
+## quota threshold events are routed to email via AWS User Notifications.
+###########################################################################
+
+locals {
+  quota_auto_management_enabled = var.quota_auto_management_opt_in_type != "Disabled"
+  quota_notifications_enabled   = local.quota_auto_management_enabled && var.operations_contact != null
+}
+
+resource "aws_servicequotas_auto_management" "main" {
+  for_each         = local.quota_auto_management_enabled ? toset(var.quota_auto_management_regions) : toset([])
+  opt_in_level     = "ACCOUNT"
+  opt_in_type      = var.quota_auto_management_opt_in_type
+  region           = each.value
+  notification_arn = local.quota_notifications_enabled ? aws_notifications_notification_configuration.quotas[0].arn : null
+  exclusion_list   = length(var.quota_auto_management_exclusion_list) > 0 ? var.quota_auto_management_exclusion_list : null
+}
+
+resource "aws_notifications_notification_hub" "quotas" {
+  count                   = local.quota_notifications_enabled ? 1 : 0
+  notification_hub_region = data.aws_region.current.name
+}
+
+resource "aws_notifications_notification_configuration" "quotas" {
+  count                = local.quota_notifications_enabled ? 1 : 0
+  name                 = "pf-quota-notifications"
+  description          = "Panfactum service quota notifications"
+  aggregation_duration = "NONE"
+  tags                 = data.pf_aws_tags.tags.tags
+
+  depends_on = [aws_notifications_notification_hub.quotas]
+}
+
+resource "aws_notificationscontacts_email_contact" "quota_ops" {
+  count         = local.quota_notifications_enabled ? 1 : 0
+  email_address = var.operations_contact.email_address
+  name          = "quota-ops"
+  tags          = data.pf_aws_tags.tags.tags
+}
+
+resource "aws_notifications_event_rule" "quotas" {
+  count                          = local.quota_notifications_enabled ? 1 : 0
+  notification_configuration_arn = aws_notifications_notification_configuration.quotas[0].arn
+  event_type                     = "AWS_SERVICEQUOTAS_APPROACHING_THRESHOLD"
+  source                         = "aws.health"
+  regions                        = toset(var.quota_auto_management_regions)
+}
+
+resource "aws_notifications_channel_association" "quota_email" {
+  count                          = local.quota_notifications_enabled ? 1 : 0
+  notification_configuration_arn = aws_notifications_notification_configuration.quotas[0].arn
+  arn                            = aws_notificationscontacts_email_contact.quota_ops[0].arn
 }
 
 ###########################################################################

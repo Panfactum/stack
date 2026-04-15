@@ -73,3 +73,44 @@ variable "billing_contact" {
     error_message = "The phone number must be in the format +[country dialing code] [area code]-[exchange-code]-[local-code], e.g., +1 555-555-5555"
   }
 }
+
+variable "quota_auto_management_opt_in_type" {
+  type        = string
+  description = "Opt-in type for AWS Service Quotas Automatic Management. NotifyAndAdjust enables proactive quota increases. NotifyOnly sends alerts only. Disabled turns off auto-management entirely."
+  default     = "NotifyAndAdjust"
+
+  validation {
+    condition     = contains(["NotifyOnly", "NotifyAndAdjust", "Disabled"], var.quota_auto_management_opt_in_type)
+    error_message = "Must be one of: NotifyOnly, NotifyAndAdjust, Disabled"
+  }
+}
+
+variable "quota_auto_management_regions" {
+  type        = list(string)
+  description = "AWS regions in which to enable Service Quotas Automatic Management"
+  default = [
+    "us-east-1",
+    "us-east-2",
+    "us-west-1",
+    "us-west-2",
+    "ap-northeast-1",
+    "ap-northeast-2",
+    "ap-northeast-3",
+    "ap-south-1",
+    "ap-southeast-1",
+    "ap-southeast-2",
+    "ca-central-1",
+    "eu-central-1",
+    "eu-north-1",
+    "eu-west-1",
+    "eu-west-2",
+    "eu-west-3",
+    "sa-east-1",
+  ]
+}
+
+variable "quota_auto_management_exclusion_list" {
+  type        = map(list(string))
+  description = "Map of service codes to lists of quota codes to exclude from automatic management"
+  default     = {}
+}
