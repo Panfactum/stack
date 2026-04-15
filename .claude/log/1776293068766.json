@@ -1,0 +1,36 @@
+{
+  "changes": [
+    {
+      "motivation": "PgBouncer rejects connections that send search_path as a startup parameter unless ignore_startup_parameters is configured. This blocks per-schema role support where clients set search_path at connection time.",
+      "summary": "Added pgbouncer_ignore_startup_parameters variable (list(string), default [\"search_path\"]) to kube_pg_cluster. Wired into Pooler CRD parameters block, joining the list with \", \" to produce PgBouncer's comma-separated format; null when empty to be excluded by the existing null-filter."
+    },
+    {
+      "motivation": "CNPG's postInitApplicationSQL only runs at cluster bootstrap, not on subsequent applies, so new schemas added after initial setup were never created.",
+      "summary": "Added a kube_job module call (schema_init_job) that runs idempotent SQL on every terraform apply. The Job creates schemas (IF NOT EXISTS), creates per-schema base roles (reader_<schema>, writer_<schema>) via DO blocks, grants appropriate privileges, and re-applies global reader/writer grants across all schemas. Uses the CNPG PostgreSQL image, superuser credentials from Kubernetes Secret env vars, and a hash of extra_schemas in the Job name to force re-creation when the schema list changes."
+    },
+    {
+      "motivation": "PgBouncer cannot set search_path per-connection, so the search_path must be baked into each database role via ALTER ROLE SET. This requires discrete Vault-managed roles per schema rather than global roles.",
+      "summary": "Added vault_database_secret_backend_role resources (schema_reader, schema_admin, schema_superuser) with for_each over extra_schemas. Each role's creation_statements include ALTER ROLE SET search_path = <schema>, public. Added kubectl_manifest.vault_secrets_schema for VaultDynamicSecret CRDs per tier+schema, updated vault allowed_roles and policy document with dynamic rules, and added six per-schema outputs (creds secret names and role names, keyed by schema)."
+    },
+    {
+      "motivation": "The test_kube_pg_cluster module needed to expose the new extra_schemas variable to allow testing the new schema support in a real deployment.",
+      "summary": "Added extra_schemas variable (list(string), default []) to test_kube_pg_cluster vars.tf and passed it through to the inner kube_pg_cluster module call."
+    },
+    {
+      "motivation": "User requested a live test deployment in production/us-east-2 to validate the new features end-to-end.",
+      "summary": "Updated environments/production/us-east-2/test_kube_pg_cluster/terragrunt.hcl: removed skip = true and set inputs = { extra_schemas = [\"test_schema\"] } to exercise all three new features."
+    },
+    {
+      "motivation": "The terse psql output (showing only command tags like CREATE SCHEMA, DO, GRANT) made it impossible to tell which SQL statements were executing or why a failure occurred.",
+      "summary": "Added -e flag to the psql command in the schema_init_sql_command local, causing psql to echo each SQL statement to stdout before executing it for full visibility into Job execution."
+    }
+  ],
+  "problems": [
+    "Terraform does not support dynamically constructing resource type references via string interpolation (e.g., vault_database_secret_backend_role[\"schema_${tier}\"]). This is not documented as a restriction in the Vault provider or Terraform docs and was only discovered at plan/apply time. The fix requires three separate static for expressions instead of a single dynamic one.",
+    "HCL template strings use $$ as an escape for a literal $, so PostgreSQL dollar-quoting (DO $$ ... END $$) requires $$$$ in HCL to produce $$ in the rendered string. This escaping rule is easy to miss and produces a subtle SQL syntax error (DO $ BEGIN) that only manifests at runtime in the Job container, not during terraform validate or plan.",
+    "PostgreSQL schema names allow underscores, but Kubernetes resource names must comply with RFC 1123 (no underscores). Using schema names directly in kubectl_manifest metadata.name and VaultDynamicSecret destination.name fields causes a Kubernetes API validation error at apply time. The mismatch between PostgreSQL identifier rules and Kubernetes naming rules is not surfaced until apply and requires replace(schema, \"_\", \"-\") in all Kubernetes-facing name fields.",
+    "The kube_job module requires pull_through_cache_enabled and vpa_enabled to be explicitly passed; it does not have defaults that match the parent module's behavior. These were omitted in the initial implementation, causing the Job to use incorrect image pull and VPA settings. The kube_job module interface does not make these required variables obvious without reading vars.tf."
+  ],
+  "session_id": "35f21b62-302c-4a59-81c4-2abc14af2ece",
+  "timestamp": "2026-04-15T22:45:13.998Z"
+}

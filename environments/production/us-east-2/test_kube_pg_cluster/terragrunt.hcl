@@ -1,3 +1,8 @@
+exclude {
+  if      = true
+  actions = ["all"]
+}
+
 include "panfactum" {
   path   = find_in_parent_folders("panfactum.hcl")
   expose = true
@@ -12,6 +17,6 @@ dependency "cnpg" {
   skip_outputs = true
 }
 
-inputs = {}
-
-skip = true
+inputs = {
+  extra_schemas = ["test_schema"]
+}

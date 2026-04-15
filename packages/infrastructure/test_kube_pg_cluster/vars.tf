@@ -73,3 +73,9 @@ variable "pgbouncer_pool_mode" {
     error_message = "pool_mode must be one of: session, transaction, or statement"
   }
 }
+
+variable "extra_schemas" {
+  description = "Extra schemas to create in the app database"
+  type        = list(string)
+  default     = []
+}

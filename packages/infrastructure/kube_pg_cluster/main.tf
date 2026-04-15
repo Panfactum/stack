@@ -53,6 +53,47 @@ locals {
     "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
     "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
   }
+
+  schema_init_sql = join("\n", flatten([
+    // Create schemas
+    [for schema in var.extra_schemas : "CREATE SCHEMA IF NOT EXISTS ${schema};"],
+
+    // Create per-schema base roles
+    [for schema in var.extra_schemas : [
+      "DO $$$$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'reader_${schema}') THEN CREATE ROLE reader_${schema} NOINHERIT; END IF; END $$$$;",
+      "DO $$$$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'writer_${schema}') THEN CREATE ROLE writer_${schema} NOINHERIT; END IF; END $$$$;",
+    ]],
+
+    // Grant per-schema permissions to per-schema base roles
+    [for schema in var.extra_schemas : [
+      "GRANT USAGE ON SCHEMA ${schema} TO reader_${schema};",
+      "GRANT SELECT ON ALL TABLES IN SCHEMA ${schema} TO reader_${schema};",
+      "GRANT SELECT ON ALL SEQUENCES IN SCHEMA ${schema} TO reader_${schema};",
+      "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA ${schema} TO reader_${schema};",
+
+      "GRANT USAGE ON SCHEMA ${schema} TO writer_${schema};",
+      "GRANT CREATE ON SCHEMA ${schema} TO writer_${schema};",
+      "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ${schema} TO writer_${schema};",
+      "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA ${schema} TO writer_${schema};",
+      "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA ${schema} TO writer_${schema};",
+    ]],
+
+    // Refresh global role grants for all schemas (including new ones)
+    [for schema in local.all_schemas : [
+      "GRANT USAGE ON SCHEMA ${schema} TO reader;",
+      "GRANT SELECT ON ALL TABLES IN SCHEMA ${schema} TO reader;",
+      "GRANT SELECT ON ALL SEQUENCES IN SCHEMA ${schema} TO reader;",
+      "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA ${schema} TO reader;",
+
+      "GRANT USAGE ON SCHEMA ${schema} TO writer;",
+      "GRANT CREATE ON SCHEMA ${schema} TO writer;",
+      "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ${schema} TO writer;",
+      "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA ${schema} TO writer;",
+      "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA ${schema} TO writer;",
+    ]],
+  ]))
+
+  schema_init_sql_command = "psql -v ON_ERROR_STOP=1 -e <<'EOSQL'\n${local.schema_init_sql}\nEOSQL"
 }
 
 data "pf_kube_labels" "labels" {
@@ -1049,14 +1090,136 @@ resource "vault_database_secret_backend_role" "superuser" {
   max_ttl     = 60 * 60 * var.vault_credential_lifetime_hours
 }
 
+/***************************************
+* Per-Schema Vault Roles
+***************************************/
+
+resource "vault_database_secret_backend_role" "schema_reader" {
+  for_each = toset(var.extra_schemas)
+  backend  = "db"
+  name     = "reader-${var.pg_cluster_namespace}-${local.cluster_name}-${each.key}"
+  db_name  = vault_database_secret_backend_connection.postgres.name
+  creation_statements = flatten([
+    // Re-run grants to pick up new objects
+    "GRANT USAGE ON SCHEMA ${each.key} TO reader_${each.key};",
+    "GRANT SELECT ON ALL TABLES IN SCHEMA ${each.key} TO reader_${each.key};",
+    "GRANT SELECT ON ALL SEQUENCES IN SCHEMA ${each.key} TO reader_${each.key};",
+    "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA ${each.key} TO reader_${each.key};",
+
+    // Also grant on public schema for search_path access
+    "GRANT USAGE ON SCHEMA public TO reader_${each.key};",
+    "GRANT SELECT ON ALL TABLES IN SCHEMA public TO reader_${each.key};",
+    "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO reader_${each.key};",
+    "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO reader_${each.key};",
+
+    // Create dynamic role
+    "CREATE ROLE \"{{name}}\" LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
+    "GRANT reader_${each.key} TO \"{{name}}\";",
+    "ALTER ROLE \"{{name}}\" SET search_path = ${each.key}, public;"
+  ])
+  renew_statements = [
+    "ALTER ROLE \"{{name}}\" VALID UNTIL '{{expiration}}'"
+  ]
+  revocation_statements = [
+    "REASSIGN OWNED BY \"{{name}}\" TO postgres",
+    "DROP OWNED BY \"{{name}}\";",
+    "DROP ROLE IF EXISTS \"{{name}}\""
+  ]
+  default_ttl = 60 * 60 * var.vault_credential_lifetime_hours
+  max_ttl     = 60 * 60 * var.vault_credential_lifetime_hours
+}
+
+resource "vault_database_secret_backend_role" "schema_admin" {
+  for_each = toset(var.extra_schemas)
+  backend  = "db"
+  name     = "admin-${var.pg_cluster_namespace}-${local.cluster_name}-${each.key}"
+  db_name  = vault_database_secret_backend_connection.postgres.name
+  creation_statements = flatten([
+    // Re-run grants for writer base role
+    "GRANT USAGE ON SCHEMA ${each.key} TO writer_${each.key};",
+    "GRANT CREATE ON SCHEMA ${each.key} TO writer_${each.key};",
+    "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ${each.key} TO writer_${each.key};",
+    "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA ${each.key} TO writer_${each.key};",
+    "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA ${each.key} TO writer_${each.key};",
+
+    // Also grant on public schema for search_path access
+    "GRANT USAGE ON SCHEMA public TO writer_${each.key};",
+    "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO writer_${each.key};",
+    "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO writer_${each.key};",
+    "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO writer_${each.key};",
+
+    // Create dynamic role
+    "CREATE ROLE \"{{name}}\" LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
+    "GRANT writer_${each.key} TO \"{{name}}\";",
+    "ALTER ROLE \"{{name}}\" SET search_path = ${each.key}, public;",
+
+    // Default privileges for objects created by this role
+    [for schema in [each.key, "public"] : [
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TABLES TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON SEQUENCES TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON FUNCTIONS TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TYPES TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON TABLES TO reader_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON SEQUENCES TO reader_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT EXECUTE ON FUNCTIONS TO reader_${each.key};",
+    ]],
+  ])
+  renew_statements = [
+    "ALTER ROLE \"{{name}}\" VALID UNTIL '{{expiration}}'"
+  ]
+  revocation_statements = [
+    "REASSIGN OWNED BY \"{{name}}\" TO postgres",
+    "DROP OWNED BY \"{{name}}\";",
+    "DROP ROLE IF EXISTS \"{{name}}\""
+  ]
+  default_ttl = 60 * 60 * var.vault_credential_lifetime_hours
+  max_ttl     = 60 * 60 * var.vault_credential_lifetime_hours
+}
+
+resource "vault_database_secret_backend_role" "schema_superuser" {
+  for_each = toset(var.extra_schemas)
+  backend  = "db"
+  name     = "superuser-${var.pg_cluster_namespace}-${local.cluster_name}-${each.key}"
+  db_name  = vault_database_secret_backend_connection.postgres.name
+  creation_statements = flatten([
+    "CREATE ROLE \"{{name}}\" SUPERUSER LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
+    "ALTER ROLE \"{{name}}\" SET search_path = ${each.key}, public;",
+
+    [for schema in [each.key, "public"] : [
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TABLES TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON SEQUENCES TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON FUNCTIONS TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TYPES TO writer_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON TABLES TO reader_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON SEQUENCES TO reader_${each.key};",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT EXECUTE ON FUNCTIONS TO reader_${each.key};",
+    ]],
+  ])
+  renew_statements = [
+    "ALTER ROLE \"{{name}}\" VALID UNTIL '{{expiration}}'"
+  ]
+  revocation_statements = [
+    "REASSIGN OWNED BY \"{{name}}\" TO postgres",
+    "DROP OWNED BY \"{{name}}\";",
+    "DROP ROLE IF EXISTS \"{{name}}\""
+  ]
+  default_ttl = 60 * 60 * var.vault_credential_lifetime_hours
+  max_ttl     = 60 * 60 * var.vault_credential_lifetime_hours
+}
+
 resource "vault_database_secret_backend_connection" "postgres" {
   backend = "db"
   name    = "${var.pg_cluster_namespace}-${local.cluster_name}"
-  allowed_roles = [
+  allowed_roles = flatten([
     "superuser-${var.pg_cluster_namespace}-${local.cluster_name}",
     "reader-${var.pg_cluster_namespace}-${local.cluster_name}",
-    "admin-${var.pg_cluster_namespace}-${local.cluster_name}"
-  ]
+    "admin-${var.pg_cluster_namespace}-${local.cluster_name}",
+    [for schema in var.extra_schemas : [
+      "reader-${var.pg_cluster_namespace}-${local.cluster_name}-${schema}",
+      "admin-${var.pg_cluster_namespace}-${local.cluster_name}-${schema}",
+      "superuser-${var.pg_cluster_namespace}-${local.cluster_name}-${schema}",
+    ]],
+  ])
 
   postgresql {
     connection_url = "postgres://postgres:${random_password.superuser_password.result}@${local.cluster_name}-rw.${var.pg_cluster_namespace}:5432/app"
@@ -1086,6 +1249,33 @@ data "vault_policy_document" "vault_secrets" {
     path         = "db/creds/${vault_database_secret_backend_role.superuser.name}"
     capabilities = ["read", "list"]
     description  = "Allows getting superuser database credentials"
+  }
+
+  dynamic "rule" {
+    for_each = var.extra_schemas
+    content {
+      path         = "db/creds/${vault_database_secret_backend_role.schema_reader[rule.value].name}"
+      capabilities = ["read", "list"]
+      description  = "Allows getting read-only database credentials for schema ${rule.value}"
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.extra_schemas
+    content {
+      path         = "db/creds/${vault_database_secret_backend_role.schema_admin[rule.value].name}"
+      capabilities = ["read", "list"]
+      description  = "Allows getting admin database credentials for schema ${rule.value}"
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.extra_schemas
+    content {
+      path         = "db/creds/${vault_database_secret_backend_role.schema_superuser[rule.value].name}"
+      capabilities = ["read", "list"]
+      description  = "Allows getting superuser database credentials for schema ${rule.value}"
+    }
   }
 }
 
@@ -1162,6 +1352,48 @@ resource "kubectl_manifest" "vault_secrets" {
       destination = {
         create = true
         name   = "${local.cluster_name}-${each.key}-creds"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.vault_auth]
+}
+
+resource "kubectl_manifest" "vault_secrets_schema" {
+  for_each = merge(
+    { for schema in var.extra_schemas : "reader-${schema}" => {
+      role_name = vault_database_secret_backend_role.schema_reader[schema].name
+      tier      = "reader"
+      schema    = schema
+    } },
+    { for schema in var.extra_schemas : "admin-${schema}" => {
+      role_name = vault_database_secret_backend_role.schema_admin[schema].name
+      tier      = "admin"
+      schema    = schema
+    } },
+    { for schema in var.extra_schemas : "superuser-${schema}" => {
+      role_name = vault_database_secret_backend_role.schema_superuser[schema].name
+      tier      = "superuser"
+      schema    = schema
+    } },
+  )
+  yaml_body = yamlencode({
+    apiVersion = "secrets.hashicorp.com/v1beta1"
+    kind       = "VaultDynamicSecret"
+    metadata = {
+      name      = "${local.cluster_name}-${each.value.tier}-${replace(each.value.schema, "_", "-")}-creds"
+      namespace = var.pg_cluster_namespace
+      labels    = module.util_cluster.labels
+    }
+    spec = {
+      vaultAuthRef   = local.cluster_name
+      mount          = "db"
+      path           = "creds/${each.value.role_name}"
+      renewalPercent = 50
+      destination = {
+        create = true
+        name   = "${local.cluster_name}-${each.value.tier}-${replace(each.value.schema, "_", "-")}-creds"
       }
     }
   })
@@ -1247,6 +1479,7 @@ resource "kubectl_manifest" "connection_pooler" {
           tcp_keepintvl             = var.pgbouncer_tcp_keepintvl == null ? null : tostring(var.pgbouncer_tcp_keepintvl)
           tcp_user_timeout          = tostring(var.pgbouncer_tcp_user_timeout ? 1 : 0)
           verbose                   = tostring(var.pgbouncer_verbose)
+          ignore_startup_parameters = length(var.pgbouncer_ignore_startup_parameters) > 0 ? join(", ", var.pgbouncer_ignore_startup_parameters) : null
         } : k => v if v != null }
       }
       monitoring = {
@@ -1535,5 +1768,55 @@ resource "kubectl_manifest" "pdb" {
     "metadata.annotations.panfactum.com/voluntary-disruption-window-start",
     "spec.maxUnavailable"
   ]
+}
+
+/***************************************
+* Schema Initialization Job
+***************************************/
+
+module "schema_init_job" {
+  count  = length(var.extra_schemas) > 0 ? 1 : 0
+  source = "../kube_job"
+
+  namespace = var.pg_cluster_namespace
+  name      = "pg-schema-init-${local.cluster_name}-${substr(sha256(join(",", var.extra_schemas)), 0, 8)}"
+
+  common_env = {
+    PGHOST     = "${local.cluster_name}-rw.${var.pg_cluster_namespace}"
+    PGPORT     = "5432"
+    PGDATABASE = "app"
+  }
+
+  common_env_from_secrets = {
+    PGUSER = {
+      secret_name = kubernetes_secret.superuser.metadata[0].name
+      key         = "username"
+    }
+    PGPASSWORD = {
+      secret_name = kubernetes_secret.superuser.metadata[0].name
+      key         = "password"
+    }
+  }
+
+  containers = [
+    {
+      name             = "schema-init"
+      image_registry   = var.pg_custom_image != null ? regex("^([^/]+)/.*", var.pg_custom_image)[0] : module.pull_through.github_registry
+      image_repository = var.pg_custom_image != null ? regex("^[^/]+/(.*):.*$", var.pg_custom_image)[0] : "cloudnative-pg/postgresql"
+      image_tag        = var.pg_custom_image != null ? regex("^.*:(.*)$", var.pg_custom_image)[0] : var.pg_version
+      command          = ["/bin/sh", "-c", local.schema_init_sql_command]
+      minimum_memory   = 50
+      minimum_cpu      = 10
+    }
+  ]
+
+  burstable_nodes_enabled    = true
+  spot_nodes_enabled         = true
+  arm_nodes_enabled          = true
+  pull_through_cache_enabled = var.pull_through_cache_enabled
+  vpa_enabled                = var.vpa_enabled
+  wait_for_success           = true
+
+  depends_on = [kubernetes_manifest.postgres_cluster]
 }
 

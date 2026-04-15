@@ -47,4 +47,5 @@ module "database" {
   instance_type_anti_affinity_required = false
   burstable_nodes_enabled              = true
   pgbouncer_pool_mode                  = "transaction"
+  extra_schemas                        = var.extra_schemas
 }

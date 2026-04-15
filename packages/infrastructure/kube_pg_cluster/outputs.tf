@@ -149,3 +149,33 @@ output "backup_directory" {
   value       = var.pg_backup_directory
 }
 
+output "db_schema_reader_roles" {
+  description = "Map of schema name to Vault role name for per-schema read-only credentials"
+  value       = { for schema in var.extra_schemas : schema => vault_database_secret_backend_role.schema_reader[schema].name }
+}
+
+output "db_schema_admin_roles" {
+  description = "Map of schema name to Vault role name for per-schema admin credentials"
+  value       = { for schema in var.extra_schemas : schema => vault_database_secret_backend_role.schema_admin[schema].name }
+}
+
+output "db_schema_superuser_roles" {
+  description = "Map of schema name to Vault role name for per-schema superuser credentials"
+  value       = { for schema in var.extra_schemas : schema => vault_database_secret_backend_role.schema_superuser[schema].name }
+}
+
+output "schema_reader_creds_secrets" {
+  description = "Map of schema name to the Kubernetes Secret name holding per-schema reader credentials"
+  value       = { for schema in var.extra_schemas : schema => "${local.cluster_name}-reader-${replace(schema, "_", "-")}-creds" }
+}
+
+output "schema_admin_creds_secrets" {
+  description = "Map of schema name to the Kubernetes Secret name holding per-schema admin credentials"
+  value       = { for schema in var.extra_schemas : schema => "${local.cluster_name}-admin-${replace(schema, "_", "-")}-creds" }
+}
+
+output "schema_superuser_creds_secrets" {
+  description = "Map of schema name to the Kubernetes Secret name holding per-schema superuser credentials"
+  value       = { for schema in var.extra_schemas : schema => "${local.cluster_name}-superuser-${replace(schema, "_", "-")}-creds" }
+}
+

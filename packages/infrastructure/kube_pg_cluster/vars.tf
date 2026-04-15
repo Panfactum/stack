@@ -476,6 +476,12 @@ variable "pgbouncer_read_write_enabled" {
   default     = true
 }
 
+variable "pgbouncer_ignore_startup_parameters" {
+  description = "A list of startup parameters that PgBouncer should ignore when sent by clients. Useful when clients (e.g., JDBC drivers) send parameters like search_path that PgBouncer does not support."
+  type        = list(string)
+  default     = ["search_path"]
+}
+
 variable "monitoring_enabled" {
   description = "Whether to add active monitoring to the deployed systems"
   type        = bool
