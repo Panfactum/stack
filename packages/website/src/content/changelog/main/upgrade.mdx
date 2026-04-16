@@ -1,0 +1,90 @@
+{/* Upgrade instructions for the next unreleased main release. */}
+
+{/* Covers: aws_organization AWS provider v6 upgrade, SERVICE_CONTROL_POLICY and TAG_POLICY enablement, expanded trusted service access principals. */}
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+
+{/* TODO: Replace with pf CLI command once implemented */}
+## Upgrade `aws_organization` to AWS Provider v6
+
+The [`aws_organization`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) module now pins the
+`hashicorp/aws` provider to v6 (from 5.x). This is a major provider version bump. In addition to the provider upgrade,
+`SERVICE_CONTROL_POLICY` and `TAG_POLICY` are now enabled by default, and trusted access is enabled for a
+significantly broader set of AWS governance services.
+
+<MarkdownAlert severity="warning">
+  Run `terraform init -upgrade` **before** running `terraform plan` or `terraform apply` in your management environment.
+  Applying without reinitializing will fail because the lock file still references the old 5.x provider version.
+</MarkdownAlert>
+
+### 1. Review the AWS Provider v6 Upgrade Guide
+
+Before proceeding, read the
+[AWS Provider v6 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-6-upgrade)
+to understand all breaking changes from 5.x. Key removals include OpsWorks, SimpleDB, and WorkLink resources, along
+with changes to nullable boolean validation. Confirm your management environment does not use any removed resources or
+arguments.
+
+### 2. Update Provider Lock Files
+
+In each management environment module directory that uses `aws_organization` (and any other module that transitively
+pins `hashicorp/aws`), run:
+
+```bash
+terraform init -upgrade
+```
+
+This regenerates the `.terraform.lock.hcl` file with the new v6 provider hash. Commit the updated lock files.
+
+### 3. Review the Plan for `aws_organization`
+
+Run a plan on the `aws_organization` module and carefully review the diff:
+
+```bash
+cd <management-environment>/aws_organization
+terragrunt plan
+```
+
+Expect the following new resources and changes:
+
+- **`SERVICE_CONTROL_POLICY`** and **`TAG_POLICY`** added to `enabled_policy_types` on `aws_organizations_organization`
+- **`aws_notifications_organizations_access`** resource created (enables AWS User Notifications trusted access)
+- A significantly expanded list of `aws_service_access_principals` (GuardDuty, Security Hub, AWS Backup, Inspector,
+  CloudTrail, Access Analyzer, Audit Manager, IPAM, License Manager, Network Manager, and others)
+
+These changes are expected. If any of them are unwanted for your organization, proceed to the next step before applying.
+
+### 4. Opt Out of Unwanted Defaults (If Needed)
+
+If any of the newly-enabled policy types or service access principals are not desired, use the new opt-out variables
+**before** running `terraform apply`:
+
+```hcl
+inputs = {
+  # Disable specific policy types if not needed
+  disabled_enabled_policy_types = ["SERVICE_CONTROL_POLICY", "TAG_POLICY"]
+
+  # Disable specific service access principals if not needed
+  disabled_aws_service_access_principals = [
+    "guardduty.amazonaws.com",
+    "securityhub.amazonaws.com",
+    # ... add others as needed
+  ]
+
+  # Disable AWS User Notifications trusted access if not desired
+  enable_notifications_access = false
+
+  # ... other existing inputs
+}
+```
+
+See the [module reference](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) for the full
+list of opt-out variables.
+
+### 5. Apply `aws_organization`
+
+Once satisfied with the plan, apply the module:
+
+```bash
+terragrunt apply
+```
