@@ -42,7 +42,7 @@ resource "random_id" "id" {
 locals {
   name            = random_id.id.hex
   namespace       = module.namespace.namespace
-  db_connect_addr = "${split(".", module.database.rw_service_name)[0]}.${local.namespace}.svc.cluster.local:${module.database.rw_service_port}"
+  db_connect_addr = "${split(".", module.database.pooler_rw_service_name)[0]}.${local.namespace}.svc.cluster.local:${module.database.pooler_rw_service_port}"
   frontend_addr   = "temporal-frontend.${local.namespace}.svc.cluster.local:7233"
 }
 
@@ -93,16 +93,13 @@ resource "kubernetes_config_map_v1" "temporal_config_template" {
               databaseName    = "app"
               connectAddr     = local.db_connect_addr
               connectProtocol = "tcp"
-              user            = "@DB_USER@"
-              password        = "@DB_PASSWORD@"
-              maxConns        = 20
-              maxIdleConns    = 20
-              maxConnLifetime = "1h"
+              user            = "@DB_USER_DEFAULT@"
+              password        = "@DB_PASSWORD_DEFAULT@"
+              maxConns        = 0
+              maxIdleConns    = 0
+              maxConnLifetime = "60s"
               tls = {
                 enabled = false
-              }
-              connectAttributes = {
-                search_path = "temporal"
               }
             }
           }
@@ -112,16 +109,13 @@ resource "kubernetes_config_map_v1" "temporal_config_template" {
               databaseName    = "app"
               connectAddr     = local.db_connect_addr
               connectProtocol = "tcp"
-              user            = "@DB_USER@"
-              password        = "@DB_PASSWORD@"
-              maxConns        = 10
-              maxIdleConns    = 10
-              maxConnLifetime = "1h"
+              user            = "@DB_USER_VISIBILITY@"
+              password        = "@DB_PASSWORD_VISIBILITY@"
+              maxConns        = 0
+              maxIdleConns    = 0
+              maxConnLifetime = "60s"
               tls = {
                 enabled = false
-              }
-              connectAttributes = {
-                search_path = "temporal_visibility"
               }
             }
           }
@@ -218,15 +212,15 @@ resource "kubernetes_config_map_v1" "temporal_dynamic_config" {
   data = {
     "dynamic_config.yaml" = yamlencode({
       "frontend.rps" = [{
-        value       = 2400
+        value       = var.frontend_rps
         constraints = {}
       }]
       "limit.maxIDLength" = [{
-        value       = 255
+        value       = var.max_id_length
         constraints = {}
       }]
       "system.forceSearchAttributesCacheRefreshOnRead" = [{
-        value       = true
+        value       = var.force_search_attributes_cache_refresh_on_read
         constraints = {}
       }]
     })

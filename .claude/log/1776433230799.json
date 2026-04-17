@@ -1,0 +1,43 @@
+{
+  "changes": [
+    {
+      "motivation": "Route Temporal's DB connections through PgBouncer for connection pooling, using per-schema credentials so search_path can be set at the role level (required for transaction pooling compatibility).",
+      "summary": "Updated `main.tf` to point `db_connect_addr` at the PgBouncer pooler service (`pooler_rw_service_name`/`pooler_rw_service_port`) instead of the direct Postgres RW service. Replaced the single global DB user/password placeholder in the config template with four per-schema placeholders (`@DB_USER_DEFAULT@`, `@DB_PASSWORD_DEFAULT@`, `@DB_USER_VISIBILITY@`, `@DB_PASSWORD_VISIBILITY@`) and removed the `connectAttributes.search_path` blocks from both datastores."
+    },
+    {
+      "motivation": "Per-schema credentials must be injected as separate env vars into each Temporal server pod, and image tags should be driven by a configurable variable rather than hardcoded.",
+      "summary": "Updated all 4 server deployments in `server.tf` (frontend, history, matching, worker) to inject `DB_USER_DEFAULT`, `DB_PASSWORD_DEFAULT`, `DB_USER_VISIBILITY`, `DB_PASSWORD_VISIBILITY` from `module.database.schema_superuser_creds_secrets[\"temporal\"]` and `schema_superuser_creds_secrets[\"temporal_visibility\"]`. All `temporalio/server` and `temporalio/admin-tools` image tags now use `var.temporal_version`."
+    },
+    {
+      "motivation": "PgBouncer session mode must be set explicitly on the cluster, and the schema-level init job must connect directly (bypassing PgBouncer) to run DDL.",
+      "summary": "Added `pgbouncer_pool_mode = \"session\"` to `module \"database\"` in `database.tf`. Added a `module \"schema_init\"` block that connects via the direct RW service (not the pooler) using superuser credentials to run `temporal-sql-tool` migrations for both schemas."
+    },
+    {
+      "motivation": "The `kube_pg_cluster` schema init handles creating schemas and roles, but not Temporal's versioned DDL migrations (`temporal-sql-tool setup-schema` / `update-schema`). Those must still run before Temporal servers start.",
+      "summary": "Restored `scripts/schema-init.sh` trimmed to only the `temporal-sql-tool` migration commands (removed the now-redundant `CREATE SCHEMA IF NOT EXISTS` lines). Restored `schema-init.sh` in the scripts ConfigMap in `main.tf`. Kept `depends_on = [module.schema_init]` on all 4 server deployments in `server.tf`."
+    },
+    {
+      "motivation": "Dynamic config values and the Temporal image version were hardcoded; making them variables allows callers to tune without forking the module.",
+      "summary": "Added `temporal_version` (default `\"1.26.2\"`), `frontend_rps` (default `2400`), `max_id_length` (default `255`), and `force_search_attributes_cache_refresh_on_read` (default `true`) to `vars.tf`. Updated dynamic config block in `main.tf` to reference these variables."
+    },
+    {
+      "motivation": "With PgBouncer as the connection governor, artificially capping app-side open connections is counterproductive — client connections to PgBouncer are cheap and PgBouncer enforces backend limits via `default_pool_size`.",
+      "summary": "Set `maxConns = 0` in both datastore SQL configs in `main.tf`, which causes Temporal to skip calling `SetMaxOpenConns` and use Go's default (unlimited). PgBouncer's `default_pool_size` and `max_client_conn` govern the actual backend connection count."
+    },
+    {
+      "motivation": "Connection lifetime controls how frequently Temporal recycles connections to PgBouncer, which affects credential rotation responsiveness and stale-connection risk.",
+      "summary": "Set `maxConnLifetime = \"60s\"` for both the default and visibility datastores in `main.tf`. Set `maxIdleConns = 0` (which is a no-op in Temporal — Go's default of 2 idle connections applies, since Temporal only calls `SetMaxIdleConns` when the value is > 0)."
+    },
+    {
+      "motivation": "render-config.sh substitutes env var placeholders into the YAML config template at pod startup; it needed to handle the new 4-variable naming scheme.",
+      "summary": "Updated the `sed` command in `scripts/render-config.sh` to substitute `DB_USER_DEFAULT`, `DB_PASSWORD_DEFAULT`, `DB_USER_VISIBILITY`, and `DB_PASSWORD_VISIBILITY` (in addition to `POD_IP`)."
+    }
+  ],
+  "problems": [
+    "Temporal's SQL config silently treats `maxIdleConns = 0` as a no-op: the wiring code uses `if cfg.MaxIdleConns > 0 { db.SetMaxIdleConns(...) }`, so zero does not disable idle connections — Go's default of 2 applies. This is not documented in Temporal's config reference, and the counter-intuitive behavior (0 ≠ zero idle connections) had to be discovered by reading Temporal source code.",
+    "Same silent no-op pattern applies to `maxConns = 0` and `maxConnLifetime = 0`: Temporal only calls the corresponding `database/sql` setter when the value is > 0. The config schema gives no indication of this, making it easy to believe you are setting a limit when you are not.",
+    "The `module \"schema_init\"` was removed entirely when the user said 'schema_init is now in the db module', but `kube_pg_cluster`'s schema init only creates schemas and roles — it does not run Temporal's versioned DDL migrations (`temporal-sql-tool`). The distinction between generic schema setup (handled by `kube_pg_cluster`) and application-specific migration bootstrapping (must still happen in `kube_temporal`) was not documented anywhere, causing the removal to be caught only after the user questioned it."
+  ],
+  "session_id": "9def0772-2120-4dc0-9f13-1324a2e82365",
+  "timestamp": "2026-04-17T13:41:38.283Z"
+}

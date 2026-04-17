@@ -127,6 +127,12 @@ variable "pg_storage_limit_gb" {
 }
 
 # Temporal-specific variables
+variable "temporal_version" {
+  description = "The version tag for the temporalio/server and temporalio/admin-tools images"
+  type        = string
+  default     = "1.26.2"
+}
+
 variable "num_history_shards" {
   description = "Number of Temporal history shards. WARNING: This value is set once during schema initialization and can NEVER be changed without a full data migration. 512 is appropriate for most workloads."
   type        = number
@@ -145,6 +151,25 @@ variable "default_namespace_retention_days" {
     condition     = var.default_namespace_retention_days > 0
     error_message = "default_namespace_retention_days must be greater than 0."
   }
+}
+
+# Dynamic config values
+variable "frontend_rps" {
+  description = "Max requests per second for the frontend service"
+  type        = number
+  default     = 2400
+}
+
+variable "max_id_length" {
+  description = "Maximum length for Temporal IDs (workflow IDs, run IDs, etc.)"
+  type        = number
+  default     = 255
+}
+
+variable "force_search_attributes_cache_refresh_on_read" {
+  description = "Whether to force a search attributes cache refresh on every read"
+  type        = bool
+  default     = true
 }
 
 # Replica counts for server services (SLA-aware)

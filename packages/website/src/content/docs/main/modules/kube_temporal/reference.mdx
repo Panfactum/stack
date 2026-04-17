@@ -71,6 +71,14 @@ Type: `number`
 
 Default: `7`
 
+### force\_search\_attributes\_cache\_refresh\_on\_read
+
+Description: Whether to force a search attributes cache refresh on every read
+
+Type: `bool`
+
+Default: `true`
+
 ### frontend\_replicas
 
 Description: Number of replicas. Defaults to 2 if sla\_target >= 2, else 1.
@@ -78,6 +86,14 @@ Description: Number of replicas. Defaults to 2 if sla\_target >= 2, else 1.
 Type: `number`
 
 Default: `null`
+
+### frontend\_rps
+
+Description: Max requests per second for the frontend service
+
+Type: `number`
+
+Default: `2400`
 
 ### history\_replicas
 
@@ -118,6 +134,14 @@ Description: Number of replicas. Defaults to 2 if sla\_target >= 2, else 1.
 Type: `number`
 
 Default: `null`
+
+### max\_id\_length
+
+Description: Maximum length for Temporal IDs (workflow IDs, run IDs, etc.)
+
+Type: `number`
+
+Default: `255`
 
 ### monitoring\_enabled
 
@@ -214,6 +238,14 @@ Description: Whether the database pods can be scheduled on spot nodes
 Type: `bool`
 
 Default: `true`
+
+### temporal\_version
+
+Description: The version tag for the temporalio/server and temporalio/admin-tools images
+
+Type: `string`
+
+Default: `"1.26.2"`
 
 ### vault\_domain
 

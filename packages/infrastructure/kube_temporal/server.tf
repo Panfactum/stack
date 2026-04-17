@@ -46,7 +46,7 @@ module "frontend" {
       init             = false
       image_registry   = "index.docker.io"
       image_repository = "temporalio/server"
-      image_tag        = "1.26.3"
+      image_tag        = var.temporal_version
       command          = ["temporal-server", "start", "--service", "frontend"]
       ports = {
         grpc = {
@@ -74,12 +74,20 @@ module "frontend" {
   }
 
   common_env_from_secrets = {
-    DB_USER = {
-      secret_name = module.database.superuser_creds_secret
+    DB_USER_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
       key         = "username"
     }
-    DB_PASSWORD = {
-      secret_name = module.database.superuser_creds_secret
+    DB_PASSWORD_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
+      key         = "password"
+    }
+    DB_USER_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
+      key         = "username"
+    }
+    DB_PASSWORD_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
       key         = "password"
     }
   }
@@ -153,7 +161,7 @@ module "history" {
       init             = false
       image_registry   = "index.docker.io"
       image_repository = "temporalio/server"
-      image_tag        = "1.26.3"
+      image_tag        = var.temporal_version
       command          = ["temporal-server", "start", "--service", "history"]
       ports = {
         grpc = {
@@ -181,12 +189,20 @@ module "history" {
   }
 
   common_env_from_secrets = {
-    DB_USER = {
-      secret_name = module.database.superuser_creds_secret
+    DB_USER_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
       key         = "username"
     }
-    DB_PASSWORD = {
-      secret_name = module.database.superuser_creds_secret
+    DB_PASSWORD_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
+      key         = "password"
+    }
+    DB_USER_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
+      key         = "username"
+    }
+    DB_PASSWORD_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
       key         = "password"
     }
   }
@@ -259,7 +275,7 @@ module "matching" {
       init             = false
       image_registry   = "index.docker.io"
       image_repository = "temporalio/server"
-      image_tag        = "1.26.3"
+      image_tag        = var.temporal_version
       command          = ["temporal-server", "start", "--service", "matching"]
       ports = {
         grpc = {
@@ -287,12 +303,20 @@ module "matching" {
   }
 
   common_env_from_secrets = {
-    DB_USER = {
-      secret_name = module.database.superuser_creds_secret
+    DB_USER_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
       key         = "username"
     }
-    DB_PASSWORD = {
-      secret_name = module.database.superuser_creds_secret
+    DB_PASSWORD_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
+      key         = "password"
+    }
+    DB_USER_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
+      key         = "username"
+    }
+    DB_PASSWORD_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
       key         = "password"
     }
   }
@@ -365,7 +389,7 @@ module "worker" {
       init             = false
       image_registry   = "index.docker.io"
       image_repository = "temporalio/server"
-      image_tag        = "1.26.3"
+      image_tag        = var.temporal_version
       command          = ["temporal-server", "start", "--service", "worker"]
       ports = {
         grpc = {
@@ -393,12 +417,20 @@ module "worker" {
   }
 
   common_env_from_secrets = {
-    DB_USER = {
-      secret_name = module.database.superuser_creds_secret
+    DB_USER_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
       key         = "username"
     }
-    DB_PASSWORD = {
-      secret_name = module.database.superuser_creds_secret
+    DB_PASSWORD_DEFAULT = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal"]
+      key         = "password"
+    }
+    DB_USER_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
+      key         = "username"
+    }
+    DB_PASSWORD_VISIBILITY = {
+      secret_name = module.database.schema_superuser_creds_secrets["temporal_visibility"]
       key         = "password"
     }
   }
@@ -449,7 +481,7 @@ module "namespace_init" {
       name             = "namespace-init"
       image_registry   = "index.docker.io"
       image_repository = "temporalio/admin-tools"
-      image_tag        = "1.26.2"
+      image_tag        = var.temporal_version
       command          = ["/bin/sh", "/scripts/namespace-init.sh"]
       minimum_memory   = 256
       minimum_cpu      = 50

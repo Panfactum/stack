@@ -16,6 +16,8 @@ module "database" {
   pg_storage_limit_gb       = var.pg_storage_limit_gb
   extra_schemas             = ["temporal", "temporal_visibility"]
 
+  pgbouncer_pool_mode = "session"
+
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
@@ -45,7 +47,7 @@ module "schema_init" {
       name             = "schema-init"
       image_registry   = "index.docker.io"
       image_repository = "temporalio/admin-tools"
-      image_tag        = "1.26.2"
+      image_tag        = var.temporal_version
       command          = ["/bin/sh", "/scripts/schema-init.sh"]
       minimum_memory   = 256
       minimum_cpu      = 50
