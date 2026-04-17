@@ -157,6 +157,8 @@ module "buildkit" {
   }
   extra_pod_annotations = {
     "container.apparmor.security.beta.kubernetes.io/buildkitd" = "unconfined"
+    # Prevent Karpenter from consolidating nodes that are hosting active builds
+    "karpenter.sh/do-not-disrupt" = "true"
   }
   containers = [
     {

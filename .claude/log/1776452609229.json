@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "motivation": "BuildKit pods were being terminated mid-build because Karpenter's consolidation logic freely selected underutilized spot nodes for deletion. The spot NodePool's terminationGracePeriod of 2m0s overrides the PDB and pod grace period, forcing pod termination before builds complete. Adding karpenter.sh/do-not-disrupt prevents Karpenter from selecting nodes hosting active BuildKit pods as consolidation candidates.",
+      "summary": "Added karpenter.sh/do-not-disrupt: 'true' to extra_pod_annotations in kube_buildkit/main.tf, so Karpenter's voluntary consolidation (Underutilized/Delete) cannot target nodes running BuildKit pods."
+    }
+  ],
+  "problems": [
+    "PR summary incorrectly stated 'buildkit pods already carry the karpenter.sh/do-not-disrupt annotation' — they did not. The annotation existed only in kube_velero and wf_spec. The misleading claim caused confusion about whether the annotation was being bypassed vs never applied.",
+    "PR summary conflated two distinct Karpenter disruption mechanisms (voluntary consolidation via Underutilized/Delete vs forced AWS spot interruption) leading to an incorrect root cause explanation. A comment in the NodePool or buildkit module explaining the difference between voluntary consolidation (blockable by do-not-disrupt) and forced interruption (not blockable) would have clarified this upfront.",
+    "The kube_buildkit module lacked any inline documentation explaining its disruption-resistance posture (max_unavailable=0, vpa_enabled=false) or why do-not-disrupt was absent, requiring a full codebase grep and external doc lookup to determine the annotation was simply missing rather than intentionally omitted."
+  ],
+  "session_id": "bd0259b3-e578-44b7-bea0-e621b7db37c2",
+  "timestamp": "2026-04-17T19:03:48.959Z"
+}
