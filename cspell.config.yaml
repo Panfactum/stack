@@ -253,6 +253,7 @@ words:
     "templatefile",
     "heredoc",
     "tmpfs",
+    "tfplugindocs",
   ]
 languageSettings:
   - languageId:

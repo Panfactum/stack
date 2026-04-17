@@ -132,6 +132,37 @@ module "sensor" {
         })
         EOT
       }
+    },
+    {
+      name            = "push-to-main-iac-provider"
+      eventSourceName = local.event_source_name
+      eventName       = "default"
+      filters = {
+        dataLogicalOperator = "and"
+        data = [
+          {
+            path  = "body.X-GitHub-Event"
+            type  = "string"
+            value = ["push"]
+          },
+          {
+            path  = "body.ref"
+            type  = "string"
+            value = ["refs/heads/main"]
+          },
+          {
+            path  = "body.repository.name"
+            type  = "string"
+            value = ["stack"]
+          }
+        ]
+        script = <<-EOT
+        ${file("${path.module}/is_modified.lua")}
+        return is_modified(event.body, {
+          "packages/iac-provider/.*"
+        })
+        EOT
+      }
     }
   ]
 
@@ -575,6 +606,48 @@ module "sensor" {
               }
             }
           }
+        }
+      }
+    },
+
+    {
+      template = {
+        name       = local.iac_provider_sync_name
+        conditions = "push-to-main-iac-provider"
+        argoWorkflow = {
+          operation = "submit"
+          source = {
+            resource = {
+              apiVersion = "argoproj.io/v1alpha1"
+              kind       = "Workflow"
+              metadata = {
+                generateName = "${local.iac_provider_sync_name}-"
+                namespace    = local.namespace
+              }
+              spec = {
+                arguments = {
+                  parameters = [
+                    {
+                      name  = "git_ref"
+                      value = "main"
+                    }
+                  ]
+                }
+                workflowTemplateRef = {
+                  name = local.iac_provider_sync_name
+                }
+              }
+            }
+          }
+          parameters = [
+            {
+              dest = "spec.arguments.parameters.0.value"
+              src = {
+                dependencyName = "push-to-main-iac-provider"
+                dataKey        = "body.after" # commit SHA after the push
+              }
+            }
+          ]
         }
       }
     },

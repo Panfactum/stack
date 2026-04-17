@@ -98,3 +98,9 @@ variable "installer_bucket" {
   description = "The S3 bucket that hosts the Panfactum installer scripts"
   type        = string
 }
+
+variable "provider_repo_github_token" {
+  description = "GitHub PAT with write access to Panfactum/terraform-provider-pf for syncing provider code"
+  type        = string
+  sensitive   = true
+}
