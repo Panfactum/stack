@@ -44,7 +44,14 @@ export VAULT_TOKEN
 pf wf sops-set-profile . ci
 
 #####################################################
-# Step 6: Use terragrunt to deploy the IaC
+# Step 6: Export additional environment variables
+#####################################################
+while IFS='=' read -r key value; do
+  export "$key=$value"
+done < <(echo "$EXTRA_ENV" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+
+#####################################################
+# Step 7: Use terragrunt to deploy the IaC
 #####################################################
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 cd "$TF_APPLY_DIR"

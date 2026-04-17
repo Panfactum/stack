@@ -134,38 +134,47 @@ module "tf_deploy_workflow" {
       name        = "tf_apply_dir"
       description = "Which directory to run 'terragrunt apply --all' in inside the ${var.repo} repository"
       default     = var.tf_apply_dir
+    },
+    {
+      name        = "extra_env"
+      description = "A JSON-encoded map of additional environment variables to set during the deployment"
+      default     = "{}"
     }
   ]
   labels_from_parameters = ["git_ref"]
 
-  common_env = {
-    REPO         = var.repo
-    GIT_REF      = "{{inputs.parameters.git_ref}}"
-    GIT_USERNAME = var.git_username
-    TF_APPLY_DIR = "{{inputs.parameters.tf_apply_dir}}"
+  common_env = merge(
+    {
+      REPO         = var.repo
+      GIT_REF      = "{{inputs.parameters.git_ref}}"
+      GIT_USERNAME = var.git_username
+      TF_APPLY_DIR = "{{inputs.parameters.tf_apply_dir}}"
+      EXTRA_ENV    = "{{inputs.parameters.extra_env}}"
 
-    # Needed for Vault authentication
-    VAULT_ROLE = module.tf_deploy_vault_role.role_name
-    VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
+      # Needed for Vault authentication
+      VAULT_ROLE = module.tf_deploy_vault_role.role_name
+      VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
 
-    # Setup cache anc config directories
-    TF_PLUGIN_CACHE_DIR   = "/tmp/.terraform"
-    AWS_CONFIG_FILE       = "/.aws/config"
-    KUBE_CONFIG_PATH      = "/.kube/config"
-    KUBECONFIG            = "/.kube/config"
-    KUBE_CLUSTER_NAME     = data.pf_metadata.metadata.kube_cluster_name
-    HELM_REPOSITORY_CACHE = "/tmp/.helm"
-    HELM_CACHE_HOME       = "/tmp/.helm"
-    HELM_DATA_HOME        = "/tmp/.helm"
+      # Setup cache anc config directories
+      TF_PLUGIN_CACHE_DIR   = "/tmp/.terraform"
+      AWS_CONFIG_FILE       = "/.aws/config"
+      KUBE_CONFIG_PATH      = "/.kube/config"
+      KUBECONFIG            = "/.kube/config"
+      KUBE_CLUSTER_NAME     = data.pf_metadata.metadata.kube_cluster_name
+      HELM_REPOSITORY_CACHE = "/tmp/.helm"
+      HELM_CACHE_HOME       = "/tmp/.helm"
+      HELM_DATA_HOME        = "/tmp/.helm"
 
-    CI  = "true"               # Required to run the Panfactum terragrunt setup in CI mode
-    WHO = "@${local.hostname}" # Use by the force-unlock program to identify locks held by this workflow
-  }
+      CI  = "true"               # Required to run the Panfactum terragrunt setup in CI mode
+      WHO = "@${local.hostname}" # Use by the force-unlock program to identify locks held by this workflow
+    },
+    var.env
+  )
   common_secrets = merge(
-    var.secrets,
     {
       GIT_PASSWORD = var.git_password
-    }
+    },
+    var.secrets
   )
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {

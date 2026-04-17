@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "User-provided env vars and secrets in var.env/var.secrets were being silently overridden by module-hardcoded defaults because Terraform's merge() gives precedence to later arguments, and the user-provided values were listed first.",
+      "summary": "Reordered merge() arguments in main.tf so that var.env and var.secrets are the last arguments, giving them override precedence over module-set defaults."
+    }
+  ],
+  "problems": [
+    "The merge() argument order bug indicates there was no comment or documentation clarifying that later arguments win in Terraform's merge() — making it easy to accidentally write the merge in the wrong order and not notice until runtime."
+  ],
+  "session_id": "b4b1b792-b656-4bbc-ae87-0cfb79612148",
+  "timestamp": "2026-04-17T13:52:29.779Z"
+}

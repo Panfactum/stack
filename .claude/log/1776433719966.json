@@ -1,0 +1,18 @@
+{
+  "changes": [
+    {
+      "motivation": "Allow callers of wf_tf_deploy to inject arbitrary non-secret environment variables that are statically baked into the workflow template at Terraform apply time.",
+      "summary": "Added a new `env` variable (type `map(string)`, default `{}`) to `vars.tf`. In `main.tf`, `common_env` is wrapped in `merge(var.env, {...})` so caller-supplied vars are included in every workflow run but cannot override built-in reserved vars like `VAULT_ADDR` or `CI`."
+    },
+    {
+      "motivation": "Allow per-submission runtime override of environment variables without requiring a Terraform re-apply, satisfying the user's requirement that this be a workflow input variable.",
+      "summary": "Added `extra_env` to `passthrough_parameters` in `main.tf` with a static default of `jsonencode({})` (not derived from `var.env`). `EXTRA_ENV = \"{{inputs.parameters.extra_env}}\"` is injected into `common_env` so the container receives the JSON string. In `deploy.sh`, a new step parses `$EXTRA_ENV` with `jq` and exports each key-value pair as an environment variable before terragrunt runs."
+    }
+  ],
+  "problems": [
+    "The user had to correct the agent twice: first to clarify that the feature should be a workflow input (Argo parameter), not just a Terraform variable; then to clarify that `var.env` static defaults should not be used as the default value for the `extra_env` workflow parameter. The distinction between static (Terraform-time) and dynamic (workflow submission-time) env var injection was not anticipated upfront, suggesting the wf_tf_deploy module's two-tier parameter model (Terraform vars vs. Argo passthrough_parameters) is not documented clearly enough for an agent to infer correct usage without guidance.",
+    "After one of the `main.tf` edits the `common_env` block was left malformed (unclosed or mis-structured HCL), requiring an additional read + edit cycle to repair. This likely occurred because multiple sequential small edits to the same block caused context drift. The pattern of modifying a complex nested HCL block in multiple incremental edits is error-prone; the correct approach is to rewrite the whole block in one edit."
+  ],
+  "session_id": "c4afa6e7-9efa-4115-9756-ef5fb13f89fd",
+  "timestamp": "2026-04-17T13:49:15.854Z"
+}

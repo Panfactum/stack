@@ -36,6 +36,12 @@ variable "git_ref" {
   default     = "main"
 }
 
+variable "env" {
+  description = "A mapping of additional environment variable names to non-sensitive values"
+  type        = map(string)
+  default     = {}
+}
+
 variable "secrets" {
   description = "A mapping of environment variable names to secret values"
   type        = map(string)
