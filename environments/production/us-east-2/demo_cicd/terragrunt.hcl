@@ -40,7 +40,6 @@ inputs = {
   site_url                   = "https://panfactum.com"
   module_bucket              = dependency.module_bucket.outputs.bucket_name
   installer_bucket           = dependency.installer_bucket.outputs.installer_bucket_name
-  provider_repo_github_token = local.secrets.provider_repo_github_token
 }
 
 skip = get_env("CI", "false") == "true"

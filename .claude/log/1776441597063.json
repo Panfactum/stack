@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "The demo_cicd IAC module was updated to add a provider_repo_github_token variable that duplicated the existing github_token variable. The secrets.yaml never had a provider_repo_github_token entry, so the new variable was referencing a non-existent secret. Consolidating to reuse github_token removes the redundancy and fixes the broken secret reference.",
+      "summary": "Removed provider_repo_github_token variable from infrastructure/demo_cicd/vars.tf, updated infrastructure/demo_cicd/iac_provider_sync.tf to use var.github_token for DEST_GIT_PASSWORD, and removed the provider_repo_github_token input from environments/production/us-east-2/demo_cicd/terragrunt.hcl."
+    }
+  ],
+  "problems": [
+    "The provider_repo_github_token variable was added to the IAC module (vars.tf and iac_provider_sync.tf) and wired up in terragrunt.hcl, but no corresponding entry was ever added to secrets.yaml. This means the configuration was silently broken — the terragrunt input referenced a missing secret key. A code review or CI check that validates all module inputs are satisfied by declared secret keys would have caught this immediately."
+  ],
+  "session_id": "faa0a4db-58ed-4717-8fac-3bb386232aa2",
+  "timestamp": "2026-04-17T16:00:11.667Z"
+}

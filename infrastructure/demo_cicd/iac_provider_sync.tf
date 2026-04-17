@@ -39,7 +39,7 @@ module "iac_provider_sync_workflow" {
   }
   common_secrets = {
     SOURCE_GIT_PASSWORD = var.github_token
-    DEST_GIT_PASSWORD   = var.provider_repo_github_token # separate write-access token
+    DEST_GIT_PASSWORD   = var.github_token
   }
 
   default_container_image = local.ci_image
