@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "motivation": "Ensure parameters in the wf_spec arguments output are stored explicitly in submitted Workflow objects — using `default` means Argo resolves values at execution time from the WorkflowTemplate but does not store them in the Workflow object, breaking UI-based retries and Argo Events sensor positional patching.",
+      "summary": "Added `workflow_arguments_with_values` local in `packages/infrastructure/wf_spec/main.tf` that transforms the parameters list: for each parameter, if `value` is not set but `default` is, copies `default` into `value` and removes `default`. Updated the `arguments` output in `outputs.tf` to use this transformed local instead of the raw `var.arguments`."
+    }
+  ],
+  "problems": [
+    "Argo Workflows `Artifact` type has no `default` field (unlike `Parameter`), but this is non-obvious and not documented in the module's `var.arguments` variable description. A comment explaining why the `default`→`value` transformation applies only to parameters (not artifacts) would prevent future contributors from re-investigating this.",
+    "The distinction between `Parameter.default` (resolved from WorkflowTemplate at execution time, not stored in Workflow object) and `Parameter.value` (stored explicitly in submitted Workflow object) is a critical Argo Workflows behavioral difference that is not documented anywhere in the wf_spec module. Callers using the `arguments` output for sensor triggers had no way to know their `default`-valued parameters would be absent from the Workflow object and thus unavailable for retries or positional patching."
+  ],
+  "session_id": "0dc61b67-eff7-4239-93fd-698b455f0650",
+  "timestamp": "2026-04-18T00:24:45.202Z"
+}

@@ -352,6 +352,19 @@ locals {
     parameters = local.workflow_parameters
   }
 
+  # For the arguments output consumed by Argo Events sensor triggers:
+  # convert "default" to "value" so parameters are stored explicitly in
+  # the submitted Workflow object (needed for retries and positional patching).
+  workflow_arguments_with_values = {
+    artifacts = lookup(var.arguments, "artifacts", [])
+    parameters = [for param in local.workflow_parameters : merge(
+      { for k, v in param : k => v if k != "default" },
+      lookup(param, "value", null) == null && lookup(param, "default", null) != null
+      ? { value = param["default"] }
+      : {}
+    )]
+  }
+
   /************************************************
   * Workflow Definition
   ************************************************/
