@@ -18,16 +18,19 @@ import { getCommitHash } from '@/util/git/getCommitHash.ts'
  * Key optimizations:
  * - Shallow cloning (depth=1) for minimal data transfer
  * - Direct commit checkout to avoid branch synchronization
- * - Automatic Git LFS support for binary assets
+ * - Optional sparse checkout (`--sparse`) to materialize only one subdirectory,
+ *   combined with `--filter=blob:none` to skip downloading unreferenced blobs
+ * - Optional LFS skip (`--no-lfs`) for repositories with no binary assets
  * - Credential persistence for subsequent operations
  * - Protection bypass for container environments
- * 
+ *
  * The command workflow:
- * 1. Shallow clone the repository
- * 2. Configure authentication for future operations
- * 3. Resolve git reference to exact commit SHA
- * 4. Fetch and checkout the specific commit
- * 5. Initialize Git LFS and pull large files
+ * 1. Shallow clone the repository (with optional blob filter + sparse flag)
+ * 2. Configure sparse checkout path (if --sparse is set)
+ * 3. Configure authentication for future operations
+ * 4. Resolve git reference to exact commit SHA
+ * 5. Fetch and checkout the specific commit (with optional blob filter)
+ * 6. Initialize Git LFS and pull large files (skipped when --no-lfs)
  * 
  * Security features:
  * - Supports token-based authentication
@@ -78,6 +81,13 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
       - Initializes Git LFS if needed
       
       Designed for use in isolated container environments.
+
+      Pass --sparse <path> to enable sparse checkout: only blobs under the
+      given subdirectory are downloaded, significantly reducing network usage
+      when you only need one directory from a large monorepo.
+
+      Pass --no-lfs to skip Git LFS initialization and pull, which is safe
+      whenever the target path contains no LFS-tracked files.
     `,
     examples: [
       [
@@ -139,7 +149,7 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
 
   /**
    * Target directory for checkout
-   * 
+   *
    * @remarks
    * Defaults to 'repo' if not specified.
    * Directory will be created if it doesn't exist.
@@ -147,23 +157,50 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
   directory = Option.String({ required: false })
 
   /**
+   * Subdirectory path to limit materialized files to via sparse checkout
+   *
+   * @remarks
+   * When set, clones with `--filter=blob:none --sparse` and runs
+   * `git sparse-checkout set <path>` so only blobs under the given
+   * subdirectory are downloaded. The fetch step also passes
+   * `--filter=blob:none` to avoid downloading unreferenced blobs.
+   *
+   * Use this when you only need one directory from a large monorepo.
+   */
+  sparsePath = Option.String('--sparse', {
+    description: 'Enable sparse checkout: only materialize files under this subdirectory',
+  })
+
+  /**
+   * Whether to skip Git LFS initialization and pull
+   *
+   * @remarks
+   * Set this when the target path contains no LFS-tracked files.
+   * Skipping LFS saves the overhead of `git lfs install` and `git lfs pull`.
+   */
+  skipLfs = Option.Boolean('--no-lfs', false, {
+    description: 'Skip Git LFS initialization and pull',
+  })
+
+  /**
    * Executes the optimized git checkout workflow
-   * 
+   *
    * @remarks
    * Performs a series of git operations optimized for CI/CD:
    * - Validates authentication parameters
-   * - Clones with minimal history
+   * - Clones with minimal history (optionally with blob filter + sparse flag)
+   * - Configures sparse checkout path when `--sparse` is set
    * - Configures credentials for future operations
    * - Resolves references to commit SHAs
-   * - Checks out exact commit
-   * - Initializes Git LFS support
-   * 
+   * - Checks out exact commit (fetch uses blob filter when `--sparse` is set)
+   * - Initializes Git LFS support (skipped when `--no-lfs` is set)
+   *
    * The process is displayed with progress indicators
    * and detailed error reporting on failures.
-   * 
+   *
    * @throws {@link CLIError}
    * Throws when username provided without password
-   * 
+   *
    * @throws {@link CLISubprocessError}
    * Throws when git operations fail
    */
@@ -195,7 +232,11 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
             cloneUrl = `https://${this.username}:${this.password}@${this.repoUrl}`
           }
 
-          const cloneCmd = ['git', 'clone', '-q', '--depth=1', cloneUrl, targetDirectory]
+          // When a sparse path is requested, skip downloading all blobs up front.
+          // git sparse-checkout set (next task) will pull only the blobs we need.
+          const cloneCmd = this.sparsePath
+            ? ['git', 'clone', '-q', '--depth=1', '--filter=blob:none', '--sparse', cloneUrl, targetDirectory]
+            : ['git', 'clone', '-q', '--depth=1', cloneUrl, targetDirectory]
 
           const cloneResult = await context.subprocessManager.execute({
             env,
@@ -208,9 +249,35 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
               `Failed to clone repository ${this.repoUrl}`,
               {
                 // Rewrite the command to avoid leaking credentials in error output
-                command: ['git', 'clone', '-q', '--depth=1', `https://${this.repoUrl}`, targetDirectory].join(' '),
+                command: (this.sparsePath
+                  ? ['git', 'clone', '-q', '--depth=1', '--filter=blob:none', '--sparse', `https://${this.repoUrl}`, targetDirectory]
+                  : ['git', 'clone', '-q', '--depth=1', `https://${this.repoUrl}`, targetDirectory]
+                ).join(' '),
                 subprocessLogs: cloneResult.output,
                 workingDirectory: process.cwd(),
+              }
+            )
+          }
+        },
+      },
+      {
+        title: 'Configuring sparse checkout',
+        skip: () => !this.sparsePath,
+        task: async () => {
+          const sparseSetCmd = ['git', 'sparse-checkout', 'set', this.sparsePath!]
+          const sparseResult = await context.subprocessManager.execute({
+            env,
+            command: sparseSetCmd,
+            workingDirectory: targetDirectory,
+          }).exited
+
+          if (sparseResult.exitCode !== 0) {
+            throw new CLISubprocessError(
+              `Failed to configure sparse checkout for path '${this.sparsePath}'`,
+              {
+                command: sparseSetCmd.join(' '),
+                subprocessLogs: sparseResult.output,
+                workingDirectory: targetDirectory,
               }
             )
           }
@@ -265,8 +332,11 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
       {
         title: 'Checking out commit',
         task: async () => {
-          // Fetch the specific commit
-          const fetchCommand = ['git', 'fetch', 'origin', commitSha]
+          // Fetch the specific commit; when sparse checkout is active, pass
+          // --filter=blob:none so only blobs under the sparse path are fetched.
+          const fetchCommand = this.sparsePath
+            ? ['git', 'fetch', '--filter=blob:none', 'origin', commitSha]
+            : ['git', 'fetch', 'origin', commitSha]
           const fetchResult = await context.subprocessManager.execute({
             env,
             command: fetchCommand,
@@ -306,6 +376,7 @@ export class WorkflowGitCheckoutCommand extends PanfactumLightCommand {
       },
       {
         title: 'Initializing Git LFS',
+        skip: () => this.skipLfs,
         task: async () => {
           // Initialize Git LFS locally
           const lfsInstallCommand = ['git', 'lfs', 'install', '--local']

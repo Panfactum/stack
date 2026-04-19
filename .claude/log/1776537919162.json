@@ -1,0 +1,22 @@
+{
+  "changes": [
+    {
+      "motivation": "The iac-provider-sync CI/CD workflow cloned the entire panfactum/stack monorepo even though only `packages/iac-provider` was needed, wasting bandwidth and time downloading blobs for website assets, CLI source, infrastructure modules, etc.",
+      "summary": "Added `--sparse <path>` option to `pf wf git-checkout` that sets `--filter=blob:none --sparse` on the clone and runs `git sparse-checkout set <path>` afterward. The subsequent fetch also receives `--filter=blob:none`, so blobs outside the declared path are never downloaded."
+    },
+    {
+      "motivation": "`pf wf git-checkout` unconditionally ran `git lfs install --local` and `git lfs pull`, but the `packages/iac-provider` directory contains zero LFS-tracked files, making this wasted work on every sync run.",
+      "summary": "Added `--no-lfs` option to `pf wf git-checkout` that skips the LFS install and pull tasks entirely when specified."
+    },
+    {
+      "motivation": "Apply the new checkout optimizations to the actual sync workflow that prompted the work.",
+      "summary": "Updated `infrastructure/demo_cicd/iac_provider_sync/sync.sh` to pass `--sparse packages/iac-provider --no-lfs` when cloning the source repo, and `--no-lfs` when cloning the destination terraform-provider-pf repo (which is pure Go with no LFS files)."
+    }
+  ],
+  "problems": [
+    "The `pf wf git-checkout` command's LFS behavior was not documented — it unconditionally runs `git lfs install` and `git lfs pull` regardless of whether the target repo or path uses LFS at all. This was only discoverable by reading the source code, not from any help text or docs, which meant the optimization opportunity was invisible to workflow authors.",
+    "There was no TOC.md or obvious entry point pointing to the iac-provider-sync workflow files. The agent had to search through commit history (`git show fb12e936`) to discover that `infrastructure/demo_cicd/iac_provider_sync/sync.sh` and `iac_provider_sync.tf` were the relevant files, rather than finding them through documentation."
+  ],
+  "session_id": "8af5b4de-4c3b-499f-b2d3-a51a9ce05e8c",
+  "timestamp": "2026-04-18T18:45:50.468Z"
+}

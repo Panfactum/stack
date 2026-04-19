@@ -3,6 +3,11 @@ set -eo pipefail
 
 #####################################################
 # Step 1: Clone source repo (monorepo)
+#
+# --sparse limits materialized files to $SOURCE_SUBPATH so
+# blobs from the rest of the monorepo are never downloaded.
+# --no-lfs is safe because packages/iac-provider has no
+# LFS-tracked files (only images elsewhere in the repo are).
 #####################################################
 mkdir -p /code/source
 cd /code/source
@@ -10,10 +15,15 @@ pf wf git-checkout \
   -r "$SOURCE_REPO" \
   -c "$GIT_REF" \
   -u "$GIT_USERNAME" \
-  -p "$SOURCE_GIT_PASSWORD"
+  -p "$SOURCE_GIT_PASSWORD" \
+  --sparse "$SOURCE_SUBPATH" \
+  --no-lfs
 
 #####################################################
 # Step 2: Clone destination repo (provider repo)
+#
+# --no-lfs is safe because terraform-provider-pf is pure
+# Go source with no LFS-tracked files.
 #####################################################
 mkdir -p /code/dest
 cd /code/dest
@@ -21,7 +31,8 @@ pf wf git-checkout \
   -r "$DEST_REPO" \
   -c "main" \
   -u "$GIT_USERNAME" \
-  -p "$DEST_GIT_PASSWORD"
+  -p "$DEST_GIT_PASSWORD" \
+  --no-lfs
 
 #####################################################
 # Step 3: Sync files from packages/iac-provider
