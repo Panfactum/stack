@@ -62,13 +62,14 @@ const presentations = defineCollection({
     pattern: "**/*.mdx",
     base: "src/content/presentations",
   }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string().optional(),
     description: z.string().optional(),
     date: z.string().optional(),
     author: z.string().optional(),
-    thumbnail: z.string().optional(),
+    thumbnail: image().optional(),
     notes: z.string().optional(),
+    footnotes: z.array(z.string()).optional(),
     slideLayout: z.enum(["default", "center", "two-column", "author"]).default("default"),
     transition: z.string().optional(),
   }),

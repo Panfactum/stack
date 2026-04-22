@@ -93,8 +93,13 @@
   font-size: var(--r-heading1-size);
 }
 
+.reveal .slides section {
+  container-type: inline-size;
+}
+
 .reveal h2 {
-  font-size: var(--r-heading2-size);
+  font-size: clamp(0.8em, 8cqi, var(--r-heading2-size));
+  white-space: nowrap;
 }
 
 .reveal h3 {
@@ -568,8 +573,8 @@
  * MERMAID DIAGRAMS
  *********************************************/
 .reveal .slides svg[id^="mermaid"] {
-  max-width: 95%;
-  max-height: 500px;
+  max-width: 100%;
+  max-height: 550px;
   margin: var(--r-block-margin) auto;
   display: block;
 }

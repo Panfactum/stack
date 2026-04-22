@@ -1,0 +1,81 @@
+{
+  "changes": [
+    {
+      "motivation": "Create scaffolding for a new 'Effective Sandboxing: Live Dangerously, Safely' presentation",
+      "summary": "Created `src/content/presentations/effective-sandboxing/` directory with a `01-title.mdx` title slide (slideLayout: center, author: Jack Langston) and an `images/` subdirectory."
+    },
+    {
+      "motivation": "Add author bio slide matching the existing hype-velocity presentation style",
+      "summary": "Created `02-author.mdx` by copying the author slide from `hype-velocity` and copying `images/headshot.jpg`. Updated author name to Jack Langston in `01-title.mdx`."
+    },
+    {
+      "motivation": "Build out presentation content slides covering the talk structure",
+      "summary": "Created slides 03–10 covering: What is 'Dangerous', Why live dangerously, and six Issues slides (Unintended Edits, Secrets Env/Files/Other processes, Supply chain attacks, Unintended communication). 'Dangerous' and 'Dangerously' styled with `#f97066` (error-400 red italic)."
+    },
+    {
+      "motivation": "Add an Ideal Solution criteria checklist and option comparison slides",
+      "summary": "Created `11-solution-sandboxing.mdx` (Ideal Solution) and slides 12–15 (Option: Agent-provided, Containers/VMs, Bubblewrap/sandbox-exec, Nono) each with a 9-item two-column checklist using inline SVG checkboxes. Items: secrets access, network deny-by-default, filesystem controls, concurrent agents, host utilities, audit log, profiles, strong enforcement, cross-platform, FOSS, easy to use, easy to share."
+    },
+    {
+      "motivation": "Mark each checklist option slide with red/yellow/green indicators to show how well each option meets criteria",
+      "summary": "Each option slide uses inline SVG marks: ✗ (red `#f97066`), ✓ (green `#32d583`), − (yellow `#fdb022`) per bullet. Slides 12–16 wrapped with `fontSize: '0.75em'` to prevent overflow."
+    },
+    {
+      "motivation": "Add a Nono-specific solution slide showing all criteria met",
+      "summary": "Created `16-solution-sandboxing-nono.mdx` with all checklist items set to green checkmarks and a footnote: 'Nono is a custom sandboxing tool built on top of bubblewrap and ebpf. Learn more at nono.panfactum.com'."
+    },
+    {
+      "motivation": "Add background education slides about the underlying technologies Nono uses",
+      "summary": "Created `17-bubblewrap.mdx` and `18-ebpf.mdx` as placeholder slides covering Bubblewrap and eBPF respectively."
+    },
+    {
+      "motivation": "Explain Nono's architecture and CLI commands",
+      "summary": "Created `19-nono-architecture.mdx` with a two-column layout: left column lists core concepts (Linux Namespaces, cgroups, eBPF Network Hooks, Secret Injection, Overlay Filesystems), right column lists Nono CLI commands (nono run, nono profile create, nono exec, nono log)."
+    },
+    {
+      "motivation": "Deep-dive slides for each major Nono feature with code examples",
+      "summary": "Created slides 20–24 (Nono: Profile, Secret Bindings, Network Policy, Filesystem Access, Audit Log) each with a two-column layout: left column 'How it works' bullets, right column code block with `data-trim data-noescape` for Reveal.js highlight.js syntax highlighting."
+    },
+    {
+      "motivation": "Demonstrate Nono live during the talk",
+      "summary": "Created `25-nono-demo.mdx` as a demo slide placeholder."
+    },
+    {
+      "motivation": "Show organizational benefits across different stakeholder roles",
+      "summary": "Created `26-benefits-org.mdx` with four columns (Developer, Operator, Security, Exec) each with a relevant SVG icon and three bullet points."
+    },
+    {
+      "motivation": "Summarize key takeaways with visual emphasis on critical words",
+      "summary": "Created `27-takeaways.mdx` with four bullets. 'dangerous' and 'most' colored red (`#f97066`), 'required' and 'bridges' colored green (`#32d583`)."
+    },
+    {
+      "motivation": "Provide a call-to-action slide with links to Nono resources",
+      "summary": "Created `28-get-started.mdx` with links to github.com/panfactum/nono and panfactum.com/presentations/effective-sandboxing, plus a brief description of Nono."
+    },
+    {
+      "motivation": "Add a closing thank-you slide with social links and icons",
+      "summary": "Created `29-thank-you.mdx` with four social links (LinkedIn, GitHub, panfactum.com, nono.panfactum.com) using SVG icon paths extracted from `@iconify/json/simple-icons` for LinkedIn and GitHub. Icons sized `1.2em` with `vertical-align: middle`."
+    },
+    {
+      "motivation": "Implement a footnote system so slides can display contextual notes below the presentation frame",
+      "summary": "Added optional `footnote` field to the presentation slide schema in `src/content/config.ts`. Updated `[slug].astro` to extract footnotes from slide frontmatter and pass them as an indexed array to `PresentationViewer`. Updated `PresentationViewer.tsx` to listen to `slidechanged` events and render the current footnote below the `.reveal` container with `min-h-[3rem]` always reserved. Footnote area is hidden in fullscreen mode."
+    },
+    {
+      "motivation": "Prevent long slide titles from wrapping to a second line",
+      "summary": "Added `container-type: inline-size` to `.reveal .slides section` and set `h2` font-size to `clamp(0.8em, 3.5cqi, 1.8em)` in `reveal-panfactum-theme.css` so headings shrink dynamically to fit one line."
+    },
+    {
+      "motivation": "Align checkbox SVG icons with the first line of wrapped text",
+      "summary": "Added `marginTop: '0.3em'` to SVG icons in checklist items and `marginBottom: '0.6em'` for spacing between items. Used `alignItems: 'flex-start'` on the row container."
+    }
+  ],
+  "problems": [
+    "CSS custom properties (Tailwind variables like `var(--color-error-300)`) do not resolve in Reveal.js MDX inline styles — the agent had to discover this by user feedback and fall back to hardcoded hex values. This should be documented in the presentation authoring guide.",
+    "The `pnpm check` TypeScript errors during the footnote feature implementation were caused by the Astro content collection schema not declaring the `footnote` field. The schema file (`src/content/config.ts`) had no documentation indicating that all frontmatter fields used in slides must be registered there first.",
+    "Reveal.js initialization has a race condition on dev server cold start — the first page load sometimes shows an empty slide area because the Reveal module hasn't finished compiling. This is a known-but-undocumented dev environment behavior.",
+    "The `@iconify/json` package icon body strings use a `0 0 24 24` viewBox but the package has no README or helper API — the correct extraction method (using Python to parse the JSON) had to be discovered manually.",
+    "Checklist slides 12–16 overflowed the slide area because the two-column 9-item layout has no automatic font scaling. The fix (wrapping with `fontSize: '0.75em'`) works but is a manual per-slide workaround; the presentation system has no built-in overflow handling or content-fit scaling for non-code slides."
+  ],
+  "session_id": "73063918-2c0b-4129-839f-42df4c2dd990",
+  "timestamp": "2026-04-22T15:28:58.326Z"
+}

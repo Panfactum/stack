@@ -3,6 +3,7 @@
 // from MDX content collection entries sorted by filename
 
 import { getCollection, render } from "astro:content";
+import { marked } from "marked";
 
 import Layout from "@/components/layouts/primary/Layout.astro";
 
@@ -53,9 +54,15 @@ const isPrintPdf = Astro.url.searchParams.has("print-pdf");
 const renderedSlides = await Promise.all(
   slides.map(async (slide) => {
     const { Content } = await render(slide);
+    const footnotes = slide.data.footnotes
+      ? await Promise.all(
+          slide.data.footnotes.map((fn: string) => marked.parseInline(fn)),
+        )
+      : undefined;
     return {
       content: Content,
       notes: slide.data.notes,
+      footnotes,
       slideLayout: slide.data.slideLayout ?? "default",
       transition: slide.data.transition,
     };
@@ -102,6 +109,13 @@ const renderedSlides = await Promise.all(
         </div>
       </div>
     </div>
+    <div id="presentation-footnotes" class="presentation-footnotes"></div>
+    <script
+      is:inline
+      id="slide-footnotes-data"
+      type="application/json"
+      set:html={JSON.stringify(renderedSlides.map((s) => s.footnotes ?? null))}
+    />
   </div>
 </Layout>
 
@@ -238,6 +252,35 @@ const renderedSlides = await Promise.all(
       );
     });
 
+    // Sync footnotes with slide changes
+    const footnotesEl = document.getElementById("presentation-footnotes");
+    const footnotesDataEl = document.getElementById("slide-footnotes-data");
+    if (footnotesEl && footnotesDataEl) {
+      const footnotes: (string[] | null)[] = JSON.parse(
+        footnotesDataEl.textContent ?? "[]",
+      );
+
+      function updateFootnotes(index: number) {
+        if (!footnotesEl) return;
+        const items = footnotes[index];
+        if (!items || items.length === 0) {
+          footnotesEl.innerHTML = "";
+          footnotesEl.style.display = "none";
+          return;
+        }
+        footnotesEl.innerHTML =
+          "<ol>" +
+          items.map((html) => `<li>${html}</li>`).join("") +
+          "</ol>";
+        footnotesEl.style.display = "";
+      }
+
+      updateFootnotes(indices.h);
+      deck.on("slidechanged", (event: Record<string, unknown>) => {
+        updateFootnotes(event["indexh"] as number);
+      });
+    }
+
     // Make deck globally accessible for the PresentationViewer component
     (window as unknown as Record<string, unknown>).Reveal = deck;
   }
@@ -321,6 +364,44 @@ const renderedSlides = await Promise.all(
   /* Center layout for specific slides */
   .reveal .slides section.center {
     text-align: center;
+  }
+
+  /* Footnotes below slide frame */
+  .presentation-footnotes {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-gray-dark-mode-400);
+  }
+
+  .presentation-footnotes ol {
+    list-style: decimal;
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .presentation-footnotes li + li {
+    margin-top: 0.25rem;
+  }
+
+  .presentation-footnotes a {
+    color: var(--color-brand-400, #70bfeb);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .presentation-footnotes a:hover {
+    color: var(--color-brand-300, #9ad3f1);
+  }
+
+  /* Hide footnotes in fullscreen mode */
+  #presentation-container.fullscreen-mode .presentation-footnotes {
+    display: none !important;
+  }
+
+  /* Hide footnotes in print-pdf mode */
+  body:has(.print-pdf) .presentation-footnotes {
+    display: none !important;
   }
 
   /* Hide header in fullscreen mode */

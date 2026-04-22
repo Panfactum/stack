@@ -254,6 +254,21 @@ words:
     "heredoc",
     "tmpfs",
     "tfplugindocs",
+    "Nono",
+    "FOSS",
+    "SLSA",
+    "slsa",
+    "badlogic",
+    "firejail",
+    "nspawn",
+    "Bubblejail",
+    "smolmachines",
+    "smol",
+    "Cardoso",
+    "unsandboxed",
+    "seccomp",
+    "Seccomp",
+    "Landlock",
   ]
 languageSettings:
   - languageId:

@@ -50,7 +50,7 @@ const presentations: PresentationMetadata[] = Array.from(
       title: firstSlide?.data.title ?? slug,
       date: firstSlide?.data.date ?? "Unknown date",
       author: firstSlide?.data.author ?? "Unknown author",
-      thumbnail: firstSlide?.data.thumbnail,
+      thumbnail: firstSlide?.data.thumbnail?.src,
     };
   })
   .sort((a, b) => {

@@ -1,0 +1,32 @@
+---
+slideLayout: "two-column"
+footnotes:
+  - "**More info:** [nono.sh/docs/cli/internals/security-model](https://nono.sh/docs/cli/internals/security-model)"
+
+---
+
+## FS Sandboxing Approaches
+
+<div class="columns">
+<div class="column">
+
+### Namespace Isolation
+
+*Bubblewrap, containers, VMs*
+
+- Faked filesystem with bind mounts
+- Requires privileged access to user namespaces (often disabled)
+
+</div>
+<div class="column">
+
+### Syscall Interception
+
+*Nono*
+
+- Real filesystem
+- No elevated privileges needed; enforced by newer kernel modules (eBPF, Landlock)
+- Every call recorded for audit log and profile tuning
+
+</div>
+</div>

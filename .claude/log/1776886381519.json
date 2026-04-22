@@ -1,0 +1,52 @@
+{
+  "changes": [
+    {
+      "motivation": "Provide supplementary text below slides visible to web viewers without cluttering the slide itself, hidden in fullscreen.",
+      "summary": "Added per-slide footnotes system: `footnotes: z.array(z.string()).optional()` schema field, build-time markdown rendering via `marked.parseInline()`, JSON data island in the Astro page, client JS to sync footnotes with slide changes via `slidechanged` event, and CSS for the footnote area (hidden in fullscreen and print-pdf modes)."
+    },
+    {
+      "motivation": "Footnote area was inside `.presentation-frame` and was wrapped by the frame border.",
+      "summary": "Moved `#presentation-footnotes` div and its JSON data script outside `.presentation-frame` to sit directly inside `#presentation-container`, below the bordered slide area."
+    },
+    {
+      "motivation": "Footnotes needed to support markdown links and bold text, not just plain text.",
+      "summary": "Switched footnote rendering from `textContent` to `innerHTML`, with each footnote string pre-rendered at build time via `marked.parseInline()`."
+    },
+    {
+      "motivation": "The four SVG icon components (XMark, CheckMark, MinusMark, Checkbox) were duplicated inline across 5 slides.",
+      "summary": "Extracted icons into a shared `_components/ChecklistIcons.tsx` SolidJS component file. Updated slides 11–15 to import from the shared component."
+    },
+    {
+      "motivation": "Icon placement broke after abstraction because the component was written using React-style camelCase CSS properties instead of SolidJS kebab-case.",
+      "summary": "Rewrote `ChecklistIcons.tsx` using SolidJS conventions: `Component` type import and kebab-case style properties (`vertical-align`, `margin-right`, `flex-shrink`)."
+    },
+    {
+      "motivation": "Thumbnail image needed to live in the public directory to be referenced as a URL string, which is inconvenient for content-collocated assets.",
+      "summary": "Changed the `thumbnail` schema field from `z.string()` to Astro's `image()` helper (using the function-schema form `defineCollection({ schema: ({ image }) => z.object({ thumbnail: image().optional() }) })`), updated the listing page to use the resolved image object, and moved the SVG to the content `images/` folder alongside other assets."
+    },
+    {
+      "motivation": "Title slide needed a visual that represented the 'Live Dangerously, Safely' theme.",
+      "summary": "Added an inline SVG graphic to the title slide: a terminal prompt (`>_`) inside a translucent blue protective bubble with a lock icon. Doubled its size on user request. The same SVG is used as the presentation thumbnail."
+    },
+    {
+      "motivation": "New slides and content restructuring throughout session.",
+      "summary": "Added/modified slides: key problems (04a→05), 'Are You At Risk?' (06) with risk bullets and red 'PWNed' annotations, 'What We Actually Want' (07), approach comparison (Bubblewrap vs Nono, 12a), Nono proxy injection mermaid diagram (13), Nono profiles+learning two-column slide with learn.png (13a), Nono other features slide with TypeScript SDK, filesystem rollbacks, and Packs (13b), and Deep Dives slide (14). Deleted the 6 issues slides (05–10). Renumbered all slides to maintain clean sequential ordering."
+    },
+    {
+      "motivation": "Test footnotes added to 4 slides to verify footnote rendering with markdown links.",
+      "summary": "Added `footnotes` frontmatter arrays to slides 04 (Why Live Dangerously), 06 (Secrets/Env), 09→renamed (Supply Chain Attacks), 12 (Agent-provided Sandboxing), 13 (Containers/VMs), 14 (Bubblewrap/sandbox-exec), and 12a (approach comparison) with external links and bold prefixes."
+    },
+    {
+      "motivation": "Various words in slide content not in the spell-check dictionary caused check failures.",
+      "summary": "Added `SLSA`, `badlogic`, `smolmachines`, `firejail`, `nspawn`, `Bubblejail`, `AppArmor`, `SELinux`, `seccomp`, `landlock`, `nono`, `unprivileged`, `syscall` to `cspell.config.yaml`."
+    }
+  ],
+  "problems": [
+    "The icon components were initially written using React-style camelCase CSS properties (`flexShrink`, `marginRight`, `verticalAlign`) in a SolidJS project. SolidJS requires kebab-case style properties in JSX style objects. This was only discovered after the icons broke visually — there was no type error. The project uses SolidJS, not React, but the file extension `.tsx` and JSX syntax look identical. A comment in the components directory or a CLAUDE.md note that the project uses SolidJS (not React) would have prevented this trial-and-error.",
+    "The `thumbnail` schema initially used `z.string()` expecting a public URL. To use Astro's `image()` for content-collocated assets, the collection `schema` must be a function receiving `{ image }` rather than a plain Zod object — this is a non-obvious Astro API distinction that required web research to discover. The content schema file had no comment explaining whether `image()` was available or how to use it.",
+    "The footnote was initially placed inside `.presentation-frame` (which has a visible border), causing it to appear wrapped by the frame border. The layout structure wasn't obvious from reading the template alone — the visual problem only appeared at runtime. A comment in the Astro template marking the frame boundary would have clarified where the footnote container should be placed.",
+    "The `marked` library was already a project dependency but this wasn't visible from the presentation-related files. The agent had to check `package.json` to discover it was available. Documenting available utility libraries in `presentations.md` or a local README would save lookup time."
+  ],
+  "session_id": "e7a25e58-b97a-4472-a01a-3301a13512a0",
+  "timestamp": "2026-04-22T19:34:07.500Z"
+}
