@@ -72,6 +72,52 @@ object({
 
 Default: `null`
 
+### quota\_auto\_management\_exclusion\_list
+
+Description: Map of service codes to lists of quota codes to exclude from automatic management
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### quota\_auto\_management\_opt\_in\_type
+
+Description: Opt-in type for AWS Service Quotas Automatic Management. NotifyAndAdjust enables proactive quota increases. NotifyOnly sends alerts only. Disabled turns off auto-management entirely.
+
+Type: `string`
+
+Default: `"NotifyAndAdjust"`
+
+### quota\_auto\_management\_regions
+
+Description: AWS regions in which to enable Service Quotas Automatic Management
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "us-east-1",
+  "us-east-2",
+  "us-west-1",
+  "us-west-2",
+  "ap-northeast-1",
+  "ap-northeast-2",
+  "ap-northeast-3",
+  "ap-south-1",
+  "ap-southeast-1",
+  "ap-southeast-2",
+  "ca-central-1",
+  "eu-central-1",
+  "eu-north-1",
+  "eu-west-1",
+  "eu-west-2",
+  "eu-west-3",
+  "sa-east-1"
+]
+```
+
 ### security\_contact
 
 Description: Security contact information for the AWS account
@@ -93,6 +139,10 @@ Default: `null`
 
 The following outputs are exported:
 
+### quota\_notification\_configuration\_arn
+
+Description: The ARN of the AWS User Notifications configuration for quota alerts
+
 ### spot\_data\_feed\_bucket
 
 Description: The name of the bucket for the spot data feed
@@ -109,10 +159,10 @@ Description: The region of the bucket for the spot data feed
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.38.0/docs) (6.38.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.40.0/docs) (6.40.0)
 
 - [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-
 {/* eslint-enable import-x/order */}
+
 {/* lint enable no-duplicate-headings */}

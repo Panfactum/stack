@@ -85,13 +85,21 @@ Type: `string`
 
 Default: n/a
 
+### recovery\_session\_duration
+
+Description: The session duration for recovery flow logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/
+
+Type: `string`
+
+Default: `"hours=8;minutes=0;seconds=0"`
+
 ### session\_duration
 
 Description: The session duration for user logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/
 
 Type: `string`
 
-Default: `"hours=8;minutes=0;seconds=0"`
+Default: `"days=30;hours=0;minutes=0;seconds=0"`
 
 ### superusers\_require\_webauthn
 
@@ -127,6 +135,6 @@ The following providers are needed by this module:
 
 - [time](https://registry.terraform.io/providers/hashicorp/time/0.13.1/docs) (0.13.1)
 
-
 {/* eslint-enable import-x/order */}
+
 {/* lint enable no-duplicate-headings */}

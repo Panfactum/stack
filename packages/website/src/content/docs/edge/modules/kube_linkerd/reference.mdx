@@ -6,6 +6,14 @@
 
 The following input variables are supported:
 
+### bootstrap\_mode\_enabled
+
+Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled
+
+Type: `bool`
+
+Default: `false`
+
 ### burstable\_nodes\_enabled
 
 Description: Whether to allow controller pods to schedule on burstable nodes. Does not affect DaemonSet pods.
@@ -110,7 +118,7 @@ No outputs.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.38.0/docs) (6.38.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.40.0/docs) (6.40.0)
 
 - [helm](https://registry.terraform.io/providers/hashicorp/helm/3.1.1/docs) (3.1.1)
 
@@ -120,6 +128,6 @@ The following providers are needed by this module:
 
 - [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-
 {/* eslint-enable import-x/order */}
+
 {/* lint enable no-duplicate-headings */}

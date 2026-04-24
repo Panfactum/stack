@@ -410,6 +410,20 @@ Type: `bool`
 
 Default: `false`
 
+### pgbouncer\_ignore\_startup\_parameters
+
+Description: A list of startup parameters that PgBouncer should ignore when sent by clients. Useful when clients (e.g., JDBC drivers) send parameters like search\_path that PgBouncer does not support.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "search_path"
+]
+```
+
 ### pgbouncer\_log\_connections
 
 Description: Whether to log each connection.
@@ -786,6 +800,18 @@ Description: The Vault role used to get admin credentials for the created Postgr
 
 Description: The Vault role used to get read-only credentials for the created PostgreSQL cluster
 
+### db\_schema\_admin\_roles
+
+Description: Map of schema name to Vault role name for per-schema admin credentials
+
+### db\_schema\_reader\_roles
+
+Description: Map of schema name to Vault role name for per-schema read-only credentials
+
+### db\_schema\_superuser\_roles
+
+Description: Map of schema name to Vault role name for per-schema superuser credentials
+
 ### db\_superuser\_role
 
 Description: The Vault role used to get superuser credentials for the created PostgreSQL cluster
@@ -854,6 +880,18 @@ Description: The service name of the db node that allows read-write access
 
 Description: The PostgreSQL port for this service
 
+### schema\_admin\_creds\_secrets
+
+Description: Map of schema name to the Kubernetes Secret name holding per-schema admin credentials
+
+### schema\_reader\_creds\_secrets
+
+Description: Map of schema name to the Kubernetes Secret name holding per-schema reader credentials
+
+### schema\_superuser\_creds\_secrets
+
+Description: Map of schema name to the Kubernetes Secret name holding per-schema superuser credentials
+
 ### server\_certs\_secret
 
 Description: The secret containing the server certificates for the database
@@ -866,7 +904,7 @@ Description: The name of the Kubernetes Secret holding credentials for the super
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.38.0/docs) (6.38.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/6.40.0/docs) (6.40.0)
 
 - [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.6/docs) (2.1.6)
 
@@ -880,6 +918,6 @@ The following providers are needed by this module:
 
 - [vault](https://registry.terraform.io/providers/hashicorp/vault/4.8.0/docs) (4.8.0)
 
-
 {/* eslint-enable import-x/order */}
+
 {/* lint enable no-duplicate-headings */}

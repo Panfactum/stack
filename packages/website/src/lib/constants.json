@@ -8,7 +8,7 @@
     },
     "edge": {
       "placeholder": "__PANFACTUM_VERSION_EDGE__",
-      "ref": "edge.26-04-05",
+      "ref": "edge.26-04-24",
       "label": "Edge",
       "slug": "edge"
     },
