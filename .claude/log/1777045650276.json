@@ -1,0 +1,24 @@
+{
+  "changes": [
+    {
+      "motivation": "When pf-tunnel.sh could not find the connection_info file, grep silently produced empty output (error swallowed by command substitution), causing opaque downstream failures instead of an actionable message.",
+      "summary": "Added an upfront file-existence check for connection_info in pf-tunnel.sh that exits immediately with a clear error directing the user to run 'pf devshell sync'."
+    },
+    {
+      "motivation": "After failing to find the bastion in connection_info, pf-tunnel.sh printed an error but continued executing, causing a second confusing error from yq when it tried to read a non-existent config.yaml.",
+      "summary": "Added exit 1 after the bastion-not-found error message in pf-tunnel.sh so the script stops at the first meaningful failure."
+    },
+    {
+      "motivation": "pf-db-tunnel.sh already exports VAULT_ADDR from a k8s annotation, but pf-tunnel.sh unconditionally overwrote it by reading config.yaml, creating an unnecessary hard dependency on that file when called from pf-db-tunnel.",
+      "summary": "Made the config.yaml VAULT_ADDR lookup in pf-tunnel.sh conditional — the lookup is skipped when VAULT_ADDR is already set in the environment."
+    }
+  ],
+  "problems": [
+    "pf-tunnel.sh used grep on connection_info inside a command substitution, silently swallowing the 'No such file or directory' error and producing an empty variable rather than a visible failure — the missing file check was completely invisible to the user.",
+    "pf-tunnel.sh lacked an exit 1 after printing the bastion-not-found error, so a single missing file caused two separate cryptic errors (grep failure + yq failure) that together obscured the real root cause.",
+    "pf-tunnel.sh unconditionally overwrote VAULT_ADDR from config.yaml even when callers (like pf-db-tunnel.sh) had already set it correctly — this undocumented coupling made pf-db-tunnel depend on a file it has no reason to need.",
+    "Error messages in pf-tunnel.sh did not tell the user what remediation step to take (i.e. run 'pf devshell sync'); they only said the file was missing or the environment name was wrong."
+  ],
+  "session_id": "9364123f-c1e0-452c-a195-8f7e5531a57e",
+  "timestamp": "2026-04-24T15:47:52.288Z"
+}

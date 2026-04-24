@@ -81,10 +81,17 @@ fi
 ####################################################################
 
 CONNECTION_INFO_FILE="$SSH_DIR/connection_info"
+
+if [[ ! -f "$CONNECTION_INFO_FILE" ]]; then
+  echo "Error: $CONNECTION_INFO_FILE not found. Run 'pf devshell sync' to generate it." >&2
+  exit 1
+fi
+
 read -r BASTION_DOMAIN BASTION_PORT <<<"$(grep -m 1 "$BASTION " "$CONNECTION_INFO_FILE" | awk '{print $2, $3}')"
 
 if [[ -z "$BASTION_DOMAIN" || -z "$BASTION_PORT" ]]; then
-  echo "Error: $BASTION not found in $CONNECTION_INFO_FILE. Ensure this name is correct or run pf-update-ssh to regenerate this file." >&2
+  echo "Error: $BASTION not found in $CONNECTION_INFO_FILE. Ensure this name is correct or run 'pf devshell sync' to regenerate this file." >&2
+  exit 1
 fi
 
 ####################################################################
@@ -103,12 +110,18 @@ fi
 ####################################################################
 # Step 4: Get a vault token for signing
 ####################################################################
-CONFIG_FILE="$SSH_DIR/config.yaml"
-VAULT_ADDR=$(yq -r ".bastions[] | select(.name == \"$BASTION\") | .vault" "$CONFIG_FILE")
 
-if [[ -z "$VAULT_ADDR" ]]; then
-  echo "No bastion named $BASTION found in $CONFIG_FILE!" >&2
-  exit 1
+# If VAULT_ADDR is already set (e.g. exported by pf-db-tunnel), use it directly
+# and skip the config.yaml lookup. This avoids requiring a manually-maintained
+# config.yaml when the caller already knows the vault address.
+if [[ -z $VAULT_ADDR ]]; then
+  CONFIG_FILE="$SSH_DIR/config.yaml"
+  VAULT_ADDR=$(yq -r ".bastions[] | select(.name == \"$BASTION\") | .vault" "$CONFIG_FILE")
+
+  if [[ -z "$VAULT_ADDR" ]]; then
+    echo "No bastion named $BASTION found in $CONFIG_FILE!" >&2
+    exit 1
+  fi
 fi
 
 export VAULT_ADDR
