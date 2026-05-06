@@ -4,7 +4,6 @@
   bun2nix,
 }:
 let
-  prekConfig = import ./lint.nix { inherit pkgs bunPkgs; };
   scripts = import ./scripts { inherit pkgs; };
   hooksConfig = import ./hooks { inherit pkgs scripts; };
 in
@@ -12,7 +11,6 @@ in
 
   shellHook = ''
     export REPO_ROOT=$(git rev-parse --show-toplevel)
-    install -m 644 ${prekConfig} "$REPO_ROOT/.pre-commit-config.yaml"
     install -m 644 ${hooksConfig.settingsJson} "$REPO_ROOT/.claude/settings.json"
     export TERRAFORM_MODULES_DIR="$REPO_ROOT/packages/infrastructure";
     export PF_IAC_DIR="$REPO_ROOT/packages/infrastructure";

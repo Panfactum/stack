@@ -132,11 +132,6 @@
               enabled = false;
               smol = false;
             },
-            precommit ? {
-              enable = false;
-              tf_fmt = true;
-              hcl_fmt = true;
-            },
           }:
           import ./packages/devshell {
             inherit
@@ -154,7 +149,6 @@
               bunPkgs
               bun2nix
               cli
-              precommit
               ;
           };
 
@@ -170,14 +164,9 @@
               enabled = true;
               smol = false;
             },
-            precommit ? {
-              enable = true;
-              tf_fmt = true;
-              hcl_fmt = true;
-            },
           }:
           let
-            devshell = panfactumPackages { inherit cli precommit; };
+            devshell = panfactumPackages { inherit cli; };
           in
           pkgs.mkShell {
             inherit name;

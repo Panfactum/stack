@@ -54,7 +54,6 @@ import ProfileForContextCommand from "./commands/kube/profile-for-context/comman
 import { K8sClusterResumeCommand } from "./commands/kube/resume/command.ts";
 import { K8sClusterSuspendCommand } from "./commands/kube/suspend/command.ts";
 import { K8sVeleroSnapshotGcCommand } from "./commands/kube/velero-snapshot-gc/command.ts";
-import { PrecommitInstallCommand } from "./commands/precommit/install/command.ts";
 import { SSOAddCommand } from "./commands/sso/add/command.ts";
 import TunnelCommand from "./commands/tunnel/command.ts";
 import { GetCommitHashCommand } from "./commands/util/get-commit-hash/command.ts";
@@ -110,7 +109,6 @@ cli.register(ClusterResetCommand);
 cli.register(DevShellUpdateCommand)
 cli.register(UpdateModuleStatusCommand)
 cli.register(ConfigGetCommand)
-cli.register(PrecommitInstallCommand)
 cli.register(AWSProfileListCommand)
 cli.register(AWSVPCNetworkTestCommand)
 // eslint-disable-next-line @typescript-eslint/no-deprecated -- Deprecated command still registered for backward compatibility

@@ -16,14 +16,8 @@
     enabled = false;
     smol = false;
   },
-  precommit ? {
-    enable = false;
-    tf_fmt = true;
-    hcl_fmt = true;
-  },
 }:
 let
-  precommitEnabled = precommit.enable or false;
 
   # Custom Packages
   customTerragrunt = pkgs.writeShellScriptBin "terragrunt" ''
@@ -200,16 +194,9 @@ let
       else
         [ ]
     )
-    ++ pkgs.lib.optionals precommitEnabled [ pkgs.prek ];
+    ++ [ pkgs.prek ];
 
-  shellHook =
-    if precommitEnabled then
-      let
-        prekConfig = import ./precommit.nix { inherit pkgs tfUtilsPkgs precommit; };
-      in
-      ''export PF_PRECOMMIT_CONFIG="${prekConfig}"''
-    else
-      "";
+  shellHook = "";
 in
 {
   inherit packages shellHook;
