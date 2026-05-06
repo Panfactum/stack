@@ -1,0 +1,180 @@
+repos:
+- hooks:
+  - id: check-merge-conflict
+    priority: 0
+  - id: check-symlinks
+    priority: 0
+  - id: mixed-line-ending
+    priority: 0
+  repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+- hooks:
+  - description: Runs spellcheck on markdown files
+    entry: /nix/store/jmrwj6a64y8r3rivf8h2ng57fwq7s2i3-cspell-9.6.4/bin/cspell lint
+      --no-progress --gitignore
+    fail_fast: true
+    files: \.(md|mdx)$
+    id: lint-spellcheck
+    language: system
+    name: Spellcheck
+    pass_filenames: true
+    priority: 0
+  - description: Runs shellcheck on shell scripts
+    entry: /nix/store/ghz6z8fvri862mgdg5kl95cpfls931h5-shellcheck-0.11.0-bin/bin/shellcheck
+    fail_fast: true
+    files: ^packages/(devshell|installer|infrastructure)/.*\.sh$
+    id: shellcheck
+    language: system
+    name: Shellcheck
+    pass_filenames: true
+    priority: 0
+  - description: Runs shfmt on shell scripts
+    entry: /nix/store/r3pj36ll7v3ss2z679arpwkg7pnka3s3-shfmt-3.12.0/bin/shfmt -w -i
+      2
+    fail_fast: true
+    files: ^packages/(devshell|installer|infrastructure)/.*\.sh$
+    id: shellfmt
+    language: system
+    name: Shell Format
+    pass_filenames: true
+    priority: 0
+  - description: Removes dead code from Nix files with deadnix
+    entry: /nix/store/sg9jxawvfpz67hg0q0ys23v15cw8sqqz-deadnix-1.3.1/bin/deadnix --edit
+    exclude: (^|/)bun\.nix$
+    fail_fast: true
+    files: ^(flake\.nix|packages/(cli|devshell|local)/.*\.nix)$
+    id: deadnix
+    language: system
+    name: Deadnix
+    pass_filenames: true
+    priority: 0
+  - description: Runs hclfmt on HCL files
+    entry: /nix/store/jm4bcf81g6kfyb8bqvxnx7rdp7ywfdry-terragrunt-0.97.0/bin/terragrunt
+      hcl fmt --file
+    fail_fast: true
+    files: ^packages/cli/.*\.hcl$
+    id: hcl-fmt
+    language: system
+    name: HCL Format
+    pass_filenames: true
+    priority: 0
+  - description: Runs tofu fmt on the infrastructure code
+    entry: /nix/store/f9gnc8z1dkdnr30ygyvlpy29ri19mcci-opentofu-1.11.5/bin/tofu fmt
+    fail_fast: false
+    files: ^(packages/infrastructure|infrastructure)/.*\.tf$
+    id: tf-fmt
+    language: system
+    name: Tofu Format
+    pass_filenames: true
+    priority: 0
+  - description: Ensures all dependencies are pinned and consistent across packages
+    entry: /nix/store/p5f3rq2pr92x9qhhkaajixny3rc4aacc-ds-check-package-json
+    fail_fast: true
+    files: (^|/)package\.json$
+    id: check-package-json
+    language: system
+    name: Check Package JSON Consistency
+    pass_filenames: false
+    priority: 0
+  - description: Validates changelog log.yaml files against the JSON schema
+    entry: ds-validate-changelog
+    fail_fast: true
+    files: ^packages/website/src/content/changelog/.*/log\.yaml$
+    id: validate-changelog-schema
+    language: system
+    name: Validate Changelog Schema
+    pass_filenames: true
+    priority: 0
+  - description: Validates changelog review.yaml files against the JSON schema
+    entry: ds-validate-changelog-review
+    fail_fast: true
+    files: ^packages/website/src/content/changelog/.*/review\.yaml$
+    id: validate-changelog-review-schema
+    language: system
+    name: Validate Changelog Review Schema
+    pass_filenames: true
+    priority: 0
+  - description: Validates metadata.yaml against the JSON schema
+    entry: ds-validate-iac-metadata
+    fail_fast: true
+    files: ^packages/infrastructure/metadata\.yaml$
+    id: validate-metadata-schema
+    language: system
+    name: Validate Metadata Schema
+    pass_filenames: true
+    priority: 0
+  - description: Fixes Nix antipatterns with statix
+    entry: /nix/store/bfpbk8xi48kgb9a1qhpdng7rjmrl5dsx-statix-0.5.8/bin/statix fix
+    exclude: (^|/)bun\.nix$
+    fail_fast: true
+    files: ^(flake\.nix|packages/(cli|devshell|local)/.*\.nix)$
+    id: statix
+    language: system
+    name: Statix
+    pass_filenames: false
+    priority: 1
+  - description: Generates terraform reference docs for changed modules
+    entry: /nix/store/4wbfi2381h8cm22iql1ijm03b21pxr8x-ds-generate-tf-reference
+    fail_fast: false
+    files: ^packages/infrastructure/[^/]+/
+    id: generate-tf-reference
+    language: system
+    name: Generate Terraform Reference
+    pass_filenames: true
+    priority: 1
+  - description: Runs nixfmt on Nix files
+    entry: /nix/store/b5m1h822ln0s493r30sgns77618ws59n-nixfmt-1.2.0/bin/nixfmt
+    exclude: (^|/)bun\.nix$
+    fail_fast: true
+    files: ^(flake\.nix|packages/(cli|devshell|local)/.*\.nix)$
+    id: nixfmt
+    language: system
+    name: Nix Format
+    pass_filenames: true
+    priority: 2
+  - description: Runs a typecheck on the website code
+    entry: /nix/store/nikxh953yhz1ab8ncdfjp1alj99qhlcb-ds-typecheck-website
+    fail_fast: true
+    files: ^packages/website/
+    id: typecheck-website
+    language: system
+    name: Typecheck Website
+    pass_filenames: false
+    priority: 2
+  - description: Runs a typecheck on the CLI code
+    entry: /nix/store/ph8irlzr09mw3rhniwd9yivv9y9nb7hs-ds-typecheck-cli
+    fail_fast: true
+    files: ^packages/cli/
+    id: typecheck-cli
+    language: system
+    name: Typecheck CLI
+    pass_filenames: false
+    priority: 2
+  - description: Runs linting for the website code
+    entry: /nix/store/h5r93gbxkvfiy9rd734x2cz19zwc6r7p-ds-lint-website
+    fail_fast: true
+    files: ^packages/website/src/.*\.(ts|tsx|astro)$
+    id: lint-website
+    language: system
+    name: Lint Website
+    pass_filenames: true
+    priority: 3
+  - description: Runs linting for the CLI code
+    entry: /nix/store/dsadw2s1d5n39xfaww6w06bsl5p210fl-ds-lint-cli
+    fail_fast: true
+    files: ^packages/cli/.*\.ts$
+    id: lint-cli
+    language: system
+    name: Lint CLI
+    pass_filenames: true
+    priority: 3
+  - description: Runs bun tests for the CLI code
+    entry: /nix/store/qjdxnb717a8sjqlxywj0xj44njqm2bjr-ds-test-cli
+    fail_fast: true
+    files: ^packages/cli/.*\.ts$
+    id: test-cli
+    language: system
+    name: Test CLI
+    pass_filenames: true
+    priority: 4
+  repo: local

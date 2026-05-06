@@ -24,7 +24,6 @@ tmp
 .claude/tasks
 *.user.yaml
 result
-.pre-commit-config.yaml
 .devenv
 .direnv
 dist
