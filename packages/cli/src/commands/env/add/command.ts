@@ -23,6 +23,7 @@ import { getRootAccountAdminAccess } from "./getRootAccountAdminAccess";
 import { hasAccessToManagementAccount } from "./hasAccessToManagementAccount";
 import { hasExistingAWSOrg } from "./hasExistingAWSOrg";
 import { provisionAWSAccount } from "./provisionAWSAccount";
+import { setupEnvironmentFiles } from "./setupEnvironmentFiles";
 import { shouldCreateAWSOrg } from "./shouldCreateAWSOrg";
 import { shouldPanfactumManageAWSOrg } from "./shouldPanfactumManageAWSOrg";
 import { updateIAMIdentityCenter } from "./updateIAMIdentityCenter";
@@ -454,6 +455,9 @@ export class EnvironmentAddCommand extends PanfactumCommand {
             newAccountName,
             resuming: resumingBootstrapping
         })
+
+        // Setup per-environment files (flake.nix, .envrc, panfactum.hcl, providers/)
+        await setupEnvironmentFiles({ context, environmentName })
 
 
         // ////////////////////////////////////////////////////////////////

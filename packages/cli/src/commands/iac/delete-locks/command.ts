@@ -3,6 +3,7 @@
 
 import { Option } from 'clipanion';
 import { PanfactumCommand } from '@/util/command/panfactumCommand';
+import { requireEnvironmentContext } from '@/util/context/requireEnvironmentContext';
 import { deleteIaCStateLocks } from '@/util/terragrunt/deleteIaCStateLocks';
 
 /**
@@ -150,6 +151,8 @@ Releasing active locks can cause state corruption.
    * Throws when required configuration is missing or AWS operations fail
    */
   override async execute(): Promise<number> {
+    requireEnvironmentContext();
+
     await deleteIaCStateLocks({
       context: this.context,
       directory: process.cwd(),

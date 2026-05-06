@@ -4,6 +4,7 @@
 import { Command } from "clipanion";
 import { Listr } from "listr2";
 import { PanfactumCommand } from "@/util/command/panfactumCommand";
+import { requireEnvironmentContext } from "@/util/context/requireEnvironmentContext";
 import { buildSyncAWSIdentityCenterTask } from "@/util/devshell/tasks/syncAWSIdentityCenterTask";
 import { syncDomainsTask } from "@/util/devshell/tasks/syncDomainsTask";
 import { buildSyncKubeClustersTask } from "@/util/devshell/tasks/syncKubeClustersTask";
@@ -95,6 +96,8 @@ export class DevShellUpdateCommand extends PanfactumCommand {
    * Throws when any synchronization task fails
    */
   async execute() {
+    requireEnvironmentContext();
+
     const { context } = this;
 
     const tasks = new Listr([], { rendererOptions: { collapseErrors: false } })

@@ -22,3 +22,8 @@ declare module "*envrc" {
   const content: string;
   export default content;
 }
+
+declare module "*.nix" {
+  const content: string;
+  export default content;
+}

@@ -144,6 +144,9 @@ locals {
   # Folder of shared snippets to generate
   provider_folder = "providers"
 
+  # Environments directory for stable state key computation
+  environments_dir = local.vars.environments_dir
+
   # local dev namespace
   # TODO: This is deprecated and will be removed / changed in a future release
   local_dev_namespace = get_env("LOCAL_DEV_NAMESPACE", "")
@@ -453,7 +456,7 @@ remote_state {
   config = {
     profile        = local.is_ci ? "ci" : local.vars.tf_state_profile
     bucket         = local.vars.tf_state_bucket
-    key            = "${local.repo_name}/${local.is_local ? "${local.local_dev_namespace}/" : ""}${path_relative_to_include()}/terraform.tfstate"
+    key            = "${local.repo_name}/${local.is_local ? "${local.local_dev_namespace}/" : ""}${replace(get_original_terragrunt_dir(), "${local.environments_dir}/", "")}/terraform.tfstate"
     region         = local.vars.tf_state_region
     encrypt        = true
     dynamodb_table = local.vars.tf_state_lock_table

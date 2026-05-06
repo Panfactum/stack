@@ -1,5 +1,5 @@
 import { join } from "node:path"
-import envRCPath from "@/files/direnv/envrc" with { type: "file" };
+import { CLIError } from "@/util/error/error";
 import { writeFile } from "@/util/fs/writeFile";
 import { TERRAGRUNT_FILES } from "@/util/terragrunt/constants";
 import { EXPECTED_GITIGNORE_CONTENTS } from "../constants";
@@ -27,7 +27,13 @@ export function syncStandardFilesTask<T extends object>(inputs: ISyncStandardFil
             subtasks.add({
                 title: "Update HCL files",
                 task: async () => {
-                    const environmentsDir = context.devshellConfig.environments_dir;
+                    const activeEnv = process.env["PF_ACTIVE_ENVIRONMENT"];
+                    if (!activeEnv) {
+                        throw new CLIError(
+                            "No environment context detected. Navigate into an environment directory to run devshell sync."
+                        );
+                    }
+                    const environmentsDir = join(context.devshellConfig.environments_dir, activeEnv);
                     await Promise.all(TERRAGRUNT_FILES.map(async ({ path, contentPath }) => {
                         const filePath = join(environmentsDir, path);
                         await writeFile({ context, filePath: filePath, contents: await Bun.file(contentPath).text(), overwrite: true })
@@ -70,13 +76,10 @@ export function syncStandardFilesTask<T extends object>(inputs: ISyncStandardFil
 
             subtasks.add({
                 title: "Update .envrc",
+                skip: "Per-environment .envrc files are managed separately",
                 task: async () => {
-                    await writeFile({
-                        context,
-                        filePath: join(context.devshellConfig.repo_root, ".envrc"),
-                        contents: await Bun.file(envRCPath).text(),
-                        overwrite: true
-                    })
+                    // The root .envrc is now a thin repo shell managed separately
+                    // Per-environment .envrc files are created by env add command
                 }
             })
 

@@ -1,0 +1,35 @@
+{
+  "changes": [
+    {
+      "motivation": "Moving panfactum.hcl into per-environment directories would break existing S3 remote state lookups because path_relative_to_include() computes keys relative to the include file location. A stable key computation anchored to environments_dir is required before any file moves.",
+      "summary": "Replaced path_relative_to_include() with replace(get_original_terragrunt_dir(), local.environments_dir + '/', '') in the panfactum.hcl template (packages/cli/src/files/terragrunt/panfactum.hcl) and in the existing environments/panfactum.hcl to preserve S3 state key paths regardless of where panfactum.hcl resides."
+    },
+    {
+      "motivation": "Upgrading shared environments/panfactum.hcl or environments/providers/ templates affected all environments simultaneously, making independent upgrades impossible.",
+      "summary": "Deleted the shared environments/panfactum.hcl and environments/providers/ (20 files). Created independent copies under environments/{development,production,management,test}/panfactum.hcl and environments/{env}/providers/ so each environment's Terragrunt configuration is fully self-contained."
+    },
+    {
+      "motivation": "A single root flake.nix locked all environments to the same Panfactum CLI version, preventing independent toolchain upgrades per environment.",
+      "summary": "Created environments/{development,production,management,test}/flake.nix and flake.lock giving each environment its own Nix devshell with independent pf_stack_version pinning. Root flake.nix was reduced to a thin repo-only shell (no infrastructure tools)."
+    },
+    {
+      "motivation": "Without automatic shell activation, developers would need to manually load the correct per-environment shell, making the per-environment isolation model impractical to use.",
+      "summary": "Created environments/{development,production,management,test}/.envrc files that activate the correct per-environment Nix devshell via nix-direnv and export PF_ACTIVE_ENVIRONMENT. Updated the root .envrc to load only the thin root devshell. Updated packages/cli/src/files/direnv/envrc template to include the PF_ACTIVE_ENVIRONMENT export."
+    },
+    {
+      "motivation": "Several pf CLI commands (devshell sync, iac delete-locks) operate on environment-specific state but had no way to know which environment the user intended to target after isolation.",
+      "summary": "Added packages/cli/src/util/context/requireEnvironmentContext.ts — a guard utility that reads PF_ACTIVE_ENVIRONMENT and throws a CLIError if unset. Applied the guard to devshell sync (command.ts) and iac delete-locks (command.ts)."
+    },
+    {
+      "motivation": "The pf env add and pf devshell sync commands previously wrote panfactum.hcl and providers/ to a shared location. They needed to scaffold and update per-environment directories instead.",
+      "summary": "Created packages/cli/src/commands/env/add/setupEnvironmentFiles.ts to scaffold per-env panfactum.hcl, providers/, flake.nix, flake.lock, and .envrc during env add. Added packages/cli/src/files/nix/flake.nix as the flake template. Updated devshell sync (syncStandardFiles.ts) to read PF_ACTIVE_ENVIRONMENT and write only to the active environment's directory."
+    }
+  ],
+  "problems": [
+    "The prd-worker agent for task 2 (per-environment panfactum.hcl and providers) did not fully delete the shared environments/panfactum.hcl and environments/providers/ directory, requiring manual cleanup after all tasks were marked complete. The task spec or worker should have verified deletion with a post-condition check.",
+    "The CI/CD task (update CI pipeline for per-environment images) was planned and specced before the user clarified that CI runs inside the environment clusters themselves. This wasted planning effort. The PRD discussion section should have explicitly flagged CI as an open question requiring user input before creating a task for it.",
+    "The impact on pf CLI scaffolding commands (env add, devshell sync) was not captured in the initial PRD — the user had to point it out after planning was presented. The PRD's Developer Experience Impact section listed abstract questions about which commands are affected but did not enumerate the concrete commands and their write paths, which would have made the gap obvious during authoring."
+  ],
+  "session_id": "16c9810b-fa4b-4c0c-b62c-2d60634825cc",
+  "timestamp": "2026-04-24T23:20:51.639Z"
+}
