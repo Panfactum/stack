@@ -1,0 +1,76 @@
+---
+summary: How the Panfactum Cloud Native Framework (PCNF) manages infrastructure using Infrastructure-as-Code.
+---
+
+# Infrastructure-as-Code
+
+## Why OpenTofu / Terraform
+
+PCNF uses :term[OpenTofu]{#opentofu} as its
+:term[infrastructure-as-code]{#infrastructure-as-code} engine. We chose this toolchain for several reasons:
+
+### :collapsible Declarative Model
+
+IaC tools fall roughly into two categories: declarative-first and imperative-first.
+
+Both end up describing the end-goal state and performing some reconciliation with live infrastructure 
+to reach it. However, the differ in how the definition of the end-goal is generated.
+
+OpenTofu takes the declarative-first approach while other tools such as [Pulumi](https://www.pulumi.com/) take an
+imperative-first approach.
+
+While many developers are attracted by the flexibility afforded by imperative-first frameworks 
+(and the ability to write infrastructure management code in programming languages they are 
+familiar with), declarative architectures provide the following benefits:
+
+* Constrained execution model: The simplified nature of declarative programming means that the vast 
+  majority of error states and bugs are fundamentally impossible to reach. If there is one area
+  where eliminating bugs is critical, it is in your core infrastructure.
+
+* Improved static analysis: Declarative code generally lends itself better to static analysis which
+  provides important safeguards against invalid infrastructure states.
+
+* Clear separation of concerns: In our experience, if one is writing logic that is too complex to
+  define in the declarative model provided by OpenTofu, it would be better scoped to the application 
+  layer of your software instead of the IaC layer. This natural limitation helps limit the amount
+  of training and conventions that your organization needs to develop on its own. 
+
+* Agentic efficacy: Having self-describing, declarative interfaces for one's infrastructure greatly
+  improves the out-of-the-box efficacy of a user's AI coding agents.
+
+### :collapsible Provider Ecosystem
+
+While PNCF is primarily built around Kubernetes as the core workload engine, it is unavoidable
+that your organization will also have non-Kubernetes infrastructure. At the absolute minimum,
+your hosting provider will need to be configured to run PNCF Kubernetes.
+
+Instead of introduces multiple additional IaC paradigms like [Helm](https://helm.sh/),
+[CloudFormation](https://aws.amazon.com/cloudformation/), [Ansible](https://www.ansible.com/), etc.,  we 
+keep things simple: all IaC is done through OpenTofu. 
+
+OpenTofu's provider plugin architecture has produced integrations with virtually
+every system that exposes a public API. This lets organizations define *all* infrastructure — cloud
+resources, Kubernetes manifests, DNS records, identity providers, and more — using a single toolchain.
+
+### :collapsible State-based Diffing
+
+Before applying any change, OpenTofu computes a precise diff between your
+declared state and what actually exists. This "plan" step gives operators a clear preview of what
+will be created, modified, or destroyed, greatly reducing the risk of unintended changes.
+
+While not unique to OpenTofu, this is a minimum requirement for safe IaC tooling.
+
+### :collapsible Mature Ecosystem
+
+Terraform (and now OpenTofu) has been the industry-standard IaC tool since the mid-2010s. This
+maturity means battle-tested providers, extensive community knowledge, and broad hiring availability.
+
+While there are certainly more purpose-built tools for certain ecosystems and operations, there
+is no other tool for which one can safely assume every engineer familiar with infrastructure management has 
+a good fundamental understanding.
+
+### :collapsible Open Source Guarantee
+
+After HashiCorp changed Terraform's license to the Business Source License (BSL)
+in 2023, the community forked the project as [OpenTofu](https://opentofu.org/) under the Mozilla Public
+License 2.0. This ensures PCNF will never be subject to vendor lock-in from a proprietary license change.

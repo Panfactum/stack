@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### aws\_ebs\_csi\_driver\_helm\_version
+### aws_ebs_csi_driver_helm_version
 
 Description: The version of the aws-ebs-csi-driver helm chart to deploy
 
@@ -14,7 +14,7 @@ Type: `string`
 
 Default: `"2.45.1"`
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -22,7 +22,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow controller pods to schedule on burstable nodes. Does not affect DaemonSet pods.
 
@@ -30,17 +30,19 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
-Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect DaemonSet pods.
+Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect
+DaemonSet pods.
 
 Type: `bool`
 
 Default: `true`
 
-### extra\_storage\_classes
+### extra_storage_classes
 
-Description: Extra EBS-backed storage classes to add to the cluster. Keys are the name of the storage class and values are their configuration.
+Description: Extra EBS-backed storage classes to add to the cluster. Keys are the name of the storage class and values
+are their configuration.
 
 Type:
 
@@ -63,7 +65,7 @@ map(object({
 
 Default: n/a
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -71,7 +73,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -79,7 +81,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -87,15 +89,16 @@ Type: `bool`
 
 Default: `true`
 
-### sla\_target
+### sla_target
 
-Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest
+uptime (99.999%), highest Cost
 
 Type: `number`
 
 Default: `3`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow controller pods to schedule on spot nodes. Does not affect DaemonSet pods.
 
@@ -103,7 +106,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -113,7 +116,9 @@ Default: `false`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 

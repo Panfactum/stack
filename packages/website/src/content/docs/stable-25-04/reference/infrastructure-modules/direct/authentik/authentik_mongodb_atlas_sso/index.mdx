@@ -4,7 +4,12 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="authentik_mongodb_atlas_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/authentik_mongodb_atlas_sso" status="beta" type="direct" />
+<ModuleHeader
+  name="authentik_mongodb_atlas_sso"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/authentik_mongodb_atlas_sso"
+  status="beta"
+  type="direct"
+/>
 
 # Authentik MongoDB Atlas SSO
 
@@ -18,7 +23,7 @@ This module configures Authentik for integration with MongoDB Atlas.
 
 2. Add a new a `terragrunt.hcl` file that looks like this:
 
-   ::: code-group labels=\[authentik\_mongodb\_atlas\_sso/terragrunt.hcl]
+   ::: code-group labels=\[authentik_mongodb_atlas_sso/terragrunt.hcl]
 
    ```hcl collapse={1-9} "REPLACE_ME"
    include "panfactum" {
@@ -41,7 +46,7 @@ This module configures Authentik for integration with MongoDB Atlas.
    inputs = {
        organization_name = dependency.authentik_core.outputs.organization_name
        authentik_domain  = dependency.kube_authentik.outputs.domain
-       
+
        # Replace AFTER "Setup MongoDB Atlas Identity Provider"
        # with the `ACS URL`
        # Example: https://auth.mongodb.com/sso/saml2/0oaw7vqdsehzxtqZ1297
@@ -63,41 +68,47 @@ This module configures Authentik for integration with MongoDB Atlas.
 
 ### Setup MongoDB Atlas Identity Provider
 
-Please follow the steps defined in the [MongoDB Atlas Identity Provider](/docs/stable-25-04/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) and resume here.
+Please follow the steps defined in the
+[MongoDB Atlas Identity Provider](/docs/stable-25-04/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider)
+and resume here.
 
 ### Sync Authentik with the Atlas Settings
 
 ![ACS & Audience URL](doc_images/mongodb-atlas-identity-providers-acs-url.png)
 
 1. Copy and set the `ACS URL` from the MongoDB Atlas Identity Provider setup to the `acs_url` input.
+
 2. Copy and set the `Audience URI` from the MongoDB Atlas Identity Provider setup to the `audience` input.
+
 3. Run `terragrunt apply`
 
 ### Test the Integration
 
 1. Go to your Authentik instance
+
 2. Find the mongodb atlas application
+
 3. Click and confirm that you are able to login
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
+- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
+- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### acs\_url
+### acs_url
 
 Description: The ACS url provided by Mongo Atlas when configuring an external identity provider
 
@@ -109,13 +120,13 @@ Description: The Entity URL provided by the Service Provider
 
 Type: `string`
 
-### authentik\_domain
+### authentik_domain
 
 Description: The domain name of the authentik instance
 
 Type: `string`
 
-### organization\_name
+### organization_name
 
 Description: The name of your organization
 
@@ -125,7 +136,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### allowed\_groups
+### allowed_groups
 
 Description: Only members of these groups can access MongoDB
 
@@ -133,7 +144,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### authentik\_namespace
+### authentik_namespace
 
 Description: The kubernetes namespace where Authentik is deployed
 
@@ -141,7 +152,7 @@ Type: `string`
 
 Default: `"authentik"`
 
-### media\_configmap
+### media_configmap
 
 Description: The configmap holding the static media that Authentik will use
 
@@ -149,7 +160,7 @@ Type: `string`
 
 Default: `"media"`
 
-### ui\_description
+### ui_description
 
 Description: The description to display in the Authentik web dashboard
 
@@ -161,15 +172,15 @@ Default: `"MongoDB Atlas"`
 
 The following outputs are exported:
 
-### issuer\_url
+### issuer_url
 
 Description: The Authentik issuer URL for the MongoDB Atlas provider
 
-### saml\_metadata
+### saml_metadata
 
 Description: The SAML metadata for the MongoDB Atlas provider
 
-### url\_sso\_post
+### url_sso_post
 
 Description: The SSO POST URL for the MongoDB Atlas provider
 
@@ -177,6 +188,4 @@ Description: The SSO POST URL for the MongoDB Atlas provider
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

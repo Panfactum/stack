@@ -1,34 +1,78 @@
 ---
 slideLayout: "two-column"
 footnotes:
-  - "[Bubblewrap](https://wiki.archlinux.org/title/Bubblewrap) uses Linux namespaces; [sandbox-exec](https://keith.github.io/xcode-man-pages/sandbox-exec.1.html) uses macOS Seatbelt profiles. Neither is cross-platform."
-  - "**See also:** [firejail](https://firejail.wordpress.com/), [systemd-nspawn](https://www.freedesktop.org/software/systemd/man/latest/systemd-nspawn.html), [Bubblejail](https://github.com/igo95862/bubblejail), [AppArmor](https://apparmor.net/) / [SELinux](https://selinuxproject.org/)"
 
+  - "[Bubblewrap](https://wiki.archlinux.org/title/Bubblewrap) uses Linux namespaces;
+    [sandbox-exec](https://keith.github.io/xcode-man-pages/sandbox-exec.1.html) uses macOS Seatbelt profiles. Neither is
+    cross-platform."
+
+  - "**See also:** [firejail](https://firejail.wordpress.com/),
+    [systemd-nspawn](https://www.freedesktop.org/software/systemd/man/latest/systemd-nspawn.html),
+    [Bubblejail](https://github.com/igo95862/bubblejail), [AppArmor](https://apparmor.net/) /
+    [SELinux](https://selinuxproject.org/)"
 ---
 
-import { XMark, CheckMark, MinusMark, Checkbox } from "@/pages/presentations/_components/ChecklistIcons"
+import { XMark, CheckMark, MinusMark, Checkbox } from "@/pages/presentations/_components/ChecklistIcons";
 
 ## Option: Bubblewrap / sandbox-exec
 
 <div class="columns">
-<div class="column">
-  <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px'}}>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Allows access to secrets without exposing them</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Deny-by-default network access w/ L7 filtering</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> R/W/X filesystem controls</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> Supports 100+ concurrent agents</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> Shares host utilities</div>
+  <div class="column">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginTop: "20px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Allows access to secrets without exposing them
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Deny-by-default network access w/ L7 filtering
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> R/W/X filesystem controls
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> Supports 100+ concurrent agents
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> Shares host utilities
+      </div>
+    </div>
   </div>
-</div>
-<div class="column">
-  <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px'}}>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Profiles</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Strong enforcement</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Cross-platform</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Audit log</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> FOSS</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Easy to use</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Easy to share</div>
+  <div class="column">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginTop: "20px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Profiles
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Strong enforcement
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Cross-platform
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Audit log
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> FOSS
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Easy to use
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Easy to share
+      </div>
+    </div>
   </div>
-</div>
 </div>

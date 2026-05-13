@@ -1,0 +1,52 @@
+term: Configuration-as-Code (CaC)
+type: iac
+summary: The practice of defining infrastructure module configuration programmatically in version-controlled files.
+description: |
+  *Infrastructure-as-Code* is typically packaged as reusable [modules](https://opentofu.org/docs/language/modules/) that can be parameterized during deployment by providing different [inputs](https://opentofu.org/docs/language/values/). This pattern allows for significant flexibility and code reuse which are critical when deploying the same infrastructure modules across various systems and environments.
+
+  Inputs can be as simple as resource tags but can also completely change the behavior of a module. It is up to the module author to define what inputs their module allows.
+
+  Most IaC tools allow users to provide inputs interactively, but inputs can also be defined directly in code. When the configuration for a deployed module is provided via code, we call that *configuration-as-code* (CaC).
+
+  While OpenTofu allows defining inputs via simple [.tfvars](https://opentofu.org/docs/language/values/variables/#variable-definitions-tfvars-files) files, a more powerful approach is to use a purpose-built configuration manager such as [Terragrunt](https://terragrunt.gruntwork.io/). Terragrunt provides several advantages:
+
+  - Packaged in a single, free, open-source binary that runs completely locally (as opposed to [Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs) or [Spacelift](https://spacelift.io/))
+  - Allows you to share intra-module configuration blocks such as the [state backend](https://opentofu.org/docs/language/settings/backends/configuration/) and [providers](https://opentofu.org/docs/language/providers/)
+  - Can deploy *specific versions* of both local and remote infrastructure modules
+  - Integrates with [sops](https://github.com/getsops/sops) to define secrets directly in your configuration-as-code
+  - Can define [inter-module dependencies](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#dependency) to control deployment order and chain module outputs to other modules' inputs
+  - Adds retry logic to deal with common intermittent provider and network failures
+  - Adds many [built-in functions](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/) that can be used in your configuration files
+
+  **In the Panfactum stack, we deploy all infrastructure modules using Terragrunt.**
+
+  ```mermaid
+  flowchart LR
+    subgraph configs ["Configuration-as-Code"]
+      dev["dev — replicas: 1"]
+      staging["staging — replicas: 2"]
+      prod["prod — replicas: 5"]
+    end
+
+    module["IaC Module"]
+
+    dev --> module
+    staging --> module
+    prod --> module
+  ```
+references:
+  - type: term
+    label: Infrastructure-as-Code
+    link: "#infrastructure-as-code"
+  - type: term
+    label: Terragrunt
+    link: "#terragrunt"
+  - type: term
+    label: Module
+    link: "#module"
+  - type: internal-docs
+    label: IaC Concepts
+    link: /docs/main/concepts/iac
+  - type: internal-docs
+    label: Deploying Modules
+    link: /docs/main/guides/iac/deploying-modules

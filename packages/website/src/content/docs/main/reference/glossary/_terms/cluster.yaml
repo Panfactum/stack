@@ -1,0 +1,28 @@
+term: Cluster
+type: kubernetes
+summary: A Kubernetes cluster deployed on AWS EKS that runs containerized workloads.
+description: |
+  A *cluster* refers to a Kubernetes cluster deployed on AWS EKS (Elastic Kubernetes Service).
+  It serves as the container orchestration platform for running application workloads within a
+  Panfactum environment.
+
+  Key characteristics:
+
+  - **One per environment-region pair**: Each combination of environment and AWS region gets its own cluster
+  - **Managed via EKS**: Panfactum uses AWS EKS for the Kubernetes control plane
+  - **Image caching**: Container images are pulled through an AWS ECR pull-through cache for reliability and performance
+  - **Cost**: A cluster costs approximately $75–150/month at minimum due to EKS and node costs
+
+  Clusters are bootstrapped using Panfactum's infrastructure modules and managed through
+  Terraform/OpenTofu. Once provisioned, the cluster hosts Panfactum's standard set of addons
+  (ingress, monitoring, secret management, etc.) before application workloads are deployed.
+references:
+  - type: term
+    label: Environment
+    link: "#environment"
+  - type: internal-docs
+    label: Cluster Setup Guide
+    link: /docs/main/guides/bootstrapping/kubernetes-cluster
+  - type: external-docs
+    label: AWS EKS Documentation
+    link: https://docs.aws.amazon.com/eks/

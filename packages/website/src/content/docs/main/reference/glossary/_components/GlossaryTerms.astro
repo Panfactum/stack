@@ -1,0 +1,314 @@
+---
+import { getCollection } from "astro:content";
+import { marked } from "marked";
+
+import { renderMermaidInHtml } from "../../../../../../lib/mermaid.ts";
+
+interface Props {
+  version: string;
+}
+
+const { version } = Astro.props;
+
+const CATEGORY_ORDER: Record<string, number> = {
+  panfactum: 0,
+  iac: 1,
+  kubernetes: 2,
+  devshell: 3,
+  other: 4,
+};
+
+const allTerms = await getCollection("glossaryTerms");
+const terms = allTerms
+  .filter((t) => t.id.startsWith(`${version}/reference/glossary/_terms/`))
+  .sort((a, b) => {
+    const catA = CATEGORY_ORDER[a.data.type] ?? 99;
+    const catB = CATEGORY_ORDER[b.data.type] ?? 99;
+    if (catA !== catB) return catA - catB;
+    return a.data.term.localeCompare(b.data.term);
+  });
+
+function toSlug(entryId: string) {
+  // Extract the YAML filename (without extension) from the collection entry ID
+  // e.g. "main/reference/glossary/_terms/configuration-as-code.yaml" → "configuration-as-code"
+  const filename = entryId.split("/").pop() ?? entryId;
+  return filename.replace(/\.\w+$/, "");
+}
+
+// Build reverse term references: if A references B, B should also reference A
+const reverseRefs = new Map<string, Array<{ type: "term"; label: string; link: string }>>();
+for (const t of terms) {
+  const sourceSlug = toSlug(t.id);
+  for (const ref of t.data.references ?? []) {
+    if (ref.type !== "term") continue;
+    const targetSlug = ref.link.replace(/^#/, "");
+    const existing = reverseRefs.get(targetSlug) ?? [];
+    if (!reverseRefs.has(targetSlug)) {
+      reverseRefs.set(targetSlug, existing);
+    }
+    existing.push({
+      type: "term",
+      label: t.data.term,
+      link: `#${sourceSlug}`,
+    });
+  }
+}
+
+const renderedTerms = await Promise.all(
+  terms.map(async (t) => {
+    const slug = toSlug(t.id);
+    let descriptionHtml = await marked.parse(t.data.description);
+    descriptionHtml = await renderMermaidInHtml(descriptionHtml, `glossary-${slug}`);
+    const explicit = t.data.references ?? [];
+    const reverse = (reverseRefs.get(slug) ?? []).filter(
+      (r) => !explicit.some((e) => e.type === "term" && e.link === r.link)
+    );
+    const references = [...explicit, ...reverse];
+    const deprecationNoticeHtml = t.data.deprecation_notice
+      ? await marked.parseInline(t.data.deprecation_notice)
+      : undefined;
+    return { slug, term: t.data.term, type: t.data.type, summary: t.data.summary, deprecationNoticeHtml, descriptionHtml, references };
+  })
+);
+---
+
+<div id="glossary-terms-container">
+{
+  renderedTerms.map((t) => (
+    <details class="collapsible-section glossary-term" data-category={t.type}>
+      <summary>
+        <div class="glossary-header">
+          <span class="glossary-chevron" />
+          <h2 id={t.slug}>
+            {t.type === "panfactum" && (
+              <svg class="glossary-type-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Panfactum</title><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            )}
+            {t.type === "iac" && (
+              <svg class="glossary-type-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Infrastructure as Code</title><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+            )}
+            {t.type === "kubernetes" && (
+              <svg class="glossary-type-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Kubernetes</title><circle cx="12" cy="12" r="10"/><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M12 22v-4"/><path d="m19.07 19.07-2.83-2.83"/><path d="M22 12h-4"/><path d="m19.07 4.93-2.83 2.83"/><circle cx="12" cy="12" r="3"/></svg>
+            )}
+            {t.type === "devshell" && (
+              <svg class="glossary-type-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>DevShell</title><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+            )}
+            {t.type === "other" && (
+              <svg class="glossary-type-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Other</title><circle cx="12" cy="12" r="10"/><line x1="12" x2="12.01" y1="8" y2="8"/><line x1="12" x2="12" y1="12" y2="16"/></svg>
+            )}
+            <span class="glossary-term-name">{t.term}</span>
+            {t.deprecationNoticeHtml && (
+              <span class="glossary-deprecated-badge" title="Deprecated">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Deprecated
+              </span>
+            )}
+          </h2>
+          <div class="glossary-actions">
+            <a href={`/docs/${version}/reference/glossary/${t.slug}/llm.txt`} class="glossary-action-btn" aria-label={`View ${t.term} as LLM text`} title="View as LLM text">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/><path d="M5 8h14a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><path d="M9 12v.01"/><path d="M15 12v.01"/><path d="M6 16l2 3"/><path d="M18 16l-2 3"/></svg>
+            </a>
+            <a href={`#${t.slug}`} class="glossary-action-btn" aria-label={`Link to ${t.term}`}>
+              <img src="/link.svg" alt="" class="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+        <span class="glossary-summary">{t.summary}</span>
+      </summary>
+      <div class="collapsible-content">
+        {t.deprecationNoticeHtml && (
+          <div class="glossary-deprecation-alert" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span set:html={t.deprecationNoticeHtml} />
+          </div>
+        )}
+        <Fragment set:html={t.descriptionHtml} />
+        {t.references.length > 0 && (
+          <div class="glossary-references">
+            {t.references.some((ref) => ref.type === "term") && (
+              <div class="glossary-ref-section">
+                <span class="glossary-references-label">
+                  <svg class="glossary-ref-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                  Related Terms
+                </span>
+                <ul>
+                  {t.references.filter((ref) => ref.type === "term").map((ref) => (
+                    <li><a href={ref.link}>{ref.label}</a></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {t.references.some((ref) => ref.type === "internal-docs") && (
+              <div class="glossary-ref-section">
+                <span class="glossary-references-label">
+                  <svg class="glossary-ref-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13h4"/><path d="M10 17h4"/></svg>
+                  Panfactum Docs
+                </span>
+                <ul>
+                  {t.references.filter((ref) => ref.type === "internal-docs").map((ref) => (
+                    <li><a href={ref.link}>{ref.label}</a></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {t.references.some((ref) => ref.type === "external-docs") && (
+              <div class="glossary-ref-section">
+                <span class="glossary-references-label">
+                  <svg class="glossary-ref-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                  External Docs
+                </span>
+                <ul>
+                  {t.references.filter((ref) => ref.type === "external-docs").map((ref) => (
+                    <li><a href={ref.link}>{ref.label}</a></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </details>
+  ))
+}
+</div>
+
+<style>
+  .glossary-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  h2 {
+    display: flex;
+    align-items: center;
+  }
+  .glossary-type-icon {
+    margin-right: 0.5rem;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+  .glossary-deprecated-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 0.25rem;
+    white-space: nowrap;
+  }
+  .glossary-deprecation-alert {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-left: 4px solid #f59e0b;
+    border-radius: 0 0.375rem 0.375rem 0;
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    font-size: 0.875rem;
+  }
+  .glossary-deprecation-alert svg {
+    flex-shrink: 0;
+    position: relative;
+    top: 2px;
+  }
+  .glossary-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .glossary-action-btn {
+    text-decoration: none !important;
+    opacity: 0.6;
+    filter: brightness(3);
+  }
+  .glossary-action-btn:hover {
+    opacity: 1;
+    filter: brightness(4);
+  }
+  .glossary-action-btn img {
+    background: transparent !important;
+  }
+  .glossary-summary {
+    display: block;
+    margin-top: 0.25rem;
+    padding: 0 1rem 0 1.75rem;
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+  .glossary-references {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .glossary-ref-section {
+    display: flex;
+    flex-direction: column;
+  }
+  .glossary-references-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.5;
+  }
+  .glossary-references ul {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+  .glossary-references li {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+  }
+  .glossary-ref-icon {
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+</style>
+
+<style is:global>
+  .collapsible-section.glossary-term > summary {
+    flex-wrap: wrap;
+  }
+  .collapsible-section.glossary-term > summary::after,
+  .collapsible-section.glossary-term > summary::before {
+    display: none;
+  }
+  .collapsible-section.glossary-term .glossary-chevron {
+    height: 1rem;
+    width: 1rem;
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+    transition: transform 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23cecfd2'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+  .collapsible-section.glossary-term[open] .glossary-chevron {
+    transform: rotate(180deg);
+  }
+  .collapsible-section.glossary-term .collapsible-content > svg {
+    display: block;
+    margin: 1.5rem auto 0;
+  }
+</style>

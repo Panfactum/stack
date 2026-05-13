@@ -2,12 +2,12 @@
 
 {/* Covers: aws_organization alias, contact info consolidation, aws_dns_zones restructure, kube_domain DNS zone, tf_bootstrap_resources secondary provider removal and backup vault rename, Authentik token migration, Authentik sso subdomain, Authentik org name, KEDA installation, node image cache removal, Kubernetes 1.33 upgrade, kube_certificates consolidation, pull_through_cache_enabled review, kube_cron_job update_type removal, burstable_nodes_enabled review, PF_SKIP_REPO_CHECK rename, pf cluster add rename, pf CLI initialization. */}
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Add `alias` to `aws_organization`
 
-The [`aws_organization`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) module now manages
-the IAM account alias for the management AWS account via a new required `alias` variable.
+The [`aws_organization`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) module now manages the
+IAM account alias for the management AWS account via a new required `alias` variable.
 
 Add an `alias` input to your `aws_organization` module configuration before the next `terragrunt apply`:
 
@@ -20,9 +20,8 @@ inputs = {
 
 ## Consolidate Contact Information Variables
 
-The contact information variables on
-[`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) and
-[`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) have been
+The contact information variables on [`aws_account`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account)
+and [`aws_registered_domains`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) have been
 consolidated to single objects for each contact.
 
 The inputs to [`aws_dns_zones`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) have been
@@ -30,8 +29,8 @@ consolidated to a single `domains` object for better per-domain configuration.
 
 Replace the individual contact field variables (e.g., `contact_first_name`, `contact_last_name`, etc.) with the new
 consolidated contact objects in your `aws_account` and `aws_registered_domains` module configurations. Refer to the
-updated [module reference docs](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) for the exact
-object structure.
+updated [module reference docs](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) for the exact object
+structure.
 
 ## Migrate `aws_dns_zones` Inputs to `domains` Object
 
@@ -40,17 +39,17 @@ consolidated from separate domain list variables into a single `domains` object 
 configuration.
 
 Migrate your `aws_dns_zones` inputs so that each key in the `domains` object is a domain name and the value contains
-per-domain configuration. See the [module reference](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones)
-for the new input schema.
+per-domain configuration. See the
+[module reference](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones) for the new input schema.
 
 ## Rename Dedicated Cluster DNS Zone
 
 Every cluster now has a dedicated DNS zone for hosting control-plane utilities. `kube_domain` is now a required
-configuration value and should be set in the `region.yaml` for every region that houses a Kubernetes cluster.
-The value must be a subdomain of a domain available to the environment.
+configuration value and should be set in the `region.yaml` for every region that houses a Kubernetes cluster. The value
+must be a subdomain of a domain available to the environment.
 
-1. Add a `kube_domain` field to `region.yaml` for every region that contains a Kubernetes cluster. The value must be
-   a subdomain of a domain already available in the environment (e.g., `kube.example.com` if `example.com` is managed).
+1. Add a `kube_domain` field to `region.yaml` for every region that contains a Kubernetes cluster. The value must be a
+   subdomain of a domain already available in the environment (e.g., `kube.example.com` if `example.com` is managed).
 
 2. Deploy the corresponding DNS zone via `aws_dns_zones` before applying cluster modules.
 
@@ -60,24 +59,26 @@ The `aws.secondary` provider alias and cross-region DynamoDB replica have been r
 [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources).
 
 1. Remove the `aws.secondary` provider alias from your `tf_bootstrap_resources` Terragrunt configuration if present.
+
 2. Re-apply `tf_bootstrap_resources` to remove the cross-region DynamoDB replica from your state lock table.
 
 ## Rename Backup Vault in `tf_bootstrap_resources`
 
 <MarkdownAlert severity="warning">
-  Complete the secondary provider removal step above before proceeding. Both changes affect `tf_bootstrap_resources`
-  and should be applied together.
+  Complete the secondary provider removal step above before proceeding. Both changes affect `tf_bootstrap_resources` and
+  should be applied together.
 </MarkdownAlert>
 
-The backup vault name in [`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources)
-now has a unique suffix to prevent conflicts. **Before applying the updated module, manually delete the existing
-backup vault** named `terraform-<env_name>`. Delete all recovery points first, then the vault.
+The backup vault name in
+[`tf_bootstrap_resources`](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) now has a
+unique suffix to prevent conflicts. **Before applying the updated module, manually delete the existing backup vault**
+named `terraform-<env_name>`. Delete all recovery points first, then the vault.
 
 ## Migrate Authentik Token to `region.secrets.yaml`
 
 The `pf sso add` command previously stored the Authentik API token as `authentikUserToken` inside
-`authentik_core_resources/secrets.yaml`. The token has been relocated to `region.secrets.yaml` under the
-standardized key `authentik_token`.
+`authentik_core_resources/secrets.yaml`. The token has been relocated to `region.secrets.yaml` under the standardized
+key `authentik_token`.
 
 If you have already run `pf sso add` and have an existing token stored in
 `<cluster-path>/authentik_core_resources/secrets.yaml` under the key `authentikUserToken`, migrate it to the
@@ -100,18 +101,22 @@ The Authentik subdomain has been standardized from `authentik.<domain>` to `sso.
 If you previously deployed Authentik at `authentik.<domain>`, you must:
 
 1. Update the `authentik_url` value in `global.yaml` from `authentik.<domain>` to `sso.<domain>`.
+
 2. Create a DNS record for `sso.<domain>` pointing to the Authentik ingress.
+
 3. Re-apply `kube_authentik` so the module picks up the new domain.
+
 4. After verifying the new domain works, remove the old `authentik.<domain>` DNS record.
 
 ## Configure Authentik Organization Name
 
-We now create the Authentik email template in `kube_authentik`. The organization name is now a required input.
-Use the new `organization_name` output from the `kube_authentik` module as an input to the `authentik_core_resources` module.
+We now create the Authentik email template in `kube_authentik`. The organization name is now a required input. Use the
+new `organization_name` output from the `kube_authentik` module as an input to the `authentik_core_resources` module.
 
 1. Add the `organization_name` variable to your `kube_authentik` module configuration.
-2. Wire the `organization_name` output from `kube_authentik` into the `authentik_core_resources` module as an input
-   via a `dependency` block:
+
+2. Wire the `organization_name` output from `kube_authentik` into the `authentik_core_resources` module as an input via
+   a `dependency` block:
 
    ```hcl
    dependency "authentik" {
@@ -126,31 +131,38 @@ Use the new `organization_name` output from the `kube_authentik` module as an in
 
 ## Install KEDA
 
-We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed.
-See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
+We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed. See the
+instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
 
 ## Remove Node Image Cache Modules
 
 <MarkdownAlert severity="warning">
   This step must be completed **before** applying the Kubernetes 1.33 upgrade below. The Kyverno-based image cache
-  system causes resource exhaustion issues in production clusters. Destroying it first prevents instability during
-  the upgrade.
+  system causes resource exhaustion issues in production clusters. Destroying it first prevents instability during the
+  upgrade.
 </MarkdownAlert>
 
 The `kube_node_image_cache` and `kube_node_image_cache_controller` modules have been removed entirely.
 
 1. Destroy any active `kube_node_image_cache` module deployments.
+
 2. Destroy any active `kube_node_image_cache_controller` module deployments.
-3. Remove the module directories for `kube_node_image_cache` and `kube_node_image_cache_controller` from your
-   Terragrunt configuration.
+
+3. Remove the module directories for `kube_node_image_cache` and `kube_node_image_cache_controller` from your Terragrunt
+   configuration.
+
 4. Remove the following input variables from any module configurations that set them:
-   * `node_image_cached_enabled` — from `kube_airbyte`, `kube_alloy`, `kube_argo_event_bus`, `kube_authentik`,
+
+   - `node_image_cached_enabled` — from `kube_airbyte`, `kube_alloy`, `kube_argo_event_bus`, `kube_authentik`,
      `kube_aws_ebs_csi`, `kube_cloudnative_pg`, `kube_gha_runners`, `kube_ingress_nginx`, `kube_linkerd`,
      `kube_monitoring`, `kube_nats`, `kube_opensearch`, `kube_pg_cluster`, `kube_redis_sentinel`, `kube_vault`
-   * `node_image_cache_enabled` — from any module that sets it
-   * `image_prepull_enabled` and `image_pin_enabled` — from container spec blocks in `kube_pod`, `kube_deployment`,
+
+   - `node_image_cache_enabled` — from any module that sets it
+
+   - `image_prepull_enabled` and `image_pin_enabled` — from container spec blocks in `kube_pod`, `kube_deployment`,
      `kube_daemon_set`, `kube_stateful_set`, `kube_cron_job`, and `kube_job`
-   * `panfactum_node_image_cache_enabled` — from `kube_policies`
+
+   - `panfactum_node_image_cache_enabled` — from `kube_policies`
 
 ## Upgrade Kubernetes to 1.33
 
@@ -159,8 +171,9 @@ release).
 
 1. Review the [Kubernetes 1.33 changelog](https://kubernetes.io/blog/2025/04/23/kubernetes-v1-33-release/) for any
    deprecated APIs or behavior changes that affect your workloads.
-2. If you pin `kube_version` explicitly in `aws_eks`, update it to `1.33`. Otherwise, re-apply `aws_eks` to trigger
-   the upgrade.
+
+2. If you pin `kube_version` explicitly in `aws_eks`, update it to `1.33`. Otherwise, re-apply `aws_eks` to trigger the
+   upgrade.
 
 No additional action is required for the bundled compatibility fixes (EBS CSI driver pinning, Descheduler config
 migration, and Ingress-nginx annotation risk level).
@@ -221,7 +234,9 @@ migration, and Ingress-nginx annotation risk level).
 5. Navigate to the `kube_certificates` directory.
 
    1. Run `terragrunt init`.
+
    2. Run `terragrunt state push state.json && rm state.json`.
+
    3. Run `terragrunt apply` and review the changes. There should be only a few resources that will be replaced.
 
 6. Remove the `kube_cert_issuers` and `kube_cert_manager` directories.
@@ -236,9 +251,11 @@ pulls for these modules will fail.
 
 Choose one of the following options:
 
-* **Option A**: Deploy the [`aws_ecr_pull_through_cache`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache)
+- **Option A**: Deploy the
+  [`aws_ecr_pull_through_cache`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache)
   module to enable pull-through caching before re-applying these modules.
-* **Option B**: Explicitly set `pull_through_cache_enabled = false` on each of `kube_nats`, `kube_pg_cluster`,
+
+- **Option B**: Explicitly set `pull_through_cache_enabled = false` on each of `kube_nats`, `kube_pg_cluster`,
   `kube_redis_sentinel`, `kube_stateful_set`, and `kube_deployment` in your module configurations.
 
 ## Remove `update_type` from `kube_cron_job`
@@ -250,16 +267,15 @@ Remove any `update_type` input from your `kube_cron_job` module configurations t
 
 ## Review `burstable_nodes_enabled` Default
 
-`burstable_nodes_enabled` now defaults to `true`. If you explicitly set it to `false`,
-no action is needed. Otherwise, confirm your workloads are compatible with burstable
-(T-family) instances.
+`burstable_nodes_enabled` now defaults to `true`. If you explicitly set it to `false`, no action is needed. Otherwise,
+confirm your workloads are compatible with burstable (T-family) instances.
 
 ## Update `PF_SKIP_REPO_CHECK` Environment Variable
 
 The `PF_SKIP_REPO_CHECK` environment variable has been renamed to `PF_SKIP_CHECK_REPO_SETUP`.
 
-If you previously set `PF_SKIP_REPO_CHECK=1` to skip the repo setup check, update your environment, CI pipelines,
-and scripts to use `PF_SKIP_CHECK_REPO_SETUP=1` instead.
+If you previously set `PF_SKIP_REPO_CHECK=1` to skip the repo setup check, update your environment, CI pipelines, and
+scripts to use `PF_SKIP_CHECK_REPO_SETUP=1` instead.
 
 ## Update `pf install-cluster` References
 
@@ -269,12 +285,12 @@ Replace all invocations of `pf install-cluster` with `pf cluster add` in your sc
 
 ## Initialize the `pf` CLI
 
-<MarkdownAlert severity="warning">
-  This step must be completed **after** all migration steps above.
-</MarkdownAlert>
+<MarkdownAlert severity="warning">This step must be completed **after** all migration steps above.</MarkdownAlert>
 
 This release adds the new `pf` CLI tool. To begin using it:
 
 1. Complete all migration steps for the breaking changes above.
+
 2. Run `pf devshell sync`. Ensure this completes successfully before proceeding.
+
 3. Run `terragrunt apply` on **all** modules (or `terragrunt run-all apply`).

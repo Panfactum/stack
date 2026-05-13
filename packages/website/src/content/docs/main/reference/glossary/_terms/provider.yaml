@@ -1,0 +1,33 @@
+term: Provider
+type: iac
+summary: An OpenTofu/Terraform plugin that enables interaction with a specific infrastructure API or service.
+description: |
+  A *provider* is an OpenTofu/Terraform plugin that translates HCL resource declarations into API calls for a specific infrastructure platform or service. Providers are the integration layer that allows OpenTofu to manage resources across hundreds of different systems.
+
+  Each provider is responsible for:
+
+  - Authenticating with the target platform's API
+  - Exposing resource types (e.g., `aws_vpc`, `kubernetes_deployment`) that can be declared in HCL
+  - Managing create, read, update, and delete (CRUD) operations on resources
+
+  Common providers used in the Panfactum stack include:
+
+  - **AWS**: Manages AWS resources (VPCs, EKS clusters, IAM roles, etc.)
+  - **Kubernetes**: Manages Kubernetes resources
+  - **Helm**: Deploys Helm charts
+  - **Vault**: Manages HashiCorp Vault resources
+
+  Providers must be declared in the `terraform.required_providers` block and initialized before a module can be deployed. Panfactum's Terragrunt scaffolding automatically handles provider configuration for the most common providers via the `pf-tf-init` command.
+references:
+  - type: term
+    label: OpenTofu
+    link: "#opentofu"
+  - type: term
+    label: Module
+    link: "#module"
+  - type: internal-docs
+    label: Setting Up Providers
+    link: /docs/main/guides/iac/deploying-modules#setting-up-providers
+  - type: external-docs
+    label: OpenTofu Provider Documentation
+    link: https://opentofu.org/docs/language/providers/

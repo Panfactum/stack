@@ -1,7 +1,7 @@
 # Extending the Panfactum Configuration
 
-While our `panfactum.hcl` provides a lot of functionality out-of-the-box, you may want to add or change
-functionality on a global basis.
+While our `panfactum.hcl` provides a lot of functionality out-of-the-box, you may want to add or change functionality on
+a global basis.
 
 To accomplish this, define your own `shared.hcl` with its own behavior in the **root** of the environment folder.
 
@@ -14,15 +14,16 @@ include "shared" {
 ```
 
 This will merge your custom settings with the Panfactum default settings (see the
-[docs](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#include) for different merge strategies).
+[docs](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#include) for different merge
+strategies).
 
 ## Accessing the Scoped YAML Variables
 
 In your `shared.hcl`, you may find it helpful to reference values defined in the `global.yaml`, `environment.yaml`,
 `region.yaml`, and `module.yaml` files, **especially because you can add arbitrary values to these files**.
 
-Unfortunately, it is not currently possible to import the resolved values
-directly from the `panfactum.hcl` into your `shared.hcl` due to [this outstanding issue](https://github.com/gruntwork-io/terragrunt/issues/1566).
+Unfortunately, it is not currently possible to import the resolved values directly from the `panfactum.hcl` into your
+`shared.hcl` due to [this outstanding issue](https://github.com/gruntwork-io/terragrunt/issues/1566).
 
 Until that issue is resolved, you should copy this block into your `shared.hcl`:
 
@@ -78,23 +79,25 @@ locals {
 
 {/* spellchecker: enable */}
 
-You will then be able to access the properly scoped variable via `local.vars` at other places in your `shared.hcl` configuration.
+You will then be able to access the properly scoped variable via `local.vars` at other places in your `shared.hcl`
+configuration.
 
 ## Supporting Additional Providers
 
-One common customization will be adding additional OpenTofu (Terraform) providers for your organization's
-custom modules. We recommend aligning your provider configuration setup with how Panfactum
-defines and enables our built-in providers. This conforms to the official
+One common customization will be adding additional OpenTofu (Terraform) providers for your organization's custom
+modules. We recommend aligning your provider configuration setup with how Panfactum defines and enables our built-in
+providers. This conforms to the official
 [terragrunt recommendation](https://terragrunt.gruntwork.io/docs/features/keep-your-terraform-code-dry/#dry-common-terraform-code-with-terragrunt-generate-blocks)
 for managing providers.
 
-Let's assume that you want to build modules that require the [Datadog terraform provider](https://registry.terraform.io/providers/DataDog/datadog/latest/docs), and you want all modules
-to use the same provider settings.
+Let's assume that you want to build modules that require the
+[Datadog terraform provider](https://registry.terraform.io/providers/DataDog/datadog/latest/docs), and you want all
+modules to use the same provider settings.
 
 1. Ensure that each module has an `include` block for your custom `shared.hcl` (see above).
 
-2. Create a new `datadog.tf` file with the following contents (example). Add it to the `environments/providers/` directory
-   alongside the other provider snippets.
+2. Create a new `datadog.tf` file with the following contents (example). Add it to the `environments/providers/`
+   directory alongside the other provider snippets.
 
    ```hcl
    provider "datadog" {

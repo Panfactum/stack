@@ -1,0 +1,40 @@
+term: Infrastructure-as-Code
+type: iac
+summary: The practice of configuring and managing infrastructure programmatically using code.
+description: |
+  *Infrastructure-as-Code* (IaC) is the practice of configuring your infrastructure programmatically instead of interactively.
+
+  This came to prominence in the mid 2000s as many infrastructure providers and systems began offering well-documented configuration [APIs](https://en.wikipedia.org/wiki/API) that could be used by third-party tooling such as Terraform.
+
+  The advantages of the IaC approach include:
+
+  - **Speed**: Thousands of discrete infrastructure components can be deployed in a single command
+  - **Reproducibility**: Ensures the *exact* same infrastructure can be deployed repeatedly
+  - **Community**: Best-practice patterns are easily shared and jointly maintained
+  - **Change management**: Infrastructure changes are reviewed using the same processes as application code, often improving an organization to meet compliance standards such as SOC 2
+  - **Documentation**: All the settings for a particular system are easily searchable, often within a single file
+
+  Due to these enormous benefits, IaC has become the de-facto methodology for managing infrastructure in professional settings. This is especially critical in settings where multiple, similar, complex environments must be provisioned and managed (for example, when maintaining development, staging, and production environments with nearly identical infrastructure).
+
+  The most widely adopted IaC tool is Terraform (and its open-source fork, OpenTofu), which uses a declarative approach — you describe the desired end state rather than the steps to reach it.
+
+  **Panfactum uses OpenTofu** as its IaC tool, paired with Terragrunt for configuration management.
+references:
+  - type: term
+    label: Configuration-as-Code
+    link: "#configuration-as-code"
+  - type: term
+    label: OpenTofu
+    link: "#opentofu"
+  - type: term
+    label: Terragrunt
+    link: "#terragrunt"
+  - type: term
+    label: Module
+    link: "#module"
+  - type: internal-docs
+    label: IaC Concepts
+    link: /docs/main/concepts/iac
+  - type: external-docs
+    label: "Wikipedia: Infrastructure as Code"
+    link: https://en.wikipedia.org/wiki/Infrastructure_as_code

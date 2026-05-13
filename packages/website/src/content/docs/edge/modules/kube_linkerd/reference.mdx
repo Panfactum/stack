@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### bootstrap\_mode\_enabled
+### bootstrap_mode_enabled
 
 Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `false`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow controller pods to schedule on burstable nodes. Does not affect DaemonSet pods.
 
@@ -22,15 +22,16 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
-Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect DaemonSet pods.
+Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect
+DaemonSet pods.
 
 Type: `bool`
 
 Default: `true`
 
-### linkerd\_helm\_version
+### linkerd_helm_version
 
 Description: The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)
 
@@ -38,7 +39,7 @@ Type: `string`
 
 Default: `"2025.10.7"`
 
-### log\_level
+### log_level
 
 Description: The log level for the Linkerd pods
 
@@ -46,7 +47,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -54,7 +55,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -62,7 +63,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -70,15 +71,16 @@ Type: `bool`
 
 Default: `true`
 
-### sla\_target
+### sla_target
 
-Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest
+uptime (99.999%), highest Cost
 
 Type: `number`
 
 Default: `3`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow controller pods to schedule on spot nodes. Does not affect DaemonSet pods.
 
@@ -86,7 +88,7 @@ Type: `bool`
 
 Default: `true`
 
-### vault\_ca\_crt
+### vault_ca_crt
 
 Description: The vault certificate authority public certificate.
 
@@ -94,7 +96,7 @@ Type: `string`
 
 Default: n/a
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -104,7 +106,9 @@ Default: `false`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 

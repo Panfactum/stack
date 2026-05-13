@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### bootstrap\_mode\_enabled
+### bootstrap_mode_enabled
 
 Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `false`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: n/a
 
-### ingress\_timeout\_seconds
+### ingress_timeout_seconds
 
 Description: The maximum number of seconds that request may take.
 
@@ -46,7 +46,7 @@ Type: `number`
 
 Default: `60`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `false`
 
-### nginx\_ingress\_helm\_version
+### nginx_ingress_helm_version
 
 Description: The version of the nginx-ingress helm chart to deploy
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `"4.15.1"`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -70,7 +70,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -78,15 +78,16 @@ Type: `bool`
 
 Default: `true`
 
-### sla\_target
+### sla_target
 
-Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest
+uptime (99.999%), highest Cost
 
 Type: `number`
 
 Default: `3`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -94,7 +95,7 @@ Type: `bool`
 
 Default: `true`
 
-### tls\_1\_2\_enabled
+### tls_1_2_enabled
 
 Description: Whether to enable TLS 1.2 protocols
 
@@ -102,7 +103,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -112,7 +113,9 @@ Default: `false`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -136,6 +139,4 @@ The following providers are needed by this module:
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

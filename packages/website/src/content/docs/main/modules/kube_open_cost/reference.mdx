@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -14,7 +14,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `true`
 
-### open\_cost\_helm\_version
+### open_cost_helm_version
 
 Description: The image version of the stakater/reloader helm chart
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: `"2.5.12"`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### spot\_data\_feed\_bucket
+### spot_data_feed_bucket
 
 Description: The name of the spot data feed bucket
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: n/a
 
-### spot\_data\_feed\_bucket\_arn
+### spot_data_feed_bucket_arn
 
 Description: The arn of the spot data feed bucket
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: n/a
 
-### spot\_data\_feed\_bucket\_region
+### spot_data_feed_bucket_region
 
 Description: The region of the spot data feed bucket
 
@@ -78,7 +78,7 @@ Type: `string`
 
 Default: n/a
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -86,7 +86,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -96,7 +96,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 

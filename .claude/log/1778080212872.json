@@ -1,0 +1,35 @@
+{
+  "changes": [
+    {
+      "motivation": "User wanted a top-level Glossary page in the Reference section",
+      "summary": "Created packages/website/src/content/docs/main/reference/glossary/index.mdx as a skeleton page with summary frontmatter and placeholder content using the ::: collapsible syntax"
+    },
+    {
+      "motivation": "New glossary page needed to appear in the site navigation",
+      "summary": "Added a Glossary entry as the first item in the Reference section of packages/website/src/content/docs/main/sideNavSections.ts"
+    },
+    {
+      "motivation": "User wanted collapsible heading sections that still appear in the sidebar TOC — plain MDX components can't do this because Astro's heading extractor only sees actual heading nodes in the compiled hast",
+      "summary": "Created packages/website/src/lib/plugins/rehypeCollapsible.ts: a rehype plugin that transforms ::: collapsible / ::: block delimiters so each heading inside becomes a <details class='collapsible-section'><summary> wrapper, keeping the heading node in the tree for TOC extraction"
+    },
+    {
+      "motivation": "The rehypeCollapsible plugin needed to be registered in the build pipeline, placed after rehypeSlug and rehypeAutolinkHeadings so IDs and anchor links are applied before wrapping",
+      "summary": "Updated packages/website/astro.config.mjs to import and register rehypeCollapsible in the rehypePlugins array"
+    },
+    {
+      "motivation": "The ::: collapsible plugin needed CSS for the <details>/<summary> toggle, chevron animation, and heading resets inside summary",
+      "summary": "Added .collapsible-section and .collapsible-content CSS rules to packages/website/src/components/layouts/docs/global.css using Tailwind @apply directives, including a rotating SVG chevron via ::after pseudo-element"
+    },
+    {
+      "motivation": "User wanted a standalone Astro component for direct MDX use, styled with inline Tailwind classes matching the MarkdownAlert pattern rather than relying on global CSS classes",
+      "summary": "Created packages/website/src/components/markdown/GlossaryTerm.astro: wraps <details>/<summary> with inline Tailwind classes, uses a real SVG chevron element with group-open:rotate-180 for the open/close animation, and accepts a term prop with a slot for the definition body"
+    }
+  ],
+  "problems": [
+    "The Write tool repeatedly failed with 'Claude requested permissions to write to file but not yet granted' even after the user explicitly approved the action. The permission dialog appeared to render in a different workmux terminal pane that the user could not easily interact with, causing multiple failed approval attempts before the root cause was identified. Claude Code's permission UX should make the approval pane more discoverable when using a terminal multiplexer.",
+    "The hook-lint PostToolUse script only runs cspell on .md/.mdx files (line 24-26 of hook-lint), but the pre-commit config has a lint-website hook that covers .astro files and a stop hook (hook-stop-lint) that runs pre-commit on all changed files. This mismatch meant the Write tool succeeded but the subsequent stop-lint run found cspell errors in the .astro file, causing a confusing cycle where the file appeared to be created but Claude kept trying to rewrite it. The discrepancy between what hook-lint lints inline vs what hook-stop-lint catches at stop-time was not obvious and required reading multiple hook scripts to diagnose.",
+    "Bash output redirection (>) and heredoc (<<) commands are blocked by Claude Code's security sandbox even when the target path is within the allowed working directory. This made it impossible to create a new file via Bash as a fallback when the Write tool permission was stuck, leaving no automated path to create the file. The sandbox restriction message incorrectly describes the block as a working-directory scope issue ('may only write to files in the allowed working directories') when the actual path was valid — the real restriction is on shell redirection operators regardless of path."
+  ],
+  "session_id": "0ad04e1a-3e32-433c-b107-6ce10fe5eedd",
+  "timestamp": "2026-05-06T15:57:13.766Z"
+}

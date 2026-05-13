@@ -8,7 +8,7 @@ import { COPYWRITE, DISCORD_URL, GITHUB_URL } from "@/lib/constants";
 
 <footer
   class={`
-    mx-auto flex max-w-screen-2xl flex-col gap-8 overflow-hidden bg-gray-dark-mode-950 px-8 pt-12
+    mt-auto flex flex-col gap-4 overflow-hidden bg-gray-dark-mode-950 pt-8
     text-gray-dark-mode-50
   `}
 >
@@ -21,14 +21,12 @@ import { COPYWRITE, DISCORD_URL, GITHUB_URL } from "@/lib/constants";
       md:flex-row
     `}>
         <div class={`
-          flex flex-col justify-between gap-8 self-start py-4
-          md:h-72
-          lg:h-96
+          flex flex-col gap-4 self-start py-4
         `}>
             <div class="flex flex-col gap-2 text-tertiary">
                 <PanfactumLogoIcon size={250} />
                 <p>
-                    The Open-Source Framework for Cloud Infrastructure
+                    There are many clouds. This one is yours.
                 </p>
                 <div class="flex items-center gap-x-6">
                     <a aria-label="Github Repository" href={GITHUB_URL}>
@@ -40,7 +38,7 @@ import { COPYWRITE, DISCORD_URL, GITHUB_URL } from "@/lib/constants";
                 </div>
             </div>
 
-            <p>{COPYWRITE}</p>
+            <p class="opacity-50">{COPYWRITE}</p>
         </div>
         <!-- <Picture
                 class="h-72 max-w-128 self-end lg:h-96"

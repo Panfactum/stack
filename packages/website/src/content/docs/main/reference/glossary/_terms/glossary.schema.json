@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "term",
+    "type",
+    "summary",
+    "description"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "term": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The display name of the glossary term."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["panfactum", "iac", "kubernetes", "devshell", "other"],
+      "description": "The category of this glossary term, used to display a type icon in the header."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A brief one-line summary shown in the collapsible header next to the term name."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A detailed markdown description shown when the collapsible section is expanded."
+    },
+    "deprecation_notice": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A markdown deprecation notice. When present, the term is marked as deprecated with a badge in the header and this content is rendered as a warning alert at the top of the expanded section."
+    },
+    "references": {
+      "type": "array",
+      "description": "A list of references related to this term.",
+      "items": {
+        "type": "object",
+        "required": ["type", "label", "link"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["term", "internal-docs", "external-docs"],
+            "description": "The type of reference: 'term' links to another glossary term, 'internal-docs' links to a page within the Panfactum docs, 'external-docs' links to an external website."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Display text for the reference link."
+          },
+          "link": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The URL or path for the reference. For 'term' type, use the term slug. For 'internal-docs', use the docs path. For 'external-docs', use the full URL."
+          }
+        }
+      }
+    }
+  }
+}

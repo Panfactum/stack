@@ -4,7 +4,12 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_sa_auth_vault" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_sa_auth_vault" status="stable" type="submodule" />
+<ModuleHeader
+  name="kube_sa_auth_vault"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_sa_auth_vault"
+  status="stable"
+  type="submodule"
+/>
 
 # Vault Authentication via Kubernetes Service Account
 
@@ -16,25 +21,25 @@ This allows our Kubernetes pods to utilize the Vault API without static credenti
 
 The following providers are needed by this module:
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### service\_account
+### service_account
 
 Description: The name of the service account that should be able to assume the AWS permissions.
 
 Type: `string`
 
-### service\_account\_namespace
+### service_account_namespace
 
 Description: The namespace of the service account.
 
 Type: `string`
 
-### vault\_policy\_hcl
+### vault_policy_hcl
 
 Description: The HCL of the policy document to assign to this Vault role.
 
@@ -52,7 +57,7 @@ Type: `string`
 
 Default: `null`
 
-### token\_ttl\_seconds
+### token_ttl_seconds
 
 Description: The maximum token lifetime in seconds
 
@@ -64,7 +69,7 @@ Default: `28800`
 
 The following outputs are exported:
 
-### role\_name
+### role_name
 
 Description: The name of the Vault auth role
 
@@ -72,15 +77,14 @@ Description: The name of the Vault auth role
 
 ### IP Whitelisting
 
-By default, this module's IRSA authentication will only work when the service account token is presented from an IP address
-inside the cluster (this also includes the cluster's public NAT IPs).
+By default, this module's IRSA authentication will only work when the service account token is presented from an IP
+address inside the cluster (this also includes the cluster's public NAT IPs).
 
 This limits the usefulness of tokens that are extracted from the cluster by an attacker.
 
-The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
-assigned in the [aws\_vpc](/docs/stable-25-04/reference/infrastructure-modules/aws/aws_vpc) and [aws\_eks](/docs/stable-25-04/reference/infrastructure-modules/aws/aws_eks)
-modules. If you need additional IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
+The underlying discovery mechanism for the whitelist defaults works by searching for resource tags assigned in the
+[aws_vpc](/docs/stable-25-04/reference/infrastructure-modules/aws/aws_vpc) and
+[aws_eks](/docs/stable-25-04/reference/infrastructure-modules/aws/aws_eks) modules. If you need additional IPs or don't
+use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

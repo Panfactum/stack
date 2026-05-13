@@ -15,6 +15,7 @@ import type { ChangelogListEntry } from './_components/ChangelogList';
 import { ChannelTabBar } from './_components/ChannelTabBar';
 import { contentIdToUrlParam, docsSlugToChangelogSlug, getDirKey, getStableChannelFromId } from './_components/changelogUtils';
 import { getNameFromId } from './_components/getNameFromId';
+import { buildChangelogSidebar } from './_lib/buildChangelogSidebar';
 
 export const ENTRIES_PER_PAGE = 10;
 
@@ -258,74 +259,7 @@ const props = Astro.props as
   | StableChannelProps;
 
 // Build sidebar sections with nested sub-items for each channel
-const sidebarChanges = await getCollection('changes');
-const sidebarUpgradeInstructions = await getCollection('upgradeInstructions');
-
-const sections = DOCS_VERSIONS.map((version) => {
-  const changelogSlug = docsSlugToChangelogSlug(version.slug);
-
-  // Upcoming — simple leaf link
-  if (version.slug === 'main') {
-    return {
-      text: version.label,
-      path: `/${changelogSlug}`
-    };
-  }
-
-  // Edge — show last 20 releases as sub-items
-  if (version.slug === 'edge') {
-    const edgeEntries = sidebarChanges
-      .filter(e => e.id.startsWith('edge'))
-      .sort((a, b) => b.id.localeCompare(a.id))
-      .slice(0, 20);
-
-    return {
-      text: version.label,
-      path: `/${changelogSlug}`,
-      sub: [
-        { text: "Release List", path: "/0" },
-        ...edgeEntries.map(entry => {
-          const urlParam = contentIdToUrlParam(entry.id);
-          const onUpgradePath = entry.data.upgrade_instructions !== undefined || entry.data.branch !== undefined;
-          return {
-            text: urlParam,
-            path: `/${urlParam}`.slice(`/${changelogSlug}`.length),
-            ...(onUpgradePath ? { onUpgradePath: true } : {}),
-            ...(entry.data.skip ? { skip: true } : {}),
-          };
-        })
-      ]
-    };
-  }
-
-  // Stable — show summary, upgrade instructions (if available), and releases
-  if (version.slug.startsWith('stable')) {
-    const channelKey = changelogSlug.replace('stable.', '');
-    const hasUpgrade = sidebarUpgradeInstructions.some(
-      e => e.id === `stable/${channelKey}/upgrade`
-    );
-
-    const sub: Array<{text: string; path: string}> = [
-      { text: "Summary", path: "/summary" },
-    ];
-    if (hasUpgrade) {
-      sub.push({ text: "Upgrade Instructions", path: "/upgrade" });
-    }
-    sub.push({ text: "Releases", path: "/0" });
-
-    return {
-      text: version.label,
-      path: `/${changelogSlug}`,
-      sub
-    };
-  }
-
-  // Fallback
-  return {
-    text: version.label,
-    path: `/${changelogSlug}/0`
-  };
-});
+const sections = await buildChangelogSidebar();
 
 let listEntries: ChangelogListEntry[] = [];
 let title = "";

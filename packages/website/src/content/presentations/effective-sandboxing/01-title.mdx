@@ -1,13 +1,21 @@
 ---
 title: "Effective Sandboxing: Live Dangerously, Safely"
-description: "How to design sandboxing strategies that enforce real security boundaries without sacrificing developer productivity"
+description:
+  "How to design sandboxing strategies that enforce real security boundaries without sacrificing developer productivity"
 date: "2026-04-22"
 author: "Jack Langston"
 slideLayout: "center"
 thumbnail: "./images/thumbnail.svg"
 ---
 
-<svg width="300" height="300" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{margin: '0 auto', display: 'block'}}>
+<svg
+  width="300"
+  height="300"
+  viewBox="0 0 200 200"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  style={{ margin: "0 auto", display: "block" }}
+>
   {/* Outer bubble / shield */}
   <circle cx="100" cy="100" r="90" stroke="#70bfeb" stroke-width="3" fill="none" opacity="0.3" />
   <circle cx="100" cy="100" r="80" stroke="#70bfeb" stroke-width="2" fill="none" opacity="0.15" />
@@ -19,7 +27,9 @@ thumbnail: "./images/thumbnail.svg"
   <circle cx="78" cy="75" r="3" fill="#fdb022" />
   <circle cx="88" cy="75" r="3" fill="#32d583" />
   {/* Prompt */}
-  <text x="65" y="100" font-family="monospace" font-size="20" fill="#70bfeb">{'>'}_</text>
+  <text x="65" y="100" font-family="monospace" font-size="20" fill="#70bfeb">
+    {">"}_
+  </text>
   {/* Cursor blink line */}
   <rect x="95" y="88" width="2" height="16" fill="#70bfeb" opacity="0.7" />
   {/* Small lock icon at bottom of bubble */}

@@ -4,30 +4,37 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_pod" status="stable" type="submodule" />
+<ModuleHeader
+  name="kube_pod"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_pod"
+  status="stable"
+  type="submodule"
+/>
 
 # Kubernetes Pod Template
 
-This module does **not** create a Kubernetes Pod but rather exposes a `pod_template` output
-that is intended to by used by higher-level controllers such as Deployments and StatefulSets. This module
-is used internally by many Panfactum submodules such as
-[kube\_deployment](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube\_stateful\_set](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+This module does **not** create a Kubernetes Pod but rather exposes a `pod_template` output that is intended to by used
+by higher-level controllers such as Deployments and StatefulSets. This module is used internally by many Panfactum
+submodules such as
+[kube_deployment](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and
+[kube_stateful_set](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
 
 ## Usage
 
-This module follows most of the conventions outlined in [this guide](/docs/stable-25-04/guides/deploying-workloads/basics).
+This module follows most of the conventions outlined in
+[this guide](/docs/stable-25-04/guides/deploying-workloads/basics).
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -87,7 +94,7 @@ Description: The namespace where the pod will run
 
 Type: `string`
 
-### workload\_name
+### workload_name
 
 Description: The name of the workload. Used by observability platform for grouping pods.
 
@@ -97,7 +104,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow pods to schedule on arm64 nodes
 
@@ -105,7 +112,7 @@ Type: `bool`
 
 Default: `true`
 
-### az\_anti\_affinity\_required
+### az_anti_affinity_required
 
 Description: Whether to prevent pods from being scheduled on the same zone
 
@@ -113,15 +120,16 @@ Type: `bool`
 
 Default: `false`
 
-### az\_spread\_preferred
+### az_spread_preferred
 
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with
+ScheduleAnyways)
 
 Type: `bool`
 
 Default: `false`
 
-### az\_spread\_required
+### az_spread_required
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
 
@@ -129,7 +137,7 @@ Type: `bool`
 
 Default: `false`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -137,7 +145,7 @@ Type: `bool`
 
 Default: `false`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -145,7 +153,7 @@ Type: `bool`
 
 Default: `true`
 
-### common\_env
+### common_env
 
 Description: Key-value pairs of the environment variables for each container
 
@@ -153,9 +161,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_env\_from\_config\_maps
+### common_env_from_config_maps
 
-Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment
+variables names and the values are the ConfigMap references.
 
 Type:
 
@@ -168,9 +177,10 @@ map(object({
 
 Default: `{}`
 
-### common\_env\_from\_secrets
+### common_env_from_secrets
 
-Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment
+variables names and the values are the Secret references.
 
 Type:
 
@@ -183,7 +193,7 @@ map(object({
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -191,7 +201,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### config\_map\_mounts
+### config_map_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
 
@@ -206,7 +216,7 @@ map(object({
 
 Default: `{}`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -214,7 +224,7 @@ Type: `bool`
 
 Default: `false`
 
-### controller\_nodes\_required
+### controller_nodes_required
 
 Description: Whether the pods must be scheduled on a controller node
 
@@ -222,15 +232,16 @@ Type: `bool`
 
 Default: `false`
 
-### default\_permissions\_enabled
+### default_permissions_enabled
 
-Description: True iff a set of default permissions should be granted to the Pod's service account (e.g., reading its own manifest).
+Description: True iff a set of default permissions should be granted to the Pod's service account (e.g., reading its own
+manifest).
 
 Type: `bool`
 
 Default: `true`
 
-### dns\_policy
+### dns_policy
 
 Description: The DNS policy for the pod
 
@@ -238,7 +249,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_labels
+### extra_labels
 
 Description: Extra labels to apply to all resources created by this module.
 
@@ -246,7 +257,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to the pod
 
@@ -254,7 +265,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Extra pod labels to use
 
@@ -262,7 +273,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the pods
 
@@ -279,9 +290,10 @@ list(object({
 
 Default: `[]`
 
-### extra\_volume\_mounts
+### extra_volume_mounts
 
-Description: A mapping of volume names to their mount configuration in the containers of the Pod. Used for dynamically generated Volumes such as in StatefulSets.
+Description: A mapping of volume names to their mount configuration in the containers of the Pod. Used for dynamically
+generated Volumes such as in StatefulSets.
 
 Type:
 
@@ -293,7 +305,7 @@ map(object({
 
 Default: `{}`
 
-### host\_anti\_affinity\_required
+### host_anti_affinity_required
 
 Description: Whether to prefer preventing pods from being scheduled on the same host
 
@@ -301,7 +313,7 @@ Type: `bool`
 
 Default: `true`
 
-### host\_network
+### host_network
 
 Description: Whether the generated pods are allowed to use the host network
 
@@ -309,7 +321,7 @@ Type: `bool`
 
 Default: `false`
 
-### instance\_type\_anti\_affinity\_required
+### instance_type_anti_affinity_required
 
 Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
 
@@ -317,7 +329,7 @@ Type: `bool`
 
 Default: `false`
 
-### linkerd\_enabled
+### linkerd_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
 
@@ -325,7 +337,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -333,7 +345,7 @@ Type: `bool`
 
 Default: `true`
 
-### match\_labels
+### match_labels
 
 Description: kubernetes labels to use in selectors to match the workload
 
@@ -341,7 +353,7 @@ Type: `map(string)`
 
 Default: `null`
 
-### mount\_owner
+### mount_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -349,7 +361,7 @@ Type: `number`
 
 Default: `1000`
 
-### node\_preferences
+### node_preferences
 
 Description: Node label preferences for the pod
 
@@ -357,7 +369,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the pod
 
@@ -365,7 +377,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler
 
@@ -373,15 +385,16 @@ Type: `bool`
 
 Default: `true`
 
-### pod\_version\_labels\_enabled
+### pod_version_labels_enabled
 
-Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent
+updates.
 
 Type: `bool`
 
 Default: `true`
 
-### priority\_class\_name
+### priority_class_name
 
 Description: The priority class to use for pods in the deployment
 
@@ -389,7 +402,7 @@ Type: `string`
 
 Default: `null`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -397,7 +410,7 @@ Type: `bool`
 
 Default: `true`
 
-### restart\_policy
+### restart_policy
 
 Description: The pod restart policy. One of: Always, OnFailure, Never
 
@@ -405,7 +418,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### secret\_mounts
+### secret_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the Pod
 
@@ -420,7 +433,7 @@ map(object({
 
 Default: `{}`
 
-### service\_account
+### service_account
 
 Description: The name of the service account to use for the pod
 
@@ -428,7 +441,7 @@ Type: `string`
 
 Default: `null`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -436,7 +449,7 @@ Type: `bool`
 
 Default: `true`
 
-### termination\_grace\_period\_seconds
+### termination_grace_period_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -444,7 +457,7 @@ Type: `number`
 
 Default: `90`
 
-### tmp\_directories
+### tmp_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -468,7 +481,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### init\_containers
+### init_containers
 
 Description: n/a
 
@@ -476,11 +489,11 @@ Description: n/a
 
 Description: n/a
 
-### match\_labels
+### match_labels
 
 Description: n/a
 
-### pod\_template
+### pod_template
 
 Description: n/a
 
@@ -488,6 +501,4 @@ Description: n/a
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

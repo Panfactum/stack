@@ -8,6 +8,7 @@ export enum NavIcons {
   book = "book",
   analyze = "analyze",
   history = "history",
+  modules = "modules",
 }
 
 export interface TopLevelDocsSectionMetadata {

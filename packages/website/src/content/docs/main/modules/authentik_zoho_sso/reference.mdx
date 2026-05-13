@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### allowed\_groups
+### allowed_groups
 
 Description: Only members of these groups can access AWS
 
@@ -14,7 +14,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### authentik\_domain
+### authentik_domain
 
 Description: The domain name of the authentik instance
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: n/a
 
-### authentik\_namespace
+### authentik_namespace
 
 Description: The kubernetes namespace where Authentik is deployed
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: n/a
 
-### media\_configmap
+### media_configmap
 
 Description: The configmap holding the static media that Authentik will use
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: n/a
 
-### organization\_name
+### organization_name
 
 Description: The name of your organization
 
@@ -46,7 +46,7 @@ Type: `string`
 
 Default: n/a
 
-### ui\_description
+### ui_description
 
 Description: The description to display in the Authentik web dashboard
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: `"Zoho"`
 
-### ui\_group
+### ui_group
 
 Description: The section in the Authentik web dashboard that this will appear in
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `"Admin"`
 
-### zoho\_acs\_url
+### zoho_acs_url
 
 Description: The ACS url provided by Zoho when configuring an external identity provider
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: n/a
 
-### zoho\_issuer
+### zoho_issuer
 
 Description: The issuer provided by Zoho when configuring an external identity provider
 
@@ -78,7 +78,7 @@ Type: `string`
 
 Default: `"zoho.com"`
 
-### zoho\_sign\_in\_url
+### zoho_sign_in_url
 
 Description: The sign-in url provided by Zoho when configuring an external identity provider
 
@@ -90,7 +90,7 @@ Default: n/a
 
 The following outputs are exported:
 
-### saml\_metadata
+### saml_metadata
 
 Description: n/a
 
@@ -108,6 +108,4 @@ The following providers are needed by this module:
 
 - [tls](https://registry.terraform.io/providers/hashicorp/tls/4.2.1/docs) (4.2.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

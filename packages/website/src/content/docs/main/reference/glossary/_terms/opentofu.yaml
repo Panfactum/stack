@@ -1,0 +1,34 @@
+term: OpenTofu
+type: iac
+summary: The open-source Terraform fork used by Panfactum for infrastructure-as-code.
+description: |
+  In late 2023, HashiCorp [announced a major update to its license](https://www.hashicorp.com/license-faq) for Terraform and its other previously open-source tools. This eliminated the ability for organizations to provide alternatives to HashiCorp's paid, hosted offerings when using Terraform.
+
+  As a result, many concerned parties came together to fork the last open-source Terraform release and create the first release of [OpenTofu](https://opentofu.org/) at the end of 2023. OpenTofu is a drop-in replacement for Terraform v1.6 (`tofu` vs `terraform`). However, as new releases emerge, the feature sets will begin to slowly diverge.
+
+  Key advantages over HashiCorp's Terraform:
+
+  - **Truly open-source**: Licensed under the Mozilla Public License 2.0 (MPL 2.0)
+  - **Community-driven**: [Dozens of companies](https://opentofu.org/supporters/) have come together to sponsor the salaries of many full-time engineers to work on its development
+  - **More contributions**: Already receives more contributions and bugfixes than the original Terraform project
+  - **Drop-in replacement**: Fully compatible with Terraform v1.6 syntax and providers
+
+  OpenTofu will likely become the new industry-standard as organizations grapple with the license change in their next upgrade cycle.
+
+  **Panfactum uses OpenTofu exclusively.** All references to "terraform" in Panfactum documentation refer to OpenTofu unless otherwise specified.
+references:
+  - type: term
+    label: Terraform
+    link: "#terraform"
+  - type: term
+    label: Infrastructure-as-Code
+    link: "#infrastructure-as-code"
+  - type: internal-docs
+    label: IaC Concepts
+    link: /docs/main/concepts/iac
+  - type: external-docs
+    label: OpenTofu Documentation
+    link: https://opentofu.org/
+  - type: external-docs
+    label: OpenTofu Manifesto
+    link: https://opentofu.org/manifesto/

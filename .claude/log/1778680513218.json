@@ -1,0 +1,13 @@
+{
+  "changes": [
+    {
+      "motivation": "The 'Docs' header nav link used SavedLink with a hardcoded default of /docs/edge/guides, and SavedLink only saved the current page when it matched the /docs/edge/guides prefix — so visiting /docs/main/... pages was never tracked. Additionally, SavedLink uses sessionStorage (cleared on new tab/browser restart), so returning to the site always fell back to the hardcoded /docs/edge/guides, ignoring the pf-active-version: 'main' value stored in localStorage.",
+      "summary": "Created DocsNavLink.tsx, a new React component replacing the Docs nav item in all three layouts (docs, primary, autopilot). Within a session it tracks the last-visited docs page across any version (prefix /docs/) in sessionStorage. Across sessions it reads pf-active-version from localStorage and constructs /docs/{savedVersion}/guides as the landing URL. Updated docs/Layout.astro, primary/Layout.astro, and autopilot/Layout.astro to import and use DocsNavLink instead of the previous NavItemWithPopup/SavedLink combination."
+    }
+  ],
+  "problems": [
+    "SavedLink's session-only (sessionStorage) tracking was not documented as a known limitation at the call sites, making it non-obvious that it could not persist the active version across browser sessions. The /docs/edge/guides hardcoded default in three separate layout files also lacked a comment explaining why edge is the fallback, which obscured the fact that the localStorage-persisted version was being ignored on load."
+  ],
+  "session_id": "f4b1e43f-0004-4ed5-8f73-6c59bb0d14a2",
+  "timestamp": "2026-05-13T13:55:31.670Z"
+}

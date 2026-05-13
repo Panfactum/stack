@@ -4,41 +4,46 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="aws_ecr_public_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/aws_ecr_public_repos" status="stable" type="direct" />
+<ModuleHeader
+  name="aws_ecr_public_repos"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/aws_ecr_public_repos"
+  status="stable"
+  type="direct"
+/>
 
 # Public AWS ECR Repositories
 
 ## Differences from Private ECR Repositories
 
-* All public ECR repositories are created in `us-east-1`.
+- All public ECR repositories are created in `us-east-1`.
 
-* Once published, image tags are immutable.
+- Once published, image tags are immutable.
 
-* There is no automatic lifecycle management for images published to public repositories.
+- There is no automatic lifecycle management for images published to public repositories.
 
 ## Custom Registry Alias
 
 Once you deploy public ECR repos, you should request a
-[custom alias](https://docs.aws.amazon.com/AmazonECR/latest/public/public-registry-settings.html).
-This may take a few days to be approved.
+[custom alias](https://docs.aws.amazon.com/AmazonECR/latest/public/public-registry-settings.html). This may take a few
+days to be approved.
 
 ## Deployment Notes
 
-* This module should be deployed in the `global` region.
+- This module should be deployed in the `global` region.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### ecr\_repositories
+### ecr_repositories
 
 Description: Mapping of names to the repositories to create.
 
@@ -65,15 +70,15 @@ No optional inputs.
 
 The following outputs are exported:
 
-### aws\_account\_id
+### aws_account_id
 
 Description: n/a
 
-### aws\_region
+### aws_region
 
 Description: n/a
 
-### ecr\_repositories
+### ecr_repositories
 
 Description: n/a
 
@@ -85,6 +90,4 @@ Description: n/a
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

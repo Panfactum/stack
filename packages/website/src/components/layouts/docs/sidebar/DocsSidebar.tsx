@@ -108,7 +108,7 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
       {/* DESKTOP VIEW */}
       <div
         class={`
-          fixed top-(--header-height) hidden
+          sticky top-(--header-height) hidden flex-shrink-0
           h-[calc(100vh_-_var(--header-height))] w-(--sidebar-width)
           overflow-y-auto border-r-2 border-primary bg-primary pt-3 text-sm
           lg:block

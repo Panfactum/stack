@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### code\_storage\_gb
+### code_storage_gb
 
 Description: The number of GB to allocate to temporary storage for downloading the code repository
 
@@ -14,7 +14,7 @@ Type: `number`
 
 Default: `1`
 
-### cpu\_millicores
+### cpu_millicores
 
 Description: The amount of CPU to allocate to pods in the workflow (in millicores)
 
@@ -30,7 +30,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### git\_password
+### git_password
 
 Description: The git password to use when checking out the code to deploy
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: `""`
 
-### git\_ref
+### git_ref
 
 Description: The default git ref to use when checking out the repo. Can be overwritten on Workflow creation.
 
@@ -46,7 +46,7 @@ Type: `string`
 
 Default: `"main"`
 
-### git\_username
+### git_username
 
 Description: The git username to use when checking out the code to deploy
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: `""`
 
-### memory\_mb
+### memory_mb
 
 Description: The amount of memory to allocate to pods in the workflow (in MB)
 
@@ -80,7 +80,8 @@ Default: n/a
 
 ### repo
 
-Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix.
+Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain
+a protocol prefix.
 
 Type: `string`
 
@@ -94,15 +95,16 @@ Type: `map(string)`
 
 Default: `{}`
 
-### tf\_apply\_dir
+### tf_apply_dir
 
-Description: The default directory where 'terragrunt apply --all' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root.
+Description: The default directory where 'terragrunt apply --all' should be executed. All modules in this directory tree
+will be deployed. Should be relative to the repository root.
 
 Type: `string`
 
 Default: n/a
 
-### tmp\_storage\_gb
+### tmp_storage_gb
 
 Description: The number of GB to allocate to temporary storage for the IaC deployment
 
@@ -118,11 +120,11 @@ The following outputs are exported:
 
 Description: The arguments to the WorkflowTemplate
 
-### aws\_role\_arn
+### aws_role_arn
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### aws\_role\_name
+### aws_role_name
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
@@ -134,7 +136,7 @@ Description: The name of the first template in the Workflow
 
 Description: The name of the WorkflowTemplate
 
-### vault\_role\_name
+### vault_role_name
 
 Description: The name of the Vault role used by the Workflow's Service Account
 

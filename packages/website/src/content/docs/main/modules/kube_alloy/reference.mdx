@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### alloy\_chart\_version
+### alloy_chart_version
 
 Description: The version of the grafana/alloy helm chart to deploy
 
@@ -14,7 +14,7 @@ Type: `string`
 
 Default: `"0.3.1"`
 
-### log\_level
+### log_level
 
 Description: The log level for the Alloy pods
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -48,7 +48,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -76,6 +78,4 @@ The following providers are needed by this module:
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

@@ -2,17 +2,18 @@
 
 {/* Covers the Linkerd major upgrade and NATS EventBus backend replacement. */}
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 <MarkdownAlert severity="warning">
   When upgrading `aws_eks` to this version, you may receive an error about attempting to recreate the cluster:
 
-  ```hcl
-  bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
-  ```
+```hcl
+bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
+```
 
-  To work around this, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
-  `bootstrap_cluster_creator_admin_privileges` input to `true`.
+To work around this, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
+`bootstrap_cluster_creator_admin_privileges` input to `true`.
+
 </MarkdownAlert>
 
 <MarkdownAlert severity="warning">
@@ -20,8 +21,9 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
   that forces redeployment of the underlying NATS StatefulSet on every tag/label update. This also impacts
   [`kube_argo_event_bus`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus).
 
-  This will cause complete loss of any pending NATS messages in Jetstream streams. If you cannot afford to lose
-  stream data, delay upgrading those modules until `edge.24-12-22` which contains the fix.
+This will cause complete loss of any pending NATS messages in Jetstream streams. If you cannot afford to lose stream
+data, delay upgrading those modules until `edge.24-12-22` which contains the fix.
+
 </MarkdownAlert>
 
 ## Linkerd Major Upgrade
@@ -29,39 +31,48 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
 This release contains a major version upgrade to Linkerd. **To upgrade with no downtime, update modules in this order:**
 
 1. [`kube_kyverno`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno)
+
 2. [`kube_policies`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+
 3. [`kube_cilium`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium)
+
 4. [`kube_linkerd`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+
 5. [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+
 6. [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+
 7. The remainder of the modules may be updated in any order.
 
 ## Replace NATS EventBus Backend
 
 The NATS backend for
 [`kube_argo_event_bus`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) has been
-replaced with the enhanced [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) module.
+replaced with the enhanced [`kube_nats`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats)
+module.
 
 To apply this module:
 
 1. Delete any associated `EventSource` or `Sensor` resources first (the `EventBus` deletion will be blocked otherwise).
+
 2. Manually delete any existing `EventBus` resources in your cluster.
+
 3. Apply the updated module.
 
-**Deleting an existing EventBus will cause any unprocessed events to be deleted.** Ensure no pending events exist
-before performing this upgrade.
+**Deleting an existing EventBus will cause any unprocessed events to be deleted.** Ensure no pending events exist before
+performing this upgrade.
 
 ## Remove Deprecated Modules
 
-`kube_fledged` and `kube_reflector` have been removed (deprecated in `edge.24-11-13`). Remove these from your
-clusters before upgrading if you haven't already.
+`kube_fledged` and `kube_reflector` have been removed (deprecated in `edge.24-11-13`). Remove these from your clusters
+before upgrading if you haven't already.
 
 ## Update `kube_node_image_cache` Images Input
 
 The `images` input of
-[`kube_node_image_cache`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache)
-has been updated to take a list of image configuration options rather than a list of image strings.
+[`kube_node_image_cache`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) has
+been updated to take a list of image configuration options rather than a list of image strings.
 
 Also, `node_image_cached_enabled` has been removed as a top-level input from Panfactum submodules (e.g.,
-[`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)) — image
-cache settings can now be configured on a per-container basis.
+[`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)) — image cache
+settings can now be configured on a per-container basis.

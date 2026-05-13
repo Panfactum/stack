@@ -1,0 +1,213 @@
+---
+summary: An overview of the Panfactum Cloud Native Framework (PCNF).
+---
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+# Overview
+
+The Panfactum Cloud Native Framework (PCNF) is framework for helping engineers deploy their own
+cloud platform alternatives to managed service offerings provided by public clouds. 
+
+To better understand the motivations behind this effort and who this project is designed for, see [this document](/docs/main/concepts/motivation). This page
+is focused on understanding what our framework actually is and what it does.
+
+## What PCNF Provides
+
+The framework exists to accomplish our mission: make deploying a fully-customizable, self-hosted cloud easier, cheaper, and faster than working with proprietary cloud vendors.
+
+To enable this mission, the our FOSS framework provides the following:
+
+### :icon[management] :collapsible IaC Management
+
+An opinionated system for managing arbitrary cloud infrastructure via Terraform / OpenTofu Infrastructure-as-Code (IaC).
+
+### :icon[kubernetes] :collapsible Cloud-agnostic, Production-ready Kubernetes
+
+An opinionated, production-ready Kubernetes stack that aims to replace the use of managed cloud services. Importantly, it is:
+   1. Cloud-provider agnostic
+   2. Controlled transparently via customizable IaC 
+   3. Configured with batteries included: autoscaling, policy engine, service-mesh, monitoring, etc.
+
+### :icon[devshell] :collapsible Local-first DevShell   
+
+A Nix-based DevShell that includes:
+   1. A local CLI / web-interface for deploying, managing, and operating the IaC and deployed infrastructure
+   1. Popular, version-matched utilities for the infrastructure
+   1. Integrations for popular coding agents for secure and safe infrastructure management
+
+### :icon[iac-modules] :collapsible Batteries-included IaC Modules
+
+1. IaC submodules that support a production-ready SDLC: hardened deployment patterns, CI/CD, observability, etc.
+1. IaC submodules for infrastructure primitives like databases, CDNs, object storage, and more.
+1. Plug-and-play IaC modules for popular OSS projects such as Airbyte, Temporal, etc.
+
+## Foundational Concepts
+
+<MarkdownAlert severity="warning">
+  Take your time and read this section in its entirety before installing or working with PNCF.
+</MarkdownAlert>
+
+1. In PNCF, _all_ configuration for your cloud lives in a single git repository that you own. This is accomplished
+   via :term[infrastructure-as-code]{#infrastructure-as-code} (:term[OpenTofu]{#opentofu})
+   and :term[configuration-as-code]{#configuration-as-code} (:term[Terragrunt]{#terragrunt}). [^iac]
+
+   [^iac]: Unlike other self-hosted clouds, there is _no_ active management layer in PNCF. 
+
+   We call this repository your :term[infrastructure repository]{#infrastructure-repository}. Our reference guide shows the canonical layout.
+
+2. This repository also defines a :term[Nix flake]{#nix-flake}, which is used to load the :term[Panfactum DevShell]{#devshell} on your local machine.
+   We provide an installer script that will automatically set this up.
+
+   That DevShell contains all the utilities that you need to configure the repository, bootstrap your cloud,
+   work with infrastructure-as-code, deploy cloud workloads, and operate your cloud environments.
+
+1. PNCF segments your cloud into :term[environments]{#environment} which are bounding boxes for permissions
+   and network control. Each environment can be running its own version of PNCF and may span multiple cloud hosting providers. We provide a cross-environment RBAC and SSO system
+   with sane out-of-the-box defaults.
+
+   Environments are then further segmented into :term[regions]{#region} which represents the abstract concept
+   of a physical datacenter. Every region is tied to one of the cloud hosting provider that your environment
+   was configured to use.
+
+1. In PNCF, the primary workload orchestrator is Kubernetes. We provide a production-ready Kubernetes
+   stack that is pre-optimized to meet all the objectives most organizations want to achieve.
+   We refer to these as :term[PNCF clusters]{#cluster}.
+
+   These clusters are deployed to deployed to a single region with at most one cluster per region. [^cloud-regions]
+
+1. This cluster is completely transparent to you and you can utilize it directly just as you would any other Kubernetes cluster.
+
+   However, we also provide 100+ IaC modules that enable you to quickly and easily deploy your workloads in a 
+   production-ready manner to the clusters. Additionally, we provide prebuilt IaC modules that enable you to
+   quickly and easily deploy popular OSS tools spanning categories such as databases, workflow engines, 
+   monitoring solutions, etc.
+
+1. We provide a self-hosted CI/CD system to enable GitOps against your infrastructure repository. This will automatically
+   deploy configuration and infrastructure changes that you or anyone in your organization makes.
+
+1. Everything you deploy is automatically discovered by the DevShell which enables anyone in your organization
+   to interact with your deployed clusters
+   and cloud environments easily, safely, and securely.
+
+[^cloud-regions]: 
+    Note that this constraint is simply to make our configuration layer easier to reason
+    about, but does not represent a limitation for the underlying cloud host.
+
+    You can have multiple PNCF regions
+    deployed to AWS `us-east-2` for example. As a result, you can still have multiple Kubernetes clusters in the same
+    environment in the same cloud provider region.
+
+## PCNF Deployment Lifecycle
+
+Below is an _extremely_ high-level overview of what installing and managing a PCNF deployment looks like.
+
+### :numbered :collapsible Install the DevShell
+
+The DevShell is a Nix flake this is used to install version-specific, OS-compatible toolchains
+necessary to install and operate a PCNF deployment.
+
+This is setup in a dedicated git repository (created JIT, if needed) that will house the IaC for the deployment.
+All configuration and tools are scoped to this repository so that your local system will not be polluted
+by anything that PCNF does.
+
+Our [installer](/docs/main/guides/getting-started/overview) takes care of this bootstrapping process
+for you. It ensures the repository exists, your system has
+the prerequisites available to begin working with the DevShell, and provides guidance on next steps
+once installation is complete.
+
+### :numbered :collapsible Add Environments
+
+Once the DevShell is running, our `pf` CLI tool is used to create a new environment. 
+
+An environment is the primary bounding box for deployed infrastructure. Every piece of infrastructure
+is deployed to an environment and can only communicate with other infrastructure deployed to that same environment by default. Network topology and RBAC are environment-scoped. Environments can span
+multiple clusters, regions, and even cloud providers. Learn more here.
+
+The `pf` tooling takes you through a guided process for all necessary steps including setting up cloud provider accounts,
+deploying IaC state backends, configuring DNS, etc.
+
+By the end of this process your git repository will be set up with all the necessary configuration to begin deploying
+real infrastructure.
+
+### :numbered :collapsible Add Clusters
+
+PCNF uses Kubernetes as the primary workload orchestrator and almost everything we deploy is designed to run
+inside the Kubernetes clusters the framework deploys.
+
+You can learn more about what a PCNF cluster contains here.
+
+The `pf` tooling takes you through a guided process for all the necessary steps to deploy a new cluster
+to an environment. 
+
+By the end of this step, you will have a production-ready cluster that can start running workloads. This will
+be defined entirely in IaC inside your git repository.
+
+### :numbered :collapsible Deploy Identity Provider
+
+The first workload that we recommend deploying is [Authentik](https://goauthentik.io/), an [identity provider](https://en.wikipedia.org/wiki/Identity_provider) that enables you and your users
+to connect to live infrastructure via SSO.
+
+One core paradigm in PCNF is that our deployments are secure-by-default. That means no static credentials, MFA-enforcement, and centralized audit logging, RBAC, and user management.
+
+Again, the `pf` tooling provides automations to set this up.
+
+### :numbered :collapsible Deploy Workloads
+
+There are two different types of workloads that you will likely want to deploy to PCNF clusters:
+
+1. **First-party software:** This is software that you have written and want to expose to your internal and external users.
+
+   We provide many IaC submodules that enable all common deployment patterns and infrastructure building blocks. You
+   can use these modules to simplify the process of creating production-ready deployments of your workloads.
+
+   Moreover, we provide agentic skills that can be used to enable coding agents to automatically create the appropriate IaC
+   using our submodules. These skills ensure your deployments take care of all the capabilities we provide and validate 
+   that your workload meet our production-ready checklists.
+
+   The IaC for these deployments lives in the generated git repository. 
+   
+2. **Third-party software:** These are utilities provided by third-parties such as databases, workflow engines, etc. that
+   can be self-hosted and are used to augment your organization's capabilities.
+
+   We provide many plug-and-play, prepackaged modules for popular software utilities with optimizations and integrations designed for PCNF. See the full list here.
+
+### :numbered :collapsible Integrate CI/CD
+
+Up until now, we have only described local operations. 
+
+However, we also provide both a CI/CD system built on [Argo](https://argoproj.github.io/workflows/) that comes complete with 
+automatic builds, testing, deployments, and other CI/CD pipelines. In PCNF, all CI/CD is designed to run
+inside the clusters themselves to optimize for performance, cost, and security.
+
+Critically, we provide turn-key modules for building your container images, deploying image updates, and deploying IaC updates.
+
+### :numbered :collapsible Operate the System
+
+Our DevShell provides the necessary utilities to safely and securely connect to and manipulate running workloads locally.
+
+This includes automatic private networking tunnels, zero-disk dynamic credentialing, environment isolation, and RBAC
+enforcement. 
+
+Not only does this make it easy to locally work with private resources like databases locally, but we have designed
+our system to enable you to safe allow agentic access to environments for debugging and testing.
+
+### :numbered :collapsible Monitor the System
+
+All of our modules come with automatic monitoring integrations so you can inspect the health of your workloads,
+debug issues, get alerted to problems, and analyze 
+their cost impact.
+
+### :numbered :collapsible Update Periodically
+
+We aim to make long-term maintenance of your PCNF deployments as hassle-free as possible.
+
+To that end, our DevShell tooling performs can perform many updates automatically.
+
+We also provide the necessary utilities so tha you can run different versions of our PCNF environments / clusters
+simultaneously without disruption so you can test upgrades in lower environments before deploying to production.
+
+Finally, we provide structured metadata about every change that we make in our [Changelog](/docs/changelog/edge/0).
+This enables you to use easily use our agent skills in our coding agents to automatically update your first-party IaC and code as the PCNF paradigms evolve.
+
+Learn more about our versioning and upgrades here.

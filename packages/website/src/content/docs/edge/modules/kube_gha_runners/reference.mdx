@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### extra\_env\_secrets
+### extra_env_secrets
 
 Description: A key-value mapping of extra secret environment variables for the runner pods
 
@@ -14,7 +14,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to every runner pod
 
@@ -22,7 +22,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Labels to add to every runner pod
 
@@ -30,15 +30,15 @@ Type: `map(string)`
 
 Default: `{}`
 
-### gha\_runner\_scale\_set\_helm\_version
+### gha_runner_scale_set_helm_version
 
-Description: The version of the  actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
+Description: The version of the actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
 
 Type: `string`
 
 Default: `"0.9.3"`
 
-### github\_token
+### github_token
 
 Description: The GitHub token that the runners will use to register with GitHub
 
@@ -46,7 +46,7 @@ Type: `string`
 
 Default: n/a
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -104,6 +104,4 @@ The following providers are needed by this module:
 
 - [vault](https://registry.terraform.io/providers/hashicorp/vault/4.8.0/docs) (4.8.0)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow pods to schedule on arm64 nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### az\_anti\_affinity\_required
+### az_anti_affinity_required
 
 Description: Whether to prevent pods from being scheduled on the same availability zone
 
@@ -22,23 +22,25 @@ Type: `bool`
 
 Default: `false`
 
-### az\_spread\_preferred
+### az_spread_preferred
 
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways). Defaults to true iff sla\_target >= 2.
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with
+ScheduleAnyways). Defaults to true iff sla_target >= 2.
 
 Type: `bool`
 
 Default: `null`
 
-### az\_spread\_required
+### az_spread_required
 
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule).
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with
+DoNotSchedule).
 
 Type: `bool`
 
 Default: `false`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -46,7 +48,7 @@ Type: `bool`
 
 Default: `true`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -54,7 +56,7 @@ Type: `bool`
 
 Default: `true`
 
-### common\_env
+### common_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -62,9 +64,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_env\_from\_config\_maps
+### common_env_from_config_maps
 
-Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment
+variables names and the values are the ConfigMap references.
 
 Type:
 
@@ -77,9 +80,10 @@ map(object({
 
 Default: `{}`
 
-### common\_env\_from\_secrets
+### common_env_from_secrets
 
-Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment
+variables names and the values are the Secret references.
 
 Type:
 
@@ -92,7 +96,7 @@ map(object({
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -100,7 +104,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### config\_map\_mounts
+### config_map_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Deployment
 
@@ -165,7 +169,7 @@ list(object({
 
 Default: n/a
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -173,7 +177,7 @@ Type: `bool`
 
 Default: `false`
 
-### controller\_nodes\_required
+### controller_nodes_required
 
 Description: Whether the pods must be scheduled on a controller node
 
@@ -181,7 +185,7 @@ Type: `bool`
 
 Default: `false`
 
-### dns\_policy
+### dns_policy
 
 Description: The DNS policy for the pods
 
@@ -189,7 +193,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_annotations
+### extra_annotations
 
 Description: A map of extra annotations that will be added to the Deployment (not the pods)
 
@@ -197,7 +201,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_labels
+### extra_labels
 
 Description: A map of extra labels that will be added to the Deployment (not the pods)
 
@@ -205,7 +209,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to the pods in the deployment
 
@@ -213,7 +217,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Extra pod labels to use
 
@@ -221,7 +225,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_service\_annotations
+### extra_service_annotations
 
 Description: Annotations to add to the service
 
@@ -229,7 +233,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_service\_labels
+### extra_service_labels
 
 Description: Extra service labels to use
 
@@ -237,7 +241,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the pods
 
@@ -254,7 +258,7 @@ list(object({
 
 Default: `[]`
 
-### host\_anti\_affinity\_required
+### host_anti_affinity_required
 
 Description: Whether to prefer preventing pods from being scheduled on the same host.
 
@@ -262,23 +266,25 @@ Type: `bool`
 
 Default: `true`
 
-### ignore\_replica\_count
+### ignore_replica_count
 
-Description: Whether to ignore changes to the replica count. When this is true, 'replicas' will ONLY be used at initial Deployment creation. Useful when implementing horizontal autoscaling.
+Description: Whether to ignore changes to the replica count. When this is true, 'replicas' will ONLY be used at initial
+Deployment creation. Useful when implementing horizontal autoscaling.
 
 Type: `bool`
 
 Default: `false`
 
-### instance\_type\_anti\_affinity\_required
+### instance_type_anti_affinity_required
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to
+true iff sla_target == 3.
 
 Type: `bool`
 
 Default: `null`
 
-### linkerd\_enabled
+### linkerd_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
 
@@ -286,7 +292,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -294,7 +300,7 @@ Type: `bool`
 
 Default: `true`
 
-### max\_surge
+### max_surge
 
 Description: The maximum number of pods that can be scheduled above the desired number of pods.
 
@@ -302,7 +308,7 @@ Type: `string`
 
 Default: `"25%"`
 
-### max\_unavailable
+### max_unavailable
 
 Description: Controls how many pods are allowed to be unavailable in the Deployment under the Pod Disruption Budget
 
@@ -310,7 +316,7 @@ Type: `number`
 
 Default: `1`
 
-### mount\_owner
+### mount_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -334,7 +340,7 @@ Type: `string`
 
 Default: n/a
 
-### node\_preferences
+### node_preferences
 
 Description: Node label preferences for the pods
 
@@ -342,7 +348,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the pods
 
@@ -350,7 +356,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -358,15 +364,16 @@ Type: `bool`
 
 Default: `true`
 
-### pod\_version\_labels\_enabled
+### pod_version_labels_enabled
 
-Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent
+updates.
 
 Type: `bool`
 
 Default: `true`
 
-### priority\_class\_name
+### priority_class_name
 
 Description: The priority class to use for pods in the Deployment
 
@@ -374,7 +381,7 @@ Type: `string`
 
 Default: `null`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -390,7 +397,7 @@ Type: `number`
 
 Default: `1`
 
-### restart\_policy
+### restart_policy
 
 Description: The pod restart policy
 
@@ -398,7 +405,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### secret\_mounts
+### secret_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the Deployment
 
@@ -414,23 +421,24 @@ map(object({
 
 Default: `{}`
 
-### service\_ip
+### service_ip
 
-Description: If provided, the Deployment's service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
+Description: If provided, the Deployment's service will be statically bound to this IP address. Must be within the
+Service IP CIDR range for the cluster.
 
 Type: `string`
 
 Default: `null`
 
-### service\_load\_balancer\_class
+### service_load_balancer_class
 
-Description: Iff service\_type == LoadBalancer, the loadBalancerClass to use.
+Description: Iff service_type == LoadBalancer, the loadBalancerClass to use.
 
 Type: `string`
 
 Default: `"service.k8s.aws/nlb"`
 
-### service\_name
+### service_name
 
 Description: If provided, the Deployment's service will have this name. If not provided, will default to name.
 
@@ -438,15 +446,15 @@ Type: `string`
 
 Default: `null`
 
-### service\_public\_domain\_names
+### service_public_domain_names
 
-Description: Iff service\_type == LoadBalancer, the public domains names that this service will be accessible from.
+Description: Iff service_type == LoadBalancer, the public domains names that this service will be accessible from.
 
 Type: `list(string)`
 
 Default: `[]`
 
-### service\_type
+### service_type
 
 Description: The type of the Deployment's Service.
 
@@ -454,7 +462,7 @@ Type: `string`
 
 Default: `"ClusterIP"`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -462,7 +470,7 @@ Type: `bool`
 
 Default: `true`
 
-### termination\_grace\_period\_seconds
+### termination_grace_period_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -470,7 +478,7 @@ Type: `number`
 
 Default: `30`
 
-### tmp\_directories
+### tmp_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -486,15 +494,16 @@ map(object({
 
 Default: `{}`
 
-### unhealthy\_pod\_eviction\_policy
+### unhealthy_pod_eviction_policy
 
-Description: Whether to allow unhealthy pods to be evicted. See https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy.
+Description: Whether to allow unhealthy pods to be evicted. See
+https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy.
 
 Type: `string`
 
 Default: `"AlwaysAllow"`
 
-### update\_type
+### update_type
 
 Description: The type of update that the Deployment should use. Must be one of: RollingUpdate, Recreate
 
@@ -502,7 +511,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### voluntary\_disruption\_window\_cron\_schedule
+### voluntary_disruption_window_cron_schedule
 
 Description: The times when disruption windows should start
 
@@ -510,7 +519,7 @@ Type: `string`
 
 Default: `"0 0/4 * * *"`
 
-### voluntary\_disruption\_window\_enabled
+### voluntary_disruption_window_enabled
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
@@ -518,7 +527,7 @@ Type: `bool`
 
 Default: `false`
 
-### voluntary\_disruption\_window\_seconds
+### voluntary_disruption_window_seconds
 
 Description: The length of the disruption window in seconds
 
@@ -526,7 +535,7 @@ Type: `number`
 
 Default: `900`
 
-### voluntary\_disruptions\_enabled
+### voluntary_disruptions_enabled
 
 Description: Whether to enable voluntary disruptions of pods in this module.
 
@@ -534,7 +543,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -542,7 +551,7 @@ Type: `bool`
 
 Default: `true`
 
-### wait\_for\_rollout
+### wait_for_rollout
 
 Description: Whether to wait for the deployment rollout before allowing terraform to proceed
 
@@ -558,15 +567,15 @@ The following outputs are exported:
 
 Description: The default labels assigned to all resources in this Deployment
 
-### match\_labels
+### match_labels
 
 Description: The labels unique to this Deployment that can be used to select any pods in this Deployment
 
-### service\_account\_name
+### service_account_name
 
 Description: The service account used for the pods
 
-### service\_name
+### service_name
 
 Description: The name of the service for the deployment
 

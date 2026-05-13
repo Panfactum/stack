@@ -1,0 +1,32 @@
+term: Terragrunt
+type: iac
+summary: A configuration-as-code tool that wraps OpenTofu/Terraform to manage module deployments.
+description: |
+  *Terragrunt* is a thin wrapper around OpenTofu/Terraform that provides configuration-as-code capabilities for managing infrastructure module deployments. It is developed by [Gruntwork](https://gruntwork.io/) and is free, open-source, and runs entirely locally.
+
+  In the Panfactum stack, Terragrunt is the primary tool for deploying all infrastructure modules. It is configured via `terragrunt.hcl` files in the environments directory.
+
+  Key capabilities that Terragrunt adds over plain OpenTofu:
+
+  - **Configuration sharing**: Share provider configurations, backend settings, and common inputs across modules
+  - **Version management**: Pin specific versions of both local and remote infrastructure modules
+  - **Inter-module dependencies**: Declare deployment order and chain outputs between modules
+  - **Secrets integration**: Integrates with [sops](https://github.com/getsops/sops) for encrypted secrets in configuration files
+  - **Retry logic**: Handles common intermittent provider and network failures automatically
+  - **Built-in functions**: Additional helper functions for constructing configuration values
+references:
+  - type: term
+    label: Configuration-as-Code
+    link: "#configuration-as-code"
+  - type: term
+    label: OpenTofu
+    link: "#opentofu"
+  - type: internal-docs
+    label: IaC Concepts
+    link: /docs/main/concepts/iac
+  - type: internal-docs
+    label: Deploying Modules
+    link: /docs/main/guides/iac/deploying-modules
+  - type: external-docs
+    label: Terragrunt Documentation
+    link: https://terragrunt.gruntwork.io/docs/

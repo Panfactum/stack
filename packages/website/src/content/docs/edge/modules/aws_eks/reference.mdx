@@ -6,15 +6,16 @@
 
 The following input variables are supported:
 
-### bootstrap\_cluster\_creator\_admin\_privileges
+### bootstrap_cluster_creator_admin_privileges
 
-Description: Whether to give cluster admin privileges to the cluster creator implicitly. Cannot be changed after cluster creation. For backwards compatibility purposes only.
+Description: Whether to give cluster admin privileges to the cluster creator implicitly. Cannot be changed after cluster
+creation. For backwards compatibility purposes only.
 
 Type: `bool`
 
 Default: `false`
 
-### bootstrap\_mode\_enabled
+### bootstrap_mode_enabled
 
 Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled.
 
@@ -22,7 +23,7 @@ Type: `bool`
 
 Default: `false`
 
-### cluster\_description
+### cluster_description
 
 Description: The purpose of the EKS cluster.
 
@@ -30,7 +31,7 @@ Type: `string`
 
 Default: n/a
 
-### cluster\_name
+### cluster_name
 
 Description: The name of the EKS cluster resource.
 
@@ -38,7 +39,7 @@ Type: `string`
 
 Default: n/a
 
-### control\_plane\_logging
+### control_plane_logging
 
 Description: Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)
 
@@ -46,7 +47,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### control\_plane\_subnets
+### control_plane_subnets
 
 Description: List of subnet names for the control plane. Must be in at least two different availability zones.
 
@@ -54,15 +55,15 @@ Type: `set(string)`
 
 Default: `[]`
 
-### dns\_service\_ip
+### dns_service_ip
 
-Description: The IP address of the cluster's DNS service. Must be inside the service\_cidr range.
+Description: The IP address of the cluster's DNS service. Must be inside the service_cidr range.
 
 Type: `string`
 
 Default: `"172.20.0.10"`
 
-### enable\_public\_access
+### enable_public_access
 
 Description: Whether the cluster control plane should be available from the public internet.
 
@@ -70,7 +71,7 @@ Type: `bool`
 
 Default: `true`
 
-### extended\_support\_enabled
+### extended_support_enabled
 
 Description: Whether to enable extended support for EOL Kubernetes versions.
 
@@ -78,15 +79,16 @@ Type: `bool`
 
 Default: `true`
 
-### extra\_admin\_principal\_arns
+### extra_admin_principal_arns
 
-Description: Grants read-write access to most resources (not included top-level cluster configuration) to the indicated principals.
+Description: Grants read-write access to most resources (not included top-level cluster configuration) to the indicated
+principals.
 
 Type: `list(string)`
 
 Default: `[]`
 
-### extra\_reader\_principal\_arns
+### extra_reader_principal_arns
 
 Description: Grants read access to all resources (including secrets) to the indicated principals.
 
@@ -94,7 +96,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### extra\_restricted\_reader\_principal\_arns
+### extra_restricted_reader_principal_arns
 
 Description: Grants read access to all resources (not including secrets) to the indicated principals.
 
@@ -102,7 +104,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### extra\_superuser\_principal\_arns
+### extra_superuser_principal_arns
 
 Description: Grants read-write access to all resources to the indicated principals.
 
@@ -110,15 +112,16 @@ Type: `list(string)`
 
 Default: `[]`
 
-### kube\_version
+### kube_version
 
-Description: Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied.
+Description: Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will
+be automatically applied.
 
 Type: `string`
 
 Default: `"1.33"`
 
-### node\_ami\_name
+### node_ami_name
 
 Description: The name of the AMI to use for the controller nodes.
 
@@ -126,7 +129,7 @@ Type: `string`
 
 Default: `"bottlerocket-aws-k8s-1.33-aarch64-v1.57.0-beaadc52"`
 
-### node\_ebs\_volume\_size\_gb
+### node_ebs_volume_size_gb
 
 Description: The size of the EBS volume in GiB to use for each node.
 
@@ -134,7 +137,7 @@ Type: `number`
 
 Default: `40`
 
-### node\_security\_groups
+### node_security_groups
 
 Description: Names of security groups allowed to communicate directly with the cluster nodes.
 
@@ -142,7 +145,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### node\_subnets
+### node_subnets
 
 Description: List of names for subnets that controller nodes should be deployed to
 
@@ -150,7 +153,7 @@ Type: `list(string)`
 
 Default: n/a
 
-### public\_access\_cidrs
+### public_access_cidrs
 
 Description: IP address ranges that can access the public control plane API endpoint.
 
@@ -159,12 +162,10 @@ Type: `set(string)`
 Default:
 
 ```json
-[
-  "0.0.0.0/0"
-]
+["0.0.0.0/0"]
 ```
 
-### root\_user\_access\_entry\_enabled
+### root_user_access_entry_enabled
 
 Description: Whether to enable the root user access entry
 
@@ -172,7 +173,7 @@ Type: `bool`
 
 Default: `true`
 
-### service\_cidr
+### service_cidr
 
 Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
 
@@ -180,7 +181,7 @@ Type: `string`
 
 Default: `"172.20.0.0/16"`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to create spot instances instead of on-demand instances
 
@@ -188,7 +189,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpc\_id
+### vpc_id
 
 Description: The id for the VPC that the cluster should be deployed into
 
@@ -200,39 +201,39 @@ Default: n/a
 
 The following outputs are exported:
 
-### cluster\_ca\_data
+### cluster_ca_data
 
 Description: The CA certificate for the Kubernetes API server
 
-### cluster\_name
+### cluster_name
 
 Description: The name of the EKS cluster
 
-### cluster\_region
+### cluster_region
 
 Description: The AWS region to which the EKS cluster is deployed
 
-### cluster\_url
+### cluster_url
 
 Description: The URL for the Kubernetes API server
 
-### dns\_service\_ip
+### dns_service_ip
 
 Description: The IP address of the cluster's DNS service.
 
-### node\_instance\_profile
+### node_instance_profile
 
 Description: The instance profile assigned to controller nodes
 
-### node\_role\_arn
+### node_role_arn
 
 Description: The ARN of the role assigned to controller nodes
 
-### node\_security\_group\_id
+### node_security_group_id
 
 Description: ID of the security group assigned to controller nodes
 
-### user\_data
+### user_data
 
 Description: The user data file provided to the controller nodes
 

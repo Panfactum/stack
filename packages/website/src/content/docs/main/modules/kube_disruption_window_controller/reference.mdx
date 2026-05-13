@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### cron\_schedule
+### cron_schedule
 
 Description: The times when disruption windows should start
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: n/a
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the annotator images
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -62,7 +62,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -74,7 +74,7 @@ Default: `true`
 
 The following outputs are exported:
 
-### disruption\_window\_id
+### disruption_window_id
 
 Description: n/a
 
@@ -88,6 +88,4 @@ The following providers are needed by this module:
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

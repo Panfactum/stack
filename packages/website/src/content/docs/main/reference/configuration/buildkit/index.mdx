@@ -4,8 +4,9 @@
 
 This file:
 
-1. Instructs the `pf-update-buildkit --build` command how to generate the registry [credential helpers](https://github.com/docker/docker-credential-helpers) used by BuildKit.
-   This command must be run by a superuser with root access to the BuildKit environment.
+1. Instructs the `pf-update-buildkit --build` command how to generate the registry
+   [credential helpers](https://github.com/docker/docker-credential-helpers) used by BuildKit. This command must be run
+   by a superuser with root access to the BuildKit environment.
 
 2. Instructs the Panfactum BuildKit commands how to connect with BuildKit.
 
@@ -30,7 +31,7 @@ module = string
 ::: code-group labels=\[.buildkit/config.yaml]
 
 ```yaml
-bastion: production-primary 
+bastion: production-primary
 module: production/us-east-2/kube_buildkit
 ```
 

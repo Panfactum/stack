@@ -36,6 +36,7 @@ let
     shellcheck = "${pkgs.shellcheck}/bin/shellcheck";
     validateChangelog = "${scripts}/bin/ds-validate-changelog";
     validateChangelogReview = "${scripts}/bin/ds-validate-changelog-review";
+    validateGlossary = "${scripts}/bin/ds-validate-glossary";
     validateIacMetadata = "${scripts}/bin/ds-validate-iac-metadata";
     checkPackageJson = "${scripts}/bin/ds-check-package-json";
   };

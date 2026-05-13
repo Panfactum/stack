@@ -1,6 +1,6 @@
 import MarkdownSVGImage from "@/components/markdown/MarkdownImgSvg";
 
-import EventBusImg from './event-bus.svg?raw'
+import EventBusImg from "./event-bus.svg?raw";
 
 # Installing an Event Bus
 
@@ -10,51 +10,57 @@ Deploy an instance of the [Argo Events](https://argoproj.github.io/argo-events/)
 
 ## Prerequisites
 
-* Deploying the components of the Event Bus requires that the Argo Events controller is running. This is done
-  via deploying the [Workflow Engine Stack Addon.](/docs/stable-25-04/guides/addons/workflow-engine/installing)
+- Deploying the components of the Event Bus requires that the Argo Events controller is running. This is done via
+  deploying the [Workflow Engine Stack Addon.](/docs/stable-25-04/guides/addons/workflow-engine/installing)
 
-* Deploying an Event Bus requires writing your own IaC. Be sure you have reviewed [our guide on how to do this in
-  the Panfactum stack.](/docs/stable-25-04/guides/iac/first-party-modules)
+- Deploying an Event Bus requires writing your own IaC. Be sure you have reviewed
+  [our guide on how to do this in the Panfactum stack.](/docs/stable-25-04/guides/iac/first-party-modules)
 
 ## Background
 
-When we refer to "Event Bus" in the Panfactum Stack, we are actually referring to an entire set of Argo
-Events components, of which the EventBus is just one. However, none of them are useful in isolation,
-so we refer to the collection as a unit: the Event Bus.
+When we refer to "Event Bus" in the Panfactum Stack, we are actually referring to an entire set of Argo Events
+components, of which the EventBus is just one. However, none of them are useful in isolation, so we refer to the
+collection as a unit: the Event Bus.
 
-More specifically, Argo Events has three independent components in
-its [architecture](https://argoproj.github.io/argo-events/concepts/architecture/):
+More specifically, Argo Events has three independent components in its
+[architecture](https://argoproj.github.io/argo-events/concepts/architecture/):
 
-* **One or more instances of an [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/):** Every
+- **One or more instances of an [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/):** Every
   EventSource creates a Kubernetes Deployment that either receives or polls for events from external systems and
   deposits them on the EventBus.
-* **One or more instances of a [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/):** Every Sensor creates
+
+- **One or more instances of a [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/):** Every Sensor creates
   a Kubernetes Deployment that consumes events from the EventBus and triggers some predefined action, called a
   [Trigger](https://argoproj.github.io/argo-events/concepts/trigger/).
-* **An [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/):** The EventBus stores events that have
-  been created by EventSources until they are consumed by Sensors. Under the hood, it is a [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream)
-  cluster.
+
+- **An [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/):** The EventBus stores events that have
+  been created by EventSources until they are consumed by Sensors. Under the hood, it is a
+  [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream) cluster.
 
 <MarkdownSVGImage src={EventBusImg} alt="Argo Events architecture" />
 
 We offer three submodules for deploying these components:
 
-* [kube\_argo\_event\_source](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
-* [kube\_argo\_sensor](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
-* [kube\_argo\_event\_bus](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+- [kube_argo_event_source](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+
+- [kube_argo_sensor](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+
+- [kube_argo_event_bus](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
 
 This particular addon has a few peculiarities:
 
-* You can have many instances of this architecture running independently in your cluster at once.
-* Due to its flexible nature, we provide submodules for the components rather than modules to deploy directly
-  from terragrunt.
-* All the above resources are namespace-scoped. In other words, an EventSource can only publish events to an EventBus
+- You can have many instances of this architecture running independently in your cluster at once.
+
+- Due to its flexible nature, we provide submodules for the components rather than modules to deploy directly from
+  terragrunt.
+
+- All the above resources are namespace-scoped. In other words, an EventSource can only publish events to an EventBus
   running in the same namespace, and a Sensor can only read events from an EventBus in the same namespace.
 
 ## Installing
 
-To install the Event Bus, you must define each of the event bus submodules in your own IaC module and then deploy
-it. Below is a code snippet that exemplifies the deployment pattern:
+To install the Event Bus, you must define each of the event bus submodules in your own IaC module and then deploy it.
+Below is a code snippet that exemplifies the deployment pattern:
 
 ```hcl
 
@@ -177,14 +183,16 @@ module "sensor" {
 
 For more advanced patterns, see the documentation for each of the modules:
 
-* [kube\_argo\_event\_source](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
-* [kube\_argo\_sensor](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
-* [kube\_argo\_event\_bus](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+- [kube_argo_event_source](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+
+- [kube_argo_sensor](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+
+- [kube_argo_event_bus](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
 
 ## Sensor Utilities
 
-When setting up the Event Bus, the bulk of the logic tends to fall in defining which events should trigger
-which actions (i.e., the Sensor spec).
+When setting up the Event Bus, the bulk of the logic tends to fall in defining which events should trigger which actions
+(i.e., the Sensor spec).
 
 We provide a submodule that contains a collection of utilities that make writing this logic easier: TODO.
 
@@ -192,26 +200,24 @@ We provide a submodule that contains a collection of utilities that make writing
 
 ### Limit the number of Event Buses in your cluster
 
-Every deployment of the Event Bus addon has a non-trivial amount of fixed overhead: at 6 pods running across
-2 Deployments and 1 StatefulSet.
+Every deployment of the Event Bus addon has a non-trivial amount of fixed overhead: at 6 pods running across 2
+Deployments and 1 StatefulSet.
 
-Instead of creating an Event Bus for every namespace, try to consolidate them whenever possible. For example,
-you might choose to have an Event Bus that handles inbound webhooks for all services across your entire organization.
+Instead of creating an Event Bus for every namespace, try to consolidate them whenever possible. For example, you might
+choose to have an Event Bus that handles inbound webhooks for all services across your entire organization.
 
-Additionally, you should never need more than one Event Bus deployment per namespace. Deploying more than one not only wastes
-resource but also will cause conflicts in event delivery with the default module settings.
+Additionally, you should never need more than one Event Bus deployment per namespace. Deploying more than one not only
+wastes resource but also will cause conflicts in event delivery with the default module settings.
 
 ### DLQ Trigger
 
-If a Sensor experiences an error or does not fire its triggers within the appropriate
-time (a couple of days by default) for any given event, that event will be lost as the EventBus is not a long-term
-storage system.
+If a Sensor experiences an error or does not fire its triggers within the appropriate time (a couple of days by default)
+for any given event, that event will be lost as the EventBus is not a long-term storage system.
 
 If preventing data loss is important to your event pipeline, you should set up a
 [dead letter queue (DLQ) trigger.](https://argoproj.github.io/argo-events/sensors/more-about-sensors-and-triggers/#dead-letter-queue-trigger)
 
 ### Performance Management
 
-We have not yet tested the Event Bus architecture for a high volume of events (> 10 / second). While we don't
-expect any issues, you will want to do adequate performance testing before deploying the Event Bus in high-load
-scenarios.
+We have not yet tested the Event Bus architecture for a high volume of events (> 10 / second). While we don't expect any
+issues, you will want to do adequate performance testing before deploying the Event Bus in high-load scenarios.

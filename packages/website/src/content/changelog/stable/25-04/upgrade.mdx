@@ -4,15 +4,12 @@
 
 ## Migrating to stable.25-04
 
-Follow these steps to move your Panfactum deployment from an
-earlier release channel to **stable.25-04**.
+Follow these steps to move your Panfactum deployment from an earlier release channel to **stable.25-04**.
 
 ### Prerequisites
 
-* You must be running at least **edge.25-04-03** before switching to
-  this stable channel. If you are on an older edge release, upgrade to
-  edge.25-04-03 first by following the edge upgrade instructions for
-  each intermediate release.
+- You must be running at least **edge.25-04-03** before switching to this stable channel. If you are on an older edge
+  release, upgrade to edge.25-04-03 first by following the edge upgrade instructions for each intermediate release.
 
 ### Steps
 
@@ -24,13 +21,11 @@ earlier release channel to **stable.25-04**.
 
 2. Run `pf update` to pull the stable.25-04 module versions.
 
-3. Apply your infrastructure changes with `terragrunt apply` across
-   all affected environments.
+3. Apply your infrastructure changes with `terragrunt apply` across all affected environments.
 
 4. Verify that all services are healthy after the apply completes.
 
 ### Post-Migration
 
-After migrating, you will only receive critical bug-fix and
-security-patch releases on this channel. Monitor the
+After migrating, you will only receive critical bug-fix and security-patch releases on this channel. Monitor the
 [release list](/docs/changelog/stable.25-04/0) for patch updates.

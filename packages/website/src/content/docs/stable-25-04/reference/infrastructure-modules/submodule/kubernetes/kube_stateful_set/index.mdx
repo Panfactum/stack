@@ -4,86 +4,119 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
-<ModuleHeader name="kube_stateful_set" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_stateful_set" status="stable" type="submodule" />
+<ModuleHeader
+  name="kube_stateful_set"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_stateful_set"
+  status="stable"
+  type="submodule"
+/>
 
 # Kubernetes StatefulSet
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
-Provides a production-hardened instance of a Kubernetes [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
-with the following enhancements:
+Provides a production-hardened instance of a Kubernetes
+[StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with the following enhancements:
 
-* Automatic headless service creation
-* Standardized resource labels
-* Pod and container security hardening
-* Persistent volume creation and mounting with automatic integrations with the
-* [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) and [Velero](https://github.com/vmware-tanzu/velero)
-* Temporary directory mounting
-* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
-* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
-* Service account configuration with default permissions
-* Integration with the Panfactum bin-packing scheduler
-* High-availability scheduling constraints
-* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
-* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
-* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
-* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
-* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+- Automatic headless service creation
+
+- Standardized resource labels
+
+- Pod and container security hardening
+
+- Persistent volume creation and mounting with automatic integrations with the
+
+- [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) and [Velero](https://github.com/vmware-tanzu/velero)
+
+- Temporary directory mounting
+
+- [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and
+  [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+
+- [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+
+- Service account configuration with default permissions
+
+- Integration with the Panfactum bin-packing scheduler
+
+- High-availability scheduling constraints
+
+- [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  configurations
+
+- Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+
+- [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+
+- [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+
+- [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various
+  Panfactum node classes
 
 ## Usage
 
 ### Basics
 
-This module follows the basic workload deployment patterns describe in [this guide](/docs/stable-25-04/guides/deploying-workloads/basics).
+This module follows the basic workload deployment patterns describe in
+[this guide](/docs/stable-25-04/guides/deploying-workloads/basics).
 
 ### Horizontal Autoscaling
 
-By default, this module does not have horizontal autoscaling built-in. If you wish
-to add horizontal autoscaling via the [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-(or similar controller), you should set `ignore_replica_count` to `true` to prevent
-this module from overriding the replica count set via horizontal autoscaling.
+By default, this module does not have horizontal autoscaling built-in. If you wish to add horizontal autoscaling via the
+[HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) (or similar controller), you should
+set `ignore_replica_count` to `true` to prevent this module from overriding the replica count set via horizontal
+autoscaling.
 
 ### Persistence
 
-One of the core use cases for a StatefulSet is the ability to persistent data across
-pod restarts through the use of [Persistent Volume Claims (PVCs)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
+One of the core use cases for a StatefulSet is the ability to persistent data across pod restarts through the use of
+[Persistent Volume Claims (PVCs)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
 
-You can configure the StatefulSet's PVCs via the `volume_mounts` input. This input
-is a map of names (arbitrary) to configuration values for each volume that should mounted to every
-pod in the StatefulSet.
+You can configure the StatefulSet's PVCs via the `volume_mounts` input. This input is a map of names (arbitrary) to
+configuration values for each volume that should mounted to every pod in the StatefulSet.
 
 The configuration values are as follows:
 
-* `storage_class`: The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) to
-  use for the volume. To learn more about the available storage class options, see [our guide.](/docs/stable-25-04/guides/deploying-workloads/persistence)
-* `initial_size_gb`: The size of the volume when it is first created.
-* `increase_gb`: How much the volume will grow every time it is autoscaled by the [PVC autoresizer](https://github.com/topolvm/pvc-autoresizer).
-* `increase_threshold_percent`: When free storage drops below this percent on the volume, the volume will be autoscaled.
-* `size_limit_gb`: The maximum size the volume is allowed to grow to.
-* `mount_path`: Absolute path inside each container that the volume is mounted to.
-* `backups_enabled`: Whether the PVC snapshots will be created when [Velero](https://github.com/vmware-tanzu/velero) backups are created (by default hourly).
+- `storage_class`: The [Storage Class](https://kubernetes.io/docs/concepts/storage/storage-classes/) to use for the
+  volume. To learn more about the available storage class options, see
+  [our guide.](/docs/stable-25-04/guides/deploying-workloads/persistence)
+
+- `initial_size_gb`: The size of the volume when it is first created.
+
+- `increase_gb`: How much the volume will grow every time it is autoscaled by the
+  [PVC autoresizer](https://github.com/topolvm/pvc-autoresizer).
+
+- `increase_threshold_percent`: When free storage drops below this percent on the volume, the volume will be autoscaled.
+
+- `size_limit_gb`: The maximum size the volume is allowed to grow to.
+
+- `mount_path`: Absolute path inside each container that the volume is mounted to.
+
+- `backups_enabled`: Whether the PVC snapshots will be created when [Velero](https://github.com/vmware-tanzu/velero)
+  backups are created (by default hourly).
 
 <MarkdownAlert severity="warning">
-  PVCs can only be autoscaled every six hours (AWS limitation), so you must choose autoscaling parameters
-  that ensure autoscaling can keep pace with your data growth rate.
+  PVCs can only be autoscaled every six hours (AWS limitation), so you must choose autoscaling parameters that ensure
+  autoscaling can keep pace with your data growth rate.
 </MarkdownAlert>
 
-You can configure the [retention policy](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention)
+You can configure the
+[retention policy](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention)
 of the volumes through the `volume_retention_policy` input.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
@@ -149,7 +182,7 @@ Description: The namespace the cluster is in
 
 Type: `string`
 
-### volume\_mounts
+### volume_mounts
 
 Description: A mapping of names to configuration for PersistentVolumeClaims used by the StatefulSet
 
@@ -172,7 +205,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow pods to schedule on arm64 nodes
 
@@ -180,7 +213,7 @@ Type: `bool`
 
 Default: `true`
 
-### az\_anti\_affinity\_required
+### az_anti_affinity_required
 
 Description: Whether to prevent pods from being scheduled on the same availability zone
 
@@ -188,15 +221,16 @@ Type: `bool`
 
 Default: `false`
 
-### az\_spread\_preferred
+### az_spread_preferred
 
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with
+ScheduleAnyways)
 
 Type: `bool`
 
 Default: `false`
 
-### az\_spread\_required
+### az_spread_required
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
 
@@ -204,7 +238,7 @@ Type: `bool`
 
 Default: `true`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -212,7 +246,7 @@ Type: `bool`
 
 Default: `false`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -220,7 +254,7 @@ Type: `bool`
 
 Default: `true`
 
-### common\_env
+### common_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -228,9 +262,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_env\_from\_config\_maps
+### common_env_from_config_maps
 
-Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment
+variables names and the values are the ConfigMap references.
 
 Type:
 
@@ -243,9 +278,10 @@ map(object({
 
 Default: `{}`
 
-### common\_env\_from\_secrets
+### common_env_from_secrets
 
-Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment
+variables names and the values are the Secret references.
 
 Type:
 
@@ -258,7 +294,7 @@ map(object({
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -266,7 +302,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### config\_map\_mounts
+### config_map_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
 
@@ -281,7 +317,7 @@ map(object({
 
 Default: `{}`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -289,7 +325,7 @@ Type: `bool`
 
 Default: `false`
 
-### controller\_nodes\_required
+### controller_nodes_required
 
 Description: Whether the pods must be scheduled on a controller node
 
@@ -297,7 +333,7 @@ Type: `bool`
 
 Default: `false`
 
-### dns\_policy
+### dns_policy
 
 Description: The DNS policy for the pods
 
@@ -305,7 +341,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_annotations
+### extra_annotations
 
 Description: A map of extra annotations that will be added to the StatefulSet (not the pods)
 
@@ -313,7 +349,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_labels
+### extra_labels
 
 Description: A map of extra labels that will be added to the StatefulSet (not the pods)
 
@@ -321,7 +357,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to the pods in the Pod
 
@@ -329,7 +365,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Extra pod labels to use
 
@@ -337,7 +373,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the pods
 
@@ -354,7 +390,7 @@ list(object({
 
 Default: `[]`
 
-### host\_anti\_affinity\_required
+### host_anti_affinity_required
 
 Description: Whether to prefer preventing pods from being scheduled on the same host
 
@@ -362,23 +398,25 @@ Type: `bool`
 
 Default: `true`
 
-### ignore\_replica\_count
+### ignore_replica_count
 
-Description: Whether to ignore changes to the replica count. When this is true, 'replicas' will ONLY be used at initial Deployment creation. Useful when implementing horizontal autoscaling.
+Description: Whether to ignore changes to the replica count. When this is true, 'replicas' will ONLY be used at initial
+Deployment creation. Useful when implementing horizontal autoscaling.
 
 Type: `bool`
 
 Default: `false`
 
-### instance\_type\_anti\_affinity\_required
+### instance_type_anti_affinity_required
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to
+true iff sla_target == 3.
 
 Type: `bool`
 
 Default: `null`
 
-### linkerd\_enabled
+### linkerd_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
 
@@ -386,7 +424,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -394,7 +432,7 @@ Type: `bool`
 
 Default: `true`
 
-### max\_unavailable
+### max_unavailable
 
 Description: Controls how many pods are allowed to be unavailable in the StatefulSet under the Pod Disruption Budget
 
@@ -402,7 +440,7 @@ Type: `number`
 
 Default: `1`
 
-### mount\_owner
+### mount_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -410,7 +448,7 @@ Type: `number`
 
 Default: `1000`
 
-### node\_image\_cached\_enabled
+### node_image_cached_enabled
 
 Description: Whether to add the container images to the node image cache for faster startup times
 
@@ -418,7 +456,7 @@ Type: `bool`
 
 Default: `true`
 
-### node\_preferences
+### node_preferences
 
 Description: Node label preferences for the pods
 
@@ -426,7 +464,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the pods
 
@@ -434,7 +472,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -442,7 +480,7 @@ Type: `bool`
 
 Default: `true`
 
-### pod\_management\_policy
+### pod_management_policy
 
 Description: The StatefulSets pod management policy
 
@@ -450,15 +488,16 @@ Type: `string`
 
 Default: `"OrderedReady"`
 
-### pod\_version\_labels\_enabled
+### pod_version_labels_enabled
 
-Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent
+updates.
 
 Type: `bool`
 
 Default: `true`
 
-### priority\_class\_name
+### priority_class_name
 
 Description: The priority class to use for pods in the StatefulSet
 
@@ -466,7 +505,7 @@ Type: `string`
 
 Default: `null`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -482,7 +521,7 @@ Type: `number`
 
 Default: `1`
 
-### restart\_policy
+### restart_policy
 
 Description: The pod restart policy
 
@@ -490,7 +529,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### secret\_mounts
+### secret_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the Pod
 
@@ -505,23 +544,24 @@ map(object({
 
 Default: `{}`
 
-### service\_ip
+### service_ip
 
-Description: If provided, the StatefulSet's service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
+Description: If provided, the StatefulSet's service will be statically bound to this IP address. Must be within the
+Service IP CIDR range for the cluster.
 
 Type: `string`
 
 Default: `null`
 
-### service\_load\_balancer\_class
+### service_load_balancer_class
 
-Description: Iff service\_type == LoadBalancer, the loadBalancerClass to use.
+Description: Iff service_type == LoadBalancer, the loadBalancerClass to use.
 
 Type: `string`
 
 Default: `"service.k8s.aws/nlb"`
 
-### service\_name
+### service_name
 
 Description: If provided, the StatefulSet's service will have this name. If not provided, will default to name.
 
@@ -529,15 +569,15 @@ Type: `string`
 
 Default: `null`
 
-### service\_public\_domain\_names
+### service_public_domain_names
 
-Description: Iff service\_type == LoadBalancer, the public domains names that this service will be accessible from.
+Description: Iff service_type == LoadBalancer, the public domains names that this service will be accessible from.
 
 Type: `list(string)`
 
 Default: `[]`
 
-### service\_type
+### service_type
 
 Description: The type of the StatefulSet's Service.
 
@@ -545,7 +585,7 @@ Type: `string`
 
 Default: `"ClusterIP"`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -553,7 +593,7 @@ Type: `bool`
 
 Default: `true`
 
-### termination\_grace\_period\_seconds
+### termination_grace_period_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -561,7 +601,7 @@ Type: `number`
 
 Default: `30`
 
-### tmp\_directories
+### tmp_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -577,15 +617,16 @@ map(object({
 
 Default: `{}`
 
-### unhealthy\_pod\_eviction\_policy
+### unhealthy_pod_eviction_policy
 
-Description: Whether to allow unhealthy pods to be evicted. See [https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+Description: Whether to allow unhealthy pods to be evicted. See
+[https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
 
 Type: `string`
 
 Default: `"AlwaysAllow"`
 
-### update\_type
+### update_type
 
 Description: The type of update that the StatefulSEt should use
 
@@ -593,7 +634,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### volume\_retention\_policy
+### volume_retention_policy
 
 Description: The persistentVolumeClaimRetentionPolicy to use of the StatefulSet
 
@@ -615,7 +656,7 @@ Default:
 }
 ```
 
-### voluntary\_disruption\_window\_cron\_schedule
+### voluntary_disruption_window_cron_schedule
 
 Description: The times when disruption windows should start
 
@@ -623,7 +664,7 @@ Type: `string`
 
 Default: `"0 0/4 * * *"`
 
-### voluntary\_disruption\_window\_enabled
+### voluntary_disruption_window_enabled
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
@@ -631,7 +672,7 @@ Type: `bool`
 
 Default: `false`
 
-### voluntary\_disruption\_window\_seconds
+### voluntary_disruption_window_seconds
 
 Description: The length of the disruption window in seconds
 
@@ -639,7 +680,7 @@ Type: `number`
 
 Default: `900`
 
-### voluntary\_disruptions\_enabled
+### voluntary_disruptions_enabled
 
 Description: Whether to enable voluntary disruptions of pods in this module.
 
@@ -647,7 +688,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -659,7 +700,7 @@ Default: `true`
 
 The following outputs are exported:
 
-### headless\_service\_name
+### headless_service_name
 
 Description: The name of the headless service where StatefulSet pods are registered
 
@@ -667,15 +708,15 @@ Description: The name of the headless service where StatefulSet pods are registe
 
 Description: The labels assigned to all resources in this deployment
 
-### match\_labels
+### match_labels
 
 Description: The labels unique to this deployment that can be used to select the pods in this deployment
 
-### service\_account\_name
+### service_account_name
 
 Description: The service account used for the pods
 
-### service\_name
+### service_name
 
 Description: The name of the service for the deployment
 

@@ -1,8 +1,8 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
 
-import linkerdPods from './linkerd-pods.jpg'
-import linkerdSidecarImg from './linkerd-sidecars.jpg';
+import linkerdPods from "./linkerd-pods.jpg";
+import linkerdSidecarImg from "./linkerd-sidecars.jpg";
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Service Mesh
@@ -11,17 +11,17 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 ## Background
 
-For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd,
-check out our [concept documentation.](/docs/stable-25-04/concepts/networking/cluster-networking#service-mesh)
+For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd, check out our
+[concept documentation.](/docs/stable-25-04/concepts/networking/cluster-networking#service-mesh)
 
 ## Deploy Linkerd
 
-[Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes,
-and we provide a module for deploying it: [kube\_linkerd](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+[Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes, and we provide a
+module for deploying it:
+[kube\_linkerd](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
 
-This module not only deploys linkerd but also connects it to the certificate infrastructure that we
-provisioned in the previous section. It also installs linkerd-specific observability tooling that we
-will review later.
+This module not only deploys linkerd but also connects it to the certificate infrastructure that we provisioned in the
+previous section. It also installs linkerd-specific observability tooling that we will review later.
 
 Let's deploy the module now:
 
@@ -29,26 +29,28 @@ Let's deploy the module now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-    ::: code-group labels=[kube_linkerd/terragrunt.hcl]
-    ```hcl collapse={1-9} "REPLACE_ME"
-    include "panfactum" {
-        path   = find_in_parent_folders("panfactum.hcl")
-        expose = true
-    }
+   ::: code-group labels=\[kube\_linkerd/terragrunt.hcl]
 
-    terraform {
-        source = include.panfactum.locals.pf_stack_source
-    }
+   ```hcl collapse={1-9} "REPLACE_ME"
+   include "panfactum" {
+       path   = find_in_parent_folders("panfactum.hcl")
+       expose = true
+   }
 
-    dependency "cert_issuers" {
-        config_path = "../kube_cert_issuers"
-    }
+   terraform {
+       source = include.panfactum.locals.pf_stack_source
+   }
 
-    inputs = {
-        vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
-    }
-    ```
-    :::
+   dependency "cert_issuers" {
+       config_path = "../kube_cert_issuers"
+   }
+
+   inputs = {
+       vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
+   }
+   ```
+
+   :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -154,15 +156,15 @@ Status check results are √
 ```
 
 <MarkdownAlert severity="info">
-  Note that you may receive some warning about components not being up-to-date. Linkerd produces
-  many minor releases and these warning are benign. You should stick with the default version
-  included in the Panfactum stack unless you have a specific reason to deviate.
+  Note that you may receive some warning about components not being up-to-date. Linkerd produces many minor releases and
+  these warning are benign. You should stick with the default version included in the Panfactum stack unless you have a
+  specific reason to deviate.
 </MarkdownAlert>
 
 ### Verify Certificate Rotation
 
-While linkerd may be working after the initial deploy, we also want to ensure it *continues* to work
-after its certificates are rotated.
+While linkerd may be working after the initial deploy, we also want to ensure it *continues* to work after its
+certificates are rotated.
 
 Rotate the certificates now:
 
@@ -176,8 +178,8 @@ cmctl renew -n linkerd \
 
 ### Install Viz
 
-Linkerd also comes with a handy debugging suite called `viz` that can be easily installed (temporarily) using
-the cli. Run this now: `linkerd viz install | kubectl apply -f -`.
+Linkerd also comes with a handy debugging suite called `viz` that can be easily installed (temporarily) using the cli.
+Run this now: `linkerd viz install | kubectl apply -f -`.
 
 ### Inject Sidecars
 
@@ -185,9 +187,8 @@ the cli. Run this now: `linkerd viz install | kubectl apply -f -`.
   Do not begin this step until the Viz components from the previous step are fully deployed.
 </MarkdownAlert>
 
-Linkerd works by injecting sidecar containers into your pods to connect them to the mesh. This happens on
-pod *creation* so already existing pods will not have any sidecars injected. Let's restart them to connect
-them to the mesh:
+Linkerd works by injecting sidecar containers into your pods to connect them to the mesh. This happens on pod *creation*
+so already existing pods will not have any sidecars injected. Let's restart them to connect them to the mesh:
 
 1. Using k9s, restart all your deployments not in the `linkerd` namespace:
 
@@ -207,7 +208,8 @@ them to the mesh:
 
 1. Run `linkerd viz tap ns/vault` to start monitoring traffic in the `vault` namespace.
 
-2. Rotate a certificate to force cert-manager to connect with Vault: `cmctl renew -n cert-manager cert-manager-webhook-certs`.
+2. Rotate a certificate to force cert-manager to connect with Vault:
+   `cmctl renew -n cert-manager cert-manager-webhook-certs`.
 
 3. The tap session should produce a response similar to this:
 
@@ -220,24 +222,24 @@ them to the mesh:
    end id=0:1 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true duration=210µs response-length=3914B
    ```
 
-   Notice that the `src` IP address will be one of the cert-manager pods and the `dst` will be one of your
-   Vault pods. Additionally, notice that `tls=true` indicates that **the request came over a TLS connection even though Vault
-   itself was never configured with TLS.** This is the service mesh sidecar container in action.
+   Notice that the `src` IP address will be one of the cert-manager pods and the `dst` will be one of your Vault pods.
+   Additionally, notice that `tls=true` indicates that **the request came over a TLS connection even though Vault itself
+   was never configured with TLS.** This is the service mesh sidecar container in action.
 
-The Linkerd documentation also provides even more granular methods that you can use to [validate the security
-of your traffic](https://linkerd.io/2.15/tasks/validating-your-traffic/).
+The Linkerd documentation also provides even more granular methods that you can use to
+[validate the security of your traffic](https://linkerd.io/2.15/tasks/validating-your-traffic/).
 
 ### Remove Viz
 
-We will revisit observability tooling in a later section, so for now, let's remove the manually created
-`viz` to keep the cluster clean of redundant resources:
+We will revisit observability tooling in a later section, so for now, let's remove the manually created `viz` to keep
+the cluster clean of redundant resources:
 
 `linkerd viz install | kubectl delete -f -`
 
 ## Next Steps
 
 At this point, all the necessary components for powering *internal* cluster networking are configured. However, before
-we configure *external* networking, we will address autoscaling
-as the cluster is likely already running 75+ containers and will soon become resource constrained.
+we configure *external* networking, we will address autoscaling as the cluster is likely already running 75+ containers
+and will soon become resource constrained.
 
 <BootstrappingGuideNav backHref={"/docs/stable-25-04/guides/bootstrapping/certificate-management"} forwardHref={"/docs/stable-25-04/guides/bootstrapping/autoscaling"} stepNumber={14} />

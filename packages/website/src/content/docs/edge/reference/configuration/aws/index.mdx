@@ -2,8 +2,8 @@
 
 ## config.yaml
 
-This file instructs the `pf-update-aws --build` command how to generate the aws config file (`config`) which is used
-by the AWS CLI and SDK.
+This file instructs the `pf-update-aws --build` command how to generate the aws config file (`config`) which is used by
+the AWS CLI and SDK.
 
 ### Format
 
@@ -31,7 +31,7 @@ extra_roles = optional(list(object({
 | `module`             | (Optional) A path from `<environments_dir>` to your `aws_iam_identity_center_permissions` module (if using) | `management/global/aws_iam_identity_center_permissions` |
 | `extra_roles`        | (Optional) Additional statically configured extra roles to use                                              | See below                                               |
 
-### extra\_roles
+### extra_roles
 
 This is a list containing objects with the following fields:
 
@@ -42,16 +42,8 @@ This is a list containing objects with the following fields:
 | `roles`        | A list of the IAM Identity Center [PermissionSets](https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html) assigned to this account | `["ExampleRole1", "ExampleRole2"]` |
 
 ### Example
-<div class="h-4"/>
-::: code-group labels=[.aws/config.yaml]
-```yaml
-sso_start_url: https://panfactum.awsapps.com/start
-sso_region: us-east-2
-default_aws_region: us-east-2
-module: management/global/aws_iam_identity_center_permissions
-extra_roles:
-  - account_name: test
-    account_id: 1234567
-    roles: ["TestRole1", "TestRole2"]
-```
-:::
+
+<div class="h-4" />
+::: code-group labels=[.aws/config.yaml] ```yaml sso_start_url: https://panfactum.awsapps.com/start sso_region:
+us-east-2 default_aws_region: us-east-2 module: management/global/aws_iam_identity_center_permissions extra_roles: -
+account_name: test account_id: 1234567 roles: ["TestRole1", "TestRole2"] ``` :::

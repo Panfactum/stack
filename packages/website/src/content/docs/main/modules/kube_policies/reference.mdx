@@ -6,15 +6,16 @@
 
 The following input variables are supported:
 
-### common\_env
+### common_env
 
-Description: Key-value pairs that will be injected into all containers in all pods in the cluster as environment variables
+Description: Key-value pairs that will be injected into all containers in all pods in the cluster as environment
+variables
 
 Type: `map(string)`
 
 Default: `{}`
 
-### common\_pod\_annotations
+### common_pod_annotations
 
 Description: Key-value pairs that will be injected as annotations into all pods in the cluster
 
@@ -22,7 +23,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_pod\_labels
+### common_pod_labels
 
 Description: Key-value pairs that will be injected as labels into all pods in the cluster
 
@@ -30,15 +31,16 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
-Description: Key-values pairs that will be injected into all containers in all pods in the cluster as environment variables (but stored in a Secret resource)
+Description: Key-values pairs that will be injected into all containers in all pods in the cluster as environment
+variables (but stored in a Secret resource)
 
 Type: `map(string)`
 
 Default: `{}`
 
-### default\_arm64\_toleration\_enabled
+### default_arm64_toleration_enabled
 
 Description: Whether pods should tolerate arm64 nodes by default
 
@@ -46,7 +48,7 @@ Type: `bool`
 
 Default: `true`
 
-### default\_burstable\_toleration\_enabled
+### default_burstable_toleration_enabled
 
 Description: Whether pods should tolerate burstable nodes by default
 
@@ -54,7 +56,7 @@ Type: `bool`
 
 Default: `false`
 
-### default\_controller\_toleration\_enabled
+### default_controller_toleration_enabled
 
 Description: Whether pods should tolerate controller (EKS) nodes by default
 
@@ -62,7 +64,7 @@ Type: `bool`
 
 Default: `false`
 
-### default\_spot\_toleration\_enabled
+### default_spot_toleration_enabled
 
 Description: Whether pods should tolerate spot nodes by default
 
@@ -70,7 +72,7 @@ Type: `bool`
 
 Default: `true`
 
-### environment\_variable\_injection\_enabled
+### environment_variable_injection_enabled
 
 Description: Whether a standard set of environment variables should be injected into each container
 
@@ -78,7 +80,7 @@ Type: `bool`
 
 Default: `true`
 
-### extra\_priority\_classes
+### extra_priority_classes
 
 Description: A mapping of extra priority class names to their values
 
@@ -86,15 +88,16 @@ Type: `map(number)`
 
 Default: `{}`
 
-### gc\_released\_volumes\_after\_days
+### gc_released_volumes_after_days
 
-Description: The number of days to wait before deleting released PersistentVolumes (PVs). These are volumes that are no longer used but may contain recovery data. Set to -1 to disable.
+Description: The number of days to wait before deleting released PersistentVolumes (PVs). These are volumes that are no
+longer used but may contain recovery data. Set to -1 to disable.
 
 Type: `number`
 
 Default: `30`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether pods should be automatically updated to use the Panfactum bin-packing scheduler.
 
@@ -102,7 +105,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether pods should have their images replaced with image references of the ECR pull-through cache.
 

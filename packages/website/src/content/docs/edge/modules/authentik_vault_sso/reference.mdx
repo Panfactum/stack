@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### allowed\_groups
+### allowed_groups
 
 Description: Only members of these groups can access AWS
 
@@ -14,7 +14,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### authentik\_domain
+### authentik_domain
 
 Description: The domain name of the authentik instance
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: n/a
 
-### authentik\_namespace
+### authentik_namespace
 
 Description: The kubernetes namespace where Authentik is deployed
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: n/a
 
-### media\_configmap
+### media_configmap
 
 Description: The configmap holding the static media that Authentik will use
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: n/a
 
-### organization\_name
+### organization_name
 
 Description: The name of your organization
 
@@ -46,7 +46,7 @@ Type: `string`
 
 Default: n/a
 
-### ui\_description
+### ui_description
 
 Description: The description to display in the Authentik web dashboard
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: `"A Hashicorp Vault cluster"`
 
-### ui\_group
+### ui_group
 
 Description: The section in the Authentik web dashboard that this will appear in
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `"Vault"`
 
-### vault\_domain
+### vault_domain
 
 Description: The domain name of the Vault instance
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: n/a
 
-### vault\_name
+### vault_name
 
 Description: The name of the vault instance. Must be unique in the Authentik system.
 
@@ -82,27 +82,27 @@ Default: n/a
 
 The following outputs are exported:
 
-### client\_id
+### client_id
 
 Description: The client ID to provide to the auth/oidc auth method in Vault
 
-### client\_secret
+### client_secret
 
 Description: The client secret to provide the auth/oidc auth method in Vault
 
-### oidc\_discovery\_url
+### oidc_discovery_url
 
 Description: The OIDC discovery url to use for the auth/oidc auth method in Vault
 
-### oidc\_issuer
+### oidc_issuer
 
 Description: The issuer to use for the auth/oidc auth method in Vault
 
-### oidc\_redirect\_uris
+### oidc_redirect_uris
 
 Description: The redirect URIs to use for the auth/oidc auth method in Vault
 
-### oidc\_redirect\_uris\_including\_regexes
+### oidc_redirect_uris_including_regexes
 
 Description: All redirect URIs including regex patterns, suitable for OIDC providers that support regex matching
 

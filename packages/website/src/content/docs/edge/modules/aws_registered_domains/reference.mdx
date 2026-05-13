@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### additional\_account\_ids\_with\_record\_access
+### additional_account_ids_with_record_access
 
 Description: Additional AWS account IDs for accounts that can assume with record manager role
 
@@ -14,7 +14,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### admin\_contact
+### admin_contact
 
 Description: Admin contact information for the domain
 
@@ -39,7 +39,7 @@ object({
 
 Default: n/a
 
-### domain\_names
+### domain_names
 
 Description: Domain names that will be managed by this module
 
@@ -47,7 +47,7 @@ Type: `set(string)`
 
 Default: n/a
 
-### enable\_auto\_renew
+### enable_auto_renew
 
 Description: Whether to enable automatic domain renewal
 
@@ -55,7 +55,7 @@ Type: `bool`
 
 Default: `true`
 
-### enable\_privacy\_protection
+### enable_privacy_protection
 
 Description: Whether to enable Whois privacy protection
 
@@ -63,7 +63,7 @@ Type: `bool`
 
 Default: `true`
 
-### enable\_transfer\_lock
+### enable_transfer_lock
 
 Description: Whether to enable domain transfer lock
 
@@ -71,7 +71,7 @@ Type: `bool`
 
 Default: `true`
 
-### registrant\_contact
+### registrant_contact
 
 Description: Registrant contact information for the domain
 
@@ -96,7 +96,7 @@ object({
 
 Default: n/a
 
-### tech\_contact
+### tech_contact
 
 Description: Tech contact information for the domain
 
@@ -129,7 +129,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### record\_manager\_role\_arn
+### record_manager_role_arn
 
 Description: The ARN of the IAM role used to manage DNS records.
 

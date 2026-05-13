@@ -1,0 +1,38 @@
+term: Nix Flake
+type: devshell
+summary: A standardized way to define Nix projects with hermetic, version-locked dependencies and reproducible outputs.
+description: |
+  A *Nix flake* is a standardized project structure for Nix that provides hermetic, reproducible
+  builds by explicitly declaring all dependencies and locking them to exact versions.
+
+  A flake consists of two key files:
+
+  - **`flake.nix`**: Declares the flake's inputs (dependencies) and outputs (packages, shells, etc.)
+  - **`flake.lock`**: A lockfile that pins every input to a specific revision, ensuring reproducibility
+
+  In Panfactum, the `flake.nix` at the repository root defines the DevShell. It imports the Panfactum
+  flake as an input and uses it to construct a development environment with all required tooling.
+  A typical Panfactum `flake.nix` includes:
+
+  - The Panfactum flake input (pinned to a specific release)
+  - A `devShells` output that extends the Panfactum base shell
+  - Optional additional packages or customizations for the organization
+
+  Flakes are a relatively new Nix feature and are enabled by default in Determinate Nix. They
+  replace older patterns like `shell.nix` and `default.nix` with a more standardized approach.
+references:
+  - type: term
+    label: Nix
+    link: "#nix"
+  - type: term
+    label: DevShell
+    link: "#devshell"
+  - type: term
+    label: Determinate Nix
+    link: "#determinate-nix"
+  - type: internal-docs
+    label: Install Tooling Guide
+    link: /docs/main/guides/getting-started/install-tooling
+  - type: external-docs
+    label: Nix Flakes Documentation
+    link: https://nix.dev/concepts/flakes

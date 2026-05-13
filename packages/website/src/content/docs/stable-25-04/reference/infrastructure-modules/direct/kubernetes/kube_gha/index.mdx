@@ -4,11 +4,17 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_gha" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_gha" status="beta" type="direct" />
+<ModuleHeader
+  name="kube_gha"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_gha"
+  status="beta"
+  type="direct"
+/>
 
 # GHA Self-hosted Runner Controllers
 
-This module provides a deployment of the [GHA Runner Controller](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/quickstart-for-actions-runner-controller)
+This module provides a deployment of the
+[GHA Runner Controller](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/quickstart-for-actions-runner-controller)
 project CRDs for running GitHub Action workflow jobs on your Panfactum Kubernetes Cluster.
 
 For installation instructions, see our [guide](/docs/stable-25-04/guides/addons/github-actions/installing).
@@ -17,13 +23,13 @@ For installation instructions, see our [guide](/docs/stable-25-04/guides/addons/
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -33,7 +39,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -41,7 +47,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -49,7 +55,7 @@ Type: `bool`
 
 Default: `true`
 
-### gha\_runner\_scale\_set\_controller\_helm\_version
+### gha_runner_scale_set_controller_helm_version
 
 Description: The version of the actions-runner-controller-charts/gha-runner-scale-set-controller helm chart to deploy
 
@@ -57,7 +63,7 @@ Type: `string`
 
 Default: `"0.9.3"`
 
-### log\_level
+### log_level
 
 Description: The log level to use for the pods
 
@@ -65,7 +71,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -73,7 +79,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -81,7 +87,7 @@ Type: `bool`
 
 Default: `true`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -89,7 +95,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -99,7 +105,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -117,6 +125,4 @@ Description: n/a
 
 No notes.
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

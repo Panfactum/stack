@@ -1,0 +1,38 @@
+term: Unit
+type: iac
+summary: A single deployable infrastructure instance defined by a Terragrunt configuration file.
+description: |
+  A *unit* is a single deployable infrastructure instance in the Panfactum stack. It corresponds to a directory containing a `terragrunt.hcl` file within the environments directory.
+
+  Each unit:
+
+  - Sources exactly one infrastructure module
+  - Has its own configuration (inputs, provider settings, dependencies)
+  - Maintains its own Terraform state file
+  - Is deployed and managed independently via `terragrunt apply`
+
+  In practice, a unit is what you interact with when running IaC commands — you navigate to a unit's directory and run `terragrunt plan` or `terragrunt apply`.
+
+  For example, in this environments layout:
+
+  ```txt
+  environments/
+    production/
+      us-east-2/
+        kube_cert_manager/
+          terragrunt.hcl    <- this is a unit
+        kube_vault/
+          terragrunt.hcl    <- this is a unit
+  ```
+
+  Each `terragrunt.hcl` represents a separate unit, even if multiple units source the same module.
+references:
+  - type: term
+    label: Module
+    link: "#module"
+  - type: term
+    label: Terragrunt
+    link: "#terragrunt"
+  - type: internal-docs
+    label: Deploying Modules
+    link: /docs/main/guides/iac/deploying-modules

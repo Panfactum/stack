@@ -107,6 +107,16 @@ repos:
     pass_filenames: true
     priority: 0
 
+  - description: Validates glossary term YAML files against the JSON schema
+    entry: ds-validate-glossary
+    fail_fast: true
+    files: ^packages/website/src/content/docs/.*/reference/glossary/_terms/.*\.yaml$
+    id: validate-glossary-schema
+    language: system
+    name: Validate Glossary Schema
+    pass_filenames: true
+    priority: 0
+
   - description: Validates metadata.yaml against the JSON schema
     entry: ds-validate-iac-metadata
     fail_fast: true

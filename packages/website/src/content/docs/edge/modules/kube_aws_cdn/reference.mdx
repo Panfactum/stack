@@ -6,15 +6,15 @@
 
 The following input variables are supported:
 
-### cors\_additional\_allowed\_origins
+### cors_additional_allowed_origins
 
-Description: Specifies which origins are allowed besides the domain name specified. Use '*' to allow any origin.
+Description: Specifies which origins are allowed besides the domain name specified. Use '\*' to allow any origin.
 
 Type: `list(string)`
 
 Default: `[]`
 
-### cors\_allowed\_headers
+### cors_allowed_headers
 
 Description: Specifies which headers are allowed for CORS requests.
 
@@ -23,12 +23,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "Content-Length"
-]
+["Content-Length"]
 ```
 
-### cors\_allowed\_methods
+### cors_allowed_methods
 
 Description: Specifies which methods are allowed. Can be GET, PUT, POST, DELETE or HEAD.
 
@@ -37,13 +35,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "GET",
-  "HEAD"
-]
+["GET", "HEAD"]
 ```
 
-### cors\_enabled
+### cors_enabled
 
 Description: True if the CloudFront distribution should handle adding CORS headers instead of the origin.
 
@@ -51,7 +46,7 @@ Type: `bool`
 
 Default: `false`
 
-### cors\_max\_age\_seconds
+### cors_max_age_seconds
 
 Description: Time in seconds that the browser can cache the response for a preflight CORS request.
 
@@ -59,7 +54,7 @@ Type: `number`
 
 Default: `3600`
 
-### custom\_error\_responses
+### custom_error_responses
 
 Description: Mutates error responses returned from the origin before forwarding them to the client
 
@@ -84,15 +79,16 @@ Type: `string`
 
 Default: `null`
 
-### geo\_restriction\_list
+### geo_restriction_list
 
-Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
+Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and
+blacklist)
 
 Type: `list(string)`
 
 Default: `[]`
 
-### geo\_restriction\_type
+### geo_restriction_type
 
 Description: What type of geographic restrictions to you want to apply to CDN clients
 
@@ -100,7 +96,7 @@ Type: `string`
 
 Default: `"none"`
 
-### logging\_cookies\_enabled
+### logging_cookies_enabled
 
 Description: Whether cookies should be included in the request logs
 
@@ -108,7 +104,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging\_enabled
+### logging_enabled
 
 Description: Whether request logging should be enabled for the CloudFront distribution
 
@@ -116,7 +112,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging\_expire\_after\_days
+### logging_expire_after_days
 
 Description: The number of days after which logs will be deleted. (0 to disable)
 
@@ -132,9 +128,10 @@ Type: `string`
 
 Default: n/a
 
-### origin\_configs
+### origin_configs
 
-Description: A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this manually. Use the outputs from kube\_ingress.
+Description: A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this
+manually. Use the outputs from kube_ingress.
 
 Type:
 
@@ -217,7 +214,7 @@ list(object({
 
 Default: n/a
 
-### origin\_shield\_enabled
+### origin_shield_enabled
 
 Description: Whether origin shield should be enabled for the CloudFront distribution
 
@@ -225,7 +222,7 @@ Type: `bool`
 
 Default: `false`
 
-### price\_class
+### price_class
 
 Description: The price class for the CDN
 
@@ -233,7 +230,7 @@ Type: `string`
 
 Default: `"PriceClass_100"`
 
-### redirect\_rules
+### redirect_rules
 
 Description: A list of redirect rules that the ingress will match against before sending requests to the upstreams
 
@@ -253,11 +250,11 @@ Default: `[]`
 
 The following outputs are exported:
 
-### distribution\_id
+### distribution_id
 
 Description: The ID of the CloudFront distribution
 
-### logging\_bucket\_name
+### logging_bucket_name
 
 Description: The name of the log bucket for CloudFront access logs
 

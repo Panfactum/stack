@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### bastion\_domains
+### bastion_domains
 
 Description: The domain names of the bastion
 
@@ -14,7 +14,7 @@ Type: `list(string)`
 
 Default: n/a
 
-### bastion\_image\_version
+### bastion_image_version
 
 Description: The version of the image to use for the deployment
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: `"17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"`
 
-### bastion\_port
+### bastion_port
 
 Description: The port the bastion should use for the ssh server
 
@@ -30,7 +30,7 @@ Type: `number`
 
 Default: `45459`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -62,15 +62,16 @@ Type: `bool`
 
 Default: `true`
 
-### sla\_target
+### sla_target
 
-Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest
+uptime (99.999%), highest Cost
 
 Type: `number`
 
 Default: `3`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -78,7 +79,7 @@ Type: `bool`
 
 Default: `true`
 
-### ssh\_cert\_lifetime\_seconds
+### ssh_cert_lifetime_seconds
 
 Description: The lifetime of SSH certs provisioned by Vault
 
@@ -86,7 +87,7 @@ Type: `number`
 
 Default: `28800`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -98,15 +99,15 @@ Default: `true`
 
 The following outputs are exported:
 
-### bastion\_domains
+### bastion_domains
 
 Description: The domains the SSH server is available on
 
-### bastion\_host\_public\_key
+### bastion_host_public_key
 
 Description: The bastion host's public key for mutual verification
 
-### bastion\_port
+### bastion_port
 
 Description: The port the SSH server is available on in each domain
 

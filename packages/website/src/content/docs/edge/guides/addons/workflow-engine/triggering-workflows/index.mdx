@@ -1,16 +1,18 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
 
-import WorkflowTemplateInWebImg from './workflow-template-in-web.jpg'
-import WorkflowTemplateSubmitInWebImg from './workflow-template-submit-in-web.jpg'
-import WorkflowTemplatesInWebImg from './workflow-templates-in-web.jpg'
+import WorkflowTemplateInWebImg from "./workflow-template-in-web.jpg";
+import WorkflowTemplateSubmitInWebImg from "./workflow-template-submit-in-web.jpg";
+import WorkflowTemplatesInWebImg from "./workflow-templates-in-web.jpg";
 
 # Triggering Workflows
 
 <MarkdownAlert severity="warning">
-  The options in this guide assume that you are using [WorkflowTemplates](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/).
-  These options demonstrate how to trigger new Workflows from WorkflowTemplates. Usage with [ClusterWorkflowTemplates](https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/)
-  will look similar, but you should consult the Argo documentation for the key differences.
+  The options in this guide assume that you are using
+  [WorkflowTemplates](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/). These options demonstrate
+  how to trigger new Workflows from WorkflowTemplates. Usage with
+  [ClusterWorkflowTemplates](https://argo-workflows.readthedocs.io/en/latest/cluster-workflow-templates/) will look
+  similar, but you should consult the Argo documentation for the key differences.
 </MarkdownAlert>
 
 The below examples assume that a WorkflowTemplate has already been created that looks like this:
@@ -89,30 +91,32 @@ To create a new Workflow from the above example WorkflowTemplate using the CLI:
 
 2. Run `argo submit --namespace example-namespace --from=WorkflowTemplate/example --parameter foo=42`.
 
-3. By default, the CLI submits the Workflow asynchronously to run in the background. If you want the CLI
-   to wait for the Workflow to finish, use the `--wait` option. You can see the many other options by running `argo submit --help`.
+3. By default, the CLI submits the Workflow asynchronously to run in the background. If you want the CLI to wait for the
+   Workflow to finish, use the `--wait` option. You can see the many other options by running `argo submit --help`.
 
-4. You can view more details about and interact with a created Workflow via the other `argo` subcommands such as
-   `get`, `watch`, `terminate`, `stop`, `resume`, `wait`, etc.
+4. You can view more details about and interact with a created Workflow via the other `argo` subcommands such as `get`,
+   `watch`, `terminate`, `stop`, `resume`, `wait`, etc.
 
 ## From an HTTP Request
 
 <MarkdownAlert severity="warning">
-  The Panfactum [kube\_argo](/docs/edge/modules/kube_argo/overview) does not create an Ingress for the Argo Workflow Server, so the HTTP API is only available
-  from inside the cluster. Since authentication must be done via ServiceAccount token, it does not make sense to expose
-  the server publicly. If you need to create a Workflow from an external event or trigger, see the next section regarding Argo Events.
+  The Panfactum [kube\_argo](/docs/edge/modules/kube_argo/overview) does not create an Ingress for the Argo Workflow
+  Server, so the HTTP API is only available from inside the cluster. Since authentication must be done via
+  ServiceAccount token, it does not make sense to expose the server publicly. If you need to create a Workflow from an
+  external event or trigger, see the next section regarding Argo Events.
 </MarkdownAlert>
 
-If you do not have the `argo` CLI available in your runtime context, you can also create Workflows directly from
-the [REST API provided by the Argo Workflow Server.](https://argo-workflows.readthedocs.io/en/latest/rest-api/)
+If you do not have the `argo` CLI available in your runtime context, you can also create Workflows directly from the
+[REST API provided by the Argo Workflow Server.](https://argo-workflows.readthedocs.io/en/latest/rest-api/)
 
-You will need to use the [Access Token method for authentication](https://argo-workflows.readthedocs.io/en/latest/access-token/)
-by creating a ServiceAccount token as described in the linked guide. You can use our
-[kube\_sa\_auth\_workflow](/docs/edge/modules/kube_sa_auth_workflow/overview)
-submodule to assign the necessary permissions to the ServiceAccount.
+You will need to use the
+[Access Token method for authentication](https://argo-workflows.readthedocs.io/en/latest/access-token/) by creating a
+ServiceAccount token as described in the linked guide. You can use our
+[kube_sa_auth_workflow](/docs/edge/modules/kube_sa_auth_workflow/overview) submodule to assign the necessary permissions
+to the ServiceAccount.
 
-To create a new Workflow from the above example WorkflowTemplate by using `curl` to query the HTTP API, you would
-run the following command:
+To create a new Workflow from the above example WorkflowTemplate by using `curl` to query the HTTP API, you would run
+the following command:
 
 ```shell
 curl -X POST "http://<your-argo-server>/api/v1/workflows/example-namespace/submit" \
@@ -135,12 +139,14 @@ curl -X POST "http://<your-argo-server>/api/v1/workflows/example-namespace/submi
 
 ## From Argo Events
 
-Using our [Event Bus Addon](/docs/edge/guides/addons/event-bus/installing), you can create an Argo [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
-that triggers new Workflows when the Event Bus receives certain types of events. This is the recommended way
-to create Workflows in response to events that occur **outside** the Kubernetes cluster [^1].
+Using our [Event Bus Addon](/docs/edge/guides/addons/event-bus/installing), you can create an Argo
+[Sensor](https://argoproj.github.io/argo-events/concepts/sensor/) that triggers new Workflows when the Event Bus
+receives certain types of events. This is the recommended way to create Workflows in response to events that occur
+**outside** the Kubernetes cluster [^1].
 
-[^1]: When creating Workflows from inside the Kubernetes cluster, you can work with the Argo API directly as
-    demonstrated in the other examples.
+[^1]:
+    When creating Workflows from inside the Kubernetes cluster, you can work with the Argo API directly as demonstrated
+    in the other examples.
 
 As an example:
 
@@ -211,21 +217,25 @@ module "sensor" {
 
 ## From Other Workflows
 
-Composing Workflows is a powerful pattern that allows you to reuse preexisting logic to chain workflows together
-into larger execution graphs. There are two ways to do this:
+Composing Workflows is a powerful pattern that allows you to reuse preexisting logic to chain workflows together into
+larger execution graphs. There are two ways to do this:
 
 ### Template References
 
-Argo provides a mechanism to reuse templates (nodes in a Workflow's execution graph) across multiple Workflows.
-This pattern is described in detail [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates).
+Argo provides a mechanism to reuse templates (nodes in a Workflow's execution graph) across multiple Workflows. This
+pattern is described in detail
+[here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates).
 
-Technically, this does not "trigger" the existing WorkflowTemplate but rather "copies" a portion of it into your new Workflow. In
-effect, you end up with a single combined Workflow that runs all the steps in the referenced WorkflowTemplates.
+Technically, this does not "trigger" the existing WorkflowTemplate but rather "copies" a portion of it into your new
+Workflow. In effect, you end up with a single combined Workflow that runs all the steps in the referenced
+WorkflowTemplates.
 
 This new WorkflowTemplate will run the `entry` template from example WorkflowTemplate twice in a series: [^3]
 
-[^3]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
-    but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
+[^3]:
+    Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of
+    WorkflowTemplates, but it is what it is. The maintainers offer some more explanation
+    [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
 
 ```hcl
 module "composed_workflow" {
@@ -262,7 +272,8 @@ module "composed_workflow" {
 }
 ```
 
-For a real world example, see our guide on rolling deployments in your [CI / CD pipelines](/docs/edge/guides/cicd/rolling-deployments).
+For a real world example, see our guide on rolling deployments in your
+[CI / CD pipelines](/docs/edge/guides/cicd/rolling-deployments).
 
 <MarkdownAlert severity="warning">
   Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template
@@ -271,14 +282,15 @@ For a real world example, see our guide on rolling deployments in your [CI / CD 
 
 ### Workflow of Workflows
 
-Rather than referencing a template from another Workflow, you can actually use one Workflow to create another.
-Argo refers to this pattern as a [Workflow of Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-of-workflows/).
+Rather than referencing a template from another Workflow, you can actually use one Workflow to create another. Argo
+refers to this pattern as a
+[Workflow of Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-of-workflows/).
 
 This provides some additional flexibility as you can override any part of the generated Workflows, but the syntax is
 significantly more verbose. We do not recommend this path unless you need this override capability.
 
-Below is an example WorkflowTemplate for a Workflow of Workflows that creates and runs a Workflow derived from the above example
-WorkflowTemplate twice in a series:
+Below is an example WorkflowTemplate for a Workflow of Workflows that creates and runs a Workflow derived from the above
+example WorkflowTemplate twice in a series:
 
 {/* spellchecker: disable */}
 
@@ -361,10 +373,10 @@ resource "kubectl_manifest" "workflow_of_workflows_template" {
 
 {/* spellchecker: enable */}
 
-Note that this is not a "special" type of Workflow but rather leverages
-the built-in [ResourceTemplate](https://argo-workflows.readthedocs.io/en/latest/resource-template/)
-functionality of a normal Argo Workflow.
+Note that this is not a "special" type of Workflow but rather leverages the built-in
+[ResourceTemplate](https://argo-workflows.readthedocs.io/en/latest/resource-template/) functionality of a normal Argo
+Workflow.
 
-This is why you have to set the `successCondition` and `failureCondition` fields
-to let the top-level Workflow (`example-workflow-of-worklows`) know when the
-resources it has created (the `example-workflow` Workflows) have succeeded or failed.
+This is why you have to set the `successCondition` and `failureCondition` fields to let the top-level Workflow
+(`example-workflow-of-worklows`) know when the resources it has created (the `example-workflow` Workflows) have
+succeeded or failed.

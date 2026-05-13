@@ -14,7 +14,7 @@ Type: `string`
 
 Default: n/a
 
-### billing\_contact
+### billing_contact
 
 Description: Billing contact information for the AWS account
 
@@ -31,7 +31,7 @@ object({
 
 Default: `null`
 
-### operations\_contact
+### operations_contact
 
 Description: Operations contact information for the AWS account
 
@@ -48,7 +48,7 @@ object({
 
 Default: `null`
 
-### primary\_contact
+### primary_contact
 
 Description: Primary contact information for the AWS account
 
@@ -72,7 +72,7 @@ object({
 
 Default: `null`
 
-### quota\_auto\_management\_exclusion\_list
+### quota_auto_management_exclusion_list
 
 Description: Map of service codes to lists of quota codes to exclude from automatic management
 
@@ -80,15 +80,16 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### quota\_auto\_management\_opt\_in\_type
+### quota_auto_management_opt_in_type
 
-Description: Opt-in type for AWS Service Quotas Automatic Management. NotifyAndAdjust enables proactive quota increases. NotifyOnly sends alerts only. Disabled turns off auto-management entirely.
+Description: Opt-in type for AWS Service Quotas Automatic Management. NotifyAndAdjust enables proactive quota increases.
+NotifyOnly sends alerts only. Disabled turns off auto-management entirely.
 
 Type: `string`
 
 Default: `"NotifyAndAdjust"`
 
-### quota\_auto\_management\_regions
+### quota_auto_management_regions
 
 Description: AWS regions in which to enable Service Quotas Automatic Management
 
@@ -118,7 +119,7 @@ Default:
 ]
 ```
 
-### security\_contact
+### security_contact
 
 Description: Security contact information for the AWS account
 
@@ -139,19 +140,19 @@ Default: `null`
 
 The following outputs are exported:
 
-### quota\_notification\_configuration\_arn
+### quota_notification_configuration_arn
 
 Description: The ARN of the AWS User Notifications configuration for quota alerts
 
-### spot\_data\_feed\_bucket
+### spot_data_feed_bucket
 
 Description: The name of the bucket for the spot data feed
 
-### spot\_data\_feed\_bucket\_arn
+### spot_data_feed_bucket_arn
 
 Description: The ARN of the bucket for the spot data feed
 
-### spot\_data\_feed\_bucket\_region
+### spot_data_feed_bucket_region
 
 Description: The region of the bucket for the spot data feed
 

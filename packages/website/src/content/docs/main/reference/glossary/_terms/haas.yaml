@@ -1,0 +1,25 @@
+term: HaaS (Hardware-as-a-Service)
+type: other
+summary: A model where physical hardware is leased from a provider who manages the physical equipment while the customer manages the software stack.
+description: |
+  *Hardware-as-a-Service* (HaaS) is a model in which a provider owns and maintains physical hardware
+  (servers, networking equipment, storage devices, etc.) and leases it to customers. The provider
+  handles hardware procurement, maintenance, repairs, and physical hosting, while the customer
+  manages the software stack running on that hardware.
+
+  HaaS differs from IaaS in that the customer typically gets access to dedicated physical machines
+  rather than virtualized resources. This can be important for workloads that require:
+
+  - **Bare-metal performance**: No hypervisor overhead
+  - **Hardware-level control**: Custom firmware, specialized accelerators (GPUs, FPGAs)
+  - **Compliance**: Certain regulatory requirements mandate dedicated physical hardware
+
+  HaaS sits below IaaS in the cloud computing stack — IaaS providers themselves often use HaaS
+  arrangements (or own their hardware outright) to build their virtualized offerings.
+references:
+  - type: term
+    label: IaaS (Infrastructure-as-a-Service)
+    link: "#iaas-infrastructure-as-a-service"
+  - type: external-docs
+    label: "Wikipedia: Hardware as a Service"
+    link: https://en.wikipedia.org/wiki/Hardware_as_a_service

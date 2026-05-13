@@ -1,0 +1,24 @@
+term: Nix
+type: devshell
+summary: A package manager and programming language used to define reproducible development environments.
+description: |
+  *Nix* is both a package manager and a functional programming language used by Panfactum to
+  codify local developer environments and tooling.
+
+  Panfactum uses Nix to:
+
+  - **Define the DevShell**: All development tooling is declared in various `flake.nix` files and built reproducibly by Nix
+  - **Pin tool versions**: Specific versions of every tool are locked, ensuring all developers and CI systems use identical binaries
+  - **Isolate environments**: Nix installs packages in isolation without polluting system paths
+
+  Nix hosts **nixpkgs**, one of the largest software repositories in the world, making nearly any
+  tool available as a Nix package. Panfactum leverages [Nix flakes](https://nix.dev/concepts/flakes)
+  for reproducible, version-locked environment definitions that integrate with `direnv` for
+  seamless shell activation.
+
+  > **Note:** You do not need to learn the Nix language to use Panfactum. The `flake.nix` file
+  > follows a straightforward template, and adding custom tools requires only minimal edits.
+references:
+  - type: term
+    label: DevShell
+    link: "#devshell"

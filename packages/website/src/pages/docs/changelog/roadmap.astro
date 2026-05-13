@@ -1,0 +1,25 @@
+---
+import Layout from '@/components/layouts/docs/Layout.astro';
+import { Content, getHeadings } from '@/content/changelog/roadmap.mdx';
+
+import { buildChangelogSidebar } from './_lib/buildChangelogSidebar';
+
+
+const sections = await buildChangelogSidebar();
+const rawHeadings = getHeadings();
+---
+
+<Layout
+  title="Roadmap"
+  description="Planned features and improvements for the Panfactum Stack"
+  headings={rawHeadings.map(h => ({ depth: h.depth, text: h.text, slug: h.slug }))}
+  metadata={[
+    {
+      text: "Changelog",
+      path: "/changelog",
+      sub: sections
+    }
+  ]}
+>
+  <Content />
+</Layout>

@@ -4,48 +4,70 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_cron_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_cron_job" status="stable" type="submodule" />
+<ModuleHeader
+  name="kube_cron_job"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_cron_job"
+  status="stable"
+  type="submodule"
+/>
 
 # Kubernetes CronJob
 
-Provides a production-hardened instance of a Kubernetes [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
-with the following enhancements:
+Provides a production-hardened instance of a Kubernetes
+[CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/) with the following enhancements:
 
-* Standardized resource labels
-* Pod and container security hardening
-* Temporary directory mounting
-* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
-* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
-* Service account configuration with default permissions
-* Integration with the Panfactum bin-packing scheduler
-* High-availability scheduling constraints
-* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
-* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
-* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
-* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
-* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+- Standardized resource labels
+
+- Pod and container security hardening
+
+- Temporary directory mounting
+
+- [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and
+  [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+
+- [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+
+- Service account configuration with default permissions
+
+- Integration with the Panfactum bin-packing scheduler
+
+- High-availability scheduling constraints
+
+- [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  configurations
+
+- Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+
+- [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+
+- [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+
+- [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various
+  Panfactum node classes
 
 ## Usage
 
 ### Basics
 
-This module follows the basic workload deployment patterns describe in [this guide](/docs/stable-25-04/guides/deploying-workloads/basics).
+This module follows the basic workload deployment patterns describe in
+[this guide](/docs/stable-25-04/guides/deploying-workloads/basics).
 
 ### Scheduling
 
-This module's has inputs that map one-for-one to the [standard Kubernetes CronJob API.](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#cronjobspec-v1-batch)
+This module's has inputs that map one-for-one to the
+[standard Kubernetes CronJob API.](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#cronjobspec-v1-batch)
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -83,7 +105,7 @@ list(object({
   }))
 ```
 
-### cron\_schedule
+### cron_schedule
 
 Description: The cron expression to use for the CronJob
 
@@ -105,15 +127,16 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### active\_deadline\_seconds
+### active_deadline_seconds
 
-Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before the system tries to terminate it; value must be positive integer.
+Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before
+the system tries to terminate it; value must be positive integer.
 
 Type: `number`
 
 Default: `86400`
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow Pods to schedule on arm64 nodes
 
@@ -121,7 +144,7 @@ Type: `bool`
 
 Default: `true`
 
-### backoff\_limit
+### backoff_limit
 
 Description: Specifies the number of retries before marking the Job failed.
 
@@ -129,7 +152,7 @@ Type: `number`
 
 Default: `6`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow Pods to schedule on burstable nodes
 
@@ -137,7 +160,7 @@ Type: `bool`
 
 Default: `false`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -145,7 +168,7 @@ Type: `bool`
 
 Default: `true`
 
-### common\_env
+### common_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -153,9 +176,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_env\_from\_config\_maps
+### common_env_from_config_maps
 
-Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment
+variables names and the values are the ConfigMap references.
 
 Type:
 
@@ -168,9 +192,10 @@ map(object({
 
 Default: `{}`
 
-### common\_env\_from\_secrets
+### common_env_from_secrets
 
-Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment
+variables names and the values are the Secret references.
 
 Type:
 
@@ -183,7 +208,7 @@ map(object({
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -191,7 +216,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### concurrency\_policy
+### concurrency_policy
 
 Description: Specifies how to treat concurrent executions of a Job.
 
@@ -199,7 +224,7 @@ Type: `string`
 
 Default: `"Forbid"`
 
-### config\_map\_mounts
+### config_map_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the CronJob
 
@@ -214,7 +239,7 @@ map(object({
 
 Default: `{}`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -222,7 +247,7 @@ Type: `bool`
 
 Default: `false`
 
-### cron\_job\_annotations
+### cron_job_annotations
 
 Description: Annotations to add to the generated CronJob
 
@@ -230,7 +255,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### disruptions\_enabled
+### disruptions_enabled
 
 Description: Whether to enable disrupting the Pods in the middle of execution.
 
@@ -238,7 +263,7 @@ Type: `bool`
 
 Default: `false`
 
-### dns\_policy
+### dns_policy
 
 Description: The DNS policy for the Pod
 
@@ -246,7 +271,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_annotations
+### extra_annotations
 
 Description: A map of extra annotations that will be added to the CronJob (not the pods)
 
@@ -254,7 +279,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_labels
+### extra_labels
 
 Description: A map of extra labels that will be added to the CronJob (not the pods)
 
@@ -262,7 +287,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to the pods in the CronJob
 
@@ -270,7 +295,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Extra pod labels to use
 
@@ -278,7 +303,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the Pods
 
@@ -295,7 +320,7 @@ list(object({
 
 Default: `[]`
 
-### failed\_jobs\_history\_limit
+### failed_jobs_history_limit
 
 Description: The number of failed jobs to retain
 
@@ -303,7 +328,7 @@ Type: `number`
 
 Default: `1`
 
-### job\_annotations
+### job_annotations
 
 Description: Annotations to add to generated Job resources
 
@@ -311,7 +336,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### linkerd\_enabled
+### linkerd_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
 
@@ -319,7 +344,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -327,7 +352,7 @@ Type: `bool`
 
 Default: `true`
 
-### mount\_owner
+### mount_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -335,7 +360,7 @@ Type: `number`
 
 Default: `1000`
 
-### node\_image\_cached\_enabled
+### node_image_cached_enabled
 
 Description: Whether to add the container images to the node image cache for faster startup times
 
@@ -343,7 +368,7 @@ Type: `bool`
 
 Default: `true`
 
-### node\_preferences
+### node_preferences
 
 Description: Node label preferences for the Pods
 
@@ -351,7 +376,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the Pods
 
@@ -359,7 +384,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
 
@@ -367,7 +392,7 @@ Type: `bool`
 
 Default: `true`
 
-### pod\_completions
+### pod_completions
 
 Description: Specifies the desired number of successfully finished Pods the Job should be run with.
 
@@ -375,7 +400,7 @@ Type: `number`
 
 Default: `1`
 
-### pod\_parallelism
+### pod_parallelism
 
 Description: Specifies the maximum desired number of Pods the Job should run at any given time.
 
@@ -383,7 +408,7 @@ Type: `number`
 
 Default: `1`
 
-### pod\_replacement\_policy
+### pod_replacement_policy
 
 Description: Specifies when to create replacement Pods
 
@@ -391,15 +416,16 @@ Type: `string`
 
 Default: `"Failed"`
 
-### pod\_version\_labels\_enabled
+### pod_version_labels_enabled
 
-Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent
+updates.
 
 Type: `bool`
 
 Default: `true`
 
-### priority\_class\_name
+### priority_class_name
 
 Description: The priority class to use for Pods in the CronJob
 
@@ -407,7 +433,7 @@ Type: `string`
 
 Default: `null`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -415,7 +441,7 @@ Type: `bool`
 
 Default: `true`
 
-### restart\_policy
+### restart_policy
 
 Description: The Pod restart policy
 
@@ -423,7 +449,7 @@ Type: `string`
 
 Default: `"OnFailure"`
 
-### secret\_mounts
+### secret_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the CronJob
 
@@ -438,7 +464,7 @@ map(object({
 
 Default: `{}`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow Pods to schedule on spot nodes
 
@@ -446,15 +472,16 @@ Type: `bool`
 
 Default: `true`
 
-### starting\_deadline\_seconds
+### starting_deadline_seconds
 
-Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones.
+Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs
+executions will be counted as failed ones.
 
 Type: `number`
 
 Default: `900`
 
-### successful\_jobs\_history\_limit
+### successful_jobs_history_limit
 
 Description: The number of successful jobs to retain
 
@@ -470,7 +497,7 @@ Type: `bool`
 
 Default: `false`
 
-### termination\_grace\_period\_seconds
+### termination_grace_period_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -478,7 +505,7 @@ Type: `number`
 
 Default: `30`
 
-### tmp\_directories
+### tmp_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -494,15 +521,16 @@ map(object({
 
 Default: `{}`
 
-### ttl\_seconds\_after\_finished
+### ttl_seconds_after_finished
 
-Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it is eligible to be automatically deleted.
+Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it
+is eligible to be automatically deleted.
 
 Type: `number`
 
 Default: `600`
 
-### update\_type
+### update_type
 
 Description: The type of update that the CronJob should use
 
@@ -510,7 +538,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the Vertical Pod Autoscaler
 
@@ -526,11 +554,11 @@ The following outputs are exported:
 
 Description: The default labels assigned to all resources in this Workflow
 
-### match\_labels
+### match_labels
 
 Description: The labels unique to this Workflow that can be used to select any pods in this Workflow
 
-### service\_account\_name
+### service_account_name
 
 Description: The service account used for the pods
 
@@ -538,6 +566,4 @@ Description: The service account used for the pods
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

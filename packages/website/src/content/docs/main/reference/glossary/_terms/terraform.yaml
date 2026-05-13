@@ -1,0 +1,35 @@
+term: Terraform
+type: iac
+deprecation_notice: "Terraform has been superseded by [OpenTofu](https://opentofu.org/). Panfactum uses OpenTofu exclusively."
+summary: HashiCorp's Infrastructure-as-Code tool and the predecessor to OpenTofu.
+description: |
+  While many IaC tools exist, none has achieved as much popularity as HashiCorp's [Terraform](https://www.terraform.io/).
+
+  Terraform provides a few key benefits over the alternatives which has allowed it to become the standard way to work with infrastructure:
+
+  - **Declarative**: You only need to declare your desired infrastructure state in the simple [Hashicorp Configuration Language](https://developer.hashicorp.com/terraform/language/syntax/configuration). This unlocks key capabilities:
+    - Removal of complex [imperative](https://en.wikipedia.org/wiki/Imperative_programming) logic for reconciling the current state and the desired state
+    - Easily readable source-code files that can quickly be understood by developers of all skill levels
+    - Infrastructure deltas that alert you to potential changes before they are applied
+    - A robust ecosystem of tooling that can easily parse source code files to ensure organizational compliance standards are met
+
+  - **API-oriented**: Rather than develop its own infrastructure management logic, Terraform simply wraps your infrastructure providers' public APIs. This allows for a simple, concise programming interface and a straightforward mechanism for debugging if something goes awry.
+
+  - **Plugin-oriented**: Terraform provides a standard, stable interface for adding new infrastructure providers, allowing the wider developer community to produce integrations with nearly every system that provides a public API. This allows organizations to define *all* infrastructure using a single toolchain, greatly simplifying infrastructure management.
+
+  In late 2023, HashiCorp [announced a major update to its license](https://www.hashicorp.com/license-faq) for Terraform and its other previously open-source tools, changing from the Mozilla Public License (MPL 2.0) to the Business Source License (BSL). This eliminated the ability for organizations to provide alternatives to HashiCorp's paid, hosted offerings when using Terraform, prompting the community to fork Terraform and create OpenTofu.
+
+  **Panfactum uses OpenTofu (the open-source Terraform fork) rather than HashiCorp's Terraform.** References to "terraform" throughout the Panfactum documentation should be understood as referring to OpenTofu.
+references:
+  - type: term
+    label: OpenTofu
+    link: "#opentofu"
+  - type: term
+    label: Infrastructure-as-Code
+    link: "#infrastructure-as-code"
+  - type: internal-docs
+    label: IaC Concepts
+    link: /docs/main/concepts/iac
+  - type: external-docs
+    label: Terraform Documentation
+    link: https://www.terraform.io/

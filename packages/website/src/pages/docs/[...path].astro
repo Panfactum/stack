@@ -71,6 +71,18 @@ const filteredHeadings = headings.filter(({text}) => {
   return text !== "Added" && text !== "Fixed" && text !== "Breaking Changes" && text !== "Changed"
 })
 
+if (entry.id.endsWith('reference/glossary')) {
+  const glossaryTerms = await getCollection('glossaryTerms');
+  const version = entry.id.split('/')[0];
+  const versionTerms = glossaryTerms
+    .filter(t => t.id.startsWith(`${version}/`))
+    .sort((a, b) => a.data.term.localeCompare(b.data.term));
+  for (const t of versionTerms) {
+    const slug = t.data.term.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    filteredHeadings.push({ depth: 2, slug, text: t.data.term });
+  }
+}
+
 const headingTitle = headings.find(({depth}) => depth === 1)?.text
 ---
 

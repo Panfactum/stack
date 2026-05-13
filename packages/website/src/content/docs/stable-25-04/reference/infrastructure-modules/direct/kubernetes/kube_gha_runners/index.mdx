@@ -4,11 +4,17 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_gha_runners" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_gha_runners" status="beta" type="direct" />
+<ModuleHeader
+  name="kube_gha_runners"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_gha_runners"
+  status="beta"
+  type="direct"
+/>
 
 # GHA Runners
 
-This module provides deployments of [self-hosted GHA runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller)
+This module provides deployments of
+[self-hosted GHA runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller)
 that can be targeted in GHA workflows.
 
 For installation instructions, see our [guide](/docs/stable-25-04/guides/addons/github-actions/installing).
@@ -17,14 +23,14 @@ For installation instructions, see our [guide](/docs/stable-25-04/guides/addons/
 
 ### Connecting the Runner to GitHub
 
-Follow [GitHub's documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api#authenticating-arc-with-a-personal-access-token-classic) to provision a
-Classic Personal Access Token (PAT) with the correct permissions. Provide this token
-as an input via `github_token`.
+Follow
+[GitHub's documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api#authenticating-arc-with-a-personal-access-token-classic)
+to provision a Classic Personal Access Token (PAT) with the correct permissions. Provide this token as an input via
+`github_token`.
 
-For each runner,
-set the `github_config_url` to the URL of your repository, organization, or enterprise. This is the entity
-that the runners will belong to. We generally recommend making the runner available at the organization level
-so that all of your organization's repositories can use the runner in their GHA workflows.
+For each runner, set the `github_config_url` to the URL of your repository, organization, or enterprise. This is the
+entity that the runners will belong to. We generally recommend making the runner available at the organization level so
+that all of your organization's repositories can use the runner in their GHA workflows.
 
 ### Referencing the Runner in a Workflow
 
@@ -50,33 +56,32 @@ jobs:
 
 ### Reducing Startup Times
 
-By default, this module does not provision any idle runners. As a result, when new workflow jobs are created,
-the jobs are delayed by 1-2 minutes as runners initialize.
+By default, this module does not provision any idle runners. As a result, when new workflow jobs are created, the jobs
+are delayed by 1-2 minutes as runners initialize.
 
-For each runner, you can set `min_replicas` to a non-zero value to allow idle runners in your cluster. These
-will be ready to receive new workflow jobs immediately and reduce your overall workflow runtimes.
-However, these will also consume their full amount of allocated resources (CPU, memory, storage)
-in the cluster while sitting idle.
+For each runner, you can set `min_replicas` to a non-zero value to allow idle runners in your cluster. These will be
+ready to receive new workflow jobs immediately and reduce your overall workflow runtimes. However, these will also
+consume their full amount of allocated resources (CPU, memory, storage) in the cluster while sitting idle.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### github\_token
+### github_token
 
 Description: The GitHub token that the runners will use to register with GitHub
 
@@ -108,7 +113,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### extra\_env\_secrets
+### extra_env_secrets
 
 Description: A key-value mapping of extra secret environment variables for the runner pods
 
@@ -116,7 +121,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to every runner pod
 
@@ -124,7 +129,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Labels to add to every runner pod
 
@@ -132,15 +137,15 @@ Type: `map(string)`
 
 Default: `{}`
 
-### gha\_runner\_scale\_set\_helm\_version
+### gha_runner_scale_set_helm_version
 
-Description: The version of the  actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
+Description: The version of the actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
 
 Type: `string`
 
 Default: `"0.9.3"`
 
-### node\_image\_cache\_enabled
+### node_image_cache_enabled
 
 Description: Whether to cache images locally for better startup performance
 
@@ -148,7 +153,7 @@ Type: `bool`
 
 Default: `true`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -156,7 +161,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -172,6 +177,4 @@ No outputs.
 
 No notes.
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

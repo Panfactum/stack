@@ -1,0 +1,461 @@
+# Roadmap
+
+A preview of the major architectural updates that are coming in 2026.
+
+## Phase 1: Management Layer Redesign
+
+One of the core principles of Panfactum is that _everything_ that our framework creates is configured
+via IaC.
+
+This gives our users complete transparency into what is happening under the hood and enables
+users to truly make each deployment their own by extending our foundational layer or even
+customizing the internals. Moreover, it is proven to be an extremely good pattern to enable our
+users' coding agents to easily integrate with our systems and have a full perspective of what is 
+going on under the hood.
+
+That said, as we have scaled over the last year and observed how users interacted with the PNCF
+systems, it has become clear that some of our initial design decisions are not sufficient for
+the experiences that we are hoping to enable.
+
+### Issues
+
+#### :numbered :collapsible Version Incompatibility
+
+  Historically, we only provide a mechanism to use a
+  single local DevShell version, and we only make the guarantee that this
+  would work with deployed infrastructure of the same version. This was fine when we were first
+  starting out, but as we've now gone through several upgrade cycles, the ergonomics around
+  staged upgrades (dev -> staging -> prod) frankly sucks. Moreover, staged upgrading is the 
+  _only_ reasonable approach to upgrading your core cloud platform infrastructure.
+
+  In practice, upgrading the DevShell in order to upgrade a lower environment would leave the 
+  DevShell unable to work with other environments like production. 
+
+  It is clear that we need to update our patterns to enable different environments to run on
+  different versions seamlessly.
+
+#### :numbered :collapsible Missing Configuration-as-code Automations
+
+  Historically, we have used Terragrunt as the configuration-as-code layer. While Terragrunt is an
+  amazing project, we are beginning to hit insurmountable limits:
+
+  * The HCL configuration language that Terragrunt uses does not lend itself well to complex automations.
+
+    We want to enable a future where users can simply run `pf upgrade`, `pf install`, and `pf configure` to
+    control their infrastructure rather than having to dig through documentation to figure out how
+    things should be configured to work. 
+
+    After having tried many different approaches to doing that with HCL, we have reached
+    the conclusion that it is not possible while preserving the user ergonomics that we want.
+
+  * We have complex automations to safely and securely inject the right configuration and credentials
+    into each IaC deployment process. The API surface that Terragrunt exposes makes this possible,
+    but only in a way that is extremely inefficient.
+
+    We are seeing users with moderately sized footprints have to wait 10+ seconds simply to run the
+    configuration initialization required for _any_ IaC command.
+
+    This latency creates a very poor interactive DX and adds significant time to CI/CD pipelines. 
+    With a runner optimized for Panfactum, this process could occur in milliseconds.
+
+  * While the Terragrunt API surface is broad, it is still missing key features that would be fairly
+    difficult to bolt-on without patching Terragrunt itself. To name a few: content-addressed storage 
+    for downloaded modules, the ability to change
+    the AWS profile in sops-encrypted files, the ability to quickly render the resolved module inputs,
+    the ability to store runner logs in a centralized manner for quick auditing and debugging, etc.
+
+#### :numbered :collapsible Daemon-less DevShell
+
+  Currently, the DevShell is relatively inert. In other words, when you load into it, nothing
+  is actively running in the background and every CLI invocation must construct an entire view of your
+  project from scratch to begin doing useful work.
+
+  While this made it easy for us to launch the framework, we are now hitting the limits of this pattern:
+
+  * The local DevShell is becoming more stateful. We are no longer just deploying Terraform, we are managing
+    tunnels, managing credentials, managing workflows that cannot fit nicely into IaC like environment bootstrapping,
+    and would like to begin providing utilities like LSPs, etc.
+
+    While it is possible to do multi-process coordination without a central daemon, this approach is significantly
+    more complex than having a central well-defined daemon have a consistent view of the system and execute
+    the appropriate work.
+
+  * Multi-process coordination inherently adds latency to every operation. Moreover, some operations such as hooks
+    are impossible to implement without a central daemon observing every system change.
+
+  * Credential management does not meet our security standard. Without a daemon, we are forced to write credentials to disk
+    which is a major vector of security problems. While this is common industry practice, we want to
+    deliver on our promise of being the most secure framework for infrastructure management. 
+
+#### :numbered :collapsible Discoverability
+
+While there is a lot of power packed into CNCF, the framework fails to provide mechanisms to
+quickly answer pretty basic questions
+that one would expect from a vertically-integrated project like ours.
+
+Some recurring examples:
+
+* What should I install next?
+* What are the inputs to this module?
+* Does this configuration have any issues?
+* What permissions do I have?
+* How do I connect to live infrastructure?
+
+This problem is exacerbated in larger organizations with users of all levels of backgrounds and skill
+levels in infrastructure management.
+
+#### :numbered :collapsible Observability
+
+Over the last year we have added some amazing automations to the framework. We have been able to
+take 10,000+ word guides and transform them into single CLI commands.
+
+However, that complexity has come at the cost of being transparent to our users about what is
+happening under the hood. Two key questions have emerged:
+
+**What is this doing to my infrastructure?**
+
+Let's take the `pf env add` command for example. This command asks for very sensitive credentials
+and a blank check to deploy infrastructure.
+
+Understandably, this causes trepidation. Simultaneously, our original approach of providing
+dozens of pages of documentation felt overwhelming.
+
+We need a solution that shows exactly what is happening / about to happen in bite-sized chunks
+that a user can digest.
+
+**What went wrong?**
+
+Let's take the `pf cluster add` command for example. This is a workflow that consists of over 
+100 nodes, each with various edge cases and failure scenarios.
+
+When something does go wrong, our users feel helpless and stranded.
+
+We need a solution that does a better job of showing everything that occurred to better enable
+self-service and agentic resolution as well as better issue reports.
+
+#### :numbered :collapsible Agent Augmentation
+
+Over the last year, we have seen a revolution in how folks are using coding agents in the SDLC. Many of our 
+users use agents for 100% of their work.
+
+We need to be able to give our users the ability to integrate PNCF management into their agents in 
+a way that is safe, secure, and performant. 
+
+That means being able to drive higher levels of determinism in manipulating configuration and infrastructure 
+than is currently possible with the management layer today.
+
+### What is Coming
+
+#### :numbered :collapsible Environment-scoped DevShell Daemons
+
+In the future, when you load the DevShell for your infrastructure repository, version-specific
+daemons will automatically be launched for each environment.
+
+These daemons will watch both the local filesystem and remote infrastructure for changes and be able to provide
+a consistent API surface for common operations.
+
+This will enable the following:
+
+* The ability to support operations across multiple environments even if they are all running
+  different versions of the PNCF framework.
+
+* Improved security as key credentials will only be stored in memory.
+
+* Improved performance as every operation will not need to reconstruct the entire configuration and live 
+  infrastructure state from scratch.
+
+* Fewer bugs as we do not need to reason about multi-process coordination -- all operations flow through
+  a single execution engine.
+
+
+#### :numbered :collapsible Custom IaC Runner
+
+We are dropping Terragrunt for both a simpler and more powerful in-house IaC runner.
+
+With that change, there will be no more HCL at the infrastructure layer.
+
+That said, the rest of the configuration layer will look extremely similar to what we have today:
+
+* Environment folder structure will remain
+* YAML-driven configuration will remain
+* All existing functionality will remain
+
+To replace the expressions that were possible in HCL, we are using tagged YAML strings that
+represent CEL expressions.
+
+For example:
+
+```yaml
+locals:
+  env: prod
+  version: v1.2.3
+  envConfig: !expr load("./env/" + inputs.env + ".yaml")
+  isProd: !expr inputs.env == "prod"
+  replicas: !expr vars.isProd ? vars.envConfig.prodReplicas : vars.envConfig.defaultReplicas
+  image: !expr "'ghcr.io/acme/api:' + inputs.version"
+
+inputs:
+  replicas: !expr vars.replicas
+  image: !expr vars.image
+  region: !expr vars.envConfig.region
+```
+
+What this unlocks:
+
+* Deterministic editing (e.g., `pf upgrade`)
+* Millisecond-level performance on common operations (e.g., `pf show inputs`).
+* Tighter integrations into other automations and components of the DevShell
+
+#### :numbered :collapsible Local Panfactum Web UI
+
+Clearly there is a need for a UI layer on top of PNCF installs -- manually reviewing hundreds of YAML
+files with only imperative CLI commands at your disposal is the cause of many of the issues stated above.
+
+Over the last year, we experimented heavily with TUIs to keep framework management scoped
+entirely to the terminal (we love tools like k9s). 
+
+However, we found far too many shortcomings of this approach:
+
+* Complex workflow graphs are basically impossible to represent, and much of managing a PNCF install is working
+with workflow graphs such as deploying modules for a region / environment.
+
+* Discoverability is poor. A k9s-interface is amazing when you already know all the key terminology. However,
+if you are trying to understand what functionality is available, it is a poor starting point.
+
+* Idiosyncrasies across various local setups. Browsers are more or less standardized and everyone knows how to use
+them. Terminal environments tend to be extremely bespoke and the more complex functionality that we add 
+the more breakages we would find. 
+
+Our new web UI will enable the following:
+
+* A simplified visual overview of everything that is installed and running and what operations are available to run
+
+* A type-aware interface for working with module inputs
+
+* Visualizations of the workflow graphs that various PNCF operations execute internally along with granular 
+  introspection into what occurred (e.g., subprocess logs, status checks, etc.)
+
+This will _complement_ but not replace the existing CLI workflows that our users have grown accustomed to.
+
+#### :numbered :collapsible Optional, Centralized IaC Coordinator
+
+As we scale up our Autopilot support business which funds development on the OSS framework, we are finding
+that our jobs would be much easier if we had the ability to answer the following two questions:
+
+* What are all the IaC deployments that have historically occurred against a particular module, including the outcomes
+  and logs?
+
+* How can we "lock" certain subsets of infrastructure to prevent anyone from deploying changes to it while we work
+  on upgrading or debugging issues?
+
+Unfortunately, these simple questions have no straightforward or built-in solution in any existing OSS tooling.
+
+Fortunately, these are trivial to resolve with a simple centralized coordination server. 
+
+We will build an OSS MVP of this for use in our Autopilot installations.
+
+This will _complement_ our existing patterns, not be required, and will run entirely on user infrastructure (i.e.,
+this will not be a paid, managed service).
+
+## Phase 2: Observability Stack
+
+By far the most requested feature by our Panfactum users is the integration of a self-hosted observability
+stack into PNCF deployments.
+
+Why? Oftentimes our users' managed observability suites are more expensive than their actual cloud workloads that
+they are monitoring. Not to mention they take a lot of work to set up.
+
+Over the last year, we have done a lot of experimentation on the observability side, and this has proven
+to be a complicated problem to solve. Cost, performance, reliability, and integrations all have their own
+rabbit holes which must be explored thoroughly before selecting an architecture to invest in long-term. Not
+to mention that "observability" is really many discrete technology stacks for metrics, logging, tracing, synthetic,
+APM, RUM, etc.
+
+Ultimately, it is clear that getting observability right is likely as big of a task as the rest of the PNCF combined,
+which is why we have not made it a priority in the early days.
+
+However, the time has come to get this integrated!
+
+### What is Coming
+
+#### :numbered :collapsible Integrated Metrics, Logging, and Tracing
+
+Our modules will come with automatically enabled metrics, log, and trace collection.
+
+These will be stored directly in the self-hosted infrastructure.
+
+We will also ship [Grafana](https://github.com/grafana/grafana) and pre-built Grafana dashboards for every major
+infrastructure component to eliminate any guesswork around what is actually happening
+in your running systems.
+
+#### :numbered :collapsible Out-of-the-box Monitoring and Alerting
+
+On top of the metrics and logs, we will provide active monitoring for thousands of 
+various issues that may be impacting your PNCF deployments and integrate 
+this into a self-hosted on-call system.
+
+Additionally, for our Autopilot customers, these issues will automatically escalate to your
+support engineers.
+
+#### :numbered :collapsible Synthetic Testing Tools
+
+One of the most expensive components of managed monitoring products are their synthetic testing
+suites.
+
+We will provide a self-hosted alternative via [canary checker](https://canarychecker.io/).
+
+We will have turn-key options to allow users to deploy tests for their workloads.
+
+Moreover, we will develop synthetic test suites for the PNCF SDLC itself, improving this
+project's overall stability.
+
+#### :numbered :collapsible Agentic Integrations
+
+As our users' AI agents take over more and more of the tedious diagnostic work, we will ensure
+we have the proper integration point to make sure their coding agents 
+can efficiently analyze the monitoring data that is collected.
+
+#### :numbered :collapsible Cost Analytics
+
+One of the most-requested features is the ability to see how much various workloads deployed using
+PNCF are actually costing the organization.
+
+We will use [OpenCost](https://opencost.io/) to finally allow users direct access to the cost
+analytics data of their workloads.
+
+## Phase 3: Multi-cloud
+
+Up until now, we have been an AWS-only framework. 
+
+Why? It has been by-far the most popular cloud within our userbase and has allowed us to gain enough
+users and paid Autopilot customers to support long-term sustainable development. To enable us to reach
+sustainability faster, we intentionally ignored development areas that were not required so long as we 
+were running on AWS.
+
+Specifically, we do not currently provide self-hosted versions of the following:
+
+* Kubernetes control plane
+* Object storage
+* Block storage
+* Container registry
+* DNS servers
+
+However, our mission has always been to be completely cloud-agnostic: no matter where you deploy PNCF, the
+primitives will always behave exactly the same.
+
+Before adding even more functionality to the PNCF, we need to circle back and address these foundational
+components so that we are not making design decisions that couple us to any one cloud.
+
+### What is Coming 
+
+#### :numbered :collapsible Replace AWS Kubernetes Control Plane
+
+Step one is providing our own PNCF Kubernetes control plane which removes EKS from our framework.
+
+Not only will this remove one core piece of AWS coupling, but this will likely 
+also reduce the net cost of running a basic PNCF cluster inside AWS by 30-50%. 
+
+#### :numbered :collapsible Bare Metal
+
+The next step is providing an implementation of PNCF that runs on bare metal so that users can 
+install us anywhere without presupposing the availability of _any_ managed services.
+
+We have already purchased the necessary hardware and built the necessary facility
+for creating a small (< $50k) on-prem test deployment of PNCF as our
+testing system.
+
+#### :numbered :collapsible Additional Cloud Provider Support
+
+We are going to aim to be able to support the following cloud providers during this initial
+multi-cloud push:
+
+* GCP
+* Hetzner
+* Scaleway
+
+## Miscellaneous
+
+We also want to complete the following major arcs of work. They are of slightly lower priority than
+the major phases outlined above, but we are going to do our best to fit them in:
+
+### :numbered :collapsible Network Tunnel Overhaul
+
+We are excited to replace our point-to-point network tunnels which are a bit cumbersome to work
+with, with a Tailscale-based local SOCKS5 network proxy system.
+
+This will enable users to establish just one network tunnel with each deployed cluster in order to
+access all network resources.
+
+Beyond simplifying operations, we hope to use this to add additional security controls:
+
+* Make all control-plane endpoints private to reduce attack surface area
+* IP allow-lists for all infrastructure credentials to prevent exfill attacks
+* Centralized auditing of network connections
+
+### :numbered :collapsible Credentialing Rework
+
+After having observed our existing RBAC and credential systems over the last couple years in various deployment
+scenarios, it is clear that we need to make the following improvements:
+
+* Replace Vault with OpenBao: Vault has long been deprecated as a viable OSS project and it is time to move on
+to its API-compatible successor OpenBao.
+
+* Use X.509 for DB creds: We have uncovered lots of edge cases and ergonomic issues when using usernames and
+  passwords for authentication with our provided databases. We will be switching over to using short-lived
+  certificates for authentication in the future. This will not only improve the stability of our systems
+  but will standardize much of our internal credentialing infrastructure.
+
+* Invest more in Authentik: When PNCF was first launched, Authentik was a relatively new project so we were
+  hesitant to integrate too heavily with it beyond the bare minimum. Over the last couple of years, 
+  we have seen it mature and have confidence in its future. As a result, we are going to remove a lot
+  of the indirection we currently have (i.e., service -> cluster Vault -> Authentik) and integrate
+  more SSO flows directly with Authentik. We hope that this will improve the UX of PNCF by providing 
+  a single dashboard where users can log into all utilities.
+
+* Better RBAC visibility and customization: The RBAC system today is not as flexible or ergonomic as
+  we want it to be. In the future, we want to make it more obvious how to extend our RBAC system,
+  onboard / offboard users, and understand who has access to what.
+
+### :numbered :collapsible Improved CI/CD Patterns
+
+CI/CD has been a major ergonomics pain-point for our users. We want to implement the following
+improvements:
+
+* GitHub actions-compatible API: Take the YAML format you all know-and-love (or hate), and have it work
+directly on our self-hosted Argo-based CI/CD system.
+
+* Optionally decouple infrastructure and app code deployments: Our current CI/CD paradigm recommends that you
+do an infrastructure deployment to update the version of your application code that is running in our
+workloads. This can often add several minutes of latency to deployments. In the future, we will have
+direct integrations with container registries: as soon as your images are built, they are deployed instantly.
+
+* Replace Argo Events: Beyond having many, many bugs that we continually have to coordinate with upstream to
+fix, it also has a very obtuse syntax for connecting external events to workflows. We are going to bring
+this component in-house.
+
+* Nix builders: As Nix continues to gain popularity, we are going to be able to support building nix-based
+  container images out of the box. Additionally, this will allow users to build 
+  images of their customized DevShells for use in their clusters.
+
+### :numbered :collapsible Autopilot Improvements
+
+As we have scaled up our number of paying support customers, it has become clear that we need to improve 
+some of the standard tooling that we provide them. 
+
+What we will be adding:
+
+* Support dashboard: A central place where users can ask questions, open tickets, receive notifications, and track
+  work that we are doing on your behalf. 
+
+* ChatOps integrations: When you have questions about your systems, you want answers immediately -- faster than
+  any human could reasonably respond. So we are going to roll out some agentic AI tooling that will allow 
+  users to get answers 10x faster than is the norm today.
+
+* User-driven development: One thing that we love about our userbase is how excited they are to hack on the framework
+  and tailor it to their unique needs. However, sometimes users want to make meaningful and positive changes to
+  the core framework itself. Moving forward, we are going to roll-out agent-assisted development tooling
+  that will allow users' feature requests to automatically be actioned without them having to spin up
+  our increasingly complex development tooling.
+
+
+

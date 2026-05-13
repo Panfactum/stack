@@ -1,0 +1,26 @@
+term: Third-Party Module
+type: iac
+summary: An infrastructure module written and maintained by an external organization.
+description: |
+  A *third-party module* is an infrastructure module written and maintained by an organization other than Panfactum or your own organization. These are typically sourced from public module registries such as the [OpenTofu Registry](https://registry.opentofu.org/) or [Terraform Registry](https://registry.terraform.io/).
+
+  Third-party modules can be used in the Panfactum stack just like any other module. However, Panfactum recommends preferring Panfactum-provided modules for infrastructure within the Panfactum ecosystem, as they are tested and maintained to work together correctly.
+
+  When using third-party modules, be mindful of:
+
+  - **Versioning**: Pin modules to specific versions to ensure reproducibility
+  - **Trust**: Review module code before deploying, as it will have access to your infrastructure credentials
+  - **License**: Check the module's license for compatibility with your organization's requirements
+references:
+  - type: term
+    label: Module
+    link: "#module"
+  - type: term
+    label: Panfactum Module
+    link: "#panfactum-module"
+  - type: term
+    label: First-Party Module
+    link: "#first-party-module"
+  - type: external-docs
+    label: OpenTofu Registry
+    link: https://registry.opentofu.org/

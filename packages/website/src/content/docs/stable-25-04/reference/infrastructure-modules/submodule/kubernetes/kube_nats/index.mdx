@@ -4,48 +4,62 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
-<ModuleHeader name="kube_nats" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_nats" status="beta" type="submodule" />
+<ModuleHeader
+  name="kube_nats"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_nats"
+  status="beta"
+  type="submodule"
+/>
 
 # NATS Jetstream
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
-This module deploys a highly-available [NATS cluster](https://nats.io/) running in [Jetstream mode.](https://docs.nats.io/nats-concepts/jetstream)
+This module deploys a highly-available [NATS cluster](https://nats.io/) running in
+[Jetstream mode.](https://docs.nats.io/nats-concepts/jetstream)
 
 ## Usage
 
 ### Credentials
 
-For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
+For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's
+outputs:
 
-* `superuser_creds_secret`: Full access to the [system account](https://docs.nats.io/running-a-nats-service/configuration/sys_accounts) (does not have access to normal data, so should generally be avoided)
-* `admin_creds_secret`: Read and write access to the data streams
-* `reader_creds_secret`: Read-only access to the data streams
+- `superuser_creds_secret`: Full access to the
+  [system account](https://docs.nats.io/running-a-nats-service/configuration/sys_accounts) (does not have access to
+  normal data, so should generally be avoided)
 
-Authenticating with NATS is done via [TLS authentication.](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tls_mutual_auth)
+- `admin_creds_secret`: Read and write access to the data streams
+
+- `reader_creds_secret`: Read-only access to the data streams
+
+Authenticating with NATS is done via
+[TLS authentication.](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tls_mutual_auth)
 Each of the above named Secrets contains the following values:
 
-* `ca.crt`: The CA certificate used to verify the server-provided certificate.
-* `tls.crt`: The certificate that the NATS client should provide to the server for authentication.
-* `tls.key`: The TLS key that the NATS client will use for securing communications with the server.
+- `ca.crt`: The CA certificate used to verify the server-provided certificate.
+
+- `tls.crt`: The certificate that the NATS client should provide to the server for authentication.
+
+- `tls.key`: The TLS key that the NATS client will use for securing communications with the server.
 
 The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
 Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
 
-The credential lifetime is configured by the `vault_credential_lifetime_hours` input (defaults
-to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thus, in the worst-case,
-credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
+The credential lifetime is configured by the `vault_credential_lifetime_hours` input (defaults to 16 hours). Credentials
+are rotated 50% of the way through their lifetime. Thus, in the worst-case, credentials that a pod receives are valid
+for `vault_credential_lifetime_hours` / 2.
 
 ### Connecting
 
 <MarkdownAlert severity="warning">
-  Note that you should generally never want to use the superuser role. While this role has access to system events, it does
-  NOT have access to the individual data streams due to a limitation in NATS resource isolation.
+  Note that you should generally never want to use the superuser role. While this role has access to system events, it
+  does NOT have access to the individual data streams due to a limitation in NATS resource isolation.
 </MarkdownAlert>
 
-The below example show how to connect to the NATS cluster
-using dynamically rotated admin credentials by mounting the client certificates
-in our [kube\_deployment](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+The below example show how to connect to the NATS cluster using dynamically rotated admin credentials by mounting the
+client certificates in our
+[kube_deployment](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
 module "nats" {
@@ -64,7 +78,7 @@ module "deployment" {
   common_env = {
     NATS_HOST = module.nats.host
     NATS_PORT = module.nats.client_port
-    
+
     # It is not strictly necessary to set these, but these are used by the NATS CLI,
     # so it can be helpful to have these set in case you need to debug.
     NATS_URL = "tls://${module.nats.host}:${module.nats.client_port}"
@@ -75,7 +89,8 @@ module "deployment" {
 }
 ```
 
-Note that you also must configure the client to use the certificates. For example, if using the [nats NPM package](https://www.npmjs.com/package/nats):
+Note that you also must configure the client to use the certificates. For example, if using the
+[nats NPM package](https://www.npmjs.com/package/nats):
 
 ```typescript
 import { connect } from "nats";
@@ -87,7 +102,7 @@ const nc = await connect({
     keyFile: process.env.NATS_KEY,
     certFile: process.env.NATS_CERT,
     caFile: process.env.NATS_CA,
-  }
+  },
 });
 ```
 
@@ -97,56 +112,65 @@ With NATS Jetstream, persistence is configured via [Streams](https://docs.nats.i
 allow you to control how messages are stored and what the limits of retention are. You can have many different streams
 on the same NATS instance.
 
-This module only creates the NATS server, not the internal streams. Your services should perform any necessary stream setup
-before launching (similar to database migrations for other data stores).
+This module only creates the NATS server, not the internal streams. Your services should perform any necessary stream
+setup before launching (similar to database migrations for other data stores).
 
 That said, there are a few global storage settings to be aware of when first creating the cluster:
 
-* `persistence_initial_storage_gb` (can not be changed after NATS cluster creation)
-* `persistence_storage_limit_gb`
-* `persistence_storage_increase_threshold_percent`
-* `persistence_storage_increase_gb`
-* `persistence_storage_class_name` (can not be changed after NATS cluster creation)
+- `persistence_initial_storage_gb` (can not be changed after NATS cluster creation)
 
-Once the NATS cluster is running, the PVC autoresizer
-(provided by [kube\_pvc\_autoresizer](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
-will automatically expand the EBS volumes once the free space
-drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
-The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling event until a maximum of `persistence_storage_limit_gb`.
+- `persistence_storage_limit_gb`
+
+- `persistence_storage_increase_threshold_percent`
+
+- `persistence_storage_increase_gb`
+
+- `persistence_storage_class_name` (can not be changed after NATS cluster creation)
+
+Once the NATS cluster is running, the PVC autoresizer (provided by
+[kube_pvc_autoresizer](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer)) will
+automatically expand the EBS volumes once the free space drops below `persistence_storage_increase_threshold_percent` of
+the current EBS volume size. The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling
+event until a maximum of `persistence_storage_limit_gb`.
 
 <MarkdownAlert severity="warning">
-  Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-  ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
+  Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result, ensure
+  that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
 </MarkdownAlert>
 
 ### Disruptions
 
 By default, shutdown of NATS pods in this module can be initiated at any time. This enables the cluster to automatically
-perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a NATS pod
-is disrupted, clients connected to that instance will need to re-establish a connection with the NATS cluster.
+perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a
+NATS pod is disrupted, clients connected to that instance will need to re-establish a connection with the NATS cluster.
 
-While this generally does not cause issues, you may want to provide more control over when these failovers can occur, so we provide the following options:
+While this generally does not cause issues, you may want to provide more control over when these failovers can occur, so
+we provide the following options:
 
 #### Disruption Windows
 
-Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if this is needed
-to meet your stability goals. You can enable this feature by setting `voluntary_disruption_window_enabled` to `true`.
+Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if
+this is needed to meet your stability goals. You can enable this feature by setting
+`voluntary_disruption_window_enabled` to `true`.
 
 The disruption windows are scheduled via `voluntary_disruption_window_cron_schedule` and the length of time of each
 window via `voluntary_disruption_window_seconds`.
 
-If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
+If you use this feature, we _strongly_ recommend that you allow disruptions at least once per day, and ideally more
+frequently.
 
 For more information on how this works, see the
-[kube\_disruption\_window\_controller](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+[kube_disruption_window_controller](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
 submodule.
 
 #### Custom PDBs
 
-Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and disallowed.
+Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and
+disallowed.
 
-You can do this by managing your own [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/).
-This module provides outputs that will allow you to match certain subsets of Redis pods.
+You can do this by managing your own
+[PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/). This module provides outputs
+that will allow you to match certain subsets of Redis pods.
 
 For example:
 
@@ -177,49 +201,53 @@ resource "kubectl_manifest" "pdb" {
 }
 ```
 
-While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application
-logic via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
+While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application logic
+via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
 operation that you do not want disrupted and then delete it upon completion.
 
 #### Completely Disabling Voluntary Disruptions
 
-Allowing the cluster to periodically initiate replacement of NATS pods is critical to maintaining system health. However,
-there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
-the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any NATS
-pod in this module.
+Allowing the cluster to periodically initiate replacement of NATS pods is critical to maintaining system health.
+However, there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether.
+Setting the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any
+NATS pod in this module.
 
-This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
+This is _strongly_ discouraged. If limiting any and all potential disruptions is of primary importance you should
+instead:
 
-* Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
-* Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+- Create a one-hour weekly disruption window to allow _some_ opportunity for automatic maintenance operations
+
+- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
 
 Note that the above configuration will significantly increase the costs of running the NATS cluster (2.5-5x) versus more
-flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
+flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last
+resort.
 
 <MarkdownAlert severity="warning">
   Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
   disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
   and limited by the use of PDBs.
 
-  An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
-  you should still implement defensive coding practices in your client code to account for potential disruptions.
+An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result, you
+should still implement defensive coding practices in your client code to account for potential disruptions.
+
 </MarkdownAlert>
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -235,7 +263,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether the database pods can be scheduled on arm64 nodes
 
@@ -243,7 +271,7 @@ Type: `bool`
 
 Default: `true`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether the database pods can be scheduled on burstable nodes
 
@@ -251,7 +279,7 @@ Type: `bool`
 
 Default: `false`
 
-### cert\_manager\_namespace
+### cert_manager_namespace
 
 Description: The namespace where cert-manager is deployed.
 
@@ -259,7 +287,7 @@ Type: `string`
 
 Default: `"cert-manager"`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -267,15 +295,16 @@ Type: `bool`
 
 Default: `false`
 
-### fsync\_interval\_seconds
+### fsync_interval_seconds
 
-Description: Interval in seconds at which data will be synced to disk on each node. Setting this to 0 will force an fsync after each message (which will lower overall throughput dramatically).
+Description: Interval in seconds at which data will be synced to disk on each node. Setting this to 0 will force an
+fsync after each message (which will lower overall throughput dramatically).
 
 Type: `number`
 
 Default: `10`
 
-### helm\_version
+### helm_version
 
 Description: The version of the bitnami/nats helm chart to use
 
@@ -283,15 +312,16 @@ Type: `string`
 
 Default: `"8.5.1"`
 
-### instance\_type\_anti\_affinity\_required
+### instance_type_anti_affinity_required
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target >= 2.
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to
+true iff sla_target >= 2.
 
 Type: `bool`
 
 Default: `null`
 
-### log\_level
+### log_level
 
 Description: The log level for the NATS pods. Must be one of: info, debug, trace
 
@@ -299,7 +329,7 @@ Type: `string`
 
 Default: `"info"`
 
-### max\_connections
+### max_connections
 
 Description: The maximum number of client connections to the NATS cluster
 
@@ -307,7 +337,7 @@ Type: `number`
 
 Default: `64000`
 
-### max\_control\_line\_kb
+### max_control_line_kb
 
 Description: The maximum length of a protocol line including combined length of subject and queue group (in KB).
 
@@ -315,7 +345,7 @@ Type: `number`
 
 Default: `4`
 
-### max\_outstanding\_catchup\_mb
+### max_outstanding_catchup_mb
 
 Description: The maximum in-flight bytes for stream catch-up.
 
@@ -323,7 +353,7 @@ Type: `number`
 
 Default: `128`
 
-### max\_payload\_mb
+### max_payload_mb
 
 Description: The maximum size of a message payload (in MB).
 
@@ -331,7 +361,7 @@ Type: `number`
 
 Default: `8`
 
-### minimum\_memory\_mb
+### minimum_memory_mb
 
 Description: The minimum memory in Mb to use for the NATS nodes
 
@@ -339,7 +369,7 @@ Type: `number`
 
 Default: `50`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -347,7 +377,7 @@ Type: `bool`
 
 Default: `false`
 
-### node\_image\_cached\_enabled
+### node_image_cached_enabled
 
 Description: Whether to add the container images to the node image cache for faster startup times
 
@@ -355,7 +385,7 @@ Type: `bool`
 
 Default: `true`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -363,7 +393,7 @@ Type: `bool`
 
 Default: `true`
 
-### persistence\_backups\_enabled
+### persistence_backups_enabled
 
 Description: Whether to enable backups of the NATS durable storage.
 
@@ -371,15 +401,16 @@ Type: `bool`
 
 Default: `true`
 
-### persistence\_initial\_storage\_gb
+### persistence_initial_storage_gb
 
-Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can only be set on cluster creation.
+Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can only be
+set on cluster creation.
 
 Type: `number`
 
 Default: `1`
 
-### persistence\_storage\_class\_name
+### persistence_storage_class_name
 
 Description: The StorageClass to use for the PVs used to store filesystem data. Can only be set on cluster creation.
 
@@ -387,7 +418,7 @@ Type: `string`
 
 Default: `"ebs-standard-retained"`
 
-### persistence\_storage\_increase\_gb
+### persistence_storage_increase_gb
 
 Description: The amount of GB to increase storage by if free space drops below the threshold
 
@@ -395,7 +426,7 @@ Type: `number`
 
 Default: `1`
 
-### persistence\_storage\_increase\_threshold\_percent
+### persistence_storage_increase_threshold_percent
 
 Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
 
@@ -403,7 +434,7 @@ Type: `number`
 
 Default: `20`
 
-### persistence\_storage\_limit\_gb
+### persistence_storage_limit_gb
 
 Description: The maximum number of gigabytes of storage to provision for each NATS node
 
@@ -411,7 +442,7 @@ Type: `number`
 
 Default: `null`
 
-### ping\_interval\_seconds
+### ping_interval_seconds
 
 Description: Interval in seconds at which pings are sent to clients, leaf nodes, and routes.
 
@@ -419,7 +450,7 @@ Type: `number`
 
 Default: `20`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -427,7 +458,7 @@ Type: `bool`
 
 Default: `false`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether the database pods can be scheduled on spot nodes
 
@@ -435,7 +466,7 @@ Type: `bool`
 
 Default: `true`
 
-### vault\_credential\_lifetime\_hours
+### vault_credential_lifetime_hours
 
 Description: The lifetime of database credentials generated by Vault
 
@@ -443,7 +474,7 @@ Type: `number`
 
 Default: `16`
 
-### vault\_internal\_pki\_backend\_mount\_path
+### vault_internal_pki_backend_mount_path
 
 Description: The mount path of the PKI backend for internal certificates.
 
@@ -451,7 +482,7 @@ Type: `string`
 
 Default: `"pki/internal"`
 
-### vault\_internal\_url
+### vault_internal_url
 
 Description: The internal URL of the Vault cluster.
 
@@ -459,7 +490,7 @@ Type: `string`
 
 Default: `"http://vault-active.vault.svc.cluster.local:8200"`
 
-### voluntary\_disruption\_window\_cron\_schedule
+### voluntary_disruption_window_cron_schedule
 
 Description: The times when disruption windows should start
 
@@ -467,7 +498,7 @@ Type: `string`
 
 Default: `"0 4 * * *"`
 
-### voluntary\_disruption\_window\_enabled
+### voluntary_disruption_window_enabled
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
@@ -475,7 +506,7 @@ Type: `bool`
 
 Default: `false`
 
-### voluntary\_disruption\_window\_seconds
+### voluntary_disruption_window_seconds
 
 Description: The length of the disruption window in seconds
 
@@ -483,7 +514,7 @@ Type: `number`
 
 Default: `3600`
 
-### voluntary\_disruptions\_enabled
+### voluntary_disruptions_enabled
 
 Description: Whether to enable voluntary disruptions of pods in this module.
 
@@ -491,7 +522,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -501,13 +532,15 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
 Default: `true`
 
-### write\_deadline\_seconds
+### write_deadline_seconds
 
 Description: The maximum number of seconds the server will block when writing messages to consumers.
 
@@ -519,15 +552,15 @@ Default: `55`
 
 The following outputs are exported:
 
-### admin\_creds\_secret
+### admin_creds_secret
 
 Description: The name of the Kubernetes Secret holding certificate credentials for the admin role in the NATS cluster
 
-### client\_port
+### client_port
 
 Description: The port that NATS clients should connect to.
 
-### cluster\_port
+### cluster_port
 
 Description: The port that NATS uses for internal cluster communication.
 
@@ -535,17 +568,18 @@ Description: The port that NATS uses for internal cluster communication.
 
 Description: The NATS cluster hostname to connect to,
 
-### metrics\_port
+### metrics_port
 
 Description: The port that Prometheus metrics is served on.
 
-### reader\_creds\_secret
+### reader_creds_secret
 
 Description: The name of the Kubernetes Secret holding certificate credentials for the reader role in the NATS cluster
 
-### superuser\_creds\_secret
+### superuser_creds_secret
 
-Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the NATS cluster
+Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the NATS
+cluster
 
 ## Usage
 

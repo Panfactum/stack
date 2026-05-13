@@ -4,24 +4,32 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_workload_utility" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_workload_utility" status="stable" type="submodule" />
+<ModuleHeader
+  name="kube_workload_utility"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_workload_utility"
+  status="stable"
+  type="submodule"
+/>
 
 # Kubernetes Utility Module
 
 This module is used to construct standard values for the following fields:
 
-* labels
-* [topologySpreadConstraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
-* [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
-* [pod affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
+- labels
+
+- [topologySpreadConstraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+
+- [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+
+- [pod affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -31,7 +39,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow pods to schedule on arm64 nodes
 
@@ -39,7 +47,7 @@ Type: `bool`
 
 Default: `true`
 
-### az\_anti\_affinity\_required
+### az_anti_affinity_required
 
 Description: Whether to prevent pods from being scheduled in the same availability zone
 
@@ -47,15 +55,16 @@ Type: `bool`
 
 Default: `false`
 
-### az\_spread\_preferred
+### az_spread_preferred
 
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with
+ScheduleAnyways)
 
 Type: `bool`
 
 Default: `true`
 
-### az\_spread\_required
+### az_spread_required
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
 
@@ -63,7 +72,7 @@ Type: `bool`
 
 Default: `false`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -71,7 +80,7 @@ Type: `bool`
 
 Default: `false`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -79,7 +88,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -87,7 +96,7 @@ Type: `bool`
 
 Default: `false`
 
-### controller\_nodes\_required
+### controller_nodes_required
 
 Description: Whether the pods must be scheduled on an EKS Node Group node
 
@@ -95,7 +104,7 @@ Type: `bool`
 
 Default: `false`
 
-### extra\_labels
+### extra_labels
 
 Description: Extra labels to add to the workload
 
@@ -103,7 +112,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the pods
 
@@ -120,7 +129,7 @@ list(object({
 
 Default: `[]`
 
-### host\_anti\_affinity\_required
+### host_anti_affinity_required
 
 Description: Whether to prefer preventing pods from being scheduled on the same host
 
@@ -128,7 +137,7 @@ Type: `bool`
 
 Default: `true`
 
-### instance\_type\_anti\_affinity\_required
+### instance_type_anti_affinity_required
 
 Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
 
@@ -136,7 +145,7 @@ Type: `bool`
 
 Default: `false`
 
-### lifetime\_evictions\_enabled
+### lifetime_evictions_enabled
 
 Description: Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)
 
@@ -144,7 +153,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -152,7 +161,7 @@ Type: `bool`
 
 Default: `true`
 
-### match\_labels
+### match_labels
 
 Description: kubernetes labels to use in selectors to match the workload
 
@@ -160,7 +169,7 @@ Type: `map(string)`
 
 Default: `null`
 
-### node\_preferences
+### node_preferences
 
 Description: Node label preferences for the pods
 
@@ -168,7 +177,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the pods
 
@@ -176,7 +185,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -184,7 +193,7 @@ Type: `bool`
 
 Default: `false`
 
-### pod\_affinity\_match\_labels
+### pod_affinity_match_labels
 
 Description: Labels to match for pod affinity
 
@@ -192,7 +201,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -200,7 +209,7 @@ Type: `bool`
 
 Default: `true`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -208,7 +217,7 @@ Type: `bool`
 
 Default: `true`
 
-### workload\_name
+### workload_name
 
 Description: The name of the workload. Used by observability platform for grouping pods.
 
@@ -228,11 +237,11 @@ Description: The affinity spec to add to each pod
 
 Description: The labels to add to each pod
 
-### match\_labels
+### match_labels
 
 Description: The label selector to use to match pods in this workload
 
-### scheduler\_name
+### scheduler_name
 
 Description: The schedulerName to use for the pods in the workload
 
@@ -240,7 +249,7 @@ Description: The schedulerName to use for the pods in the workload
 
 Description: The tolerations to add to each pod
 
-### topology\_spread\_constraints
+### topology_spread_constraints
 
 Description: The topology spread constraints to add to each pod
 
@@ -248,6 +257,4 @@ Description: The topology spread constraints to add to each pod
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

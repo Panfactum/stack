@@ -4,7 +4,12 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_linkerd" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_linkerd" status="stable" type="direct" />
+<ModuleHeader
+  name="kube_linkerd"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_linkerd"
+  status="stable"
+  type="direct"
+/>
 
 # Linkerd2 Service Mesh
 
@@ -14,21 +19,21 @@ This module deploys the [Linkerd2 service mesh.](https://linkerd.io/)
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### vault\_ca\_crt
+### vault_ca_crt
 
 Description: The vault certificate authority public certificate.
 
@@ -38,7 +43,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow controller pods to schedule on burstable nodes. Does not affect DaemonSet pods.
 
@@ -46,15 +51,16 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
-Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect DaemonSet pods.
+Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect
+DaemonSet pods.
 
 Type: `bool`
 
 Default: `true`
 
-### linkerd\_helm\_version
+### linkerd_helm_version
 
 Description: The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)
 
@@ -62,7 +68,7 @@ Type: `string`
 
 Default: `"2024.11.2"`
 
-### log\_level
+### log_level
 
 Description: The log level for the Linkerd pods
 
@@ -70,7 +76,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -78,7 +84,7 @@ Type: `bool`
 
 Default: `false`
 
-### node\_image\_cache\_enabled
+### node_image_cache_enabled
 
 Description: Whether to cache images locally for better startup performance
 
@@ -86,7 +92,7 @@ Type: `bool`
 
 Default: `false`
 
-### node\_image\_cached\_enabled
+### node_image_cached_enabled
 
 Description: Whether to add the container images to the node image cache for faster startup times
 
@@ -94,7 +100,7 @@ Type: `bool`
 
 Default: `true`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -102,7 +108,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -110,15 +116,16 @@ Type: `bool`
 
 Default: `true`
 
-### sla\_target
+### sla_target
 
-Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest
+uptime (99.999%), highest Cost
 
 Type: `number`
 
 Default: `3`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow controller pods to schedule on spot nodes. Does not affect DaemonSet pods.
 
@@ -126,7 +133,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -136,7 +143,9 @@ Default: `false`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -150,6 +159,4 @@ No outputs.
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

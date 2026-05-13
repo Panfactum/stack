@@ -4,7 +4,12 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_buildkit" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_buildkit" status="beta" type="direct" />
+<ModuleHeader
+  name="kube_buildkit"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_buildkit"
+  status="beta"
+  type="direct"
+/>
 
 # Moby BuildKit
 
@@ -12,13 +17,13 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -28,7 +33,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### buildkit\_image\_version
+### buildkit_image_version
 
 Description: The version of BuildKit to use
 
@@ -36,7 +41,7 @@ Type: `string`
 
 Default: `"v0.18.1-rootless"`
 
-### cache\_clear\_cron
+### cache_clear_cron
 
 Description: A cron expression for how often the BuildKit cache should be cleared.
 
@@ -44,7 +49,7 @@ Type: `string`
 
 Default: `"0 0 * * 0"`
 
-### cpu\_millicores
+### cpu_millicores
 
 Description: The number of cpus millicores to request for the buildkit pod
 
@@ -52,7 +57,7 @@ Type: `number`
 
 Default: `2000`
 
-### initial\_storage\_gb
+### initial_storage_gb
 
 Description: The initial number of GB to use for the local image temp storage
 
@@ -60,7 +65,7 @@ Type: `number`
 
 Default: `25`
 
-### ip\_allow\_list
+### ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -68,7 +73,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### max\_replicas
+### max_replicas
 
 Description: The maximum number of replicas of buildkit to use
 
@@ -76,7 +81,7 @@ Type: `number`
 
 Default: `10`
 
-### max\_storage\_gb
+### max_storage_gb
 
 Description: The maximum number of GB to use for the local image temp storage
 
@@ -84,7 +89,7 @@ Type: `number`
 
 Default: `250`
 
-### memory\_mb
+### memory_mb
 
 Description: The amount of memory in MB to request for the buildkit pod
 
@@ -92,7 +97,7 @@ Type: `number`
 
 Default: `8000`
 
-### min\_replicas
+### min_replicas
 
 Description: The minimum number of replicas of buildkit to use
 
@@ -100,7 +105,7 @@ Type: `number`
 
 Default: `1`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -108,7 +113,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -116,7 +121,7 @@ Type: `bool`
 
 Default: `true`
 
-### scale\_down\_delay\_seconds
+### scale_down_delay_seconds
 
 Description: How long since the last build was initiated that BuildKit will be automatically scaled to zero
 
@@ -124,7 +129,7 @@ Type: `number`
 
 Default: `1800`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -132,7 +137,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled. Does not apply to the actual BuildKit containers.
 
@@ -144,19 +149,19 @@ Default: `true`
 
 The following outputs are exported:
 
-### cache\_bucket\_name
+### cache_bucket_name
 
 Description: n/a
 
-### cache\_bucket\_region
+### cache_bucket_region
 
 Description: n/a
 
-### ecr\_registry
+### ecr_registry
 
 Description: n/a
 
-### eks\_cluster\_name
+### eks_cluster_name
 
 Description: n/a
 
@@ -164,6 +169,4 @@ Description: n/a
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

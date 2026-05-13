@@ -17,6 +17,99 @@ import tseslint from "typescript-eslint"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+// Inline plugin: custom MDX lint rules (fixable).
+const mdxLocalPlugin = {
+  rules: {
+    // Ensures MDX list items are separated by blank lines.
+    "loose-lists": {
+      meta: {
+        type: "layout",
+        fixable: "whitespace",
+        schema: [],
+        messages: { missingBlankLine: "List item must be preceded by a blank line." },
+      },
+      create(context) {
+        const LIST_ITEM_RE = /^(\s*)([-*+]|\d+[.)]) /
+        const FENCE_RE = /^\s*```/
+        return {
+          Program() {
+            const source = context.sourceCode.getText()
+            const lines = source.split("\n")
+            let inCodeBlock = false
+            let offset = 0
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i]
+              if (FENCE_RE.test(line)) {
+                inCodeBlock = !inCodeBlock
+              } else if (!inCodeBlock && i > 0 && LIST_ITEM_RE.test(line) && lines[i - 1].trim() !== "") {
+                const insertAt = offset
+                context.report({
+                  loc: { line: i + 1, column: 0 },
+                  messageId: "missingBlankLine",
+                  fix(fixer) {
+                    return fixer.insertTextBeforeRange([insertAt, insertAt + line.length], "\n")
+                  },
+                })
+              }
+              offset += line.length + 1
+            }
+          },
+        }
+      },
+    },
+
+    // Ensures a space before footnote anchors like [^name].
+    "footnote-spacing": {
+      meta: {
+        type: "layout",
+        fixable: "whitespace",
+        schema: [],
+        messages: { missingSpace: "Footnote anchor must be preceded by a space." },
+      },
+      create(context) {
+        const FENCE_RE = /^\s*```/
+        // Matches a non-space character immediately before a footnote anchor [^...].
+        // Excludes footnote definitions (lines starting with [^..]:) and link refs.
+        const FOOTNOTE_ANCHOR_RE = /\S\[\^[^\]]+\]/g
+        return {
+          Program() {
+            const source = context.sourceCode.getText()
+            const lines = source.split("\n")
+            let inCodeBlock = false
+            let offset = 0
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i]
+              if (FENCE_RE.test(line)) {
+                inCodeBlock = !inCodeBlock
+              } else if (!inCodeBlock) {
+                // Skip footnote definition lines (e.g., [^name]:)
+                if (/^\s*\[\^[^\]]+\]:/.test(line)) {
+                  offset += line.length + 1
+                  continue
+                }
+                let match
+                FOOTNOTE_ANCHOR_RE.lastIndex = 0
+                while ((match = FOOTNOTE_ANCHOR_RE.exec(line)) !== null) {
+                  const charBeforeIdx = offset + match.index
+                  const bracketIdx = charBeforeIdx + 1
+                  context.report({
+                    loc: { line: i + 1, column: match.index + 1 },
+                    messageId: "missingSpace",
+                    fix(fixer) {
+                      return fixer.insertTextBeforeRange([bracketIdx, bracketIdx], " ")
+                    },
+                  })
+                }
+              }
+              offset += line.length + 1
+            }
+          },
+        }
+      },
+    },
+  },
+}
+
 export default tseslint.config(
   // 1. Global ignores (replaces top-level ignorePatterns)
   {
@@ -150,6 +243,7 @@ export default tseslint.config(
   {
     files: ["**/*.mdx"],
     extends: [mdx.flat, tseslint.configs.disableTypeChecked],
+    plugins: { prettier: prettierPlugin, "mdx-local": mdxLocalPlugin },
     settings: { "mdx/code-blocks": false, "mdx/language-mapper": {} },
     rules: {
       "no-unused-expressions": "off",
@@ -157,6 +251,9 @@ export default tseslint.config(
       "import-x/no-unresolved": "off",
       "unused-imports/no-unused-imports": "off",
       "mdx/remark": "error",
+      "prettier/prettier": "error",
+      "mdx-local/loose-lists": "error",
+      "mdx-local/footnote-spacing": "error",
     },
   },
 

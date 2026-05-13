@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### admin\_groups
+### admin_groups
 
 Description: The names of the kubernetes groups to give admin access to the namespace.
 
@@ -15,12 +15,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "system:admins"
-]
+["system:admins"]
 ```
 
-### extra\_labels
+### extra_labels
 
 Description: Extra labels to apply to the namespace resource
 
@@ -28,7 +26,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### linkerd\_inject
+### linkerd_inject
 
 Description: Whether to inject linkerd sidecars into pods in this namespace.
 
@@ -36,7 +34,7 @@ Type: `bool`
 
 Default: `true`
 
-### loadbalancer\_enabled
+### loadbalancer_enabled
 
 Description: Whether the namespace is going to create LoadBalancer services
 
@@ -44,7 +42,7 @@ Type: `bool`
 
 Default: `false`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -60,7 +58,7 @@ Type: `string`
 
 Default: n/a
 
-### reader\_groups
+### reader_groups
 
 Description: The names of the kubernetes groups to give read access to the namespace.
 
@@ -69,9 +67,7 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "system:readers"
-]
+["system:readers"]
 ```
 
 ## Outputs
@@ -92,6 +88,4 @@ The following providers are needed by this module:
 
 - [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

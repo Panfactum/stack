@@ -4,10 +4,12 @@
 
 ## config.yaml
 
-This file instructs the `pf-update-kube --build` command how to generate the cluster connection info file (`cluster_info`).
+This file instructs the `pf-update-kube --build` command how to generate the cluster connection info file
+(`cluster_info`).
 
 This command must be run by a superuser with root access to all clusters. This enables non-superusers to use
-`cluster_info` to setup their personal kubeconfig files without needing access to the infrastructure modules (via `pf-update-kube`).
+`cluster_info` to setup their personal kubeconfig files without needing access to the infrastructure modules (via
+`pf-update-kube`).
 
 ### config.yaml Format
 
@@ -42,10 +44,11 @@ clusters:
 
 ## config.user.yaml
 
-This file instructs the `pf-update-kube` command how to generate a user-specific [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) file.
+This file instructs the `pf-update-kube` command how to generate a user-specific
+[kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) file.
 
-This is required because each user will have different access levels to each cluster. Running `pf-kube-update` requires that the
-`cluster_info` file is set up (via `pf-update-kube --build`).
+This is required because each user will have different access levels to each cluster. Running `pf-kube-update` requires
+that the `cluster_info` file is set up (via `pf-update-kube --build`).
 
 ### config.user.yaml Format
 
@@ -79,24 +82,28 @@ clusters:
 
 :::
 
-## cluster\_info
+## cluster_info
 
 This is a space-delimited file with each line representing metadata for a particular cluster. The columns are:
 
-* cluster name
-* cluster region
-* cluster API server URL
-* md5 hash of the CA cert data for the API server
+- cluster name
+
+- cluster region
+
+- cluster API server URL
+
+- md5 hash of the CA cert data for the API server
 
 ### Example
 
 <div class="h-4" />
 
-::: code-group labels=\[.kube/cluster\_info]
+::: code-group labels=\[.kube/cluster_info]
 
 ```yaml
-production-primary us-east-2 https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com 44f5cb46f1d07e4f3806f26cc4424d97
-development-primary us-east-2 https://6B4CCB112AD882D9331473BA90CB8F80.yl4.us-east-2.eks.amazonaws.com b56614e34b012836c761ac2c1b816ada
+production-primary us-east-2 https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com
+44f5cb46f1d07e4f3806f26cc4424d97 development-primary us-east-2
+https://6B4CCB112AD882D9331473BA90CB8F80.yl4.us-east-2.eks.amazonaws.com b56614e34b012836c761ac2c1b816ada
 ```
 
 :::

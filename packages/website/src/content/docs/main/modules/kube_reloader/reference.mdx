@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### reloader\_helm\_version
+### reloader_helm_version
 
 Description: The version of the stakater/reloader helm chart
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: `"2.2.9"`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -62,7 +62,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -72,7 +72,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 

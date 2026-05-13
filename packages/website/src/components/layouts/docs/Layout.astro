@@ -7,10 +7,14 @@ import ArticleTableOfContents, {
   type ArticleHeadingMetadata,
 } from "./ArticleTableOfContents.astro";
 import DocumentationArticle from "./DocumentationArticle";
+import Footer from "./Footer.astro";
+import PopoverManager from "./PopoverManager";
 import { DOCS_NAV_LINKS } from "./links";
 import DocsSidebar from "./sidebar/DocsSidebar";
 import { type DocsMetadata } from "./types";
+import { ChangelogNavItem } from "../common/ChangelogNavItem";
 import CommonLayout from "../common/CommonLayout.astro";
+import { DocsNavLink } from "../common/DocsNavLink";
 import Header from "../common/Header.astro";
 import { NavItemWithPopup } from "../common/NavItemWithPopup";
 import { SolutionsNavItem } from "../common/SolutionsNavItem";
@@ -51,18 +55,11 @@ const {
       saveEnabled={true}
       client:idle
       />
-      <NavItemWithPopup
-      title="Docs"
-      action="/docs/edge/guides"
-      saveEnabled={true}
-      client:idle
+      <DocsNavLink
+        class="mt-2 cursor-pointer bg-transparent text-display-xs font-bold hover:text-brand-600 focus-visible:outline-none"
+        client:idle
       />
-      <NavItemWithPopup
-      title="Changelog"
-      action="/docs/changelog"
-      saveEnabled={true}
-      client:idle
-      />
+      <ChangelogNavItem client:idle />
       <!-- <NavItemWithPopup
       title="Blog"
       action="/blog"
@@ -82,7 +79,9 @@ const {
       class:list={[
         `
           mx-auto flex h-full w-screen flex-col items-start
-          lg:flex-row
+          mt-0
+          md:mt-16
+          lg:mt-(--header-height) lg:flex-row
           xl:max-w-screen-3xl
         `,
         "min-h-[calc(100vh_-_var(--header-height))]"
@@ -90,13 +89,17 @@ const {
     >
       {metadata && <DocsSidebar fullPath={pathname} metadata={metadata} client:load />}
         <DocumentationArticle
-                showTOC={headings.length > 1}
                 client:load
         >
-            <slot/>
+            <div class="block">
+              <slot/>
+            </div>
+            <Footer />
         </DocumentationArticle>
       {headings.length > 1   && (<ArticleTableOfContents headings={headings} />)}
     </div>
     <SearchDialog fullPath={pathname} client:idle />
 </CommonLayout>
 <script src="./scripts/copyHeaderLink.ts" />
+<script src="./scripts/openCollapsibleOnHash.ts" />
+<PopoverManager client:load />

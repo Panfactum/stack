@@ -2,15 +2,16 @@
 
 {/* Covers: aws_organization AWS provider v6 upgrade, SERVICE_CONTROL_POLICY and TAG_POLICY enablement, expanded trusted service access principals. */}
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 {/* TODO: Replace with pf CLI command once implemented */}
+
 ## Upgrade `aws_organization` to AWS Provider v6
 
 The [`aws_organization`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) module now pins the
 `hashicorp/aws` provider to v6 (from 5.x). This is a major provider version bump. In addition to the provider upgrade,
-`SERVICE_CONTROL_POLICY` and `TAG_POLICY` are now enabled by default, and trusted access is enabled for a
-significantly broader set of AWS governance services.
+`SERVICE_CONTROL_POLICY` and `TAG_POLICY` are now enabled by default, and trusted access is enabled for a significantly
+broader set of AWS governance services.
 
 <MarkdownAlert severity="warning">
   Run `terraform init -upgrade` **before** running `terraform plan` or `terraform apply` in your management environment.
@@ -21,8 +22,8 @@ significantly broader set of AWS governance services.
 
 Before proceeding, read the
 [AWS Provider v6 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-6-upgrade)
-to understand all breaking changes from 5.x. Key removals include OpsWorks, SimpleDB, and WorkLink resources, along
-with changes to nullable boolean validation. Confirm your management environment does not use any removed resources or
+to understand all breaking changes from 5.x. Key removals include OpsWorks, SimpleDB, and WorkLink resources, along with
+changes to nullable boolean validation. Confirm your management environment does not use any removed resources or
 arguments.
 
 ### 2. Update Provider Lock Files
@@ -48,7 +49,9 @@ terragrunt plan
 Expect the following new resources and changes:
 
 - **`SERVICE_CONTROL_POLICY`** and **`TAG_POLICY`** added to `enabled_policy_types` on `aws_organizations_organization`
+
 - **`aws_notifications_organizations_access`** resource created (enables AWS User Notifications trusted access)
+
 - A significantly expanded list of `aws_service_access_principals` (GuardDuty, Security Hub, AWS Backup, Inspector,
   CloudTrail, Access Analyzer, Audit Manager, IPAM, License Manager, Network Manager, and others)
 
@@ -78,8 +81,8 @@ inputs = {
 }
 ```
 
-See the [module reference](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) for the full
-list of opt-out variables.
+See the [module reference](/docs/edge/reference/infrastructure-modules/direct/aws/aws_organization) for the full list of
+opt-out variables.
 
 ### 5. Apply `aws_organization`
 

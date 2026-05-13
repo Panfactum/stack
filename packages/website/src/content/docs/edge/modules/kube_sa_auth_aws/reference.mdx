@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### allow\_public\_s3\_presigned\_urls
+### allow_public_s3_presigned_urls
 
 Description: Whether to allow the service account to generate presigned URLs that will be publicly accessible
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `false`
 
-### annotate\_service\_account
+### annotate_service_account
 
 Description: Whether or not to annotate the service account
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### iam\_policy\_json
+### iam_policy_json
 
 Description: An IAM policy document in rendered JSON string form.
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: n/a
 
-### ip\_allow\_list
+### ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -38,7 +38,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### service\_account
+### service_account
 
 Description: The name of the service account that should be able to assume the AWS permissions.
 
@@ -46,7 +46,7 @@ Type: `string`
 
 Default: n/a
 
-### service\_account\_namespace
+### service_account_namespace
 
 Description: The namespace of the service account.
 
@@ -58,19 +58,19 @@ Default: n/a
 
 The following outputs are exported:
 
-### policy\_arn
+### policy_arn
 
 Description: The ARN of the policy assigned to the role.
 
-### role\_arn
+### role_arn
 
 Description: The ARN of the role created for the service account.
 
-### role\_name
+### role_name
 
 Description: The name of the role created for the service account.
 
-### service\_account\_annotations
+### service_account_annotations
 
 Description: The annotations to apply to the service account
 

@@ -1,5 +1,4 @@
-{/* Upgrade instructions for edge release 24-10-18. */}
-{/* Covers the devenv to plain nix flakes migration. */}
+{/* Upgrade instructions for edge release 24-10-18. */} {/* Covers the devenv to plain nix flakes migration. */}
 
 ## Migrate from devenv to Plain Nix Flakes
 
@@ -10,6 +9,7 @@ installation ~5 minutes, down from 45+) and opens the shell instantly after init
 ### Update `flake.nix`
 
 **Before:**
+
 ```nix
 {
     inputs = {
@@ -27,6 +27,7 @@ installation ~5 minutes, down from 45+) and opens the shell instantly after init
 ```
 
 **After:**
+
 ```nix
 {
   inputs = {
@@ -47,6 +48,7 @@ installation ~5 minutes, down from 45+) and opens the shell instantly after init
 ### Remove devenv Files
 
 1. Remove your `devenv.nix` file.
+
 2. Remove the `.devenv` directory.
 
 For alternatives to devenv functionality using the new devShell paradigm, see

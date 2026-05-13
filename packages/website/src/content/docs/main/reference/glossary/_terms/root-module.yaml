@@ -1,0 +1,30 @@
+term: Root Module
+type: iac
+summary: The top-level OpenTofu module that is deployed directly via Terragrunt.
+description: |
+  A *root module* is the top-level OpenTofu/Terraform module that is deployed directly into your infrastructure. It is the entry point for a deployment unit and is configured by a `terragrunt.hcl` file.
+
+  Root modules differ from submodules in that they:
+
+  - Are invoked directly by Terragrunt via `terragrunt apply`
+  - Maintain their own Terraform state file
+  - Define provider configurations
+  - Can declare dependencies on other root modules
+
+  In the Panfactum stack, root modules typically live in `packages/infrastructure/` (for Panfactum-provided modules) or in the directory specified by the `iac_dir` repo variable (for first-party modules).
+references:
+  - type: term
+    label: Module
+    link: "#module"
+  - type: term
+    label: Submodule
+    link: "#submodule"
+  - type: term
+    label: Unit
+    link: "#unit"
+  - type: term
+    label: Terragrunt
+    link: "#terragrunt"
+  - type: external-docs
+    label: OpenTofu Root Module Documentation
+    link: https://opentofu.org/docs/language/modules/#the-root-module

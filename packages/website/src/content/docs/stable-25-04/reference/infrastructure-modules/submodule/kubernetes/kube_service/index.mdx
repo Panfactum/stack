@@ -4,11 +4,17 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_service" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_service" status="stable" type="submodule" />
+<ModuleHeader
+  name="kube_service"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_service"
+  status="stable"
+  type="submodule"
+/>
 
 # Kubernetes Service
 
-Provides a pre-configured instance of a Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
+Provides a pre-configured instance of a Kubernetes
+[Service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
 **This is currently only meant to be used as an internal Panfactum submodule.**
 
@@ -18,17 +24,17 @@ We do not recommend using this directly.
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### match\_labels
+### match_labels
 
 Description: The label selector to use for pods backing the Service
 
@@ -50,7 +56,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### external\_traffic\_policy
+### external_traffic_policy
 
 Description: The ExternalTrafficPolicy of the Service.
 
@@ -58,7 +64,7 @@ Type: `string`
 
 Default: `"Cluster"`
 
-### extra\_annotations
+### extra_annotations
 
 Description: Extra annotations to add to the Service.
 
@@ -66,7 +72,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_labels
+### extra_labels
 
 Description: Extra labels to add to the Service.
 
@@ -74,7 +80,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### headless\_enabled
+### headless_enabled
 
 Description: Set to true iff setting up a StatefulSet headless service.
 
@@ -82,7 +88,7 @@ Type: `bool`
 
 Default: `false`
 
-### internal\_traffic\_policy
+### internal_traffic_policy
 
 Description: The InternalTrafficPolicy of the Service.
 
@@ -90,7 +96,7 @@ Type: `string`
 
 Default: `"Cluster"`
 
-### load\_balancer\_class
+### load_balancer_class
 
 Description: Iff type == LoadBalancer, the loadBalancerClass to use.
 
@@ -114,7 +120,7 @@ map(object({
 
 Default: `{}`
 
-### public\_domain\_names
+### public_domain_names
 
 Description: Iff type == LoadBalancer, the public domains names that this service will be accessible from.
 
@@ -122,9 +128,10 @@ Type: `list(string)`
 
 Default: `[]`
 
-### service\_ip
+### service_ip
 
-Description: If provided, the service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
+Description: If provided, the service will be statically bound to this IP address. Must be within the Service IP CIDR
+range for the cluster.
 
 Type: `string`
 
@@ -142,7 +149,7 @@ Default: `"ClusterIP"`
 
 The following outputs are exported:
 
-### service\_name
+### service_name
 
 Description: n/a
 
@@ -150,6 +157,4 @@ Description: n/a
 
 No notes.
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

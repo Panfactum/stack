@@ -4,49 +4,56 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_monitoring" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_monitoring" status="alpha" type="direct" />
+<ModuleHeader
+  name="kube_monitoring"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_monitoring"
+  status="alpha"
+  type="direct"
+/>
 
 # Panfactum Monitoring Stack
 
-This module provides a deployment of the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). It includes:
+This module provides a deployment of the
+[kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). It
+includes:
 
-* The [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
+- The [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
 
-* Grafana
+- Grafana
 
-* Alert Manager
+- Alert Manager
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### grafana\_domain
+### grafana_domain
 
 Description: The domain on which to expose Grafana.
 
 Type: `string`
 
-### vault\_domain
+### vault_domain
 
 Description: The domain of the Vault instance running in the cluster.
 
@@ -56,7 +63,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### additional\_tracked\_resource\_labels
+### additional_tracked_resource_labels
 
 Description: Kubernetes resource labels to include in metric labels
 
@@ -64,7 +71,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### additional\_tracked\_resources
+### additional_tracked_resources
 
 Description: Additional Kubernetes resources to track in kube-state-metrics
 
@@ -72,7 +79,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### alertmanager\_local\_storage\_initial\_size\_gb
+### alertmanager_local_storage_initial_size_gb
 
 Description: Number of GB to use for the local alertmanager storage (before autoscaled)
 
@@ -80,7 +87,7 @@ Type: `number`
 
 Default: `2`
 
-### alertmanager\_log\_level
+### alertmanager_log_level
 
 Description: The log level for the alertmanager pods
 
@@ -88,7 +95,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### alertmanager\_storage\_class\_name
+### alertmanager_storage_class_name
 
 Description: The storage class to use for local alertmanager storage
 
@@ -96,7 +103,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -104,7 +111,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -112,7 +119,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -120,7 +127,7 @@ Type: `bool`
 
 Default: `true`
 
-### enhanced\_ha\_enabled
+### enhanced_ha_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -128,7 +135,7 @@ Type: `bool`
 
 Default: `true`
 
-### grafana\_basic\_auth\_enabled
+### grafana_basic_auth_enabled
 
 Description: Whether to enable username and password authentication. Should only be enabled during debugging.
 
@@ -136,23 +143,25 @@ Type: `bool`
 
 Default: `true`
 
-### grafana\_db\_backup\_directory
+### grafana_db_backup_directory
 
-Description: The name of the directory in the backup bucket containing the backups files for the Grafana PostgreSQL database.
+Description: The name of the directory in the backup bucket containing the backups files for the Grafana PostgreSQL
+database.
 
 Type: `string`
 
 Default: `"initial"`
 
-### grafana\_db\_recovery\_directory
+### grafana_db_recovery_directory
 
-Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives
+Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL
+archives
 
 Type: `string`
 
 Default: `null`
 
-### grafana\_db\_recovery\_mode\_enabled
+### grafana_db_recovery_mode_enabled
 
 Description: Whether to enable recovery mode for the Grafana PostgreSQL database
 
@@ -160,15 +169,16 @@ Type: `bool`
 
 Default: `false`
 
-### grafana\_db\_recovery\_target\_time
+### grafana_db_recovery_target_time
 
-Description: If provided, will recover the Grafana PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
+Description: If provided, will recover the Grafana PostgreSQL database to the indicated target time in RFC 3339 format
+rather than to the latest data.
 
 Type: `string`
 
 Default: `null`
 
-### grafana\_log\_level
+### grafana_log_level
 
 Description: The log level for the grafana pods
 
@@ -176,7 +186,7 @@ Type: `string`
 
 Default: `"error"`
 
-### ingress\_enabled
+### ingress_enabled
 
 Description: Whether or not to enable the ingress for routing public traffic to prometheus stack components
 
@@ -184,7 +194,7 @@ Type: `bool`
 
 Default: `false`
 
-### kube\_api\_server\_monitoring\_enabled
+### kube_api_server_monitoring_enabled
 
 Description: Whether to enable monitoring of the API server
 
@@ -192,7 +202,7 @@ Type: `bool`
 
 Default: `false`
 
-### kube\_prometheus\_stack\_version
+### kube_prometheus_stack_version
 
 Description: The version of the kube-prometheus-stack to deploy
 
@@ -200,7 +210,7 @@ Type: `string`
 
 Default: `"58.5.3"`
 
-### loki\_chart\_version
+### loki_chart_version
 
 Description: The version of the grafana/loki helm chart to deploy
 
@@ -208,7 +218,7 @@ Type: `string`
 
 Default: `"6.6.2"`
 
-### loki\_storage\_class\_name
+### loki_storage_class_name
 
 Description: The storage class to use for local loki storage
 
@@ -216,7 +226,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### metrics\_retention\_resolution\_1h
+### metrics_retention_resolution_1h
 
 Description: Number of days 1h metrics resolution should be kept
 
@@ -224,7 +234,7 @@ Type: `number`
 
 Default: `1825`
 
-### metrics\_retention\_resolution\_5m
+### metrics_retention_resolution_5m
 
 Description: Number of days 5m metrics resolution should be kept
 
@@ -232,7 +242,7 @@ Type: `number`
 
 Default: `90`
 
-### metrics\_retention\_resolution\_raw
+### metrics_retention_resolution_raw
 
 Description: Number of days the raw metrics resolution should be kept
 
@@ -240,7 +250,7 @@ Type: `number`
 
 Default: `15`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -248,15 +258,16 @@ Type: `bool`
 
 Default: `false`
 
-### monitoring\_etcd\_enabled
+### monitoring_etcd_enabled
 
-Description: Whether to monitor the Kubernetes API server's etcd instances. Only enable for debugging purposes as it contains a huge amount of metrics.
+Description: Whether to monitor the Kubernetes API server's etcd instances. Only enable for debugging purposes as it
+contains a huge amount of metrics.
 
 Type: `bool`
 
 Default: `false`
 
-### node\_image\_cached\_enabled
+### node_image_cached_enabled
 
 Description: Whether to add the container images to the node image cache for faster startup times
 
@@ -264,7 +275,7 @@ Type: `bool`
 
 Default: `true`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -272,7 +283,7 @@ Type: `bool`
 
 Default: `true`
 
-### prometheus\_default\_scrape\_interval\_seconds
+### prometheus_default_scrape_interval_seconds
 
 Description: The default interval between prometheus scrapes (in seconds)
 
@@ -280,7 +291,7 @@ Type: `number`
 
 Default: `60`
 
-### prometheus\_local\_storage\_initial\_size\_gb
+### prometheus_local_storage_initial_size_gb
 
 Description: Number of GB to use for the local prometheus storage (before autoscaled)
 
@@ -288,7 +299,7 @@ Type: `number`
 
 Default: `2`
 
-### prometheus\_log\_level
+### prometheus_log_level
 
 Description: The log level for the prometheus pods
 
@@ -296,7 +307,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### prometheus\_operator\_log\_level
+### prometheus_operator_log_level
 
 Description: The log level for the prometheus operator pods
 
@@ -304,7 +315,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### prometheus\_storage\_class\_name
+### prometheus_storage_class_name
 
 Description: The storage class to use for local prometheus storage
 
@@ -312,7 +323,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -320,7 +331,7 @@ Type: `bool`
 
 Default: `true`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -328,23 +339,25 @@ Type: `bool`
 
 Default: `true`
 
-### thanos\_bucket\_web\_domain
+### thanos_bucket_web_domain
 
-Description: Domain to host the Thanos bucket web UI on. If not provided, will be on the same subdomain as grafana but with the thanos-bucket identifier (thanos-bucket.\<grafana-subdomain>)
+Description: Domain to host the Thanos bucket web UI on. If not provided, will be on the same subdomain as grafana but
+with the thanos-bucket identifier (thanos-bucket.\<grafana-subdomain>)
 
 Type: `string`
 
 Default: `null`
 
-### thanos\_bucket\_web\_enable
+### thanos_bucket_web_enable
 
-Description: Whether to enable the web dashboard for the Thanos bucket analyzer which can show debugging information about your metrics data
+Description: Whether to enable the web dashboard for the Thanos bucket analyzer which can show debugging information
+about your metrics data
 
 Type: `bool`
 
 Default: `true`
 
-### thanos\_chart\_version
+### thanos_chart_version
 
 Description: The version of the bitnami/thanos helm chart to deploy
 
@@ -352,15 +365,16 @@ Type: `string`
 
 Default: `"15.4.7"`
 
-### thanos\_compactor\_disk\_storage\_gb
+### thanos_compactor_disk_storage_gb
 
-Description: Number of GB for the ephemeral thanos compactor disk. See [https://thanos.io/tip/components/compact.md/#disk](https://thanos.io/tip/components/compact.md/#disk)
+Description: Number of GB for the ephemeral thanos compactor disk. See
+[https://thanos.io/tip/components/compact.md/#disk](https://thanos.io/tip/components/compact.md/#disk)
 
 Type: `number`
 
 Default: `100`
 
-### thanos\_compactor\_storage\_class\_name
+### thanos_compactor_storage_class_name
 
 Description: The storage class to use for the thanos compactor local storage
 
@@ -368,7 +382,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### thanos\_image\_version
+### thanos_image_version
 
 Description: The version of thanos images to use
 
@@ -376,7 +390,7 @@ Type: `string`
 
 Default: `"v0.35.0"`
 
-### thanos\_log\_level
+### thanos_log_level
 
 Description: The log level for the thanos pods
 
@@ -384,7 +398,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### thanos\_ruler\_storage\_class\_name
+### thanos_ruler_storage_class_name
 
 Description: The storage class to use for the thanos ruler local storage
 
@@ -392,7 +406,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### thanos\_store\_gateway\_storage\_class\_name
+### thanos_store_gateway_storage_class_name
 
 Description: The storage class to use for the thanos store gateway local storage
 
@@ -400,7 +414,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -410,7 +424,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -420,19 +436,20 @@ Default: `true`
 
 The following outputs are exported:
 
-### bucket\_web\_url
+### bucket_web_url
 
 Description: n/a
 
-### db\_backup\_bucket
+### db_backup_bucket
 
 Description: The name of the S3 bucket that contains the PostgreSQL backups and WAL archives for Grafana
 
-### db\_backup\_directory
+### db_backup_directory
 
-Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives for Grafana
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives for
+Grafana
 
-### grafana\_admin\_password
+### grafana_admin_password
 
 Description: n/a
 
@@ -440,7 +457,7 @@ Description: n/a
 
 Description: n/a
 
-### thanos\_query\_frontend\_url
+### thanos_query_frontend_url
 
 Description: n/a
 
@@ -448,6 +465,4 @@ Description: n/a
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

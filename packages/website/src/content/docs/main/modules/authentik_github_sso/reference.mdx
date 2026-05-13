@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### acs\_url
+### acs_url
 
 Description: The ACS url provided by GitHub when configuring an external identity provider
 
@@ -14,7 +14,7 @@ Type: `string`
 
 Default: n/a
 
-### authentik\_domain
+### authentik_domain
 
 Description: The domain name of the Authentik instance
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: n/a
 
-### authentik\_namespace
+### authentik_namespace
 
 Description: The kubernetes namespace where Authentik is deployed
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: `"authentik"`
 
-### extra\_allowed\_groups
+### extra_allowed_groups
 
 Description: Additional groups that can access GitHub
 
@@ -38,7 +38,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### media\_configmap
+### media_configmap
 
 Description: The ConfigMap holding the static media that Authentik will use
 
@@ -46,7 +46,7 @@ Type: `string`
 
 Default: `"media"`
 
-### organization\_name
+### organization_name
 
 Description: The name of your organization
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: n/a
 
-### ui\_description
+### ui_description
 
 Description: The description to display in the Authentik web dashboard
 
@@ -70,15 +70,15 @@ The following outputs are exported:
 
 Description: The certificate used to sign SAML responses
 
-### issuer\_url
+### issuer_url
 
 Description: The Authentik issuer URL for the GitHub provider
 
-### saml\_metadata
+### saml_metadata
 
 Description: The SAML metadata for the GitHub provider. https://en.wikipedia.org/wiki/SAML_metadata
 
-### sso\_post\_url
+### sso_post_url
 
 Description: The URL where SAML authentication requests are sent from the Service Provider (GitHub)
 
@@ -96,6 +96,4 @@ The following providers are needed by this module:
 
 - [tls](https://registry.terraform.io/providers/hashicorp/tls/4.2.1/docs) (4.2.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

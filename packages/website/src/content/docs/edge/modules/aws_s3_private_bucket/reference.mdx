@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### access\_policy
+### access_policy
 
 Description: AWS access policy for the bucket.
 
@@ -14,7 +14,7 @@ Type: `string`
 
 Default: `null`
 
-### acl\_aws\_logs\_delivery\_enabled
+### acl_aws_logs_delivery_enabled
 
 Description: Whether the ACL for awslogsdelivery is enabled
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `false`
 
-### acl\_enabled
+### acl_enabled
 
 Description: Whether to allow ACL use on the bucket
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `false`
 
-### audit\_log\_enabled
+### audit_log_enabled
 
 Description: Whether the bucket's audit log should be stored.
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `false`
 
-### bucket\_name
+### bucket_name
 
 Description: The name of the s3 bucket.
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: n/a
 
-### expire\_after\_days
+### expire_after_days
 
 Description: Whether objects older than indicated days should be deleted. (0 to disable)
 
@@ -62,7 +62,7 @@ Type: `number`
 
 Default: `0`
 
-### expire\_old\_versions
+### expire_old_versions
 
 Description: Whether old object versions should be expired.
 
@@ -70,7 +70,7 @@ Type: `bool`
 
 Default: `true`
 
-### force\_destroy
+### force_destroy
 
 Description: Whether the bucket can be deleted if objects still exist in it.
 
@@ -78,7 +78,7 @@ Type: `bool`
 
 Default: `false`
 
-### intelligent\_transitions\_enabled
+### intelligent_transitions_enabled
 
 Description: Whether objects should be subject to intelligent access tiering.
 
@@ -86,7 +86,7 @@ Type: `bool`
 
 Default: `true`
 
-### kms\_master\_key\_id
+### kms_master_key_id
 
 Description: If provided, will use this CMK for bucket encryption (SSS-KMS) rather than the SSE-S3 key
 
@@ -94,7 +94,7 @@ Type: `string`
 
 Default: `null`
 
-### timed\_transitions\_enabled
+### timed_transitions_enabled
 
 Description: Whether objects should be transitioned to lower storage tiers after a certain amount of time.
 
@@ -102,7 +102,7 @@ Type: `bool`
 
 Default: `false`
 
-### versioning\_enabled
+### versioning_enabled
 
 Description: Whether object versioning is enabled.
 
@@ -114,19 +114,19 @@ Default: `false`
 
 The following outputs are exported:
 
-### bucket\_arn
+### bucket_arn
 
 Description: n/a
 
-### bucket\_id
+### bucket_id
 
 Description: n/a
 
-### bucket\_name
+### bucket_name
 
 Description: n/a
 
-### regional\_domain\_name
+### regional_domain_name
 
 Description: n/a
 

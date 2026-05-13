@@ -1,0 +1,31 @@
+---
+interface Props {
+  author?: string;
+}
+
+const { author } = Astro.props;
+---
+
+<figure class="relative my-4 border-l-4 border-brand pl-3 pt-4 pb-2 pr-4 bg-gray-dark-mode-800 rounded-r-md">
+  <div class="absolute -top-[15px] -left-[15px] bg-white border-2 border-brand rounded-full w-[30px] h-[30px] flex items-center justify-center">
+    <svg
+      class="rotate-180"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="#3b81b0"
+      aria-hidden="true"
+    >
+      <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+    </svg>
+  </div>
+  <blockquote class="italic text-secondary">
+    <slot />
+  </blockquote>
+  {author && (
+    <figcaption class="mt-2 text-sm text-tertiary pl-12">
+      &mdash; {author}
+    </figcaption>
+  )}
+</figure>

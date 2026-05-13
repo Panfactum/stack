@@ -1,6 +1,8 @@
 ---
 // Autopilot layout component with second tier navigation support
+import { ChangelogNavItem } from "../common/ChangelogNavItem";
 import CommonLayout from "../common/CommonLayout.astro";
+import { DocsNavLink } from "../common/DocsNavLink";
 import Header from "../common/Header.astro";
 import { NavItemWithPopup } from "../common/NavItemWithPopup";
 import { ScrollBehavior } from "../common/ScrollBehavior.tsx";
@@ -36,12 +38,11 @@ const {
       saveEnabled={true}
       client:idle
       />
-      <NavItemWithPopup
-      title="Docs"
-      action="/docs/edge/guides"
-      saveEnabled={true}
-      client:idle
+      <DocsNavLink
+        class="mt-2 cursor-pointer bg-transparent text-display-xs font-bold hover:text-brand-600 focus-visible:outline-none"
+        client:idle
       />
+      <ChangelogNavItem client:idle />
       <!-- <NavItemWithPopup
       title="Blog"
       action="/blog"

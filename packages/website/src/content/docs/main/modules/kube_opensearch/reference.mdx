@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether the opensearch pods can be scheduled on arm64 nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -22,7 +22,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### backups\_force\_delete
+### backups_force_delete
 
 Description: Whether to delete backups on destroy
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `false`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether the opensearch pods can be scheduled on burstable nodes
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `false`
 
-### dashboard\_domain
+### dashboard_domain
 
 Description: The domain for hosting the opensearch dashboard
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: `null`
 
-### dashboard\_enabled
+### dashboard_enabled
 
 Description: Whether the opensearch dashboard is enabled
 
@@ -62,23 +62,26 @@ Type: `bool`
 
 Default: `false`
 
-### extra\_cluster\_settings
+### extra_cluster_settings
 
-Description: Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to override existing configuration values. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/).
+Description: Settings that will be added to the opensearch.yml configuration file for the cluster. Can also be used to
+override existing configuration values. See
+[docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/).
 
 Type: `map(any)`
 
 Default: `{}`
 
-### instance\_type\_anti\_affinity\_required
+### instance_type_anti_affinity_required
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to
+true iff sla_target == 3.
 
 Type: `bool`
 
 Default: `null`
 
-### log\_level
+### log_level
 
 Description: The log level for the opensearch pods
 
@@ -86,7 +89,7 @@ Type: `string`
 
 Default: `"WARN"`
 
-### minimum\_memory\_mb
+### minimum_memory_mb
 
 Description: The minimum memory in MB to allocate to each OpenSearch node
 
@@ -94,7 +97,7 @@ Type: `number`
 
 Default: `4000`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -110,7 +113,7 @@ Type: `string`
 
 Default: n/a
 
-### opensearch\_version
+### opensearch_version
 
 Description: The version of OpenSearch to deploy. Note that we only test this module with the default version.
 
@@ -118,7 +121,7 @@ Type: `string`
 
 Default: `"3.2.0"`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -126,7 +129,7 @@ Type: `bool`
 
 Default: `true`
 
-### persistence\_backups\_enabled
+### persistence_backups_enabled
 
 Description: Whether to enable backups of the persistent storage.
 
@@ -134,7 +137,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -142,7 +145,7 @@ Type: `bool`
 
 Default: `false`
 
-### replica\_count
+### replica_count
 
 Description: The number of OpenSearch replicas to deploy
 
@@ -150,17 +153,20 @@ Type: `number`
 
 Default: `3`
 
-### s3\_bucket\_access\_policy
+### s3_bucket_access_policy
 
-Description: Additional [AWS access policy]( https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference) for the remote-storage S3 bucket.
+Description: Additional
+[AWS access policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference)
+for the remote-storage S3 bucket.
 
 Type: `string`
 
 Default: `null`
 
-### slow\_request\_log\_thresholds
+### slow_request_log_thresholds
 
-Description: The thresholds for which slow requests are logged. See [docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs).
+Description: The thresholds for which slow requests are logged. See
+[docs](https://docs.opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs).
 
 Type:
 
@@ -175,7 +181,7 @@ object({
 
 Default: `{}`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether the opensearch pods can be scheduled on spot nodes
 
@@ -183,7 +189,7 @@ Type: `bool`
 
 Default: `true`
 
-### storage\_class
+### storage_class
 
 Description: The StorageClass to use for the disk storage. Cannot be changed after
 
@@ -191,7 +197,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### storage\_increase\_gb
+### storage_increase_gb
 
 Description: The amount of GB to increase storage by if free space drops below the threshold
 
@@ -199,7 +205,7 @@ Type: `number`
 
 Default: `5`
 
-### storage\_increase\_threshold\_percent
+### storage_increase_threshold_percent
 
 Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
 
@@ -207,15 +213,16 @@ Type: `number`
 
 Default: `20`
 
-### storage\_initial\_gb
+### storage_initial_gb
 
-Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after installation.
+Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be
+changed after installation.
 
 Type: `number`
 
 Default: `10`
 
-### storage\_limit\_gb
+### storage_limit_gb
 
 Description: The maximum number of GB of storage to provision for each opensearch node
 
@@ -223,7 +230,7 @@ Type: `number`
 
 Default: `null`
 
-### vault\_credential\_lifetime\_hours
+### vault_credential_lifetime_hours
 
 Description: The lifetime of database credentials generated by Vault
 
@@ -231,7 +238,7 @@ Type: `number`
 
 Default: `16`
 
-### vault\_internal\_url
+### vault_internal_url
 
 Description: The url to the vault instance for internal cert issuance
 
@@ -239,7 +246,7 @@ Type: `string`
 
 Default: `"http://vault-active.vault.svc.cluster.local:8200"`
 
-### voluntary\_disruption\_window\_cron\_schedule
+### voluntary_disruption_window_cron_schedule
 
 Description: The times when disruption windows should start
 
@@ -247,7 +254,7 @@ Type: `string`
 
 Default: `"0 4 * * *"`
 
-### voluntary\_disruption\_window\_enabled
+### voluntary_disruption_window_enabled
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
@@ -255,7 +262,7 @@ Type: `bool`
 
 Default: `false`
 
-### voluntary\_disruption\_window\_seconds
+### voluntary_disruption_window_seconds
 
 Description: The length of the disruption window in seconds
 
@@ -263,7 +270,7 @@ Type: `number`
 
 Default: `3600`
 
-### voluntary\_disruptions\_enabled
+### voluntary_disruptions_enabled
 
 Description: Whether to enable voluntary disruptions of pods in this module.
 
@@ -271,7 +278,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -281,7 +288,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -291,19 +300,20 @@ Default: `true`
 
 The following outputs are exported:
 
-### admin\_creds\_secret
+### admin_creds_secret
 
-Description: The name of the Kubernetes Secret holding certificate credentials for the admin role in the OpenSearch cluster
+Description: The name of the Kubernetes Secret holding certificate credentials for the admin role in the OpenSearch
+cluster
 
-### client\_port
+### client_port
 
 Description: The port that OpenSearch clients should connect to.
 
-### dashboard\_superuser\_password
+### dashboard_superuser_password
 
 Description: The password for superuser access to the opensearch dashboard
 
-### dashboard\_superuser\_username
+### dashboard_superuser_username
 
 Description: The username for superuser access to the opensearch dashboard
 
@@ -311,13 +321,15 @@ Description: The username for superuser access to the opensearch dashboard
 
 Description: The OpenSearch cluster hostname to connect to,
 
-### reader\_creds\_secret
+### reader_creds_secret
 
-Description: The name of the Kubernetes Secret holding certificate credentials for the reader role in the OpenSearch cluster
+Description: The name of the Kubernetes Secret holding certificate credentials for the reader role in the OpenSearch
+cluster
 
-### superuser\_creds\_secret
+### superuser_creds_secret
 
-Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the OpenSearch cluster
+Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the OpenSearch
+cluster
 
 ## Providers
 
@@ -335,6 +347,4 @@ The following providers are needed by this module:
 
 - [vault](https://registry.terraform.io/providers/hashicorp/vault/4.8.0/docs) (4.8.0)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

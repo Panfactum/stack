@@ -1,0 +1,32 @@
+term: Environment
+type: panfactum
+summary: The top-level bounding box for deployed infrastructure in PNCF.
+description: |
+  In PNCF, an *environment* is a set of infrastructure components that is isolated from the infrastructure
+  components of other environments. What happens in one environment does not impact what happens
+  in another.
+
+  Moreover, in PNCF, RBAC permissions are scoped to the environment level. Assigning a user permissions
+  in an environment will automatically grant corresponding access to all resources contained in that 
+  envirnment (e.g., network tunnels, control plane components, databases, etc.).
+
+  Environment are _conceptual_ in nature, but they often correspond to infrastructure primitives in the cloud
+  hosting provider. For example, for AWS-enabled environments, a corresponding AWS account is created
+  for the environment. 
+
+  Importantly, a single environment can have multiple cloud hosting providers enabled. This enables you
+  to have a single environment with clusters deployed to multiple hosting providers which will be
+  able to communicate with each other and receive the same sets of permissions.
+
+  Examples of common environments:
+
+  * `production`: Used for user-facing infrastructure
+  * `staging`: Used for end-to-end tests
+  * `development`: Used for rapid integration tests
+
+  Note that PNCF has no opinion on what environments you create, what their purpose is, or how you
+  use them. In other words, a "production" environment has no conceptual meaning to the underlying framework,
+  it is just a string identifier.
+
+  The one exception is a special environment called "management". That is used for some internal
+  meta-operations. See the corresponding glossary entry.

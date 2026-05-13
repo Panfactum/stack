@@ -11,11 +11,12 @@ export const PRIMARY_NAV_LINKS: NavLink[] = [
     url: "/pricing",
   },
   {
-    title: "Blog",
-    url: "/blog",
+    title: "Docs",
+    url: "/docs/edge/guides",
   },
   {
-    title: "About",
-    url: "/about",
+    title: "Changelog",
+    url: "/docs/changelog/edge/0",
+    popup: true,
   },
 ];

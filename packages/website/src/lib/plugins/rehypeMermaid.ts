@@ -1,14 +1,21 @@
 // Rehype plugin that renders mermaid code blocks to inline SVGs
-// using isomorphic-mermaid (no browser/Playwright required).
+// using the shared mermaid utility (no browser/Playwright required).
 
 import type { Element, Root } from "hast";
 import { toString as hastToString } from "hast-util-to-string";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-interface RehypeMermaidOptions {
-  mermaidConfig?: Record<string, unknown>;
-}
+import { renderMermaidToSvg } from "../mermaid.ts";
+
+// Vite statically transforms all import() expressions to route them through
+// its SSR module runner. Constructing the import call at runtime hides it
+// from Vite's static analysis so it falls through to Node.js's native loader.
+// eslint-disable-next-line @typescript-eslint/no-implied-eval
+const nativeImport = new Function(
+  "specifier",
+  "return import(specifier)",
+) as (specifier: string) => Promise<Record<string, unknown>>;
 
 interface MermaidDiagram {
   /** Index of the <pre> node within its parent's children array */
@@ -18,17 +25,6 @@ interface MermaidDiagram {
   /** The raw mermaid diagram source text */
   source: string;
 }
-
-// Vite statically transforms all import() expressions to route them through
-// its SSR module runner. During dev-mode content processing the runner may
-// already be closed, causing "Vite module runner has been closed" errors.
-// Constructing the import call at runtime hides it from Vite's static
-// analysis so it falls through to Node.js's native module loader.
-// eslint-disable-next-line @typescript-eslint/no-implied-eval
-const nativeImport = new Function(
-  "specifier",
-  "return import(specifier)",
-) as (specifier: string) => Promise<Record<string, unknown>>;
 
 /**
  * Determines whether a HAST element is a mermaid code block,
@@ -49,9 +45,7 @@ const isMermaidPreNode = (node: Element): boolean => {
   );
 };
 
-const rehypeMermaid: Plugin<[RehypeMermaidOptions?], Root> = (options = {}) => {
-  const { mermaidConfig } = options;
-
+const rehypeMermaid: Plugin<[], Root> = () => {
   return async (tree: Root) => {
     // Collect all mermaid diagrams first since we can't await inside visit.
     const diagrams: MermaidDiagram[] = [];
@@ -71,15 +65,6 @@ const rehypeMermaid: Plugin<[RehypeMermaidOptions?], Root> = (options = {}) => {
 
     if (diagrams.length === 0) return;
 
-    const mermaidModule = (await nativeImport("isomorphic-mermaid")) as {
-      default: {
-        initialize: (config: Record<string, unknown>) => void;
-        render: (
-          id: string,
-          text: string,
-        ) => Promise<{ svg: string }>;
-      };
-    };
     const fromHtmlModule = (await nativeImport(
       "hast-util-from-html-isomorphic",
     )) as {
@@ -88,23 +73,14 @@ const rehypeMermaid: Plugin<[RehypeMermaidOptions?], Root> = (options = {}) => {
         options?: { fragment?: boolean },
       ) => Root;
     };
-
-    const mermaid = mermaidModule.default;
     const { fromHtmlIsomorphic } = fromHtmlModule;
-
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: "strict",
-      htmlLabels: false,
-      ...mermaidConfig,
-    });
 
     // Render each diagram and replace the <pre> node with the SVG.
     // Process in reverse index order so that earlier indices remain valid
     // when we splice into the parent's children array.
     for (const diagram of diagrams.reverse()) {
       const diagramId = `mermaid-${diagram.index}`;
-      const { svg } = await mermaid.render(diagramId, diagram.source);
+      const svg = await renderMermaidToSvg(diagramId, diagram.source);
 
       const svgTree = fromHtmlIsomorphic(svg, { fragment: true });
       const svgElement = svgTree.children[0];

@@ -12,16 +12,19 @@ database credentials. We have switched to a new paradigm using the
 To remove it:
 
 1. Apply this release.
+
 2. Remove any dependency blocks to `kube_secrets_csi` in your `terragrunt.hcl` files.
+
 3. Run `terragrunt destroy` on the `kube_secrets_csi` module.
 
-This saves approximately 150MB of memory per node and improves security by removing pods that needed elevated
-host-level permissions.
+This saves approximately 150MB of memory per node and improves security by removing pods that needed elevated host-level
+permissions.
 
 ## Rename Credential Outputs
 
 [`kube_pg_cluster`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
-[`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) output renames:
+[`kube_redis_sentinel`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) output
+renames:
 
 | Old Name             | New Name        |
 | -------------------- | --------------- |
@@ -32,12 +35,14 @@ host-level permissions.
 
 `pf-providers-enable` has been renamed to `pf-tf-init`. It now has expanded functionality:
 
-* Influences every module in the directory tree where it is run (not just CWD).
-* Runs `init -upgrade` on every module to update provider versions and download submodules.
-* Significantly improved runtime speed.
+- Influences every module in the directory tree where it is run (not just CWD).
 
-Update the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) steps to use `pf-tf-init` when
-upgrading the Panfactum version in an environment.
+- Runs `init -upgrade` on every module to update provider versions and download submodules.
+
+- Significantly improved runtime speed.
+
+Update the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) steps to use `pf-tf-init` when upgrading the
+Panfactum version in an environment.
 
 ## Remove Manual Provider Configuration
 

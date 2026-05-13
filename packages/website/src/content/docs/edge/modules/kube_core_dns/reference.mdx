@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### core\_dns\_image\_version
+### core_dns_image_version
 
 Description: The version of the image to use for the deployment
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: `"1.14.2"`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### service\_ip
+### service_ip
 
 Description: The IP address that the DNS service will be exposed on
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `"172.20.0.10"`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -70,7 +70,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -94,6 +94,4 @@ The following providers are needed by this module:
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

@@ -1,0 +1,30 @@
+term: Panfactum Module
+type: panfactum
+summary: An infrastructure module provided and maintained by Panfactum.
+description: |
+  A *Panfactum module* is an infrastructure module authored, tested, and maintained by Panfactum. These modules are published as part of the PNCF and are available for use in any PNCF deployment.
+
+  Panfactum modules are categorized as:
+
+  - **Direct modules**: Intended to be deployed directly via Terragrunt into your environments
+  - **Submodules**: Intended to be used as child modules within your own first-party modules
+
+  Panfactum modules are versioned alongside the Panfactum Stack and should be pinned to a specific stack version using the `pf_stack_version` Terragrunt variable.
+
+  In your Terragrunt configuration, Panfactum direct modules are sourced using `include.panfactum.locals.pf_stack_source`, which automatically handles version resolution and caching.
+references:
+  - type: term
+    label: Module
+    link: "#module"
+  - type: term
+    label: First-Party Module
+    link: "#first-party-module"
+  - type: term
+    label: Submodule
+    link: "#submodule"
+  - type: internal-docs
+    label: Infrastructure Modules Reference
+    link: /docs/main/reference/infrastructure-modules/overview
+  - type: internal-docs
+    label: Deploying Panfactum Modules
+    link: /docs/main/guides/iac/deploying-modules

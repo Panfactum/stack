@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### action\_history\_max\_gb
+### action_history_max_gb
 
 Description: Maximum number of gigabytes allowed in ActionHistory before pruning.
 
@@ -14,7 +14,7 @@ Type: `number`
 
 Default: `1`
 
-### action\_history\_max\_rows
+### action_history_max_rows
 
 Description: Maximum number of rows allowed in ActionHistory before pruning.
 
@@ -22,7 +22,7 @@ Type: `number`
 
 Default: `1000`
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -30,7 +30,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `true`
 
-### cdn\_mode\_enabled
+### cdn_mode_enabled
 
 Description: Whether to enable CDN mode for the Vault ingress
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### db\_recovery\_directory
+### db_recovery_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `null`
 
-### db\_recovery\_mode\_enabled
+### db_recovery_mode_enabled
 
 Description: Whether to enable recovery mode for the PostgreSQL database
 
@@ -70,15 +70,16 @@ Type: `bool`
 
 Default: `false`
 
-### db\_recovery\_target\_time
+### db_recovery_target_time
 
-Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
+Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather
+than to the latest data.
 
 Type: `string`
 
 Default: `null`
 
-### debug\_logs\_enabled
+### debug_logs_enabled
 
 Description: Whether debug logs are enabled.
 
@@ -94,15 +95,16 @@ Type: `string`
 
 Default: n/a
 
-### geo\_restriction\_list
+### geo_restriction_list
 
-Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
+Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and
+blacklist)
 
 Type: `list(string)`
 
 Default: `[]`
 
-### geo\_restriction\_type
+### geo_restriction_type
 
 Description: What type of geographic restrictions to you want to apply to CDN clients
 
@@ -110,7 +112,7 @@ Type: `string`
 
 Default: `"none"`
 
-### grist\_version
+### grist_version
 
 Description: The version of Grist to use
 
@@ -118,23 +120,19 @@ Type: `string`
 
 Default: `"1.3.2"`
 
-### hidden\_ui\_elements
+### hidden_ui_elements
 
-Description: UI elements to hide. See GRIST\_HIDE\_UI\_ELEMENTS.
+Description: UI elements to hide. See GRIST_HIDE_UI_ELEMENTS.
 
 Type: `list(string)`
 
 Default:
 
 ```json
-[
-  "billing",
-  "createSite",
-  "multiSite"
-]
+["billing", "createSite", "multiSite"]
 ```
 
-### ingress\_enabled
+### ingress_enabled
 
 Description: Whether to enable ingress to the Grist server
 
@@ -142,7 +140,7 @@ Type: `bool`
 
 Default: `true`
 
-### log\_level
+### log_level
 
 Description: The log level for the Grist pods
 
@@ -150,7 +148,7 @@ Type: `string`
 
 Default: `"debug"`
 
-### minimum\_memory\_mb
+### minimum_memory_mb
 
 Description: The memory floor for the Grist servers (in MB).
 
@@ -158,7 +156,7 @@ Type: `number`
 
 Default: `300`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -174,7 +172,7 @@ Type: `string`
 
 Default: `"grist"`
 
-### organization\_name
+### organization_name
 
 Description: Name of the organization to set up in Grist.
 
@@ -182,7 +180,7 @@ Type: `string`
 
 Default: n/a
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -190,7 +188,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -198,7 +196,7 @@ Type: `bool`
 
 Default: `true`
 
-### root\_email
+### root_email
 
 Description: The email address to use for the root Grist administrator. Warning: must be changed manually once applied.
 
@@ -206,7 +204,7 @@ Type: `string`
 
 Default: n/a
 
-### session\_max\_length\_hours
+### session_max_length_hours
 
 Description: The max length of the user session before requiring re-authentication.
 
@@ -214,15 +212,16 @@ Type: `number`
 
 Default: `16`
 
-### sla\_target
+### sla_target
 
-Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest
+uptime (99.999%), highest Cost
 
 Type: `number`
 
 Default: `3`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -230,7 +229,7 @@ Type: `bool`
 
 Default: `true`
 
-### telemetry\_enabled
+### telemetry_enabled
 
 Description: Whether usage data will be reported to Grist for product-improvement purposes.
 
@@ -238,7 +237,7 @@ Type: `bool`
 
 Default: `true`
 
-### vault\_domain
+### vault_domain
 
 Description: The domain of the Vault instance running in the cluster.
 
@@ -246,7 +245,7 @@ Type: `string`
 
 Default: n/a
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -258,15 +257,15 @@ Default: `true`
 
 The following outputs are exported:
 
-### db\_admin\_role
+### db_admin_role
 
 Description: n/a
 
-### db\_reader\_role
+### db_reader_role
 
 Description: n/a
 
-### db\_superuser\_role
+### db_superuser_role
 
 Description: n/a
 
@@ -278,19 +277,19 @@ Description: n/a
 
 Description: The name of the namespace where NocoDB will be deployed.
 
-### redis\_admin\_role
+### redis_admin_role
 
 Description: n/a
 
-### redis\_reader\_role
+### redis_reader_role
 
 Description: n/a
 
-### redis\_superuser\_role
+### redis_superuser_role
 
 Description: n/a
 
-### root\_email
+### root_email
 
 Description: The email for the superuser user.
 

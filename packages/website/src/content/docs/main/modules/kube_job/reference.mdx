@@ -6,15 +6,16 @@
 
 The following input variables are supported:
 
-### active\_deadline\_seconds
+### active_deadline_seconds
 
-Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before the system tries to terminate it; value must be positive integer.
+Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before
+the system tries to terminate it; value must be positive integer.
 
 Type: `number`
 
 Default: `86400`
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow Pods to schedule on arm64 nodes
 
@@ -22,7 +23,7 @@ Type: `bool`
 
 Default: `true`
 
-### backoff\_limit
+### backoff_limit
 
 Description: Specifies the number of retries before marking the Job failed.
 
@@ -30,7 +31,7 @@ Type: `number`
 
 Default: `1`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow Pods to schedule on burstable nodes
 
@@ -38,7 +39,7 @@ Type: `bool`
 
 Default: `true`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -46,7 +47,7 @@ Type: `bool`
 
 Default: `true`
 
-### common\_env
+### common_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -54,9 +55,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_env\_from\_config\_maps
+### common_env_from_config_maps
 
-Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment
+variables names and the values are the ConfigMap references.
 
 Type:
 
@@ -69,9 +71,10 @@ map(object({
 
 Default: `{}`
 
-### common\_env\_from\_secrets
+### common_env_from_secrets
 
-Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment
+variables names and the values are the Secret references.
 
 Type:
 
@@ -84,7 +87,7 @@ map(object({
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -92,7 +95,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### concurrency\_policy
+### concurrency_policy
 
 Description: Specifies how to treat concurrent executions of a Job.
 
@@ -100,7 +103,7 @@ Type: `string`
 
 Default: `"Forbid"`
 
-### config\_map\_mounts
+### config_map_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Job
 
@@ -149,7 +152,7 @@ list(object({
 
 Default: n/a
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -157,7 +160,7 @@ Type: `bool`
 
 Default: `false`
 
-### disruptions\_enabled
+### disruptions_enabled
 
 Description: Whether to enable disrupting the Pods in the middle of execution.
 
@@ -165,7 +168,7 @@ Type: `bool`
 
 Default: `false`
 
-### dns\_policy
+### dns_policy
 
 Description: The DNS policy for the Pod
 
@@ -173,7 +176,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_annotations
+### extra_annotations
 
 Description: A map of extra annotations that will be added to the Job (not the pods)
 
@@ -181,7 +184,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_labels
+### extra_labels
 
 Description: A map of extra labels that will be added to the Job (not the pods)
 
@@ -189,7 +192,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to the pods in the Job
 
@@ -197,9 +200,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_failure\_policy\_rules
+### extra_pod_failure_policy_rules
 
-Description: Specifies when a pod is marked as failed. See [failure policy docs](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-failure-policy)
+Description: Specifies when a pod is marked as failed. See
+[failure policy docs](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-failure-policy)
 
 Type:
 
@@ -217,7 +221,7 @@ list(object({
 
 Default: `[]`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Extra pod labels to use
 
@@ -225,7 +229,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the Pods
 
@@ -242,7 +246,7 @@ list(object({
 
 Default: `[]`
 
-### linkerd\_enabled
+### linkerd_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
 
@@ -250,7 +254,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -258,7 +262,7 @@ Type: `bool`
 
 Default: `true`
 
-### mount\_owner
+### mount_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -282,7 +286,7 @@ Type: `string`
 
 Default: n/a
 
-### node\_preferences
+### node_preferences
 
 Description: Node label preferences for the Pods
 
@@ -290,7 +294,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the Pods
 
@@ -298,7 +302,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
 
@@ -306,7 +310,7 @@ Type: `bool`
 
 Default: `true`
 
-### pod\_completions
+### pod_completions
 
 Description: Specifies the desired number of successfully finished Pods the Job should be run with.
 
@@ -314,7 +318,7 @@ Type: `number`
 
 Default: `1`
 
-### pod\_parallelism
+### pod_parallelism
 
 Description: Specifies the maximum desired number of Pods the Job should run at any given time.
 
@@ -322,15 +326,16 @@ Type: `number`
 
 Default: `1`
 
-### pod\_version\_labels\_enabled
+### pod_version_labels_enabled
 
-Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent
+updates.
 
 Type: `bool`
 
 Default: `true`
 
-### priority\_class\_name
+### priority_class_name
 
 Description: The priority class to use for Pods in the Job
 
@@ -338,7 +343,7 @@ Type: `string`
 
 Default: `null`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -346,7 +351,7 @@ Type: `bool`
 
 Default: `true`
 
-### secret\_mounts
+### secret_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the Job
 
@@ -362,7 +367,7 @@ map(object({
 
 Default: `{}`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow Pods to schedule on spot nodes
 
@@ -370,15 +375,16 @@ Type: `bool`
 
 Default: `true`
 
-### starting\_deadline\_seconds
+### starting_deadline_seconds
 
-Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones.
+Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs
+executions will be counted as failed ones.
 
 Type: `number`
 
 Default: `900`
 
-### termination\_grace\_period\_seconds
+### termination_grace_period_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -386,7 +392,7 @@ Type: `number`
 
 Default: `30`
 
-### tmp\_directories
+### tmp_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -402,15 +408,16 @@ map(object({
 
 Default: `{}`
 
-### ttl\_seconds\_after\_finished
+### ttl_seconds_after_finished
 
-Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it is eligible to be automatically deleted.
+Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it
+is eligible to be automatically deleted.
 
 Type: `number`
 
 Default: `600`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the Vertical Pod Autoscaler
 
@@ -418,7 +425,7 @@ Type: `bool`
 
 Default: `true`
 
-### wait\_for\_success
+### wait_for_success
 
 Description: True iff you want to wait for Job success before completing the apply
 
@@ -434,11 +441,11 @@ The following outputs are exported:
 
 Description: The default labels assigned to all resources in this Workflow
 
-### match\_labels
+### match_labels
 
 Description: The labels unique to this Workflow that can be used to select any pods in this Workflow
 
-### service\_account\_name
+### service_account_name
 
 Description: The service account used for the pods
 
@@ -454,6 +461,4 @@ The following providers are needed by this module:
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

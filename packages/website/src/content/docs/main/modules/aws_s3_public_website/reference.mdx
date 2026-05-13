@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### bucket\_name
+### bucket_name
 
 Description: The name of the s3 bucket.
 
@@ -14,7 +14,7 @@ Type: `string`
 
 Default: n/a
 
-### cors\_additional\_allowed\_origins
+### cors_additional_allowed_origins
 
 Description: Specifies which origins are allowed besides the domain name specified
 
@@ -22,7 +22,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cors\_allowed\_headers
+### cors_allowed_headers
 
 Description: Specifies which headers are allowed for CORS requests.
 
@@ -31,12 +31,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "Content-Length"
-]
+["Content-Length"]
 ```
 
-### cors\_allowed\_methods
+### cors_allowed_methods
 
 Description: Specifies which methods are allowed. Can be GET, PUT, POST, DELETE or HEAD.
 
@@ -45,13 +43,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "GET",
-  "HEAD"
-]
+["GET", "HEAD"]
 ```
 
-### cors\_expose\_headers
+### cors_expose_headers
 
 Description: Specifies expose header in the response.
 
@@ -59,7 +54,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cors\_max\_age\_seconds
+### cors_max_age_seconds
 
 Description: Time in seconds that the browser can cache the response for a preflight CORS request.
 
@@ -67,7 +62,7 @@ Type: `number`
 
 Default: `3600`
 
-### default\_cache\_behavior
+### default_cache_behavior
 
 Description: The default configuration for requests that hit the CloudFront distribution.
 
@@ -102,17 +97,19 @@ object({
 
 Default: `{}`
 
-### default\_file
+### default_file
 
-Description: A default file name to use when no file is specified (/some/file/ => /some/file/index.html). If this is '', no default file extension will be applied.
+Description: A default file name to use when no file is specified (/some/file/ => /some/file/index.html). If this is '',
+no default file extension will be applied.
 
 Type: `string`
 
 Default: `"index.html"`
 
-### default\_file\_strict
+### default_file_strict
 
-Description: Iff true, then all requests with paths that do not end with a file extension (dot followed by alphanumeric characters) will have the `default_file` appended.
+Description: Iff true, then all requests with paths that do not end with a file extension (dot followed by alphanumeric
+characters) will have the `default_file` appended.
 
 Type: `bool`
 
@@ -134,7 +131,7 @@ Type: `list(string)`
 
 Default: n/a
 
-### expire\_after\_days
+### expire_after_days
 
 Description: Whether objects older than indicated days should be deleted. (0 to disable)
 
@@ -142,7 +139,7 @@ Type: `number`
 
 Default: `0`
 
-### expire\_old\_versions
+### expire_old_versions
 
 Description: Whether old object versions should be expired.
 
@@ -150,7 +147,7 @@ Type: `bool`
 
 Default: `true`
 
-### force\_destroy
+### force_destroy
 
 Description: Whether the bucket can be deleted if objects still exist in it.
 
@@ -158,23 +155,25 @@ Type: `bool`
 
 Default: `false`
 
-### geo\_restriction\_list
+### geo_restriction_list
 
-Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
+Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and
+blacklist)
 
 Type: `list(string)`
 
 Default: `[]`
 
-### geo\_restriction\_type
+### geo_restriction_type
 
-Description: What type of geographic restrictions to you want to apply to CDN clients. Must be one of: none, blacklist, whitelist.
+Description: What type of geographic restrictions to you want to apply to CDN clients. Must be one of: none, blacklist,
+whitelist.
 
 Type: `string`
 
 Default: `"none"`
 
-### intelligent\_transitions\_enabled
+### intelligent_transitions_enabled
 
 Description: Whether objects should be subject to intelligent access tiering.
 
@@ -182,7 +181,7 @@ Type: `bool`
 
 Default: `true`
 
-### logging\_cookies\_enabled
+### logging_cookies_enabled
 
 Description: Whether cookies should be included in the CloudFront request logs
 
@@ -190,7 +189,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging\_enabled
+### logging_enabled
 
 Description: Whether request logging should be enabled for the CloudFront distribution
 
@@ -198,7 +197,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging\_expire\_after\_days
+### logging_expire_after_days
 
 Description: The number of days after which CloudFront logs will be deleted. (0 to disable)
 
@@ -206,7 +205,7 @@ Type: `number`
 
 Default: `0`
 
-### not\_found\_path
+### not_found_path
 
 Description: The bucket path to return when the HTTP request path isn't found in the S3 bucket
 
@@ -214,9 +213,10 @@ Type: `string`
 
 Default: `"/404.html"`
 
-### path\_match\_behaviors
+### path_match_behaviors
 
-Description: Similar to default\_cache\_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '*.jpg').
+Description: Similar to default_cache_behavior but allows you to specify specific rules for certain path patterns. The
+keys for this map are the path patterns (e.g., '\*.jpg').
 
 Type:
 
@@ -249,15 +249,15 @@ map(object({
 
 Default: `{}`
 
-### price\_class
+### price_class
 
-Description: The price class for the CDN. Must be one of: PriceClass\_All, PriceClass\_200, PriceClass\_100.
+Description: The price class for the CDN. Must be one of: PriceClass_All, PriceClass_200, PriceClass_100.
 
 Type: `string`
 
 Default: `"PriceClass_100"`
 
-### redirect\_rules
+### redirect_rules
 
 Description: A list of redirect rules that the ingress will match against before sending requests to the upstreams
 
@@ -273,7 +273,7 @@ list(object({
 
 Default: `[]`
 
-### rewrite\_rules
+### rewrite_rules
 
 Description: Rewrite rules to add for the path resolution
 
@@ -288,7 +288,7 @@ list(object({
 
 Default: `[]`
 
-### timed\_transitions\_enabled
+### timed_transitions_enabled
 
 Description: Whether objects should be transitioned to lower storage tiers after a certain amount of time.
 
@@ -296,7 +296,7 @@ Type: `bool`
 
 Default: `false`
 
-### versioning\_enabled
+### versioning_enabled
 
 Description: Whether object versioning is enabled.
 
@@ -308,11 +308,11 @@ Default: `false`
 
 The following outputs are exported:
 
-### bucket\_arn
+### bucket_arn
 
 Description: n/a
 
-### bucket\_name
+### bucket_name
 
 Description: n/a
 

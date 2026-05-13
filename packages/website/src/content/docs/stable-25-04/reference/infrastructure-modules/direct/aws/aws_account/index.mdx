@@ -4,7 +4,12 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="aws_account" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/aws_account" status="stable" type="direct" />
+<ModuleHeader
+  name="aws_account"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/aws_account"
+  status="stable"
+  type="direct"
+/>
 
 # AWS Account
 
@@ -16,9 +21,9 @@ Completes top-level configuration for each AWS account:
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -30,115 +35,115 @@ Description: The human-readable string for the AWS account.
 
 Type: `string`
 
-### billing\_email\_address
+### billing_email_address
 
 Description: The email address where you want to receive invoices for your organization
 
 Type: `string`
 
-### billing\_full\_name
+### billing_full_name
 
 Description: The full name of the person who receives invoices for your organization
 
 Type: `string`
 
-### billing\_phone\_number
+### billing_phone_number
 
 Description: The phone number of the person who receives invoices for your organization
 
 Type: `string`
 
-### billing\_title
+### billing_title
 
 Description: The title of the person who receives invoices for your organization
 
 Type: `string`
 
-### contact\_address\_line\_1
+### contact_address_line_1
 
 Description: The street address for your organization (line 1)
 
 Type: `string`
 
-### contact\_city
+### contact_city
 
 Description: The city for your organization
 
 Type: `string`
 
-### contact\_company\_name
+### contact_company_name
 
 Description: The name of your organization
 
 Type: `string`
 
-### contact\_country\_code
+### contact_country_code
 
 Description: The ISO-3166 two-letter country code for your organization
 
 Type: `string`
 
-### contact\_full\_name
+### contact_full_name
 
 Description: The full name of the primary contact who manages your organization's AWS account
 
 Type: `string`
 
-### contact\_phone\_number
+### contact_phone_number
 
 Description: The phone number of the primary contact who manages your organization's AWS account
 
 Type: `string`
 
-### contact\_postal\_code
+### contact_postal_code
 
 Description: The postal code for your organization
 
 Type: `string`
 
-### operations\_email\_address
+### operations_email_address
 
 Description: The email address for the person who leads operations for your organization
 
 Type: `string`
 
-### operations\_full\_name
+### operations_full_name
 
 Description: The full name of the person who leads operations for your organization
 
 Type: `string`
 
-### operations\_phone\_number
+### operations_phone_number
 
 Description: The phone number of the person who leads operations for your organization
 
 Type: `string`
 
-### operations\_title
+### operations_title
 
 Description: The title of the person who leads operations for your organization
 
 Type: `string`
 
-### security\_email\_address
+### security_email_address
 
 Description: The email address for the person who leads security for your organization
 
 Type: `string`
 
-### security\_full\_name
+### security_full_name
 
 Description: The full name of the person who leads security for your organization
 
 Type: `string`
 
-### security\_phone\_number
+### security_phone_number
 
 Description: The phone number of the person who leads security for your organization
 
 Type: `string`
 
-### security\_title
+### security_title
 
 Description: The title of the person who leads security for your organization
 
@@ -148,7 +153,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### contact\_address\_line\_2
+### contact_address_line_2
 
 Description: The street address for your organization (line 2)
 
@@ -156,7 +161,7 @@ Type: `string`
 
 Default: `null`
 
-### contact\_district\_or\_county
+### contact_district_or_county
 
 Description: The district or county of your organization
 
@@ -164,7 +169,7 @@ Type: `string`
 
 Default: `null`
 
-### contact\_state\_or\_region
+### contact_state_or_region
 
 Description: The state or region for your organization
 
@@ -172,7 +177,7 @@ Type: `string`
 
 Default: `null`
 
-### contact\_website\_url
+### contact_website_url
 
 Description: The website your organization
 
@@ -184,15 +189,15 @@ Default: `null`
 
 The following outputs are exported:
 
-### spot\_data\_feed\_bucket
+### spot_data_feed_bucket
 
 Description: The name of the bucket for the spot data feed
 
-### spot\_data\_feed\_bucket\_arn
+### spot_data_feed_bucket_arn
 
 Description: The ARN of the bucket for the spot data feed
 
-### spot\_data\_feed\_bucket\_region
+### spot_data_feed_bucket_region
 
 Description: The region of the bucket for the spot data feed
 
@@ -200,6 +205,4 @@ Description: The region of the bucket for the spot data feed
 
 No notes
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -14,7 +14,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### aws\_plugin\_version
+### aws_plugin_version
 
 Description: The image version of the velero/velero-plugin-for-aws image
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: `"v1.12.0"`
 
-### log\_level
+### log_level
 
 Description: The log level for the Velero pods
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### velero\_helm\_version
+### velero_helm_version
 
 Description: The version of the velero helm chart
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `"9.1.3"`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -72,7 +72,9 @@ Default: `true`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 
@@ -82,11 +84,11 @@ Default: `true`
 
 The following outputs are exported:
 
-### backup\_bucket
+### backup_bucket
 
 Description: The name of the S3 bucket used to store cluster backups
 
-### backup\_bucket\_arn
+### backup_bucket_arn
 
 Description: The ARN of the S3 bucket used to store cluster backups
 

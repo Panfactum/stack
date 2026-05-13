@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### kubernetes\_url
+### kubernetes_url
 
 Description: The url to the kubernetes API server
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: n/a
 
-### log\_level
+### log_level
 
 Description: The log level for the vault-secrets-operators pods
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: `"error"`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `true`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### vault\_internal\_url
+### vault_internal_url
 
 Description: The internal url of the vault instance
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: n/a
 
-### vault\_secrets\_operator\_helm\_version
+### vault_secrets_operator_helm_version
 
 Description: The version of the vault-secrets-operator helm chart to deploy
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: `"1.3.0"`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -80,7 +80,9 @@ Default: `false`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 

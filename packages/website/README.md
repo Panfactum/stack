@@ -8,10 +8,10 @@ All commands are run from the root of the project, from a terminal:
 
 | Command          | Action                                      |
 | :--------------- | :------------------------------------------ |
-| `pnpm dev`   | Starts local dev server at `localhost:4321` |
-| `pnpm build` | Build your production site to `./dist/`     |
-| `pnpm check` | Check for type errors    |
-| `pnpm lint` | Perform linting with autofix enabled  |
+| `bun run dev`   | Starts local dev server at `localhost:4321` |
+| `bun run build` | Build your production site to `./dist/`     |
+| `bun run check` | Check for type errors    |
+| `bun run lint` | Perform linting with autofix enabled  |
 
 # General Architecture
 
@@ -22,7 +22,7 @@ in Markdown files under `/src/content` which contains documentation, blog articl
 
 In particular, we use an enhanced Markdown syntax (MDX) for which you can find general information [here](https://docs.astro.build/en/guides/markdown-content/). We have enhanced the basic Markdown build pipeline with many plugins, including several custom ones.
 
-All code is written in Typescript and uses `pnpm` as the package manager. We aim to enable the strictest possible type-checking and linting whenever possible.
+All code is written in Typescript and uses `bun` as the package manager. We aim to enable the strictest possible type-checking and linting whenever possible.
 
 ## Project Structure
 

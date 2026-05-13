@@ -1,0 +1,33 @@
+term: Region
+type: panfactum
+summary: An AWS geographic region where infrastructure resources are deployed.
+description: |
+  A *region* refers to an AWS geographic region (e.g., `us-east-2`, `eu-west-1`) where infrastructure resources are deployed.
+
+  In the Panfactum stack, a region is a subdivision of an environment. Each environment can span multiple regions, and each environment-region pair may host its own Kubernetes cluster.
+
+  Region-specific configuration is stored in `region.yaml` files within the environments directory:
+
+  ```txt
+  environments/
+    production/
+      us-east-2/
+        region.yaml    <- region-specific settings
+        module1/
+        module2/
+      eu-west-1/
+        region.yaml
+        module1/
+  ```
+
+  Each region's `region.yaml` can define settings such as the AWS region name, provider configuration, and Terragrunt variables that apply to all modules deployed in that region.
+references:
+  - type: term
+    label: Environment
+    link: "#environment"
+  - type: term
+    label: Cluster
+    link: "#cluster"
+  - type: external-docs
+    label: AWS Regions
+    link: https://docs.aws.amazon.com/general/latest/gr/rande.html

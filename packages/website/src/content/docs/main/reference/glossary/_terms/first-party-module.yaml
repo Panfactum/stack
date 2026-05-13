@@ -1,0 +1,28 @@
+term: First-Party Module
+type: iac
+summary: An infrastructure module written and maintained by your own organization.
+description: |
+  A *first-party module* is an infrastructure module written and maintained by your organization, typically stored in your stack repository under a directory configured by the `iac_dir` [repo variable.](/docs/main/reference/configuration/repo-variables)
+
+  First-party modules are written in OpenTofu/Terraform HCL syntax and follow the same conventions as any other module. They are deployed via Terragrunt using `include.panfactum.locals.source` to automatically resolve versioning.
+
+  Common uses for first-party modules include:
+
+  - Deploying your own application workloads
+  - Combining multiple Panfactum submodules into higher-level abstractions
+  - Adding organization-specific infrastructure not covered by Panfactum modules
+
+  First-party modules may reference Panfactum submodules as child modules to leverage shared infrastructure patterns.
+references:
+  - type: term
+    label: Module
+    link: "#module"
+  - type: term
+    label: Panfactum Module
+    link: "#panfactum-module"
+  - type: term
+    label: Third-Party Module
+    link: "#third-party-module"
+  - type: internal-docs
+    label: Developing First-Party Modules
+    link: /docs/main/guides/iac/first-party-modules

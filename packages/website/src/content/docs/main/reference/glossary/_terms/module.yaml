@@ -1,0 +1,43 @@
+term: Module
+type: iac
+summary: A reusable, parameterizable collection of infrastructure resources defined in OpenTofu/Terraform.
+description: |
+  A *module* is a reusable, parameterizable unit of infrastructure code written in [Hashicorp Configuration Language (HCL)](https://developer.hashicorp.com/terraform/language/syntax/configuration). It encapsulates a set of related infrastructure resources (e.g., a Kubernetes deployment, an AWS VPC) that can be configured and deployed together.
+
+  Modules accept *inputs* (also called variables) that control their behavior, and produce *outputs* that can be passed to other modules. This design enables infrastructure patterns to be shared and reused across environments.
+
+  In the Panfactum stack, modules are broadly categorized as:
+
+  - **Root modules**: Deployed directly via Terragrunt
+  - **Submodules**: Called as child modules within other modules
+
+  And by authorship:
+
+  - **Panfactum modules**: Provided by the Panfactum project
+  - **First-party modules**: Written by your organization
+  - **Third-party modules**: Sourced from external providers
+references:
+  - type: term
+    label: Root Module
+    link: "#root-module"
+  - type: term
+    label: Submodule
+    link: "#submodule"
+  - type: term
+    label: Panfactum Module
+    link: "#panfactum-module"
+  - type: term
+    label: First-Party Module
+    link: "#first-party-module"
+  - type: term
+    label: Third-Party Module
+    link: "#third-party-module"
+  - type: term
+    label: OpenTofu
+    link: "#opentofu"
+  - type: internal-docs
+    label: Infrastructure Modules Reference
+    link: /docs/main/reference/infrastructure-modules/overview
+  - type: external-docs
+    label: OpenTofu Module Documentation
+    link: https://opentofu.org/docs/language/modules/

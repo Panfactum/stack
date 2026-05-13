@@ -2,35 +2,43 @@
 
 {/* Covers the major component version upgrades and first-party IaC provider updates. */}
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 <MarkdownAlert severity="warning">
   This release contains a bug that will cause Cilium to crash if deployed via
-  [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
-  Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+  [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy). Please ensure you
+  upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
 </MarkdownAlert>
 
 <MarkdownAlert severity="warning">
-  AWS published an AMI update to Bottlerocket OS on January 4, 2025 that breaks compatibility with all edge
-  releases until `edge.25-01-09`. You should upgrade your `aws_eks` and `karpenter_node_pools` modules directly
-  to `edge.25-01-09` to avoid cluster disruption.
+  AWS published an AMI update to Bottlerocket OS on January 4, 2025 that breaks compatibility with all edge releases
+  until `edge.25-01-09`. You should upgrade your `aws_eks` and `karpenter_node_pools` modules directly to
+  `edge.25-01-09` to avoid cluster disruption.
 </MarkdownAlert>
 
 ## Update Provider Versions in First-Party IaC
 
-All terraform provider versions in Panfactum modules have been upgraded. Any first-party IaC modules that
-utilize Panfactum submodules will need their provider versions upgraded as well. See the
-[provider versions reference](/docs/edge/reference/infrastructure-modules/overview#provider-versions) for the new values.
+All terraform provider versions in Panfactum modules have been upgraded. Any first-party IaC modules that utilize
+Panfactum submodules will need their provider versions upgraded as well. See the
+[provider versions reference](/docs/edge/reference/infrastructure-modules/overview#provider-versions) for the new
+values.
 
 ## Component Upgrades
 
 This release upgrades many components. Generally no action is required, but review each component's release notes:
 
-* [Kubernetes 1.29 → 1.30](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.30.md)
-* [Authentik 2024.4.2 → 2024.6.4](https://docs.goauthentik.io/docs/releases/2024.6)
-* [Argo Workflows 3.5 → 3.6](https://argo-workflows.readthedocs.io/en/latest/upgrading/#upgrading-to-v36)
-* [Karpenter 1.0 → 1.1](https://karpenter.sh/docs/upgrading/upgrade-guide/)
-* [Redis 7.2 → 7.4](https://redis.io/blog/announcing-redis-community-edition-and-redis-stack-74/)
-* [Velero 1.13 → 1.15](https://velero.io/docs/main/upgrade-to-1.15/)
-* [VPA 1.1 → 1.2](https://github.com/kubernetes/autoscaler/releases/tag/vertical-pod-autoscaler-1.2.0)
-* [PostgreSQL 16.4 → 16.6](https://www.postgresql.org/docs/release/16.6/)
+- [Kubernetes 1.29 → 1.30](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.30.md)
+
+- [Authentik 2024.4.2 → 2024.6.4](https://docs.goauthentik.io/docs/releases/2024.6)
+
+- [Argo Workflows 3.5 → 3.6](https://argo-workflows.readthedocs.io/en/latest/upgrading/#upgrading-to-v36)
+
+- [Karpenter 1.0 → 1.1](https://karpenter.sh/docs/upgrading/upgrade-guide/)
+
+- [Redis 7.2 → 7.4](https://redis.io/blog/announcing-redis-community-edition-and-redis-stack-74/)
+
+- [Velero 1.13 → 1.15](https://velero.io/docs/main/upgrade-to-1.15/)
+
+- [VPA 1.1 → 1.2](https://github.com/kubernetes/autoscaler/releases/tag/vertical-pod-autoscaler-1.2.0)
+
+- [PostgreSQL 16.4 → 16.6](https://www.postgresql.org/docs/release/16.6/)

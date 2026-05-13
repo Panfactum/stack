@@ -7,8 +7,10 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeWrap from "rehype-wrap-all";
+import remarkDirective from "remark-directive";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import remarkCollapsible from "./src/lib/plugins/remarkCollapsible.ts";
 import compress from "./src/lib/plugins/compress.ts"
 import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
@@ -18,7 +20,15 @@ import rehypeMermaid from "./src/lib/plugins/rehypeMermaid.ts";
 import tailwindcss from "@tailwindcss/vite";
 import autoprefixer from 'autoprefixer'
 import postcssImporter from 'postcss-import';
+import rehypeCollapsible from "./src/lib/plugins/rehypeCollapsible.ts";
+import remarkNumbered from "./src/lib/plugins/remarkNumbered.ts";
+import remarkIcon from "./src/lib/plugins/remarkIcon.ts";
+import rehypeNumbered from "./src/lib/plugins/rehypeNumbered.ts";
+import rehypeIcon from "./src/lib/plugins/rehypeIcon.ts";
 import rehypeCodeGroup from "./src/lib/plugins/codeGroups.ts";
+import rehypeFootnotePopover from "./src/lib/plugins/rehypeFootnotePopover.ts";
+import remarkTerm from "./src/lib/plugins/remarkTerm.ts";
+import rehypeTermPopover from "./src/lib/plugins/rehypeTermPopover.ts";
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
@@ -69,33 +79,9 @@ export default defineConfig({
     })
   },
   markdown: {
-    remarkPlugins: [remarkGfm, remarkMath],
+    remarkPlugins: [remarkGfm, remarkMath, remarkDirective, remarkCollapsible, remarkNumbered, remarkIcon, remarkTerm],
     rehypePlugins: [
-      [rehypeMermaid, {
-        // Mermaid renders SVGs at build time in Node.js, so CSS var()
-        // references cannot be used here. Values must be hex literals
-        // that match the Tailwind @theme tokens in global.css.
-        mermaidConfig: {
-          theme: "dark",
-          themeVariables: {
-            darkMode: true,
-            background: "#0c111d",         // gray-dark-mode-950
-            primaryColor: "#1a3b50",       // brand-750
-            primaryTextColor: "#f5f5f6",   // gray-dark-mode-50
-            primaryBorderColor: "#333741", // gray-dark-mode-700
-            secondaryColor: "#1f242f",     // gray-dark-mode-800
-            secondaryTextColor: "#cecfd2", // gray-dark-mode-300
-            lineColor: "#70bfeb",          // brand-300
-            textColor: "#f5f5f6",          // gray-dark-mode-50
-            mainBkg: "#1a3b50",            // brand-750
-            nodeBorder: "#333741",         // gray-dark-mode-700
-            clusterBkg: "#161b26",         // gray-dark-mode-900
-            clusterBorder: "#333741",      // gray-dark-mode-700
-            titleColor: "#f5f5f6",         // gray-dark-mode-50
-            edgeLabelBackground: "#1f242f", // gray-dark-mode-800
-          },
-        },
-      }],
+      rehypeMermaid,
       rehypeReplaceStrings,
       rehypeSlug,
       [rehypeAutolinkHeadings, { behavior: "append" }],
@@ -103,7 +89,12 @@ export default defineConfig({
         rehypeWrap,
         { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
       ],
+      rehypeCollapsible,
+      rehypeNumbered,
+      rehypeIcon,
       rehypeCodeGroup,
+      rehypeFootnotePopover,
+      rehypeTermPopover,
       rehypeKatex,
     ],
   },

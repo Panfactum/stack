@@ -1,0 +1,12 @@
+term: CLI (pf)
+type: panfactum
+summary: A command-line interface bundled in the DevShell that is used for interacting with Panfactum IaC and deployed infrastructure
+description: |
+  When talking about "the" CLI in the context of Panfactum, we are talking about the `pf` binary that ships with the DevShell.
+
+  This CLI can be used to drive various operations against both local IaC / CaC as well as operations against running infrastructure.
+references:
+  - type: term
+    label: DevShell
+    link: "#devshell"
+

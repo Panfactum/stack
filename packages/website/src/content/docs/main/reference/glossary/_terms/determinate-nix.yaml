@@ -1,0 +1,30 @@
+term: Determinate Nix
+type: devshell
+summary: An opinionated distribution of the Nix package manager maintained by Determinate Systems that Panfactum strongly recommends.
+description: |
+  *Determinate Nix* is a downstream distribution of the Nix package manager produced by
+  [Determinate Systems](https://determinate.systems). Panfactum strongly recommends it as the
+  way to install Nix, though it is not strictly required.
+
+  Key differences from other Nix implementations:
+
+  - **Flakes enabled by default**: Nix flakes are enabled out of the box without extra configuration
+  - **Improved installer**: Provides a reliable, uninstallable installer that works across Linux and macOS
+  - **macOS Linux builder**: Includes a native Linux builder on macOS via the Apple Virtualization framework
+  - **Performance improvements**: Parallel evaluation, lazy trees, and multi-threaded garbage collection
+references:
+  - type: term
+    label: Nix
+    link: "#nix"
+  - type: term
+    label: DevShell
+    link: "#devshell"
+  - type: internal-docs
+    label: Install Tooling Guide
+    link: /docs/main/guides/getting-started/install-tooling
+  - type: external-docs
+    label: Determinate Nix Docs
+    link: https://docs.determinate.systems/determinate-nix
+  - type: external-docs
+    label: Nix Installer (GitHub)
+    link: https://github.com/DeterminateSystems/nix-installer

@@ -34,6 +34,8 @@ case "$FILE_PATH" in
     { @validateChangelog@ "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   elif [[ "$REL_PATH" =~ ^packages/website/src/content/changelog/.*review\.yaml$ ]]; then
     { @validateChangelogReview@ "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
+  elif [[ "$REL_PATH" =~ ^packages/website/src/content/docs/.*/reference/glossary/_terms/.*\.yaml$ ]]; then
+    { @validateGlossary@ "$FILE_PATH" >"$TMPDIR/glossary-validate" 2>&1 || echo "glossary-validate" >>"$TMPDIR/failed"; } &
   elif [[ "$REL_PATH" == "packages/infrastructure/metadata.yaml" ]]; then
     { @validateIacMetadata@ "$FILE_PATH" >"$TMPDIR/changelog-validate" 2>&1 || echo "changelog-validate" >>"$TMPDIR/failed"; } &
   fi
@@ -64,6 +66,10 @@ while read -r tool; do
   changelog-validate)
     ERRORS+="changelog-validate: validation errors found in $FILE_PATH"$'\n'
     ERRORS+="$(cat "$TMPDIR/changelog-validate")"$'\n'
+    ;;
+  glossary-validate)
+    ERRORS+="glossary-validate: validation errors found in $FILE_PATH"$'\n'
+    ERRORS+="$(cat "$TMPDIR/glossary-validate")"$'\n'
     ;;
   package-json)
     ERRORS+="$(cat "$TMPDIR/package-json")"$'\n'

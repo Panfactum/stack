@@ -1,10 +1,10 @@
 import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
 
-import awsImg from './aws.jpg'
-import dashboardImg from './dashboard.jpg'
-import eksImg from './eks.jpg'
-import k9sImg from './k9s.jpg'
+import awsImg from "./aws.jpg";
+import dashboardImg from "./dashboard.jpg";
+import eksImg from "./eks.jpg";
+import k9sImg from "./k9s.jpg";
 
 # Connect to Infrastructure
 
@@ -14,26 +14,32 @@ Retrieve credentials for connecting to the various components of your organizati
 
 ## User Provisioning
 
-To access live infrastructure, you must first have an account in your organization's [identity provider (IdP)](https://en.wikipedia.org/wiki/Identity_provider). [^1]
-This account with be used to sign in to all service providers.
+To access live infrastructure, you must first have an account in your organization's
+[identity provider (IdP)](https://en.wikipedia.org/wiki/Identity_provider). [^1] This account with be used to sign in to
+all service providers.
 
-[^1]: The IdP itself should have already been provisioned in the [bootstrapping guide.](/docs/edge/guides/bootstrapping/identity-provider)
+[^1]:
+    The IdP itself should have already been provisioned in the
+    [bootstrapping guide.](/docs/edge/guides/bootstrapping/identity-provider)
 
-If your organization's administrators have not already [provisioned your account](/docs/edge/guides/user-management/provisioning-new-user), ask them now. You
-will need to follow [this guide](/docs/edge/guides/user-management/setting-up-new-user) to set up your user for the first time.
+If your organization's administrators have not already
+[provisioned your account](/docs/edge/guides/user-management/provisioning-new-user), ask them now. You will need to
+follow [this guide](/docs/edge/guides/user-management/setting-up-new-user) to set up your user for the first time.
 
 Once your user is provisioned, make sure you are able to access your organization's Authentik dashboard: [^2]
 
 <MarkdownImage src={dashboardImg} alt="Authentik dashboard" />
 
-[^2]: If you are not sure the URL, ask an organization administrator or refer to your organization's internal documentation.
+[^2]:
+    If you are not sure the URL, ask an organization administrator or refer to your organization's internal
+    documentation.
 
 The applications you see will vary based on your organization's settings.
 
 ## Accessing AWS
 
-If your organization granted you AWS access, you should see AWS in your Authentik dashboard. You can click on the app
-to get brought to the access portal showing your individual account access:
+If your organization granted you AWS access, you should see AWS in your Authentik dashboard. You can click on the app to
+get brought to the access portal showing your individual account access:
 
 <MarkdownImage src={awsImg} alt="AWS access portal" />
 
@@ -41,18 +47,20 @@ Your visible accounts and roles will vary based on your organization's settings.
 
 ### AWS CLI Access
 
-These accounts and roles are already available for use inside your local repository. They are configured under the `aws_dir` directory (defaults to `.aws`).
+These accounts and roles are already available for use inside your local repository. They are configured under the
+`aws_dir` directory (defaults to `.aws`).
 
-Access is made available via [AWS CLI/SDK profiles](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html). You
-can view all your organization's profiles by running `aws configure list-profiles`.
+Access is made available via
+[AWS CLI/SDK profiles](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html). You can view all your
+organization's profiles by running `aws configure list-profiles`.
 
 Each profile is of the format `<account>-<role>`.
 
 You may not have access to all of your organization's profiles. Check the access portal to see which accounts and roles
 you can use.
 
-You can set your active profile by setting the `AWS_PROFILE` environment variable (e.g., `export AWS_PROFILE=<your_profile>`)
-or by passing the `--profile <your_profile>` flag to the `aws` CLI.
+You can set your active profile by setting the `AWS_PROFILE` environment variable (e.g.,
+`export AWS_PROFILE=<your_profile>`) or by passing the `--profile <your_profile>` flag to the `aws` CLI.
 
 Let's confirm this works:
 
@@ -83,20 +91,24 @@ the Web UI: [^3]
 
    <MarkdownImage src={eksImg} alt="EKS dashboard" />
 
-[^3]: You can see what accounts and regions your clusters are deployed to by examining the `environments_dir` folder in your
-    repository (defaults to `environments`). Search for `aws_eks` module folders. Ask an organization administrator if your need further guidance.
+[^3]:
+    You can see what accounts and regions your clusters are deployed to by examining the `environments_dir` folder in
+    your repository (defaults to `environments`). Search for `aws_eks` module folders. Ask an organization administrator
+    if your need further guidance.
 
 ### Kubernetes CLI Access
 
-The above dashboard is read-only. If you want to make changes to your cluster, you will need to access your clusters from the CLI.
-This will require setting up your [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) file.
+The above dashboard is read-only. If you want to make changes to your cluster, you will need to access your clusters
+from the CLI. This will require setting up your
+[kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) file.
 
 We provide an easy way to do this by performing the following actions within your organization's repository:
 
 1. Copy the `config.user.example.yaml` file in your `kube_dir` folder (defaults to `.kube`) to `config.user.yaml`.
 
-2. Update the `config.user.yaml` to include the clusters you want to access and what AWS profile you want to use for that access. See
-   the [reference docs](/docs/edge/reference/configuration/kubernetes#config.user.yaml) for the specific syntax.
+2. Update the `config.user.yaml` to include the clusters you want to access and what AWS profile you want to use for
+   that access. See the [reference docs](/docs/edge/reference/configuration/kubernetes#config.user.yaml) for the
+   specific syntax.
 
 3. Run `pf-update-kube` to create your kubeconfig file.
 
@@ -111,8 +123,8 @@ We provide an easy way to do this by performing the following actions within you
    To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
    ```
 
-In the Panfactum stack, we highly recommend [k9s](https://k9scli.io/) as the tool for interactively interfacing with your Kubernetes clusters. We
-will reference it often in our documentation, so you should gain familiarity.
+In the Panfactum stack, we highly recommend [k9s](https://k9scli.io/) as the tool for interactively interfacing with
+your Kubernetes clusters. We will reference it often in our documentation, so you should gain familiarity.
 
 Launch it now via `k9s`:
 
@@ -124,10 +136,15 @@ Launch it now via `k9s`:
 
 Here are some ideas for next steps:
 
-* [Learn how to deploy infrastructure using infrastructure-as-code](/docs/edge/guides/iac/deploying-modules)
+- [Learn how to deploy infrastructure using infrastructure-as-code](/docs/edge/guides/iac/deploying-modules)
 
-* [Customize your organization's devShell](/docs/edge/guides/development-shell/customizing)
+- [Customize your organization's devShell](/docs/edge/guides/development-shell/customizing)
 
-* [Connect to databases](/docs/edge/guides/networking/database-connections)
+- [Connect to databases](/docs/edge/guides/networking/database-connections)
 
-<MarkdownGuideNav backHref={"/docs/edge/guides/getting-started/boot-developer-environment"} stepNumber={4} totalSteps={4} progressLabel={"Getting Started Guide:"} />
+<MarkdownGuideNav
+  backHref={"/docs/edge/guides/getting-started/boot-developer-environment"}
+  stepNumber={4}
+  totalSteps={4}
+  progressLabel={"Getting Started Guide:"}
+/>

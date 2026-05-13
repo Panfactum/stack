@@ -1,0 +1,31 @@
+term: Submodule
+type: iac
+summary: An OpenTofu module used as a child within another module rather than deployed directly.
+description: |
+  A *submodule* is an OpenTofu/Terraform module that is called as a child module within another module rather than being deployed directly via Terragrunt. Submodules are composed into larger modules using `module` blocks in HCL.
+
+  In the Panfactum stack, submodules are a key mechanism for code reuse. Panfactum provides many submodules (such as `kube_pod`, `kube_service`, etc.) that encapsulate common infrastructure patterns and can be imported into first-party modules.
+
+  Unlike root modules, submodules:
+
+  - Do not have their own Terraform state
+  - Do not declare provider configurations (these are inherited from the parent)
+  - Cannot be deployed standalone via Terragrunt
+
+  When using Panfactum submodules in first-party code, use the `pf_module_source` and `pf_module_ref` variables to ensure the submodule version automatically tracks the deployed Panfactum Stack version.
+references:
+  - type: term
+    label: Module
+    link: "#module"
+  - type: term
+    label: Root Module
+    link: "#root-module"
+  - type: term
+    label: Panfactum Module
+    link: "#panfactum-module"
+  - type: internal-docs
+    label: Using Panfactum Submodules
+    link: /docs/main/guides/iac/first-party-modules#using-panfactum-submodules
+  - type: external-docs
+    label: OpenTofu Child Modules Documentation
+    link: https://opentofu.org/docs/language/modules/

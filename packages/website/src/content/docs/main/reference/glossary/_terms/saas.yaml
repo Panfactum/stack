@@ -1,0 +1,30 @@
+term: SaaS (Software-as-a-Service)
+type: other
+summary: A software distribution model where applications are hosted by a provider and accessed by customers over the internet.
+description: |
+  *Software-as-a-Service* (SaaS) is a software distribution model in which a provider hosts an
+  application and makes it available to customers over the internet, typically on a subscription basis.
+  The provider manages everything — infrastructure, platform, application code, updates, and security.
+
+  SaaS sits at the top of the cloud computing stack:
+
+  - **IaaS** gives you raw infrastructure
+  - **PaaS** gives you a managed platform
+  - **SaaS** gives you a fully managed application
+
+  Examples of SaaS products include GitHub, Slack, Datadog, and PagerDuty.
+
+  In the Panfactum ecosystem, several third-party SaaS products are integrated via IaC modules
+  (e.g., Authentik SSO connectors for services like GitHub and MongoDB Atlas). One goal of Panfactum
+  is to reduce reliance on expensive SaaS tools by providing self-hosted alternatives where practical
+  (e.g., using Grafana instead of Datadog for observability).
+references:
+  - type: term
+    label: IaaS (Infrastructure-as-a-Service)
+    link: "#iaas-infrastructure-as-a-service"
+  - type: term
+    label: PaaS (Platform-as-a-Service)
+    link: "#paas-platform-as-a-service"
+  - type: external-docs
+    label: "Wikipedia: Software as a Service"
+    link: https://en.wikipedia.org/wiki/Software_as_a_service

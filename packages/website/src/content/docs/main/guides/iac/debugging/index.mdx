@@ -1,31 +1,38 @@
 # Debugging
 
-Unfortunately, there is no step-by-step guide that can resolve all issues with Terragrunt and OpenTofu (Terraform). However,
-most issues can be resolved through the following:
+Unfortunately, there is no step-by-step guide that can resolve all issues with Terragrunt and OpenTofu (Terraform).
+However, most issues can be resolved through the following:
 
-* Ensure that you have the correct providers enabled by running `pf-tf-init` in the module directory.
+- Ensure that you have the correct providers enabled by running `pf-tf-init` in the module directory.
 
-* Ensure that you are authenticated for the region / environment you are attempting to run the command in:
+- Ensure that you are authenticated for the region / environment you are attempting to run the command in:
 
-  * aws
-    * Should succeed: `aws --profile <profile> sts get-caller-identity`
-    * To fix: `aws --profile <profile> sso login`
+  - aws
 
-  * kubernetes
-    * Should succeed: `kubectl --context <context> get cluster-info`
-    * To fix: `pf-update-kube`
+    - Should succeed: `aws --profile <profile> sts get-caller-identity`
 
-  * vault
-    * Should succeed: `vault token lookup --address <vault-address>`
-    * To fix: `pf-get-vault-token <vault-address>`
+    - To fix: `aws --profile <profile> sso login`
 
-* Delete the `.terragrunt-cache` directory at the root of the repo to resolve issues caused by a stale cache.
+  - kubernetes
 
-* Try to re-init the module causing issues by running `terragrunt init`.
+    - Should succeed: `kubectl --context <context> get cluster-info`
 
-* Review the [debugging documentation](https://terragrunt.gruntwork.io/docs/features/debugging/) provided by the Terragrunt team.
+    - To fix: `pf-update-kube`
 
-* Review the [debugging documentation](https://opentofu.org/docs/internals/debugging/) provided by the OpenTofu team.
+  - vault
+
+    - Should succeed: `vault token lookup --address <vault-address>`
+
+    - To fix: `pf-get-vault-token <vault-address>`
+
+- Delete the `.terragrunt-cache` directory at the root of the repo to resolve issues caused by a stale cache.
+
+- Try to re-init the module causing issues by running `terragrunt init`.
+
+- Review the [debugging documentation](https://terragrunt.gruntwork.io/docs/features/debugging/) provided by the
+  Terragrunt team.
+
+- Review the [debugging documentation](https://opentofu.org/docs/internals/debugging/) provided by the OpenTofu team.
 
 ## Common Errors
 
@@ -33,8 +40,8 @@ most issues can be resolved through the following:
 
 `Call to function "sops_decrypt_file" failed: Error getting data key: 0 successful groups required, got 0.`
 
-This means the AWS profile needed to access the secrets file by sops is not currently available. This usually
-occurs when your SSO session has expired. Login to the correct profile: `aws --profile <profile> sso login`.
+This means the AWS profile needed to access the secrets file by sops is not currently available. This usually occurs
+when your SSO session has expired. Login to the correct profile: `aws --profile <profile> sso login`.
 
 ### sops File Not Encrypted
 
@@ -46,8 +53,8 @@ This means your secrets file was not encrypted by sops. Encrypt it via `sops -e 
 
 `Error: Invalid provider configuration`
 
-This likely means the module is using one or more providers that you have not enabled. Run
-`pf-tf-init` in the module directory to automatically enable all the required providers.
+This likely means the module is using one or more providers that you have not enabled. Run `pf-tf-init` in the module
+directory to automatically enable all the required providers.
 
 ### Available checksums are for packages targeting different platforms
 
@@ -62,18 +69,17 @@ platforms); for more information:                                               
 https://opentofu.org/docs/language/files/dependency-lock/#checksum-verification
 ```
 
-When first deployed, every IaC module generates a `.terraform.lock.hcl` file. This file
-contains checksum hashes for the Tofu provider binaries to ensure that the same provider
-is always used to deploy this module unless explicitly updated.
+When first deployed, every IaC module generates a `.terraform.lock.hcl` file. This file contains checksum hashes for the
+Tofu provider binaries to ensure that the same provider is always used to deploy this module unless explicitly updated.
 
-Unfortunately, the list of checksums only contain hashes for your current operating system (e.g., `linux`)
-and system architecture (e.g., `amd64`) by default. This will cause the above error to appear
-if you try to deploy the IaC from a different operating system or system architecture.
+Unfortunately, the list of checksums only contain hashes for your current operating system (e.g., `linux`) and system
+architecture (e.g., `amd64`) by default. This will cause the above error to appear if you try to deploy the IaC from a
+different operating system or system architecture.
 
 Run `pf-tf-init` to add checksums for all common systems.
 
-This uses the [providers lock](https://opentofu.org/docs/cli/commands/providers/lock/) command
-to enable the following platforms: `darwin_amd64`, `darwin_arm64`, `linux_amd64`, `linux_arm64`.
+This uses the [providers lock](https://opentofu.org/docs/cli/commands/providers/lock/) command to enable the following
+platforms: `darwin_amd64`, `darwin_arm64`, `linux_amd64`, `linux_arm64`.
 
 ### Inconsistent final plan
 
@@ -90,8 +96,8 @@ This is a bug in the provider, which should be reported in the provider's
 own issue tracker.
 ```
 
-Issues like this can occasionally occur when non-breaking internal refactors are completed
-on resources that use the `kubectl` provider.
+Issues like this can occasionally occur when non-breaking internal refactors are completed on resources that use the
+`kubectl` provider.
 
 This is a transient error and can be resolved by simply re-running `terragrunt apply`.
 
@@ -126,20 +132,20 @@ To resolve, delete your terragrunt cache (`.terragrunt-cache`) and retry.
 
 `Error: Module not installed`
 
-OpenTofu requires that module and submodule code be stored in certain locations on disk. This is done
-via a call to `init` (i.e., `terragrunt init`).
+OpenTofu requires that module and submodule code be stored in certain locations on disk. This is done via a call to
+`init` (i.e., `terragrunt init`).
 
 When you first apply a module, Terragrunt will ["auto-init"](https://terragrunt.gruntwork.io/docs/features/auto-init/)
 your module as a convenience.
 
-However, as the internals of modules change (such as between Panfactum releases),
-the submodules sometimes moves or new submodules are added. This requires the module be reinitialized.
-Unfortunately, Terragrunt does not have the capability
+However, as the internals of modules change (such as between Panfactum releases), the submodules sometimes moves or new
+submodules are added. This requires the module be reinitialized. Unfortunately, Terragrunt does not have the capability
 to detect when module internals change and thus will not automatically `init` again. [^1]
 
-[^1]: You may be wondering: Why not just automatically `init` before every `apply`? The answer is that `init` is a relatively
-    expensive operation and can add 5-15 seconds of execution time. This would be annoying to deal with on every `apply` when
-    it is only needed occasionally.
+[^1]:
+    You may be wondering: Why not just automatically `init` before every `apply`? The answer is that `init` is a
+    relatively expensive operation and can add 5-15 seconds of execution time. This would be annoying to deal with on
+    every `apply` when it is only needed occasionally.
 
-As a result, when you run into this error, you just need to run `terragrunt init` manually. Generally, this can be across
-your entire environment by at once by running `terragrunt init --all`.
+As a result, when you run into this error, you just need to run `terragrunt init` manually. Generally, this can be
+across your entire environment by at once by running `terragrunt init --all`.

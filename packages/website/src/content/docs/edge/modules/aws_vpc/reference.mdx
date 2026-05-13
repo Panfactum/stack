@@ -6,9 +6,10 @@
 
 The following input variables are supported:
 
-### nat\_associations
+### nat_associations
 
-Description: A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values represent destination subnets that will contain the NAT resources.
+Description: A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values
+represent destination subnets that will contain the NAT resources.
 
 Type: `map(string)`
 
@@ -32,7 +33,7 @@ map(object({
 
 Default: `{}`
 
-### vpc\_cidr
+### vpc_cidr
 
 Description: The main CIDR range for the VPC.
 
@@ -40,7 +41,7 @@ Type: `string`
 
 Default: `"10.0.0.0/16"`
 
-### vpc\_extra\_tags
+### vpc_extra_tags
 
 Description: Extra tags to add to the VPC resource.
 
@@ -48,7 +49,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### vpc\_flow\_logs\_enabled
+### vpc_flow_logs_enabled
 
 Description: Whether to enable VPC flow logs
 
@@ -56,7 +57,7 @@ Type: `bool`
 
 Default: `false`
 
-### vpc\_flow\_logs\_expire\_after\_days
+### vpc_flow_logs_expire_after_days
 
 Description: How many days until VPC flow logs expire.
 
@@ -64,7 +65,7 @@ Type: `number`
 
 Default: `30`
 
-### vpc\_name
+### vpc_name
 
 Description: The name of the VPC resource.
 
@@ -72,7 +73,7 @@ Type: `string`
 
 Default: n/a
 
-### vpc\_peer\_acceptances
+### vpc_peer_acceptances
 
 Description: A list of VPC peering requests to accept. All VPC peers will be routable from all subnets.
 
@@ -92,27 +93,27 @@ Default: `{}`
 
 The following outputs are exported:
 
-### nat\_config
+### nat_config
 
 Description: Configuration for NAT ASG readiness checks
 
-### nat\_ips
+### nat_ips
 
 Description: n/a
 
-### subnet\_info
+### subnet_info
 
 Description: Outputs a map of Subnet info.
 
-### test\_config
+### test_config
 
 Description: Configuration for the pf-vpc-network-test command
 
-### vpc\_cidr
+### vpc_cidr
 
 Description: n/a
 
-### vpc\_id
+### vpc_id
 
 Description: n/a
 

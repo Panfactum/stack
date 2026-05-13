@@ -1,0 +1,41 @@
+{
+  "changes": [
+    {
+      "motivation": "Store glossary term definitions as YAML files instead of inline MDX so terms are easy to add, edit, and validate without touching the page source.",
+      "summary": "Created `_terms/term-a.yaml` and `_terms/term-b.yaml` as example glossary entries. Added `glossaryTerms` Astro content collection in `content.config.ts` with a glob that covers all doc versions (`**/*.yaml` under `src/content/docs`). Schema requires `term`, `summary`, and `description` (markdown) fields."
+    },
+    {
+      "motivation": "Render YAML-driven glossary terms as collapsible sections matching the site's existing `.collapsible-section` styling, with heading anchors for direct linking.",
+      "summary": "Created `_components/GlossaryTerms.astro` that queries `glossaryTerms`, filters by version prefix, sorts alphabetically, and renders each term as a `<details class='collapsible-section'>` with the term title, inline summary text, a link anchor, and a robot-icon LLM link. Simplified `index.mdx` to import and render this component."
+    },
+    {
+      "motivation": "Keep glossary terms visible in the right-hand TOC sidebar, which is built from the `headings` array produced by the markdown pipeline — component-rendered headings are invisible to it.",
+      "summary": "Modified `[...path].astro` to detect when rendering the glossary page (entry ID ends with `reference/glossary`) and append synthetic heading entries for each term to `filteredHeadings`. Fixed an off-by-one: the entry ID is `main/reference/glossary`, not `main/reference/glossary/index`."
+    },
+    {
+      "motivation": "Allow direct deep-links to individual glossary terms even though the terms are inside collapsed `<details>` elements (browser can't scroll to hidden content).",
+      "summary": "Created `scripts/openCollapsibleOnHash.ts` and wired it into `Layout.astro`. On page load and on `hashchange`, it walks up from the target element and opens any ancestor `<details>` elements so the browser can scroll to the term."
+    },
+    {
+      "motivation": "Expose glossary data as machine-readable JSON for tooling and integrations.",
+      "summary": "Created `src/pages/docs/[version]/reference/glossary.json.ts` that returns all terms for the requested version as a sorted JSON array with `term` and `summary` fields. Added a `GlossaryActions.astro` component with a floating top-right JSON icon button linking to this endpoint, imported in `index.mdx`."
+    },
+    {
+      "motivation": "Allow LLM tools to consume individual glossary terms in plain-text markdown format, following the same pattern used on the changelog pages.",
+      "summary": "Created `src/pages/docs/[version]/reference/glossary/[term]/llm.txt.ts` that renders a single term as a plain-text markdown file. Added a robot icon button in each glossary row (left of the link anchor) pointing to this endpoint."
+    },
+    {
+      "motivation": "Enforce correctness of YAML term files at commit time, preventing missing fields or typos from reaching production.",
+      "summary": "Created `glossary.schema.json` (JSON Schema for term files), `ds-validate-glossary.ts` (AJV-based validator following the changelog validator pattern), registered the script in `packages/local/scripts/default.nix`, added it to `hook-lint.sh` for file-save validation, and added a pre-commit hook in `.pre-commit-config.yaml`. Pre-commit entry was commented out pending devshell rebuild."
+    }
+  ],
+  "problems": [
+    "Astro content collection entry IDs for MDX files omit the `/index` suffix — the entry for `main/reference/glossary/index.mdx` has ID `main/reference/glossary`, not `main/reference/glossary/index`. The `endsWith('reference/glossary/index')` check in `[...path].astro` silently matched nothing, causing the TOC injection to be skipped. This had to be discovered by inspecting `.astro/data-store.json` at runtime.",
+    "Global CSS rule `.collapsible-section > summary .icon.icon-link { display: none !important }` suppresses the standard rehype autolink anchor inside collapsible summaries. This is intentional but undocumented, so the agent added the anchor markup and only discovered it was invisible after rendering. A comment on the CSS rule explaining the rationale (and the recommended alternative class name) would prevent this trial-and-error.",
+    "Nix devshell derivations only include git-tracked files. Adding a new script file (`ds-validate-glossary.ts`) is silently ignored by the build until `git add` is run. The validator binary was missing at runtime with no diagnostic pointing to the untracked file as the cause. The scripts `default.nix` or its README should document this requirement.",
+    "Pre-commit hooks and Claude Code session hooks both reference a baked-in Nix store path. Adding a new script to the devshell requires rebuilding the derivation, but the running shell (and the current Claude Code session) continues using the stale path. The new hook entry therefore errors on every tool call for the remainder of the session. There is no in-session way to reload the environment, so the hook entry had to be commented out as a workaround. Documentation on the devshell rebuild workflow for hook authors would prevent this.",
+    "The agent used `pnpm` (and ran full builds) despite the project convention being `bun` and avoiding builds. This had to be corrected by the user twice. The preference is captured in MEMORY.md but was not applied consistently at session start."
+  ],
+  "session_id": "663d5d69-b435-4a6f-9943-4085fc3d90da",
+  "timestamp": "2026-05-06T16:50:25.575Z"
+}

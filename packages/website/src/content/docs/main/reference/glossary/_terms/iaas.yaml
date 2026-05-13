@@ -1,0 +1,27 @@
+term: IaaS (Infrastructure-as-a-Service)
+type: other
+summary: A cloud computing model that provides virtualized computing resources such as servers, storage, and networking on demand.
+description: |
+  *Infrastructure-as-a-Service* (IaaS) is a cloud computing model in which a provider supplies
+  virtualized computing resources — servers, storage, networking, and other fundamental infrastructure —
+  over the internet on a pay-as-you-go basis.
+
+  With IaaS, the provider manages the physical hardware (data centers, physical servers, power, cooling,
+  etc.), while the customer manages everything above that: operating systems, middleware, runtimes,
+  applications, and data.
+
+  Common IaaS providers include:
+
+  - **AWS** (Amazon Web Services)
+  - **Google Cloud Platform** (GCP)
+  - **Microsoft Azure**
+
+  IaaS is the foundational layer of the cloud computing stack. Panfactum is built primarily on top of
+  AWS IaaS offerings and uses Infrastructure-as-Code to manage IaaS resources programmatically.
+references:
+  - type: term
+    label: Infrastructure-as-Code
+    link: "#infrastructure-as-code"
+  - type: external-docs
+    label: "Wikipedia: Infrastructure as a Service"
+    link: https://en.wikipedia.org/wiki/Infrastructure_as_a_service

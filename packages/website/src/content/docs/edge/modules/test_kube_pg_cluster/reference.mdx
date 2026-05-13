@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -14,7 +14,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### backups\_enabled
+### backups_enabled
 
 Description: Whether this database has backups enabled
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### backups\_force\_delete
+### backups_force_delete
 
 Description: Whether to delete backups on destroy
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `false`
 
-### extra\_schemas
+### extra_schemas
 
 Description: Extra schemas to create in the app database
 
@@ -38,7 +38,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### log\_connections\_enabled
+### log_connections_enabled
 
 Description: Whether to log each connection
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `false`
 
-### pg\_cpu\_millicores
+### pg_cpu_millicores
 
 Description: The amount of cpu to allocate to the postgres pods (in millicores)
 
@@ -54,7 +54,7 @@ Type: `number`
 
 Default: `250`
 
-### pg\_instances
+### pg_instances
 
 Description: The number of instances to deploy in the postgres cluster
 
@@ -62,7 +62,7 @@ Type: `number`
 
 Default: `2`
 
-### pg\_memory\_mb
+### pg_memory_mb
 
 Description: The amount of memory to allocate to the postgres pods (in Mi)
 
@@ -70,7 +70,7 @@ Type: `number`
 
 Default: `1000`
 
-### pg\_version
+### pg_version
 
 Description: The version of postgres to deploy
 
@@ -78,15 +78,15 @@ Type: `string`
 
 Default: `"16.2-10"`
 
-### pgbouncer\_pool\_mode
+### pgbouncer_pool_mode
 
-Description: What pool\_mode to run pgbouncer in
+Description: What pool_mode to run pgbouncer in
 
 Type: `string`
 
 Default: `"session"`
 
-### pgbouncer\_version
+### pgbouncer_version
 
 Description: The version of the cloudnative-pg/pgbouncer image to use
 
@@ -94,7 +94,7 @@ Type: `string`
 
 Default: `"1.22.1"`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -102,7 +102,7 @@ Type: `bool`
 
 Default: `false`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -114,15 +114,15 @@ Default: `true`
 
 The following outputs are exported:
 
-### db\_admin\_role
+### db_admin_role
 
 Description: n/a
 
-### db\_reader\_role
+### db_reader_role
 
 Description: n/a
 
-### db\_superuser\_role
+### db_superuser_role
 
 Description: n/a
 

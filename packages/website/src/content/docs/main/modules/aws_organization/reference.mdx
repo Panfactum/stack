@@ -8,7 +8,8 @@ The following input variables are supported:
 
 ### accounts
 
-Description: AWS accounts to create in the organization. Keys are arbitrary, but if changed /removed will delete the account.
+Description: AWS accounts to create in the organization. Keys are arbitrary, but if changed /removed will delete the
+account.
 
 Type:
 
@@ -53,7 +54,7 @@ Type: `string`
 
 Default: n/a
 
-### alternate\_contacts
+### alternate_contacts
 
 Description: The alternate contacts for the AWS organization
 
@@ -84,7 +85,7 @@ object({
 
 Default: `{}`
 
-### disabled\_aws\_service\_access\_principals
+### disabled_aws_service_access_principals
 
 Description: Service access principals to remove from the Panfactum defaults
 
@@ -92,7 +93,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### disabled\_enabled\_policy\_types
+### disabled_enabled_policy_types
 
 Description: Organization policy types to remove from the Panfactum defaults
 
@@ -100,7 +101,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### enable\_notifications\_access
+### enable_notifications_access
 
 Description: Whether to enable AWS User Notifications trusted access in the organization
 
@@ -108,15 +109,16 @@ Type: `bool`
 
 Default: `true`
 
-### enable\_support\_service\_access
+### enable_support_service_access
 
-Description: Whether to enable AWS Support service access in the organization. Requires a Business, Enterprise On-Ramp, or Enterprise support plan.
+Description: Whether to enable AWS Support service access in the organization. Requires a Business, Enterprise On-Ramp,
+or Enterprise support plan.
 
 Type: `bool`
 
 Default: `false`
 
-### extra\_aws\_service\_access\_principals
+### extra_aws_service_access_principals
 
 Description: Additional service access principals to use in addition to the Panfactum defaults
 
@@ -124,7 +126,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### extra\_enabled\_policy\_types
+### extra_enabled_policy_types
 
 Description: Additional organization policy types to enable in addition to the Panfactum defaults
 
@@ -132,7 +134,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### primary\_contact
+### primary_contact
 
 Description: The primary contact for the AWS organization
 
@@ -161,7 +163,7 @@ Default: n/a
 
 The following outputs are exported:
 
-### aws\_accounts
+### aws_accounts
 
 Description: The AWS accounts that were provisioned in the organization
 

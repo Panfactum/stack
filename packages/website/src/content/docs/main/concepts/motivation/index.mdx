@@ -1,0 +1,279 @@
+---
+summary: Why Panfactum exists and the problems it is designed to solve.
+---
+
+import MarkdownQuoteBlock from "@/components/markdown/MarkdownQuoteBlock.astro";
+
+# Motivation
+
+<MarkdownQuoteBlock author="Panfactum Motto">There are many clouds. This one is yours.</MarkdownQuoteBlock>
+
+Almost all modern software is designed with some level of integration with cloud workloads. Even offline, local-first 
+workloads use cloud-native tools to build, test, and distribute the software.
+Ultimately, cloud operations has become a central chokepoint in software development.
+
+However, the toolchains that most organizations use to build, deploy, and maintain software in the cloud are expensive and difficult to work with. We have normalized the experience of having to wrangle dozens of disparate systems, services, and tools
+while simultaneously locking ourselves into proprietary cloud vendors.
+
+We believe that this is one of the world's most significant drags on creativity and value creation. In concrete terms, 
+the cost of building and running software in the cloud is 10x higher than it ought to be, a
+[>\$1T / year economic impact](https://a16z.com/the-cost-of-cloud-a-trillion-dollar-paradox/).
+
+This goes beyond the problem paying exorbitant prices for cloud infrastructure. Our core thesis is that the central
+paradigms of modern public cloud infrastructure
+([multi-tenant](https://www.cloudflare.com/learning/cloud/what-is-multitenancy/), managed services) are now holding us
+back rather than propelling us forward.
+
+**Panfactum was launched with one mission: make deploying a fully-customizable, self-hosted cloud easier, cheaper, and
+faster than working with proprietary cloud vendors.**
+
+Over the next decade, the importance of achieving our mission will only grow. [^mission-growth]
+
+[^mission-growth]:
+    1. The pace of software development will continue to accelerate. Not only is the number of engineers increasing, but
+       AI will vastly increasing the number of people who are working with software as a part of their job function.
+
+    2. The cloud is becoming an increasingly large cost center for businesses (with a disproportionate impact on SMBs).
+       In a post-[ZIRP](https://en.wikipedia.org/wiki/Zero_interest-rate_policy) environment, making efficient use of
+       these expensive resources will become a critical business objective.
+
+    3. As we enter the post-[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) SaaS era, cloud
+       workloads are becoming increasingly complex. For example, systems like agentic AI workflows are not easily served
+       by the turn-key solutions existing cloud platforms provide.
+
+    4. The open-source ecosystem of alternatives to expensive SaaS platforms has crossed an inflection point where the
+       open-source alternatives are now as good or better than their managed service alternatives. This trend is likely
+       to only amplify in the coming years. However, most businesses still do not have a turnkey framework to easily
+       deploy and operate these FOSS apps.
+
+## How Did We Get Here?
+
+### :icon[no-investment] :collapsible Lack of Sustainable Investment
+
+Since the inception of cloud computing, the vast majority of investment capital and platform engineer effort has flowed
+to:
+
+1. **Multi-tenant, managed platforms inherently fall short**:
+
+   1. Multi-tenant platforms are economically incentivized towards proprietary standards.
+
+      1. This creates vendor lock-in and high-switching costs which allows multi-tenant platforms to capture 80%+
+         operating margins for mostly undifferentiated services.
+
+      2. This also adds unnecessary friction and barriers for integrating the latest tooling and capabilities.
+
+   2. Multi-tenant platforms cannot be customized to an organization's unique needs. A one-size-fits-all approach only
+      works in the very early stages of a business — large organizations lose 1,000s of engineering hours to building
+      expensive and brittle workarounds.
+
+   3. Engineers cannot have visibility into the underlying platform behavior as this would break the tenant isolation
+      guarantee. As a result, engineers cannot easily self-service platform enhancements or fixes. In many
+      organizations, more time is lost to debugging than building.
+
+   4. Feature development for multi-tenant platforms is 10x slower and 10x more expensive because every user shares a
+      single platform interface. Time/money that could be spent unlocking new capabilities is spent on ensuring
+      backwards compatibility, tenant isolation, and billing management.
+
+   5. The set of capabilities that a multi-tenant platform can provide is always a subset of what can be provided in a
+      single-tenant system due to the additional design constraint of tenant isolation.
+
+   6. Multi-tenant platforms must be more complicated as their single interface must (a) support years of legacy
+      configuration options and (b) display the total sum of capabilities needed by their entire user base. Platforms
+      such as AWS were supposed to make things easier, but they still require thousands of configuration options to set
+      up successfully in a production-hardened manner.
+
+2. **Single-purpose tools like Kubernetes, PostgreSQL, etc. are time-consuming and error-prone to glue together**, even
+   if they could be used as constituent parts of a world-class platform. These projects are difficult to master which
+   prevents organizations from making good use of them without the aid of managed services.
+
+3. Failed initiatives from companies that built some parts of an **open, single-tenant platform but were not able to
+   commercialize** without either going out of business or reverting to a multi-tenant offering driven by an
+   [Open Core](https://en.wikipedia.org/wiki/Open-core_model) model where useful features were only available on their
+   managed platform.
+
+### :icon[coupling] :collapsible Tight IaaS and PaaS Coupling
+
+Platforms require hardware. Infrastructure-as-a-Service (IaaS) [^iaas] such as on-demand server provisioning has
+historically only been available to large platform providers such as AWS which has cost structures that make building an
+amazing platform difficult and/or impossible (i.e., metered network pricing, etc.). Most organizations cannot make the
+up-front capital investment required to bring IaaS in-house.
+
+[^iaas]:
+    Cloud computing model where a provider supplies virtualized compute, storage, and networking resources on demand.
+
+    [Read more](/docs/main/concepts/background/networking/aws-primitives)
+
+### :icon[skillsets] :collapsible Niche Skillsets
+
+Most engineers have forgotten / never learned how to build or deploy cloud platform infrastructure. It will always be easier to use AWS
+managed services than build a platform for your organization from scratch, and so the vast majority of engineers lack
+the motivation and funds to challenge the status quo.
+
+## What Makes It Possible to Solve the Problem Now?
+
+### :icon[decoupling] :collapsible IaaS and PaaS Decoupling
+
+The IaaS and PaaS layers are becoming increasingly decoupled. It is now straightforward to find an IaaS provider and
+bring your own platform layer. This defines what cost structures are available to those building next-generation cloud
+platforms.
+
+### :icon[standards] :collapsible PaaS Standardization
+
+The tools for setting up a platform layer have become widely standardized: Kubernetes, Terraform/OpenTofu, Nix, etc.
+This creates a consistent, declarative architecture for managing single-tenant platforms, vastly decreasing their setup
+and long-term maintenance overhead.
+
+### :icon[investment] :collapsible FOSS Quality and Velocity Improvements
+
+Development velocity and capabilities in FOSS projects are now outpacing development in the proprietary platform layer
+for the first time. A platform builder no longer needs to build each individual component but can rather serve as a
+system integrator, improving development speed and capital efficiency.
+
+### :icon[dollar] :collapsible New Sustainable Business Models
+
+Advancements in automation and agentic AI are making tech-enabled service business models viable and scalable, allowing
+organizations like us to provide the platform layer as an OSS product and remain profitable through service offerings.
+
+## How Are We Solving the Problem?
+
+### :icon[pncf] :collapsible Panfactum Cloud Native Framework (PNCF)
+
+We are building a FOSS project, the Panfactum Cloud Native Framework (PCNF), to meet our core mission.
+
+You can learn more about PNCF [here](/docs/main/concepts/pcnf/overview).
+
+### :icon[autopilot] :collapsible Panfactum Autopilot
+
+To fund development on PNCF:
+
+1. We sell support plans that guarantee success, offload tedious maintenance tasks from our users, and provide
+   round-the-clock incident triaging.
+
+2. We sell access to agentic tooling that makes managing PCNF completely automated.
+
+Learn more [here](/autopilot).
+
+## How Is Our Approach Different?
+
+We adopt the following principles when developing our framework:
+
+### :icon[server] :collapsible Single-tenant and self-hosted
+
+As long as it is easy to setup and maintain, a self-hosted, single-tenant cloud platform provides better costs,
+performance, security, availability, durability, control, and capabilities over managed, multi-tenant alternatives.
+
+We will never offer a "managed" version of our framework that locks critical features behind a paywall. All our effort
+is focused on making the self-hosted system the optimal path, not a loss-leader.
+
+### :icon[check] :collapsible Just Works
+
+Our framework will allow users to build and deploy a production-ready cloud platform on day one without needing to have
+deep mastery of how everything works. We are able to be deployed in organizations both with and without existing
+infrastructure.
+
+The sane defaults we provide will be able to tackle the vast majority of common use cases.
+
+Our operating standard is that everything we provide will work _better_ than the proprietary alternative. Importantly,
+everything we provide will be secure, scalable, and highly-available by default.
+
+Where customization is needed, our automations will provide a step-by-step, guided experience to enable any user of any
+skillset to be successful.
+
+### :icon[hammer] :collapsible Immediately Useful
+
+A weakness with existing self-hosted cloud solutions is that they focus almost exclusively on the base infrastructure
+and core primitives (e.g., networking, storage, containers, etc.). While it is critical to get these right, it still
+requires significant effort by the user to transform these primitives into anything useful for your organization.
+
+We go beyond the primitives and also provide:
+
+- A unified access control layer built on zero-trust paradigms and SSO everywhere
+
+* [Infrastructure modules](/docs/main/modules) for deploying 100+ popular OSS projects
+
+* [Infrastructure submodules](/docs/main/modules) that support the entire SDLC for your first-party code: various
+  secure, highly-available deployment patterns, CI/CD, and integrated monitoring and alerting, and disaster recovery
+
+* A local DevShell that automatically discovers your deployed infrastructure and makes it easy for all developers in
+  your organization to work with
+
+### :icon[wallet] :collapsible Cost-optimized
+
+The modern public cloud provides amazing capabilities and features, but there is always the underlying, unspoken truth
+that they exist to capture as much of your organization's wallet as possible. They are focused being just affordable
+enough that you don't leave (but no cheaper).
+
+We stand in opposition to this: maximizing your efficiency is at the core of every design decision that we make. Our
+framework takes advantage of every tool at its disposal (autoscaling, spot instances, locality-aware networking, FOSS
+alternatives to managed services, etc.) to give you confidence that your workloads are running in the most efficient
+manner possible.
+
+### :icon[bot] :collapsible Agent-forward
+
+It is clear that the future of software development will increasingly be built around agentic workflows, not just for
+building software but for managing and monitoring its deployment as well.
+
+We also know that the last thing the world needs is yet-another-agent or agent-framework.
+
+Instead, we are focused on providing primitives that make your existing agents and agentic workflows much more useful
+when working with systems deployed using our cloud framework.
+
+### :icon[standards] :collapsible Built exclusively with familiar, open-source standards and tooling
+
+Our framework, your cloud. The only way to meet that goal with confidence is to make sure that users have access to the
+actual platform code and to ensure that the platform is built with the standards that everyone is already familiar with:
+Kubernetes, Terraform, Nix, etc.
+
+We will ensure users can use our platform as a foundation that they can extend to meet their unique needs.
+
+## Who Are We Building For?
+
+### :icon[person] :collapsible Primary Users
+
+Our primary users are engineering leaders in businesses / organizations who are responsible for setting up and managing
+their organization's cloud infrastructure. Our goal is to help these engineers become the superstars of their
+organization and deliver features, capabilities, and tooling that would otherwise not be possible or affordable.
+
+We assume that our primary users have baseline familiarity with popular cloud technologies such as Kubernetes and
+Terraform and that they have worked on cloud infrastructure professionally before.
+
+### :icon[people] :collapsible Secondary Users
+
+Our secondary users are everyone else in each organization where our framework is deployed: other engineers, executives,
+etc.
+
+There is a subtle, but important, distinction between our primary and secondary users.
+
+Our primary users are the ones responsible for the long-term outcomes of the deployed framework: they have a holistic
+set of requirements that include things like maintainability, security, availability, cost, etc.
+
+Our secondary users usually have more focused, ad-hoc needs, and often come to our primary users for support.
+
+Our goal is to enable our primary users to quickly and easily build solutions that address their needs 10x more
+effectively than they would have otherwise been able to.
+
+### :icon[no-people] :collapsible Non-users
+
+1. Our framework is designed for _organizational_ contexts. Our framework has to address concerns that people looking
+   for personal hosting solutions do not need to worry about, and this adds unnecessary complexity for these use cases.
+   We suggest some popular FOSS personal cloud solutions like [Runtipi](https://runtipi.io/),
+   [YunoHost](https://yunohost.org/), or [CasaOS](https://casaos.zimaspace.com/).
+
+2. Our framework is designed for _technology companies_. Our focus is on improving an organization's ability to deliver
+   software solutions. As a result, we assume that you have at least one software engineer in your organization.
+
+   SMBs who are not familiar with standard SDLC practices would be better served by using managed cloud solutions.
+
+3. Our framework is designed for _post-MVP_ projects. If you are just building an MVP, it is likely that the complexity
+   of deploying your own cloud is not (yet) necessary.
+
+   Objectives like security, observability, availability, disaster recovery, etc. are important but probably just add
+   unnecessary complexity at the MVP stage. Additionally, it will often be _more_ expensive to do so than to use one of
+   the free tiers that public cloud solutions offer.
+
+   If you are looking for a self-hosted, open-source cloud platform that is designed for early-stage organizations or
+   MVP work, we would recommend [Coolify](https://coolify.io/), [Dokku](https://dokku.com/), or
+   [Dokploy](https://dokploy.com/).
+
+   You can always come back and deploy the Panfactum framework when you are ready to take your organization to the next
+   level. Migration is not difficult since you won't be relying on proprietary cloud systems.

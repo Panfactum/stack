@@ -9,8 +9,8 @@ The following variable renames have been applied across
 [`kube_stateful_set`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set),
 [`kube_cron_job`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job),
 [`kube_pod`](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod),
-[`wf_spec`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec),
-and [`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
+[`wf_spec`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), and
+[`kube_workload_utility`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
 
 | Old Name                               | New Name                                            |
 | -------------------------------------- | --------------------------------------------------- |
@@ -46,10 +46,13 @@ In [`kube_constants`](/docs/edge/reference/infrastructure-modules/submodule/kube
 
 The following inputs have been removed from workload submodules as they are no longer recommended:
 
-* `prefer_spot_nodes_enabled`
-* `prefer_burstable_nodes_enabled`
-* `prefer_arm_nodes_enabled`
-* `az_anti_affinity_preferred` (use `az_spread_preferred` instead)
+- `prefer_spot_nodes_enabled`
+
+- `prefer_burstable_nodes_enabled`
+
+- `prefer_arm_nodes_enabled`
+
+- `az_anti_affinity_preferred` (use `az_spread_preferred` instead)
 
 ## `enhanced_ha_enabled` Removed from Submodules
 
@@ -58,23 +61,27 @@ The `enhanced_ha_enabled` input has been replaced with more granular tuning knob
 
 ## Controller Node Taints
 
-Nodes managed by EKS Node Groups are now tainted with `controller=true:NoSchedule`. Most workload submodules
-have a new `controller_nodes_enabled` input to allow your workloads to tolerate this taint if desired.
+Nodes managed by EKS Node Groups are now tainted with `controller=true:NoSchedule`. Most workload submodules have a new
+`controller_nodes_enabled` input to allow your workloads to tolerate this taint if desired.
 
 ## Default Flag Changes
 
 The following flags are now enabled by default in workload submodules:
 
-* `spot_nodes_enabled`
-* `arm_nodes_enabled`
-* `vpa_enabled`
-* `panfactum_scheduler_enabled`
-* `pull_through_cache_enabled`
+- `spot_nodes_enabled`
 
-Additionally in `kube_deployment`: `az_spread_preferred` is now enabled by default.
-In `kube_stateful_set`: `az_spread_required` and `instance_type_spread_required` are now enabled by default.
+- `arm_nodes_enabled`
+
+- `vpa_enabled`
+
+- `panfactum_scheduler_enabled`
+
+- `pull_through_cache_enabled`
+
+Additionally in `kube_deployment`: `az_spread_preferred` is now enabled by default. In `kube_stateful_set`:
+`az_spread_required` and `instance_type_spread_required` are now enabled by default.
 
 ## Remove BuildKit StatefulSets
 
-Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace
-must be removed if [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed.
+Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace must be
+removed if [`kube_buildkit`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed.

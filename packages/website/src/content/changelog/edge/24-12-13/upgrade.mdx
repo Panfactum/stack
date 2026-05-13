@@ -2,18 +2,18 @@
 
 {/* Covers kube_rbac removal, kube_priority_classes consolidation, and provider version updates. */}
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro"
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 <MarkdownAlert severity="warning">
-  This Authentik upgrade contains
-  [a problem](https://github.com/goauthentik/authentik/issues/12321) that will result in updates to group names
-  not automatically synchronizing with AWS. If that is a problem, defer upgrading until the issue is resolved.
+  This Authentik upgrade contains [a problem](https://github.com/goauthentik/authentik/issues/12321) that will result in
+  updates to group names not automatically synchronizing with AWS. If that is a problem, defer upgrading until the issue
+  is resolved.
 </MarkdownAlert>
 
 <MarkdownAlert severity="warning">
   This release contains a bug that will cause Cilium to crash if deployed via
-  [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
-  Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+  [`wf_tf_deploy`](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy). Please ensure you
+  upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
 </MarkdownAlert>
 
 ## Remove `kube_rbac`
@@ -22,6 +22,7 @@ The `kube_rbac` module has been deprecated and replaced by EKS access entries in
 [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks).
 
 1. First, upgrade [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks).
+
 2. After the `aws_eks` upgrade is complete, destroy any deployments of `kube_rbac`.
 
 ## Remove `kube_priority_classes`
@@ -36,5 +37,6 @@ The `kube_priority_classes` module has been consolidated into
 
 This release upgrades the following Terraform provider versions — update these in first-party IaC:
 
-* `pf`: 0.0.4 → 0.0.5
-* `authentik`: 2024.6.1 → 2024.8.4
+- `pf`: 0.0.4 → 0.0.5
+
+- `authentik`: 2024.6.1 → 2024.8.4

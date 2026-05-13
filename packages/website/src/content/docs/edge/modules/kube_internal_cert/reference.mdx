@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### common\_name
+### common_name
 
 Description: Common name to add to add to the cert
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: `"336h0m0s"`
 
-### extra\_labels
+### extra_labels
 
 Description: Extra labels to add to the Certificate and Secret resources
 
@@ -30,7 +30,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### include\_localhost
+### include_localhost
 
 Description: Whether to include localhost in the SANs
 
@@ -38,7 +38,7 @@ Type: `bool`
 
 Default: `false`
 
-### include\_subdomains
+### include_subdomains
 
 Description: Whether to include subdomains of the services via wildcard
 
@@ -46,7 +46,7 @@ Type: `bool`
 
 Default: `false`
 
-### is\_ca
+### is_ca
 
 Description: Whether the certificate is a certificate authority certificate or not.
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `false`
 
-### issuer\_name
+### issuer_name
 
 Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: n/a
 
-### private\_key\_algorithm
+### private_key_algorithm
 
 Description: The algorithm to use for the private key. Must be one of: ECDSA, RSA
 
@@ -78,7 +78,7 @@ Type: `string`
 
 Default: `"ECDSA"`
 
-### private\_key\_encoding
+### private_key_encoding
 
 Description: The encoding of the private key. Must by `PKCS1` or `PKCS8`
 
@@ -86,7 +86,7 @@ Type: `string`
 
 Default: `"PKCS1"`
 
-### private\_key\_rotation\_enabled
+### private_key_rotation_enabled
 
 Description: Whether to enable private key rotation.
 
@@ -94,7 +94,7 @@ Type: `bool`
 
 Default: `true`
 
-### renew\_before
+### renew_before
 
 Description: How long prior to the expiration that certificate renewal will be triggered.
 
@@ -102,7 +102,7 @@ Type: `string`
 
 Default: `"168h0m0s"`
 
-### sans\_enabled
+### sans_enabled
 
 Description: Whether to set SANS in the generated certificate
 
@@ -110,7 +110,7 @@ Type: `bool`
 
 Default: `true`
 
-### secret\_name
+### secret_name
 
 Description: The name of the secret to save the keypair to
 
@@ -118,7 +118,7 @@ Type: `string`
 
 Default: n/a
 
-### service\_names
+### service_names
 
 Description: The names of the kubernetes service(s) to use for the domain names
 
@@ -134,7 +134,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### use\_cluster\_issuer
+### use_cluster_issuer
 
 Description: Whether to use a ClusterIssuer. If false, will use an Issuer.
 
@@ -146,11 +146,11 @@ Default: `true`
 
 The following outputs are exported:
 
-### certificate\_name
+### certificate_name
 
 Description: n/a
 
-### secret\_name
+### secret_name
 
 Description: n/a
 
@@ -164,6 +164,4 @@ The following providers are needed by this module:
 
 - [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

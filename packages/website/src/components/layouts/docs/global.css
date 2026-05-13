@@ -28,6 +28,14 @@
         @apply list-decimal
     }
 
+    ol ol {
+        @apply list-[lower-alpha]
+    }
+
+    ol ol ol {
+        @apply list-[lower-roman]
+    }
+
     ul, ol {
         @apply ml-6 md:ml-8
     }
@@ -101,12 +109,6 @@
         @apply !shadow-sm !my-4;
     }
 
-    #footnote-label {
-        position: relative;
-        width: unset;
-        height: unset;
-    }
-
     .rehype-code-group {
         figure {
             @apply !my-0;
@@ -132,6 +134,91 @@
         @apply border-0 rounded-t-lg;
     }
 
+    /* Collapsible Section Styles */
+    .collapsible-section {
+        @apply my-2 rounded border border-primary;
+    }
+
+    .collapsible-section > summary {
+        @apply flex cursor-pointer list-none items-center justify-between px-4 py-3 font-semibold bg-secondary;
+    }
+
+    .collapsible-section > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .collapsible-section > summary::after {
+        content: "";
+        @apply h-4 w-4 shrink-0 transition-transform duration-200;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23cecfd2'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+    .collapsible-section[open] > summary::after {
+        transform: rotate(180deg);
+    }
+
+    .collapsible-section > summary h1,
+    .collapsible-section > summary h2,
+    .collapsible-section > summary h3,
+    .collapsible-section > summary h4,
+    .collapsible-section > summary h5,
+    .collapsible-section > summary h6 {
+        @apply m-0 p-0 border-0 text-lg;
+    }
+
+    .collapsible-content {
+        @apply px-4 py-3;
+    }
+
+    /* Numbered Heading Styles */
+    .numbered-heading {
+        @apply flex items-center gap-3;
+    }
+
+    .numbered-heading::before {
+        content: attr(data-number);
+        @apply inline-flex items-center justify-center shrink-0
+               w-8 h-8 rounded-full
+               bg-brand-500 text-white
+               text-base font-bold;
+    }
+
+    /* Icon Heading Styles */
+    .icon-heading {
+        @apply flex items-center gap-3;
+    }
+
+    .heading-icon {
+        @apply inline-flex shrink-0 text-brand-300;
+
+        *  {
+            color: inherit;
+        }
+    }
+
+    .heading-icon-h1 svg {
+        @apply w-8 lg:w-10;
+    }
+
+    .heading-icon-h2 svg {
+        @apply w-7 lg:w-8;
+    }
+
+    .heading-icon-h3 svg {
+        @apply w-6 lg:w-7;
+    }
+
+    .heading-icon-h4 svg {
+        @apply w-5 lg:w-6;
+    }
+
+    .heading-icon-h5 svg,
+    .heading-icon-h6 svg {
+        @apply w-4 lg:w-5;
+    }
+
     /* Emphasis Styles */
     em {
         @apply text-gray-dark-mode-300;
@@ -141,21 +228,32 @@
         @apply font-medium text-brand-200;
     }
 
-    /* Footnote Styles */
-    section.footnotes {
-        @apply -mx-6 px-6 py-4 bg-gray-dark-mode-900;
-
-        h2 {
-            @apply m-0;
-        }
+    /* Term Popover Trigger */
+    .term-popover-trigger {
+        @apply cursor-pointer;
+        text-decoration: underline dotted;
+        text-decoration-color: theme(--color-brand-400);
+        text-underline-offset: 4px;
+        text-decoration-thickness: 1px;
     }
 
-    sup {
-        @apply top-0;
+    .term-popover-trigger:hover {
+        text-decoration-color: theme(--color-brand-300);
     }
 
-    sup a {
-        @apply text-xs font-medium border py-0.5 px-1.5 rounded no-underline;
+    /* Footnote Popover Trigger */
+    .footnote-popover-trigger {
+        @apply inline-flex items-center justify-center
+               w-[1.4em] h-[1.4em] rounded-full
+               border border-brand-400 bg-transparent
+               text-brand-400 text-[0.75em] font-semibold
+               cursor-pointer leading-none;
+        vertical-align: 0.15em;
+        font-family: inherit;
+    }
+
+    .footnote-popover-trigger:hover {
+        @apply bg-brand-400 text-gray-dark-mode-950;
     }
 
     /* Latex Styles */
@@ -170,7 +268,8 @@
     }
 
     /* Copy Header Link Styles */
-    *:hover>a>.icon.icon-link {
+    *:hover>a>.icon.icon-link,
+    .collapsible-section > summary:hover a>.icon.icon-link {
         display: inline-block;
         width: 1rem;
         height: 1rem;
@@ -192,4 +291,71 @@
     img {
         @apply bg-white;
     }
+}
+
+/* Footnote Popover (outside .content so it's not scoped) */
+.footnote-popover {
+    @apply z-200 rounded-lg border border-gray-dark-mode-700
+           bg-gray-dark-mode-900 px-4 py-3 shadow-lg;
+    max-width: min(24rem, 80vw);
+}
+
+.footnote-popover p {
+    @apply my-1 text-sm leading-relaxed text-gray-dark-mode-300;
+}
+
+.footnote-popover a {
+    @apply text-brand-200 underline underline-offset-4 decoration-1 cursor-pointer
+           hover:text-brand-300;
+}
+
+.footnote-popover code {
+    @apply font-montreal font-semibold text-sm text-brand-200;
+}
+
+.footnote-popover strong {
+    @apply font-medium text-brand-200;
+}
+
+.footnote-popover em {
+    @apply text-gray-dark-mode-300;
+}
+
+.footnote-popover ul {
+    @apply list-disc ml-4 my-1;
+}
+
+.footnote-popover ol {
+    @apply list-decimal ml-4 my-1;
+}
+
+.footnote-popover li {
+    @apply text-sm leading-relaxed text-gray-dark-mode-300;
+}
+
+.footnote-popover .footnote-read-more {
+    @apply block mt-2 pt-2 border-t border-gray-dark-mode-700
+           text-sm font-medium text-brand-400
+           no-underline hover:underline;
+}
+
+/* Term Popover (outside .content so it's not scoped) */
+.term-popover {
+    @apply z-200 rounded-lg border border-gray-dark-mode-700
+           bg-gray-dark-mode-900 px-4 py-3 shadow-lg;
+    max-width: min(24rem, 80vw);
+}
+
+.term-popover .term-popover-title {
+    @apply mt-0 mb-1 text-sm font-semibold text-gray-dark-mode-50;
+}
+
+.term-popover p {
+    @apply my-1 text-sm leading-relaxed text-gray-dark-mode-300;
+}
+
+.term-popover .term-read-more {
+    @apply block mt-2 pt-2 border-t border-gray-dark-mode-700
+           text-sm font-medium text-brand-400
+           no-underline hover:underline;
 }

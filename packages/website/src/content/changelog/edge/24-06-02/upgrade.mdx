@@ -6,9 +6,9 @@
 The EKS CoreDNS addon has been replaced with the
 [`kube_core_dns`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) module.
 
-1. Add the `dns_service_ip` input to [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) deployments
-   by following [this guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr). Double check that the
-   `dns_service_ip` is the same IP as defined by `kube-system/kube-dns`.
+1. Add the `dns_service_ip` input to [`aws_eks`](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+   deployments by following [this guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr).
+   Double check that the `dns_service_ip` is the same IP as defined by `kube-system/kube-dns`.
 
 2. Additionally, set `core_dns_addon_enabled` to `true`.
 
@@ -18,14 +18,15 @@ The EKS CoreDNS addon has been replaced with the
    [`kube_karpenter_node_pools`](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
    module, and re-apply the module. Ensure that all of your nodes have been replaced with the new configuration.
 
-5. Deploy `kube_core_dns` by following [this guide](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns).
-   Note that this deployment will fail as the original addon service is still running and the IP is already taken.
+5. Deploy `kube_core_dns` by following
+   [this guide](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns). Note that this deployment
+   will fail as the original addon service is still running and the IP is already taken.
 
 6. Delete `kube-system/kube-dns` and re-apply `kube_core_dns`. Note that while the service is deleted, DNS will be
    temporarily unavailable in your cluster.
 
-7. Once you've validated that DNS is working in the cluster, remove the `core_dns_addon_enabled` input
-   from the `aws_eks` module and re-apply.
+7. Once you've validated that DNS is working in the cluster, remove the `core_dns_addon_enabled` input from the
+   `aws_eks` module and re-apply.
 
 ## Fix Label Selectors
 
@@ -33,5 +34,5 @@ Label selectors in [`kube_pod`](/docs/edge/reference/infrastructure-modules/subm
 stabilized, but require a one-time manual deletion of already-deployed Deployments before re-applying.
 
 Delete the `bastion/bastion` deployment (and any other deployments created by
-[`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment))
-before running `terragrunt apply`.
+[`kube_deployment`](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)) before running
+`terragrunt apply`.

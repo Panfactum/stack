@@ -1,16 +1,17 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
 
-import ExampleWorkflowImg from './example-workflow.jpg'
-import RegisteredRunnersImg from './registered-runners.jpg'
-import RunWorkflowImg from './run-workflow.jpg'
-import WorkflowCompleteImg from './workflow-complete.jpg'
+import ExampleWorkflowImg from "./example-workflow.jpg";
+import RegisteredRunnersImg from "./registered-runners.jpg";
+import RunWorkflowImg from "./run-workflow.jpg";
+import WorkflowCompleteImg from "./workflow-complete.jpg";
 
 # Installing Self-hosted Runners for GitHub Actions
 
 ## Objective
 
-Install [self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners)
+Install
+[self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners)
 to leverage your Panfactum clusters for executing GHA workflows.
 
 ## Background and Limitations
@@ -19,18 +20,19 @@ to leverage your Panfactum clusters for executing GHA workflows.
   Please ensure you have read this section and the associated links thoroughly before continuing.
 </MarkdownAlert>
 
-GitHub Actions are **not** the recommended method for setting up CI / CD in Panfactum clusters. We
-provide a full set of guides for our recommended architecture [here](/docs/edge/guides/cicd/getting-started).
+GitHub Actions are **not** the recommended method for setting up CI / CD in Panfactum clusters. We provide a full set of
+guides for our recommended architecture [here](/docs/edge/guides/cicd/getting-started).
 
-Additionally, GitHub Actions have many shortcomings compared to a more full-featured, Kubernetes-native workflow
-engine such as Argo Workflows. See our detailed analysis and list of limitations [here](/docs/edge/concepts/cicd/gha).
+Additionally, GitHub Actions have many shortcomings compared to a more full-featured, Kubernetes-native workflow engine
+such as Argo Workflows. See our detailed analysis and list of limitations [here](/docs/edge/concepts/cicd/gha).
 
 ## Install the Runner Controller
 
-To begin using self-hosted runners, you must first install the [Actions Runner Controller (ARC)](https://github.com/actions/actions-runner-controller)
-which is a Kubernetes operator that orchestrates and scales the runners based on Kubernetes custom resources.
+To begin using self-hosted runners, you must first install the
+[Actions Runner Controller (ARC)](https://github.com/actions/actions-runner-controller) which is a Kubernetes operator
+that orchestrates and scales the runners based on Kubernetes custom resources.
 
-We provide a module to deploy this controller: [kube\_gha](/docs/edge/modules/kube_gha/overview).
+We provide a module to deploy this controller: [kube_gha](/docs/edge/modules/kube_gha/overview).
 
 Let's deploy it now:
 
@@ -38,7 +40,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-   ::: code-group labels=\[kube\_gha/terragrunt.hcl]
+   ::: code-group labels=\[kube_gha/terragrunt.hcl]
 
    ```hcl collapse={1-14} "REPLACE_ME"
    include "panfactum" {
@@ -70,7 +72,7 @@ You should now see a new Deployment running in the `gha` namespace called `gha-c
 
 The controller allows you to create various "runners" which are the pods that will actually execute your GHA code.
 
-To create runners, you will use our [kube\_gha\_runners](/docs/edge/modules/kube_gha_runners/overview) module.
+To create runners, you will use our [kube_gha_runners](/docs/edge/modules/kube_gha_runners/overview) module.
 
 Let's deploy one type of runner now:
 
@@ -78,7 +80,7 @@ Let's deploy one type of runner now:
 
 2. Add a `terragrunt.hcl` and sops-encrypted `secrets.yaml` to that directory that looks like this:
 
-   ::: code-group labels=\[kube\_gha\_runners/terragrunt.hcl, kube\_gha\_runners/secrets.yaml]
+   ::: code-group labels=\[kube_gha_runners/terragrunt.hcl, kube_gha_runners/secrets.yaml]
 
    ```hcl collapse={1-14} "REPLACE_ME"
    include "panfactum" {
@@ -138,30 +140,33 @@ Let's deploy one type of runner now:
 
    :::
 
-   1. Follow [GitHub's documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api#authenticating-arc-with-a-personal-access-token-classic) to provision a
-      Classic Personal Access Token (PAT) with the correct permissions. Provide this token
-      as an input via `github_token`. Make sure that the token is [encrypted with sops.](/docs/edge/guides/iac/deploying-modules#using-secrets)
+   1. Follow
+      [GitHub's documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api#authenticating-arc-with-a-personal-access-token-classic)
+      to provision a Classic Personal Access Token (PAT) with the correct permissions. Provide this token as an input
+      via `github_token`. Make sure that the token is
+      [encrypted with sops.](/docs/edge/guides/iac/deploying-modules#using-secrets)
 
-   2. The `runners` input is a key-value map that defines the different runner groups that your workflow jobs can target. The keys
-      are the names of the groups and the values are their configuration. See the [module documentation](/docs/edge/modules/kube_gha_runners/overview)
-      for information on the various configuration values.
+   2. The `runners` input is a key-value map that defines the different runner groups that your workflow jobs can
+      target. The keys are the names of the groups and the values are their configuration. See the
+      [module documentation](/docs/edge/modules/kube_gha_runners/overview) for information on the various configuration
+      values.
 
       <MarkdownAlert severity="warning">
-        The names of your runners must be globally unique to your organization. So if you install runners in multiple clusters,
-        they cannot have identical names.
+        The names of your runners must be globally unique to your organization. So if you install runners in multiple
+        clusters, they cannot have identical names.
       </MarkdownAlert>
 
-   3. The only required configuration value is the `github_config_url` which defines where in GitHub your runners will be registered
-      for use. You can register runners to either (a) a single repository, (b) an entire organization, or (c) an entire enterprise. The `github_config_url`
-      is simply the URL to one of those entities (e.g., `https://github.com/Panfactum/stack`). We recommend registering runners to your
-      organization.
+   3. The only required configuration value is the `github_config_url` which defines where in GitHub your runners will
+      be registered for use. You can register runners to either (a) a single repository, (b) an entire organization, or
+      (c) an entire enterprise. The `github_config_url` is simply the URL to one of those entities (e.g.,
+      `https://github.com/Panfactum/stack`). We recommend registering runners to your organization.
 
 3. Run `pf-tf-init` in the directory to enable the required providers.
 
 4. Run `terragrunt apply`.
 
-Assuming you have registered runners to your organization, you should now be able to see your runners in your GitHub organization's
-settings:
+Assuming you have registered runners to your organization, you should now be able to see your runners in your GitHub
+organization's settings:
 
 <MarkdownImage src={RegisteredRunnersImg} alt="Runners successfully registered with GitHub" />
 
@@ -188,8 +193,8 @@ Let's create a test workflow in on of your repositories to verify that self-host
 
 3. Commit and push this new `.github/workflows/example.yaml`.
 
-4. Open the GitHub repository in a web browser. Navigate to the Actions tab. You should see the "Example" workflow in the
-   left-hand sidebar:
+4. Open the GitHub repository in a web browser. Navigate to the Actions tab. You should see the "Example" workflow in
+   the left-hand sidebar:
 
    <MarkdownImage src={ExampleWorkflowImg} alt="Workflow is registered with the repository" />
 
@@ -203,8 +208,8 @@ Let's create a test workflow in on of your repositories to verify that self-host
    <MarkdownImage src={WorkflowCompleteImg} alt="Workflow completed successfully" />
 
    <MarkdownAlert severity="info">
-     If the workflow is stuck in a pending state, double check that your runner is available on the repository
-     by visiting Actions > Runners > Self-hosted runners. Additionally, make sure that the `runs-on` value in your
+     If the workflow is stuck in a pending state, double check that your runner is available on the repository by
+     visiting Actions > Runners > Self-hosted runners. Additionally, make sure that the `runs-on` value in your
      `.github/workflows/example.yaml` matches the name of at least one runner in this view.
    </MarkdownAlert>
 

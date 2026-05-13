@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### annotate\_service\_account
+### annotate_service_account
 
 Description: Whether or not to annotate the service account with the AWS role ARN
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### extra\_aws\_permissions
+### extra_aws_permissions
 
 Description: Extra JSON-encoded AWS permissions to assign to the workflow
 
@@ -22,7 +22,7 @@ Type: `string`
 
 Default: `"{}"`
 
-### ip\_allow\_list
+### ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -30,7 +30,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### service\_account
+### service_account
 
 Description: The name of the service account that should be able to assume the AWS permissions.
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: n/a
 
-### service\_account\_namespace
+### service_account_namespace
 
 Description: The namespace of the service account.
 
@@ -50,19 +50,19 @@ Default: n/a
 
 The following outputs are exported:
 
-### policy\_arn
+### policy_arn
 
 Description: The ARN of the policy assigned to the role.
 
-### role\_arn
+### role_arn
 
 Description: The ARN of the AWS role created for the service account.
 
-### role\_name
+### role_name
 
 Description: The name of the AWS role created for the service account.
 
-### service\_account\_annotations
+### service_account_annotations
 
 Description: The annotations to apply to the service account
 

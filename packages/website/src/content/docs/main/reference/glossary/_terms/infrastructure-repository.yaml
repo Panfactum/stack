@@ -1,0 +1,38 @@
+term: Infrastructure Repository
+type: panfactum
+summary: The version-controlled repository that contains all IaC, environment configurations, and DevShell definitions for a PNCF deployment.
+description: |
+  The *infrastructure repository* (often called the "infra repo") is your Git repository
+  that houses all of the code and configuration needed to manage your Panfactum-based infrastructure.
+
+  One of the primary purposes of PNCF is to provide tooling to help you manage this repository and make
+  it your own. Everything about how PNCF infrastructure behaves is controlled in this single repository
+  (i.e., there is no external PNCF management server outside your control).
+
+  For more information about the standard layout of the infrastructure repository, see these 
+  docs.
+references:
+  - type: term
+    label: Infrastructure-as-Code
+    link: "#infrastructure-as-code"
+  - type: term
+    label: DevShell
+    link: "#devshell"
+  - type: term
+    label: Nix Flake
+    link: "#nix-flake"
+  - type: term
+    label: Environment
+    link: "#environment"
+  - type: term
+    label: Unit
+    link: "#unit"
+  - type: term
+    label: First-Party Module
+    link: "#first-party-module"
+  - type: internal-docs
+    label: IaC Repository Setup
+    link: /docs/main/guides/iac/repo-setup
+  - type: internal-docs
+    label: Bootstrapping Overview
+    link: /docs/main/guides/bootstrapping/overview

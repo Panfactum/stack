@@ -5,8 +5,8 @@
 
 Karpenter has updated its CRD specification which requires manual intervention during upgrade.
 
-**After** updating the `pf_stack_version` for any deployments of the `kube_karpenter_node_pools` module,
-run the following commands in the `kube_karpenter_node_pools` folder:
+**After** updating the `pf_stack_version` for any deployments of the `kube_karpenter_node_pools` module, run the
+following commands in the `kube_karpenter_node_pools` folder:
 
 ```bash
 pf-providers-enable
@@ -24,5 +24,5 @@ kubectl delete nodepools burstable burstable-arm on-demand on-demand-arm spot sp
 kubectl delete ec2nc spot burstable on-demand
 ```
 
-The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled
-from nodes using the old CRDs to nodes using the new CRDs.
+The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
+nodes using the old CRDs to nodes using the new CRDs.

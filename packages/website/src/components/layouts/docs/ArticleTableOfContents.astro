@@ -29,7 +29,7 @@ const depthPadding = (depth: number) => {
 ---
 
 <div class={`
-  float-right hidden min-w-(--toc-width)
+  hidden min-w-(--toc-width) flex-shrink-0
   xl:block
 `}>
   {
@@ -37,7 +37,7 @@ const depthPadding = (depth: number) => {
       <nav
         aria-label="Table of Contents"
         class={`
-          fixed top-(--header-height) flex h-[calc(100vh_-_var(--header-height))] w-(--toc-width)
+          sticky top-(--header-height) flex h-[calc(100vh_-_var(--header-height))] w-(--toc-width)
           flex-col gap-y-4 overflow-y-auto px-4 pt-4
         `}
       >

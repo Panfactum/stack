@@ -2,31 +2,32 @@
 slideLayout: "two-column"
 footnotes:
   - "**More info:** [nono.sh/docs/cli/internals/security-model](https://nono.sh/docs/cli/internals/security-model)"
-
 ---
 
 ## FS Sandboxing Approaches
 
 <div class="columns">
-<div class="column">
+  <div class="column">
+    ### Namespace Isolation
 
-### Namespace Isolation
+    *Bubblewrap, containers, VMs*
 
-*Bubblewrap, containers, VMs*
+    * Faked filesystem with bind mounts
 
-- Faked filesystem with bind mounts
-- Requires privileged access to user namespaces (often disabled)
+    * Requires privileged access to user namespaces (often disabled)
 
-</div>
-<div class="column">
+  </div>
 
-### Syscall Interception
+  <div class="column">
+    ### Syscall Interception
 
-*Nono*
+    *Nono*
 
-- Real filesystem
-- No elevated privileges needed; enforced by newer kernel modules (eBPF, Landlock)
-- Every call recorded for audit log and profile tuning
+    * Real filesystem
 
-</div>
+    * No elevated privileges needed; enforced by newer kernel modules (eBPF, Landlock)
+
+    * Every call recorded for audit log and profile tuning
+
+  </div>
 </div>

@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### authentik\_namespace
+### authentik_namespace
 
 Description: The kubernetes namespace where Authentik is deployed
 
@@ -14,7 +14,7 @@ Type: `string`
 
 Default: n/a
 
-### default\_groups\_enabled
+### default_groups_enabled
 
 Description: Whether to create the default Panfactum RBAC groups
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### email\_templates\_configmap
+### email_templates_configmap
 
 Description: The configmap holding the email templates that Authentik will use
 
@@ -30,7 +30,7 @@ Type: `string`
 
 Default: n/a
 
-### extra\_groups
+### extra_groups
 
 Description: Whether to create the default Panfactum RBAC groups
 
@@ -45,7 +45,7 @@ map(object({
 
 Default: `{}`
 
-### favicon\_ico\_b64
+### favicon_ico_b64
 
 Description: A stringified ico image for displaying on the Authentik web UI (base64 encoded)
 
@@ -53,7 +53,7 @@ Type: `string`
 
 Default: `null`
 
-### logo\_svg\_b64
+### logo_svg_b64
 
 Description: A stringified svg logo for displaying on the Authentik UI (base64 encoded)
 
@@ -61,7 +61,7 @@ Type: `string`
 
 Default: `null`
 
-### media\_configmap
+### media_configmap
 
 Description: The configmap holding the static media that Authentik will use
 
@@ -69,7 +69,7 @@ Type: `string`
 
 Default: n/a
 
-### organization\_domain
+### organization_domain
 
 Description: The domain name of the organization for which Authentik serves as the IdP
 
@@ -77,7 +77,7 @@ Type: `string`
 
 Default: n/a
 
-### organization\_name
+### organization_name
 
 Description: The name of the organization for which Authentik serves as the IdP
 
@@ -85,7 +85,7 @@ Type: `string`
 
 Default: n/a
 
-### recovery\_session\_duration
+### recovery_session_duration
 
 Description: The session duration for recovery flow logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/
 
@@ -93,7 +93,7 @@ Type: `string`
 
 Default: `"hours=8;minutes=0;seconds=0"`
 
-### session\_duration
+### session_duration
 
 Description: The session duration for user logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/
 
@@ -101,7 +101,7 @@ Type: `string`
 
 Default: `"days=30;hours=0;minutes=0;seconds=0"`
 
-### superusers\_require\_webauthn
+### superusers_require_webauthn
 
 Description: True iff superusers must use webauthn MFA to authenticate
 
@@ -117,7 +117,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### organization\_name
+### organization_name
 
 Description: n/a
 

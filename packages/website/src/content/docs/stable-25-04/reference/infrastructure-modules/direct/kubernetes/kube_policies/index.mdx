@@ -4,27 +4,31 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 { }
 
-<ModuleHeader name="kube_policies" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_policies" status="stable" type="direct" />
+<ModuleHeader
+  name="kube_policies"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_policies"
+  status="stable"
+  type="direct"
+/>
 
 # Panfactum Policies for Kyverno
 
-This module installs a handful of default Kyverno policies that enable better and more production-hardened defaults
-in the Kubernetes cluster.
+This module installs a handful of default Kyverno policies that enable better and more production-hardened defaults in
+the Kubernetes cluster.
 
-[kube\_kyverno](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_kyverno) must be installed
-in order for this module to work.
+[kube_kyverno](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_kyverno) must be installed in
+order for this module to work.
 
 ## Priority Classes
 
-This module also sets up additional priority classes in addition to the default ones provided
-by Kubernetes:
+This module also sets up additional priority classes in addition to the default ones provided by Kubernetes:
 
-* `database` (`10000000`): Used for running stateful pods
+- `database` (`10000000`): Used for running stateful pods
 
-* `default` (`0`): The global default priority class
+- `default` (`0`): The global default priority class
 
-* `cluster-important` (`100000000`): Used for controllers that provide ancillary
-  (but not critical) cluster functionality
+- `cluster-important` (`100000000`): Used for controllers that provide ancillary (but not critical) cluster
+  functionality
 
 Additionally, you can set up arbitrary additional priority classes as needed via the `extra_priority_classes` input.
 
@@ -55,20 +59,20 @@ kubectl api-resources --no-headers | awk '{
 
 against a Kubernetes cluster with all the stack resources deployed.
 
-This is required by we must explicitly enumerate permissions for all resources in order to exclude secret resources
-for the restricted-reader role.
+This is required by we must explicitly enumerate permissions for all resources in order to exclude secret resources for
+the restricted-reader role.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -78,15 +82,16 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### common\_env
+### common_env
 
-Description: Key-value pairs that will be injected into all containers in all pods in the cluster as environment variables
+Description: Key-value pairs that will be injected into all containers in all pods in the cluster as environment
+variables
 
 Type: `map(string)`
 
 Default: `{}`
 
-### common\_pod\_annotations
+### common_pod_annotations
 
 Description: Key-value pairs that will be injected as annotations into all pods in the cluster
 
@@ -94,7 +99,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_pod\_labels
+### common_pod_labels
 
 Description: Key-value pairs that will be injected as labels into all pods in the cluster
 
@@ -102,15 +107,16 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
-Description: Key-values pairs that will be injected into all containers in all pods in the cluster as environment variables (but stored in a Secret resource)
+Description: Key-values pairs that will be injected into all containers in all pods in the cluster as environment
+variables (but stored in a Secret resource)
 
 Type: `map(string)`
 
 Default: `{}`
 
-### default\_arm64\_toleration\_enabled
+### default_arm64_toleration_enabled
 
 Description: Whether pods should tolerate arm64 nodes by default
 
@@ -118,7 +124,7 @@ Type: `bool`
 
 Default: `true`
 
-### default\_burstable\_toleration\_enabled
+### default_burstable_toleration_enabled
 
 Description: Whether pods should tolerate burstable nodes by default
 
@@ -126,7 +132,7 @@ Type: `bool`
 
 Default: `false`
 
-### default\_controller\_toleration\_enabled
+### default_controller_toleration_enabled
 
 Description: Whether pods should tolerate controller (EKS) nodes by default
 
@@ -134,7 +140,7 @@ Type: `bool`
 
 Default: `false`
 
-### default\_spot\_toleration\_enabled
+### default_spot_toleration_enabled
 
 Description: Whether pods should tolerate spot nodes by default
 
@@ -142,7 +148,7 @@ Type: `bool`
 
 Default: `true`
 
-### environment\_variable\_injection\_enabled
+### environment_variable_injection_enabled
 
 Description: Whether a standard set of environment variables should be injected into each container
 
@@ -150,7 +156,7 @@ Type: `bool`
 
 Default: `true`
 
-### extra\_priority\_classes
+### extra_priority_classes
 
 Description: A mapping of extra priority class names to their values
 
@@ -158,15 +164,16 @@ Type: `map(number)`
 
 Default: `{}`
 
-### gc\_released\_volumes\_after\_days
+### gc_released_volumes_after_days
 
-Description: The number of days to wait before deleting released PersistentVolumes (PVs). These are volumes that are no longer used but may contain recovery data. Set to -1 to disable.
+Description: The number of days to wait before deleting released PersistentVolumes (PVs). These are volumes that are no
+longer used but may contain recovery data. Set to -1 to disable.
 
 Type: `number`
 
 Default: `30`
 
-### panfactum\_node\_image\_cache\_enabled
+### panfactum_node_image_cache_enabled
 
 Description: Whether support for the node-local image cache should be enabled
 
@@ -174,7 +181,7 @@ Type: `bool`
 
 Default: `true`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether pods should be automatically updated to use the Panfactum bin-packing scheduler.
 
@@ -182,7 +189,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether pods should have their images replaced with image references of the ECR pull-through cache.
 
@@ -225,9 +232,7 @@ kubectl api-resources --no-headers | awk '{
 
 against a Kubernetes cluster with all the stack resources deployed.
 
-This is required by we must explicitly enumerate permissions for all resources in order to exclude secret resources
-for the restricted-reader role.
+This is required by we must explicitly enumerate permissions for all resources in order to exclude secret resources for
+the restricted-reader role.
 
-
-{ }
-{/* lint enable no-duplicate-headings */}
+{ } {/* lint enable no-duplicate-headings */}

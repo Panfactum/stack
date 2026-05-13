@@ -16,27 +16,26 @@ When you are ready to cut a new edge release:
 
 The release script will automatically perform the following actions:
 
-* Create the new release name based on today's date (e.g., `edge.26-04-05`).
+- Create the new release name based on today's date (e.g., `edge.26-04-05`).
 
-* Copy all the unreleased documentation (under `packages/website/src/content/docs/main`) to the
-  edge documentation (under `packages/website/src/content/docs/edge`), rewriting internal links
-  and version placeholders.
+- Copy all the unreleased documentation (under `packages/website/src/content/docs/main`) to the edge documentation
+  (under `packages/website/src/content/docs/edge`), rewriting internal links and version placeholders.
 
-* Copy the unreleased changelog (`changelog/main/log.yaml`) into a dated edge entry
-  (e.g., `changelog/edge/26-04-05/log.yaml`) and move any `upgrade.mdx` alongside it.
+- Copy the unreleased changelog (`changelog/main/log.yaml`) into a dated edge entry (e.g.,
+  `changelog/edge/26-04-05/log.yaml`) and move any `upgrade.mdx` alongside it.
 
-* Reset `changelog/main/log.yaml` and `changelog/main/review.yaml` for the next release cycle.
+- Reset `changelog/main/log.yaml` and `changelog/main/review.yaml` for the next release cycle.
 
-* Update `constants.json` with the new edge version ref.
+- Update `constants.json` with the new edge version ref.
 
-* Create and push the release commit and git tag.
+- Create and push the release commit and git tag.
 
 ## Stable Releases
 
 ### New Stable Release Channel
 
-Every stable release occurs on a stable release "channel" which lives on a dedicated git branch. The base
-of each stable branch is an edge release.
+Every stable release occurs on a stable release "channel" which lives on a dedicated git branch. The base of each stable
+branch is an edge release.
 
 To create a new stable release channel:
 
@@ -48,21 +47,21 @@ To create a new stable release channel:
 
 The release script will automatically perform the following actions:
 
-* Create the new release channel name based on today's date.
+- Create the new release channel name based on today's date.
 
-* Copy all the edge documentation (under `packages/website/src/content/docs/edge`) to the
-  new stable release channel documentation (under `packages/website/src/content/docs/<stable_release_slug>`).
+- Copy all the edge documentation (under `packages/website/src/content/docs/edge`) to the new stable release channel
+  documentation (under `packages/website/src/content/docs/<stable_release_slug>`).
 
-* Create a Changelog for the stable release channel.
+- Create a Changelog for the stable release channel.
 
-* Update the Edge Changelog to indicate which edge release the new stable channel was forked from.
+- Update the Edge Changelog to indicate which edge release the new stable channel was forked from.
 
-* Update the metadata files for the documentation site so that the new release channel will appear in the version
+- Update the metadata files for the documentation site so that the new release channel will appear in the version
   selector and other relevant locations.
 
-* Create and push the new stable release branch and the initial stable version tag for the release branch.
+- Create and push the new stable release branch and the initial stable version tag for the release branch.
 
-* Commit and push the documentation updates for the website.
+- Commit and push the documentation updates for the website.
 
 ### New Stable Release
 

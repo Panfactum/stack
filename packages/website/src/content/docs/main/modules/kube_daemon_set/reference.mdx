@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### arm\_nodes\_enabled
+### arm_nodes_enabled
 
 Description: Whether to allow pods to schedule on arm64 nodes
 
@@ -14,7 +14,7 @@ Type: `bool`
 
 Default: `true`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### cilium\_required
+### cilium_required
 
 Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `true`
 
-### common\_env
+### common_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -38,9 +38,10 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common\_env\_from\_config\_maps
+### common_env_from_config_maps
 
-Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment
+variables names and the values are the ConfigMap references.
 
 Type:
 
@@ -53,9 +54,10 @@ map(object({
 
 Default: `{}`
 
-### common\_env\_from\_secrets
+### common_env_from_secrets
 
-Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment
+variables names and the values are the Secret references.
 
 Type:
 
@@ -68,7 +70,7 @@ map(object({
 
 Default: `{}`
 
-### common\_secrets
+### common_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -76,7 +78,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### config\_map\_mounts
+### config_map_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the DaemonSet
 
@@ -140,7 +142,7 @@ list(object({
 
 Default: n/a
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -148,7 +150,7 @@ Type: `bool`
 
 Default: `true`
 
-### dns\_policy
+### dns_policy
 
 Description: The DNS policy for the pods
 
@@ -156,7 +158,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_annotations
+### extra_annotations
 
 Description: A map of extra annotations that will be added to the DaemonSet (not the pods)
 
@@ -164,7 +166,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_labels
+### extra_labels
 
 Description: A map of extra labels that will be added to the DaemonSet (not the pods)
 
@@ -172,7 +174,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_annotations
+### extra_pod_annotations
 
 Description: Annotations to add to the pods in the DaemonSet
 
@@ -180,7 +182,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_pod\_labels
+### extra_pod_labels
 
 Description: Extra pod labels to use
 
@@ -188,7 +190,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra\_tolerations
+### extra_tolerations
 
 Description: Extra tolerations to add to the pods
 
@@ -205,7 +207,7 @@ list(object({
 
 Default: `[]`
 
-### host\_network
+### host_network
 
 Description: Whether the generated pods are allowed to use the host network
 
@@ -213,7 +215,7 @@ Type: `bool`
 
 Default: `false`
 
-### linkerd\_enabled
+### linkerd_enabled
 
 Description: True iff the Linkerd sidecar should be injected into the pods
 
@@ -221,7 +223,7 @@ Type: `bool`
 
 Default: `true`
 
-### linkerd\_required
+### linkerd_required
 
 Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
@@ -229,7 +231,7 @@ Type: `bool`
 
 Default: `true`
 
-### min\_available
+### min_available
 
 Description: Controls how many pods are allowed to be unavailable in the DaemonSet under the Pod Disruption Budget
 
@@ -237,15 +239,16 @@ Type: `number`
 
 Default: `0`
 
-### min\_ready\_seconds
+### min_ready_seconds
 
-Description: The minimum number of seconds for which a newly created pod should be ready without any of its containers crashing.
+Description: The minimum number of seconds for which a newly created pod should be ready without any of its containers
+crashing.
 
 Type: `number`
 
 Default: `5`
 
-### mount\_owner
+### mount_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -269,7 +272,7 @@ Type: `string`
 
 Default: n/a
 
-### node\_requirements
+### node_requirements
 
 Description: Node label requirements for the pods
 
@@ -277,15 +280,16 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### pod\_version\_labels\_enabled
+### pod_version_labels_enabled
 
-Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent
+updates.
 
 Type: `bool`
 
 Default: `true`
 
-### priority\_class\_name
+### priority_class_name
 
 Description: The priority class to use for pods in the DaemonSet
 
@@ -293,7 +297,7 @@ Type: `string`
 
 Default: `"system-node-critical"`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -301,7 +305,7 @@ Type: `bool`
 
 Default: `true`
 
-### restart\_policy
+### restart_policy
 
 Description: The pod restart policy
 
@@ -309,7 +313,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### secret\_mounts
+### secret_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the DaemonSet
 
@@ -324,7 +328,7 @@ map(object({
 
 Default: `{}`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -332,7 +336,7 @@ Type: `bool`
 
 Default: `true`
 
-### termination\_grace\_period\_seconds
+### termination_grace_period_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -340,7 +344,7 @@ Type: `number`
 
 Default: `30`
 
-### tmp\_directories
+### tmp_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -356,15 +360,16 @@ map(object({
 
 Default: `{}`
 
-### unhealthy\_pod\_eviction\_policy
+### unhealthy_pod_eviction_policy
 
-Description: Whether to allow unhealthy pods to be evicted. See https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy.
+Description: Whether to allow unhealthy pods to be evicted. See
+https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy.
 
 Type: `string`
 
 Default: `"AlwaysAllow"`
 
-### update\_type
+### update_type
 
 Description: The type of update that the DaemonSet should use. One of: RollingUpdate, OnDelete
 
@@ -372,7 +377,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -380,7 +385,7 @@ Type: `bool`
 
 Default: `true`
 
-### wait\_for\_rollout
+### wait_for_rollout
 
 Description: Whether to wait for the DaemonSet rollout before allowing terraform to proceed
 
@@ -396,11 +401,11 @@ The following outputs are exported:
 
 Description: The default labels assigned to all resources in this DaemonSet
 
-### match\_labels
+### match_labels
 
 Description: The labels unique to this Deployment that can be used to select any pods in this DaemonSet
 
-### service\_account\_name
+### service_account_name
 
 Description: The service account used for the pods
 
@@ -416,6 +421,4 @@ The following providers are needed by this module:
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.8.1/docs) (3.8.1)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

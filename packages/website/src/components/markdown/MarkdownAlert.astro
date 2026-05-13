@@ -2,23 +2,55 @@
 interface Props {
   severity: "info" | "warning";
 }
-const baseClass = "flex gap-lg items-center px-4 border-l-4 my-4";
+const baseClass = "relative border-l-4 pl-3 pt-0.5 pb-2 pr-4 my-4 rounded-r-md";
 
 const classes = {
   info: "bg-gray-light-mode-300 [&_a]:!text-black [&_a]:dark:!text-white dark:bg-accent dark:bg-brand-docs-info border-brand",
-  warning: "bg-warning-primary [&_a]:!text-black [&_a]:dark:!text-white dark:bg-brand-docs-warning border-warning",
+  warning: "bg-warning-950 border-warning-500",
   error: "bg-error-primary dark:bg-brand-docs-error border-error",
   success: "bg-success-primary dark:bg-brand-docs-success border-success"
 }
 
+const iconFills: Record<string, string> = {
+  info: "#d0d8dd",
+  warning: "#4e1d09",
+  error: "#f04438",
+  success: "#12b76a",
+}
+
+const iconClasses = {
+  info: "bg-brand border-brand",
+  warning: "bg-warning-500 border-warning-500",
+  error: "bg-error-500 border-error-500",
+  success: "bg-success-500 border-success-500",
+}
+
 const {severity} = Astro.props;
 const styleClasses = classes[severity];
+const iconClass = iconClasses[severity];
 ---
 
 <div class:list={[
   baseClass,
   styleClasses
 ]}>
+  <div class:list={[
+    "absolute -top-[13px] -left-[13px] border-2 rounded-full w-[26px] h-[26px] flex items-center justify-center",
+    iconClass
+  ]}>
+    <svg
+      class="-mt-[3px]"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill={iconFills[severity]}
+      aria-hidden="true"
+    >
+      {severity === "warning" && <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>}
+      {severity === "info" && <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>}
+    </svg>
+  </div>
   <div class="w-full" role="alert">
     <slot />
   </div>

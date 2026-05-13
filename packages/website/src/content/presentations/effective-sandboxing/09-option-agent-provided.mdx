@@ -1,36 +1,81 @@
 ---
 slideLayout: "two-column"
 footnotes:
-  - "**Best feature coverage, but still limited:** Claude Code's permission system is documented at [docs.anthropic.com/en/docs/claude-code/security](https://docs.anthropic.com/en/docs/claude-code/security)."
-  - "**Limited:** OpenAI Codex sandboxing docs: [developers.openai.com/codex/concepts/sandboxing](https://developers.openai.com/codex/concepts/sandboxing#getting-started)."
-  - "**Limited:** Cursor terminal environment docs: [cursor.com/docs/agent/tools/terminal](https://cursor.com/docs/agent/tools/terminal#environment-variables)."
-  - "**DIY:** Pi Coding Agent sandbox extension: [github.com/badlogic/pi-mono/.../sandbox/index.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/examples/extensions/sandbox/index.ts)."
 
+  - "**Best feature coverage, but still limited:** Claude Code's permission system is documented at
+    [docs.anthropic.com/en/docs/claude-code/security](https://docs.anthropic.com/en/docs/claude-code/security)."
+
+  - "**Limited:** OpenAI Codex sandboxing docs:
+    [developers.openai.com/codex/concepts/sandboxing](https://developers.openai.com/codex/concepts/sandboxing#getting-started)."
+
+  - "**Limited:** Cursor terminal environment docs:
+    [cursor.com/docs/agent/tools/terminal](https://cursor.com/docs/agent/tools/terminal#environment-variables)."
+
+  - "**DIY:** Pi Coding Agent sandbox extension:
+    [github.com/badlogic/pi-mono/.../sandbox/index.ts](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/examples/extensions/sandbox/index.ts)."
 ---
 
-import { XMark, CheckMark, MinusMark, Checkbox } from "@/pages/presentations/_components/ChecklistIcons"
+import { XMark, CheckMark, MinusMark, Checkbox } from "@/pages/presentations/_components/ChecklistIcons";
 
 ## Option: Agent-provided Sandboxing
 
 <div class="columns">
-<div class="column">
-  <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px'}}>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Allows access to secrets without exposing them</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Deny-by-default network access w/ L7 filtering</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> R/W/X filesystem controls</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> Supports 100+ concurrent agents</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> Shares host utilities</div>
+  <div class="column">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginTop: "20px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Allows access to secrets without exposing them
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Deny-by-default network access w/ L7 filtering
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> R/W/X filesystem controls
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> Supports 100+ concurrent agents
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> Shares host utilities
+      </div>
+    </div>
   </div>
-</div>
-<div class="column">
-  <div style={{display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px'}}>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Profiles</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><XMark /> Strong enforcement</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Cross-platform</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Audit log</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> FOSS</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><CheckMark /> Easy to use</div>
-    <div style={{display: 'flex', alignItems: 'flex-start'}}><MinusMark /> Easy to share</div>
+  <div class="column">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginTop: "20px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Profiles
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <XMark /> Strong enforcement
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Cross-platform
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Audit log
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> FOSS
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <CheckMark /> Easy to use
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <MinusMark /> Easy to share
+      </div>
+    </div>
   </div>
-</div>
 </div>

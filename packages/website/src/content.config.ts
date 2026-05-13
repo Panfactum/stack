@@ -57,6 +57,26 @@ const upgradeInstructions = defineCollection({
   loader: glob({ pattern: "**/*.mdx", base: "src/content/changelog" }),
 });
 
+const glossaryTerms = defineCollection({
+  loader: glob({
+    pattern: "**/*.yaml",
+    base: "src/content/docs",
+    generateId: ({ entry }) => entry,
+  }),
+  schema: z.object({
+    term: z.string(),
+    type: z.enum(["panfactum", "iac", "kubernetes", "devshell", "other"]),
+    summary: z.string(),
+    description: z.string(),
+    deprecation_notice: z.string().optional(),
+    references: z.array(z.object({
+      type: z.enum(["term", "internal-docs", "external-docs"]),
+      label: z.string(),
+      link: z.string(),
+    })).optional(),
+  }),
+});
+
 const presentations = defineCollection({
   loader: glob({
     pattern: "**/*.mdx",
@@ -75,4 +95,4 @@ const presentations = defineCollection({
   }),
 });
 
-export const collections = { docs, maturityModel, changes, upgradeInstructions, presentations };
+export const collections = { docs, maturityModel, changes, upgradeInstructions, presentations, glossaryTerms };

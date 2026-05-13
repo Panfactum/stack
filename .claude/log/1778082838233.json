@@ -1,0 +1,36 @@
+{
+  "changes": [
+    {
+      "motivation": "Enable collapsible sections in docs pages while keeping headings visible in the sidebar TOC — headings need to remain real `<h2>` HAST nodes so Astro's heading extractor finds them.",
+      "summary": "Created `rehypeCollapsible.ts` rehype plugin that transforms headings inside a `.collapsible-region` wrapper div into `<details class=\"collapsible-section\"><summary>{heading}</summary><div class=\"collapsible-content\">{body}</div></details>` structures."
+    },
+    {
+      "motivation": "Provide MDX-compatible per-heading collapsible syntax using `remark-directive`'s `:name` text directive (the `{.class}` syntax is invalid in MDX files because MDX parses `{}` as JSX expressions).",
+      "summary": "Created `remarkCollapsible.ts` remark plugin that detects `:collapsible` text directives on headings, strips the directive node from heading children, and adds a `data-collapsible` property so the downstream rehype plugin can identify them."
+    },
+    {
+      "motivation": "Wire up the new collapsible plugins in the correct order: `remarkDirective` → `remarkCollapsible` (remark phase) → `rehypeCollapsible` (after `rehypeAutolinkHeadings`, before `rehypeCodeGroup`).",
+      "summary": "Modified `astro.config.mjs` to import and register `remarkDirective`, `remarkCollapsible`, and `rehypeCollapsible` in the rehype/remark plugin arrays."
+    },
+    {
+      "motivation": "Style collapsible sections with a border, rounded corners, chevron indicator, and smooth open/close animation. Also hide the autolink anchor icon inside `<summary>` to prevent the copy-link click from also toggling `<details>`.",
+      "summary": "Added `.collapsible-section`, `.collapsible-section > summary`, `::after` chevron, `[open]` rotation, heading override styles, and `.icon-link` visibility rule to `global.css` inside the `.content` block."
+    },
+    {
+      "motivation": "Replace component-based glossary with per-heading `:collapsible` directive syntax so terms appear in the sidebar TOC and render as expandable sections.",
+      "summary": "Rewrote `packages/website/src/content/docs/main/reference/glossary/index.mdx` using `## Term :collapsible` heading syntax. Deleted the now-unused `GlossaryTerm.astro` component."
+    },
+    {
+      "motivation": "Install `remark-directive` package to enable `:name`, `::name`, and `:::name` directive syntax in markdown/MDX files.",
+      "summary": "Ran `bun add remark-directive` and pinned the version to `4.0.0` (removed `^` caret) in `package.json`."
+    }
+  ],
+  "problems": [
+    "The `{.collapsible}` per-heading class syntax was initially attempted for MDX files before discovering it is invalid — MDX parses `{}` as JSX expressions, causing acorn parse errors. This was a trial-and-error discovery; a comment in the MDX docs or a clear error message would have prevented the detour.",
+    "The first implementation of `rehypeCollapsible.ts` used fragile string-matching on raw `<p>` element text (`::: collapsible` / `:::`) to find delimiters — a pattern copied from `codeGroups.ts`. This was replaced twice (once for remark-directive container directives, again for text directives) before landing on the final approach. The `codeGroups.ts` pattern comment should note its limitations and recommend remark-directive for new plugins.",
+    "The `remarkCollapsible.ts` plugin had unused imports left after refactoring (e.g. `toString` from `mdast-util-to-string`, `Node` type) that caused lint errors. These were artifacts of rapid iteration across multiple plugin designs.",
+    "`pnpm` was used for `pnpm add remark-directive` initially despite the project using `bun` — the user had to correct this. The project CLAUDE.md or README should document the package manager convention."
+  ],
+  "session_id": "3085c10d-ad03-4159-8637-f7de2eca516d",
+  "timestamp": "2026-05-06T15:54:24.211Z"
+}

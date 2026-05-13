@@ -4,38 +4,45 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
-<ModuleHeader name="kube_aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_aws_cdn" status="beta" type="submodule" />
+<ModuleHeader
+  name="kube_aws_cdn"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/kube_aws_cdn"
+  status="beta"
+  type="submodule"
+/>
 
 # AWS CDN for Kubernetes Ingresses
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
-This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs`
-output from instances of the [kube\_ingress](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
-module and forwarding them to the [aws\_cdn](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_cdn) module.
+This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs` output from
+instances of the [kube_ingress](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+module and forwarding them to the [aws_cdn](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_cdn)
+module.
 
-This module takes the same arguments as `aws_cdn`, so see it's [module documentation](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_cdn)
-for more information.
+This module takes the same arguments as `aws_cdn`, so see it's
+[module documentation](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_cdn) for more information.
 
 ## Limitations
 
-* The upstream ingresses for this module must all use the same set of domains. AWS Cloudfront provides
-  no ability to perform routing based on domain names (only HTTP paths). If the ingresses
-  you provide this module use different sets of domains, your routing will break in unexpected ways.
+- The upstream ingresses for this module must all use the same set of domains. AWS Cloudfront provides no ability to
+  perform routing based on domain names (only HTTP paths). If the ingresses you provide this module use different sets
+  of domains, your routing will break in unexpected ways.
 
-* Changing the domains of your upstream ingresses will cause the Cloudfront distribution to re-provision its certificates
-  causing a brief window of downtime (1-2 minutes).
+- Changing the domains of your upstream ingresses will cause the Cloudfront distribution to re-provision its
+  certificates causing a brief window of downtime (1-2 minutes).
 
-* You cannot use the same domain name on multiple CDNs. As a result, you can only create ONE `kube_aws_cdn` resource
-  for all ingresses that use a particular domain name.
+- You cannot use the same domain name on multiple CDNs. As a result, you can only create ONE `kube_aws_cdn` resource for
+  all ingresses that use a particular domain name.
 
-* For additional limitations, see the [aws\_cdn](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_cdn) module docs.
+- For additional limitations, see the
+  [aws_cdn](/docs/stable-25-04/reference/infrastructure-modules/submodule/aws/aws_cdn) module docs.
 
 ## Usage
 
 <MarkdownAlert severity="warning">
-  Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
-  are deployed globally.
+  Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources are
+  deployed globally.
 </MarkdownAlert>
 
 ```hcl
@@ -57,9 +64,9 @@ module "ingress_1" {
    namespace    = local.namespace
    name         = "example1"
    domains      = ["example.com"]
-   
+
     ...
-   
+
    # CDN mode MUST be enabled if you want to use a
    # CDN in front of an ingress
    cdn_mode_enabled = true
@@ -73,13 +80,13 @@ module "ingress_2" {
    domains      = ["example.com"]
 
    ...
-   
+
    cdn_mode_enabled = true
    ingress_configs  = [{
       path_prefix = "/test"
-      
+
       ...
-      
+
       # You can configure CDN behavior on a per-ingress basis
       # See the kube_ingress documentation for more information
       cdn = {
@@ -93,7 +100,7 @@ module "ingress_2" {
 
 module "cdn" {
    source = "${var.pf_module_source}kube_aws_cdn${var.pf_module_ref}"
-   
+
    # Since the CDN operates globally, you must use the global
    # provider as follows:
    providers = {
@@ -101,7 +108,7 @@ module "cdn" {
    }
 
    name               = "example"
-   
+
    # Concatenate the CDN configs provided by each
    # ingress module and pass them to the CDN module
    origin_configs = concat(
@@ -115,13 +122,13 @@ module "cdn" {
 
 The following providers are needed by this module:
 
-* [archive](https://registry.terraform.io/providers/hashicorp/archive/2.6.0/docs) (2.6.0)
+- [archive](https://registry.terraform.io/providers/hashicorp/archive/2.6.0/docs) (2.6.0)
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -133,9 +140,10 @@ Description: The name of the CDN that will get created
 
 Type: `string`
 
-### origin\_configs
+### origin_configs
 
-Description: A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this manually. Use the outputs from kube\_ingress.
+Description: A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this
+manually. Use the outputs from kube_ingress.
 
 Type:
 
@@ -220,7 +228,7 @@ list(object({
 
 The following input variables are optional (have default values):
 
-### cors\_additional\_allowed\_origins
+### cors_additional_allowed_origins
 
 Description: Specifies which origins are allowed besides the domain name specified. Use '\*' to allow any origin.
 
@@ -228,7 +236,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cors\_allowed\_headers
+### cors_allowed_headers
 
 Description: Specifies which headers are allowed for CORS requests.
 
@@ -237,12 +245,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "Content-Length"
-]
+["Content-Length"]
 ```
 
-### cors\_allowed\_methods
+### cors_allowed_methods
 
 Description: Specifies which methods are allowed. Can be GET, PUT, POST, DELETE or HEAD.
 
@@ -251,13 +257,10 @@ Type: `list(string)`
 Default:
 
 ```json
-[
-  "GET",
-  "HEAD"
-]
+["GET", "HEAD"]
 ```
 
-### cors\_enabled
+### cors_enabled
 
 Description: True if the CloudFront distribution should handle adding CORS headers instead of the origin.
 
@@ -265,7 +268,7 @@ Type: `bool`
 
 Default: `false`
 
-### cors\_max\_age\_seconds
+### cors_max_age_seconds
 
 Description: Time in seconds that the browser can cache the response for a preflight CORS request.
 
@@ -273,7 +276,7 @@ Type: `number`
 
 Default: `3600`
 
-### custom\_error\_responses
+### custom_error_responses
 
 Description: Mutates error responses returned from the origin before forwarding them to the client
 
@@ -298,15 +301,16 @@ Type: `string`
 
 Default: `null`
 
-### geo\_restriction\_list
+### geo_restriction_list
 
-Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
+Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and
+blacklist)
 
 Type: `list(string)`
 
 Default: `[]`
 
-### geo\_restriction\_type
+### geo_restriction_type
 
 Description: What type of geographic restrictions to you want to apply to CDN clients
 
@@ -314,7 +318,7 @@ Type: `string`
 
 Default: `"none"`
 
-### logging\_cookies\_enabled
+### logging_cookies_enabled
 
 Description: Whether cookies should be included in the request logs
 
@@ -322,7 +326,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging\_enabled
+### logging_enabled
 
 Description: Whether request logging should be enabled for the CloudFront distribution
 
@@ -330,7 +334,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging\_expire\_after\_days
+### logging_expire_after_days
 
 Description: The number of days after which logs will be deleted. (0 to disable)
 
@@ -338,7 +342,7 @@ Type: `number`
 
 Default: `0`
 
-### origin\_shield\_enabled
+### origin_shield_enabled
 
 Description: Whether origin shield should be enabled for the CloudFront distribution
 
@@ -346,7 +350,7 @@ Type: `bool`
 
 Default: `false`
 
-### price\_class
+### price_class
 
 Description: The price class for the CDN
 
@@ -354,7 +358,7 @@ Type: `string`
 
 Default: `"PriceClass_100"`
 
-### redirect\_rules
+### redirect_rules
 
 Description: A list of redirect rules that the ingress will match against before sending requests to the upstreams
 
@@ -374,11 +378,11 @@ Default: `[]`
 
 The following outputs are exported:
 
-### distribution\_id
+### distribution_id
 
 Description: The ID of the CloudFront distribution
 
-### logging\_bucket\_name
+### logging_bucket_name
 
 Description: The name of the log bucket for CloudFront access logs
 

@@ -8,13 +8,14 @@ The following input variables are supported:
 
 ### active
 
-Description: The status of the identity provider in MongoDB Atlas. Setting to false will disable the identity provider and SSO will not function.
+Description: The status of the identity provider in MongoDB Atlas. Setting to false will disable the identity provider
+and SSO will not function.
 
 Type: `bool`
 
 Default: `true`
 
-### associated\_domains
+### associated_domains
 
 Description: The domains associated with the identity provider
 
@@ -22,7 +23,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### extra\_role\_mappings
+### extra_role_mappings
 
 Description: Extra authentik roles to map to MongoDB Atlas roles. `{<panfactum role> => [<mongodb role>, ...]}`
 
@@ -30,7 +31,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### federation\_settings\_id
+### federation_settings_id
 
 Description: The IDP ID from MongoDB Atlas
 
@@ -38,7 +39,7 @@ Type: `string`
 
 Default: n/a
 
-### idp\_id
+### idp_id
 
 Description: The IDP ID from MongoDB Atlas
 
@@ -46,7 +47,7 @@ Type: `string`
 
 Default: n/a
 
-### issuer\_url
+### issuer_url
 
 Description: The issuer URL
 
@@ -62,7 +63,7 @@ Type: `string`
 
 Default: `"Panfactum Authentik Integration"`
 
-### organization\_id
+### organization_id
 
 Description: ID of the MongoDB Atlas organization
 
@@ -70,7 +71,7 @@ Type: `string`
 
 Default: n/a
 
-### sso\_debug\_enabled
+### sso_debug_enabled
 
 Description: Enable SSO debug. This allows users to login with a password bypassing the SSO flow.
 
@@ -78,7 +79,7 @@ Type: `bool`
 
 Default: `false`
 
-### sso\_url
+### sso_url
 
 Description: The SSO URL
 
@@ -90,7 +91,7 @@ Default: n/a
 
 The following outputs are exported:
 
-### acs\_url
+### acs_url
 
 Description: Assertion consumer service URL to which the IdP sends the SAML response
 
@@ -102,6 +103,4 @@ The following providers are needed by this module:
 
 - [mongodbatlas](https://registry.terraform.io/providers/panfactum/mongodbatlas/2.9.0/docs) (2.9.0)
 
-
-{/* eslint-enable import-x/order */}
-{/* lint enable no-duplicate-headings */}
+{/* eslint-enable import-x/order */} {/* lint enable no-duplicate-headings */}

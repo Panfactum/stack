@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### aws\_iam\_ip\_allow\_list
+### aws_iam_ip_allow_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -14,7 +14,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### burstable\_nodes\_enabled
+### burstable_nodes_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -22,7 +22,7 @@ Type: `bool`
 
 Default: `true`
 
-### cloudflare\_api\_token
+### cloudflare_api_token
 
 Description: Cloudflare API Token
 
@@ -30,9 +30,10 @@ Type: `string`
 
 Default: `null`
 
-### cloudflare\_zones
+### cloudflare_zones
 
-Description: A mapping of public DNS domains managed by Cloudflare to their configuration; external-dns uses this to set domain records
+Description: A mapping of public DNS domains managed by Cloudflare to their configuration; external-dns uses this to set
+domain records
 
 Type:
 
@@ -44,7 +45,7 @@ map(object({
 
 Default: `{}`
 
-### controller\_nodes\_enabled
+### controller_nodes_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -52,7 +53,7 @@ Type: `bool`
 
 Default: `true`
 
-### external\_dns\_helm\_version
+### external_dns_helm_version
 
 Description: The version of the ExternalDNS helm chart to deploy
 
@@ -60,7 +61,7 @@ Type: `string`
 
 Default: `"1.20.0"`
 
-### log\_level
+### log_level
 
 Description: The log level for the ExternalDNS pods
 
@@ -68,7 +69,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### monitoring\_enabled
+### monitoring_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -76,7 +77,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum\_scheduler\_enabled
+### panfactum_scheduler_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -84,7 +85,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -92,9 +93,10 @@ Type: `bool`
 
 Default: `true`
 
-### route53\_zones
+### route53_zones
 
-Description: A mapping of public DNS domains managed by AWS to their configuration; external-dns uses this to set domain records
+Description: A mapping of public DNS domains managed by AWS to their configuration; external-dns uses this to set domain
+records
 
 Type:
 
@@ -107,7 +109,7 @@ map(object({
 
 Default: `{}`
 
-### spot\_nodes\_enabled
+### spot_nodes_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -115,7 +117,7 @@ Type: `bool`
 
 Default: `true`
 
-### sync\_policy
+### sync_policy
 
 Description: How should ExternalDNS handle DNS record synchronization
 
@@ -123,7 +125,7 @@ Type: `string`
 
 Default: `"upsert-only"`
 
-### vpa\_enabled
+### vpa_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -133,7 +135,9 @@ Default: `false`
 
 ### wait
 
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to
+proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment
+failures.
 
 Type: `bool`
 

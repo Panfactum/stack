@@ -1,0 +1,29 @@
+term: PaaS (Platform-as-a-Service)
+type: other
+summary: A cloud computing model that provides a managed platform for developing, running, and managing applications without handling the underlying infrastructure.
+description: |
+  *Platform-as-a-Service* (PaaS) is a cloud computing model in which a provider delivers a complete
+  platform — including the operating system, runtime, middleware, and development tools — so that
+  customers can focus on building and deploying applications without managing the underlying infrastructure.
+
+  PaaS sits between IaaS and SaaS in the cloud computing stack:
+
+  - **IaaS** gives you raw infrastructure (VMs, storage, networking)
+  - **PaaS** gives you a managed platform to run your code
+  - **SaaS** gives you a fully managed application
+
+  Examples of PaaS offerings include Heroku, AWS Elastic Beanstalk, Google App Engine, and Vercel.
+
+  Panfactum effectively serves as a self-hosted PaaS — it provides a complete, production-ready platform
+  built on IaaS that handles networking, autoscaling, observability, CI/CD, and more, so that teams can
+  focus on deploying their applications.
+references:
+  - type: term
+    label: IaaS (Infrastructure-as-a-Service)
+    link: "#iaas-infrastructure-as-a-service"
+  - type: term
+    label: SaaS (Software-as-a-Service)
+    link: "#saas-software-as-a-service"
+  - type: external-docs
+    label: "Wikipedia: Platform as a Service"
+    link: https://en.wikipedia.org/wiki/Platform_as_a_service

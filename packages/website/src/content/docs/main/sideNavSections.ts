@@ -14,54 +14,74 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
     icon: NavIcons.lightBulb,
     sub: [
       {
-        text: "Infrastructure-as-Code",
-        path: "/iac",
+        text: "Motivation",
+        path: "/motivation",
       },
       {
-        text: "Networking",
-        path: "/networking",
+        text: "PCNF",
+        path: "/pcnf",
         sub: [
           {
-            text: "Cryptography",
-            path: "/cryptography",
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: "AWS Network Primitives",
-            path: "/aws-primitives",
-          },
-          {
-            text: "Network Address Translation (NAT)",
-            path: "/nat",
-          },
-          {
-            text: "Subdomain Delegation",
-            path: "/subdomain-delegation",
-          },
-          {
-            text: "Kubernetes Networking",
-            path: "/cluster-networking",
+            text: "Infrastructure-as-Code",
+            path: "/infrastructure-as-code",
           },
         ],
       },
-      {
-        text: "Autoscaling",
-        path: "/autoscaling",
-      },
-      {
-        text: "BuildKit",
-        path: "/buildkit",
-      },
-      {
-        text: "CI / CD",
-        path: "/cicd",
+{
+        text: "Background",
+        path: "/background",
         sub: [
           {
-            text: "Recommended Architecture",
-            path: "/recommended-architecture",
+            text: "Networking",
+            path: "/networking",
+            sub: [
+              {
+                text: "Cryptography",
+                path: "/cryptography",
+              },
+              {
+                text: "AWS Network Primitives",
+                path: "/aws-primitives",
+              },
+              {
+                text: "Network Address Translation (NAT)",
+                path: "/nat",
+              },
+              {
+                text: "Subdomain Delegation",
+                path: "/subdomain-delegation",
+              },
+              {
+                text: "Kubernetes Networking",
+                path: "/cluster-networking",
+              },
+            ],
           },
           {
-            text: "GHA",
-            path: "/gha",
+            text: "Autoscaling",
+            path: "/autoscaling",
+          },
+          {
+            text: "BuildKit",
+            path: "/buildkit",
+          },
+          {
+            text: "CI / CD",
+            path: "/cicd",
+            sub: [
+              {
+                text: "Recommended Architecture",
+                path: "/recommended-architecture",
+              },
+              {
+                text: "GHA",
+                path: "/gha",
+              },
+            ],
           },
         ],
       },
@@ -433,7 +453,7 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
   {
     text: "Modules",
     path: "/modules",
-    icon: NavIcons.book,
+    icon: NavIcons.modules,
     sub: [
       {
         text: "Airbyte",
@@ -1299,6 +1319,14 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
     icon: NavIcons.analyze,
     sub: [
       {
+        text: "Glossary",
+        path: "/glossary",
+      },
+      {
+        text: "Infrastructure Repository",
+        path: "/infrastructure-repository",
+      },
+      {
         text: "Configuration",
         path: "/configuration",
         sub: [
@@ -1392,6 +1420,10 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
       {
         text: "RBAC",
         path: "/rbac",
+      },
+      {
+        text: "Learning Resources",
+        path: "/learning-resources",
       },
     ],
   }

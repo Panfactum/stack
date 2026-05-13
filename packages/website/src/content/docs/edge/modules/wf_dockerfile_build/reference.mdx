@@ -6,7 +6,7 @@
 
 The following input variables are supported:
 
-### amd\_builder\_enabled
+### amd_builder_enabled
 
 Description: Whether to build amd64 images.
 
@@ -22,7 +22,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### arm\_builder\_enabled
+### arm_builder_enabled
 
 Description: Whether to build arm64 images.
 
@@ -30,7 +30,7 @@ Type: `bool`
 
 Default: `true`
 
-### build\_context
+### build_context
 
 Description: Relative path from the root of the repository to the build context to submit to BuildKit
 
@@ -38,7 +38,7 @@ Type: `string`
 
 Default: `"."`
 
-### build\_timeout
+### build_timeout
 
 Description: The number of seconds after which the build will be timed out
 
@@ -46,7 +46,7 @@ Type: `number`
 
 Default: `3600`
 
-### code\_repo
+### code_repo
 
 Description: The URL of the git repo containing the Dockerfile to build. Must NOT contain a protocol prefix.
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: n/a
 
-### code\_storage\_gb
+### code_storage_gb
 
 Description: The size of the volume to mount the code into
 
@@ -62,7 +62,7 @@ Type: `number`
 
 Default: `1`
 
-### cpu\_millicores
+### cpu_millicores
 
 Description: The amount of CPU to allocate to pods in the workflow (in millicores)
 
@@ -70,7 +70,7 @@ Type: `number`
 
 Default: `25`
 
-### dockerfile\_path
+### dockerfile_path
 
 Description: Relative path from the root of the repository to the Dockerfile / Containerfile to submit to Buildkit
 
@@ -78,7 +78,7 @@ Type: `string`
 
 Default: `"./Dockerfile"`
 
-### extra\_ecr\_repo\_arns\_for\_pull\_access
+### extra_ecr_repo_arns_for_pull_access
 
 Description: ARNs of private ECR repositories from which the Dockerfile pulls base images FROM
 
@@ -86,7 +86,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### git\_password
+### git_password
 
 Description: The password to use when checking out the code to deploy
 
@@ -94,15 +94,16 @@ Type: `string`
 
 Default: `""`
 
-### git\_ref
+### git_ref
 
-Description: The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the Workflow
+Description: The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the
+Workflow
 
 Type: `string`
 
 Default: `"main"`
 
-### git\_username
+### git_username
 
 Description: The username to use when checking out the code to deploy
 
@@ -110,7 +111,7 @@ Type: `string`
 
 Default: `""`
 
-### image\_repo
+### image_repo
 
 Description: The name of the AWS ECR repository where generated images will be pushed
 
@@ -118,7 +119,7 @@ Type: `string`
 
 Default: n/a
 
-### image\_tag\_prefix
+### image_tag_prefix
 
 Description: The prefix to prepend to the image tag
 
@@ -126,7 +127,7 @@ Type: `string`
 
 Default: `""`
 
-### memory\_mb
+### memory_mb
 
 Description: The amount of memory to allocate to pods in the workflow (in MB)
 
@@ -150,7 +151,7 @@ Type: `string`
 
 Default: n/a
 
-### pull\_through\_cache\_enabled
+### pull_through_cache_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -158,7 +159,7 @@ Type: `bool`
 
 Default: `true`
 
-### push\_image\_enabled
+### push_image_enabled
 
 Description: True iff images should be pushed to ECR in addition to being built
 
@@ -166,7 +167,7 @@ Type: `bool`
 
 Default: `true`
 
-### retry\_max\_attempts
+### retry_max_attempts
 
 Description: The maximum number of allowable retries
 
@@ -190,11 +191,11 @@ The following outputs are exported:
 
 Description: The arguments to the WorkflowTemplate
 
-### aws\_role\_arn
+### aws_role_arn
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### aws\_role\_name
+### aws_role_name
 
 Description: The name of the AWS role used by the Workflow's Service Account
 

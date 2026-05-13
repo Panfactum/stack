@@ -1,0 +1,18 @@
+term: DevShell
+type: devshell
+summary: A Nix-based development shell that provides all tools needed to work with the Panfactum framework.
+description: |
+  A *DevShell* (development shell) is a reproducible, isolated shell environment built using Nix flakes
+  that automatically provides all the tooling required to work with the Panfactum framework.
+
+  Key properties:
+
+  - **Automatic activation**: Activated automatically via `direnv` when you navigate into the repository
+  - **Isolated**: Installed in a separate directory and does not interfere with system-level tooling
+  - **Versioned**: Tools are pinned to specific versions that are tested to work with your live infrastructure
+  - **Configurable**: Defined in a `flake.nix` file at the repository root; custom tools can be added
+  - **First-run build time**: Takes several minutes on initial setup as Nix downloads and builds packages
+
+  The Panfactum DevShell includes CLI tools like `kubectl`, `tofu`, `aws`, `helm`,
+  and all other utilities needed for infrastructure management. Organizations can extend the base
+  DevShell to include their own tooling.

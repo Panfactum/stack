@@ -1,0 +1,28 @@
+---
+summary: Reference for the standard layout of a Panfactum infrastructure repository.
+---
+
+import { FileTree } from "./_components/FileTree.tsx";
+import { INFRA_REPO_TREE } from "./_components/fileTreeData.ts";
+
+# Infrastructure Repository
+
+The Panfactum stack expects your infrastructure repository to follow a standard directory layout.
+This structure is scaffolded automatically when you run `pf-env-scaffold`, but understanding it
+is essential for working effectively with the stack.
+
+For a complete working example, see the
+[reference infrastructure repository](https://github.com/Panfactum/reference-infrastructure).
+
+## Layout
+
+Click any file or directory to view its description.
+
+<FileTree tree={INFRA_REPO_TREE} client:idle />
+
+## Related
+
+- [Terragrunt Variables](/docs/main/reference/configuration/terragrunt-variables) — Configuration hierarchy details
+- [Repository Variables](/docs/main/reference/configuration/repo-variables) — Customizable directory paths
+- [Developing First-Party Modules](/docs/main/guides/iac/first-party-modules) — Writing modules in `infrastructure/`
+- [Configuring IaC](/docs/main/guides/bootstrapping/configuring-infrastructure-as-code) — Initial repo setup walkthrough
