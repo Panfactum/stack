@@ -50,7 +50,7 @@ Let's get started.
   authentication with the sops KMS encryption key.
 
 - [kube_vault](/docs/edge/modules/kube_vault/overview) to allow SSO authentication with the Vault KMS unseal key.
-  </MarkdownAlert>
+</MarkdownAlert>
 
 ### Enable AWS IAM Identity Center
 
@@ -365,7 +365,7 @@ Let's deploy it now:
 
 5. Run `terragrunt apply`.
 
-    <MarkdownAlert severity="warning">
+<MarkdownAlert severity="warning">
 When you set up the AWS IAM Identity Center at the beginning of this guide section, it becomes bound to a single AWS region.
 If this region is different than the AWS region used in your `global` region, you will run into the following error:
 
@@ -384,7 +384,7 @@ If this region is different than the AWS region used in your `global` region, yo
    You can fix this by setting the `aws_region` value to the AWS IAM Identity Center region in a `module.yaml` file for
    `aws_iam_identity_center_permissions`.
 
-    </MarkdownAlert>
+</MarkdownAlert>
 
 6. Refresh the AWS access portal, and you will now see you have SSO access to your AWS accounts:
 
