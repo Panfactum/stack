@@ -5,11 +5,13 @@
 ### Pod creation rate limiting
 
 The workflow controller limits pod creation across its workflows to an average of 10 pods/second,
-with an initial burst of 25. Override the module inputs to tune these values:
+with an initial burst of 25. Override the module input to tune these values:
 
 ```hcl
-pod_creation_rate_limit       = 10
-pod_creation_rate_limit_burst = 25
+pod_creation_rate_limit = {
+  limit = 10
+  burst = 25
+}
 ```
 
 The rate must be positive; the burst must be a positive integer. A burst greater than the rate
@@ -17,7 +19,7 @@ is generally recommended. Workflows still run concurrently, sharing the controll
 Excess pod creations are deferred for reconciliation while workflows remain eligible to progress;
 workflow deadlines still apply. This can increase startup latency and only throttles pod creation.
 
-Set `pod_creation_rate_limit_enabled = false` to omit the limiter configuration and restore the
+Set `pod_creation_rate_limit = null` to omit the limiter configuration and restore the
 previous behavior. This may help initialization failures caused by pod creation bursts saturating
 the Kubernetes API; it does not address failures before pod creation.
 

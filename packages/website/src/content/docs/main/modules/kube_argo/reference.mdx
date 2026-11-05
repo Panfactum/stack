@@ -121,27 +121,25 @@ Default: `false`
 
 ### pod_creation_rate_limit
 
-Description: Average number of pods the workflow controller may create per second when pod creation rate limiting is enabled.
+Description: Controller-wide pod creation rate limit: limit is the average pods per second and burst is the maximum burst capacity. Set to null to disable.
 
-Type: `number`
+Type:
 
-Default: `10`
+```hcl
+object({
+    limit = number
+    burst = number
+  })
+```
 
-### pod_creation_rate_limit_burst
+Default:
 
-Description: Maximum burst of pod creations allowed by the workflow controller when pod creation rate limiting is enabled.
-
-Type: `number`
-
-Default: `25`
-
-### pod_creation_rate_limit_enabled
-
-Description: Whether to limit pod creation across workflows managed by the controller. Disable to restore the previous behavior.
-
-Type: `bool`
-
-Default: `true`
+```json
+{
+  "burst": 25,
+  "limit": 10
+}
+```
 
 ### pg_maximum_cpu_millicores
 

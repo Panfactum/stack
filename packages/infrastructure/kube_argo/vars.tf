@@ -1,29 +1,22 @@
-variable "pod_creation_rate_limit_enabled" {
-  description = "Whether to limit pod creation across workflows managed by the controller. Disable to restore the previous behavior."
-  type        = bool
-  default     = true
-  nullable    = false
-}
-
 variable "pod_creation_rate_limit" {
-  description = "Average number of pods the workflow controller may create per second when pod creation rate limiting is enabled."
-  type        = number
-  default     = 10
-  nullable    = false
-  validation {
-    condition     = var.pod_creation_rate_limit > 0
-    error_message = "pod_creation_rate_limit must be greater than zero."
+  description = "Controller-wide pod creation rate limit: limit is the average pods per second and burst is the maximum burst capacity. Set to null to disable."
+  type = object({
+    limit = number
+    burst = number
+  })
+  default = {
+    limit = 10
+    burst = 25
   }
-}
-
-variable "pod_creation_rate_limit_burst" {
-  description = "Maximum burst of pod creations allowed by the workflow controller when pod creation rate limiting is enabled."
-  type        = number
-  default     = 25
-  nullable    = false
+  nullable = true
   validation {
-    condition     = var.pod_creation_rate_limit_burst > 0 && floor(var.pod_creation_rate_limit_burst) == var.pod_creation_rate_limit_burst
-    error_message = "pod_creation_rate_limit_burst must be a positive integer."
+    condition = var.pod_creation_rate_limit == null ? true : try(
+      var.pod_creation_rate_limit.limit > 0 &&
+      var.pod_creation_rate_limit.burst > 0 &&
+      floor(var.pod_creation_rate_limit.burst) == var.pod_creation_rate_limit.burst,
+      false
+    )
+    error_message = "pod_creation_rate_limit must be null or have a positive limit and a positive integer burst."
   }
 }
 
