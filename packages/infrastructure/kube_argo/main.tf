@@ -356,6 +356,7 @@ resource "helm_release" "argo" {
       }
 
       controller = {
+        resourceRateLimit = var.pod_creation_rate_limit
         clusterWorkflowTemplates = {
           enabled = false
         }

@@ -119,6 +119,28 @@ Type: `bool`
 
 Default: `false`
 
+### pod_creation_rate_limit
+
+Description: Controller-wide pod creation rate limit: limit is the average pods per second and burst is the maximum burst capacity. Set to null to disable.
+
+Type:
+
+```hcl
+object({
+    limit = number
+    burst = number
+  })
+```
+
+Default:
+
+```json
+{
+  "burst": 25,
+  "limit": 10
+}
+```
+
 ### pg_maximum_cpu_millicores
 
 Description: The maximum amount of cpu to allocate to the postgres pods (in millicores)
